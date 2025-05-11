@@ -1,0 +1,1 @@
+export default function CoachingPage() { return (<div className='text-center p-8'><h1 className='text-4xl font-bold'>Coaching Program</h1><p className='mt-4 text-lg'>Launch your business with our tiered coaching options.</p></div>); }

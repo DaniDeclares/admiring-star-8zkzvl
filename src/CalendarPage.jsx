@@ -1,0 +1,1 @@
+export default function CalendarPage() { return (<div className='text-center p-8'><h1 className='text-4xl font-bold'>Events Calendar</h1><p className='mt-4 text-lg'>Stay updated on our upcoming availability and events.</p></div>); }

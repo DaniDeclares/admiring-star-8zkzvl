@@ -1,0 +1,1 @@
+export default function WeddingsPage() { return (<div className='text-center p-8'><h1 className='text-4xl font-bold'>Weddings</h1><p className='mt-4 text-lg'>Explore our luxury wedding and reception packages.</p></div>); }
