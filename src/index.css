@@ -1,7 +1,68 @@
+/* src/index.css */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap");
 
+:root {
+  --color-primary: #8b1e2e;
+  --color-secondary: #f8f5f1;
+  --color-accent: #d4af37;
+  --font-primary: "Merriweather", serif;
+  --font-secondary: "Roboto", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 body {
   margin: 0;
-  font-family: 'Georgia', serif;
-  background-color: #F8F5F1;
-  color: #8B1E2E;
+  background-color: var(--color-secondary);
+  font-family: var(--font-secondary);
+  color: #333;
+}
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.btn {
+  font-family: var(--font-primary);
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+.btn:hover {
+  background-color: var(--color-accent);
+}
+
+.homepage__hero {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+.homepage__logo {
+  max-width: 180px;
+  margin-bottom: 1.5rem;
+}
+.homepage__features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+}
+.feature {
+  background-color: #fff;
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+.homepage__footer {
+  text-align: center;
+  padding: 2rem 0;
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
 }

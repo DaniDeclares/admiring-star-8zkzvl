@@ -1,0 +1,30 @@
+{
+  "setupTasks": [
+    {
+      "name": "Installing Dependencies",
+      "command": "pnpm install"
+    }
+  ],
+  "tasks": {
+    "start": {
+      "name": "start",
+      "command": "pnpm start",
+      "runAtStart": true,
+      "preview": {
+        "port": 3000
+      }
+    },
+    "build": {
+      "name": "build",
+      "command": "pnpm build"
+    },
+    "test": {
+      "name": "test",
+      "command": "pnpm test"
+    },
+    "eject": {
+      "name": "eject",
+      "command": "pnpm eject"
+    }
+  }
+}

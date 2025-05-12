@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/main.22a22149.css","mappings":"AACA,KAGE,wBAAyB,CACzB,aAAc,CAFd,yBAA6B,CAD7B,QAIF","sources":["index.css"],"sourcesContent":["\nbody {\n  margin: 0;\n  font-family: 'Georgia', serif;\n  background-color: #F8F5F1;\n  color: #8B1E2E;\n}\n"],"names":[],"sourceRoot":""}

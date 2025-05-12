@@ -1,13 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#8B1E2E" />
-    <title>Dani Declares</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+
+    <!-- Facebook Domain Verification -->
+    <meta name="facebook-domain-verification" content="tu82x5ys1ea1ijt4cbxzqxr29yhex0" />
+
+    <!-- Google Tag Manager (Head) -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src =
+          "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-5J9QMG74");
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Primary SEO -->
+    <title>Dani Declares • Coaching, Events, Weddings & More</title>
+    <meta
+      name="description"
+      content="Dani Declares empowers your next moment: 1:1 coaching, community events, bespoke weddings, on-the-go notary, and financial planning."
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="Dani Declares • Empower Your Next Moment" />
+    <meta
+      property="og:description"
+      content="Coaching • Events • Weddings • Notary • Finance – Unlock your potential with Dani Declares."
+    />
+    <meta
+      property="og:image"
+      content="%PUBLIC_URL%/assets/hero/hero-couple-beach-wide.jpg"
+    />
+    <meta property="og:url" content="https://www.danideclares.com/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Font Awesome (for social icons) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-+N4M1XJh4IBLI6dP+O5v3GPs+FJgVg1sCkfcSTLZZkK+wD+eCfT5bGyIOWIRbSaa8p/IjZkGbfJ3Xlk+YGlK+A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Meta Pixel Code -->
+    <script>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod
+            ? n.callMethod.apply(n, arguments)
+            : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = "2.0";
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(
+        window,
+        document,
+        "script",
+        "https://connect.facebook.net/en_US/fbevents.js"
+      );
+      fbq("init", "1370033934339982");
+      fbq("track", "PageView");
+    </script>
+    <noscript
+      ><img
+        height="1"
+        width="1"
+        style="display: none"
+        src="https://www.facebook.com/tr?id=1370033934339982&ev=PageView&noscript=1"
+      />
+    </noscript>
+    <!-- End Meta Pixel -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics 4 -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-KN7E9K69YY"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-KN7E9K69YY", { send_page_view: true });
+    </script>
+    <!-- End Google Analytics -->
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-5J9QMG74"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
   </body>

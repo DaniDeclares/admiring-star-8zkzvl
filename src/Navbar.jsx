@@ -1,15 +1,30 @@
-import { Link } from 'react-router-dom';
+// src/Navbar.jsx
+import React from "react";
+import { Link } from "react-router-dom";
+import "./Navbar.css";
 
 export default function Navbar() {
   return (
-    <nav className="bg-white shadow-md py-4 px-6 flex justify-between items-center text-[#8B1E2E] font-serif">
-      <div className="text-2xl font-bold">Dani Declares</div>
-      <div className="flex space-x-4 text-lg">
-        <Link to="/" className="hover:underline">Home</Link>
-        <Link to="/weddings" className="hover:underline">Weddings</Link>
-        <Link to="/calendar" className="hover:underline">Calendar</Link>
-        <Link to="/coaching" className="hover:underline">Coaching</Link>
+    <nav className="navbar">
+      <div className="navbar__logo">
+        <Link to="/">
+          <img src="/logo.jpg" alt="Dani Declares Logo" />
+        </Link>
       </div>
+      <ul className="navbar__links">
+        <li>
+          <Link to="/">Home</Link>
+        </li>
+        <li>
+          <Link to="/weddings">Weddings</Link>
+        </li>
+        <li>
+          <Link to="/calendar">Calendar</Link>
+        </li>
+        <li>
+          <Link to="/coaching">Coaching</Link>
+        </li>
+      </ul>
     </nav>
   );
 }
