@@ -1,0 +1,84 @@
+/* src/PackagesPage.css */
+
+.packages-page {
+  padding: 2rem;
+  font-family: "Georgia", serif;
+  background: #f8f5f1;
+  color: #8b1e2e;
+}
+
+.hero-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+  text-align: center;
+  color: #5c2a2a;
+  margin-bottom: 2rem;
+}
+
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.package-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.package-card h2 {
+  color: #8b1e2e;
+  margin-bottom: 0.25rem;
+}
+
+.package-card h3 {
+  color: #5c2a2a;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
+.price {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.ideal {
+  font-style: italic;
+  margin-bottom: 1rem;
+  color: #5c2a2a;
+}
+
+.package-card ul {
+  flex-grow: 1;
+  list-style: disc inside;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+}
+
+.package-card li {
+  margin-bottom: 0.5rem;
+}
+
+.cta-button {
+  align-self: center;
+  background: #8b1e2e;
+  color: #f8f5f1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.cta-button:hover {
+  background: #5c2a2a;
+}

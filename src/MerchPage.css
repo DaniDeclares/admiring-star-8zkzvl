@@ -1,0 +1,91 @@
+/* src/MerchPage.css */
+
+.merch-page {
+  padding: 2rem;
+  font-family: "Georgia", serif;
+  background: #f8f5f1;
+  color: #8b1e2e;
+}
+
+.merch-hero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.merch-hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.merch-hero p {
+  color: #5c2a2a;
+  font-size: 1.1rem;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.product-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.product-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.product-card h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #8b1e2e;
+}
+
+.price {
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  color: #5c2a2a;
+}
+
+.cta-button {
+  background: #8b1e2e;
+  color: #f8f5f1;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+.cta-button:hover {
+  background: #5c2a2a;
+}
+.merch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+}
+.merch-card {
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+  border-radius: 6px;
+}
+.merch-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+}

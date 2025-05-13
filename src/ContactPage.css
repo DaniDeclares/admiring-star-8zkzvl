@@ -1,0 +1,109 @@
+.contact-page {
+  font-family: "Georgia", serif;
+  padding: 2rem;
+  background: #f8f5f1;
+  color: #8b1e2e;
+}
+
+.hero-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.hero-subtitle {
+  text-align: center;
+  color: #5c2a2a;
+  margin-bottom: 2rem;
+}
+
+.booking-embed {
+  margin-bottom: 2rem;
+}
+
+.booking-embed h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #8b1e2e;
+}
+
+.contact-info {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.contact-info h2 {
+  margin-bottom: 0.5rem;
+}
+
+.contact-info p a {
+  color: #8b1e2e;
+  text-decoration: none;
+}
+
+.contact-info p a:hover {
+  text-decoration: underline;
+}
+
+.inquiry-form {
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+
+.inquiry-form h2 {
+  margin-bottom: 1rem;
+}
+
+.inquiry-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inquiry-form input,
+.inquiry-form textarea {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  width: 100%;
+}
+
+.cta-button {
+  background: #8b1e2e;
+  color: #f8f5f1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.cta-button:hover {
+  background: #5c2a2a;
+}
+
+.success {
+  margin-top: 1rem;
+  color: green;
+  font-weight: bold;
+  text-align: center;
+}
+
+.social-and-paypal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .inquiry-form form {
+    width: 100%;
+  }
+}

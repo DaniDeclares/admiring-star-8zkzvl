@@ -1,0 +1,84 @@
+/* src/EventsPage.css */
+
+.page {
+  padding: 2rem;
+  font-family: 'Georgia', serif;
+  background-color: #F8F5F1;
+  color: #8B1E2E;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #5C2A2A;
+}
+
+.event-box {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 1.5rem auto;
+  max-width: 600px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.event-box h2 {
+  margin-bottom: 0.75rem;
+  color: #8B1E2E;
+  font-size: 1.75rem;
+}
+
+.event-box p {
+  margin-bottom: 1rem;
+  color: #5C2A2A;
+  line-height: 1.5;
+}
+
+.event-box ul {
+  list-style: disc inside;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+}
+
+.event-box li {
+  margin-bottom: 0.5rem;
+}
+
+.cta-button,
+.secondary-button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.cta-button {
+  background: #8B1E2E;
+  color: #F8F5F1;
+  border: none;
+  margin-right: 0.5rem;
+}
+
+.cta-button:hover {
+  background: #5C2A2A;
+}
+
+.secondary-button {
+  background: transparent;
+  color: #8B1E2E;
+  border: 2px solid #8B1E2E;
+}
+
+.secondary-button:hover {
+  background: #8B1E2E;
+  color: #F8F5F1;
+}

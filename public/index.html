@@ -1,17 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1"
-    />
-
-    <!-- Facebook Domain Verification -->
-    <meta name="facebook-domain-verification" content="tu82x5ys1ea1ijt4cbxzqxr29yhex0" />
-
-    <!-- Google Tag Manager (Head) -->
+    <!-- Google Tag Manager -->
     <script>
       (function (w, d, s, l, i) {
         w[l] = w[l] || [];
@@ -20,12 +10,15 @@
           j = d.createElement(s),
           dl = l != "dataLayer" ? "&l=" + l : "";
         j.async = true;
-        j.src =
-          "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
         f.parentNode.insertBefore(j, f);
       })(window, document, "script", "dataLayer", "GTM-5J9QMG74");
     </script>
     <!-- End Google Tag Manager -->
+
+    <!-- Required meta tags -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- Primary SEO -->
     <title>Dani Declares • Coaching, Events, Weddings & More</title>
@@ -35,7 +28,10 @@
     />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:title" content="Dani Declares • Empower Your Next Moment" />
+    <meta
+      property="og:title"
+      content="Dani Declares • Empower Your Next Moment"
+    />
     <meta
       property="og:description"
       content="Coaching • Events • Weddings • Notary • Finance – Unlock your potential with Dani Declares."
@@ -50,16 +46,13 @@
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- Font Awesome (for social icons) -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      integrity="sha512-+N4M1XJh4IBLI6dP+O5v3GPs+FJgVg1sCkfcSTLZZkK+wD+eCfT5bGyIOWIRbSaa8p/IjZkGbfJ3Xlk+YGlK+A=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
+    <!-- Pinterest Domain Verification -->
+    <meta name="p:domain_verify" content="5443c6e07f84906b7ddb5318f38b91f4" />
 
-    <!-- Meta Pixel Code -->
+    <!-- AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-1271590126273860" />
+
+    <!-- Facebook Pixel Code -->
     <script>
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return;
@@ -72,6 +65,7 @@
         n.push = n;
         n.loaded = !0;
         n.version = "2.0";
+        n.queue = [];
         t = b.createElement(e);
         t.async = !0;
         t.src = v;
@@ -86,17 +80,17 @@
       fbq("init", "1370033934339982");
       fbq("track", "PageView");
     </script>
-    <noscript
-      ><img
+    <noscript>
+      <img
         height="1"
         width="1"
         style="display: none"
         src="https://www.facebook.com/tr?id=1370033934339982&ev=PageView&noscript=1"
       />
     </noscript>
-    <!-- End Meta Pixel -->
+    <!-- End Facebook Pixel -->
 
-    <!-- Global site tag (gtag.js) - Google Analytics 4 -->
+    <!-- Google Analytics (gtag.js) -->
     <script
       async
       src="https://www.googletagmanager.com/gtag/js?id=G-KN7E9K69YY"
@@ -107,10 +101,14 @@
         dataLayer.push(arguments);
       }
       gtag("js", new Date());
-      gtag("config", "G-KN7E9K69YY", { send_page_view: true });
+      gtag("config", "G-KN7E9K69YY");
     </script>
-    <!-- End Google Analytics -->
+
+    <!-- Favicon & Manifest -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
   </head>
+
   <body>
     <!-- Google Tag Manager (noscript) -->
     <noscript
