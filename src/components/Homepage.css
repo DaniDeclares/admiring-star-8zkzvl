@@ -1,0 +1,114 @@
+/* Page wrapper */
+.homepage {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: #faf8f2; /* Soft ivory */
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+.hero-logo {
+  max-width: 200px;
+  margin-bottom: 1rem;
+}
+.hero h1 {
+  font-family: 'Merriweather', serif;
+  font-size: 2.5rem;
+  color: #8B1E2E; /* Burgundy */
+  margin-bottom: 0.5rem;
+}
+.hero p {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.125rem;
+  color: #444;
+  margin-bottom: 1.5rem;
+}
+.hero-cta .btn {
+  margin: 0 0.5rem;
+}
+
+/* Services preview */
+.services-preview {
+  padding: 3rem 1rem;
+}
+.services-preview h2 {
+  font-family: 'Merriweather', serif;
+  font-size: 2rem;
+  text-align: center;
+  color: #8B1E2E;
+  margin-bottom: 2rem;
+}
+.services-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+.service-card {
+  background: #fff;
+  border: 2px solid #8B1E2E;
+  border-radius: 6px;
+  padding: 1rem 2rem;
+  text-decoration: none;
+  color: #8B1E2E;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+.service-card:hover {
+  background: #8B1E2E;
+  color: #fff;
+}
+
+/* Newsletter CTA */
+.newsletter-cta {
+  background: #8B1E2E;
+  color: #fff;
+  text-align: center;
+  padding: 3rem 1rem;
+  margin-top: 2rem;
+  border-radius: 8px;
+}
+.newsletter-cta h2 {
+  font-family: 'Merriweather', serif;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.newsletter-cta p {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+.newsletter-form input {
+  padding: 0.75rem 1rem;
+  width: 250px;
+  max-width: 80%;
+  border: none;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+}
+.newsletter-form .btn--cta {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background: #f5e9e4;
+  color: #8B1E2E;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .hero {
+    padding: 2rem 0.5rem;
+  }
+  .hero h1 {
+    font-size: 2rem;
+  }
+  .services-grid {
+    gap: 0.5rem;
+  }
+}

@@ -1,0 +1,63 @@
+/* src/components/FestivalBanner.css */
+
+.festival-banner {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #b8335b 0%, #f88ea8 100%);
+  color: #fff;
+  z-index: 1100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.festival-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+  gap: 0.75rem;
+}
+
+.festival-emoji {
+  font-size: 1.4rem;
+}
+
+.festival-text {
+  font-size: 1rem;
+}
+
+.festival-countdown {
+  font-weight: bold;
+  background: rgba(255,255,255,0.2);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+.festival-cta {
+  margin-left: 1rem;
+  background: #fff;
+  color: #b8335b;
+  padding: 0.4rem 0.9rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .festival-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .festival-cta {
+    margin-left: 0;
+  }
+}
+
+/* push down page content so banner doesn't cover it */
+body {
+  padding-top: 2.5rem;
+}

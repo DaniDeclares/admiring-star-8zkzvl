@@ -1,0 +1,49 @@
+// src/components/FestivalBanner.jsx
+import React, { useEffect, useState } from "react";
+import "./FestivalBanner.css";
+
+export default function FestivalBanner() {
+  // Set your festival start date here:
+  const festivalDate = new Date("2025-07-19T09:00:00");
+  const [timeLeft, setTimeLeft] = useState(getDelta());
+
+  function getDelta() {
+    const now = new Date();
+    const delta = festivalDate - now;
+    if (delta <= 0) return null;
+    const days = Math.floor(delta / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((delta / (1000 * 60 * 60)) % 24);
+    const mins = Math.floor((delta / (1000 * 60)) % 60);
+    return { days, hours, mins };
+  }
+
+  useEffect(() => {
+    const timer = setInterval(() => setTimeLeft(getDelta()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="festival-banner">
+      <div className="festival-content">
+        <span className="festival-emoji">🎪</span>
+        <span className="festival-text">
+          Declare Your Worth Festival  
+          <strong>July 19–20, 2025</strong>
+        </span>
+        {timeLeft && (
+          <span className="festival-countdown">
+            {timeLeft.days}d {timeLeft.hours}h {timeLeft.mins}m
+          </span>
+        )}
+        <a
+          href="/festival"
+          className="festival-cta"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Get Tickets
+        </a>
+      </div>
+    </div>
+  );
+}
