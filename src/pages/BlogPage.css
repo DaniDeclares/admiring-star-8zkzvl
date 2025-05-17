@@ -1,80 +1,80 @@
-/* src/BlogPage.css */
-
-.blog-page {
-  padding: 2rem;
-  font-family: "Georgia", serif;
-  background: #f8f5f1;
-  color: #8b1e2e;
+/* Page wrapper */
+.page.blog-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background: #faf8f2;
 }
 
+/* Hero */
 .blog-hero {
   text-align: center;
   margin-bottom: 2rem;
 }
-
 .blog-hero h1 {
+  font-family: 'Merriweather', serif;
   font-size: 2.5rem;
+  color: #8B1E2E;
   margin-bottom: 0.5rem;
 }
-
 .blog-hero p {
-  color: #5c2a2a;
-  font-size: 1.1rem;
+  font-family: 'Montserrat', sans-serif;
+  color: #555;
 }
 
+/* Posts grid */
 .posts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
+/* Individual post */
 .post-card {
+  display: block;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
   transition: transform 0.2s ease;
 }
-
 .post-card:hover {
   transform: translateY(-4px);
 }
-
 .post-card img {
   width: 100%;
-  height: 140px;
+  height: 180px;
   object-fit: cover;
 }
-
 .post-content {
   padding: 1rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
-
 .post-content h3 {
-  margin-bottom: 0.25rem;
+  font-family: 'Merriweather', serif;
+  margin: 0 0 0.5rem;
+  color: #8B1E2E;
 }
-
 .post-date {
+  font-family: 'Montserrat', sans-serif;
   font-size: 0.9rem;
-  color: #5c2a2a;
+  color: #999;
   margin-bottom: 0.75rem;
 }
-
 .post-excerpt {
-  flex-grow: 1;
+  font-family: 'Montserrat', sans-serif;
+  color: #666;
   margin-bottom: 1rem;
-  line-height: 1.4;
+}
+.read-more {
+  font-family: 'Montserrat', sans-serif;
+  color: #8B1E2E;
+  font-weight: bold;
 }
 
-.read-more {
-  font-weight: bold;
-  color: #8b1e2e;
-  align-self: flex-end;
+/* Responsive */
+@media (max-width: 600px) {
+  .page.blog-page {
+    padding: 1rem;
+  }
 }

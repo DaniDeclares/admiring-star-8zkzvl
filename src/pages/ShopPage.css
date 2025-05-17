@@ -5,16 +5,20 @@
   padding: 2rem 1rem;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: #f8f5f1; /* Ivory background */
 }
 
 /* Header */
 .page.shop-page .hero-title {
+  font-family: 'Merriweather', serif;
+  color: #8B1E2E; /* Burgundy */
   font-size: 2.5rem;
   text-align: center;
   margin-bottom: 0.5rem;
 }
 
 .page.shop-page .hero-subtitle {
+  font-family: 'Montserrat', sans-serif;
   font-size: 1.25rem;
   text-align: center;
   margin-bottom: 2rem;
@@ -37,6 +41,10 @@
   text-align: center;
   display: flex;
   flex-direction: column;
+  transition: transform 0.2s ease;
+}
+.product-card:hover {
+  transform: translateY(-4px);
 }
 
 .product-card img {
@@ -48,12 +56,15 @@
 
 /* Product title & description */
 .product-card h2 {
+  font-family: 'Georgia', serif;
   font-size: 1.25rem;
   margin: 0.5rem 0;
+  color: #8B1E2E;
 }
 
 .product-card .desc {
   flex-grow: 1;
+  font-family: 'Montserrat', sans-serif;
   font-size: 0.95rem;
   color: #666;
   margin-bottom: 1rem;
@@ -61,15 +72,16 @@
 
 /* Price */
 .product-card .price {
+  font-family: 'Merriweather', serif;
   font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 1rem;
   color: #222;
 }
 
-/* Buy button wrapper (PayPalButton handles its own styling) */
-.product-card .buy-button {
-  margin-top: auto;
+/* Buy button wrapper */
+.product-card .btn {
+  width: 100%;
 }
 
 /* Responsive tweaks */

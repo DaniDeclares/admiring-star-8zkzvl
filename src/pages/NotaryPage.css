@@ -1,62 +1,61 @@
-/* src/NotaryPage.css */
-
-.notary-page {
-  padding: 2rem;
-  font-family: "Georgia", serif;
-  background: #f8f5f1;
-  color: #8b1e2e;
+.page.notary-page {
+  padding: 2rem 1rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: 'Georgia', serif;
+  color: #8B1E2E;
 }
 
 .page-title {
-  text-align: center;
   font-size: 2.5rem;
+  text-align: center;
   margin-bottom: 0.5rem;
 }
 
 .page-subtitle {
   text-align: center;
-  color: #5c2a2a;
   margin-bottom: 2rem;
+  color: #5C2A2A;
 }
 
 .services-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
 }
 
 .service-card {
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 1.5rem;
-  width: 280px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
 }
 
 .service-card h2 {
-  font-size: 1.5rem;
   margin-bottom: 0.5rem;
+  font-size: 1.5rem;
 }
 
-.meta {
+.service-card .meta {
   font-style: italic;
-  color: #5c2a2a;
   margin-bottom: 1rem;
+  color: #5C2A2A;
 }
 
-.desc {
+.service-card .desc {
+  flex-grow: 1;
   margin-bottom: 1rem;
   line-height: 1.4;
 }
 
 .cta-button {
-  display: inline-block;
-  background: #8b1e2e;
-  color: #f8f5f1;
-  padding: 0.5rem 1rem;
+  background: #8B1E2E;
+  color: #fff;
+  text-align: center;
+  padding: 0.75rem;
   border-radius: 6px;
   text-decoration: none;
   font-weight: bold;
@@ -64,30 +63,30 @@
 }
 
 .cta-button:hover {
-  background: #5c2a2a;
+  background: #5C2A2A;
 }
 
 .contact-info {
   text-align: center;
   margin-top: 2rem;
+  font-size: 1rem;
 }
 
 .contact-info a {
-  color: #8b1e2e;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.contact-info a:hover {
+  color: #8B1E2E;
   text-decoration: underline;
 }
 
-.cta-button {
-  background-color: #fff;
-  color: #8b1e2e;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
+@media (max-width: 600px) {
+  .page.notary-page {
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
 }

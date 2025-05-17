@@ -2,6 +2,8 @@
 import React from "react";
 
 // site-wide chrome
+import FestivalBanner from "../components/FestivalBanner";
+import "../components/FestivalBanner.css";
 import Navbar from "../components/Navbar";
 import "../components/Navbar.css";
 import SocialLinks from "../components/SocialLinks";
@@ -46,6 +48,8 @@ const PRODUCTS = [
 export default function ShopPage() {
   return (
     <>
+      <FestivalBanner />
+
       <Navbar />
 
       <main className="page shop-page">

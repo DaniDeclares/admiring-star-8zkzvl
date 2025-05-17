@@ -1,152 +1,70 @@
-/* src/CoachingPage.css */
-
 .coaching-page {
-  background: #f8f5f1;
-  color: #8b1e2e;
-  font-family: "Georgia", serif;
-  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background: #f9f9f9;
 }
 
 .coaching-hero {
   text-align: center;
   margin-bottom: 2rem;
 }
-
 .coaching-hero h1 {
-  font-size: 2.75rem;
+  font-size: 2.5rem;
   margin-bottom: 0.5rem;
 }
-
 .coaching-hero p {
-  color: #5c2a2a;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
+  color: #555;
 }
 
 .packages {
   margin-bottom: 3rem;
 }
-
-.packages h2 {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
 .packages-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.5rem;
 }
-
 .package-card {
   background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
   padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
-
 .package-card h3 {
   margin-bottom: 0.5rem;
+  color: #222;
 }
-
 .package-card .meta {
-  font-style: italic;
-  color: #5c2a2a;
   margin-bottom: 1rem;
+  color: #444;
+}
+.package-card .btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+.package-card .btn.disabled {
+  pointer-events: none;
+  opacity: 0.5;
 }
 
-.package-card p {
-  margin-bottom: 1rem;
-}
-
-.btn--book {
-  background: #8b1e2e;
-  color: #f8f5f1;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: bold;
-  display: inline-block;
-  transition: background 0.3s ease;
-}
-
-.btn--book:hover {
-  background: #5c2a2a;
-}
-
-.funnel-cta {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 2rem;
-  text-align: center;
-  max-width: 600px;
-  margin: 0 auto 3rem;
-}
-
-.funnel-cta h2 {
-  color: #8b1e2e;
-  margin-bottom: 0.5rem;
-}
-
-.funnel-cta p {
-  color: #5c2a2a;
-  margin-bottom: 1rem;
-}
-
-.funnel-form {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.funnel-form input {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  width: 250px;
-  font-size: 1rem;
-}
-
-.btn--cta {
-  background: #8b1e2e;
-  color: #f8f5f1;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.btn--cta:hover {
-  background: #5c2a2a;
-}
-
-.thank-you p {
-  font-weight: bold;
-  color: green;
-  margin-bottom: 1rem;
-}
-
+/* Benefits section */
 .benefits {
-  max-width: 700px;
-  margin: 0 auto 2rem;
-}
-
-.benefits h2 {
   text-align: center;
+  margin-bottom: 3rem;
+}
+.benefits h2 {
   margin-bottom: 1rem;
 }
-
 .benefits ul {
-  list-style: disc inside;
-  color: #5c2a2a;
+  list-style: none;
+  padding: 0;
 }
-
 .benefits li {
   margin-bottom: 0.5rem;
 }

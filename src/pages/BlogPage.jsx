@@ -1,7 +1,19 @@
-// src/BlogPage.jsx
 import React from "react";
 import { Link } from "react-router-dom";
-import Footer from "./Footer";
+
+// site chrome  
+import FestivalBanner from "../components/FestivalBanner";  
+import "../components/FestivalBanner.css";
+import Navbar from "../components/Navbar";
+import "../components/Navbar.css";
+import SocialLinks from "../components/SocialLinks";
+import "../components/SocialLinks.css";
+import CookieConsent from "../components/CookieConsent";
+import "../components/CookieConsent.css";
+import Footer from "../components/Footer";
+import "../components/footer.css";
+
+// page styles
 import "./BlogPage.css";
 
 const POSTS = [
@@ -42,7 +54,10 @@ const POSTS = [
 export default function BlogPage() {
   return (
     <>
-      <div className="page blog-page">
+      <FestivalBanner />
+      <Navbar />
+
+      <main className="page blog-page">
         <header className="blog-hero">
           <h1>Dani Declares Blog</h1>
           <p>Insights, guides, and inspiration on weddings, finance, entrepreneurship, and more.</p>
@@ -61,7 +76,10 @@ export default function BlogPage() {
             </Link>
           ))}
         </div>
-      </div>
+      </main>
+
+      <SocialLinks />
+      <CookieConsent />
       <Footer />
     </>
   );
