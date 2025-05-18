@@ -1,0 +1,59 @@
+/* src/pages/MembershipPage.css */
+.membership-page {
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+.membership-page .subtitle {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+.billing-toggle {
+  display: inline-flex;
+  margin-bottom: 2rem;
+}
+.billing-toggle button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  background: none;
+  cursor: pointer;
+}
+.billing-toggle .active {
+  background: #8B1E2E;
+  color: #fff;
+  border-color: #8B1E2E;
+}
+.tiers-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-bottom: 2rem;
+}
+.tier-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+}
+.tier-card h3 {
+  margin-bottom: 0.5rem;
+}
+.tier-desc {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 0.75rem;
+}
+.tier-price {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.tier-price span {
+  font-size: 0.9rem;
+  color: #555;
+}
+.btn--accent {
+  background: #222;
+  color: #fff;
+}

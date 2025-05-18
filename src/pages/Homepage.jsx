@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import heroBg from "./assets/hero/hero-couple-beach-wide.jpg";
-import "./Homepage.css";
-import Footer from "./Footer";
+import "../Homepage.css";
+import Footer from "../components/Footer.css";
 
 export default function Homepage() {
   return (

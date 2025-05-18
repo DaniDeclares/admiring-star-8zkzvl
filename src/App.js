@@ -1,8 +1,7 @@
-// src/App.js
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-// global styles (reset, fonts, etc.)
+// global styles
 import "./index.css";
 
 // site-wide chrome
@@ -15,7 +14,7 @@ import "./components/SocialLinks.css";
 import CookieConsent from "./components/CookieConsent";
 import "./components/CookieConsent.css";
 import Footer from "./components/Footer";
-import "./components/footer.css";
+import "./components/Footer.css";
 
 // pages + their styles
 import Homepage from "./pages/Homepage";
@@ -34,30 +33,30 @@ import NotaryPage from "./pages/NotaryPage";
 import "./pages/NotaryPage.css";
 import ContactPage from "./pages/ContactPage";
 import "./pages/ContactPage.css";
+import MembershipPage from "./pages/MembershipPage";
+import "./pages/MembershipPage.css";
 
 export default function App() {
   return (
     <Router>
-      {/* top banner & nav */}
       <FestivalBanner />
       <Navbar />
 
-      {/* dynamic page content */}
       <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/coaching" element={<CoachingPage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/weddings" element={<WeddingsPage />} />
-        <Route path="/notary" element={<NotaryPage />} />
-        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/"           element={<Homepage />} />
+        <Route path="/blog"       element={<BlogPage />} />
+        <Route path="/shop"       element={<ShopPage />} />
+        <Route path="/coaching"   element={<CoachingPage />} />
+        <Route path="/events"     element={<EventsPage />} />
+        <Route path="/weddings"   element={<WeddingsPage />} />
+        <Route path="/notary"     element={<NotaryPage />} />
+        <Route path="/contact"    element={<ContactPage />} />
+        <Route path="/membership" element={<MembershipPage />} />
 
-        {/* catch-all: redirect invalid URLs home */}
+        {/* invalid URLs → home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      {/* footer chrome */}
       <SocialLinks />
       <CookieConsent />
       <Footer />

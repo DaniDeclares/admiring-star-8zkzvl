@@ -1,6 +1,9 @@
+// src/pages/CoachingPage.jsx
 import React, { useState } from "react";
 
 // site chrome
+import FestivalBanner from "../components/FestivalBanner";
+import "../components/FestivalBanner.css";
 import Navbar from "../components/Navbar";
 import "../components/Navbar.css";
 import SocialLinks from "../components/SocialLinks";
@@ -8,7 +11,7 @@ import "../components/SocialLinks.css";
 import CookieConsent from "../components/CookieConsent";
 import "../components/CookieConsent.css";
 import Footer from "../components/Footer";
-import "../components/footer.css";
+import "../components/Footer.css";
 
 // PayPal button component
 import PayPalButton from "../components/PayPalButton";
@@ -39,15 +42,18 @@ const PACKAGES = [
 ];
 
 export default function CoachingPage() {
-  // keep track of which packages have been paid for
+  // track which packages have been paid for
   const [paidPackages, setPaidPackages] = useState({});
 
   const handlePaid = (pkgName) => {
     setPaidPackages((prev) => ({ ...prev, [pkgName]: true }));
+    // TODO: also notify you (e.g. webhook, email) about the purchase
   };
 
   return (
     <>
+      {/* top banner + nav */}
+      <FestivalBanner />
       <Navbar />
 
       <main className="coaching-page">
@@ -65,21 +71,21 @@ export default function CoachingPage() {
                 <p className="meta">
                   {p.duration} • <strong>${p.price}</strong>
                 </p>
-                <PayPalButton
-                  price={p.price}
-                  onSuccess={() => handlePaid(p.name)}
-                />
+
+                {/* PayPal pay button */}
+                <PayPalButton price={p.price} onSuccess={() => handlePaid(p.name)} />
+
+                {/* Only enable booking once paid */}
                 <a
-                  href={p.tidycalUrl}
+                  href={paidPackages[p.name] ? p.tidycalUrl : "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`btn btn--book ${
-                    !paidPackages[p.name] ? "disabled" : ""
-                  }`}
+                  className={`btn btn--book ${!paidPackages[p.name] ? "btn--disabled" : ""}`}
+                  onClick={(e) => {
+                    if (!paidPackages[p.name]) e.preventDefault();
+                  }}
                 >
-                  {paidPackages[p.name]
-                    ? "Book Your Session"
-                    : "Pay First to Book"}
+                  {paidPackages[p.name] ? "Book Your Session" : "Pay First to Book"}
                 </a>
               </div>
             ))}
@@ -97,6 +103,7 @@ export default function CoachingPage() {
         </section>
       </main>
 
+      {/* footer chrome */}
       <SocialLinks />
       <CookieConsent />
       <Footer />
