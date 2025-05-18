@@ -1,131 +1,89 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import heroBg from "./assets/hero/hero-couple-beach-wide.jpg";
-import "../Homepage.css";
-import Footer from "../components/Footer.css";
+
+// Chrome
+import FestivalBanner from "../components/FestivalBanner";
+import "../components/FestivalBanner.css";
+import Navbar from "../components/Navbar";
+import "../components/Navbar.css";
+import SocialLinks from "../components/SocialLinks";
+import "../components/SocialLinks.css";
+import CookieConsent from "../components/CookieConsent";
+import "../components/CookieConsent.css";
+import Footer from "../components/Footer";
+import "../components/Footer.css";
+
+// Styles
+import "./Homepage.css";
 
 export default function Homepage() {
   return (
     <>
-      <div className="homepage">
-        {/* Hero */}
-        <section className="hero" style={{ backgroundImage: `url(${heroBg})` }}>
-          <div className="hero__overlay" />
-          <div className="hero__content">
-            <h1 className="hero__title">Empower Your Next Moment</h1>
-            <p className="hero__subtitle">
-              Coaching • Events • Weddings • Notary • Finance
-            </p>
-            <Link to="/coaching" className="btn btn--primary">
-              Get Started
-            </Link>
-          </div>
-        </section>
+      <FestivalBanner />
+      <Navbar />
 
-        {/* Services Overview */}
-        <section className="services-overview">
-          <div className="service-card">
-            <h2>Coaching</h2>
-            <p>1:1 and group coaching to unlock your potential.</p>
-            <Link to="/coaching" className="btn btn--secondary">
-              Learn More
-            </Link>
-          </div>
-          <div className="service-card">
-            <h2>Events</h2>
-            <p>Festivals, mixers, and the “I Do Declare” game show.</p>
-            <Link to="/events" className="btn btn--secondary">
-              View Events
-            </Link>
-          </div>
-          <div className="service-card">
-            <h2>Weddings</h2>
-            <p>Custom planning, officiant services & pop-up weddings.</p>
-            <Link to="/weddings" className="btn btn--secondary">
+      <main className="homepage">
+        <section className="hero">
+          <img
+            className="hero-logo"
+            src={`${process.env.PUBLIC_URL}/assets/logo/logo.png`}
+            alt="Dani Declares Logo"
+          />
+          <h1>Empower Your Next Moment</h1>
+          <p>
+            Coaching • Events • Weddings • Notary • Finance<br />
+            Unlock your potential with Dani Declares.
+          </p>
+          <div className="hero-cta">
+            <Link to="/coaching" className="btn btn--primary">
               Explore Packages
             </Link>
-          </div>
-          <div className="service-card">
-            <h2>Merch Shop</h2>
-            <p>Planners, notebooks, and branded gear to stay inspired.</p>
-            <Link to="/merch" className="btn btn--secondary">
-              Shop Now
+            <Link to="/contact" className="btn btn--secondary">
+              Get in Touch
             </Link>
           </div>
         </section>
 
-        {/* Events Preview */}
-        <section className="events-preview">
-          <h2>Upcoming Events</h2>
-          <div className="events-list">
-            <div className="event-item">
-              <h3>Declare Your Worth Festival</h3>
-              <p>Brook Run Park, Dunwoody, GA | Date TBA</p>
-              <Link to="/events" className="link">
-                Learn More
+        <section className="services-preview">
+          <h2>What We Offer</h2>
+          <div className="services-grid">
+            {[
+              { title: "1:1 Coaching", to: "/coaching" },
+              { title: "Signature Events", to: "/events" },
+              { title: "Bespoke Weddings", to: "/weddings" },
+              { title: "Pop-Up Notary", to: "/notary" },
+              { title: "Financial Planning", to: "/finance" },
+            ].map((s) => (
+              <Link key={s.title} to={s.to} className="service-card">
+                {s.title}
               </Link>
-            </div>
-            <div className="event-item">
-              <h3>Sign & Sip: Notary + Networking</h3>
-              <p>Refuge Coffee Co., Clarkston GA | June 2, 2025</p>
-              <Link to="/events" className="link">
-                Learn More
-              </Link>
-            </div>
-            <div className="event-item">
-              <h3>Love & Legalities Mixer</h3>
-              <p>Atlanta Area | July 13, 2025</p>
-              <Link to="/events" className="link">
-                Learn More
-              </Link>
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* Blog Preview */}
-        <section className="blog-preview">
-          <h2>From the Blog</h2>
-          <div className="posts-preview">
-            <div className="post-item">
-              <h3>5 Financial Tips for Newlyweds</h3>
-              <p>Combine finances and plan your budget with ease.</p>
-              <Link to="/blog/financial-tips-newlyweds" className="link">
-                Read More
-              </Link>
-            </div>
-            <div className="post-item">
-              <h3>How to Plan a Pop-Up Wedding</h3>
-              <p>Secrets to a stress-free, stylish pop-up ceremony.</p>
-              <Link to="/blog/popup-wedding-guide" className="link">
-                Read More
-              </Link>
-            </div>
-          </div>
-          <Link to="/blog" className="btn btn--secondary">
-            View All Posts
-          </Link>
-        </section>
+        <section className="newsletter-cta">
+          <h2>Stay In The Loop</h2>
+          <p>Sign up for early-bird offers, event updates & free resources.</p>
 
-        {/* Newsletter Signup */}
-        <section className="newsletter-signup">
-          <h2>Stay Connected</h2>
-          <p>Subscribe to our magazine for monthly insights.</p>
-          {/* Embed your Mailchimp/HubSpot form here */}
-          <div className="newsletter-form">
-            <script
-              src="https://js-na2.hsforms.net/forms/embed/242764935.js"
-              defer
-            />
-            <div
-              className="hs-form-frame"
-              data-region="na2"
-              data-form-id="d4cd290e-7766-4bf5-91a2-c1274ddd882e"
-              data-portal-id="242764935"
-            />
-          </div>
+          {/* Mailchimp Embed */}
+          <div
+            className="mc_embed_signup"
+            dangerouslySetInnerHTML={{
+              __html: `
+  <form action="https://danideclares.us19.list-manage.com/subscribe/post?u=a28036bff232caaa9e6879b80&id=6e822d70e9" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
+    <div id="mc_embed_signup_scroll">
+      <input type="email" name="EMAIL" class="required email" placeholder="Your best email" required />
+      <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="btn btn--cta"/>
+    </div>
+  </form>
+              `,
+            }}
+          />
         </section>
-      </div>
+      </main>
 
+      <SocialLinks />
+      <CookieConsent />
       <Footer />
     </>
   );

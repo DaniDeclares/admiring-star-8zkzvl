@@ -1,100 +1,57 @@
-/* src/pages/ShopPage.css */
-
-/* Page container */
-.page.shop-page {
+.shop-page {
   padding: 2rem 1rem;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: #f8f5f1; /* Ivory background */
+  text-align: center;
 }
 
-/* Header */
-.page.shop-page .hero-title {
-  font-family: 'Merriweather', serif;
-  color: #8B1E2E; /* Burgundy */
+.shop-page h1 {
   font-size: 2.5rem;
-  text-align: center;
   margin-bottom: 0.5rem;
 }
 
-.page.shop-page .hero-subtitle {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1.25rem;
-  text-align: center;
+.shop-page p {
+  font-size: 1.2rem;
   margin-bottom: 2rem;
-  color: #555;
 }
 
-/* Product grid */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
 }
 
-/* Individual card */
 .product-card {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   padding: 1rem;
-  text-align: center;
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease;
-}
-.product-card:hover {
-  transform: translateY(-4px);
+  align-items: center;
 }
 
 .product-card img {
-  max-width: 100%;
+  width: 100%;
   height: auto;
   border-radius: 4px;
   margin-bottom: 1rem;
 }
 
-/* Product title & description */
 .product-card h2 {
-  font-family: 'Georgia', serif;
   font-size: 1.25rem;
   margin: 0.5rem 0;
-  color: #8B1E2E;
 }
 
 .product-card .desc {
   flex-grow: 1;
-  font-family: 'Montserrat', sans-serif;
   font-size: 0.95rem;
   color: #666;
   margin-bottom: 1rem;
 }
 
-/* Price */
 .product-card .price {
-  font-family: 'Merriweather', serif;
   font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  color: #222;
-}
-
-/* Buy button wrapper */
-.product-card .btn {
-  width: 100%;
-}
-
-/* Responsive tweaks */
-@media (max-width: 480px) {
-  .page.shop-page {
-    padding: 1rem 0.5rem;
-  }
-
-  .page.shop-page .hero-title {
-    font-size: 2rem;
-  }
-
-  .page.shop-page .hero-subtitle {
-    font-size: 1rem;
-  }
 }

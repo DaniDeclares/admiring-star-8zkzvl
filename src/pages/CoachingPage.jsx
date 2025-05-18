@@ -1,7 +1,6 @@
-// src/pages/CoachingPage.jsx
 import React, { useState } from "react";
 
-// site chrome
+// Chrome
 import FestivalBanner from "../components/FestivalBanner";
 import "../components/FestivalBanner.css";
 import Navbar from "../components/Navbar";
@@ -13,46 +12,24 @@ import "../components/CookieConsent.css";
 import Footer from "../components/Footer";
 import "../components/Footer.css";
 
-// PayPal button component
+// PayPal
 import PayPalButton from "../components/PayPalButton";
 import "../components/PayPalButton.css";
 
-// page styles
+// Styles
 import "./CoachingPage.css";
 
 const PACKAGES = [
-  {
-    name: "Discovery Session",
-    duration: "30 mins",
-    price: 99,
-    tidycalUrl: "https://tidycal.com/danideclaresns/discovery-session",
-  },
-  {
-    name: "1:1 Coaching Package",
-    duration: "4×1-hr sessions",
-    price: 499,
-    tidycalUrl: "https://tidycal.com/danideclaresns/1-1-package",
-  },
-  {
-    name: "VIP Intensive",
-    duration: "6 hrs",
-    price: 1200,
-    tidycalUrl: "https://tidycal.com/danideclaresns/vip-intensive",
-  },
+  { name: "Discovery Session", duration: "30 mins", price: 99, url: "https://tidycal.com/danideclaresns/discovery-session" },
+  { name: "1:1 Coaching", duration: "4×1 hr sessions", price: 499, url: "https://tidycal.com/danideclaresns/1-1-package" },
+  { name: "VIP Intensive", duration: "6 hrs", price: 1200, url: "https://tidycal.com/danideclaresns/vip-intensive" },
 ];
 
 export default function CoachingPage() {
-  // track which packages have been paid for
-  const [paidPackages, setPaidPackages] = useState({});
-
-  const handlePaid = (pkgName) => {
-    setPaidPackages((prev) => ({ ...prev, [pkgName]: true }));
-    // TODO: also notify you (e.g. webhook, email) about the purchase
-  };
+  const [paid, setPaid] = useState({});
 
   return (
     <>
-      {/* top banner + nav */}
       <FestivalBanner />
       <Navbar />
 
@@ -68,24 +45,18 @@ export default function CoachingPage() {
             {PACKAGES.map((p) => (
               <div key={p.name} className="package-card">
                 <h3>{p.name}</h3>
-                <p className="meta">
-                  {p.duration} • <strong>${p.price}</strong>
-                </p>
-
-                {/* PayPal pay button */}
-                <PayPalButton price={p.price} onSuccess={() => handlePaid(p.name)} />
-
-                {/* Only enable booking once paid */}
+                <p className="meta">{p.duration} • <strong>${p.price}</strong></p>
+                <PayPalButton
+                  price={p.price}
+                  onSuccess={() => setPaid((prev) => ({ ...prev, [p.name]: true }))}
+                />
                 <a
-                  href={paidPackages[p.name] ? p.tidycalUrl : "#"}
+                  href={p.url}
+                  className={`btn btn--book ${paid[p.name] ? "" : "disabled"}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`btn btn--book ${!paidPackages[p.name] ? "btn--disabled" : ""}`}
-                  onClick={(e) => {
-                    if (!paidPackages[p.name]) e.preventDefault();
-                  }}
                 >
-                  {paidPackages[p.name] ? "Book Your Session" : "Pay First to Book"}
+                  {paid[p.name] ? "Book Your Session" : "Pay First to Book"}
                 </a>
               </div>
             ))}
@@ -103,7 +74,6 @@ export default function CoachingPage() {
         </section>
       </main>
 
-      {/* footer chrome */}
       <SocialLinks />
       <CookieConsent />
       <Footer />
