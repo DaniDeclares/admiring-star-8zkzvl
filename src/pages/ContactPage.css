@@ -1,68 +1,29 @@
-.page.contact-page {
-  max-width: 800px;
-  margin: 0 auto;
+.contact-page {
   padding: 2rem 1rem;
-  background: #fafafa;
-}
-
-.contact-hero {
+  max-width: 600px;
+  margin: 0 auto;
   text-align: center;
-  margin-bottom: 2rem;
 }
 
-.contact-hero .hero-title {
+.contact-page h1 {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
-  color: #222;
 }
 
-.contact-hero .hero-subtitle {
-  font-size: 1.1rem;
+.contact-page p {
   color: #555;
+  margin-bottom: 1.5rem;
 }
 
-.form-section {
-  margin-bottom: 3rem;
+.direct-contact {
+  margin-top: 2rem;
 }
 
-.contact-info {
-  text-align: center;
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-
-.contact-info h2 {
-  margin-bottom: 0.75rem;
-  color: #222;
-}
-
-.contact-info p {
-  margin: 0;
-  font-size: 1rem;
-  color: #444;
-}
-
-.contact-info a {
-  color: #0070f3;
+.direct-contact a {
+  color: #8b1e2e;
   text-decoration: none;
 }
-.contact-info a:hover {
+
+.direct-contact a:hover {
   text-decoration: underline;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .page.contact-page {
-    padding: 1rem;
-  }
-
-  .contact-hero .hero-title {
-    font-size: 2rem;
-  }
-
-  .contact-hero .hero-subtitle {
-    font-size: 1rem;
-  }
 }
