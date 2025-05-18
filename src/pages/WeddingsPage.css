@@ -2,18 +2,21 @@
   padding: 2rem 1rem;
   max-width: 1200px;
   margin: 0 auto;
-  text-align: center;
-  font-family: 'Georgia', serif;
   color: #333;
 }
 
+.weddings-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
 .weddings-hero h1 {
   font-size: 2.5rem;
+  color: #8B1E2E;
   margin-bottom: 0.5rem;
 }
-
 .weddings-hero p {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  color: #555;
   margin-bottom: 1.5rem;
 }
 
@@ -21,43 +24,85 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
-  margin: 2rem 0;
+  margin-bottom: 3rem;
 }
-
 .package-card {
   background: #fff;
-  padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
 }
-
+.package-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #8B1E2E;
+}
 .package-price {
   font-size: 1.25rem;
-  color: #8B1E2E;
-  margin: 0.5rem 0;
-}
-
-.gallery-section h2,
-.why-choose h2 {
-  margin-top: 3rem;
+  font-weight: bold;
   margin-bottom: 1rem;
 }
+.package-desc {
+  flex-grow: 1;
+  margin-bottom: 1.25rem;
+  color: #666;
+}
+.package-card .btn {
+  margin-top: auto;
+}
 
+.gallery-section {
+  margin-bottom: 3rem;
+}
+.gallery-section h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #8B1E2E;
+}
+
+.why-choose {
+  margin-bottom: 3rem;
+}
+.why-choose h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #8B1E2E;
+}
 .why-choose ul {
   list-style: disc inside;
-  text-align: left;
   max-width: 600px;
-  margin: 0 auto 2rem;
+  margin: 0 auto;
+  color: #555;
+}
+.why-choose li {
+  margin-bottom: 0.5rem;
 }
 
 .cta-final {
-  background: #8B1E2E;
-  color: #fff;
+  text-align: center;
   padding: 2rem 1rem;
+  background: #f9f9f9;
   border-radius: 8px;
-  margin-top: 2rem;
+}
+.cta-final p {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+.cta-final .btn--primary {
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
 }
 
-.cta-final .btn {
-  margin-top: 1rem;
+@media (max-width: 480px) {
+  .weddings-hero h1 {
+    font-size: 2rem;
+  }
+  .weddings-hero p {
+    font-size: 1rem;
+  }
 }
