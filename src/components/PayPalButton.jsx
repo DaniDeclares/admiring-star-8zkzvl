@@ -15,3 +15,21 @@ export default function PayPalButton() {
     </div>
   );
 }
+import React, { useEffect, useRef } from "react";
+
+export default function PayPalButton({ price, onSuccess }) {
+  const ref = useRef();
+
+  useEffect(() => {
+    if (!window.paypal) return;
+    window.paypal.Buttons({
+      style: { layout: "vertical", color: "gold" },
+      createOrder: (data, actions) =>
+        actions.order.create({ purchase_units: [{ amount: { value: price } }] }),
+      onApprove: (data, actions) =>
+        actions.order.capture().then(onSuccess),
+    }).render(ref.current);
+  }, [price]);
+
+  return <div ref={ref} />;
+}
