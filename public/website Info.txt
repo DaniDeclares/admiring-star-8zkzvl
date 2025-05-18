@@ -1,0 +1,124 @@
+Use this info to fully handle everything that needed to buid the site. remember that we are scaling this site to make $20,000/month NO LATER than August 1st (today is 5/18/25) remember all the plans i told you i have for my business and for my website and impelement those. i have delegated you to take care of everything needed in this file: C:\Users\Dani Declares\admiring-star-8zkzvl> including: 
+
+
+    Directory: C:\Users\Dani Declares\admiring-star-8zkzvl
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         5/17/2025   8:09 AM                .codesandbox
+d-----         5/17/2025   8:09 AM                .github
+d-----         5/17/2025   6:29 PM                .vercel
+d-----         5/17/2025   1:17 PM                build
+d-----         5/17/2025   4:41 PM                node_modules
+d-----         5/17/2025   8:09 AM                public
+d-----         5/17/2025   6:26 PM                src
+-a----         5/17/2025   8:09 AM            416 .devcontainer
+-a----         5/17/2025   1:14 PM             23 .gitignore
+-a----         5/17/2025   4:41 PM         678321 package-lock.json
+-a----         5/17/2025  11:11 AM            876 package.json
+-a----         5/17/2025   8:09 AM             50 README.md
+-a----         5/17/2025   7:11 PM            325 vercel.json
+-a----         5/17/2025   8:09 AM           2870 yarn-error.log
+
+
+
+
+
+PayPal	Client-side Client ID (for the JS SDK):
+Client ID
+AbsR-8imZi3QwDWf0e0XhjTVB1GdXCnfcmTOXTDlBjkWTt5LjGNr8aby78jy58oUwGFvgsuYT_XEzfzq
+
+Secret key 1
+EPvD4fTZC15m9O_Ked-UvLAM0gQz0j-jzqpU2_J7Gfrs66Ea6fKDJUPwWyhSWCCAbebOCy2T0FBvfcah
+
+	
+
+TidyCal	Your booking URLs:
+https://tidycal.com/danideclaresns/discovery-session
+https://tidycal.com/danideclaresns/15-minute-meeting
+https://tidycal.com/danideclaresns/60-minute-meeting
+https://tidycal.com/danideclaresns/60-minute-meeting
+https://tidycal.com/danideclaresns/vip-intensive
+https://tidycal.com/danideclaresns/one-on-one-coaching
+https://tidycal.com/danideclaresns/luxury-membership-onboarding
+https://tidycal.com/danideclaresns/vendor-booth-standard
+https://tidycal.com/danideclaresns/vendor-booth-premium
+https://tidycal.com/danideclaresns/speaker-badge-pickup
+https://tidycal.com/danideclaresns/badge-pickup
+
+Formspree	Form endpoint IDs
+Homepage Newsletter	YOUR_NEWSLETTER_ID	email
+Free eBook Download	YOUR_EBOOK_ID	email
+Pop-Up Wedding Starter Kit	YOUR_WEDDING_KIT_ID	name, email, wedding_date, venue_city
+Pop-Up Notary Starter Kit	YOUR_NOTARY_KIT_ID	name, email, service_type, preferred_date
+Membership Registration	YOUR_MEMBERSHIP_ID	name, email, membership_tier
+Coaching Inquiry	YOUR_COACHING_ID	name, email, message
+Free Wedding Raffle	YOUR_RAFFLE_ID	name, email, phone
+Speaker Proposal	YOUR_SPEAKER_ID	name, email, bio, topic_proposal
+Festival Sponsor Inquiry	YOUR_SPONSOR_ID	company, contact_name, email, tier_interest
+Festival Vendor Application	YOUR_VENDOR_ID	company, contact_name, email, booth_size
+
+Mailchimp	Audience (list) ID and embedded-form JS snippet
+	Audience ID
+
+6e822d70e9
+<div id="mc_embed_shell">
+      <link href="//cdn-images.mailchimp.com/embedcode/classic-061523.css" rel="stylesheet" type="text/css">
+  <style type="text/css">
+        #mc_embed_signup{background:#fff; false;clear:left; font:14px Helvetica,Arial,sans-serif; width: 600px;}
+        /* Add your own Mailchimp form style overrides in your site stylesheet or in this style block.
+           We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+</style>
+<div id="mc_embed_signup">
+    <form action="https://danideclares.us19.list-manage.com/subscribe/post?u=a28036bff232caaa9e6879b80&amp;id=6e822d70e9&amp;f_id=00df8ae3f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
+        <div id="mc_embed_signup_scroll"><h2>Subscribe</h2>
+            <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+            <div class="mc-field-group"><label for="mce-EMAIL">Email Address <span class="asterisk">*</span></label><input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value=""></div><div class="mc-field-group"><label for="mce-SMSPHONE">SMS Phone Number <span class="asterisk">*</span></label><div class="" style="display: flex; border: 1px solid rgb(171, 176, 178);"><div style="display: flex;"><span style="padding-left: 16px; padding-right: 4px; align-self: center;"><div style="display: flex; align-content: flex-start; align-items: center; gap: 10px;"><img src="https://digitalasset.intuit.com/render/content/dam/intuit/mc-fe/en_us/images/forms-landing-pages/smsphone/flag-us.svg" alt="Country Code" width="28" height="28"></div></span></div><input type="text" name="SMSPHONE" class="REQ_CSS" id="mce-SMSPHONE" value="" style="border: none;"></div><div class="mc-sms-phone-group"><div><input type="checkbox" name="mc-SMSPHONE-ack" id="mc-SMSPHONE-ack" value="true"></div><div class="small-meta">Dani Declares - By providing your phone number and checking the box, you agree to receive promotional and marketing messages (e.g., abandoned carts), notifications, and customer service communications from Dani Declares. Message and data rates may apply. Consent is not a condition of purchase. Message frequency varies. Text HELP for help. Text STOP to cancel. See  and<a href="http://eepurl.com/jeD3gY" target="_blank">Terms</a>.</div></div></div>
+        <div id="mce-responses" class="clear">
+            <div class="response" id="mce-error-response" style="display: none;"></div>
+            <div class="response" id="mce-success-response" style="display: none;"></div>
+        </div><div aria-hidden="true" style="position: absolute; left: -5000px;"><input type="text" name="b_a28036bff232caaa9e6879b80_6e822d70e9" tabindex="-1" value=""></div><div class="clear"><input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" value="Subscribe"></div>
+    </div>
+</form>
+</div>
+<script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[7]='SMSPHONE';ftypes[7]='smsphone';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';fnames[6]='COMPANY';ftypes[6]='text';}(jQuery));var $mcj = jQuery.noConflict(true);</script></div>
+
+
+HubSpot	Portal ID, Form ID
+Dani Declares- <div id="mc_embed_shell">
+      <link href="//cdn-images.mailchimp.com/embedcode/classic-061523.css" rel="stylesheet" type="text/css">
+  <style type="text/css">
+        #mc_embed_signup{background:#fff; false;clear:left; font:14px Helvetica,Arial,sans-serif; width: 600px;}
+        /* Add your own Mailchimp form style overrides in your site stylesheet or in this style block.
+           We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+</style>
+<div id="mc_embed_signup">
+    <form action="https://danideclares.us19.list-manage.com/subscribe/post?u=a28036bff232caaa9e6879b80&amp;id=6e822d70e9&amp;f_id=00df8ae3f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
+        <div id="mc_embed_signup_scroll"><h2>Subscribe</h2>
+            <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+            <div class="mc-field-group"><label for="mce-EMAIL">Email Address <span class="asterisk">*</span></label><input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value=""></div><div class="mc-field-group"><label for="mce-SMSPHONE">SMS Phone Number <span class="asterisk">*</span></label><div class="" style="display: flex; border: 1px solid rgb(171, 176, 178);"><div style="display: flex;"><span style="padding-left: 16px; padding-right: 4px; align-self: center;"><div style="display: flex; align-content: flex-start; align-items: center; gap: 10px;"><img src="https://digitalasset.intuit.com/render/content/dam/intuit/mc-fe/en_us/images/forms-landing-pages/smsphone/flag-us.svg" alt="Country Code" width="28" height="28"></div></span></div><input type="text" name="SMSPHONE" class="REQ_CSS" id="mce-SMSPHONE" value="" style="border: none;"></div><div class="mc-sms-phone-group"><div><input type="checkbox" name="mc-SMSPHONE-ack" id="mc-SMSPHONE-ack" value="true"></div><div class="small-meta">Dani Declares - By providing your phone number and checking the box, you agree to receive promotional and marketing messages (e.g., abandoned carts), notifications, and customer service communications from Dani Declares. Message and data rates may apply. Consent is not a condition of purchase. Message frequency varies. Text HELP for help. Text STOP to cancel. See  and<a href="http://eepurl.com/jeD3gY" target="_blank">Terms</a>.</div></div></div><div class="mc-field-group"><label for="mce-FNAME">First Name </label><input type="text" name="FNAME" class=" text" id="mce-FNAME" value=""></div><div class="mc-field-group"><label for="mce-LNAME">Last Name </label><input type="text" name="LNAME" class=" text" id="mce-LNAME" value=""></div>
+        <div id="mce-responses" class="clear">
+            <div class="response" id="mce-error-response" style="display: none;"></div>
+            <div class="response" id="mce-success-response" style="display: none;"></div>
+        </div><div aria-hidden="true" style="position: absolute; left: -5000px;"><input type="text" name="b_a28036bff232caaa9e6879b80_6e822d70e9" tabindex="-1" value=""></div><div class="clear"><input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" value="Subscribe"></div>
+    </div>
+</form>
+</div>
+<script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[7]='SMSPHONE';ftypes[7]='smsphone';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';fnames[6]='COMPANY';ftypes[6]='text';}(jQuery));var $mcj = jQuery.noConflict(true);</script></div>
+
+URL
+https://mailchi.mp/f15a59925755/sms-signup
+http://eepurl.com/jeDjzo
+
+Printify	Store ID and product template IDs (for on-demand merch)
+You had me install something so that you can create all the prinitify merch but i do have something i can upload to help with a couple items.
+
+
+Calendly Danielle Fong
+
+https://calendly.com/danideclaresns
+
+
+
+Make sure to build in entirety and then tell me what i need to create/delete/update in my powershell and notepad and i will copy in paste. i want your results in groups of 4.
