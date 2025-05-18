@@ -1,105 +1,63 @@
 .page.events-page {
-  padding: 2rem;
+  padding: 2rem 1rem;
+  max-width: 800px;
+  margin: 0 auto;
   font-family: 'Georgia', serif;
-  background-color: #F8F5F1;
-  color: #8B1E2E;
+  color: #4A2E3C;
 }
 
 .page-title {
   text-align: center;
   font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .page-subtitle {
   text-align: center;
   margin-bottom: 2rem;
-  color: #5C2A2A;
+  color: #6D3B51;
 }
 
 .event-box {
-  background: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   padding: 1.5rem;
-  margin: 1.5rem auto;
-  max-width: 600px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
 }
 
 .event-box h2 {
-  margin-bottom: 0.75rem;
   color: #8B1E2E;
-  font-size: 1.75rem;
-}
-
-.event-box p {
-  margin-bottom: 1rem;
-  color: #5C2A2A;
-  line-height: 1.5;
+  margin-bottom: 0.5rem;
 }
 
 .event-box ul {
   list-style: disc inside;
-  margin-bottom: 1rem;
-  padding-left: 1rem;
-}
-
-.event-box li {
-  margin-bottom: 0.5rem;
+  margin: 1rem 0;
 }
 
 .cta-button,
 .secondary-button {
   display: inline-block;
+  margin-right: 0.5rem;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
   font-weight: bold;
   text-decoration: none;
-  transition: background 0.3s ease;
 }
 
 .cta-button {
   background: #8B1E2E;
-  color: #F8F5F1;
-  border: none;
-  margin-right: 0.5rem;
-}
-
-.cta-button:hover {
-  background: #5C2A2A;
+  color: #fff;
 }
 
 .secondary-button {
   background: transparent;
-  color: #8B1E2E;
   border: 2px solid #8B1E2E;
+  color: #8B1E2E;
 }
 
 .secondary-button:hover {
   background: #8B1E2E;
-  color: #F8F5F1;
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .page.events-page {
-    padding: 1rem;
-  }
-
-  .page-title {
-    font-size: 2rem;
-  }
-
-  .event-box {
-    margin: 1rem 0;
-    padding: 1rem;
-  }
-
-  .cta-button,
-  .secondary-button {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 0.5rem;
-  }
+  color: #fff;
 }

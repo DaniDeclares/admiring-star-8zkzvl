@@ -1,21 +1,19 @@
 import React from "react";
 
-// festival banner  
+// site chrome  
 import FestivalBanner from "../components/FestivalBanner";  
 import "../components/FestivalBanner.css";
+import Navbar from "../components/Navbar";
+import "../components/Navbar.css";
+import SocialLinks from "../components/SocialLinks";
+import "../components/SocialLinks.css";
+import CookieConsent from "../components/CookieConsent";
+import "../components/CookieConsent.css";
+import Footer from "../components/Footer";
+import "../components/Footer.css";
 
-// site chrome  
-import Navbar from "../components/Navbar";  
-import "../components/Navbar.css";  
-import SocialLinks from "../components/SocialLinks";  
-import "../components/SocialLinks.css";  
-import CookieConsent from "../components/CookieConsent";  
-import "../components/CookieConsent.css";  
-import Footer from "../components/Footer";  
-import "../components/footer.css";  
-
-// gallery component  
-import WeddingsGallery from "../components/WeddingsGallery";  
+// gallery component
+import WeddingsGallery from "../components/WeddingsGallery";
 import "../components/WeddingsGallery.css";
 
 // page styles  
@@ -46,10 +44,9 @@ export default function WeddingsPage() {
   return (
     <>
       <FestivalBanner />
-
       <Navbar />
 
-      <main className="weddings-page">
+      <main className="page weddings-page">
         <header className="weddings-hero">
           <h1>Weddings by Dani Declares</h1>
           <p>
@@ -73,12 +70,10 @@ export default function WeddingsPage() {
               <div className="package-price">{pkg.price}</div>
               <p>{pkg.desc}</p>
               <a
-                href="https://paypal.me/danideclaresns?country.x=US&locale.x=en_US"
+                href={`/packages#${pkg.id}`}
                 className="btn btn--secondary"
-                target="_blank"
-                rel="noopener noreferrer"
               >
-                Inquire &amp; Pay Deposit
+                View Details
               </a>
             </div>
           ))}
@@ -93,7 +88,7 @@ export default function WeddingsPage() {
           <h2>Why Choose Dani Declares?</h2>
           <ul>
             <li>Personalized design & full creative production</li>
-            <li>White-glove concierge service & on-site coordination</li>
+            <li>White-glove concierge & on-site coordination</li>
             <li>Luxury vendor management & contract negotiation</li>
             <li>Financial planning consult & custom wedding website</li>
           </ul>

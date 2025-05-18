@@ -1,10 +1,8 @@
 import React from "react";
 
-// festival banner
-import FestivalBanner from "../components/FestivalBanner";
+// site chrome  
+import FestivalBanner from "../components/FestivalBanner";  
 import "../components/FestivalBanner.css";
-
-// site chrome
 import Navbar from "../components/Navbar";
 import "../components/Navbar.css";
 import SocialLinks from "../components/SocialLinks";
@@ -12,9 +10,9 @@ import "../components/SocialLinks.css";
 import CookieConsent from "../components/CookieConsent";
 import "../components/CookieConsent.css";
 import Footer from "../components/Footer";
-import "../components/footer.css";
+import "../components/Footer.css";
 
-// page styles
+// page styles  
 import "./EventsPage.css";
 
 const EVENTS = [
@@ -22,7 +20,7 @@ const EVENTS = [
     title: "Declare Your Worth Festival",
     date: "July 12–14, 2025",
     location: "Atlanta, GA",
-    highlights: [ 
+    highlights: [
       "Keynote workshops on entrepreneurship",
       "Live coaching sessions",
       "Networking brunch",
@@ -53,7 +51,6 @@ export default function EventsPage() {
   return (
     <>
       <FestivalBanner />
-
       <Navbar />
 
       <main className="page events-page">
