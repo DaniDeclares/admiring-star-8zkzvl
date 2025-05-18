@@ -15,7 +15,7 @@ import "./components/SocialLinks.css";
 import CookieConsent from "./components/CookieConsent";
 import "./components/CookieConsent.css";
 import Footer from "./components/Footer";
-import "./components/Footer.css";
+import "./components/footer.css";
 
 // pages + their styles
 import Homepage from "./pages/Homepage";

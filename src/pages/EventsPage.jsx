@@ -22,7 +22,7 @@ const EVENTS = [
     title: "Declare Your Worth Festival",
     date: "July 12–14, 2025",
     location: "Atlanta, GA",
-    highlights: [
+    highlights: [ 
       "Keynote workshops on entrepreneurship",
       "Live coaching sessions",
       "Networking brunch",
