@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
-import logo from "../assets/logo.jpg";
+import logo from "../components/assets/logo.jpg";
 import "./Navbar.css";
 
 export default function Navbar() {
