@@ -15,7 +15,7 @@ import Footer from "../components/Footer.jsx";
 import "../components/Footer.css";no
 
 // Assets
-import heroLogo from "../assets/logo/logo-gold-seal.png";
+import heroLogo from "../assets/logo/logo.jpg";
 
 // Styles
 import "./Homepage.css";
