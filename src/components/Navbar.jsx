@@ -2,15 +2,18 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
+
+// **FIXED asset imports**:
 import logoSeal from "../assets/logo/logo-gold-seal.png";
 import logoScript from "../assets/logo/logo-script.png";
+import logo from "../assets/logo/logo.jpg";
+
 import "./Navbar.css";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cart } = useCart();
   const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-
   const closeMenu = () => setMenuOpen(false);
 
   const links = [
@@ -37,15 +40,12 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/" onClick={closeMenu}>
-          <img src={logo} alt="Dani Declares Logo" className="navbar-logo" />
+          {/* you can swap between logos here */}
+          <img src={logoSeal} alt="Dani Declares Seal" className="navbar-logo" />
         </Link>
       </div>
 
-      <button
-        className="hamburger"
-        aria-label="Toggle menu"
-        onClick={() => setMenuOpen(!menuOpen)}
-      >
+      <button className="hamburger" aria-label="Toggle menu" onClick={() => setMenuOpen(!menuOpen)}>
         ☰
       </button>
 
