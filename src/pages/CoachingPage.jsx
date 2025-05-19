@@ -1,4 +1,4 @@
-notepad import React, { useState } from "react";
+import React, { useState } from "react";
 
 // Chrome
 import FestivalBanner from "../components/FestivalBanner.jsx";
@@ -11,6 +11,9 @@ import CookieConsent from "../components/CookieConsent.jsx";
 import "../components/CookieConsent.css";
 import Footer from "../components/Footer.jsx";
 import "../components/Footer.css";
+
+// HubSpot embed
+import HubSpotForm from "../components/HubSpotForm.jsx";
 
 // PayPal
 import PayPalButton from "../components/PayPalButton.jsx";
