@@ -5,35 +5,35 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import "./index.css";
 
 // site-wide chrome
-import FestivalBanner from "./components/FestivalBanner";
+import FestivalBanner from "./components/FestivalBanner.jsx";
 import "./components/FestivalBanner.css";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar.jsx";
 import "./components/Navbar.css";
-import SocialLinks from "./components/SocialLinks";
+import SocialLinks from "./components/SocialLinks.jsx";
 import "./components/SocialLinks.css";
-import CookieConsent from "./components/CookieConsent";
+import CookieConsent from "./components/CookieConsent.jsx";
 import "./components/CookieConsent.css";
-import Footer from "./components/Footer";
+import Footer from "./components/Footer.jsx";
 import "./components/Footer.css";
 
 // pages + their styles
-import Homepage from "./pages/Homepage";
+import Homepage from "./pages/Homepage.jsx";
 import "./pages/Homepage.css";
-import BlogPage from "./pages/BlogPage";
+import BlogPage from "./pages/BlogPage.jsx";
 import "./pages/BlogPage.css";
-import ShopPage from "./pages/ShopPage";
+import ShopPage from "./pages/ShopPage.jsx";
 import "./pages/ShopPage.css";
-import CoachingPage from "./pages/CoachingPage";
+import CoachingPage from "./pages/CoachingPage.jsx";
 import "./pages/CoachingPage.css";
-import EventsPage from "./pages/EventsPage";
+import EventsPage from "./pages/EventsPage.jsx";
 import "./pages/EventsPage.css";
-import WeddingsPage from "./pages/WeddingsPage";
+import WeddingsPage from "./pages/WeddingsPage.jsx";
 import "./pages/WeddingsPage.css";
-import NotaryPage from "./pages/NotaryPage";
+import NotaryPage from "./pages/NotaryPage.jsx";
 import "./pages/NotaryPage.css";
-import ContactPage from "./pages/ContactPage";
+import ContactPage from "./pages/ContactPage.jsx";
 import "./pages/ContactPage.css";
-import MembershipPage from "./pages/MembershipPage";
+import MembershipPage from "./pages/MembershipPage.jsx";
 import "./pages/MembershipPage.css";
 
 export default function App() {
