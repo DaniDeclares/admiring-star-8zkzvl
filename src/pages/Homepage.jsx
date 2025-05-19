@@ -1,3 +1,4 @@
+// src/pages/Homepage.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -13,6 +14,9 @@ import "../components/CookieConsent.css";
 import Footer from "../components/Footer.jsx";
 import "../components/Footer.css";
 
+// Assets
+import heroLogo from "../assets/logo.jpg";  // adjust name if needed
+
 // Styles
 import "./Homepage.css";
 
@@ -26,7 +30,7 @@ export default function Homepage() {
         <section className="hero">
           <img
             className="hero-logo"
-            src={require("../assets/logo.jpg")}
+            src={heroLogo}
             alt="Dani Declares"
           />
           <h1>Empower Your Next Moment</h1>
@@ -52,7 +56,7 @@ export default function Homepage() {
               { title: "Signature Events", to: "/events" },
               { title: "Bespoke Weddings", to: "/weddings" },
               { title: "Pop-Up Notary", to: "/notary" },
-              { title: "Financial Planning", to: "/finance" },
+              { title: "Financial Planning", to: "/financial" },
             ].map((s) => (
               <Link key={s.title} to={s.to} className="service-card">
                 {s.title}
@@ -70,7 +74,7 @@ export default function Homepage() {
             className="mc_embed_signup"
             dangerouslySetInnerHTML={{
               __html: `
-<form action="https://danideclares.us19.list-manage.com/subscribe/post?u=a28036bff232caaa9e6879b80&id=6e822d70e9" method="post" target="_blank">
+<form action="https://danideclares.us19.list-manage.com/subscribe/post?u=a28036bff232caaa9e6879b80&id=6e822d70e9" method="post" target="_blank" class="newsletter-form">
   <input type="email" name="EMAIL" placeholder="Your best email" required />
   <input type="submit" value="Subscribe" class="btn btn--cta"/>
 </form>
