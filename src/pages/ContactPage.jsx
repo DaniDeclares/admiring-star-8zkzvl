@@ -1,19 +1,19 @@
 import React from "react";
 
 // Chrome
-import FestivalBanner from "../components/FestivalBanner";
+import FestivalBanner from "../components/FestivalBanner.jsx";
 import "../components/FestivalBanner.css";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar.jsx";
 import "../components/Navbar.css";
-import SocialLinks from "../components/SocialLinks";
+import SocialLinks from "../components/SocialLinks.jsx";
 import "../components/SocialLinks.css";
-import CookieConsent from "../components/CookieConsent";
+import CookieConsent from "../components/CookieConsent.jsx";
 import "../components/CookieConsent.css";
-import Footer from "../components/Footer";
+import Footer from "../components/Footer.jsx";
 import "../components/Footer.css";
 
 // HubSpot embed
-import HubSpotForm from "../components/HubSpotForm";
+import HubSpotForm from "../components/HubSpotForm.jsx";
 
 // Styles
 import "./ContactPage.css";

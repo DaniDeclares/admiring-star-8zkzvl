@@ -1,19 +1,19 @@
 import React from "react";
 
 // site chrome
-import FestivalBanner from "../components/FestivalBanner";
+import FestivalBanner from "../components/FestivalBanner.jsx";
 import "../components/FestivalBanner.css";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar.jsx";
 import "../components/Navbar.css";
-import SocialLinks from "../components/SocialLinks";
+import SocialLinks from "../components/SocialLinks.jsx";
 import "../components/SocialLinks.css";
-import CookieConsent from "../components/CookieConsent";
+import CookieConsent from "../components/CookieConsent.jsx";
 import "../components/CookieConsent.css";
-import Footer from "../components/Footer";
+import Footer from "../components/Footer.jsx";
 import "../components/Footer.css";
 
 // gallery component
-import WeddingsGallery from "../components/WeddingsGallery";
+import WeddingsGallery from "../components/WeddingsGallery.jsx";
 import "../components/WeddingsGallery.css";
 
 // page styles
