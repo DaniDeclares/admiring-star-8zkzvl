@@ -1,6 +1,8 @@
+// src/pages/ShopPage.jsx
 import React from "react";
+import { Link } from "react-router-dom";
 
-// site-wide chrome
+// site chrome
 import FestivalBanner from "../components/FestivalBanner.jsx";
 import "../components/FestivalBanner.css";
 import Navbar from "../components/Navbar.jsx";
@@ -12,34 +14,11 @@ import "../components/CookieConsent.css";
 import Footer from "../components/Footer.jsx";
 import "../components/Footer.css";
 
-// buy button component
+// Buy button
 import PayPalButton from "../components/PayPalButton.jsx";
 import "../components/PayPalButton.css";
 
-// **Import each merch image from your src/assets folder**
-import plannerWeekly from "../assets/merch/planner-weekly.jpg";
-import budgetNotebook from "../assets/merch/budget-notebook.jpg";
-import deluxePlanner from "../assets/merch/planner-deluxe.jpg";
-import weddingTimelinePlanner from "../assets/merch/wedding-timeline.jpg";
-import goalTracker from "../assets/merch/goal-tracker.jpg";
-import workbook90day from "../assets/merch/90day-workbook.jpg";
-import stickerPack from "../assets/merch/stickers.jpg";
-import gelPenSet from "../assets/merch/gel-pens.jpg";
-import ceramicMug from "../assets/merch/ceramic-mug.jpg";
-import tumbler from "../assets/merch/tumbler.jpg";
-import toteBag from "../assets/merch/tote.jpg";
-import waterBottle from "../assets/merch/bottle.jpg";
-import scentedCandle from "../assets/merch/candle.jpg";
-import throwPillow from "../assets/merch/pillow.jpg";
-import photoAlbum from "../assets/merch/photo-album.jpg";
-import milestoneCards from "../assets/merch/milestone-cards.jpg";
-import deskCalendar from "../assets/merch/desk-calendar.jpg";
-import mousePad from "../assets/merch/mouse-pad.jpg";
-import popSocket from "../assets/merch/popsocket.jpg";
-import enamelPin from "../assets/merch/enamel-pin.jpg";
-import keychain from "../assets/merch/keychain.jpg";
-import blanket from "../assets/merch/blanket.jpg";
-
+// styles
 import "./ShopPage.css";
 
 const PRODUCTS = [
