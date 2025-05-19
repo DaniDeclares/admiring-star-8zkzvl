@@ -15,7 +15,7 @@ import Footer from "../components/Footer.jsx";
 import "../components/Footer.css";
 
 // Assets
-import heroLogo from "../assets/logo.jpg";  // adjust name if needed
+import heroLogo from "../components/assets/logo.jpg";
 
 // Styles
 import "./Homepage.css";
