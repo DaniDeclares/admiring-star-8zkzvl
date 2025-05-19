@@ -1,5 +1,5 @@
 import React from "react";
-import "./WeddingsGallery.css";
+import "../components/WeddingsGallery.css";
 
 const IMAGES = [
   { src: require("../assets/weddings/barn-hanging-glass-orbs.jpg"), alt: "Hanging glass orb tablescape" },
