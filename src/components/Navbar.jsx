@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
-import logoSeal from "./assets/logo/logo-gold-seal.png";
+import logo from "../assets/logo.jpg";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -36,11 +36,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/" onClick={closeMenu}>
-          <img
-            src={logoSeal}
-            alt="Dani Declares Logo"
-            className="navbar-logo"
-          />
+          <img src={logo} alt="Dani Declares Logo" className="navbar-logo" />
         </Link>
       </div>
 

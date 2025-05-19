@@ -1,4 +1,4 @@
-notepadimport React from "react";
+import React from "react";
 import "./PayPalButton.css";
 
 export default function PayPalButton() {

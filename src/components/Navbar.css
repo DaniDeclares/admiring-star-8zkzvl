@@ -1,23 +1,22 @@
-/* src/Navbar.css */
-
 .navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  background: var(--color-secondary);
+  padding: 0.5rem 1rem;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
 .navbar-logo {
   height: 40px;
+  width: auto;
 }
 
 .hamburger {
+  display: none;
   background: none;
   border: none;
   font-size: 1.5rem;
-  cursor: pointer;
-  display: none;
 }
 
 .navbar-links {
@@ -25,54 +24,33 @@
   gap: 1rem;
 }
 
-.navbar-links a {
-  text-decoration: none;
-  color: var(--color-primary);
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.navbar-links a:hover {
-  color: var(--color-accent);
-}
-
-/* Cart icon */
 .cart-link {
   position: relative;
-  display: flex;
-  align-items: center;
 }
 
 .cart-badge {
   position: absolute;
   top: -6px;
   right: -10px;
-  background: var(--color-accent);
-  color: var(--color-secondary);
+  background: #e00;
+  color: #fff;
   border-radius: 50%;
   padding: 0 6px;
   font-size: 0.75rem;
-  line-height: 1.2;
 }
 
-/* Mobile */
+/* mobile */
 @media (max-width: 768px) {
-  .hamburger {
-    display: block;
-  }
-  .navbar-links {
+  .hamburger { display: block; }
+  .navbar-links { 
+    display: none;
+    flex-direction: column;
     position: absolute;
     top: 100%;
-    left: 0;
     right: 0;
-    background: var(--color-secondary);
-    flex-direction: column;
-    align-items: center;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
+    background: white;
+    width: 200px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   }
-  .navbar-links.open {
-    max-height: 500px; /* big enough for all links */
-  }
+  .navbar-links.open { display: flex; }
 }

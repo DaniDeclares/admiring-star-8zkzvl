@@ -1,4 +1,4 @@
-nimport React from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 // Chrome
@@ -26,8 +26,8 @@ export default function Homepage() {
         <section className="hero">
           <img
             className="hero-logo"
-            src={`${process.env.PUBLIC_URL}/assets/logo/logo.png`}
-            alt="Dani Declares Logo"
+            src={require("../assets/logo.jpg")}
+            alt="Dani Declares"
           />
           <h1>Empower Your Next Moment</h1>
           <p>
@@ -70,12 +70,10 @@ export default function Homepage() {
             className="mc_embed_signup"
             dangerouslySetInnerHTML={{
               __html: `
-  <form action="https://danideclares.us19.list-manage.com/subscribe/post?u=a28036bff232caaa9e6879b80&id=6e822d70e9" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
-    <div id="mc_embed_signup_scroll">
-      <input type="email" name="EMAIL" class="required email" placeholder="Your best email" required />
-      <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="btn btn--cta"/>
-    </div>
-  </form>
+<form action="https://danideclares.us19.list-manage.com/subscribe/post?u=a28036bff232caaa9e6879b80&id=6e822d70e9" method="post" target="_blank">
+  <input type="email" name="EMAIL" placeholder="Your best email" required />
+  <input type="submit" value="Subscribe" class="btn btn--cta"/>
+</form>
               `,
             }}
           />
