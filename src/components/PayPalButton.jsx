@@ -1,22 +1,4 @@
-import React, { useEffect, useRef } from "react";
-import "./PayPalButton.css";
-
-export default function PayPalButton({ price, onSuccess }) {
-  const ref = useRef();
-
-  useEffect(() => {
-    if (!window.paypal) return;
-    window.paypal.Buttons({
-      style: { layout: "vertical", color: "gold" },
-      createOrder: (data, actions) =>
-        actions.order.create({ purchase_units: [{ amount: { value: price } }] }),
-      onApprove: (data, actions) =>
-        actions.order.capture().then(onSuccess),
-    }).render(ref.current);
-  }, [price]);
-
-  return <div ref={ref} />;
-}
+// src/components/PayPalButton.jsx
 import React, { useEffect, useRef } from "react";
 import "./PayPalButton.css";
 
@@ -27,7 +9,7 @@ export default function PayPalButton({ price, onSuccess }) {
     if (!window.paypal) {
       const script = document.createElement("script");
       script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.REACT_APP_PAYPAL_CLIENT_ID}`;
-      script.addEventListener("load", () => renderButton());
+      script.addEventListener("load", renderButton);
       document.body.appendChild(script);
     } else {
       renderButton();

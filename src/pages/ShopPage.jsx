@@ -1,4 +1,4 @@
-import React from "react";
+notepadimport React from "react";
 
 // Chrome
 import FestivalBanner from "../components/FestivalBanner.jsx";

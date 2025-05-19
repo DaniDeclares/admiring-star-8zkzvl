@@ -12,10 +12,10 @@ import "../components/SocialLinks.css";
 import CookieConsent from "../components/CookieConsent.jsx";
 import "../components/CookieConsent.css";
 import Footer from "../components/Footer.jsx";
-import "../components/Footer.css";
+import "../components/Footer.css";no
 
 // Assets
-import heroLogo from "../components/assets/logo.jpg";
+import heroLogo from "../assets/logo/logo-gold-seal.png";
 
 // Styles
 import "./Homepage.css";

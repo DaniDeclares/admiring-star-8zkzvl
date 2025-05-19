@@ -4,7 +4,7 @@ import "./FestivalBanner.css";
 
 export default function FestivalBanner() {
   // Set your festival start date here:
-  const festivalDate = new Date("2025-07-19T09:00:00");
+  const festivalDate = new Date("2025-07-28T09:00:00");
   const [timeLeft, setTimeLeft] = useState(getDelta());
 
   function getDelta() {
