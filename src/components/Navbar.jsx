@@ -4,9 +4,9 @@ import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
 
 // **FIXED asset imports**:
-import logoSeal from "../assets/logo/logo-gold-seal.png";
+import logoSeal   from "../assets/logo/logo-gold-seal.png";
 import logoScript from "../assets/logo/logo-script.png";
-import logo from "../assets/logo/logo.jpg";
+import logo       from "../assets/logo/logo.jpg";
 
 import "./Navbar.css";
 
@@ -17,41 +17,45 @@ export default function Navbar() {
   const closeMenu = () => setMenuOpen(false);
 
   const links = [
-    ["/", "Home"],
+    ["/shop",     "Shop"],          // ← ADDED
+    ["/",         "Home"],
     ["/weddings", "Weddings"],
-    ["/notary", "Notary"],
+    ["/notary",   "Notary"],
     ["/coaching", "Coaching"],
     ["/calendar", "Calendar"],
-    ["/events", "Events"],
+    ["/events",   "Events"],
     ["/packages", "Packages"],
-    ["/pricing", "Pricing"],
-    ["/sponsor", "Sponsor"],
-    ["/speaker", "Speak & Vendor"],
-    ["/financial", "Financial"],
-    ["/blog", "Blog"],
-    ["/merch", "Merch Shop"],
+    ["/pricing",  "Pricing"],
+    ["/sponsor",  "Sponsor"],
+    ["/speaker",  "Speak & Vendor"],
+    ["/financial","Financial"],
+    ["/blog",     "Blog"],
+    ["/merch",    "Merch Shop"],
     ["/magazine", "Magazine"],
-    ["/faq", "FAQ"],
-    ["/media", "Media"],
-    ["/speakers", "Speakers"],
+    ["/faq",      "FAQ"],
+    ["/media",    "Media"],
+    ["/speakers","Speakers"],
   ];
 
   return (
     <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/" onClick={closeMenu}>
-          {/* you can swap between logos here */}
           <img src={logoSeal} alt="Dani Declares Seal" className="navbar-logo" />
         </Link>
       </div>
 
-      <button className="hamburger" aria-label="Toggle menu" onClick={() => setMenuOpen(!menuOpen)}>
+      <button
+        className="hamburger"
+        aria-label="Toggle menu"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
         ☰
       </button>
 
       <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
         {links.map(([to, label]) => (
-          <Link key={to} to={to} onClick={closeMenu}>
+          <Link key={to} to={to} onClick={closeMenu} className="nav-link">
             {label}
           </Link>
         ))}
