@@ -8,7 +8,7 @@ export default function PayPalButton({ price, onSuccess }) {
   useEffect(() => {
     if (!window.paypal) {
       const script = document.createElement("script");
-      script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.REACT_APP_PAYPAL_CLIENT_ID}`;
+      script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.REACT_APP_PAYPAL_CLIENT_ID}&currency=USD`;
       script.addEventListener("load", renderButton);
       document.body.appendChild(script);
     } else {
