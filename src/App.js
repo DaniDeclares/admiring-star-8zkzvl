@@ -58,7 +58,6 @@ export default function App() {
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/finance"    element={<FinancialPage />} />
         <Route path="/festival"   element={<FestivalPage />} />
- 
 
         {/* invalid URLs → home */}
         <Route path="*" element={<Navigate to="/" replace />} />
