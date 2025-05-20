@@ -1,57 +1,76 @@
+/* src/pages/ShopPage.css */
 .shop-page {
-  padding: 2rem 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
+  padding: 2rem;
+  background-color: #F8F5F1; /* ivory */
 }
 
-.shop-page h1 {
-  font-size: 2.5rem;
+.hero-title {
+  font-family: Georgia, serif;
+  color: #8B1E2E; /* burgundy */
+  text-align: center;
   margin-bottom: 0.5rem;
 }
 
-.shop-page p {
-  font-size: 1.2rem;
+.hero-subtitle {
+  font-family: Montserrat, sans-serif;
+  color: #333;
+  text-align: center;
   margin-bottom: 2rem;
 }
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
 }
 
 .product-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background-color: #fff;
+  border: 2px solid #8B1E2E;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.product-card img {
-  width: 100%;
-  height: auto;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-}
-
-.product-card h2 {
-  font-size: 1.25rem;
+.product-name {
+  font-family: Georgia, serif;
+  color: #8B1E2E;
   margin: 0.5rem 0;
 }
 
-.product-card .desc {
-  flex-grow: 1;
-  font-size: 0.95rem;
-  color: #666;
-  margin-bottom: 1rem;
+.price {
+  font-family: Montserrat, sans-serif;
+  font-weight: bold;
+  color: #333;
+  margin: 0.25rem 0;
 }
 
-.product-card .price {
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
+.desc {
+  font-family: Montserrat, sans-serif;
+  color: #555;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.buy-button {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  font-family: Montserrat, sans-serif;
+  font-size: 0.9rem;
+  text-decoration: none;
+  background-color: #8B1E2E; /* burgundy */
+  color: #F8F5F1; /* ivory */
+  border: 2px solid #D4AF37; /* gold */
+  border-radius: 0.25rem;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.buy-button:hover {
+  background-color: #6F1720;
+  transform: translateY(-2px);
+}
+
+.buy-button:active {
+  transform: translateY(0);
 }
