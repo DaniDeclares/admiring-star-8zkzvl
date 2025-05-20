@@ -35,6 +35,10 @@ import ContactPage from "./pages/ContactPage.jsx";
 import "./pages/ContactPage.css";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import "./pages/MembershipPage.css";
+import FinancialPage from "./pages/FinancialPage.jsx";
+import "./pages/FinancialPage.css";
+import FestivalPage from "./pages/FestivalPage.jsx";
+import "./pages/FestivalPage.css";
 
 export default function App() {
   return (
@@ -52,6 +56,9 @@ export default function App() {
         <Route path="/notary"     element={<NotaryPage />} />
         <Route path="/contact"    element={<ContactPage />} />
         <Route path="/membership" element={<MembershipPage />} />
+        <Route path="/finance"    element={<FinancialPage />} />
+        <Route path="/festival"   element={<FestivalPage />} />
+ 
 
         {/* invalid URLs → home */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,0 +1,10 @@
+.insurance-cta {
+  background: #fafafa;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  margin: 2rem 0;
+}
+.insurance-cta .btn--primary {
+  margin-top: 1rem;
+}

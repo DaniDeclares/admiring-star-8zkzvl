@@ -1,0 +1,23 @@
+/* src/pages/FestivalPage.css */
+
+.festival-page {
+  padding: 4rem 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.festival-page h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.festival-page p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.festival-support {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
