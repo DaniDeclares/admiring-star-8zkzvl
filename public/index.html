@@ -41,8 +41,8 @@
       content="Coaching • Events • Weddings • Notary • Finance – Unlock your potential with Dani Declares."
     />
     <meta property="og:image" content="%PUBLIC_URL%/assets/hero/hero-couple-beach-wide.jpg" />
-    <meta property="og:url" content="https://www.danideclares.com/" />
-    <meta property="og:type" content="website" />
+    <meta property="og:url"   content="https://www.danideclares.com/" />
+    <meta property="og:type"  content="website" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -52,38 +52,37 @@
 
     <!-- AdSense -->
     <meta name="google-adsense-account" content="ca-pub-1271590126273860" />
+    <!-- If you actually want to load AdSense you’ll also need: -->
+    <!-- <script data-ad-client="ca-pub-1271590126273860" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script> -->
 
-    <!-- Facebook Pixel Code -->
+    <!-- Facebook Pixel -->
     <script>
-  !(function(f,b,e,v,n,t,s){
-    if(f.fbq) return; 
-    n=f.fbq=function(){
-      n.callMethod
-        ? n.callMethod.apply(n,arguments)
-        : n.queue.push(arguments);
-    };
-    if(!f._fbq) f._fbq = n;
-    n.push = n;
-    n.loaded = !0;
-    n.version = '2.0';
-    n.queue = [];                
-    t=b.createElement(e);
-    t.async=!0;
-    t.src=v;
-    s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s);
-  })(
-    window,
-    document,
-    'script',
-    'https://connect.facebook.net/en_US/fbevents.js'
-  );
-  if (window.fbq) {
-    fbq('init', '1370033934339982');
-    fbq('track', 'PageView');
-  }
-</script>
-
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = "2.0";
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(
+        window,
+        document,
+        "script",
+        "https://connect.facebook.net/en_US/fbevents.js"
+      );
+      if (window.fbq) {
+        fbq("init", "1370033934339982");
+        fbq("track", "PageView");
+      }
+    </script>
     <noscript
       ><img
         height="1"
@@ -93,7 +92,7 @@
     /></noscript>
     <!-- End Facebook Pixel -->
 
-    <!-- Google Analytics (gtag.js) -->
+    <!-- Google Analytics -->
     <script
       async
       src="https://www.googletagmanager.com/gtag/js?id=G-KN7E9K69YY"
@@ -113,15 +112,14 @@
         publicApiKey: "NTNkMzZkYjAtMTNmMC00MmU4LThmODMtNGI3YzZmNjBiMzdhNjM4ODMwODkxMTUzNTc0NzYw",
         loadStrategy: "on-user-interaction",
       };
-      // ... (existing initialization code) ...
     </script>
     <!-- End Snipcart Settings -->
 
-    <!-- Favicon & Manifest -->
-    <!-- We’re not using a Web App Manifest or favicon.ico any more -->
+    <!-- Favicon & Manifest (optional) -->
     <!-- <link rel="manifest" href="%PUBLIC_URL%/manifest.json" /> -->
-    <!-- <link rel="icon" href="%PUBLIC_URL%/favicon.ico" /> -->
+    <!-- <link rel="icon"     href="%PUBLIC_URL%/favicon.ico"   /> -->
 
+  </head>
   <body>
     <!-- Google Tag Manager (noscript) -->
     <noscript
@@ -138,7 +136,12 @@
     <div id="root"></div>
 
     <!-- Snipcart DOM node -->
-    <div hidden id="snipcart" data-api-key="NTNkMzZkYjAtMTNmMC00MmU4LThmODMtNGI3YzZmNjBiMzdhNjM4ODMwODkxMTUzNTc0NzYw"></div>
-    <!-- End Snipcart -->
+    <div
+      hidden
+      id="snipcart"
+      data-api-key="NTNkMzZkYjAtMTNmMC00MmU4LThmODMtNGI3YzZmNjBiMzdhNjM4ODMwODkxMTUzNTc0NzYw"
+    ></div>
+
+    <!-- CRA will inject your bundled scripts here -->
   </body>
 </html>
