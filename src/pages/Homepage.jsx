@@ -12,7 +12,7 @@ import "../components/SocialLinks.css";
 import CookieConsent from "../components/CookieConsent.jsx";
 import "../components/CookieConsent.css";
 import Footer from "../components/Footer.jsx";
-import "../components/Footer.css";no
+import "../components/Footer.css";
 
 // Assets
 import heroLogo from "../assets/logo/logo.jpg";
@@ -39,11 +39,16 @@ export default function Homepage() {
             Unlock your potential with Dani Declares.
           </p>
           <div className="hero-cta">
-            <Link to="/coaching" className="btn btn--primary">
-              Explore Packages
+            <Link to="/financial" className="btn btn--primary">
+              Free Insurance Quote
             </Link>
-            <Link to="/contact" className="btn btn--secondary">
-              Get in Touch
+            <Link
+              to="/festival"
+              className="btn btn--secondary"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Early-Bird Festival Tickets
             </Link>
           </div>
         </section>
