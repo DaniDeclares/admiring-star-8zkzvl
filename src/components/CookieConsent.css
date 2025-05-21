@@ -1,72 +1,80 @@
 .cookie-consent {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.7);
-  color: #fff;
-  padding: 1.5rem;
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-}
-
-.cookie-consent__banner {
-  max-width: 700px;
+  width: 100%;
   background: #f8f5f1;
+  border-top: 3px solid #d4af37;
+  padding: 1.5rem 1rem;
+  box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  font-family: "Montserrat", sans-serif;
+}
+
+.cookie-banner {
+  max-width: 820px;
+  margin: auto;
+  text-align: center;
   color: #333;
-  padding: 1.5rem;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.cookie-consent__title {
-  margin: 0 0 0.5rem;
+.cookie-banner h2 {
   color: #8b1e2e;
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
 }
 
-.cookie-consent__message,
-.cookie-consent__advanced {
-  margin: 0.75rem 0;
+.cookie-banner p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.cookie-banner .advanced {
   font-size: 0.95rem;
-  line-height: 1.4;
-}
-
-.cookie-consent__advanced {
-  font-size: 0.9rem;
   color: #555;
 }
 
-.cookie-consent__actions {
-  text-align: right;
+.cookie-actions {
   margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.cookie-consent__btn {
-  font-family: "Montserrat", sans-serif;
+.cookie-actions button {
+  padding: 0.6rem 1.4rem;
   border: none;
-  padding: 0.5rem 1.25rem;
-  margin-left: 0.5rem;
-  border-radius: 4px;
-  cursor: pointer;
+  border-radius: 6px;
   font-weight: bold;
-  transition: background 0.2s ease;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
-.cookie-consent__btn--accept {
-  background: #8b1e2e;
-  color: #f8f5f1;
+.cookie-actions .accept {
+  background-color: #8b1e2e;
+  color: white;
 }
 
-.cookie-consent__btn--accept:hover {
-  background: #a22a3b;
+.cookie-actions .accept:hover {
+  background-color: #6a171f;
 }
 
-.cookie-consent__btn--decline {
-  background: #ccc;
+.cookie-actions .decline {
+  background-color: #ddd;
   color: #333;
 }
 
-.cookie-consent__btn--decline:hover {
-  background: #bbb;
+.cookie-actions .decline:hover {
+  background-color: #bbb;
+}
+
+@media (max-width: 600px) {
+  .cookie-actions {
+    flex-direction: column;
+  }
+
+  .cookie-actions button {
+    width: 100%;
+  }
 }

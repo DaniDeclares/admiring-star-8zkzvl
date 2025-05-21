@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import "./FestivalBanner.css";
 
 export default function FestivalBanner() {
-  // Festival kicks off July 28, 2025 at 9 AM
   const festivalDate = new Date("2025-07-28T09:00:00");
   const [timeLeft, setTimeLeft] = useState(getDelta());
 
@@ -11,9 +10,9 @@ export default function FestivalBanner() {
     const now = new Date();
     const delta = festivalDate - now;
     if (delta <= 0) return null;
-    const days  = Math.floor(delta / (1000 * 60 * 60 * 24));
+    const days = Math.floor(delta / (1000 * 60 * 60 * 24));
     const hours = Math.floor((delta / (1000 * 60 * 60)) % 24);
-    const mins  = Math.floor((delta / (1000 * 60)) % 60);
+    const mins = Math.floor((delta / (1000 * 60)) % 60);
     return { days, hours, mins };
   }
 
@@ -25,7 +24,9 @@ export default function FestivalBanner() {
   return (
     <div className="festival-banner">
       <div className="festival-content">
-        <span className="festival-emoji">🎪</span>
+        <span className="festival-emoji" role="img" aria-label="festival">
+          🎪
+        </span>
         <span className="festival-text">
           Declare Your Worth Festival&nbsp;
           <strong>July 28–29, 2025</strong>

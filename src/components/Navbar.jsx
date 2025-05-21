@@ -3,11 +3,7 @@ import { Link } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
 
-// **FIXED asset imports**:
-import logoSeal   from "../assets/logo/logo-gold-seal.png";
-import logoScript from "../assets/logo/logo-script.png";
-import logo       from "../assets/logo/logo.jpg";
-
+import logoSeal from "../assets/logo/logo-gold-seal.png";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -17,7 +13,7 @@ export default function Navbar() {
   const closeMenu = () => setMenuOpen(false);
 
   const links = [
-    ["/shop",     "Shop"],          // ← ADDED
+    ["/shop",     "Shop"],
     ["/",         "Home"],
     ["/weddings", "Weddings"],
     ["/notary",   "Notary"],
@@ -34,22 +30,18 @@ export default function Navbar() {
     ["/magazine", "Magazine"],
     ["/faq",      "FAQ"],
     ["/media",    "Media"],
-    ["/speakers","Speakers"],
+    ["/speakers", "Speakers"],
   ];
 
   return (
     <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/" onClick={closeMenu}>
-          <img src={logoSeal} alt="Dani Declares Seal" className="navbar-logo" />
+          <img src={logoSeal} alt="Dani Declares Logo" className="navbar-logo" />
         </Link>
       </div>
 
-      <button
-        className="hamburger"
-        aria-label="Toggle menu"
-        onClick={() => setMenuOpen(!menuOpen)}
-      >
+      <button className="hamburger" aria-label="Toggle menu" onClick={() => setMenuOpen(!menuOpen)}>
         ☰
       </button>
 
@@ -59,7 +51,6 @@ export default function Navbar() {
             {label}
           </Link>
         ))}
-
         <Link to="/cart" className="cart-link" onClick={closeMenu}>
           <FiShoppingCart size={20} />
           {totalQty > 0 && <span className="cart-badge">{totalQty}</span>}

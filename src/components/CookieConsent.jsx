@@ -14,7 +14,7 @@ export default function CookieConsent() {
   const accept = () => {
     localStorage.setItem(STORAGE_KEY, "accepted");
     setVisible(false);
-    // You can fire your analytics init here, e.g. window.gtag() or GTM push
+    // Fire tracking setup here if needed
   };
 
   const decline = () => {
@@ -26,30 +26,21 @@ export default function CookieConsent() {
 
   return (
     <div className="cookie-consent">
-      <div className="cookie-consent__banner">
-        <h2 className="cookie-consent__title">This website uses cookies.</h2>
-        <p className="cookie-consent__message">
-          We use cookies to analyze website traffic and optimize your
-          experience. By accepting, your data is aggregated with other user
-          data.
+      <div className="cookie-banner">
+        <h2>This website uses cookies.</h2>
+        <p>
+          We use cookies to analyze traffic and improve your experience.
+          Accepting enables tracking for better insights and faster performance.
         </p>
-        <p className="cookie-consent__advanced">
-          <strong>Advanced Tracking:</strong>
-          Allow us to place cookies so we can report how many people visit,
-          speed up your experience, and integrate third-party metrics. Keep this
-          on to see insights in your Dashboard.
+        <p className="advanced">
+          <strong>Advanced Tracking:</strong> Keep this enabled to access
+          third-party analytics and personalized features.
         </p>
-        <div className="cookie-consent__actions">
-          <button
-            className="cookie-consent__btn cookie-consent__btn--decline"
-            onClick={decline}
-          >
+        <div className="cookie-actions">
+          <button className="decline" onClick={decline}>
             Decline
           </button>
-          <button
-            className="cookie-consent__btn cookie-consent__btn--accept"
-            onClick={accept}
-          >
+          <button className="accept" onClick={accept}>
             Accept
           </button>
         </div>
