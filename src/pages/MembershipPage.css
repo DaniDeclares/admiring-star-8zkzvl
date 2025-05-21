@@ -1,59 +1,107 @@
-/* src/pages/MembershipPage.css */
+/* MembershipPage.css */
 .membership-page {
-  padding: 2rem 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  background: #FFF8F2;
+  padding: 2rem;
+  font-family: 'Montserrat', sans-serif;
+  color: #333;
+}
+
+.membership-page h1 {
+  font-size: 2.5rem;
   text-align: center;
+  color: #8B1E2E;
 }
-.membership-page .subtitle {
-  color: #555;
-  margin-bottom: 1.5rem;
+
+.subtitle {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #5a5a5a;
 }
+
 .billing-toggle {
-  display: inline-flex;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
   margin-bottom: 2rem;
 }
+
 .billing-toggle button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
-  background: none;
+  padding: 0.75rem 1.5rem;
+  background: #eee;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
   cursor: pointer;
+  transition: background 0.3s;
 }
-.billing-toggle .active {
-  background: #8B1E2E;
+
+.billing-toggle button.active {
+  background: #D4AF37;
   color: #fff;
-  border-color: #8B1E2E;
 }
+
 .tiers-grid {
   display: grid;
-  gap: 1.5rem;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  margin-bottom: 2rem;
+  gap: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
 }
+
 .tier-card {
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border: 1px solid #D4AF37;
   padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  text-align: center;
 }
+
 .tier-card h3 {
+  color: #8B1E2E;
   margin-bottom: 0.5rem;
 }
+
 .tier-desc {
-  font-size: 0.95rem;
-  color: #666;
-  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #555;
 }
+
 .tier-price {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 1rem;
 }
+
 .tier-price span {
   font-size: 0.9rem;
-  color: #555;
+  color: #777;
+  margin-left: 4px;
 }
+
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: #8B1E2E;
+  color: #fff;
+}
+
+.btn--secondary {
+  background: #D4AF37;
+  color: #000;
+}
+
 .btn--accent {
-  background: #222;
+  background: #6E1A25;
   color: #fff;
 }
