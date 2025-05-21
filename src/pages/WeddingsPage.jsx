@@ -24,19 +24,19 @@ const PACKAGES = [
     id: "crowned-in-love",
     name: "Crowned in Love",
     price: "$75,000",
-    desc: "Full-service planning + concierge for 150–200 guests.",
+    desc: "Our signature full-service package for elegant events of 150–200 guests.",
   },
   {
     id: "the-opulent-weekend",
     name: "The Opulent Weekend",
     price: "$95,000",
-    desc: "3-day destination experience for 50–100 guests.",
+    desc: "3-day luxury experience for up to 100 guests — rehearsal, ceremony, and farewell brunch.",
   },
   {
     id: "eternally-yours",
     name: "Eternally Yours",
     price: "Starting at $125,000",
-    desc: "Fully bespoke luxury wedding experience.",
+    desc: "A completely bespoke wedding weekend, crafted exclusively to your vision.",
   },
 ];
 

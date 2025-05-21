@@ -26,25 +26,25 @@ const SERVICES = [
     title: "Apostille Assistance",
     duration: "30 mins",
     price: "$250",
-    desc: "Handle apostille filings for documents destined abroad.",
+    desc: "Secure apostille services for international documents — handled start to finish.",
   },
   {
-    title: "Fingerprinting",
+    title: "Fingerprinting (FD-258)",
     duration: "per session",
     price: "$50",
-    desc: "FD-258 ink fingerprinting cards for background checks.",
+    desc: "Compliant ink fingerprinting for background checks and licensing.",
   },
   {
-    title: "Loan Signing Appointment",
+    title: "Loan Signing Agent",
     duration: "1 hr",
     price: "$100",
-    desc: "Certified signing agent for refinance, HELOC, purchase closings.",
+    desc: "Certified for refinance, HELOCs, and real estate closings — fully mobile.",
   },
   {
-    title: "Notary + Financial Wellness",
+    title: "Notary + Finance Session",
     duration: "1 hr",
     price: "$135",
-    desc: "Bundle notary with expert financial coaching.",
+    desc: "Bundle notary services with personal financial wellness coaching.",
   },
 ];
 
@@ -54,21 +54,21 @@ export default function NotaryPage() {
       <FestivalBanner />
       <Navbar />
 
-      <div className="notary-page">
-        <h1 className="page-title">Notary & Apostille Services</h1>
-        <p className="page-subtitle">
-          Convenient, certified, and trusted by Georgia professionals.
-        </p>
+      <main className="notary-page">
+        <header className="hero">
+          <h1>Notary & Apostille Services</h1>
+          <p>Trusted. Mobile. Always prepared to serve you where you are.</p>
+        </header>
 
-        <div className="services-grid">
-          {SERVICES.map((s, i) => (
-            <div key={i} className="service-card">
-              <h2>{s.title}</h2>
-              <p className="meta">{s.duration} | {s.price}</p>
-              <p className="desc">{s.desc}</p>
+        <section className="services-grid">
+          {SERVICES.map((service, index) => (
+            <div key={index} className="service-card">
+              <h2>{service.title}</h2>
+              <p className="meta">{service.duration} • {service.price}</p>
+              <p className="desc">{service.desc}</p>
               <a
                 href="https://tidycal.com/danideclaresns"
-                className="cta-button"
+                className="btn btn--book"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -76,16 +76,16 @@ export default function NotaryPage() {
               </a>
             </div>
           ))}
-        </div>
+        </section>
 
         <section className="contact-info">
-          <h3>Questions?</h3>
+          <h3>Have Questions?</h3>
           <p>
-            Email <a href="mailto:danideclaresns@gmail.com">danideclaresns@gmail.com</a> or
-            call <a href="tel:+14705324892">(470) 523-4892</a>.
+            Email <a href="mailto:danideclaresns@gmail.com">danideclaresns@gmail.com</a><br />
+            or call/text <a href="tel:+14705324892">(470) 523-4892</a>
           </p>
         </section>
-      </div>
+      </main>
 
       <SocialLinks />
       <CookieConsent />

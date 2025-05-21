@@ -1,56 +1,91 @@
+/* NotaryPage.css */
 .notary-page {
-  padding: 2rem 1rem;
-  max-width: 900px;
-  margin: 0 auto;
+  background-color: #F8F5F1;
+  padding: 2rem;
+  font-family: Montserrat, Arial, sans-serif;
+  color: #333;
 }
 
-.page-title {
+.hero {
   text-align: center;
+  margin-bottom: 3rem;
+}
+
+.hero h1 {
   font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  color: #8B1E2E;
 }
 
-.page-subtitle {
-  text-align: center;
-  color: #5c2a2a;
-  margin-bottom: 2rem;
+.hero p {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  color: #555;
 }
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin-top: 2rem;
 }
 
 .service-card {
-  background: #fff;
+  background: white;
+  border: 1px solid #D4AF37;
+  border-radius: 12px;
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  text-align: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+}
+
+.service-card h2 {
+  color: #8B1E2E;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
 }
 
 .service-card .meta {
-  color: #333;
-  margin-bottom: 0.75rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #444;
 }
 
-.cta-button {
-  background: #8b1e2e;
-  color: #fff;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
+.service-card .desc {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.btn--book {
   display: inline-block;
-  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #8B1E2E;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 6px;
+  transition: background-color 0.3s;
 }
 
-.cta-button:hover {
-  background: #5c2a2a;
+.btn--book:hover {
+  background-color: #6e1a25;
 }
 
 .contact-info {
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 3rem;
+}
+
+.contact-info h3 {
+  font-size: 1.4rem;
+  color: #8B1E2E;
+}
+
+.contact-info p {
+  font-size: 1rem;
+  margin-top: 0.5rem;
 }

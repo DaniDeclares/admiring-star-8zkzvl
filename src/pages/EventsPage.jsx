@@ -1,7 +1,7 @@
 import React from "react";
 
-// site chrome  
-import FestivalBanner from "../components/FestivalBanner.jsx";  
+// Chrome
+import FestivalBanner from "../components/FestivalBanner.jsx";
 import "../components/FestivalBanner.css";
 import Navbar from "../components/Navbar.jsx";
 import "../components/Navbar.css";
@@ -12,75 +12,52 @@ import "../components/CookieConsent.css";
 import Footer from "../components/Footer.jsx";
 import "../components/Footer.css";
 
-// page styles  
+// Styles
 import "./EventsPage.css";
 
-const EVENTS = [
-  {
-    title: "Declare Your Worth Festival",
-    date: "July 12–14, 2025",
-    location: "Atlanta, GA",
-    highlights: [
-      "Keynote workshops on entrepreneurship",
-      "Live coaching sessions",
-      "Networking brunch",
-      "Evening gala with live music",
-    ],
-    cta: {
-      label: "Get Early-Bird Tickets",
-      href: "/tickets?utm_source=site&utm_campaign=events",
-    },
-  },
-  {
-    title: "Pop-Up Notary Roadshow",
-    date: "May 21–25, 2025",
-    location: "Savannah, GA → Charleston, SC",
-    highlights: [
-      "On-the-spot notarizations",
-      "Legal clinics",
-      "Branded merch giveaways",
-    ],
-    cta: {
-      label: "Reserve Your Spot",
-      href: "/notary-roadshow?utm_source=site&utm_campaign=events",
-    },
-  },
-];
-
 export default function EventsPage() {
+  const events = [
+    {
+      title: "Sign & Sip: Notary Pop-Up",
+      date: "June 2, 2025",
+      desc: "Network and notarize in style. Pop-up event with wine, vibes & legal help.",
+      link: "https://tidycal.com/danideclaresns/sign-sip",
+    },
+    {
+      title: "Love & Legalities: Wedding Mixer",
+      date: "July 13, 2025",
+      desc: "Couples + planners meet vendors, officiants & notaries in a romantic setting.",
+      link: "https://tidycal.com/danideclaresns/love-legalities",
+    },
+    {
+      title: "Declare Your Worth Festival",
+      date: "July 28–29, 2025",
+      desc: "2-day experience of coaching, shopping, and storytelling to empower your legacy.",
+      link: "/festival",
+    },
+  ];
+
   return (
     <>
       <FestivalBanner />
       <Navbar />
 
-      <main className="page events-page">
-        <h1 className="page-title">Upcoming Events</h1>
-        <p className="page-subtitle">
-          From our signature Declare Your Worth Festival to our Pop-Up Notary
-          Roadshow—join us live!
-        </p>
+      <main className="events-page">
+        <h1>Upcoming Experiences</h1>
+        <p className="intro">Tap into your worth—live and in person.</p>
 
-        {EVENTS.map((evt) => (
-          <div key={evt.title} className="event-box">
-            <h2>{evt.title}</h2>
-            <p>
-              <strong>Date:</strong> {evt.date}
-              <br />
-              <strong>Location:</strong> {evt.location}
-            </p>
-            <ul>
-              {evt.highlights.map((h) => (
-                <li key={h}>{h}</li>
-              ))}
-            </ul>
-            <a href={evt.cta.href} className="cta-button">
-              {evt.cta.label}
-            </a>
-            <a href="/calendar" className="secondary-button">
-              View Calendar
-            </a>
-          </div>
-        ))}
+        <div className="event-grid">
+          {events.map((e) => (
+            <div key={e.title} className="event-card">
+              <h2>{e.title}</h2>
+              <p className="date">{e.date}</p>
+              <p className="desc">{e.desc}</p>
+              <a className="btn btn--primary" href={e.link} target="_blank" rel="noreferrer">
+                RSVP
+              </a>
+            </div>
+          ))}
+        </div>
       </main>
 
       <SocialLinks />

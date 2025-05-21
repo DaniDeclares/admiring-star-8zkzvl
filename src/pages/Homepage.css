@@ -1,44 +1,56 @@
-.homepage .hero {
+/* Homepage.css */
+.homepage {
   text-align: center;
-  padding: 4rem 1rem;
+  padding: 2rem;
+  background-color: #F8F5F1;
 }
 .hero-logo {
-  width: 160px;
+  width: 200px;
   margin-bottom: 1rem;
 }
-.hero-cta .btn {
-  margin: 0 0.5rem;
-}
-.services-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-  margin: 2rem 0;
-}
-.service-card {
-  padding: 1rem 1.5rem;
-  background: #f9f9f9;
-  border-radius: 8px;
-  text-decoration: none;
-  color: #333;
-}
-.newsletter-cta {
-  background: #fff5e6;
-  text-align: center;
-  padding: 2rem 1rem;
-}
-.mc_embed_signup input[type="email"] {
-  padding: 0.5rem;
-  width: 250px;
-  margin-right: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
 .hero-cta {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
   justify-content: center;
+  gap: 1rem;
+}
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  text-decoration: none;
+  color: white;
+}
+.btn--primary {
+  background-color: #8B1E2E;
+}
+.btn--secondary {
+  background-color: #D4AF37;
+  color: black;
+}
+
+/* BlogPage.css */
+.blog-page {
+  padding: 2rem;
+  background-color: #fff;
+  color: #333;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* EventsPage.css */
+.events-page {
+  padding: 2rem;
+  background-color: #fff;
+  color: #333;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ContactPage.css */
+.contact-page {
+  padding: 2rem;
+  background-color: #fff;
+  color: #333;
+  max-width: 800px;
+  margin: 0 auto;
 }
