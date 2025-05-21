@@ -22,21 +22,23 @@ const PRODUCTS = [
     id: "planner-001",
     name: "Undated Weekly Planner",
     price: 35,
-    desc: "Stay on track with your weekly goals in this elegant planner."
+    desc: "Stay on track with your weekly goals in this elegant planner.",
+    image: "/static/media/logo-script.png"
   },
   {
     id: "notebook-002",
     name: "Declare Your Worth Budget Notebook",
     price: 20,
-    desc: "Track income & expenses in style."
+    desc: "Track income & expenses in style.",
+    image: "/static/media/logo-gold-seal.png"
   },
   {
     id: "planner-003",
     name: "Leather-Bound Deluxe Planner",
     price: 50,
-    desc: "Premium planner wrapped in burgundy leather."
+    desc: "Premium planner wrapped in burgundy leather.",
+    image: "/static/media/love-marquee-barn.jpg"
   },
-  // ...continue for all products
 ];
 
 export default function ShopPage() {
@@ -52,6 +54,7 @@ export default function ShopPage() {
         <div className="product-grid">
           {PRODUCTS.map((p) => (
             <div key={p.id} className="product-card">
+              <img src={p.image} alt={p.name} className="product-image" />
               <h2 className="product-name">{p.name}</h2>
               <p className="price">${p.price}</p>
               <p className="desc">{p.desc}</p>
@@ -62,6 +65,7 @@ export default function ShopPage() {
                 data-item-price={p.price}
                 data-item-url="/shop"
                 data-item-description={p.desc}
+                data-item-image={p.image}
               >
                 Buy Now
               </button>
