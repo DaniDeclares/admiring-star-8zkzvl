@@ -49,3 +49,4 @@ export default function App() {
     </Router>
   );
 }
+<Route path="*" element={<Navigate to="/" replace />} />
