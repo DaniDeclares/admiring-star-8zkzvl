@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <!-- Snipcart: CSS & JS -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.snipcart.com/themes/v3.4.0/default/snipcart.css"
-    />
-    <script
-      async
-      src="https://cdn.snipcart.com/themes/v3.4.0/default/snipcart.js"
-    ></script>
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <title>Dani Declares</title>
+
+    <!-- Snipcart -->
+    <link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.4.0/default/snipcart.css" />
+    <script async src="https://cdn.snipcart.com/themes/v3.4.0/default/snipcart.js"></script>
+    <script>
+      window.SnipcartSettings = {
+        publicApiKey: "NTNkMzZkYjAtMTNmMC00MmU4LThmODMtNGI3YzZmNjBiMzdhNjM4ODMwODkxMTUzNTc0NzYw",
+        loadStrategy: "on-user-interaction",
+      };
+    </script>
 
     <!-- Google Tag Manager -->
     <script>
@@ -20,119 +27,40 @@
         w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
         var f = d.getElementsByTagName(s)[0],
           j = d.createElement(s),
-          dl = l != "dataLayer" ? "&l=" + l : "";
+          dl = l !== "dataLayer" ? "&l=" + l : "";
         j.async = true;
         j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
         f.parentNode.insertBefore(j, f);
-      })(
-        window,
-        document,
-        "script",
-        "dataLayer",
-        "GTM-5J9QMG74"
-      );
+      })(window, document, "script", "dataLayer", "GTM-5J9QMG74");
     </script>
-    <!-- End Google Tag Manager -->
-
-    <!-- Required meta tags -->
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-
-    <!-- Primary SEO -->
-    <title>Dani Declares • Coaching, Events, Weddings & More</title>
-    <meta
-      name="description"
-      content="Dani Declares empowers your next moment: 1:1 coaching, community events, bespoke weddings, on-the-go notary, and financial planning."
-    />
-
-    <!-- Open Graph / Facebook -->
-    <meta
-      property="og:title"
-      content="Dani Declares • Empower Your Next Moment"
-    />
-    <meta
-      property="og:description"
-      content="Coaching • Events • Weddings • Notary • Finance – Unlock your potential with Dani Declares."
-    />
-    <meta
-      property="og:image"
-      content="%PUBLIC_URL%/assets/hero/hero-couple-beach-wide.jpg"
-    />
-    <meta property="og:url" content="https://www.danideclares.com/" />
-    <meta property="og:type" content="website" />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-
-    <!-- Pinterest Domain Verification -->
-    <meta
-      name="p:domain_verify"
-      content="5443c6e07f84906b7ddb5318f38b91f4"
-    />
-
-    <!-- AdSense -->
-    <meta
-      name="google-adsense-account"
-      content="ca-pub-1271590126273860"
-    />
-    <!-- If you use AdSense, also add:
-    <script data-ad-client="ca-pub-1271590126273860" async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
-    </script>
-    -->
 
     <!-- Facebook Pixel -->
     <script>
-      try {
-        !(function (f, b, e, v, n, t, s) {
-          if (f.fbq) return;
-          n = (f.fbq = function () {
-            n.callMethod
-              ? n.callMethod.apply(n, arguments)
-              : n.queue.push(arguments);
-          });
-          if (!f._fbq) f._fbq = n;
-          n.push = n;
-          n.loaded = !0;
-          n.version = "2.0";
-          n.queue = [];
-          t = b.createElement(e);
-          t.async = !0;
-          t.src = v;
-          s = b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t, s);
-        })(
-          window,
-          document,
-          "script",
-          "https://connect.facebook.net/en_US/fbevents.js"
-        );
-        if (window.fbq) {
-          fbq("init", "1370033934339982");
-          fbq("track", "PageView");
-        }
-      } catch (err) {
-        console.warn("FB Pixel load failed:", err);
-      }
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = "2.0";
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+      fbq("init", "1370033934339982");
+      fbq("track", "PageView");
     </script>
     <noscript>
-      <img
-        height="1"
-        width="1"
-        style="display: none"
-        src="https://www.facebook.com/tr?id=1370033934339982&ev=PageView&noscript=1"
-      />
+      <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1370033934339982&ev=PageView&noscript=1"/>
     </noscript>
-    <!-- End Facebook Pixel -->
 
-    <!-- Google Analytics (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-KN7E9K69YY"
-    ></script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KN7E9K69YY"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
@@ -141,43 +69,13 @@
       gtag("js", new Date());
       gtag("config", "G-KN7E9K69YY");
     </script>
-
-    <!-- Snipcart Settings -->
-    <script>
-      window.SnipcartSettings = {
-        publicApiKey:
-          "NTNkMzZkYjAtMTNmMC00MmU4LThmODMtNGI3YzZmNjBiMzdhNjM4ODMwODkxMTUzNTc0NzYw",
-        loadStrategy: "on-user-interaction",
-      };
-    </script>
-    <!-- End Snipcart Settings -->
-
-    <!-- Favicon & Manifest -->
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
   </head>
-  <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript>
-      <iframe
-        src="https://www.googletagmanager.com/ns.html?id=GTM-5J9QMG74"
-        height="0"
-        width="0"
-        style="display: none; visibility: hidden"
-      ></iframe>
-    </noscript>
-    <!-- End Google Tag Manager -->
 
+  <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 
-    <!-- Snipcart DOM node -->
-    <div
-      hidden
-      id="snipcart"
-      data-api-key="NTNkMzZkYjAtMTNmMC00MmU4LThmODMtNGI3YzZmNjBiMzdhNjM4ODMwODkxMTUzNTc0NzYw"
-    ></div>
-
-    <!-- CRA injects bundled scripts here -->
+    <!-- Snipcart DOM -->
+    <div hidden id="snipcart" data-api-key="NTNkMzZkYjAtMTNmMC00MmU4LThmODMtNGI3YzZmNjBiMzdhNjM4ODMwODkxMTUzNTc0NzYw"></div>
   </body>
 </html>

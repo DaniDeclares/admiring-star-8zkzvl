@@ -81,4 +81,10 @@
   .nav-link {
     margin: 0.5rem 0;
   }
+
+.nav-link.active {
+  font-weight: bold;
+  color: #D4AF37; /* Dani Declares gold accent */
+}
+
 }

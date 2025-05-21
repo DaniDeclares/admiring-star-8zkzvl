@@ -1,17 +1,19 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App.js";
+import App from "./App";
 import { BrowserRouter } from "react-router-dom";
-import { CartProvider } from "./context/CartContext.jsx";
+import { CartProvider } from "./context/CartContext";
+import { HelmetProvider } from "react-helmet-async"; // Add this
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <CartProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <HelmetProvider> {/* Wrap App */}
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </HelmetProvider>
     </CartProvider>
   </React.StrictMode>
 );
