@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import "./HubSpotForm.css";
 
 export default function HubSpotForm({
   region = "na2",
@@ -7,20 +8,26 @@ export default function HubSpotForm({
 }) {
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = `https://js-${region}.hsforms.net/forms/embed/${portalId}.js`;
-    script.defer = true;
+    script.src = `https://js-${region}.hsforms.net/forms/embed/v2.js`;
+    script.async = true;
     document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, [region, portalId]);
 
-  return (
-    <div
-      className="hs-form-frame"
-      data-region={region}
-      data-portal-id={portalId}
-      data-form-id={formId}
-    />
-  );
+    script.onload = () => {
+      if (window.hbspt) {
+        window.hbspt.forms.create({
+          region,
+          portalId,
+          formId,
+          target: "#hubspot-form",
+        });
+      }
+    };
+
+    return () => {
+      const node = document.querySelector("script[src*='hsforms']");
+      if (node) document.body.removeChild(node);
+    };
+  }, [region, portalId, formId]);
+
+  return <div id="hubspot-form" className="hs-form-frame" />;
 }
