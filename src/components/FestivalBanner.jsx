@@ -4,7 +4,6 @@ import "./FestivalBanner.css";
 
 export default function FestivalBanner() {
   const festivalDate = new Date("2025-07-28T09:00:00");
-  const [timeLeft, setTimeLeft] = useState(getDelta());
 
   function getDelta() {
     const now = new Date();
@@ -16,6 +15,8 @@ export default function FestivalBanner() {
     return { days, hours, mins };
   }
 
+  const [timeLeft, setTimeLeft] = useState(getDelta());
+
   useEffect(() => {
     const timer = setInterval(() => setTimeLeft(getDelta()), 60_000);
     return () => clearInterval(timer);
@@ -24,22 +25,5 @@ export default function FestivalBanner() {
   return (
     <div className="festival-banner">
       <div className="festival-content">
-        <span className="festival-emoji" role="img" aria-label="festival">
-          🎪
-        </span>
-        <span className="festival-text">
-          Declare Your Worth Festival&nbsp;
-          <strong>July 28–29, 2025</strong>
-        </span>
-        {timeLeft && (
-          <span className="festival-countdown">
-            {timeLeft.days}d {timeLeft.hours}h {timeLeft.mins}m
-          </span>
-        )}
-        <Link to="/festival" className="festival-cta">
-          Get Tickets
-        </Link>
-      </div>
-    </div>
-  );
-}
+        <span className="festival-emoji" role="img" aria-label="festival">🎪</span>
+        <span className="festival-text"
