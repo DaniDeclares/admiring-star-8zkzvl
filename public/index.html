@@ -1,91 +1,92 @@
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dani Declares — Coaching, Events, Weddings & More</title>
 
-  <!-- Title + Meta -->
-  <title>Dani Declares — Coaching, Events, Weddings & More</title>
-  <meta name="title" content="Dani Declares — Coaching, Events, Weddings & More" />
-  <meta name="description" content="Empowering you to declare your worth through transformative coaching, vibrant events, unforgettable weddings, and financial clarity." />
+    <!-- Meta Tags -->
+    <meta name="description" content="Empowering you to declare your worth through transformative coaching, vibrant events, unforgettable weddings, and financial clarity." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://danideclares.com/" />
+    <meta property="og:title" content="Dani Declares — Coaching, Events, Weddings & More" />
+    <meta property="og:description" content="Empowering you to declare your worth through transformative coaching, vibrant events, unforgettable weddings, and financial clarity." />
+    <meta property="og:image" content="/apple-touch-icon.png" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://danideclares.com/" />
+    <meta property="twitter:title" content="Dani Declares — Coaching, Events, Weddings & More" />
+    <meta property="twitter:description" content="Empowering you to declare your worth through transformative coaching, vibrant events, unforgettable weddings, and financial clarity." />
+    <meta property="twitter:image" content="/apple-touch-icon.png" />
 
-  <!-- Favicons -->
-  <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" />
-  <link rel="manifest" href="%PUBLIC_URL%/site.webmanifest" />
-  <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="shortcut icon" href="/favicon.ico" />
 
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://danideclares.com/" />
-  <meta property="og:title" content="Dani Declares — Coaching, Events, Weddings & More" />
-  <meta property="og:description" content="Empowering you to declare your worth through transformative coaching, vibrant events, unforgettable weddings, and financial clarity." />
-  <meta property="og:image" content="%PUBLIC_URL%/apple-touch-icon.png" />
-
-  <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://danideclares.com/" />
-  <meta property="twitter:title" content="Dani Declares — Coaching, Events, Weddings & More" />
-  <meta property="twitter:description" content="Empowering you to declare your worth through transformative coaching, vibrant events, unforgettable weddings, and financial clarity." />
-  <meta property="twitter:image" content="%PUBLIC_URL%/apple-touch-icon.png" />
-
-  <!-- Snipcart -->
-  <link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.4.0/default/snipcart.css" />
-  <script async src="https://cdn.snipcart.com/themes/v3.4.0/default/snipcart.js"></script>
-  <script>
-    window.SnipcartSettings = {
-      publicApiKey: "NTNkMzZkYjAtMTNmMC00MmU4LThmODMtNGI3YzZmNjBiMzdhNjM4ODMwODkxMTUzNTc0NzYw",
-      loadStrategy: "on-user-interaction",
-    };
-  </script>
-
-  <!-- Google Tag Manager -->
-  <script>
-    (function (w, d, s, l, i) {
-      w[l] = w[l] || [];
-      w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
-      var f = d.getElementsByTagName(s)[0],
-        j = d.createElement(s),
-        dl = l !== "dataLayer" ? "&l=" + l : "";
-      j.async = true;
-      j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
-      f.parentNode.insertBefore(j, f);
-    })(window, document, "script", "dataLayer", "GTM-5J9QMG74");
-  </script>
-
-  <!-- Facebook Pixel -->
-  <script>
-    !(function (f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function () {
-        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+    <!-- Third-party scripts (commented to isolate bugs) -->
+    <!--
+    <link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.4.0/default/snipcart.css" />
+    <script async src="https://cdn.snipcart.com/themes/v3.4.0/default/snipcart.js"></script>
+    <script>
+      window.SnipcartSettings = {
+        publicApiKey: "NTNkMzZkYjAtMTNmMC00MmU4LThmODMtNGI3YzZmNjBiMzdhNjM4ODMwODkxMTUzNTc0NzYw",
+        loadStrategy: "on-user-interaction",
       };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = "2.0";
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = !0;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
-    fbq("init", "1370033934339982");
-    fbq("track", "PageView");
-  </script>
-  <noscript>
-    <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1370033934339982&ev=PageView&noscript=1"/>
-  </noscript>
+    </script>
 
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KN7E9K69YY"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
-    gtag("config", "G-KN7E9K69YY");
-  </script>
-</head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KN7E9K69YY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-KN7E9K69YY");
+    </script>
+
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l !== "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-5J9QMG74");
+    </script>
+
+    <script>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = "2.0";
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+      fbq("init", "1370033934339982");
+      fbq("track", "PageView");
+    </script>
+    -->
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+
+    <!-- Snipcart DOM (optional) -->
+    <!-- <div hidden id="snipcart" data-api-key="YOUR_SNIPCART_PUBLIC_API_KEY"></div> -->
+  </body>
+</html>
