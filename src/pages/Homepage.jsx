@@ -3,7 +3,6 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
-import heroLogo from "../assets/logo/logo-gold-seal.png";
 
 import "./Homepage.css";
 
@@ -27,7 +26,6 @@ export default function Homepage() {
       <main className="homepage">
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="hero-overlay">
-            <img className="hero-logo" src={heroLogo} alt="Dani Declares" />
             <h1>Declare Your Worth</h1>
             <p>Life Coaching. Celebrations. Financial Empowerment.</p>
 
