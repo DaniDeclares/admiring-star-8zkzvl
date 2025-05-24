@@ -9,9 +9,10 @@ import Footer from "./components/Footer.jsx";
 
 import Homepage from "./pages/Homepage.jsx";
 import CoachingPage from "./pages/CoachingPage.jsx";
-import BlogPage from "./pages/BlogPage.jsx";
 import EventsPage from "./pages/EventsPage.jsx";
 import WeddingsPage from "./pages/WeddingsPage.jsx";
+import NotaryPage from "./pages/NotaryPage.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
 
 export default function App() {
   return (
@@ -21,9 +22,10 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/coaching" element={<CoachingPage />} />
-        <Route path="/blog" element={<BlogPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/weddings" element={<WeddingsPage />} />
+        <Route path="/notary" element={<NotaryPage />} />
+        <Route path="/contact" element={<ContactPage />} />
       </Routes>
       <SocialLinks />
       <CookieConsent />
