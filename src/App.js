@@ -17,6 +17,7 @@ import MembershipPage from "./pages/MembershipPage.jsx";
 import FinancialPage from "./pages/FinancialPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
+import FestivalPage from "./pages/FestivalPage.jsx";
 
 export default function App() {
   return (
