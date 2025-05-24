@@ -3,7 +3,6 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
-
 import "./Homepage.css";
 
 export default function Homepage() {
@@ -15,12 +14,6 @@ export default function Homepage() {
           name="description"
           content="Coaching, Events, and Financial services designed for women who know their worth. Book, shop, or declare it today."
         />
-        <meta property="og:title" content="Dani Declares • Empower Your Next Moment" />
-        <meta property="og:description" content="Coaching • Events • Weddings • Notary • Finance – Unlock your potential with Dani Declares." />
-        <meta property="og:image" content="/assets/hero/hero-couple-beach-wide.jpg" />
-        <meta property="og:url" content="https://www.danideclares.com/" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
       <main className="homepage">
@@ -28,48 +21,46 @@ export default function Homepage() {
           <div className="hero-overlay">
             <h1>Declare Your Worth</h1>
             <p>Life Coaching. Celebrations. Financial Empowerment.</p>
-
             <div className="hero-cta">
-              <Link to="/coaching" className="btn btn--primary">
-                Book a Coaching Session
-              </Link>
-              <Link to="/financial" className="btn btn--secondary">
-                Get a Free Quote
-              </Link>
-              <Link
-                to="/festival"
-                className="btn btn--outline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Early-Bird Festival Tickets
-              </Link>
+              <Link to="/coaching" className="btn btn--primary">Book a Coaching Session</Link>
+              <Link to="/financial" className="btn btn--secondary">Get a Free Quote</Link>
+              <Link to="/festival" className="btn btn--outline" target="_blank" rel="noopener noreferrer">Early-Bird Festival Tickets</Link>
             </div>
           </div>
         </section>
 
+        <section className="why-dani">
+          <h2>Why Dani Declares?</h2>
+          <p>Helping over 300 women unlock clarity, confidence, and celebration through bespoke coaching and events.</p>
+        </section>
+
         <section className="services-preview">
-          <h2>What We Offer</h2>
+          <h2>Our Signature Services</h2>
           <div className="services-grid">
-            {[
-              { title: "1:1 Coaching", to: "/coaching" },
-              { title: "Signature Events", to: "/events" },
-              { title: "Bespoke Weddings", to: "/weddings" },
-              { title: "Pop-Up Notary", to: "/notary" },
-              { title: "Financial Planning", to: "/financial" },
-            ].map((s) => (
-              <Link key={s.title} to={s.to} className="service-card">
-                <div className="service-image"></div>
-                <span>{s.title}</span>
+            {["coaching", "events", "weddings", "notary", "financial"].map((s) => (
+              <Link key={s} to={`/${s}`} className={`service-card ${s}`}>
+                <div className="service-image" />
+                <span>{s.charAt(0).toUpperCase() + s.slice(1)}</span>
               </Link>
             ))}
           </div>
         </section>
 
+        <section className="testimonial-strip">
+          <blockquote>
+            "Dani helped me find my voice and step into my power. I’ve never felt more confident." — Amanda B.
+          </blockquote>
+        </section>
+
+        <section className="feature-tile">
+          <h2>👕 New Merch Drop: Worthy. Whole. Winning.</h2>
+          <p>Celebrate the season with fresh prints for powerful women. Perfect for Father’s Day gifts too.</p>
+          <Link to="/shop" className="btn btn--primary">Shop Now</Link>
+        </section>
+
         <section className="newsletter-cta">
           <h2>Stay In The Loop</h2>
           <p>Sign up for early-bird offers, event updates & free resources.</p>
-
           <div
             className="mc_embed_signup"
             dangerouslySetInnerHTML={{

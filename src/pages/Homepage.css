@@ -1,68 +1,57 @@
-/* Font Imports */
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Raleway:wght@400;700&display=swap');
+/* Homepage.css */
 
-/* Global Typography */
-body {
-  font-family: 'Raleway', sans-serif;
-  margin: 0;
-  padding: 0;
-  color: #2c2c2c;
-  background-color: #F8F5F1;
-}
-
-/* Main Homepage Layout */
+/* Global Reset */
 .homepage {
+  font-family: 'Raleway', sans-serif;
+  background-color: #F9F6F1;
+  color: #333;
   text-align: center;
-  padding: 3rem 1rem;
 }
 
 /* Hero Section */
 .hero {
+  position: relative;
+  height: 90vh;
   background-size: cover;
   background-position: center;
-  color: white;
-  padding: 6rem 1rem 4rem;
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-overlay {
-  background: rgba(0, 0, 0, 0.55);
-  padding: 3rem 1rem;
-  max-width: 800px;
-  margin: 0 auto;
-  border-radius: 1rem;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 4rem 2rem;
+  border-radius: 12px;
+  color: white;
+  max-width: 720px;
+  width: 100%;
+  text-align: center;
 }
 
-.hero-logo {
-  width: 160px;
-  margin-bottom: 1.5rem;
-}
-
-.hero h1 {
-  font-family: 'Lora', serif;
-  font-size: 2.75rem;
+.hero-overlay h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
   margin-bottom: 0.5rem;
 }
 
-.hero p {
-  font-size: 1.2rem;
+.hero-overlay p {
+  font-size: 1.25rem;
   margin-bottom: 2rem;
 }
 
-/* CTA Buttons */
 .hero-cta {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
   gap: 1rem;
 }
 
 .btn {
   padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  text-decoration: none;
+  border-radius: 50px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
 .btn--primary {
@@ -71,101 +60,95 @@ body {
 }
 
 .btn--primary:hover {
-  background-color: #6e1625;
+  background-color: #6c1723;
 }
 
 .btn--secondary {
   background-color: #D4AF37;
-  color: black;
+  color: #000;
 }
 
 .btn--secondary:hover {
-  background-color: #c29f2e;
+  background-color: #b4942f;
 }
 
 .btn--outline {
+  border: 2px solid #fff;
+  color: #fff;
   background: transparent;
-  border: 2px solid #D4AF37;
-  color: #D4AF37;
 }
 
 .btn--outline:hover {
-  background-color: #D4AF37;
-  color: black;
+  background-color: rgba(255,255,255,0.1);
 }
 
-/* Services Preview */
+/* Services Section */
 .services-preview {
-  padding: 4rem 1rem 3rem;
+  padding: 4rem 2rem;
   background-color: #fff;
 }
 
 .services-preview h2 {
-  font-size: 2rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 2.25rem;
   margin-bottom: 2rem;
-  font-family: 'Lora', serif;
 }
 
 .services-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.5rem;
 }
 
 .service-card {
-  background-color: #f1ece6;
-  padding: 1rem 1.5rem;
-  border-radius: 0.75rem;
+  background-color: #F1ECE6;
+  padding: 2rem 1rem;
+  border-radius: 12px;
   text-decoration: none;
-  color: #2c2c2c;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  width: 180px;
-  text-align: center;
+  color: #333;
+  transition: transform 0.2s;
 }
 
 .service-card:hover {
-  background-color: #e3dad2;
+  transform: translateY(-5px);
+  background-color: #e7e0da;
 }
 
-/* Newsletter CTA */
+/* Newsletter Section */
 .newsletter-cta {
-  padding: 4rem 1rem;
-  background-color: #F8F5F1;
+  background-color: #8B1E2E;
+  color: white;
+  padding: 4rem 2rem;
 }
 
 .newsletter-cta h2 {
   font-size: 2rem;
   margin-bottom: 1rem;
-  font-family: 'Lora', serif;
 }
 
 .newsletter-cta p {
-  margin-bottom: 1.5rem;
-  font-size: 1.1rem;
+  margin-bottom: 2rem;
 }
 
 .newsletter-form input[type="email"] {
   padding: 0.75rem;
-  border: 1px solid #ccc;
   border-radius: 5px;
-  margin-right: 0.5rem;
-  width: 250px;
-  max-width: 100%;
-}
-
-.newsletter-form .btn--cta {
-  padding: 0.75rem 1.5rem;
-  background-color: #8B1E2E;
-  color: white;
   border: none;
-  border-radius: 5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  margin-right: 1rem;
+  width: 300px;
+  max-width: 90%;
 }
 
-.newsletter-form .btn--cta:hover {
-  background-color: #6e1625;
+.newsletter-form input[type="submit"] {
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  border: none;
+  background-color: #D4AF37;
+  color: #000;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.newsletter-form input[type="submit"]:hover {
+  background-color: #b4942f;
 }
