@@ -39,7 +39,10 @@ export default function App() {
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/financial" element={<FinancialPage />} />
         <Route path="/festival" element={<FestivalPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/*
+  <Route path="*" element={<Navigate to="/" replace />} />
+*/}
+
       </Routes>
 
       <SocialLinks />
