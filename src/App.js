@@ -15,8 +15,8 @@ import NotaryPage from "./pages/NotaryPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import FinancialPage from "./pages/FinancialPage.jsx";
-import FestivalPage from "./pages/FestivalPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
+import ShopPage from "./pages/ShopPage.jsx";
 
 export default function App() {
   return (
@@ -32,8 +32,8 @@ export default function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/financial" element={<FinancialPage />} />
-        <Route path="/festival" element={<FestivalPage />} />
         <Route path="/blog" element={<BlogPage />} />
+        <Route path="/shop" element={<ShopPage />} />
       </Routes>
       <SocialLinks />
       <CookieConsent />
