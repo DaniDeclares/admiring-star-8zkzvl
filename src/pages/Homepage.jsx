@@ -29,7 +29,6 @@ export default function Homepage() {
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
-      <FestivalBanner />
       <Navbar />
 
       <main className="homepage">
