@@ -9,7 +9,9 @@ import Footer from "./components/Footer.jsx";
 
 import Homepage from "./pages/Homepage.jsx";
 import CoachingPage from "./pages/CoachingPage.jsx";
-import BlogPage from "./pages/BlogPage.jsx"; // ✅ NEW
+import BlogPage from "./pages/BlogPage.jsx";
+import EventsPage from "./pages/EventsPage.jsx";
+import WeddingsPage from "./pages/WeddingsPage.jsx";
 
 export default function App() {
   return (
@@ -19,7 +21,9 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/coaching" element={<CoachingPage />} />
-        <Route path="/blog" element={<BlogPage />} /> {/* ✅ NEW */}
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/weddings" element={<WeddingsPage />} />
       </Routes>
       <SocialLinks />
       <CookieConsent />
