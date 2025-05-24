@@ -31,27 +31,33 @@ export default function Homepage() {
 
       <Navbar />
 
-      <main className="homepage">
-        <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
-          <div className="hero-overlay">
-            <img className="hero-logo" src={heroLogo} alt="Dani Declares" />
-            <h1>Empower Your Next Moment</h1>
-            <p>Coaching • Events • Weddings • Notary • Finance</p>
-            <div className="hero-cta">
-              <Link to="/financial" className="btn btn--primary">
-                Free Insurance Quote
-              </Link>
-              <Link
-                to="/festival"
-                className="btn btn--secondary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Early-Bird Festival Tickets
-              </Link>
-            </div>
-          </div>
-        </section>
+      <meta name="description" content="Coaching, Events, and Financial services designed for women who know their worth. Book, shop, or declare it today." />
+
+<section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
+  <div className="hero-overlay">
+    <img className="hero-logo" src={heroLogo} alt="Dani Declares" />
+    <h1>Declare Your Worth</h1>
+    <p>Life Coaching. Celebrations. Financial Empowerment.</p>
+
+    <div className="hero-cta">
+      <Link to="/coaching" className="btn btn--primary">
+        Book a Coaching Session
+      </Link>
+      <Link to="/financial" className="btn btn--secondary">
+        Get a Free Quote
+      </Link>
+      <Link
+        to="/festival"
+        className="btn btn--outline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Early-Bird Festival Tickets
+      </Link>
+    </div>
+  </div>
+</section>
+
 
         <section className="services-preview">
           <h2>What We Offer</h2>
