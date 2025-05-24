@@ -2,7 +2,6 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 
-import FestivalBanner from "../components/FestivalBanner.jsx";
 import Navbar from "../components/Navbar.jsx";
 import SocialLinks from "../components/SocialLinks.jsx";
 import CookieConsent from "../components/CookieConsent.jsx";
