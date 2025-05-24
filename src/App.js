@@ -8,6 +8,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/coaching" element={<CoachingPage />} />
+        <Route path="/" element={<div style={{ padding: '2rem' }}>TEST CONTENT: Home route is working ✅</div>} />
       </Routes>
       <SocialLinks />
       <CookieConsent />
