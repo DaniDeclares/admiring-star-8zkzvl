@@ -13,11 +13,9 @@ import EventsPage from "./pages/EventsPage.jsx";
 import WeddingsPage from "./pages/WeddingsPage.jsx";
 import NotaryPage from "./pages/NotaryPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
-import MembershipPage from "./pages/MembershipPage.jsx";
 import FinancialPage from "./pages/FinancialPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
-import FestivalPage from "./pages/FestivalPage.jsx";
 
 export default function App() {
   return (
@@ -26,16 +24,14 @@ export default function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Homepage />} />
+        <Route path="/shop" element={<ShopPage />} />
         <Route path="/coaching" element={<CoachingPage />} />
-        <Route path="/events" element={<EventsPage />} />
+        <Route path="/financial" element={<FinancialPage />} />
         <Route path="/weddings" element={<WeddingsPage />} />
+        <Route path="/events" element={<EventsPage />} />
         <Route path="/notary" element={<NotaryPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/membership" element={<MembershipPage />} />
-        <Route path="/financial" element={<FinancialPage />} />
         <Route path="/blog" element={<BlogPage />} />
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/festival" element={<FestivalPage />} />
       </Routes>
       <SocialLinks />
       <CookieConsent />
