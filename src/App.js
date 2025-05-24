@@ -34,6 +34,7 @@ export default function App() {
         <Route path="/financial" element={<FinancialPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/shop" element={<ShopPage />} />
+        <Route path="/festival" element={<FestivalPage />} />
       </Routes>
       <SocialLinks />
       <CookieConsent />

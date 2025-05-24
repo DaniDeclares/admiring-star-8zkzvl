@@ -36,6 +36,7 @@ export default function Navbar() {
     ["/faq",      "FAQ"],
     ["/media",    "Media"],
     ["/speakers", "Speakers"],
+    ["/festival", "Festival"],
   ];
 
   return (
