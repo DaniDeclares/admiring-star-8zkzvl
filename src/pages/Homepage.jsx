@@ -2,11 +2,6 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 
-import Navbar from "../components/Navbar.jsx";
-import SocialLinks from "../components/SocialLinks.jsx";
-import CookieConsent from "../components/CookieConsent.jsx";
-import Footer from "../components/Footer.jsx";
-
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
 import heroLogo from "../assets/logo/logo-gold-seal.png";
 
@@ -28,8 +23,6 @@ export default function Homepage() {
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
-
-      <Navbar />
 
       <main className="homepage">
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
@@ -92,10 +85,6 @@ export default function Homepage() {
           />
         </section>
       </main>
-
-      <SocialLinks />
-      <CookieConsent />
-      <Footer />
     </>
   );
 }
