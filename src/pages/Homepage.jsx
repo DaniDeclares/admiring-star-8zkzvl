@@ -19,7 +19,7 @@ export default function Homepage() {
         <title>Dani Declares • Coaching, Events, Weddings & More</title>
         <meta
           name="description"
-          content="Dani Declares empowers your next moment: 1:1 coaching, community events, bespoke weddings, on-the-go notary, and financial planning."
+          content="Coaching, Events, and Financial services designed for women who know their worth. Book, shop, or declare it today."
         />
         <meta property="og:title" content="Dani Declares • Empower Your Next Moment" />
         <meta property="og:description" content="Coaching • Events • Weddings • Notary • Finance – Unlock your potential with Dani Declares." />
@@ -31,33 +31,31 @@ export default function Homepage() {
 
       <Navbar />
 
-      <meta name="description" content="Coaching, Events, and Financial services designed for women who know their worth. Book, shop, or declare it today." />
+      <main className="homepage">
+        <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
+          <div className="hero-overlay">
+            <img className="hero-logo" src={heroLogo} alt="Dani Declares" />
+            <h1>Declare Your Worth</h1>
+            <p>Life Coaching. Celebrations. Financial Empowerment.</p>
 
-<section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
-  <div className="hero-overlay">
-    <img className="hero-logo" src={heroLogo} alt="Dani Declares" />
-    <h1>Declare Your Worth</h1>
-    <p>Life Coaching. Celebrations. Financial Empowerment.</p>
-
-    <div className="hero-cta">
-      <Link to="/coaching" className="btn btn--primary">
-        Book a Coaching Session
-      </Link>
-      <Link to="/financial" className="btn btn--secondary">
-        Get a Free Quote
-      </Link>
-      <Link
-        to="/festival"
-        className="btn btn--outline"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Early-Bird Festival Tickets
-      </Link>
-    </div>
-  </div>
-</section>
-
+            <div className="hero-cta">
+              <Link to="/coaching" className="btn btn--primary">
+                Book a Coaching Session
+              </Link>
+              <Link to="/financial" className="btn btn--secondary">
+                Get a Free Quote
+              </Link>
+              <Link
+                to="/festival"
+                className="btn btn--outline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Early-Bird Festival Tickets
+              </Link>
+            </div>
+          </div>
+        </section>
 
         <section className="services-preview">
           <h2>What We Offer</h2>
