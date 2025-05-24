@@ -18,24 +18,14 @@ export default function Navbar() {
   };
 
   const links = [
-    ["/shop",     "Shop"],
     ["/",         "Home"],
+    ["/shop",     "Shop"],
+    ["/coaching", "Coaching"],
+    ["/events",   "Events"],
     ["/weddings", "Weddings"],
     ["/notary",   "Notary"],
-    ["/coaching", "Coaching"],
-    ["/calendar", "Calendar"],
-    ["/events",   "Events"],
-    ["/packages", "Packages"],
-    ["/pricing",  "Pricing"],
-    ["/sponsor",  "Sponsor"],
-    ["/speaker",  "Speak & Vendor"],
     ["/financial","Financial"],
     ["/blog",     "Blog"],
-    ["/merch",    "Merch Shop"],
-    ["/magazine", "Magazine"],
-    ["/faq",      "FAQ"],
-    ["/media",    "Media"],
-    ["/speakers", "Speakers"],
     ["/festival", "Festival"],
   ];
 
