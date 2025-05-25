@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { Helmet } from "react-helmet-async";
 import HubSpotForm from "../components/HubSpotForm.jsx";
-
 import "./CoachingPage.css";
 
 const PACKAGES = [
@@ -9,28 +8,23 @@ const PACKAGES = [
     name: "Discovery Session",
     duration: "30 mins",
     price: 99,
-    payUrl: "https://paypal.me/danideclaresns/99",
     bookUrl: "https://tidycal.com/danideclaresns/discovery-session"
   },
   {
     name: "1:1 Coaching",
-    duration: "4×1 hr sessions",
+    duration: "4 sessions (1 hr each)",
     price: 499,
-    payUrl: "https://paypal.me/danideclaresns/499",
     bookUrl: "https://tidycal.com/danideclaresns/one-on-one-coaching"
   },
   {
     name: "VIP Intensive",
     duration: "6 hrs",
     price: 1200,
-    payUrl: "https://paypal.me/danideclaresns/1200",
     bookUrl: "https://tidycal.com/danideclaresns/vip-intensive"
   }
 ];
 
 export default function CoachingPage() {
-  const [paid, setPaid] = useState({});
-
   return (
     <>
       <Helmet>
@@ -58,42 +52,62 @@ export default function CoachingPage() {
         <section className="testimonials">
           <h2>Client Breakthroughs</h2>
           <div className="carousel">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div key={n} className="carousel-item">
-                <p>
-                  “Dani helped me unlock my power and profit — I’m finally building the life I want.”
-                </p>
-                <span>— Client {n}</span>
+            {[
+              {
+                name: "Alex P.",
+                text: "Dani helped me unlock my power and profit — I’m finally building the life I want."
+              },
+              {
+                name: "Morgan S.",
+                text: "I gained so much clarity and confidence. My business is thriving!"
+              },
+              {
+                name: "Jamie L.",
+                text: "The mindset shifts I experienced with Dani were game-changing."
+              },
+              {
+                name: "Taylor R.",
+                text: "I left every session with a clear plan and renewed motivation."
+              },
+              {
+                name: "Jordan K.",
+                text: "Dani’s coaching gave me the push I needed to take action."
+              },
+              {
+                name: "Casey M.",
+                text: "I finally feel in control of my growth and direction."
+              }
+            ].map((client, idx) => (
+              <div key={idx} className="carousel-item">
+                <div className="testimonial-avatar" aria-label={`Avatar for ${client.name}`}>
+                  {/* Simple colored circle with initials */}
+                  <span>
+                    {client.name.split(" ").map(n => n[0]).join("")}
+                  </span>
+                </div>
+                <p>“{client.text}”</p>
+                <span>— {client.name}</span>
               </div>
             ))}
           </div>
         </section>
 
         <section className="packages">
-          <h2>Your Coaching Options</h2>
+          <h2>Coaching Options</h2>
           <div className="packages-grid">
             {PACKAGES.map((p) => (
               <div key={p.name} className="package-card">
                 <h3>{p.name}</h3>
                 <p className="meta">
-                  {p.duration} • <strong>${p.price}</strong>
+                  {p.duration} &nbsp;•&nbsp; <strong>${p.price}</strong>
                 </p>
                 <a
-                  href={p.payUrl}
-                  className="btn"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setPaid((prev) => ({ ...prev, [p.name]: true }))}
-                >
-                  Pay to Book
-                </a>
-                <a
                   href={p.bookUrl}
-                  className={`btn btn--book ${paid[p.name] ? "" : "disabled"}`}
+                  className="btn btn--primary"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {paid[p.name] ? "Complete Booking" : "Pay First"}
+                  Book Now
                 </a>
               </div>
             ))}
@@ -101,11 +115,11 @@ export default function CoachingPage() {
         </section>
 
         <section className="benefits">
-          <h2>What You’ll Walk Away With</h2>
+          <h2>What You’ll Gain</h2>
           <ul>
-            <li>💡 Clarity on your next move</li>
-            <li>📈 Strategy for growth</li>
-            <li>🎯 Accountability to take action</li>
+            <li>💡 Clarity on your next steps</li>
+            <li>📈 A personalized growth strategy</li>
+            <li>🎯 Accountability and support</li>
             <li>💬 Real-time mindset shifts</li>
           </ul>
         </section>

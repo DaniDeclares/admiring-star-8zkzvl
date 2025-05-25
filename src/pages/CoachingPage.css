@@ -195,6 +195,20 @@
   margin-bottom: 0.5rem;
 }
 
+.testimonial-avatar {
+  width: 40px;
+  height: 40px;
+  background: #e0e7ef;
+  color: #3a4668;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .packages-grid {
