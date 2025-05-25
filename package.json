@@ -6,6 +6,7 @@
   "dependencies": {
     "@vercel/speed-insights": "^1.2.0",
     "dotenv": "^16.5.0",
+    "gh-pages": "^6.3.0",
     "http-proxy-middleware": "^3.0.5",
     "node-fetch": "^3.3.2",
     "react": "^18.2.0",
@@ -24,7 +25,9 @@
     "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "browserslist": {
     "production": [
@@ -37,5 +40,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "homepage": "https://DaniDeclares.github.io/admiring-star-8zkzvl"
 }
