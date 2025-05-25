@@ -38,9 +38,21 @@ export default function CoachingPage() {
 
       <main className="coaching-page">
         <header className="coaching-hero">
-          <h1>Coaching & Business Support</h1>
-          <p>Empowering you with clarity, confidence, and actionable strategy.</p>
+          <h1>Private Coaching to Declare Your Worth</h1>
+          <p>Confidence. Clarity. Cash Flow. Whether you're launching or leveling up—we’ve got you.</p>
         </header>
+
+        <section className="testimonial-carousel">
+          <h2>Client Breakthroughs</h2>
+          <div className="carousel">
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <div key={n} className="testimonial-slide">
+                <p>"Dani helped me double my income and triple my confidence. I'm booked for the next 3 months!"</p>
+                <span>— Happy Client {n}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="packages">
           <h2>Your Coaching Options</h2>
@@ -67,13 +79,19 @@ export default function CoachingPage() {
         </section>
 
         <section className="benefits">
-          <h2>What You’ll Learn</h2>
+          <h2>What You’ll Walk Away With</h2>
           <ul>
-            <li>Daily rituals for unstoppable confidence</li>
-            <li>Step-by-step goal-setting framework</li>
-            <li>Strategies to launch or scale your side hustle</li>
-            <li>Money-mindset shifts for financial growth</li>
+            <li>🔓 Mindset tools to unlock your inner CEO</li>
+            <li>🗂 Clear, strategic action plans tailored to you</li>
+            <li>📈 Confidence to sell, show up, and shine</li>
+            <li>💸 Roadmap to grow your side hustle or full-time dream</li>
           </ul>
+        </section>
+
+        <section className="coaching-contact">
+          <h2>Still Have Questions?</h2>
+          <p>Drop your email and we’ll follow up with a personalized response:</p>
+          <HubSpotForm />
         </section>
       </main>
 

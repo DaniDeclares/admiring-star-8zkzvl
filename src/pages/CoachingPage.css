@@ -1,8 +1,12 @@
+/* CoachingPage.css */
+
 .coaching-page {
+  font-family: 'Raleway', sans-serif;
   padding: 2rem;
+  background-color: #F8F5F1;
+  color: #333;
   max-width: 1200px;
-  margin: auto;
-  font-family: 'Montserrat', sans-serif;
+  margin: 0 auto;
 }
 
 .coaching-hero {
@@ -11,84 +15,138 @@
 }
 
 .coaching-hero h1 {
-  color: #8b1e2e;
   font-size: 2.5rem;
+  color: #8B1E2E;
 }
 
 .coaching-hero p {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
   color: #555;
 }
 
 .packages {
-  text-align: center;
   margin-bottom: 3rem;
+}
+
+.packages h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
 }
 
 .packages-grid {
   display: flex;
-  gap: 2rem;
   flex-wrap: wrap;
+  gap: 2rem;
   justify-content: center;
 }
 
 .package-card {
-  background-color: #fffefc;
-  border: 1px solid #d4af37;
+  background: #fff;
   border-radius: 12px;
-  padding: 2rem;
-  max-width: 300px;
-  flex: 1;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  width: 300px;
+  text-align: center;
 }
 
 .package-card h3 {
+  color: #8B1E2E;
   margin-bottom: 0.5rem;
-  color: #8b1e2e;
 }
 
 .package-card .meta {
-  font-size: 0.95rem;
+  color: #666;
   margin-bottom: 1rem;
 }
 
 .package-card .btn {
-  margin-top: 1rem;
   display: inline-block;
-}
-
-.btn--book {
-  background-color: #8b1e2e;
-  color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #D4AF37;
+  color: #000;
+  border: none;
   border-radius: 6px;
   text-decoration: none;
+  font-weight: bold;
+  margin-top: 1rem;
 }
 
-.btn--book.disabled {
+.package-card .btn.disabled {
   background-color: #ccc;
-  pointer-events: none;
   cursor: not-allowed;
 }
 
 .benefits {
-  margin-top: 3rem;
-  text-align: center;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 3rem;
 }
 
 .benefits h2 {
-  color: #8b1e2e;
+  text-align: center;
+  color: #8B1E2E;
+  margin-bottom: 1rem;
 }
 
 .benefits ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  text-align: left;
+  list-style: none;
+  padding: 0;
   max-width: 600px;
-  margin: 1rem auto;
-  color: #444;
+  margin: 0 auto;
+  text-align: left;
 }
 
 .benefits li {
+  background: url('/assets/icons/checkmark.svg') no-repeat left center;
+  background-size: 20px;
+  padding-left: 30px;
   margin-bottom: 0.75rem;
+}
+
+.testimonials {
+  text-align: center;
+  padding: 2rem 0;
+  background-color: #f3f3f3;
+  border-radius: 12px;
+}
+
+.testimonials h2 {
+  color: #8B1E2E;
+  margin-bottom: 1.5rem;
+}
+
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.carousel-item {
+  flex: 0 0 80%;
+  scroll-snap-align: center;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.carousel-item p {
+  font-style: italic;
+  color: #555;
+}
+
+.carousel-item span {
+  display: block;
+  margin-top: 0.5rem;
+  font-weight: bold;
+  color: #8B1E2E;
 }
