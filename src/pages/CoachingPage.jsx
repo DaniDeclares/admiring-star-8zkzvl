@@ -1,25 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
+import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 
-// Chrome
 import FestivalBanner from "../components/FestivalBanner.jsx";
-import "../components/FestivalBanner.css";
 import Navbar from "../components/Navbar.jsx";
-import "../components/Navbar.css";
 import SocialLinks from "../components/SocialLinks.jsx";
-import "../components/SocialLinks.css";
 import CookieConsent from "../components/CookieConsent.jsx";
-import "../components/CookieConsent.css";
 import Footer from "../components/Footer.jsx";
-import "../components/Footer.css";
-
-// HubSpot embed
+import PayPalButton from "../components/PayPalButton.jsx";
 import HubSpotForm from "../components/HubSpotForm.jsx";
 
-// PayPal
-import PayPalButton from "../components/PayPalButton.jsx";
-import "../components/PayPalButton.css";
-
-// Styles
 import "./CoachingPage.css";
 
 const PACKAGES = [
@@ -29,17 +19,23 @@ const PACKAGES = [
 ];
 
 export default function CoachingPage() {
-  const [paid, setPaid] = useState({});
-
   return (
     <>
+      <Helmet>
+        <title>Coaching • Dani Declares</title>
+        <meta name="description" content="Book a session with Dani to unlock confidence, cash flow, and clarity." />
+      </Helmet>
+
       <FestivalBanner />
       <Navbar />
 
       <main className="coaching-page">
         <header className="coaching-hero">
-          <h1>Private Coaching to Declare Your Worth</h1>
-          <p>Confidence. Clarity. Cash Flow. Whether you're launching or leveling up—we’ve got you.</p>
+          <h1>Ready to Declare Your Worth?</h1>
+          <p>Let’s build the clarity, confidence, and cash flow you’ve been waiting for.</p>
+          <Link to="https://tidycal.com/danideclaresns" target="_blank" className="btn btn--primary">
+            Book Your Free Coaching Intro
+          </Link>
         </header>
 
         <section className="testimonial-carousel">
@@ -47,8 +43,8 @@ export default function CoachingPage() {
           <div className="carousel">
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <div key={n} className="testimonial-slide">
-                <p>"Dani helped me double my income and triple my confidence. I'm booked for the next 3 months!"</p>
-                <span>— Happy Client {n}</span>
+                <p>“Dani helped me unlock my power and profit — I’m finally building the life I want.”</p>
+                <span>— Coaching Client {n}</span>
               </div>
             ))}
           </div>
@@ -61,17 +57,9 @@ export default function CoachingPage() {
               <div key={p.name} className="package-card">
                 <h3>{p.name}</h3>
                 <p className="meta">{p.duration} • <strong>${p.price}</strong></p>
-                <PayPalButton
-                  price={p.price}
-                  onSuccess={() => setPaid((prev) => ({ ...prev, [p.name]: true }))}
-                />
-                <a
-                  href={p.url}
-                  className={`btn btn--book ${paid[p.name] ? "" : "disabled"}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {paid[p.name] ? "Book Your Session" : "Pay First to Book"}
+                <PayPalButton price={p.price} />
+                <a href={p.url} className="btn btn--book" target="_blank" rel="noopener noreferrer">
+                  Book Session
                 </a>
               </div>
             ))}
@@ -81,10 +69,10 @@ export default function CoachingPage() {
         <section className="benefits">
           <h2>What You’ll Walk Away With</h2>
           <ul>
-            <li>🔓 Mindset tools to unlock your inner CEO</li>
-            <li>🗂 Clear, strategic action plans tailored to you</li>
-            <li>📈 Confidence to sell, show up, and shine</li>
-            <li>💸 Roadmap to grow your side hustle or full-time dream</li>
+            <li>💡 Clarity on your next move</li>
+            <li>📈 Strategy for growth</li>
+            <li>🎯 Accountability to take action</li>
+            <li>💬 Real-time mindset shifts</li>
           </ul>
         </section>
 
