@@ -33,7 +33,37 @@ export default function EventsPage() {
       title: "Declare Your Worth Festival",
       date: "July 28–29, 2025",
       desc: "2-day experience of coaching, shopping, and storytelling to empower your legacy.",
-      link: "/festival",
+      link: "https://tidycal.com/danideclaresns/event-membership-onboarding",
+    },
+    {
+      title: "Vendor Booth: Standard",
+      date: "Apply Anytime",
+      desc: "Showcase your business at our next event. Limited spots available.",
+      link: "https://tidycal.com/danideclaresns/vendor-booth-standard",
+    },
+    {
+      title: "Vendor Booth: Premium",
+      date: "Apply Anytime",
+      desc: "Premium placement and perks for your brand at our festival.",
+      link: "https://tidycal.com/danideclaresns/vendor-booth-premium",
+    },
+    {
+      title: "Speaker Badge Pickup",
+      date: "Festival Week",
+      desc: "Registered speakers: schedule your badge pickup here.",
+      link: "https://tidycal.com/danideclaresns/speaker-badge-pickup",
+    },
+    {
+      title: "Attendee Badge Pickup",
+      date: "Festival Week",
+      desc: "Attendees: reserve your badge pickup slot for a smooth check-in.",
+      link: "https://tidycal.com/danideclaresns/badge-pickup",
+    },
+    {
+      title: "Free Coaching Intro Session",
+      date: "Book Anytime",
+      desc: "Start your breakthrough journey with a complimentary intro call.",
+      link: "https://tidycal.com/danideclaresns/discovery-session",
     },
   ];
 
@@ -52,8 +82,8 @@ export default function EventsPage() {
               <h2>{e.title}</h2>
               <p className="date">{e.date}</p>
               <p className="desc">{e.desc}</p>
-              <a className="btn btn--primary" href={e.link} target="_blank" rel="noreferrer">
-                RSVP
+              <a className="btn btn--primary" href={e.link} target="_blank" rel="noopener noreferrer">
+                RSVP / Book
               </a>
             </div>
           ))}

@@ -1,41 +1,181 @@
-.page.contact-page {
-  padding: 2rem 1rem;
-  max-width: 800px;
+/* CoachingPage.css */
+
+.coaching-page {
+  font-family: 'Raleway', sans-serif;
+  padding: 2rem;
+  background-color: #F8F5F1;
+  color: #333;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-.contact-hero {
+.coaching-hero {
   text-align: center;
-  margin-bottom: 2rem;
-}
-.contact-hero h1 {
-  font-size: 2.5rem;
-  margin-bottom: .5rem;
-  color: #8B1E2E;
-}
-.contact-hero p {
-  font-size: 1.2rem;
-  color: #555;
-}
-
-.form-section {
   margin-bottom: 3rem;
 }
 
-.contact-info {
+.coaching-hero h1 {
+  font-size: 2.5rem;
+  color: #8B1E2E;
+}
+
+.coaching-hero p {
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
+  color: #555;
+}
+
+.coaching-hero .btn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #8B1E2E;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.testimonial-carousel {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 3rem;
+}
+
+.testimonial-carousel h2 {
   text-align: center;
-  margin-top: 2rem;
+  color: #8B1E2E;
+  margin-bottom: 1rem;
 }
-.contact-info h2 {
-  font-size: 1.75rem;
-  margin-bottom: .75rem;
+
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.testimonial-slide {
+  flex: 0 0 80%;
+  scroll-snap-align: start;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  min-width: 250px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.testimonial-slide p {
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.testimonial-slide span {
+  font-weight: bold;
   color: #8B1E2E;
 }
-.contact-info p {
-  font-size: 1rem;
-  color: #333;
+
+.packages {
+  margin-bottom: 3rem;
 }
-.contact-info a {
+
+.packages h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.packages-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.package-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  width: 300px;
+  text-align: center;
+}
+
+.package-card h3 {
   color: #8B1E2E;
-  text-decoration: underline;
+  margin-bottom: 0.5rem;
+}
+
+.package-card .meta {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.package-card .btn {
+  display: inline-block;
+  padding: 0.75rem 1.25rem;
+  background-color: #D4AF37;
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.package-card .btn.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.benefits {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 3rem;
+}
+
+.benefits h2 {
+  text-align: center;
+  color: #8B1E2E;
+  margin-bottom: 1rem;
+}
+
+.benefits ul {
+  list-style: none;
+  padding: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.benefits li {
+  background-image: url("../assets/icons/checkmark.svg");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 20px;
+  padding-left: 30px;
+  margin-bottom: 0.75rem;
+}
+
+.coaching-contact {
+  text-align: center;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.coaching-contact p {
+  color: #555;
+  margin-bottom: 1rem;
 }

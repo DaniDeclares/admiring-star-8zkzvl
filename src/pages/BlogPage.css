@@ -40,3 +40,17 @@
 .blog-card p {
   margin-bottom: 1rem;
 }
+
+/* Add to BlogPage.css */
+.blog-featured-card {
+  background: #fff7e6;
+  border: 2px solid #f7c873;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.blog-featured-card h2 {
+  color: #8B1E2E;
+  margin-bottom: 0.5rem;
+}

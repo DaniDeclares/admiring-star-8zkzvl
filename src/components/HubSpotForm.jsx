@@ -29,5 +29,14 @@ export default function HubSpotForm({
     };
   }, [region, portalId, formId]);
 
-  return <div id="hubspot-form" className="hs-form-frame" />;
+  return (
+    <a
+      href="https://share-na2.hsforms.com/21M0pDndmS_WRosEnTd2ILg40jamf"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn"
+    >
+      Open Contact Form
+    </a>
+  );
 }

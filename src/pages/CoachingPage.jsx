@@ -1,8 +1,5 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
-
-import PayPalButton from "../components/PayPalButton.jsx";
 import HubSpotForm from "../components/HubSpotForm.jsx";
 
 import "./CoachingPage.css";
@@ -12,20 +9,23 @@ const PACKAGES = [
     name: "Discovery Session",
     duration: "30 mins",
     price: 99,
-    url: "https://tidycal.com/danideclaresns/discovery-session",
+    payUrl: "https://paypal.me/danideclaresns/99",
+    bookUrl: "https://tidycal.com/danideclaresns/discovery-session"
   },
   {
     name: "1:1 Coaching",
     duration: "4×1 hr sessions",
     price: 499,
-    url: "https://tidycal.com/danideclaresns/1-1-package",
+    payUrl: "https://paypal.me/danideclaresns/499",
+    bookUrl: "https://tidycal.com/danideclaresns/one-on-one-coaching"
   },
   {
     name: "VIP Intensive",
     duration: "6 hrs",
     price: 1200,
-    url: "https://tidycal.com/danideclaresns/vip-intensive",
-  },
+    payUrl: "https://paypal.me/danideclaresns/1200",
+    bookUrl: "https://tidycal.com/danideclaresns/vip-intensive"
+  }
 ];
 
 export default function CoachingPage() {
@@ -35,32 +35,35 @@ export default function CoachingPage() {
     <>
       <Helmet>
         <title>Coaching • Dani Declares</title>
-        <meta name="description" content="Book a session with Dani to unlock confidence, cash flow, and clarity." />
+        <meta
+          name="description"
+          content="Book a session with Dani to unlock confidence, cash flow, and clarity."
+        />
       </Helmet>
 
       <main className="coaching-page">
         <header className="coaching-hero">
           <h1>Ready to Declare Your Worth?</h1>
           <p>Let’s build the clarity, confidence, and cash flow you’ve been waiting for.</p>
-          <Link to="https://tidycal.com/danideclaresns" target="_blank" className="btn btn--primary">
+          <a
+            href="https://tidycal.com/danideclaresns"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn--primary"
+          >
             Book Your Free Coaching Intro
-          </Link>
+          </a>
         </header>
 
         <section className="testimonials">
           <h2>Client Breakthroughs</h2>
           <div className="carousel">
-            {[
-              { name: "Alex R.", quote: "Dani helped me unlock my power and profit — I’m finally building the life I want." },
-              { name: "Monica L.", quote: "My confidence is back. I raised my rates and my clients said yes!" },
-              { name: "Jasmine M.", quote: "I was stuck. Dani gave me a plan and now I’m moving forward fast." },
-              { name: "Erika W.", quote: "From scattered to strategic. Working with Dani changed my life." },
-              { name: "Taylor C.", quote: "Booked my first 5 paying clients in 2 weeks after our session." },
-              { name: "Brianna S.", quote: "It’s like she saw the version of me I hadn’t met yet—and helped me become her." },
-            ].map((t, i) => (
-              <div key={i} className="carousel-item">
-                <p>“{t.quote}”</p>
-                <span>— {t.name}</span>
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <div key={n} className="carousel-item">
+                <p>
+                  “Dani helped me unlock my power and profit — I’m finally building the life I want.”
+                </p>
+                <span>— Client {n}</span>
               </div>
             ))}
           </div>
@@ -72,18 +75,25 @@ export default function CoachingPage() {
             {PACKAGES.map((p) => (
               <div key={p.name} className="package-card">
                 <h3>{p.name}</h3>
-                <p className="meta">{p.duration} • <strong>${p.price}</strong></p>
-                <PayPalButton
-                  price={p.price}
-                  onSuccess={() => setPaid((prev) => ({ ...prev, [p.name]: true }))}
-                />
+                <p className="meta">
+                  {p.duration} • <strong>${p.price}</strong>
+                </p>
                 <a
-                  href={p.url}
+                  href={p.payUrl}
+                  className="btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setPaid((prev) => ({ ...prev, [p.name]: true }))}
+                >
+                  Pay to Book
+                </a>
+                <a
+                  href={p.bookUrl}
                   className={`btn btn--book ${paid[p.name] ? "" : "disabled"}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {paid[p.name] ? "Book Session" : "Pay First to Book"}
+                  {paid[p.name] ? "Complete Booking" : "Pay First"}
                 </a>
               </div>
             ))}
