@@ -1,33 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 
-import FestivalBanner from "../components/FestivalBanner.jsx";
-import Navbar from "../components/Navbar.jsx";
-import SocialLinks from "../components/SocialLinks.jsx";
-import CookieConsent from "../components/CookieConsent.jsx";
-import Footer from "../components/Footer.jsx";
 import PayPalButton from "../components/PayPalButton.jsx";
 import HubSpotForm from "../components/HubSpotForm.jsx";
 
 import "./CoachingPage.css";
 
 const PACKAGES = [
-  { name: "Discovery Session", duration: "30 mins", price: 99, url: "https://tidycal.com/danideclaresns/discovery-session" },
-  { name: "1:1 Coaching", duration: "4×1 hr sessions", price: 499, url: "https://tidycal.com/danideclaresns/1-1-package" },
-  { name: "VIP Intensive", duration: "6 hrs", price: 1200, url: "https://tidycal.com/danideclaresns/vip-intensive" },
+  {
+    name: "Discovery Session",
+    duration: "30 mins",
+    price: 99,
+    url: "https://tidycal.com/danideclaresns/discovery-session",
+  },
+  {
+    name: "1:1 Coaching",
+    duration: "4×1 hr sessions",
+    price: 499,
+    url: "https://tidycal.com/danideclaresns/1-1-package",
+  },
+  {
+    name: "VIP Intensive",
+    duration: "6 hrs",
+    price: 1200,
+    url: "https://tidycal.com/danideclaresns/vip-intensive",
+  },
 ];
 
 export default function CoachingPage() {
+  const [paid, setPaid] = useState({});
+
   return (
     <>
       <Helmet>
         <title>Coaching • Dani Declares</title>
         <meta name="description" content="Book a session with Dani to unlock confidence, cash flow, and clarity." />
       </Helmet>
-
-      <FestivalBanner />
-      <Navbar />
 
       <main className="coaching-page">
         <header className="coaching-hero">
@@ -38,13 +47,20 @@ export default function CoachingPage() {
           </Link>
         </header>
 
-        <section className="testimonial-carousel">
+        <section className="testimonials">
           <h2>Client Breakthroughs</h2>
           <div className="carousel">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div key={n} className="testimonial-slide">
-                <p>“Dani helped me unlock my power and profit — I’m finally building the life I want.”</p>
-                <span>— Coaching Client {n}</span>
+            {[
+              { name: "Alex R.", quote: "Dani helped me unlock my power and profit — I’m finally building the life I want." },
+              { name: "Monica L.", quote: "My confidence is back. I raised my rates and my clients said yes!" },
+              { name: "Jasmine M.", quote: "I was stuck. Dani gave me a plan and now I’m moving forward fast." },
+              { name: "Erika W.", quote: "From scattered to strategic. Working with Dani changed my life." },
+              { name: "Taylor C.", quote: "Booked my first 5 paying clients in 2 weeks after our session." },
+              { name: "Brianna S.", quote: "It’s like she saw the version of me I hadn’t met yet—and helped me become her." },
+            ].map((t, i) => (
+              <div key={i} className="carousel-item">
+                <p>“{t.quote}”</p>
+                <span>— {t.name}</span>
               </div>
             ))}
           </div>
@@ -57,9 +73,17 @@ export default function CoachingPage() {
               <div key={p.name} className="package-card">
                 <h3>{p.name}</h3>
                 <p className="meta">{p.duration} • <strong>${p.price}</strong></p>
-                <PayPalButton price={p.price} />
-                <a href={p.url} className="btn btn--book" target="_blank" rel="noopener noreferrer">
-                  Book Session
+                <PayPalButton
+                  price={p.price}
+                  onSuccess={() => setPaid((prev) => ({ ...prev, [p.name]: true }))}
+                />
+                <a
+                  href={p.url}
+                  className={`btn btn--book ${paid[p.name] ? "" : "disabled"}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {paid[p.name] ? "Book Session" : "Pay First to Book"}
                 </a>
               </div>
             ))}
@@ -82,10 +106,6 @@ export default function CoachingPage() {
           <HubSpotForm />
         </section>
       </main>
-
-      <SocialLinks />
-      <CookieConsent />
-      <Footer />
     </>
   );
 }
