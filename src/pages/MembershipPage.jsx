@@ -84,6 +84,20 @@ const VENDOR_BOOTHS = [
   },
 ];
 
+const memberships = [
+  {
+    label: "Platinum Partner (Monthly)",
+    url: "https://buy.stripe.com/14A5kCfOp3iC85V9176kg08",
+    desc: "Top-tier sponsor with maximum exposure and perks.",
+  },
+  {
+    label: "Platinum Partner (Yearly)",
+    url: "https://buy.stripe.com/00wdR86dP7yS4TJdhn6kg09",
+    desc: "Annual platinum sponsorship for ultimate impact.",
+  },
+  // ...add all other sponsor/membership options here
+];
+
 export default function MembershipPage() {
   const [billing, setBilling] = useState("monthly");
 
@@ -187,6 +201,26 @@ export default function MembershipPage() {
                 >
                   Reserve Booth
                 </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="membership-options">
+          <h2>Membership & Sponsorship</h2>
+          <div className="membership-buttons">
+            {memberships.map((m) => (
+              <div key={m.label} className="membership-card">
+                <h3>{m.label}</h3>
+                <p>{m.desc}</p>
+                <a
+                  href={m.url}
+                  className="btn btn--primary"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Join as {m.label}
+                </a>
               </div>
             ))}
           </div>

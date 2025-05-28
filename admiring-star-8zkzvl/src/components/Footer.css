@@ -1,0 +1,48 @@
+.footer {
+  background-color: #8b1e2e;
+  color: #fff;
+  padding: 2rem 1rem;
+  font-family: "Montserrat", sans-serif;
+  text-align: center;
+}
+
+.footer-top {
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.footer-top p {
+  margin: 0.4rem 0;
+}
+
+.footer-top a {
+  color: #ffd700;
+  text-decoration: underline;
+}
+
+.footer-top a:hover {
+  color: #fff2b0;
+}
+
+.footer-social {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.footer-social a {
+  color: #fff;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.footer-social a:hover {
+  color: #ffd700;
+}
+
+.footer-bottom {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}

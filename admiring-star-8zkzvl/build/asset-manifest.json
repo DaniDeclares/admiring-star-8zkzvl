@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "/admiring-star-8zkzvl/static/css/main.1a8bb42c.css",
+    "main.js": "/admiring-star-8zkzvl/static/js/main.537350fe.js",
+    "static/media/hero-couple-beach-wide.jpg": "/admiring-star-8zkzvl/static/media/hero-couple-beach-wide.3aa45d67abcf5a5de60e.jpg",
+    "static/media/love-marquee-barn.jpg": "/admiring-star-8zkzvl/static/media/love-marquee-barn.0cd4f88d0eba33588465.jpg",
+    "static/media/barn-ceiling-drapery.jpg": "/admiring-star-8zkzvl/static/media/barn-ceiling-drapery.71788230dd49d91704b9.jpg",
+    "static/media/rustic-outdoor-lounge-2.jpg": "/admiring-star-8zkzvl/static/media/rustic-outdoor-lounge-2.5c07463f7b5653e21d42.jpg",
+    "static/media/barn-hanging-glass-orbs.jpg": "/admiring-star-8zkzvl/static/media/barn-hanging-glass-orbs.847bdf05538f12304c97.jpg",
+    "static/media/boho-outdoor-lounge.jpg": "/admiring-star-8zkzvl/static/media/boho-outdoor-lounge.fb73ee5c44f5ea68448c.jpg",
+    "static/media/ivory-sofa-lounge.jpg": "/admiring-star-8zkzvl/static/media/ivory-sofa-lounge.ae274bc6bf7de66b103f.jpg",
+    "static/media/rustic-outdoor-lounge-1.jpg": "/admiring-star-8zkzvl/static/media/rustic-outdoor-lounge-1.eee32df79fa6fa4495cb.jpg",
+    "static/media/logo-gold-seal.png": "/admiring-star-8zkzvl/static/media/logo-gold-seal.86d43254a8b3a9953409.png",
+    "static/media/wooden-coffee-table.jpg": "/admiring-star-8zkzvl/static/media/wooden-coffee-table.0ee75aec6da084971e5e.jpg",
+    "index.html": "/admiring-star-8zkzvl/index.html",
+    "static/media/checkmark.svg": "/admiring-star-8zkzvl/static/media/checkmark.56ce4a8dbb4e901c5522.svg",
+    "main.1a8bb42c.css.map": "/admiring-star-8zkzvl/static/css/main.1a8bb42c.css.map",
+    "main.537350fe.js.map": "/admiring-star-8zkzvl/static/js/main.537350fe.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1a8bb42c.css",
+    "static/js/main.537350fe.js"
+  ]
+}

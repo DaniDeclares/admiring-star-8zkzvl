@@ -78,6 +78,13 @@ export default function FestivalPage() {
         </div>
       </main>
 
+      <section className="event-overview">
+        <h2>Declare Your Worth Festival 2025</h2>
+        <p>
+          Two-day experience of coaching, shopping, storytelling, and community to empower your legacy.
+        </p>
+      </section>
+
       <SocialLinks />
       <CookieConsent />
       <Footer />

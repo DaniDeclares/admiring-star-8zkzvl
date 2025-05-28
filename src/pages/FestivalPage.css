@@ -1,15 +1,15 @@
 /* src/pages/FestivalPage.css */
 
 .festival-page {
-  padding: 4rem 2rem;
-  max-width: 600px;
+  max-width: 1100px;
   margin: 0 auto;
-  text-align: center;
+  padding: 2rem 1rem 3rem 1rem;
+  background: #fff;
 }
 
-.festival-page h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+.festival-page h1, .festival-page h2 {
+  text-align: center;
+  color: #8B1E2E;
 }
 
 .festival-page p {
@@ -17,7 +17,73 @@
   margin-bottom: 2rem;
 }
 
-.festival-support {
-  margin-top: 1.5rem;
-  font-size: 0.9rem;
+.event-overview {
+  background: #f9f3f5;
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.ticket-tiers, .vendor-opportunities, .sponsorship-packages {
+  margin-bottom: 2.5rem;
+}
+
+.tickets-list, .vendor-buttons, .sponsor-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.ticket-card, .vendor-card, .sponsor-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  min-width: 240px;
+  max-width: 320px;
+  flex: 1 1 260px;
+  box-shadow: 0 2px 8px rgba(139,30,46,0.07);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.ticket-card h3, .vendor-card h3, .sponsor-card h3 {
+  color: #8B1E2E;
+  margin-bottom: 0.5rem;
+}
+.ticket-card p, .vendor-card p, .sponsor-card p {
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  background: #8B1E2E;
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+.btn--primary { background: #8B1E2E; }
+.btn--secondary { background: #f7b731; color: #222; }
+.btn--secondary:hover, .btn--secondary:focus { background: #e0a800; color: #222; }
+.btn--tertiary { background: #e0e0e0; color: #8B1E2E; }
+.btn--tertiary:hover, .btn--tertiary:focus { background: #d1d1d1; color: #8B1E2E; }
+
+@media (max-width: 900px) {
+  .tickets-list, .vendor-buttons, .sponsor-buttons {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .ticket-card, .vendor-card, .sponsor-card {
+    max-width: 98vw;
+    min-width: 0;
+    padding: 1.2rem 0.7rem;
+  }
 }

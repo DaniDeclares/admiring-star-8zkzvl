@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import Countdown from "react-countdown";
 
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
 import "./Homepage.css";
+import FestivalBanner from "../components/FestivalBanner.jsx";
+import Navbar from "../components/Navbar.jsx";
+import SocialLinks from "../components/SocialLinks.jsx";
+import CookieConsent from "../components/CookieConsent.jsx";
+import Footer from "../components/Footer.jsx";
+import "../components/FestivalBanner.css";
+import "../components/Navbar.css";
+import "../components/SocialLinks.css";
+import "../components/CookieConsent.css";
+import "../components/Footer.css";
 
 const FESTIVAL_DATE = new Date("2025-07-28T09:00:00-04:00");
 
@@ -34,34 +45,15 @@ const testimonials = [
   }
 ];
 
-function Countdown() {
-  const [timeLeft, setTimeLeft] = useState({});
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const diff = FESTIVAL_DATE - now;
-      if (diff <= 0) {
-        setTimeLeft({});
-        clearInterval(interval);
-        return;
-      }
-      setTimeLeft({
-        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((diff / (1000 * 60)) % 60),
-        seconds: Math.floor((diff / 1000) % 60)
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (!timeLeft.days && !timeLeft.hours) return <span>Festival is LIVE!</span>;
+function CountdownTimer() {
+  // Set festival start date/time (July 28, 2025, 9:00 AM)
+  const festivalDate = new Date("2025-07-28T09:00:00");
 
   return (
-    <span>
-      {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
-    </span>
+    <div className="festival-countdown">
+      <h3>Declare Your Worth Festival starts in:</h3>
+      <Countdown date={festivalDate} />
+    </div>
   );
 }
 
@@ -85,7 +77,9 @@ export default function Homepage() {
         />
       </Helmet>
 
-      <main className="homepage">
+      <FestivalBanner />
+      <Navbar />
+      <main className="homepage home-main">
         {/* HERO */}
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="hero-overlay">
@@ -106,7 +100,7 @@ export default function Homepage() {
             <strong>July 28–29, 2025 • Atlanta, GA</strong>
           </p>
           <div style={{ fontSize: "1.5rem", color: "#8B1E2E", margin: "1rem 0" }}>
-            <Countdown />
+            <CountdownTimer />
           </div>
           <a
             href="https://tidycal.com/danideclaresns/event-membership-onboarding"
@@ -271,7 +265,19 @@ export default function Homepage() {
             Open Contact Form
           </a>
         </section>
+        <a
+          href="https://buy.stripe.com/aFa5kC9q18CW2LBb9f6kg01"
+          className="btn btn--primary"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ marginTop: "2rem" }}
+        >
+          Book Now
+        </a>
       </main>
+      <SocialLinks />
+      <CookieConsent />
+      <Footer />
     </>
   );
 }
