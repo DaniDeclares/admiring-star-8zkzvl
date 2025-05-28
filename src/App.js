@@ -7,7 +7,7 @@ import SocialLinks from "./components/SocialLinks.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import Footer from "./components/Footer.jsx";
 
-import Homepage from "./pages/Homepage.jsx";
+import Homepage from "./pages/HomePage.jsx";
 import CoachingPage from "./pages/CoachingPage.jsx";
 import EventsPage from "./pages/EventsPage.jsx";
 import WeddingsPage from "./pages/WeddingsPage.jsx";
