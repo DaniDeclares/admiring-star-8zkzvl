@@ -1,7 +1,0 @@
-node_modules
-.vercel
-
-__MACOSX/
-# local env files
-.env
-.env.local
