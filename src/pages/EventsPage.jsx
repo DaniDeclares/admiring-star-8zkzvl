@@ -1,11 +1,5 @@
 import React from "react";
-
-// Chrome
-import FestivalBanner from "../components/FestivalBanner.jsx";
-import Navbar from "../components/Navbar.jsx";
-import SocialLinks from "../components/SocialLinks.jsx";
-import CookieConsent from "../components/CookieConsent.jsx";
-import Footer from "../components/Footer.jsx";
+import { Helmet } from "react-helmet-async";
 
 // Styles
 import "./EventsPage.css";
@@ -92,6 +86,14 @@ const sponsorshipPackages = [
 export default function EventsPage() {
   return (
     <>
+      <Helmet>
+        <title>Events • Declare Your Worth Festival</title>
+        <meta
+          name="description"
+          content="Explore ticket tiers, vendor booths, speaker slots, and sponsor opportunities for the Declare Your Worth Festival."
+        />
+      </Helmet>
+
       <FestivalBanner />
       <Navbar />
       <main className="events-page">

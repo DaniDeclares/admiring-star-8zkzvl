@@ -1,18 +1,4 @@
 import React from "react";
-
-// Chrome
-import FestivalBanner from "../components/FestivalBanner.jsx";
-import "../components/FestivalBanner.css";
-import Navbar from "../components/Navbar.jsx";
-import "../components/Navbar.css";
-import SocialLinks from "../components/SocialLinks.jsx";
-import "../components/SocialLinks.css";
-import CookieConsent from "../components/CookieConsent.jsx";
-import "../components/CookieConsent.css";
-import Footer from "../components/Footer.jsx";
-import "../components/Footer.css";
-
-// Styles
 import "./NotaryPage.css";
 
 const SERVICES = [
@@ -50,46 +36,40 @@ const SERVICES = [
 
 export default function NotaryPage() {
   return (
-    <>
-      <FestivalBanner />
-      <Navbar />
+    <main className="notary-page">
+      <header className="hero">
+        <h1>Notary & Apostille Services</h1>
+        <p>Trusted. Mobile. Always prepared to serve you where you are.</p>
+      </header>
 
-      <main className="notary-page">
-        <header className="hero">
-          <h1>Notary & Apostille Services</h1>
-          <p>Trusted. Mobile. Always prepared to serve you where you are.</p>
-        </header>
+      <section className="services-grid">
+        {SERVICES.map((service, index) => (
+          <div key={index} className="service-card">
+            <h2>{service.title}</h2>
+            <p className="meta">
+              {service.duration} • {service.price}
+            </p>
+            <p className="desc">{service.desc}</p>
+            <a
+              href="https://tidycal.com/danideclaresns"
+              className="btn btn--book"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book Now
+            </a>
+          </div>
+        ))}
+      </section>
 
-        <section className="services-grid">
-          {SERVICES.map((service, index) => (
-            <div key={index} className="service-card">
-              <h2>{service.title}</h2>
-              <p className="meta">{service.duration} • {service.price}</p>
-              <p className="desc">{service.desc}</p>
-              <a
-                href="https://tidycal.com/danideclaresns"
-                className="btn btn--book"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Book Now
-              </a>
-            </div>
-          ))}
-        </section>
-
-        <section className="contact-info">
-          <h3>Have Questions?</h3>
-          <p>
-            Email <a href="mailto:danideclaresns@gmail.com">danideclaresns@gmail.com</a><br />
-            or call/text <a href="tel:+14705324892">(470) 523-4892</a>
-          </p>
-        </section>
-      </main>
-
-      <SocialLinks />
-      <CookieConsent />
-      <Footer />
-    </>
+      <section className="contact-info">
+        <h3>Have Questions?</h3>
+        <p>
+          Email <a href="mailto:danideclaresns@gmail.com">danideclaresns@gmail.com</a>
+          <br />
+          or call/text <a href="tel:+14705324892">(470) 523-4892</a>
+        </p>
+      </section>
+    </main>
   );
 }

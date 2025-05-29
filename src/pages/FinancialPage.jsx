@@ -1,25 +1,17 @@
 import React from "react";
-
-// Chrome
-import FestivalBanner from "../components/FestivalBanner.jsx";
-import "../components/FestivalBanner.css";
-import Navbar from "../components/Navbar.jsx";
-import "../components/Navbar.css";
-import SocialLinks from "../components/SocialLinks.jsx";
-import "../components/SocialLinks.css";
-import CookieConsent from "../components/CookieConsent.jsx";
-import "../components/CookieConsent.css";
-import Footer from "../components/Footer.jsx";
-import "../components/Footer.css";
-
-// Styles
+import { Helmet } from "react-helmet-async";
 import "./FinancialPage.css";
 
 export default function FinancialPage() {
   return (
     <>
-      <FestivalBanner />
-      <Navbar />
+      <Helmet>
+        <title>Financial Empowerment • Dani Declares</title>
+        <meta
+          name="description"
+          content="Book a free financial consult with Dani to explore life insurance options and legacy-building strategies tailored to your goals."
+        />
+      </Helmet>
 
       <main className="financial-page">
         <header className="financial-hero">
@@ -43,10 +35,6 @@ export default function FinancialPage() {
           </a>
         </section>
       </main>
-
-      <SocialLinks />
-      <CookieConsent />
-      <Footer />
     </>
   );
 }

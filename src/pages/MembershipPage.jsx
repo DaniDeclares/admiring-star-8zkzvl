@@ -1,18 +1,4 @@
 import React, { useState } from "react";
-
-// site chrome
-import FestivalBanner from "../components/FestivalBanner.jsx";
-import "../components/FestivalBanner.css";
-import Navbar from "../components/Navbar.jsx";
-import "../components/Navbar.css";
-import SocialLinks from "../components/SocialLinks.jsx";
-import "../components/SocialLinks.css";
-import CookieConsent from "../components/CookieConsent.jsx";
-import "../components/CookieConsent.css";
-import Footer from "../components/Footer.jsx";
-import "../components/Footer.css";
-
-// styles
 import "./MembershipPage.css";
 
 const VIP_TIERS = [
@@ -95,141 +81,140 @@ const memberships = [
     url: "https://buy.stripe.com/00wdR86dP7yS4TJdhn6kg09",
     desc: "Annual platinum sponsorship for ultimate impact.",
   },
-  // ...add all other sponsor/membership options here
+  // Add additional sponsor packages as needed
 ];
 
 export default function MembershipPage() {
   const [billing, setBilling] = useState("monthly");
 
   return (
-    <>
-      <FestivalBanner />
-      <Navbar />
+    <main className="page membership-page">
+      <h1>Join the Dani Declares Community</h1>
+      <p className="subtitle">
+        Flexible plans for luxury membership, event access, or vendor booths.
+      </p>
 
-      <main className="page membership-page">
-        <h1>Join the Dani Declares Community</h1>
-        <p className="subtitle">Flexible plans for luxury membership, event access, or vendor booths.</p>
+      <div className="billing-toggle">
+        <button
+          className={billing === "monthly" ? "active" : ""}
+          onClick={() => setBilling("monthly")}
+        >
+          Monthly
+        </button>
+        <button
+          className={billing === "yearly" ? "active" : ""}
+          onClick={() => setBilling("yearly")}
+        >
+          Yearly (save 15%)
+        </button>
+      </div>
 
-        <div className="billing-toggle">
-          <button
-            className={billing === "monthly" ? "active" : ""}
-            onClick={() => setBilling("monthly")}
-          >
-            Monthly
-          </button>
-          <button
-            className={billing === "yearly" ? "active" : ""}
-            onClick={() => setBilling("yearly")}
-          >
-            Yearly (save 15%)
-          </button>
-        </div>
-
-        <section>
-          <h2>Dani Declares Luxury</h2>
-          <div className="tiers-grid">
-            {VIP_TIERS.map((tier) => {
-              const price = billing === "monthly" ? tier.monthly : tier.yearly;
-              return (
-                <div key={tier.id} className="tier-card">
-                  <h3>{tier.name}</h3>
-                  <p className="tier-desc">{tier.desc}</p>
-                  <p className="tier-price">${price}<span>/{billing}</span></p>
-                  <button
-                    className="snipcart-add-item btn btn--primary"
-                    data-item-id={tier.id}
-                    data-item-name={`${tier.name} Membership`}
-                    data-item-price={price}
-                    data-item-url="/membership"
-                    data-item-description={tier.desc}
-                    data-item-custom1-name="Billing Cycle"
-                    data-item-custom1-options="Monthly,Yearly"
-                    data-item-custom1-value={billing}
-                  >
-                    {billing === "monthly" ? "Join Monthly" : "Pre-pay Yearly"}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <section>
-          <h2>Event-Only Access</h2>
-          <div className="tiers-grid">
-            {EVENT_TIERS.map((tier) => {
-              const price = billing === "monthly" ? tier.monthly : tier.yearly;
-              return (
-                <div key={tier.id} className="tier-card">
-                  <h3>{tier.name}</h3>
-                  <p className="tier-desc">{tier.desc}</p>
-                  <p className="tier-price">${price}<span>/{billing}</span></p>
-                  <button
-                    className="snipcart-add-item btn btn--secondary"
-                    data-item-id={tier.id}
-                    data-item-name={`${tier.name} Event Membership`}
-                    data-item-price={price}
-                    data-item-url="/membership"
-                    data-item-description={tier.desc}
-                    data-item-custom1-name="Billing Cycle"
-                    data-item-custom1-options="Monthly,Yearly"
-                    data-item-custom1-value={billing}
-                  >
-                    {billing === "monthly" ? "Subscribe" : "Pre-pay"}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <section>
-          <h2>Secure Your Vendor Booth</h2>
-          <div className="tiers-grid">
-            {VENDOR_BOOTHS.map((booth) => (
-              <div key={booth.id} className="tier-card">
-                <h3>{booth.name}</h3>
-                <p className="tier-desc">{booth.desc}</p>
-                <p className="tier-price">${booth.price}</p>
+      <section>
+        <h2>Dani Declares Luxury</h2>
+        <div className="tiers-grid">
+          {VIP_TIERS.map((tier) => {
+            const price = billing === "monthly" ? tier.monthly : tier.yearly;
+            return (
+              <div key={tier.id} className="tier-card">
+                <h3>{tier.name}</h3>
+                <p className="tier-desc">{tier.desc}</p>
+                <p className="tier-price">
+                  ${price}
+                  <span>/{billing}</span>
+                </p>
                 <button
-                  className="snipcart-add-item btn btn--accent"
-                  data-item-id={booth.id}
-                  data-item-name={booth.name}
-                  data-item-price={booth.price}
+                  className="snipcart-add-item btn btn--primary"
+                  data-item-id={tier.id}
+                  data-item-name={`${tier.name} Membership`}
+                  data-item-price={price}
                   data-item-url="/membership"
-                  data-item-description={booth.desc}
+                  data-item-description={tier.desc}
+                  data-item-custom1-name="Billing Cycle"
+                  data-item-custom1-options="Monthly,Yearly"
+                  data-item-custom1-value={billing}
                 >
-                  Reserve Booth
+                  {billing === "monthly" ? "Join Monthly" : "Pre-pay Yearly"}
                 </button>
               </div>
-            ))}
-          </div>
-        </section>
+            );
+          })}
+        </div>
+      </section>
 
-        <section className="membership-options">
-          <h2>Membership & Sponsorship</h2>
-          <div className="membership-buttons">
-            {memberships.map((m) => (
-              <div key={m.label} className="membership-card">
-                <h3>{m.label}</h3>
-                <p>{m.desc}</p>
-                <a
-                  href={m.url}
-                  className="btn btn--primary"
-                  target="_blank"
-                  rel="noopener noreferrer"
+      <section>
+        <h2>Event-Only Access</h2>
+        <div className="tiers-grid">
+          {EVENT_TIERS.map((tier) => {
+            const price = billing === "monthly" ? tier.monthly : tier.yearly;
+            return (
+              <div key={tier.id} className="tier-card">
+                <h3>{tier.name}</h3>
+                <p className="tier-desc">{tier.desc}</p>
+                <p className="tier-price">
+                  ${price}
+                  <span>/{billing}</span>
+                </p>
+                <button
+                  className="snipcart-add-item btn btn--secondary"
+                  data-item-id={tier.id}
+                  data-item-name={`${tier.name} Event Membership`}
+                  data-item-price={price}
+                  data-item-url="/membership"
+                  data-item-description={tier.desc}
+                  data-item-custom1-name="Billing Cycle"
+                  data-item-custom1-options="Monthly,Yearly"
+                  data-item-custom1-value={billing}
                 >
-                  Join as {m.label}
-                </a>
+                  {billing === "monthly" ? "Subscribe" : "Pre-pay"}
+                </button>
               </div>
-            ))}
-          </div>
-        </section>
-      </main>
+            );
+          })}
+        </div>
+      </section>
 
-      <SocialLinks />
-      <CookieConsent />
-      <Footer />
-    </>
+      <section>
+        <h2>Secure Your Vendor Booth</h2>
+        <div className="tiers-grid">
+          {VENDOR_BOOTHS.map((booth) => (
+            <div key={booth.id} className="tier-card">
+              <h3>{booth.name}</h3>
+              <p className="tier-desc">{booth.desc}</p>
+              <p className="tier-price">${booth.price}</p>
+              <button
+                className="snipcart-add-item btn btn--accent"
+                data-item-id={booth.id}
+                data-item-name={booth.name}
+                data-item-price={booth.price}
+                data-item-url="/membership"
+                data-item-description={booth.desc}
+              >
+                Reserve Booth
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="membership-options">
+        <h2>Membership & Sponsorship</h2>
+        <div className="membership-buttons">
+          {memberships.map((m) => (
+            <div key={m.label} className="membership-card">
+              <h3>{m.label}</h3>
+              <p>{m.desc}</p>
+              <a
+                href={m.url}
+                className="btn btn--primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Join as {m.label}
+              </a>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }

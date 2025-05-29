@@ -1,17 +1,5 @@
-
 import React from "react";
-
-// Chrome
-import FestivalBanner from "../components/FestivalBanner.jsx";
-import "../components/FestivalBanner.css";
-import Navbar from "../components/Navbar.jsx";
-import "../components/Navbar.css";
-import SocialLinks from "../components/SocialLinks.jsx";
-import "../components/SocialLinks.css";
-import CookieConsent from "../components/CookieConsent.jsx";
-import "../components/CookieConsent.css";
-import Footer from "../components/Footer.jsx";
-import "../components/Footer.css";
+import { Helmet } from "react-helmet-async";
 
 // HubSpot embed
 import HubSpotForm from "../components/HubSpotForm.jsx";
@@ -22,6 +10,14 @@ import "./ContactPage.css";
 export default function ContactPage() {
   return (
     <>
+      <Helmet>
+        <title>Contact • Dani Declares</title>
+        <meta
+          name="description"
+          content="Have a question or want to work together? Reach out to Dani Declares today."
+        />
+      </Helmet>
+
       <FestivalBanner />
       <Navbar />
 
@@ -40,9 +36,7 @@ export default function ContactPage() {
           <p>
             📧 <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
             <br />
-            📞{" "}
-            <a href="tel:+14707423930">(470) 742-3930</a> or{" "}
-            <a href="tel:+18643265362">(864) 326-5362</a>
+            📞 <a href="tel:+14707423930">(470) 742-3930</a> or <a href="tel:+18643265362">(864) 326-5362</a>
           </p>
         </section>
       </main>

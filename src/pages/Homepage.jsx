@@ -2,53 +2,38 @@ import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import Countdown from "react-countdown";
-
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
 import "./Homepage.css";
-import FestivalBanner from "../components/FestivalBanner.jsx";
-import Navbar from "../components/Navbar.jsx";
-import SocialLinks from "../components/SocialLinks.jsx";
-import CookieConsent from "../components/CookieConsent.jsx";
-import Footer from "../components/Footer.jsx";
-import "../components/FestivalBanner.css";
-import "../components/Navbar.css";
-import "../components/SocialLinks.css";
-import "../components/CookieConsent.css";
-import "../components/Footer.css";
-
-const FESTIVAL_DATE = new Date("2025-07-28T09:00:00-04:00");
 
 const testimonials = [
   {
     quote: "Dani helped me unlock my power and profit — I’m finally building the life I want.",
-    author: "Alex R."
+    author: "Alex R.",
   },
   {
     quote: "My confidence is back. I raised my rates and my clients said yes!",
-    author: "Monica L."
+    author: "Monica L.",
   },
   {
     quote: "I was stuck. Dani gave me a plan and now I’m moving forward fast.",
-    author: "Jasmine M."
+    author: "Jasmine M.",
   },
   {
     quote: "From scattered to strategic. Working with Dani changed my life.",
-    author: "Erika W."
+    author: "Erika W.",
   },
   {
     quote: "Booked my first 5 paying clients in 2 weeks after our session.",
-    author: "Taylor C."
+    author: "Taylor C.",
   },
   {
     quote: "It’s like she saw the version of me I hadn’t met yet—and helped me become her.",
-    author: "Brianna S."
-  }
+    author: "Brianna S.",
+  },
 ];
 
 function CountdownTimer() {
-  // Set festival start date/time (July 28, 2025, 9:00 AM)
-  const festivalDate = new Date("2025-07-28T09:00:00");
-
+  const festivalDate = new Date("2025-07-28T09:00:00-04:00");
   return (
     <div className="festival-countdown">
       <h3>Declare Your Worth Festival starts in:</h3>
@@ -77,8 +62,6 @@ export default function Homepage() {
         />
       </Helmet>
 
-      <FestivalBanner />
-      <Navbar />
       <main className="homepage home-main">
         {/* HERO */}
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
@@ -96,9 +79,7 @@ export default function Homepage() {
         {/* FESTIVAL PROMO */}
         <section className="testimonial-carousel" style={{ marginBottom: "2rem" }}>
           <h2>Declare Your Worth Festival</h2>
-          <p>
-            <strong>July 28–29, 2025 • Atlanta, GA</strong>
-          </p>
+          <p><strong>July 28–29, 2025 • Atlanta, GA</strong></p>
           <div style={{ fontSize: "1.5rem", color: "#8B1E2E", margin: "1rem 0" }}>
             <CountdownTimer />
           </div>
@@ -110,9 +91,7 @@ export default function Homepage() {
           >
             Get Early Bird Tickets
           </a>
-          <p style={{ color: "#b00", marginTop: "0.5rem" }}>
-            Early Bird pricing ends soon!
-          </p>
+          <p style={{ color: "#b00", marginTop: "0.5rem" }}>Early Bird pricing ends soon!</p>
         </section>
 
         {/* TESTIMONIAL CAROUSEL */}
@@ -130,66 +109,36 @@ export default function Homepage() {
         <section className="packages">
           <h2>Your Coaching Options</h2>
           <div className="packages-grid">
-            <div className="package-card">
-              <h3>Discovery Session</h3>
-              <p className="meta">30 mins • <strong>$99</strong></p>
-              <a
-                href="https://paypal.me/danideclaresns/99"
-                className="btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pay to Book
-              </a>
-              <a
-                href="https://tidycal.com/danideclaresns/discovery-session"
-                className="btn btn--book"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Complete Booking
-              </a>
-            </div>
-            <div className="package-card">
-              <h3>1:1 Coaching</h3>
-              <p className="meta">4×1 hr sessions • <strong>$499</strong></p>
-              <a
-                href="https://paypal.me/danideclaresns/499"
-                className="btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pay to Book
-              </a>
-              <a
-                href="https://tidycal.com/danideclaresns/one-on-one-coaching"
-                className="btn btn--book"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Complete Booking
-              </a>
-            </div>
-            <div className="package-card">
-              <h3>VIP Intensive</h3>
-              <p className="meta">6 hrs • <strong>$1200</strong></p>
-              <a
-                href="https://paypal.me/danideclaresns/1200"
-                className="btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pay to Book
-              </a>
-              <a
-                href="https://tidycal.com/danideclaresns/vip-intensive"
-                className="btn btn--book"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Complete Booking
-              </a>
-            </div>
+            {[
+              {
+                title: "Discovery Session",
+                price: 99,
+                time: "30 mins",
+                paypal: "https://paypal.me/danideclaresns/99",
+                booking: "https://tidycal.com/danideclaresns/discovery-session",
+              },
+              {
+                title: "1:1 Coaching",
+                price: 499,
+                time: "4×1 hr sessions",
+                paypal: "https://paypal.me/danideclaresns/499",
+                booking: "https://tidycal.com/danideclaresns/one-on-one-coaching",
+              },
+              {
+                title: "VIP Intensive",
+                price: 1200,
+                time: "6 hrs",
+                paypal: "https://paypal.me/danideclaresns/1200",
+                booking: "https://tidycal.com/danideclaresns/vip-intensive",
+              },
+            ].map((pkg) => (
+              <div key={pkg.title} className="package-card">
+                <h3>{pkg.title}</h3>
+                <p className="meta">{pkg.time} • <strong>${pkg.price}</strong></p>
+                <a href={pkg.paypal} className="btn" target="_blank" rel="noopener noreferrer">Pay to Book</a>
+                <a href={pkg.booking} className="btn btn--book" target="_blank" rel="noopener noreferrer">Complete Booking</a>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -210,49 +159,29 @@ export default function Homepage() {
           <div className="packages-grid">
             <div className="package-card">
               <h3>Weddings & Events</h3>
-              <a
-                href="https://tidycal.com/danideclaresns/event-membership-onboarding"
-                className="btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://tidycal.com/danideclaresns/event-membership-onboarding" className="btn" target="_blank" rel="noopener noreferrer">
                 Event Membership Onboarding
               </a>
             </div>
             <div className="package-card">
               <h3>Vendor Booths</h3>
-              <a
-                href="https://tidycal.com/danideclaresns/vendor-booth-standard"
-                className="btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://tidycal.com/danideclaresns/vendor-booth-standard" className="btn" target="_blank" rel="noopener noreferrer">
                 Standard Booth
               </a>
-              <a
-                href="https://tidycal.com/danideclaresns/vendor-booth-premium"
-                className="btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://tidycal.com/danideclaresns/vendor-booth-premium" className="btn" target="_blank" rel="noopener noreferrer">
                 Premium Booth
               </a>
             </div>
             <div className="package-card">
               <h3>Notary Services (GA/SC)</h3>
-              <a
-                href="https://tidycal.com/danideclaresns/luxury-membership-onboarding"
-                className="btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://tidycal.com/danideclaresns/luxury-membership-onboarding" className="btn" target="_blank" rel="noopener noreferrer">
                 Refer a Pro / Book Now
               </a>
             </div>
           </div>
         </section>
 
-        {/* CONTACT / LEAD FORM */}
+        {/* CONTACT CTA */}
         <section className="coaching-contact">
           <h2>Still Have Questions?</h2>
           <p>Drop your email and we’ll follow up with a personalized response:</p>
@@ -265,6 +194,7 @@ export default function Homepage() {
             Open Contact Form
           </a>
         </section>
+
         <a
           href="https://buy.stripe.com/aFa5kC9q18CW2LBb9f6kg01"
           className="btn btn--primary"
@@ -275,9 +205,6 @@ export default function Homepage() {
           Book Now
         </a>
       </main>
-      <SocialLinks />
-      <CookieConsent />
-      <Footer />
     </>
   );
 }
