@@ -5,3 +5,4 @@ __MACOSX/
 # local env files
 .env
 .env.local
+build/
