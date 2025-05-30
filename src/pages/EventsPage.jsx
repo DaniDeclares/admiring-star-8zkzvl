@@ -94,8 +94,6 @@ export default function EventsPage() {
         />
       </Helmet>
 
-      <FestivalBanner />
-      <Navbar />
       <main className="events-page">
         <h1>Festival Events & Opportunities</h1>
 
@@ -159,9 +157,6 @@ export default function EventsPage() {
           </div>
         </section>
       </main>
-      <SocialLinks />
-      <CookieConsent />
-      <Footer />
     </>
   );
 }

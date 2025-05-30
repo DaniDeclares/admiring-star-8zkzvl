@@ -18,9 +18,6 @@ export default function ContactPage() {
         />
       </Helmet>
 
-      <FestivalBanner />
-      <Navbar />
-
       <main className="contact-page">
         <h1>Get In Touch</h1>
         <p>Have a question or want to work together? Drop your info below.</p>
@@ -40,10 +37,6 @@ export default function ContactPage() {
           </p>
         </section>
       </main>
-
-      <SocialLinks />
-      <CookieConsent />
-      <Footer />
     </>
   );
 }

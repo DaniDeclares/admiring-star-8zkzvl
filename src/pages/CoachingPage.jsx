@@ -35,9 +35,6 @@ export default function CoachingPage() {
 				/>
 			</Helmet>
 
-			<FestivalBanner />
-			<Navbar />
-
 			<header className="coaching-hero">
 				<h1>Ready to Declare Your Worth?</h1>
 				<p>
@@ -185,10 +182,6 @@ export default function CoachingPage() {
 					</li>
 				</ol>
 			</section>
-
-			<SocialLinks />
-			<CookieConsent />
-			<Footer />
 		</main>
 	);
 }

@@ -31,9 +31,6 @@ export default function BlogPage() {
 
   return (
     <main className="blog-page">
-      <FestivalBanner />
-      <Navbar />
-
       <h1>Dani Declares Blog</h1>
       <p className="tagline">Stories, strategies, and spotlight features for every life chapter.</p>
 
@@ -57,10 +54,6 @@ export default function BlogPage() {
           </div>
         ))}
       </div>
-
-      <SocialLinks />
-      <CookieConsent />
-      <Footer />
     </main>
   );
 }
