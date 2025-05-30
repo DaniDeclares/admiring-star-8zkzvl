@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import Countdown from "react-countdown";
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
-import eventBackground from "../assets/marketing/festival-bg.jpg";
+import eventBackground from "../assets/festival/pexels-fang-liu-1996637-3617724.jpg";
 import "./Homepage.css";
 
 const testimonials = [
@@ -71,10 +71,6 @@ export default function Homepage() {
       </Helmet>
 
       <main className="homepage home-main">
-        <div style={{ backgroundColor: 'yellow', padding: '20px', textAlign: 'center' }}>
-           TEST ELEMENT — IF YOU SEE THIS, EDITS ARE WORKING
-        </div>
-
         {/* HERO */}
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="hero-overlay">
