@@ -1,36 +1,49 @@
 import React from "react";
 import "./NotaryPage.css";
 
+// Updated, competitive, Atlanta-area pricing & services:
 const SERVICES = [
   {
     title: "Mobile Notary Visit",
-    duration: "per notarial act",
-    price: "$75",
-    desc: "On-site notarizations at your home, office, or event — we come to you.",
-  },
-  {
-    title: "Apostille Assistance",
-    duration: "30 mins",
-    price: "$250",
-    desc: "Secure apostille services for international documents — handled start to finish.",
-  },
-  {
-    title: "Fingerprinting (FD-258)",
-    duration: "per session",
+    duration: "Includes travel + up to 3 signatures",
     price: "$50",
-    desc: "Compliant ink fingerprinting for background checks and licensing.",
+    desc: "On-site notarizations at your home, office, hospital, or favorite coffee shop. Additional signatures $5 each. Evening/weekend +$20.",
   },
   {
     title: "Loan Signing Agent",
-    duration: "1 hr",
-    price: "$100",
-    desc: "Certified for refinance, HELOCs, and real estate closings — fully mobile.",
+    duration: "All closing types",
+    price: "$150",
+    desc: "Certified for refinance, HELOCs, purchases, and real estate closings — accurate, insured, and fully mobile. Scanbacks & print included.",
+  },
+  {
+    title: "Apostille Assistance",
+    duration: "Per document (expedited available)",
+    price: "$175",
+    desc: "Apostille facilitation for U.S. and international documents. Expedited and courier service available. Contact for custom/bulk pricing.",
+  },
+  {
+    title: "Mobile Fingerprinting (FD-258)",
+    duration: "First card $50, each add'l $20",
+    price: "$50+",
+    desc: "Compliant ink fingerprinting for employment, licensing, and background checks. We bring everything to you.",
+  },
+  {
+    title: "I-9 Employment Verification",
+    duration: "Standard appointment",
+    price: "$50",
+    desc: "Fast, compliant remote hire verification for local and relocating employees. We partner with HR and remote workers.",
   },
   {
     title: "Notary + Finance Session",
     duration: "1 hr",
     price: "$135",
-    desc: "Bundle notary services with personal financial wellness coaching.",
+    desc: "Bundle your notary service with a personal finance wellness checkup. Learn, plan, and sign — all in one visit.",
+  },
+  {
+    title: "Business/Bulk Notary Plans",
+    duration: "For offices, title, legal & healthcare",
+    price: "Custom/Discounted",
+    desc: "Ask about recurring, bulk, or corporate notary rates for your firm, agency, or real estate team.",
   },
 ];
 
@@ -38,8 +51,14 @@ export default function NotaryPage() {
   return (
     <main className="notary-page">
       <header className="hero">
-        <h1>Notary & Apostille Services</h1>
-        <p>Trusted. Mobile. Always prepared to serve you where you are.</p>
+        <h1 className="text-4xl font-bold mb-2">Mobile Notary & Apostille Services</h1>
+        <p className="mt-2 text-lg mb-3">
+          Serving Dunwoody, Atlanta, and all surrounding areas. <br />
+          <span className="font-semibold text-[#D4AF37]">Same-day, evening & weekend appointments available.</span>
+        </p>
+        <p className="text-base text-gray-600">
+          Insured | NNA Certified | Flexible & Family-Friendly | <span className="italic">We come to you</span>
+        </p>
       </header>
 
       <section className="services-grid">
@@ -47,29 +66,4 @@ export default function NotaryPage() {
           <div key={index} className="service-card">
             <h2>{service.title}</h2>
             <p className="meta">
-              {service.duration} • {service.price}
-            </p>
-            <p className="desc">{service.desc}</p>
-            <a
-              href="https://tidycal.com/danideclaresns"
-              className="btn btn--book"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Book Now
-            </a>
-          </div>
-        ))}
-      </section>
-
-      <section className="contact-info">
-        <h3>Have Questions?</h3>
-        <p>
-          Email <a href="mailto:danideclaresns@gmail.com">danideclaresns@gmail.com</a>
-          <br />
-          or call/text <a href="tel:+14705324892">(470) 523-4892</a>
-        </p>
-      </section>
-    </main>
-  );
-}
+              {service.duration} &nbsp;•&nbsp; <span className="font-bold">{service.price}</span>
