@@ -15,9 +15,13 @@ import NotaryPage from "./pages/NotaryPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import FinancialPage from "./pages/FinancialPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
+<<<<<<< HEAD
 import BlogPostPage from "./pages/BlogPostPage.jsx";  // ← ADD THIS LINE
 import ShopPage from "./pages/ShopPage.jsx";
 import FestivalPage from "./pages/FestivalPage.jsx";
+=======
+import ShopPage from "./pages/ShopPage.jsx";
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 
 export default function App() {
   return (
@@ -34,8 +38,11 @@ export default function App() {
         <Route path="/notary" element={<NotaryPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/blog" element={<BlogPage />} />
+<<<<<<< HEAD
         <Route path="/blog/:slug" element={<BlogPostPage />} />  {/* ← NEW BLOG POST ROUTE */}
         <Route path="/festival" element={<FestivalPage />} />
+=======
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
       </Routes>
       <SocialLinks />
       <CookieConsent />

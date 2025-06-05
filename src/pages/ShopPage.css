@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* src/pages/EventsPage.css */
 
 .events-page {
@@ -69,4 +70,132 @@
 
 .event-btn:hover {
   background-color: #6F1824;
+=======
+/* src/pages/ShopPage.css */
+.shop-page {
+  padding: 2rem;
+  background-color: #F8F5F1; /* ivory */
+}
+
+.page.shop-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem 1rem;
+  background: #fff;
+}
+
+.hero-title {
+  font-family: Georgia, serif;
+  color: #8B1E2E; /* burgundy */
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+  font-family: Montserrat, sans-serif;
+  color: #333;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.stripe-tickets {
+  margin: 2rem 0;
+}
+.stripe-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.shop-products .product-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.product-card {
+  background: #f9f3f5;
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  min-width: 240px;
+  max-width: 320px;
+  flex: 1 1 260px;
+  box-shadow: 0 2px 8px rgba(139,30,46,0.07);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.product-name {
+  font-family: Georgia, serif;
+  color: #8B1E2E;
+  margin: 0.5rem 0;
+}
+
+.product-title {
+  color: #8B1E2E;
+  margin-bottom: 0.5rem;
+}
+
+.price {
+  font-family: Montserrat, sans-serif;
+  font-weight: bold;
+  color: #333;
+  margin: 0.25rem 0;
+}
+
+.desc {
+  font-family: Montserrat, sans-serif;
+  color: #555;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.product-desc {
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.product-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  background: #8B1E2E;
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+.btn--primary { background: #8B1E2E; }
+.btn--secondary { background: #f7b731; color: #222; }
+.btn--secondary:hover, .btn--secondary:focus { background: #e0a800; color: #222; }
+
+@media (max-width: 900px) {
+  .shop-products .product-list {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .product-card {
+    max-width: 98vw;
+    min-width: 0;
+    padding: 1.2rem 0.7rem;
+  }
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 }

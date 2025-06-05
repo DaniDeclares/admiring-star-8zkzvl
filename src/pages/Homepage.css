@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Homepage.css */
 
 /* GENERAL */
@@ -19,11 +20,26 @@ a {
   background-size: cover;
   background-position: center;
   padding: 120px 20px 100px 20px;
+=======
+/* HomePage.css */
+
+.home-main {
+  font-family: 'Inter', sans-serif;
+  color: #222;
+  background-color: #fff;
+}
+
+.hero {
+  background-size: cover;
+  background-position: center;
+  padding: 120px 20px;
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
   text-align: center;
   position: relative;
 }
 
 .hero-overlay {
+<<<<<<< HEAD
   background-color: rgba(139, 30, 46, 0.70); /* semi-burgundy overlay */
   padding: 60px 20px 40px 20px;
   border-radius: 18px;
@@ -90,10 +106,24 @@ a {
 }
 
 /* FESTIVAL BANNER */
+=======
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 60px 20px;
+  border-radius: 10px;
+  display: inline-block;
+  color: #fff;
+}
+
+.hero-cta .btn {
+  margin: 10px;
+}
+
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 .festival-banner {
   background-size: cover;
   background-position: center;
   position: relative;
+<<<<<<< HEAD
   padding: 80px 20px;
   text-align: center;
   color: #fff;
@@ -142,11 +172,38 @@ a {
 
 .carousel {
   max-width: 600px;
+=======
+  padding: 100px 20px;
+  text-align: center;
+  color: #fff;
+}
+
+.festival-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 50px;
+  border-radius: 10px;
+}
+
+.early-bird-note {
+  color: #ffd700;
+  margin-top: 0.5rem;
+}
+
+.testimonial-carousel {
+  padding: 60px 20px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.carousel {
+  max-width: 700px;
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
   margin: 0 auto;
 }
 
 .testimonial-slide {
   font-style: italic;
+<<<<<<< HEAD
   font-size: 1.12rem;
   margin-bottom: 0.8rem;
   min-height: 54px;
@@ -208,18 +265,32 @@ a {
 }
 .other-services h2 {
   color: #8B1E2E;
+=======
+}
+
+.packages {
+  padding: 60px 20px;
+  text-align: center;
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 }
 
 .packages-grid {
   display: flex;
   flex-wrap: wrap;
+<<<<<<< HEAD
   gap: 24px;
   justify-content: center;
   margin-top: 20px;
+=======
+  justify-content: center;
+  gap: 30px;
+  margin-top: 30px;
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 }
 
 .package-card {
   background: #fff5f7;
+<<<<<<< HEAD
   padding: 28px 18px;
   border-radius: 12px;
   width: 270px;
@@ -276,4 +347,51 @@ a {
     min-width: 94vw;
     width: 100%;
   }
+=======
+  padding: 30px;
+  border-radius: 10px;
+  width: 280px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.coaching-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 30px 0;
+}
+
+.coaching-benefits ul {
+  list-style: none;
+  padding: 0;
+}
+
+.coaching-benefits li {
+  margin: 10px 0;
+}
+
+.coaching-contact {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: #f2f2f2;
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.burgundy {
+  background-color: #800020;
+  color: #fff;
+}
+
+.burgundy:hover {
+  background-color: #990022;
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 }

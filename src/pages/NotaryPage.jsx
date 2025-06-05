@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // src/pages/NotaryPage.jsx
+=======
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 import React from "react";
 import "./NotaryPage.css";
 
@@ -54,6 +57,7 @@ export default function NotaryPage() {
       <header className="hero">
         <h1 className="text-4xl font-bold mb-2">Mobile Notary & Apostille Services</h1>
         <p className="mt-2 text-lg mb-3">
+<<<<<<< HEAD
           Serving Dunwoody, Atlanta, and all surrounding areas.
           <br />
           <span className="font-semibold text-[#D4AF37]">
@@ -63,6 +67,13 @@ export default function NotaryPage() {
         <p className="text-base text-gray-600">
           Insured | NNA Certified | Flexible & Family-Friendly |{" "}
           <span className="italic">We come to you</span>
+=======
+          Serving Dunwoody, Atlanta, and all surrounding areas. <br />
+          <span className="font-semibold text-[#D4AF37]">Same-day, evening & weekend appointments available.</span>
+        </p>
+        <p className="text-base text-gray-600">
+          Insured | NNA Certified | Flexible & Family-Friendly | <span className="italic">We come to you</span>
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
         </p>
       </header>
 
@@ -71,8 +82,12 @@ export default function NotaryPage() {
           <div key={index} className="service-card">
             <h2>{service.title}</h2>
             <p className="meta">
+<<<<<<< HEAD
               {service.duration} &nbsp;•&nbsp;{" "}
               <span className="font-bold">{service.price}</span>
+=======
+              {service.duration} &nbsp;•&nbsp; <span className="font-bold">{service.price}</span>
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
             </p>
             <p className="desc">{service.desc}</p>
             <a
@@ -89,23 +104,34 @@ export default function NotaryPage() {
 
       <section className="extra-info text-center mt-8">
         <p className="text-base mb-2">
+<<<<<<< HEAD
           <strong>Travel outside Dunwoody/Perimeter:</strong> +$1/mile • Bulk & business discounts available.
           <br />
           <span className="italic">
             All major cards & cash accepted. Rush, same-day, or after-hours available on request.
           </span>
+=======
+          <strong>Travel outside Dunwoody/Perimeter:</strong> +$1/mile • Bulk & business discounts available.<br />
+          <span className="italic">All major cards & cash accepted. Rush, same-day, or after-hours available on request.</span>
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
         </p>
       </section>
 
       <section className="contact-info mt-8">
         <h3>Have Questions?</h3>
         <p>
+<<<<<<< HEAD
           Email{" "}
           <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
           <br />
           or call/text{" "}
           <a href="tel:+14705234892">(470) 523-4892</a> |{" "}
           <a href="tel:+18643265362">(864) 326-5362</a>
+=======
+          Email <a href="mailto:danideclaresns@gmail.com">danideclaresns@gmail.com</a>
+          <br />
+          or call/text <a href="tel:+14705324892">(470) 523-4892</a>
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
         </p>
       </section>
     </main>

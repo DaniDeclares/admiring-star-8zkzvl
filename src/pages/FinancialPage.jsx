@@ -1,8 +1,12 @@
+<<<<<<< HEAD
 // src/pages/FinancialPage.jsx
+=======
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import "./FinancialPage.css";
 
+<<<<<<< HEAD
 const SERVICES = [
   {
     title: "Term Life Insurance",
@@ -34,6 +38,8 @@ const SERVICES = [
   },
 ];
 
+=======
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 export default function FinancialPage() {
   return (
     <>
@@ -41,13 +47,18 @@ export default function FinancialPage() {
         <title>Financial Empowerment • Dani Declares</title>
         <meta
           name="description"
+<<<<<<< HEAD
           content="Book a free financial consult with Dani to explore Primerica term life insurance, debt elimination, and legacy-building strategies tailored to your goals."
+=======
+          content="Book a free financial consult with Dani to explore life insurance options and legacy-building strategies tailored to your goals."
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
         />
       </Helmet>
 
       <main className="financial-page">
         <header className="financial-hero">
           <h1>Financial Empowerment</h1>
+<<<<<<< HEAD
           <p>Helping you build wealth, eliminate debt, and protect your legacy.</p>
         </header>
 
@@ -64,6 +75,16 @@ export default function FinancialPage() {
           <h2>Get Your Free Term Life Quote</h2>
           <p>
             As a licensed Primerica agent, I provide no-obligation term life insurance quotes to protect your family's future during the years that matter most.
+=======
+          <p>Helping you build wealth, protect your legacy, and declare your worth.</p>
+        </header>
+
+        <section className="insurance-cta">
+          <h2>Get Your Free Life Insurance Quote</h2>
+          <p>
+            As a licensed financial professional with Primerica, I provide
+            no-obligation quotes tailored to your family’s goals and budget.
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
           </p>
           <a
             href="https://tidycal.com/danideclaresns/15-minute-insurance"
@@ -74,6 +95,7 @@ export default function FinancialPage() {
             Book Your Insurance Consult
           </a>
         </section>
+<<<<<<< HEAD
 
         <section className="extra-info text-center">
           <p className="text-base mb-2">
@@ -102,6 +124,8 @@ export default function FinancialPage() {
             <a href="tel:+18643265362">(864) 326-5362</a>
           </p>
         </section>
+=======
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
       </main>
     </>
   );

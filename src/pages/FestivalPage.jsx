@@ -20,6 +20,18 @@ import DamlaSelen from "../assets/festival-images/pexels-damla-selen-demir-42913
 import FangLiu from "../assets/festival-images/pexels-fang-liu-1996637-3617724 - Copy.jpg";
 import RahulP from "../assets/festival-images/pexels-rahulp9800-7627169.jpg";
 
+// Import festival images (place these files in src/assets/festival/)
+import FacePaintMamaDaughter from "../assets/festival/istockphoto-147288826-612x612.webp";
+import TugOfWar from "../assets/festival/istockphoto-1048325338-612x612.webp";
+import FamilyFunCarnival from "../assets/festival/istockphoto-1266364936-612x612.jpg";
+import SmilingFamily from "../assets/festival/istockphoto-1495159969-612x612.webp";
+import ParkFamily from "../assets/festival/istockphoto-2164186356-612x612.webp";
+import KidEntrepreneur1 from "../assets/festival/kid entrepenuer 1.jpg";
+import KidEntrepreneur2 from "../assets/festival/kid entrepenuer 2.jpg";
+import KidEntrepreneur4 from "../assets/festival/kid entrepenuer 4.jpg";
+import LemonadeStand from "../assets/festival/kid entreprenuer 7.jpg";
+import KidPhotographer from "../assets/festival/pexels-photo-7551751.jpeg";
+import Teamwork from "../assets/festival/pexels-photo-7590860.jpeg"; // renamed example
 
 export default function FestivalPage() {
   return (

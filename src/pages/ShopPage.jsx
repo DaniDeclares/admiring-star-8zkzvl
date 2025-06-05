@@ -1,4 +1,5 @@
 import React from "react";
+<<<<<<< HEAD
 import "./ShopPage.css";
 
 // Product list for Dani Declares — update image filenames if needed!
@@ -94,6 +95,84 @@ const PRODUCTS = [
     desc: "Premium garment-dyed tee, soft-washed and comfortable. Minimal Dani Declares logo on the chest.",
     image: "/images/products/unisex-garment-dyed-tshirt.jpg",
   },
+=======
+
+// styles
+import "./ShopPage.css";
+
+// Product data with Snipcart integration
+const PRODUCTS = [
+  {
+    id: "1970d7cc838",
+    name: "License to Dad Mug",
+    price: 14.99,
+    desc: "Durable ceramic mug with 'License to Dad' design. Dishwasher & microwave safe. 11oz.",
+    image: "/images/products/1970d7cc838 (3).jpg",
+  },
+  {
+    id: "1970d7cc838-white",
+    name: "Witnessed By Dad Tee (White)",
+    price: 19.99,
+    desc: "Gildan 5000 tee. 'Witnessed By Dad' design on white cotton.",
+    image: "/images/products/1970d7cc838 (5).jpg",
+  },
+  {
+    id: "1970d7cc838-maroon",
+    name: "Witnessed By Dad Tee (Maroon)",
+    price: 19.99,
+    desc: "Gildan 5000 tee. 'Witnessed By Dad' design on maroon.",
+    image: "/images/products/1970d7cc838 (2).jpg",
+  },
+  {
+    id: "1970d7cc838-red",
+    name: "Witnessed By Dad Tee (Red)",
+    price: 19.99,
+    desc: "Gildan 5000 tee. 'Witnessed By Dad' design on red.",
+    image: "/images/products/1970d7cc838 (7).jpg",
+  },
+  {
+    id: "1970d7cc838-darkgray",
+    name: "Witnessed By Dad Tee (Dark Gray)",
+    price: 19.99,
+    desc: "Gildan 5000 tee. 'Witnessed By Dad' design on dark gray.",
+    image: "/images/products/1970d7cc838 (9).jpg",
+  },
+  {
+    id: "1970d7cc838-gray",
+    name: "Witnessed By Dad Tee (Gray)",
+    price: 19.99,
+    desc: "Gildan 5000 tee. 'Witnessed By Dad' design on gray.",
+    image: "/images/products/1970d7cc838 (6).jpg",
+  },
+  {
+    id: "1970d7cc838-lightgray",
+    name: "Witnessed By Dad Tee (Light Gray)",
+    price: 19.99,
+    desc: "Gildan 5000 tee. 'Witnessed By Dad' design on light gray.",
+    image: "/images/products/1970d7cc838 (4).jpg",
+  },
+  {
+    id: "1970d7cc838-sand",
+    name: "Witnessed By Dad Tee (Sand)",
+    price: 19.99,
+    desc: "Gildan 5000 tee. 'Witnessed By Dad' design on sand.",
+    image: "/images/products/1970d7cc838 (8).jpg",
+  },
+  {
+    id: "1970d7cc838-sleeve",
+    name: "Official Dad Documents Only Laptop Sleeve",
+    price: 24.99,
+    desc: "Protect your laptop in style. Soft interior, durable exterior.",
+    image: "/images/products/1970d7cc838 (1).jpg",
+  },
+  {
+    id: "1970d7cc838-tote",
+    name: "Official Dad Documents Only Tote Bag",
+    price: 17.99,
+    desc: "Sturdy cotton tote bag for all your dad documents.",
+    image: "/images/products/1970d7cc838 (10).jpg",
+  }
+>>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 ];
 
 export default function ShopPage() {
