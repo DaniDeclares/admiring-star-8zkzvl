@@ -1,129 +1,72 @@
-import React from "react";
-import "./ShopPage.css";
+/* src/pages/EventsPage.css */
 
-// Dani Declares Merch — update image filenames to match /public/images/products/
-const PRODUCTS = [
-  {
-    id: "cheaper-to-keep-dad-mug",
-    name: "Cheaper to Keep Dad Mug",
-    price: 14.99,
-    desc: "Classic white ceramic mug. Bold 'It's Cheaper to Keep Dad — Estimated: 1983' graphic in deep green. Dishwasher & microwave safe. 11oz.",
-    image: "/images/products/cheaper-to-keep-dad-mug.jpg", // Replace with actual filename!
-  },
-  {
-    id: "signed-sealed-dadlivered-glass-mug",
-    name: "Signed. Sealed. Dad-livered. Glass Mug",
-    price: 17.99,
-    desc: "Crystal clear glass mug with 'Signed. Sealed. Dad-livered.' wraparound print. Sturdy and gift-ready for Dad.",
-    image: "/images/products/signed-sealed-dadlivered-glass-mug.jpg",
-  },
-  {
-    id: "license-to-dad-mug",
-    name: "License to Dad Mug",
-    price: 14.99,
-    desc: "Ceramic mug featuring gold 'License to Dad — Authorized to Dad Anywhere in the Continental US' design.",
-    image: "/images/products/license-to-dad-mug.jpg",
-  },
-  {
-    id: "license-to-dad-beach-towel",
-    name: "License to Dad Beach Towel",
-    price: 34.99,
-    desc: "Soft, oversized towel with gold shades and 'License to Dad — Authorized to Dad Anywhere in the Continental US.'",
-    image: "/images/products/license-to-dad-beach-towel.jpg",
-  },
-  {
-    id: "cheaper-to-keep-dad-beach-towel",
-    name: "Cheaper to Keep Dad Beach Towel",
-    price: 34.99,
-    desc: "Plush beach towel with 'It's Cheaper to Keep Dad — Estimated: 1983' print in deep green.",
-    image: "/images/products/cheaper-to-keep-dad-beach-towel.jpg",
-  },
-  {
-    id: "official-dad-documents-tote-bag",
-    name: "Official Dad Documents Tote Bag",
-    price: 19.99,
-    desc: "Eco-friendly, sturdy tote bag. Printed with 'Official Dad Documents Only.' Perfect for work, groceries, or dad stuff.",
-    image: "/images/products/official-dad-documents-tote-bag.jpg",
-  },
-  {
-    id: "dad-documents-laptop-sleeve",
-    name: "Dad Documents Laptop Sleeve",
-    price: 24.99,
-    desc: "Protective sleeve for laptops with a fun 'Dad Documents' design. Soft interior, tough exterior.",
-    image: "/images/products/dad-documents-laptop-sleeve.jpg",
-  },
-  {
-    id: "grill-sergeant-beach-towel",
-    name: "Grill Sergeant Beach Towel",
-    price: 34.99,
-    desc: "BBQ-approved! Soft white towel with green 'Grill Sergeant' print. Ideal for summer, picnics, pool, and grilling dads.",
-    image: "/images/products/grill-sergeant-beach-towel.jpg",
-  },
-  {
-    id: "dads-beach-towel-license-to-dad",
-    name: "Dad's Beach Towel (License to Dad)",
-    price: 34.99,
-    desc: "Show off Dad's credentials poolside! White towel with 'License to Dad' and sunglasses print.",
-    image: "/images/products/dads-beach-towel-license-to-dad.jpg",
-  },
-  {
-    id: "desk-mat-coach-counselor-officiant-dad",
-    name: "Desk Mat for Coach Counselor Officiant Dad",
-    price: 29.99,
-    desc: "Large, smooth desk mat with 'Coach. Counselor. Officiant. Dad.' design. Inspiring office accessory.",
-    image: "/images/products/desk-mat-coach-counselor-officiant-dad.jpg",
-  },
-  {
-    id: "heartfelt-dad-unisex-tee",
-    name: "Heartfelt Dad Unisex T-Shirt",
-    price: 24.99,
-    desc: "Ultra-soft, classic fit tee with 'Heartfelt Dad' graphic. Great for Father's Day or everyday family love.",
-    image: "/images/products/heartfelt-dad-unisex-tee.jpg",
-  },
-  {
-    id: "declare-your-worth-tee",
-    name: "Inspirational T-shirt: Declare Your Worth",
-    price: 24.99,
-    desc: "'Declare Your Worth' empowerment tee. Motivational print on breathable cotton, for confident everyday style.",
-    image: "/images/products/declare-your-worth-tee.jpg",
-  },
-  {
-    id: "unisex-garment-dyed-tshirt",
-    name: "Unisex Garment-Dyed T-shirt",
-    price: 22.99,
-    desc: "Premium garment-dyed tee, soft-washed and comfortable. Minimal Dani Declares logo on the chest.",
-    image: "/images/products/unisex-garment-dyed-tshirt.jpg",
-  },
-];
+.events-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  color: #8B1E2E;
+  font-family: "Georgia", serif;
+}
 
-export default function ShopPage() {
-  return (
-    <main className="shop-page">
-      <h1 className="hero-title">Shop Dani Declares</h1>
-      <p className="hero-subtitle">
-        Unique gifts for dads, entrepreneurs, and anyone ready to Declare Their Worth!
-      </p>
-      <div className="product-grid">
-        {PRODUCTS.map((product) => (
-          <div key={product.id} className="product-card">
-            <img src={product.image} alt={product.name} />
-            <h2 className="product-name">{product.name}</h2>
-            <p className="desc">{product.desc}</p>
-            <div className="price">${product.price.toFixed(2)}</div>
-            <button
-              className="snipcart-add-item btn btn--primary"
-              data-item-id={product.id}
-              data-item-price={product.price}
-              data-item-url="/shop"
-              data-item-description={product.desc}
-              data-item-image={product.image}
-              data-item-name={product.name}
-            >
-              Add to Cart
-            </button>
-          </div>
-        ))}
-      </div>
-    </main>
-  );
+.page-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.intro-text {
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+.events-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.event-card {
+  background: #fff;
+  border: 1px solid #E2E2E2;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.event-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #8B1E2E;
+}
+
+.event-meta {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.event-desc {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  color: #333;
+}
+
+.event-btn {
+  display: inline-block;
+  text-decoration: none;
+  background-color: #8B1E2E;
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.event-btn:hover {
+  background-color: #6F1824;
 }

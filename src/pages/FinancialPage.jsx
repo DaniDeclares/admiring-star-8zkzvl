@@ -6,31 +6,31 @@ import "./FinancialPage.css";
 const SERVICES = [
   {
     title: "Term Life Insurance",
-    desc: "Affordable term policies to protect your family’s future. Coverage options range from 10 to 30 years—customized to your needs.",
-  },
-  {
-    title: "Whole Life Insurance",
-    desc: "Permanent coverage that builds cash value over time. Ideal for legacy planning and guaranteed protection.",
-  },
-  {
-    title: "Universal Life Insurance",
-    desc: "Flexible premiums and death benefits with a cash-value component. Adapt your policy as life circumstances change.",
-  },
-  {
-    title: "Final Expense Insurance",
-    desc: "Simplified-issue coverage to handle funeral costs and final bills. No medical exam required—quick approval.",
-  },
-  {
-    title: "Investments & Retirement Planning",
-    desc: "Access to Primerica Mutual Funds, IRAs, 401(k) rollovers, and education savings plans to help grow your wealth tax-efficiently.",
+    desc: "Primerica offers affordable term policies (10–35 years) underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Ideal for families seeking protection during key years.",
   },
   {
     title: "Debt Elimination Strategy",
-    desc: "Personalized action plan to pay off high-interest debts faster using proven budgeting and debt-reduction techniques.",
+    desc: "We’ll create a personalized debt-stacking plan to pay off high-interest obligations in a targeted order—freeing up cash flow for savings and investments.",
   },
   {
     title: "Budget & Cash-Flow Review",
-    desc: "One-on-one session to audit your income, expenses, and savings—identify opportunities to save more and reach your goals.",
+    desc: "One-on-one session to audit your income, expenses, and savings. Identify where you can save more, reduce expenses, and build an emergency fund.",
+  },
+  {
+    title: "Mutual Funds & Retirement Planning",
+    desc: "Access Primerica’s Lifetime Investment Program™: professionally managed portfolios tailored to your goals, time horizon, and risk tolerance. Includes IRAs, 401(k) rollovers, and education savings plans (529).",
+  },
+  {
+    title: "Credit Monitoring & Identity Protection",
+    desc: "Stay on top of your credit score and safeguard against identity theft. Receive alerts and guidance to help maintain a healthy credit profile.",
+  },
+  {
+    title: "Education Savings Plans (529 Plans)",
+    desc: "Plan ahead for college: open and manage a 529 account to grow tax-advantaged savings for your child’s education.",
+  },
+  {
+    title: "Life Insurance Policy Review",
+    desc: "Already have coverage? Let’s review your current policy to ensure it still meets your needs. We’ll compare options and recommend any adjustments.",
   },
 ];
 
@@ -41,14 +41,14 @@ export default function FinancialPage() {
         <title>Financial Empowerment • Dani Declares</title>
         <meta
           name="description"
-          content="Book a free financial consult with Dani to explore life insurance options and legacy-building strategies tailored to your goals."
+          content="Book a free financial consult with Dani to explore Primerica term life insurance, debt elimination, and legacy-building strategies tailored to your goals."
         />
       </Helmet>
 
       <main className="financial-page">
         <header className="financial-hero">
           <h1>Financial Empowerment</h1>
-          <p>Helping you build wealth, protect your legacy, and declare your worth.</p>
+          <p>Helping you build wealth, eliminate debt, and protect your legacy.</p>
         </header>
 
         <section className="services-grid">
@@ -61,10 +61,9 @@ export default function FinancialPage() {
         </section>
 
         <section className="insurance-cta">
-          <h2>Get Your Free Life Insurance Quote</h2>
+          <h2>Get Your Free Term Life Quote</h2>
           <p>
-            As a licensed Primerica Financial Services agent, I offer no-obligation
-            quotes and personalized strategies to ensure your family’s financial security.
+            As a licensed Primerica agent, I provide no-obligation term life insurance quotes to protect your family's future during the years that matter most.
           </p>
           <a
             href="https://tidycal.com/danideclaresns/15-minute-insurance"
@@ -78,16 +77,16 @@ export default function FinancialPage() {
 
         <section className="extra-info text-center">
           <p className="text-base mb-2">
-            Primerica services include:
+            Primerica focuses exclusively on affordable term life insurance. We also offer:
           </p>
           <ul className="info-list">
-            <li>Term, Whole, Universal, and Final Expense Life Insurance</li>
-            <li>Mutual Funds & Retirement Planning (IRAs, 401(k) Rollovers)</li>
-            <li>Education Savings Plans (529 College Savings)</li>
-            <li>Debt Reduction & Budget Planning</li>
+            <li>Debt Elimination & Budget Planning</li>
+            <li>Mutual Funds & Retirement Planning (Lifetime Investment Program™)</li>
+            <li>529 Education Savings Plans</li>
+            <li>Credit Monitoring & Identity Protection</li>
           </ul>
           <p className="text-sm italic">
-            Primerica Financial Services is not a bank. Investments and insurance products are offered through Primerica Financial Services.  
+            Primerica Financial Services is not a bank. Term life insurance is underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Mutual funds are offered through PFS Investments, Inc.  
             Quotes and investment advice provided by Dani Declares, a licensed Primerica agent.
           </p>
         </section>
