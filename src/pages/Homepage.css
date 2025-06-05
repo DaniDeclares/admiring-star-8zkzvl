@@ -1,18 +1,10 @@
-<<<<<<< HEAD
-/* Homepage.css */
-
 /* GENERAL */
 .home-main {
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   color: #222;
-  background: #F8F5F1; /* ivory */
+  background: #F8F5F1;
   margin: 0;
   padding: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
 }
 
 /* HERO SECTION */
@@ -20,36 +12,18 @@ a {
   background-size: cover;
   background-position: center;
   padding: 120px 20px 100px 20px;
-=======
-/* HomePage.css */
-
-.home-main {
-  font-family: 'Inter', sans-serif;
-  color: #222;
-  background-color: #fff;
-}
-
-.hero {
-  background-size: cover;
-  background-position: center;
-  padding: 120px 20px;
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
   text-align: center;
   position: relative;
 }
-
 .hero-overlay {
-<<<<<<< HEAD
-  background-color: rgba(139, 30, 46, 0.70); /* semi-burgundy overlay */
+  background-color: rgba(139, 30, 46, 0.70);
   padding: 60px 20px 40px 20px;
   border-radius: 18px;
-  display: inline-block;
   color: #fff;
   max-width: 700px;
   margin: 0 auto;
   box-shadow: 0 6px 24px rgba(139,30,46,0.07);
 }
-
 .hero h1 {
   font-family: 'Georgia', 'Roboto', serif;
   font-size: 2.8rem;
@@ -58,18 +32,17 @@ a {
   letter-spacing: 2px;
   font-weight: bold;
 }
-
 .hero-subtitle {
   font-size: 1.4rem;
   color: #fffbe9;
   margin-bottom: 2rem;
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
-
 .hero-cta .btn {
   margin: 8px;
 }
 
+/* BUTTONS */
 .btn {
   display: inline-block;
   padding: 14px 30px;
@@ -84,52 +57,18 @@ a {
   transition: background 0.2s, color 0.2s;
   box-shadow: 0 3px 8px rgba(139,30,46,0.08);
 }
-
-.burgundy {
-  background-color: #8B1E2E;
-  color: #fff;
-}
-
-.burgundy:hover {
-  background: #721623;
-  color: #ffd700;
-}
-
-.gold {
-  background: #D4AF37;
-  color: #222;
-}
-
-.gold:hover {
-  background: #ffd700;
-  color: #8B1E2E;
-}
+.burgundy { background-color: #8B1E2E; color: #fff; }
+.burgundy:hover { background: #721623; color: #ffd700; }
 
 /* FESTIVAL BANNER */
-=======
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 60px 20px;
-  border-radius: 10px;
-  display: inline-block;
-  color: #fff;
-}
-
-.hero-cta .btn {
-  margin: 10px;
-}
-
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 .festival-banner {
   background-size: cover;
   background-position: center;
   position: relative;
-<<<<<<< HEAD
   padding: 80px 20px;
   text-align: center;
   color: #fff;
-  margin-bottom: 0;
 }
-
 .festival-overlay {
   background: rgba(139, 30, 46, 0.85);
   padding: 40px 15px 35px 15px;
@@ -138,19 +77,13 @@ a {
   max-width: 650px;
   margin: 0 auto;
 }
-
 .festival-overlay h2 {
   font-family: 'Georgia', 'Roboto', serif;
   color: #FFD700;
   font-size: 2.2rem;
   margin-bottom: 0.3rem;
 }
-
-.festival-countdown {
-  margin: 16px 0 20px 0;
-  color: #fffbe9;
-}
-
+.festival-countdown { margin: 16px 0 20px 0; color: #fffbe9; }
 .early-bird-note {
   color: #FFD700;
   margin-top: 0.6rem;
@@ -164,46 +97,13 @@ a {
   background: #fff;
   text-align: center;
 }
-
-.testimonial-carousel h2 {
-  color: #8B1E2E;
-  margin-bottom: 18px;
-}
-
+.testimonial-carousel h2 { color: #8B1E2E; margin-bottom: 18px; }
 .carousel {
   max-width: 600px;
-=======
-  padding: 100px 20px;
-  text-align: center;
-  color: #fff;
-}
-
-.festival-overlay {
-  background-color: rgba(0, 0, 0, 0.6);
-  padding: 50px;
-  border-radius: 10px;
-}
-
-.early-bird-note {
-  color: #ffd700;
-  margin-top: 0.5rem;
-}
-
-.testimonial-carousel {
-  padding: 60px 20px;
-  background-color: #f9f9f9;
-  text-align: center;
-}
-
-.carousel {
-  max-width: 700px;
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
   margin: 0 auto;
 }
-
 .testimonial-slide {
   font-style: italic;
-<<<<<<< HEAD
   font-size: 1.12rem;
   margin-bottom: 0.8rem;
   min-height: 54px;
@@ -222,12 +122,7 @@ a {
   text-align: center;
   background: #FFF5F7;
 }
-
-.packages h2 {
-  color: #8B1E2E;
-  font-size: 1.7rem;
-}
-
+.packages h2 { color: #8B1E2E; font-size: 1.7rem; }
 .coaching-list {
   list-style-type: none;
   padding: 0;
@@ -235,62 +130,32 @@ a {
   color: #222;
   font-size: 1.14rem;
 }
-
-.coaching-list li {
-  margin-bottom: 8px;
-}
-
+.coaching-list li { margin-bottom: 8px; }
 .coaching-benefits h3 {
   font-size: 1.2rem;
   margin-bottom: 10px;
   color: #D4AF37;
 }
-
 .coaching-benefits ul {
   list-style: none;
   padding: 0;
   margin-bottom: 18px;
 }
-
 .coaching-benefits li {
   margin: 10px 0;
   font-size: 1.05rem;
 }
 
 /* OTHER SERVICES */
-.other-services {
-  background: #f9f9f9;
-  padding: 56px 12px;
-  text-align: center;
-}
-.other-services h2 {
-  color: #8B1E2E;
-=======
-}
-
-.packages {
-  padding: 60px 20px;
-  text-align: center;
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
-}
-
 .packages-grid {
   display: flex;
   flex-wrap: wrap;
-<<<<<<< HEAD
   gap: 24px;
   justify-content: center;
   margin-top: 20px;
-=======
-  justify-content: center;
-  gap: 30px;
-  margin-top: 30px;
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 }
-
 .package-card {
   background: #fff5f7;
-<<<<<<< HEAD
   padding: 28px 18px;
   border-radius: 12px;
   width: 270px;
@@ -300,7 +165,6 @@ a {
   flex-direction: column;
   align-items: center;
 }
-
 .package-card h3 {
   color: #8B1E2E;
   margin-bottom: 10px;
@@ -323,7 +187,7 @@ a {
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
-  .hero, .festival-banner, .packages, .testimonial-carousel, .coaching-contact, .other-services {
+  .hero, .festival-banner, .packages, .testimonial-carousel, .coaching-contact {
     padding-left: 6px;
     padding-right: 6px;
   }
@@ -347,51 +211,4 @@ a {
     min-width: 94vw;
     width: 100%;
   }
-=======
-  padding: 30px;
-  border-radius: 10px;
-  width: 280px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-}
-
-.coaching-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0 0 30px 0;
-}
-
-.coaching-benefits ul {
-  list-style: none;
-  padding: 0;
-}
-
-.coaching-benefits li {
-  margin: 10px 0;
-}
-
-.coaching-contact {
-  text-align: center;
-  padding: 60px 20px;
-  background-color: #f2f2f2;
-}
-
-.btn {
-  display: inline-block;
-  padding: 12px 24px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.burgundy {
-  background-color: #800020;
-  color: #fff;
-}
-
-.burgundy:hover {
-  background-color: #990022;
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 }

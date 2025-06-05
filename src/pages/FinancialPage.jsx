@@ -1,12 +1,7 @@
-<<<<<<< HEAD
-// src/pages/FinancialPage.jsx
-=======
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import "./FinancialPage.css";
 
-<<<<<<< HEAD
 const SERVICES = [
   {
     title: "Term Life Insurance",
@@ -38,8 +33,6 @@ const SERVICES = [
   },
 ];
 
-=======
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 export default function FinancialPage() {
   return (
     <>
@@ -47,18 +40,13 @@ export default function FinancialPage() {
         <title>Financial Empowerment • Dani Declares</title>
         <meta
           name="description"
-<<<<<<< HEAD
           content="Book a free financial consult with Dani to explore Primerica term life insurance, debt elimination, and legacy-building strategies tailored to your goals."
-=======
-          content="Book a free financial consult with Dani to explore life insurance options and legacy-building strategies tailored to your goals."
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
         />
       </Helmet>
 
       <main className="financial-page">
         <header className="financial-hero">
           <h1>Financial Empowerment</h1>
-<<<<<<< HEAD
           <p>Helping you build wealth, eliminate debt, and protect your legacy.</p>
         </header>
 
@@ -71,31 +59,40 @@ export default function FinancialPage() {
           ))}
         </section>
 
+        {/* Payment-first flow for insurance consult */}
         <section className="insurance-cta">
-          <h2>Get Your Free Term Life Quote</h2>
-          <p>
-            As a licensed Primerica agent, I provide no-obligation term life insurance quotes to protect your family's future during the years that matter most.
-=======
-          <p>Helping you build wealth, protect your legacy, and declare your worth.</p>
-        </header>
-
-        <section className="insurance-cta">
-          <h2>Get Your Free Life Insurance Quote</h2>
-          <p>
-            As a licensed financial professional with Primerica, I provide
-            no-obligation quotes tailored to your family’s goals and budget.
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
+          <h2>Book Your Free Insurance Quote</h2>
+          <ol className="cta-flow">
+            <li>
+              <strong>Step 1:</strong>{" "}
+              <a
+                href="https://buy.stripe.com/28E6oGeKldXg71R7X36kg0p"
+                className="btn btn--primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Pay & Secure Your Spot
+              </a>
+            </li>
+            <li style={{ marginTop: "1rem" }}>
+              <strong>Step 2:</strong>{" "}
+              After payment, <b>you’ll be redirected to book your session time</b>.
+              <br />
+              <a
+                href="https://tidycal.com/danideclaresns/15-minute-insurance"
+                className="btn btn--secondary"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ marginTop: 8 }}
+              >
+                Book Your Consult
+              </a>
+            </li>
+          </ol>
+          <p style={{ marginTop: "1.3rem", color: "#888", fontSize: "0.96rem" }}>
+            No-obligation quote from a licensed Primerica agent—customized to your goals and budget.
           </p>
-          <a
-            href="https://tidycal.com/danideclaresns/15-minute-insurance"
-            className="btn btn--primary"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Book Your Insurance Consult
-          </a>
         </section>
-<<<<<<< HEAD
 
         <section className="extra-info text-center">
           <p className="text-base mb-2">
@@ -116,16 +113,12 @@ export default function FinancialPage() {
         <section className="contact-info">
           <h3>Have Questions?</h3>
           <p>
-            Email{" "}
-            <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
+            Email <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
             <br />
-            or call/text{" "}
-            <a href="tel:+14705234892">(470) 523-4892</a> |{" "}
+            or call/text <a href="tel:+14705234892">(470) 523-4892</a> |{" "}
             <a href="tel:+18643265362">(864) 326-5362</a>
           </p>
         </section>
-=======
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
       </main>
     </>
   );

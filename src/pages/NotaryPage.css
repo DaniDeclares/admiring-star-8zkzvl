@@ -1,113 +1,119 @@
-/* NotaryPage.css */
 .notary-page {
   background-color: #F8F5F1;
   padding: 2rem;
   font-family: Montserrat, Arial, sans-serif;
   color: #333;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .hero {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
-
 .hero h1 {
-  font-size: 2.5rem;
+  font-size: 2.3rem;
   color: #8B1E2E;
 }
-
 .hero p {
-  font-size: 1.2rem;
-  margin-top: 1rem;
+  font-size: 1.1rem;
+  margin-top: 0.7rem;
   color: #555;
 }
-
+.hero .highlight {
+  color: #D4AF37;
+  font-weight: 600;
+}
+.hero .feature {
+  color: #8B1E2E;
+  font-weight: 500;
+}
 .services-grid {
   display: grid;
   gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   margin-top: 2rem;
 }
-
 .service-card {
-  background: white;
-  border: 1px solid #D4AF37;
+  background: #fff;
+  border: 1.5px solid #D4AF37;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s;
+  box-shadow: 0 3px 12px rgba(139,30,46,0.07);
   color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
-
-.service-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(139,30,46,0.07), 0 3px 10px rgba(0,0,0,0.05);
-}
-
 .service-card h2 {
   color: #8B1E2E;
-  font-size: 1.3rem;
+  font-size: 1.13rem;
   margin-bottom: 0.5rem;
 }
-
 .service-card .meta {
   font-weight: bold;
   margin-bottom: 0.5rem;
   color: #444;
 }
-
+.service-card .bold {
+  color: #8B1E2E;
+}
 .service-card .desc {
   color: #666;
-  font-size: 0.95rem;
+  font-size: 0.97rem;
   margin-bottom: 1rem;
 }
-
-.btn--book {
+.btn {
   display: inline-block;
-  padding: 0.5rem 1rem;
+  padding: 0.54rem 1.25rem;
+  border-radius: 7px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  margin-top: 0.3rem;
+  margin-bottom: 0.2rem;
+  transition: background-color 0.2s;
+}
+.btn--primary {
+  background-color: #D4AF37;
+  color: #8B1E2E;
+}
+.btn--primary:hover, .btn--primary:focus {
+  background-color: #C0982B;
+  color: #8B1E2E;
+}
+.btn--book {
   background-color: #8B1E2E;
   color: white;
-  text-decoration: none;
-  font-weight: bold;
-  border-radius: 6px;
-  transition: background-color 0.3s;
-  font-size: 1rem;
 }
-
-.btn--book:hover {
+.btn--book:hover, .btn--book:focus {
   background-color: #6e1a25;
+  color: #fff;
 }
-
-.btn--book:focus {
-  outline: 2px solid #D4AF37;
-  outline-offset: 2px;
-}
-
 .extra-info {
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   color: #555;
   font-size: 1rem;
 }
-
+.extra-info .italic {
+  font-style: italic;
+  color: #888;
+}
 .contact-info {
   text-align: center;
   margin-top: 3rem;
 }
-
 .contact-info h3 {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   color: #8B1E2E;
 }
-
 .contact-info p {
   font-size: 1rem;
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
 }
 
-/* Responsive Tweaks for Small Screens */
+/* Responsive */
 @media (max-width: 700px) {
   .notary-page {
     padding: 1rem;
@@ -116,19 +122,12 @@
     padding: 1rem;
   }
   .hero h1 {
-    font-size: 2rem;
+    font-size: 1.6rem;
   }
 }
-
 @media (max-width: 500px) {
   .services-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  .extra-info {
-    font-size: 0.95rem;
-  }
-  .contact-info h3 {
-    font-size: 1.15rem;
+    gap: 1.15rem;
   }
 }

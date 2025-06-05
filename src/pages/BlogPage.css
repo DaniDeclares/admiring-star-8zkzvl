@@ -1,33 +1,122 @@
 .blog-page {
-  max-width: 960px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 3rem 1.2rem 4rem 1.2rem;
+  background: #F8F5F1;
+  min-height: 90vh;
+}
+.blog-title {
+  font-family: Georgia, serif;
+  color: #8B1E2E;
+  text-align: center;
+  margin-bottom: 0.3em;
+  font-size: 2.3rem;
+}
+.blog-tagline {
+  font-family: Montserrat, Arial, Helvetica, sans-serif;
+  text-align: center;
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+  color: #444;
+}
+.blog-mailchimp {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.2rem;
+}
+.blog-mailchimp form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 .blog-grid {
   display: grid;
-  gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  margin-top: 2rem;
+  gap: 2.1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 .blog-card {
   background: #fff5f7;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(139,30,46,0.07);
-  padding: 2rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 14px rgba(139,30,46,0.08);
+  padding: 2rem 1.7rem 2.5rem 1.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 320px;
+}
+.blog-card-title {
+  color: #8B1E2E;
+  font-family: Georgia, serif;
+  font-size: 1.35rem;
+  margin-bottom: 0.25em;
 }
 .blog-meta {
-  font-size: 0.9rem;
-  color: #8B1E2E;
-  margin-bottom: 0.5rem;
+  font-size: 0.93rem;
+  color: #B47A84;
+  margin-bottom: 0.75em;
+  font-family: Montserrat, Arial, Helvetica, sans-serif;
+}
+.blog-summary {
+  font-family: Montserrat, Arial, Helvetica, sans-serif;
+  color: #555;
+  margin-bottom: 1.2em;
 }
 .btn--secondary {
   background: #D4AF37;
   color: #222;
   border-radius: 6px;
-  padding: 0.5rem 1.1rem;
+  padding: 0.57rem 1.25rem;
   text-decoration: none;
   font-weight: bold;
+  border: none;
+  margin-top: auto;
+  transition: background 0.2s, color 0.2s;
+  font-family: Montserrat, Arial, Helvetica, sans-serif;
 }
-.btn--secondary:hover {
+.btn--secondary:hover,
+.btn--secondary:focus {
   background: #b8952c;
+  color: #fff;
+}
+@media (max-width: 700px) {
+  .blog-page {
+    padding: 2.2rem 0.2rem 3rem 0.2rem;
+  }
+  .blog-card {
+    padding: 1.2rem 0.7rem 1.7rem 0.7rem;
+  }
+}
+.blog-post-page {
+  background: #fff5f7;
+  border-radius: 16px;
+  box-shadow: 0 2px 14px rgba(139,30,46,0.08);
+  padding: 2rem 1.5rem 2.2rem 1.5rem;
+  margin: 2rem auto 3rem auto;
+  max-width: 750px;
+}
+
+.blog-post-page .blog-title {
+  font-family: Georgia, serif;
+  font-size: 2.1rem;
+  color: #8B1E2E;
+  margin-bottom: 0.6rem;
+}
+
+.blog-post-page .blog-meta {
+  font-family: Montserrat, Arial, Helvetica, sans-serif;
+  font-size: 0.98rem;
+  color: #B47A84;
+  margin-bottom: 1.5rem;
+}
+
+.blog-content {
+  font-family: Montserrat, Arial, Helvetica, sans-serif;
+  color: #363636;
+  line-height: 1.7;
+}
+
+@media (max-width: 700px) {
+  .blog-post-page {
+    padding: 1.2rem 0.4rem 1.2rem 0.4rem;
+  }
 }

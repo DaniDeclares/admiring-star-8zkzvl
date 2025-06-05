@@ -1,76 +1,3 @@
-<<<<<<< HEAD
-/* src/pages/EventsPage.css */
-
-.events-page {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  color: #8B1E2E;
-  font-family: "Georgia", serif;
-}
-
-.page-title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.intro-text {
-  text-align: center;
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
-  color: #555;
-}
-
-.events-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-}
-
-.event-card {
-  background: #fff;
-  border: 1px solid #E2E2E2;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.event-title {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-  color: #8B1E2E;
-}
-
-.event-meta {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-bottom: 1rem;
-  color: #555;
-}
-
-.event-desc {
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 1.25rem;
-  color: #333;
-}
-
-.event-btn {
-  display: inline-block;
-  text-decoration: none;
-  background-color: #8B1E2E;
-  color: #fff;
-  padding: 0.6rem 1.2rem;
-  border-radius: 4px;
-  font-weight: 600;
-  transition: background 0.3s ease;
-}
-
-.event-btn:hover {
-  background-color: #6F1824;
-=======
 /* src/pages/ShopPage.css */
 .shop-page {
   padding: 2rem;
@@ -98,28 +25,10 @@
   margin-bottom: 2rem;
 }
 
-.stripe-tickets {
-  margin: 2rem 0;
-}
-.stripe-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: center;
-  margin: 2rem 0;
-}
-
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
-}
-
-.shop-products .product-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: center;
 }
 
 .product-card {
@@ -134,40 +43,25 @@
   margin-bottom: 1rem;
 }
 
-.product-name {
+.product-name, .product-title {
   font-family: Georgia, serif;
   color: #8B1E2E;
   margin: 0.5rem 0;
 }
 
-.product-title {
-  color: #8B1E2E;
-  margin-bottom: 0.5rem;
-}
-
-.price {
+.price, .product-price {
   font-family: Montserrat, sans-serif;
   font-weight: bold;
   color: #333;
-  margin: 0.25rem 0;
+  margin: 0.25rem 0 1rem 0;
+  font-size: 1.2rem;
 }
 
-.desc {
+.desc, .product-desc {
   font-family: Montserrat, sans-serif;
   color: #555;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   margin: 0.5rem 0 1rem;
-}
-
-.product-desc {
-  color: #555;
-  margin-bottom: 1rem;
-}
-
-.product-price {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
 }
 
 .btn {
@@ -188,8 +82,8 @@
 .btn--secondary:hover, .btn--secondary:focus { background: #e0a800; color: #222; }
 
 @media (max-width: 900px) {
-  .shop-products .product-list {
-    flex-direction: column;
+  .product-grid {
+    grid-template-columns: 1fr;
     gap: 1.2rem;
   }
   .product-card {
@@ -197,5 +91,4 @@
     min-width: 0;
     padding: 1.2rem 0.7rem;
   }
->>>>>>> 64b40dc7b9889077ee874c87a365fe2330bda43f
 }

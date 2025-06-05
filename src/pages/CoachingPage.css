@@ -1,5 +1,3 @@
-/* CoachingPage.css */
-
 .coaching-page {
   font-family: 'Raleway', sans-serif;
   padding: 2rem;
@@ -43,21 +41,17 @@
   background-color: #8B1E2E;
   color: #fff;
 }
-
 .btn--primary:hover {
   background-color: #a62c3b;
 }
-
 .btn--book {
   background-color: #f7c873;
   color: #8B1E2E;
   margin-left: 0.5rem;
 }
-
 .btn--book:hover {
   background-color: #ffe0a3;
 }
-
 .btn.disabled,
 .package-card .btn.disabled {
   background-color: #ccc;
@@ -101,13 +95,11 @@
   margin: 0 auto;
   text-align: left;
 }
-
 .testimonial-slide p,
 .carousel-item p {
   font-style: italic;
   color: #555;
 }
-
 .testimonial-slide span,
 .carousel-item span {
   display: block;
@@ -119,20 +111,17 @@
 .packages {
   margin-bottom: 3rem;
 }
-
 .packages h2 {
   text-align: center;
   font-size: 2rem;
   margin-bottom: 2rem;
 }
-
 .packages-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
   justify-content: center;
 }
-
 .package-card {
   background: #fff;
   border-radius: 12px;
@@ -141,15 +130,23 @@
   width: 300px;
   text-align: center;
 }
-
 .package-card h3 {
   color: #8B1E2E;
   margin-bottom: 0.5rem;
 }
-
 .package-card .meta {
   color: #666;
   margin-bottom: 1rem;
+}
+/* SCHEDULING NOTE STYLE */
+.schedule-note {
+  background: #fffbe8;
+  color: #8B1E2E;
+  border-radius: 6px;
+  margin-top: 8px;
+  padding: 0.7em 1em;
+  font-size: 0.97em;
+  border-left: 4px solid #D4AF37;
 }
 
 .benefits {
@@ -159,13 +156,11 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   margin-bottom: 3rem;
 }
-
 .benefits h2 {
   text-align: center;
   color: #8B1E2E;
   margin-bottom: 1rem;
 }
-
 .benefits ul {
   list-style: none;
   padding: 0;
@@ -173,7 +168,6 @@
   margin: 0 auto;
   text-align: left;
 }
-
 .benefits li {
   background: url("../assets/icons/checkmark.svg") no-repeat left center;
   background-size: 20px;
@@ -209,14 +203,7 @@
   margin-bottom: 0.5rem;
 }
 
-/* New styles for coaching session page */
-.page.coaching-page {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 2rem 1rem 3rem 1rem;
-  background: #fff;
-}
-
+/* Section for Power Coaching Session */
 .coaching-session {
   background: #f9f3f5;
   border-radius: 1rem;
@@ -224,7 +211,6 @@
   margin: 2rem 0;
   text-align: center;
 }
-
 .coaching-session h2 {
   color: #8B1E2E;
   margin-bottom: 0.5rem;
@@ -234,24 +220,6 @@
   margin-bottom: 1.2rem;
 }
 
-.btn {
-  background: #8B1E2E;
-  color: #fff;
-  border: none;
-  border-radius: 0.7rem;
-  padding: 0.7rem 1.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  margin-top: 0.5rem;
-  transition: background 0.2s;
-}
-.btn:hover, .btn:focus {
-  background: #7d1b29;
-  color: #fff;
-}
-
 /* Responsive */
 @media (max-width: 900px) {
   .packages-grid {
@@ -259,9 +227,8 @@
     align-items: center;
   }
 }
-
 @media (max-width: 600px) {
-  .page.coaching-page {
+  .coaching-page {
     padding: 1rem 0.2rem 2rem 0.2rem;
   }
   .coaching-session {
