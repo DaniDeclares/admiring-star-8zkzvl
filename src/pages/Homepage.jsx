@@ -35,13 +35,11 @@ const testimonials = [
 
 function CountdownTimer() {
   const festivalDate = new Date("2025-07-28T09:00:00-04:00");
-
   const renderer = ({ days, hours, minutes, seconds }) => (
     <div>
       {days}d {hours}h {minutes}m {seconds}s
     </div>
   );
-
   return (
     <div className="festival-countdown">
       <h3>Declare Your Worth Festival starts in:</h3>
@@ -52,7 +50,6 @@ function CountdownTimer() {
 
 export default function Homepage() {
   const [testimonialIdx, setTestimonialIdx] = useState(0);
-
   useEffect(() => {
     const interval = setInterval(() => {
       setTestimonialIdx((idx) => (idx + 1) % testimonials.length);
@@ -69,13 +66,12 @@ export default function Homepage() {
           content="Coaching, Events, and Financial services designed for women who know their worth. Book, shop, or declare it today."
         />
       </Helmet>
-
       <main className="homepage home-main">
         {/* HERO */}
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="hero-overlay">
             <h1>Declare Your Worth</h1>
-            <p>Life Coaching. Celebrations. Financial Empowerment.</p>
+            <p className="hero-subtitle">Life Coaching. Celebrations. Financial Empowerment.</p>
             <div className="hero-cta">
               <Link to="/coaching" className="btn burgundy">Start Your Learning Journey</Link>
               <Link to="/financial" className="btn burgundy">Get a Free Quote</Link>
@@ -83,7 +79,6 @@ export default function Homepage() {
             </div>
           </div>
         </section>
-
         {/* FESTIVAL PROMO */}
         <section className="festival-banner" style={{ backgroundImage: `url(${eventBackground})` }}>
           <div className="festival-overlay">
@@ -94,18 +89,16 @@ export default function Homepage() {
             <p className="early-bird-note">Early Bird pricing ends soon!</p>
           </div>
         </section>
-
         {/* TESTIMONIAL CAROUSEL */}
         <section className="testimonial-carousel">
           <h2>Client Breakthroughs</h2>
           <div className="carousel">
-            <div className="testimonial-slide" style={{ minWidth: "100%" }}>
+            <div className="testimonial-slide">
               <p>“{testimonials[testimonialIdx].quote}”</p>
               <span>— {testimonials[testimonialIdx].author}</span>
             </div>
           </div>
         </section>
-
         {/* COACHING PACKAGES */}
         <section className="packages">
           <h2>Your Coaching Options</h2>
@@ -125,7 +118,6 @@ export default function Homepage() {
           </div>
           <Link to="/coaching" className="btn burgundy">Start Your Learning Journey Today</Link>
         </section>
-
         {/* OTHER SERVICES */}
         <section className="packages">
           <h2>More Ways to Work With Dani</h2>
@@ -153,7 +145,6 @@ export default function Homepage() {
             </div>
           </div>
         </section>
-
         {/* CONTACT CTA */}
         <section className="coaching-contact">
           <h2>Still Have Questions?</h2>
