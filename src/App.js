@@ -15,8 +15,9 @@ import NotaryPage from "./pages/NotaryPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import FinancialPage from "./pages/FinancialPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
+import BlogPostPage from "./pages/BlogPostPage.jsx";  // ← ADD THIS LINE
 import ShopPage from "./pages/ShopPage.jsx";
-import FestivalPage from "./pages/FestivalPage.jsx";  // ← import FestivalPage
+import FestivalPage from "./pages/FestivalPage.jsx";
 
 export default function App() {
   return (
@@ -33,7 +34,8 @@ export default function App() {
         <Route path="/notary" element={<NotaryPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/blog" element={<BlogPage />} />
-        <Route path="/festival" element={<FestivalPage />} />  {/* ← add this line */}
+        <Route path="/blog/:slug" element={<BlogPostPage />} />  {/* ← NEW BLOG POST ROUTE */}
+        <Route path="/festival" element={<FestivalPage />} />
       </Routes>
       <SocialLinks />
       <CookieConsent />
