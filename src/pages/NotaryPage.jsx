@@ -67,3 +67,35 @@ export default function NotaryPage() {
             <h2>{service.title}</h2>
             <p className="meta">
               {service.duration} &nbsp;•&nbsp; <span className="font-bold">{service.price}</span>
+            </p>
+            <p className="desc">{service.desc}</p>
+            <a
+              href="https://tidycal.com/danideclaresns"
+              className="btn btn--book"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book Now
+            </a>
+          </div>
+        ))}
+      </section>
+
+      <section className="extra-info text-center mt-8">
+        <p className="text-base mb-2">
+          <strong>Travel outside Dunwoody/Perimeter:</strong> +$1/mile • Bulk & business discounts available.<br />
+          <span className="italic">All major cards & cash accepted. Rush, same-day, or after-hours available on request.</span>
+        </p>
+      </section>
+
+      <section className="contact-info mt-8">
+        <h3>Have Questions?</h3>
+        <p>
+          Email <a href="mailto:danideclaresns@gmail.com">danideclaresns@gmail.com</a>
+          <br />
+          or call/text <a href="tel:+14705324892">(470) 523-4892</a>
+        </p>
+      </section>
+    </main>
+  );
+}

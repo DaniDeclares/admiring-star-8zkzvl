@@ -86,3 +86,49 @@
 }
 
 .extra-info {
+  text-align: center;
+  margin-top: 2rem;
+  color: #555;
+  font-size: 1rem;
+}
+
+.contact-info {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.contact-info h3 {
+  font-size: 1.4rem;
+  color: #8B1E2E;
+}
+
+.contact-info p {
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Responsive Tweaks for Small Screens */
+@media (max-width: 700px) {
+  .notary-page {
+    padding: 1rem;
+  }
+  .service-card {
+    padding: 1rem;
+  }
+  .hero h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .extra-info {
+    font-size: 0.95rem;
+  }
+  .contact-info h3 {
+    font-size: 1.15rem;
+  }
+}
