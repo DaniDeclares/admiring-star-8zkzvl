@@ -1,0 +1,279 @@
+/* Homepage.css */
+
+/* GENERAL */
+.home-main {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  color: #222;
+  background: #F8F5F1; /* ivory */
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* HERO SECTION */
+.hero {
+  background-size: cover;
+  background-position: center;
+  padding: 120px 20px 100px 20px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-overlay {
+  background-color: rgba(139, 30, 46, 0.70); /* semi-burgundy overlay */
+  padding: 60px 20px 40px 20px;
+  border-radius: 18px;
+  display: inline-block;
+  color: #fff;
+  max-width: 700px;
+  margin: 0 auto;
+  box-shadow: 0 6px 24px rgba(139,30,46,0.07);
+}
+
+.hero h1 {
+  font-family: 'Georgia', 'Roboto', serif;
+  font-size: 2.8rem;
+  margin-bottom: 0.5rem;
+  color: #FFD700;
+  letter-spacing: 2px;
+  font-weight: bold;
+}
+
+.hero-subtitle {
+  font-size: 1.4rem;
+  color: #fffbe9;
+  margin-bottom: 2rem;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+.hero-cta .btn {
+  margin: 8px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 14px 30px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  margin: 4px 0;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 3px 8px rgba(139,30,46,0.08);
+}
+
+.burgundy {
+  background-color: #8B1E2E;
+  color: #fff;
+}
+
+.burgundy:hover {
+  background: #721623;
+  color: #ffd700;
+}
+
+.gold {
+  background: #D4AF37;
+  color: #222;
+}
+
+.gold:hover {
+  background: #ffd700;
+  color: #8B1E2E;
+}
+
+/* FESTIVAL BANNER */
+.festival-banner {
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  padding: 80px 20px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 0;
+}
+
+.festival-overlay {
+  background: rgba(139, 30, 46, 0.85);
+  padding: 40px 15px 35px 15px;
+  border-radius: 14px;
+  display: inline-block;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.festival-overlay h2 {
+  font-family: 'Georgia', 'Roboto', serif;
+  color: #FFD700;
+  font-size: 2.2rem;
+  margin-bottom: 0.3rem;
+}
+
+.festival-countdown {
+  margin: 16px 0 20px 0;
+  color: #fffbe9;
+}
+
+.early-bird-note {
+  color: #FFD700;
+  margin-top: 0.6rem;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+/* TESTIMONIALS */
+.testimonial-carousel {
+  padding: 54px 16px;
+  background: #fff;
+  text-align: center;
+}
+
+.testimonial-carousel h2 {
+  color: #8B1E2E;
+  margin-bottom: 18px;
+}
+
+.carousel {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.testimonial-slide {
+  font-style: italic;
+  font-size: 1.12rem;
+  margin-bottom: 0.8rem;
+  min-height: 54px;
+  color: #333;
+}
+.testimonial-slide span {
+  display: block;
+  font-size: 0.96rem;
+  color: #8B1E2E;
+  margin-top: 0.3rem;
+}
+
+/* COACHING PACKAGES */
+.packages {
+  padding: 58px 14px;
+  text-align: center;
+  background: #FFF5F7;
+}
+
+.packages h2 {
+  color: #8B1E2E;
+  font-size: 1.7rem;
+}
+
+.coaching-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 18px 0;
+  color: #222;
+  font-size: 1.14rem;
+}
+
+.coaching-list li {
+  margin-bottom: 8px;
+}
+
+.coaching-benefits h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #D4AF37;
+}
+
+.coaching-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 18px;
+}
+
+.coaching-benefits li {
+  margin: 10px 0;
+  font-size: 1.05rem;
+}
+
+/* OTHER SERVICES */
+.other-services {
+  background: #f9f9f9;
+  padding: 56px 12px;
+  text-align: center;
+}
+.other-services h2 {
+  color: #8B1E2E;
+}
+
+.packages-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.package-card {
+  background: #fff5f7;
+  padding: 28px 18px;
+  border-radius: 12px;
+  width: 270px;
+  min-height: 168px;
+  box-shadow: 0 0 10px rgba(139,30,46,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.package-card h3 {
+  color: #8B1E2E;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+/* CONTACT SECTION */
+.coaching-contact {
+  text-align: center;
+  padding: 54px 10px 48px 10px;
+  background: #f2f2f2;
+}
+.coaching-contact h2 {
+  color: #8B1E2E;
+  margin-bottom: 10px;
+}
+.coaching-contact p {
+  margin-bottom: 18px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .hero, .festival-banner, .packages, .testimonial-carousel, .coaching-contact, .other-services {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .packages-grid, .package-card {
+    flex-direction: column;
+    width: 100%;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-overlay, .festival-overlay {
+    padding: 30px 7px;
+    border-radius: 10px;
+  }
+  .hero h1, .festival-overlay h2 {
+    font-size: 2rem;
+  }
+  .package-card {
+    padding: 18px 7px;
+    min-width: 94vw;
+    width: 100%;
+  }
+}

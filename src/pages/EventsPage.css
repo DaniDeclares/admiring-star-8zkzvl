@@ -1,0 +1,82 @@
+.events-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem 1rem;
+  background: #fff;
+}
+
+.events-page h1 {
+  text-align: center;
+  color: #8B1E2E;
+  margin-bottom: 1.5rem;
+}
+
+.events-page .intro {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.event-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.event-card {
+  background: #f9f3f5;
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  min-width: 240px;
+  max-width: 340px;
+  flex: 1 1 260px;
+  box-shadow: 0 2px 8px rgba(139,30,46,0.07);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.event-card h2 {
+  color: #8B1E2E;
+  margin-bottom: 0.5rem;
+}
+.event-card .date {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+.event-card .desc {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  background: #8B1E2E;
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0.5rem 0.25rem;
+  transition: background 0.2s;
+}
+.btn--primary { background: #8B1E2E; }
+.btn--secondary { background: #f7b731; color: #222; }
+.btn--secondary:hover, .btn--secondary:focus { background: #e0a800; color: #222; }
+.btn--tertiary { background: #e0e0e0; color: #8B1E2E; }
+.btn--tertiary:hover, .btn--tertiary:focus { background: #d1d1d1; color: #8B1E2E; }
+
+@media (max-width: 900px) {
+  .event-grid {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .event-card {
+    max-width: 98vw;
+    min-width: 0;
+    padding: 1.2rem 0.7rem;
+  }
+}

@@ -1,0 +1,90 @@
+.navbar {
+  background: #fff;
+  border-bottom: 2px solid #D4AF37;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Montserrat', sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-logo {
+  height: 40px;
+}
+
+.hamburger {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+  color: #8B1E2E;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #333;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: #8B1E2E;
+}
+
+.cart-link {
+  position: relative;
+  color: #8B1E2E;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.75rem;
+  background: #D4AF37;
+  color: #000;
+  border-radius: 50%;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .navbar-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: #fff;
+    padding: 1rem;
+    display: none;
+  }
+
+  .navbar-links.open {
+    display: flex;
+  }
+
+  .nav-link {
+    margin: 0.5rem 0;
+  }
+
+.nav-link.active {
+  font-weight: bold;
+  color: #D4AF37; /* Dani Declares gold accent */
+}
+
+}
