@@ -59,38 +59,24 @@ export default function FinancialPage() {
           ))}
         </section>
 
-        {/* Payment-first flow for insurance consult */}
+        {/* Direct, no-payment booking CTA */}
         <section className="insurance-cta">
-          <h2>Book Your Free Insurance Quote</h2>
-          <ol className="cta-flow">
-            <li>
-              <strong>Step 1:</strong>{" "}
-              <a
-                href="https://buy.stripe.com/28E6oGeKldXg71R7X36kg0p"
-                className="btn btn--primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pay & Secure Your Spot
-              </a>
-            </li>
-            <li style={{ marginTop: "1rem" }}>
-              <strong>Step 2:</strong>{" "}
-              After payment, <b>you’ll be redirected to book your session time</b>.
-              <br />
-              <a
-                href="https://tidycal.com/danideclaresns/15-minute-insurance"
-                className="btn btn--secondary"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ marginTop: 8 }}
-              >
-                Book Your Consult
-              </a>
-            </li>
-          </ol>
-          <p style={{ marginTop: "1.3rem", color: "#888", fontSize: "0.96rem" }}>
-            No-obligation quote from a licensed Primerica agent—customized to your goals and budget.
+          <h2>Book Your Free Financial Quote</h2>
+          <p>
+            Get a custom plan or insurance quote—no payment required. <br />
+            <strong>Click below to book your free 15-minute session:</strong>
+          </p>
+          <a
+            href="https://tidycal.com/danideclaresns/15-minute-meeting"
+            className="btn btn--primary"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ marginTop: 20, marginBottom: 16, display: "inline-block" }}
+          >
+            Book Free 15-Minute Consult
+          </a>
+          <p style={{ color: "#888", fontSize: "0.96rem" }}>
+            No sales pressure—just honest advice for your family’s financial security.
           </p>
         </section>
 
@@ -105,7 +91,7 @@ export default function FinancialPage() {
             <li>Credit Monitoring & Identity Protection</li>
           </ul>
           <p className="text-sm italic">
-            Primerica Financial Services is not a bank. Term life insurance is underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Mutual funds are offered through PFS Investments, Inc.  
+            Primerica Financial Services is not a bank. Term life insurance is underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Mutual funds are offered through PFS Investments, Inc.<br/>
             Quotes and investment advice provided by Dani Declares, a licensed Primerica agent.
           </p>
         </section>
