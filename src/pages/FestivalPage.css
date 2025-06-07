@@ -1,47 +1,60 @@
+/* src/pages/FestivalPage.css — Dani Declares Festival Brand */
+
 .festival-page {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem 1rem 3rem 1rem;
-  background: #fff;
+  padding: 2.2rem 1rem 3.2rem 1rem;
+  background: #F8F5F1;  /* Ivory for premium, festive energy */
 }
 
 .festival-hero {
   background-size: cover;
   background-position: center;
-  padding: 120px 20px 60px 20px;
+  padding: 90px 20px 50px 20px; /* Slightly reduced for a cleaner hero */
   text-align: center;
   position: relative;
 }
 .festival-hero-overlay {
-  background: rgba(139, 30, 46, 0.68);
-  padding: 50px 20px;
-  border-radius: 12px;
+  background: rgba(139, 30, 46, 0.73); /* Richer burgundy overlay for contrast */
+  padding: 42px 20px;
+  border-radius: 18px;
   display: inline-block;
   color: #fff;
   margin: 0 auto;
+  max-width: 700px;
+  box-shadow: 0 6px 24px rgba(139,30,46,0.10);
 }
 
 .festival-overview {
-  background: #f9f3f5;
-  border-radius: 1rem;
-  padding: 2rem 1.5rem;
-  margin-bottom: 2rem;
+  background: #fff;
+  border-radius: 1.1rem;
+  padding: 2.1rem 1.7rem;
+  margin-bottom: 2.2rem;
   text-align: center;
+  box-shadow: 0 2px 10px rgba(212,175,55,0.07);
 }
-.festival-page h1, .festival-page h2 {
+
+.festival-page h1,
+.festival-page h2 {
   text-align: center;
   color: #8B1E2E;
-  font-family: Georgia, serif;
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.2px;
+  font-weight: bold;
+  text-shadow: 0 2px 12px #f9e7e7;
 }
 .festival-page h3 {
   color: #8B1E2E;
-  font-family: Merriweather, Georgia, serif;
+  font-family: 'Merriweather', Georgia, serif;
 }
-.festival-page p, .festival-overview p {
-  font-size: 1.1rem;
+.festival-page p,
+.festival-overview p {
+  font-size: 1.13rem;
   margin-bottom: 2rem;
-  color: #333;
+  color: #353535;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
+
 .festival-images-grid,
 .kid-images-grid,
 .workshop-images-grid {
@@ -49,16 +62,18 @@
   gap: 1.3rem;
   flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.4rem;
 }
 .festival-images-grid img,
 .kid-images-grid img,
 .workshop-images-grid img {
-  width: 110px;
-  height: 110px;
+  width: 115px;
+  height: 115px;
   object-fit: cover;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(139,30,46,0.09);
+  border-radius: 1.1rem;
+  box-shadow: 0 2px 10px rgba(139,30,46,0.10);
+  border: 2.5px solid #D4AF37;
+  background: #fff;
 }
 @media (max-width: 700px) {
   .festival-images-grid img,
@@ -72,7 +87,7 @@
 .schedule-card {
   background: #fff;
   border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(139,30,46,0.05);
+  box-shadow: 0 2px 10px rgba(139,30,46,0.07);
   padding: 1.5rem 1rem;
   margin-bottom: 2rem;
 }
@@ -80,6 +95,7 @@
   list-style: disc;
   margin: 0 0 1.2rem 1.1rem;
   color: #555;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
 .vendor-grid {
@@ -92,12 +108,18 @@
 .vendor-card {
   background: #fff;
   border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(139,30,46,0.07);
-  padding: 1.5rem 1rem;
+  box-shadow: 0 2px 10px rgba(139,30,46,0.08);
+  padding: 1.5rem 1.1rem;
   min-width: 240px;
   max-width: 340px;
   flex: 1 1 260px;
   text-align: left;
+  border: 1.5px solid #F8F5F1;
+  transition: box-shadow 0.15s, border-color 0.13s;
+}
+.vendor-card:hover {
+  box-shadow: 0 6px 18px rgba(139,30,46,0.16);
+  border-color: #D4AF37;
 }
 
 .vendor-card h3 {
@@ -128,7 +150,8 @@
   background: #f9f3f5;
   border-radius: 1rem;
   padding: 2rem 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.3rem;
+  box-shadow: 0 2px 8px rgba(212,175,55,0.06);
 }
 .faq-item {
   margin-bottom: 1.2rem;
@@ -146,7 +169,8 @@
   text-align: center;
   padding: 2rem 1.5rem 1rem 1.5rem;
   background: #fff5f7;
-  border-radius: 1rem;
+  border-radius: 1.1rem;
+  box-shadow: 0 2px 10px rgba(212,175,55,0.05);
 }
 .festival-cta-buttons {
   display: flex;
@@ -161,17 +185,22 @@
   border: none;
   border-radius: 0.7rem;
   padding: 0.7rem 1.5rem;
-  font-size: 1rem;
+  font-size: 1.07rem;
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
   margin-top: 0.5rem;
   font-family: inherit;
-  font-weight: 500;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: background 0.17s, color 0.16s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(139,30,46,0.07);
 }
-.btn.burgundy, .btn--primary { background: #8B1E2E; }
-.btn.burgundy:hover, .btn--primary:hover { background: #a62c3b; }
+.btn.burgundy,
+.btn--primary { background: #8B1E2E; }
+.btn.burgundy:hover,
+.btn--primary:hover { background: #D4AF37; color: #8B1E2E; }
+.btn--secondary { background: #D4AF37; color: #222; }
+.btn--secondary:hover { background: #b8952c; color: #fff; }
 
 @media (max-width: 900px) {
   .festival-images-grid,

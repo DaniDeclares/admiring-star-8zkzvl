@@ -1,91 +1,66 @@
+// src/components/WeddingsGallery.jsx
 import React from "react";
+import "./WeddingsGallery.css";
 
-// gallery component
-import WeddingsGallery from "../components/WeddingsGallery.jsx";
-import "../components/WeddingsGallery.css";
-
-// page styles
-import "./WeddingsPage.css";
-
-const PACKAGES = [
-  {
-    id: "crowned-in-love",
-    name: "Crowned in Love",
-    price: "$75,000",
-    desc: "Our signature full-service package for elegant events of 150–200 guests.",
-  },
-  {
-    id: "the-opulent-weekend",
-    name: "The Opulent Weekend",
-    price: "$95,000",
-    desc: "3-day luxury experience for up to 100 guests — rehearsal, ceremony, and farewell brunch.",
-  },
-  {
-    id: "eternally-yours",
-    name: "Eternally Yours",
-    price: "Starting at $125,000",
-    desc: "A completely bespoke wedding weekend, crafted exclusively to your vision.",
-  },
+const images = [
+  "barn-ceiling-drapery.jpg",
+  "barn-hanging-glass-orbs.jpg",
+  "BlueChina_Bridesmaids_Fireplace.jpg",
+  "BlueChina_Bride_Silhouette_Window.jpg",
+  "BlueChina_WeddingParty_BlackWhite.jpg",
+  "boho-outdoor-lounge.jpg",
+  "Bride_Mom_Veil_Prep.jpg",
+  "FloralWedding_Couple_GoldChairs.jpg",
+  "FloralWedding_Groomsmen_BlueSuits.jpg",
+  "GoldenWedding_CoupleCloseUp.jpg",
+  "ivory-sofa-lounge.jpg",
+  "LakefrontWedding_BridalGuest_RedDress.jpg",
+  "LakefrontWedding_CeremonySetup.jpg",
+  "LakefrontWedding_Officiant_Podium.jpg",
+  "love-marquee-barn.jpg",
+  "MansionWedding_Bride_Portrait.jpg",
+  "MansionWedding_CoupleOnStairs.jpg",
+  "MansionWedding_FamilyStaircase.jpg",
+  "MansionWedding_FirstLook.jpg",
+  "MansionWedding_Kiss_Umbrella.jpg",
+  "MansionWedding_RingsMiddleFinger.jpg",
+  "MilitaryWedding_AisleWalk.jpg",
+  "MilitaryWedding_FamilyPortrait.jpg",
+  "MilitaryWedding_FirstLook.jpg",
+  "MilitaryWedding_PewMoment.jpg",
+  "MilitaryWedding_WeddingParty.jpg",
+  "MountainBride_CircleArch_Bouquet.jpg",
+  "MountainBride_CircleArch_FacingBouquet.jpg",
+  "MountainBride_CircleArch_HoldingTrain.jpg",
+  "pexels-amar-10288373.jpg",
+  "pexels-dziana-hasanbekava-6401686.jpg",
+  "pexels-panditwiguna-2788491.jpg",
+  "pexels-quang-nguyen-vinh-222549-2175614.jpg",
+  "pexels-rachel-claire-5490145.jpg",
+  "pexels-soner-gorkem-9756539-6119578.jpg",
+  "pexels-ufuk-hambarduzu-2828991-7862462.jpg",
+  "rustic-barn-wedding-reception-with-greenery-on-wooden-table.jpg",
+  "rustic-outdoor-lounge-1.jpg",
+  "rustic-outdoor-lounge-2.jpg",
+  "VintageCar_BrideGroom_BouquetKiss.jpg",
+  "VintageCar_BrideGroom_Kiss.jpg",
+  "WeddingDress_Hanging_Archway.jpg",
+  "wooden-coffee-table.jpg",
 ];
 
-export default function WeddingsPage() {
+export default function WeddingsGallery() {
   return (
-    <main className="page weddings-page">
-      <header className="weddings-hero">
-        <h1>Weddings by Dani Declares</h1>
-        <p>
-          From intimate elopements to grand celebrations—luxury planning
-          tailored to your vision.
-        </p>
-        <a
-          href="https://tidycal.com/danideclaresns/30-minute-meeting?service=wedding"
-          className="btn btn--primary"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Book a Planning Consult
-        </a>
-      </header>
-
-      <section className="package-list">
-        {PACKAGES.map((pkg) => (
-          <div key={pkg.id} className="package-card">
-            <h2>{pkg.name}</h2>
-            <div className="package-price">{pkg.price}</div>
-            <p className="package-desc">{pkg.desc}</p>
-            <a href={`/packages#${pkg.id}`} className="btn btn--secondary">
-              View Details
-            </a>
-          </div>
-        ))}
-      </section>
-
-      <section className="gallery-section">
-        <h2>Our Work</h2>
-        <WeddingsGallery />
-      </section>
-
-      <section className="why-choose">
-        <h2>Why Choose Dani Declares?</h2>
-        <ul>
-          <li>Personalized design & full creative production</li>
-          <li>White-glove concierge & on-site coordination</li>
-          <li>Luxury vendor management & contract negotiation</li>
-          <li>Financial planning consult & custom wedding website</li>
-        </ul>
-      </section>
-
-      <section className="cta-final">
-        <p>Ready to craft your dream wedding?</p>
-        <a
-          href="https://tidycal.com/danideclaresns/30-minute-meeting?service=wedding"
-          className="btn btn--primary"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Schedule Your Consultation
-        </a>
-      </section>
-    </main>
+    <div className="gallery-grid">
+      {images.map((img, i) => (
+        <div className="gallery-img-wrapper" key={i}>
+          <img
+            src={`/images/weddings/${img}`}
+            alt={`Wedding gallery photo ${i + 1}`}
+            className="gallery-img"
+            loading="lazy"
+          />
+        </div>
+      ))}
+    </div>
   );
 }
