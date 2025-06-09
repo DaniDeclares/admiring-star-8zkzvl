@@ -1,6 +1,6 @@
-// src/components/WeddingsGallery.jsx
+// src/components/WeddingsPage.jsx
 import React from "react";
-import "./WeddingsGallery.css";
+import "./WeddingsPage.css";
 
 const images = [
   "barn-ceiling-drapery.jpg",
