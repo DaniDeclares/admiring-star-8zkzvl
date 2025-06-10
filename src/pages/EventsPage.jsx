@@ -110,7 +110,6 @@ Perfect for couples who want a quick, meaningful ceremony without months of plan
     ],
   },
 ];
-
 // FESTIVAL TICKETS, VENDOR, SPONSOR DATA
 const ticketTiers = [
   {
@@ -158,52 +157,117 @@ const vendorOpportunities = [
   },
 ];
 
+// ** EVENT SPONSORSHIPS (Event-only) **
 const sponsorshipPackages = [
   {
     label: "Platinum Partner (Monthly)",
     url: "https://buy.stripe.com/14A5kCfOp3iC85V9176kg08",
-    desc: "Top-tier sponsor with maximum exposure and perks.",
+    price: "$250/month",
+    desc: (
+      <ul className="sponsor-benefits">
+        <li>Top logo placement on all festival banners and main stage</li>
+        <li>Largest booth at every festival (best location!)</li>
+        <li>6 VIP tickets to each festival</li>
+        <li>Exclusive sponsor introduction on-stage and social media</li>
+        <li>Logo and backlink on event website</li>
+        <li>Swag in all attendee bags</li>
+        <li>Priority interviews/press for your business at the event</li>
+      </ul>
+    ),
   },
   {
     label: "Platinum Partner (Yearly)",
     url: "https://buy.stripe.com/00wdR86dP7yS4TJdhn6kg09",
-    desc: "Annual platinum sponsorship for ultimate impact.",
+    price: "$1,000/year",
+    desc: (
+      <ul className="sponsor-benefits">
+        <li>All monthly Platinum perks, plus:</li>
+        <li>Platinum badge on event booth and all festival press releases</li>
+      </ul>
+    ),
   },
   {
     label: "Gold Sponsor (Monthly)",
     url: "https://buy.stripe.com/28E9AS6dP9H04TJ6SZ6kg0a",
-    desc: "Gold-level sponsor with premium recognition.",
+    price: "$100/month",
+    desc: (
+      <ul className="sponsor-benefits">
+        <li>Logo on vendor area banners and select locations</li>
+        <li>4 VIP tickets to each festival</li>
+        <li>Premium booth location</li>
+        <li>Social media sponsor shoutout</li>
+        <li>Logo on festival website</li>
+        <li>Mention in event recap email</li>
+      </ul>
+    ),
   },
   {
     label: "Gold Sponsor (Yearly)",
     url: "https://buy.stripe.com/5kQ7sKgStdXg2LB3GN6kg0b",
-    desc: "Annual gold sponsorship for your brand.",
+    price: "$500/year",
+    desc: (
+      <ul className="sponsor-benefits">
+        <li>All monthly Gold perks for every event, plus:</li>
+        <li>Gold feature in annual event recap</li>
+      </ul>
+    ),
   },
   {
     label: "Bronze Sponsor (Monthly)",
     url: "https://buy.stripe.com/14A8wO45H2eygCrcdj6kg0c",
-    desc: "Bronze-level sponsor with community perks.",
+    price: "$50/month",
+    desc: (
+      <ul className="sponsor-benefits">
+        <li>Logo on community event banners and web page</li>
+        <li>Standard vendor booth at the festival</li>
+        <li>2 general admission tickets</li>
+        <li>Group sponsor thank-you during the event</li>
+      </ul>
+    ),
   },
   {
     label: "Bronze Sponsor (Yearly)",
     url: "https://buy.stripe.com/dRm00i9q1cTcgCr4KR6kg0d",
-    desc: "Annual bronze sponsorship for your business.",
+    price: "$250/year",
+    desc: (
+      <ul className="sponsor-benefits">
+        <li>All Bronze monthly perks at every event for a year</li>
+      </ul>
+    ),
   },
 ];
+
+// ** DANI DECLARES COMPANY SPONSOR (Flagship) **
+const companySponsor = {
+  label: "Dani Declares Company Sponsor",
+  price: "$997/year or $97/month",
+  monthlyUrl: "https://buy.stripe.com/monthly_company_sponsor_link", // UPDATE THESE!
+  yearlyUrl: "https://buy.stripe.com/yearly_company_sponsor_link",  // UPDATE THESE!
+  desc: (
+    <ul className="sponsor-benefits">
+      <li><b>Your brand, products, or services integrated into the “I Do Declare” YouTube Gameshow!</b> (Featured in all wedding giveaway challenges; on-air mentions; backlinks in every episode description; opportunity to give away products in the dream wedding package!)</li>
+      <li><b>Full-page ad + feature in Declare Your Worth Magazine</b> (digital and print reach)</li>
+      <li><b>FREE Notary + Finance Session</b> for you or your business each year ($135 value)</li>
+      <li><b>One Mobile Notary Visit or Apostille, free ($50–$175 value)</b></li>
+      <li><b>Officiant Services for one employee or client’s wedding, free ($150 value)</b></li>
+      <li><b>Company-wide Insurance/Financial Planning Session</b> with our licensed Primerica agent (personal and business)</li>
+      <li><b>Premium vendor booth</b> at every festival + 4 VIP tickets/year</li>
+      <li><b>Logo & backlink</b> on ALL event and company web pages, YouTube, and social</li>
+      <li><b>Monthly sponsor feature</b> in company email blast & social</li>
+      <li><b>First-in-line for special projects, collabs, and event takeovers!</b></li>
+    </ul>
+  ),
+};
 
 export default function EventsPage() {
   return (
     <>
       <Helmet>
         <title>Events • Dani Declares</title>
-        <meta
-          name="description"
-          content="Explore all upcoming pop-ups, social events, ceremonies, and festival opportunities with Dani Declares."
-        />
+        <meta name="description" content="Explore all upcoming pop-ups, social events, ceremonies, and festival opportunities with Dani Declares." />
       </Helmet>
       <main className="events-page">
         <h1>Upcoming Events & Experiences</h1>
-        {/* Regular & Pop-Up Events */}
         <section className="events-list">
           {EVENTS.map((event, idx) => (
             <div key={idx} className="event-card">
@@ -250,12 +314,7 @@ export default function EventsPage() {
               <div key={t.label} className="ticket-card">
                 <h3>{t.label}</h3>
                 <p>{t.desc}</p>
-                <a
-                  href={t.url}
-                  className="btn btn--primary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={t.url} className="btn btn--primary" target="_blank" rel="noopener noreferrer">
                   Buy {t.label}
                 </a>
               </div>
@@ -269,36 +328,64 @@ export default function EventsPage() {
               <div key={v.label} className="vendor-card">
                 <h3>{v.label}</h3>
                 <p>{v.desc}</p>
-                <a
-                  href={v.url}
-                  className="btn btn--secondary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={v.url} className="btn btn--secondary" target="_blank" rel="noopener noreferrer">
                   Apply for {v.label}
                 </a>
               </div>
             ))}
           </div>
         </section>
+
+        {/* --- Festival Sponsorships (EVENT-ONLY) --- */}
         <section className="sponsorship-packages">
-          <h2>Sponsorship Packages</h2>
+          <h2>Festival/Event Sponsorship Packages</h2>
           <div className="sponsor-buttons">
             {sponsorshipPackages.map((s) => (
               <div key={s.label} className="sponsor-card">
                 <h3>{s.label}</h3>
-                <p>{s.desc}</p>
-                <a
-                  href={s.url}
-                  className="btn btn--tertiary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <div className="sponsor-price">{s.price}</div>
+                <div>{s.desc}</div>
+                <a href={s.url} className="btn btn--primary" target="_blank" rel="noopener noreferrer">
                   Sponsor: {s.label}
                 </a>
               </div>
             ))}
           </div>
+        </section>
+
+        {/* --- COMPANY SPONSOR PACKAGE (FLAGSHIP) --- */}
+        <section className="company-sponsor-package">
+          <h2 style={{textAlign: "center", color: "#8B1E2E", marginTop: "3rem"}}>Dani Declares Company Sponsor</h2>
+          <div className="sponsor-card" style={{margin: "2rem auto", maxWidth: 600}}>
+            <h3>Annual Company Sponsor</h3>
+            <div className="sponsor-price">{companySponsor.price}</div>
+            <div>{companySponsor.desc}</div>
+            <div className="sponsor-actions" style={{display: "flex", gap: 18}}>
+              <a
+                href={companySponsor.monthlyUrl}
+                className="btn btn--primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Sponsor Monthly
+              </a>
+              <a
+                href={companySponsor.yearlyUrl}
+                className="btn btn--secondary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Sponsor Yearly
+              </a>
+            </div>
+          </div>
+        </section>
+        <section className="sponsor-comparison">
+          <h3>What’s the Difference?</h3>
+          <ul>
+            <li><b>Festival/Event Sponsors:</b> Get event-specific perks (logo, booth, tickets, social, ONLY for festivals).</li>
+            <li><b>Company Sponsor:</b> <span style={{color:"#D4AF37"}}>Get everything above, plus: magazine features, YouTube integration, and direct service credits for your business or clients.</span></li>
+          </ul>
         </section>
       </main>
     </>
