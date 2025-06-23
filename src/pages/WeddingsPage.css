@@ -119,6 +119,28 @@
   font-family: 'Georgia', serif;
 }
 
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.3rem;
+}
+
+.gallery-img-wrapper {
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.gallery-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.gallery-img:hover {
+  transform: scale(1.03);
+}
+
 /* "WHY CHOOSE US" */
 .why-choose {
   background: #fff;
