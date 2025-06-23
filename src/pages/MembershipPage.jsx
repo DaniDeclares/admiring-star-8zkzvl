@@ -1,8 +1,8 @@
+// src/pages/MembershipPage.jsx
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import "./MembershipPage.css";
 
-// --- TIER DATA ---
 const VIP_TIERS = [
   {
     id: "vip-platinum",
@@ -85,23 +85,20 @@ const memberships = [
   {
     label: "Platinum Partner (Monthly)",
     url: "https://buy.stripe.com/14A5kCfOp3iC85V9176kg08",
-    desc: "Top-tier sponsor with maximum exposure and perks.",
+    desc: "Top-tier sponsor with maximum exposure and perks."
   },
   {
     label: "Platinum Partner (Yearly)",
     url: "https://buy.stripe.com/00wdR86dP7yS4TJdhn6kg09",
-    desc: "Annual platinum sponsorship for ultimate impact.",
-  },
-  // Add additional sponsor packages as needed
+    desc: "Annual platinum sponsorship for ultimate impact."
+  }
 ];
 
-// --- TESTIMONIAL/LOGO STRIP ---
-// Swap in real client logos if available!
 const testimonials = [
   {
     quote: "Joining Dani Declares as a Platinum Partner put our business in front of hundreds of ideal clients—we loved the hands-on support!",
     author: "Aria J.",
-    logo: "/assets/partner-logos/ariaj-logo.png" // Example path
+    logo: "/assets/partner-logos/ariaj-logo.png"
   },
   {
     quote: "I’ve never had so many leads from a single event. The onboarding was seamless.",
@@ -116,7 +113,7 @@ export default function MembershipPage() {
   return (
     <main className="page membership-page">
       <Helmet>
-        <title>Membership & Sponsorship • Dani Declares</title>
+        <title>Membership Tiers, Vendor Booths, Event Sponsorships | Dani Declares</title>
         <meta name="description" content="Become a member, sponsor, or vendor with Dani Declares. Choose from VIP, event, or booth packages—get perks, promotion, and access." />
       </Helmet>
 
@@ -126,23 +123,11 @@ export default function MembershipPage() {
         <span className="urgent">Lock in your spot—limited premium tiers for 2025!</span>
       </p>
 
-      {/* Billing Toggle */}
       <div className="billing-toggle">
-        <button
-          className={billing === "monthly" ? "active" : ""}
-          onClick={() => setBilling("monthly")}
-        >
-          Monthly
-        </button>
-        <button
-          className={billing === "yearly" ? "active" : ""}
-          onClick={() => setBilling("yearly")}
-        >
-          Yearly <span className="save">Save 15%</span>
-        </button>
+        <button className={billing === "monthly" ? "active" : ""} onClick={() => setBilling("monthly")}>Monthly</button>
+        <button className={billing === "yearly" ? "active" : ""} onClick={() => setBilling("yearly")}>Yearly <span className="save">Save 15%</span></button>
       </div>
 
-      {/* VIP Tiers */}
       <section>
         <h2>Dani Declares Luxury Membership</h2>
         <div className="tiers-grid">
@@ -152,15 +137,8 @@ export default function MembershipPage() {
               <div key={tier.id} className="tier-card">
                 <h3>{tier.name}</h3>
                 <p className="tier-desc">{tier.desc}</p>
-                <p className="tier-price">
-                  ${price}
-                  <span>/{billing}</span>
-                </p>
-                <ul className="perk-list">
-                  {tier.perks.map((perk) => (
-                    <li key={perk}>{perk}</li>
-                  ))}
-                </ul>
+                <p className="tier-price">${price}<span>/{billing}</span></p>
+                <ul className="perk-list">{tier.perks.map((perk) => <li key={perk}>{perk}</li>)}</ul>
                 <button
                   className="snipcart-add-item btn btn--primary"
                   data-item-id={tier.id}
@@ -171,19 +149,14 @@ export default function MembershipPage() {
                   data-item-custom1-name="Billing Cycle"
                   data-item-custom1-options="Monthly,Yearly"
                   data-item-custom1-value={billing}
-                >
-                  {billing === "monthly" ? "Join Monthly" : "Pre-pay Yearly"}
-                </button>
-                <div className="onboarding-info">
-                  <span>After payment, you’ll get instant onboarding access & a member welcome kit.</span>
-                </div>
+                >{billing === "monthly" ? "Join Monthly" : "Pre-pay Yearly"}</button>
+                <div className="onboarding-info"><span>After payment, you’ll get instant onboarding access & a member welcome kit.</span></div>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* Event-Only */}
       <section>
         <h2>Event-Only Access</h2>
         <div className="tiers-grid">
@@ -193,15 +166,8 @@ export default function MembershipPage() {
               <div key={tier.id} className="tier-card">
                 <h3>{tier.name}</h3>
                 <p className="tier-desc">{tier.desc}</p>
-                <p className="tier-price">
-                  ${price}
-                  <span>/{billing}</span>
-                </p>
-                <ul className="perk-list">
-                  {tier.perks.map((perk) => (
-                    <li key={perk}>{perk}</li>
-                  ))}
-                </ul>
+                <p className="tier-price">${price}<span>/{billing}</span></p>
+                <ul className="perk-list">{tier.perks.map((perk) => <li key={perk}>{perk}</li>)}</ul>
                 <button
                   className="snipcart-add-item btn btn--secondary"
                   data-item-id={tier.id}
@@ -212,19 +178,14 @@ export default function MembershipPage() {
                   data-item-custom1-name="Billing Cycle"
                   data-item-custom1-options="Monthly,Yearly"
                   data-item-custom1-value={billing}
-                >
-                  {billing === "monthly" ? "Subscribe" : "Pre-pay"}
-                </button>
-                <div className="onboarding-info">
-                  <span>You'll receive an email to book your onboarding call & event access instructions.</span>
-                </div>
+                >{billing === "monthly" ? "Subscribe" : "Pre-pay"}</button>
+                <div className="onboarding-info"><span>You'll receive an email to book your onboarding call & event access instructions.</span></div>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* Vendor Booths */}
       <section>
         <h2>Secure Your Vendor Booth</h2>
         <div className="tiers-grid">
@@ -233,11 +194,7 @@ export default function MembershipPage() {
               <h3>{booth.name}</h3>
               <p className="tier-desc">{booth.desc}</p>
               <p className="tier-price">${booth.price}</p>
-              <ul className="perk-list">
-                {booth.perks.map((perk) => (
-                  <li key={perk}>{perk}</li>
-                ))}
-              </ul>
+              <ul className="perk-list">{booth.perks.map((perk) => <li key={perk}>{perk}</li>)}</ul>
               <button
                 className="snipcart-add-item btn btn--accent"
                 data-item-id={booth.id}
@@ -245,18 +202,13 @@ export default function MembershipPage() {
                 data-item-price={booth.price}
                 data-item-url="/membership"
                 data-item-description={booth.desc}
-              >
-                Reserve Booth
-              </button>
-              <div className="onboarding-info">
-                <span>Get vendor details & setup packet after purchase.</span>
-              </div>
+              >Reserve Booth</button>
+              <div className="onboarding-info"><span>Get vendor details & setup packet after purchase.</span></div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Sponsorship & Membership Buttons */}
       <section className="membership-options">
         <h2>Membership & Sponsorship</h2>
         <div className="membership-buttons">
@@ -264,20 +216,12 @@ export default function MembershipPage() {
             <div key={m.label} className="membership-card">
               <h3>{m.label}</h3>
               <p>{m.desc}</p>
-              <a
-                href={m.url}
-                className="btn btn--primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Join as {m.label}
-              </a>
+              <a href={m.url} className="btn btn--primary" target="_blank" rel="noopener noreferrer">Join as {m.label}</a>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Testimonial/Logo Strip */}
       <section className="testimonial-strip">
         {testimonials.map((t, i) => (
           <div key={i} className="testimonial-item">
@@ -288,7 +232,6 @@ export default function MembershipPage() {
         ))}
       </section>
 
-      {/* Comparison Table */}
       <section className="comparison-table-section">
         <h2>Compare All Tiers</h2>
         <div className="comparison-table-wrap">
@@ -305,20 +248,11 @@ export default function MembershipPage() {
               </tr>
             </thead>
             <tbody>
-              {[
-                "Magazine Cover",
-                "Magazine Spread",
-                "Magazine Mention",
-                "YouTube Cameo",
-                "VIP Booth",
-                "Standard Booth",
-                "Guide Listing",
-                "VIP Passes"
-              ].map((perk) => (
+              {["Magazine Cover", "Magazine Spread", "Magazine Mention", "YouTube Cameo", "VIP Booth", "Standard Booth", "Guide Listing", "VIP Passes"].map((perk) => (
                 <tr key={perk}>
                   <td>{perk}</td>
-                  <td>{perk === "Magazine Cover" || perk === "YouTube Cameo" || perk === "VIP Booth" ? "✓" : ""}</td>
-                  <td>{perk === "Magazine Spread" || perk === "Standard Booth" ? "✓" : ""}</td>
+                  <td>{["Magazine Cover", "YouTube Cameo", "VIP Booth"].includes(perk) ? "✓" : ""}</td>
+                  <td>{["Magazine Spread", "Standard Booth"].includes(perk) ? "✓" : ""}</td>
                   <td>{perk === "Magazine Mention" ? "✓" : ""}</td>
                   <td>{perk === "VIP Booth" ? "✓" : ""}</td>
                   <td>{perk === "Standard Booth" ? "✓" : ""}</td>
