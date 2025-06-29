@@ -127,6 +127,7 @@ export default function Homepage() {
             <p className="early-bird-note">Early Bird pricing ends soon!</p>
           </div>
         </section>
+
         {/* TESTIMONIAL CAROUSEL */}
         <section className="testimonial-carousel">
           <h2>Client Breakthroughs</h2>
@@ -137,6 +138,7 @@ export default function Homepage() {
             </div>
           </div>
         </section>
+
         {/* COACHING PACKAGES */}
         <section className="packages">
           <h2>Your Coaching Options</h2>
@@ -156,6 +158,7 @@ export default function Homepage() {
           </div>
           <Link to="/coaching" className="btn burgundy">Start Your Learning Journey Today</Link>
         </section>
+
         {/* OTHER SERVICES */}
         <section className="packages">
           <h2>More Ways to Work With Dani</h2>
@@ -183,6 +186,7 @@ export default function Homepage() {
             </div>
           </div>
         </section>
+
         {/* CONTACT CTA */}
         <section className="coaching-contact">
           <h2>Still Have Questions?</h2>
