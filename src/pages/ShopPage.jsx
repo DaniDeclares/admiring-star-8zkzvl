@@ -1,5 +1,5 @@
-// src/pages/ShopPage.jsx
 import React from "react";
+import { Helmet } from "react-helmet-async";  // ✅ This was missing!
 import "./ShopPage.css";
 
 const PRODUCTS = [
