@@ -1,6 +1,4 @@
 import React from "react";
-// src/pages/EventsPage.jsx
-import React from "react";
 import { Helmet } from "react-helmet-async";
 import "./EventsPage.css";
 
