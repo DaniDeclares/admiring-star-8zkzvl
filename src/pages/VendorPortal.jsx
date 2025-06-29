@@ -1,43 +1,67 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useSearchParams, Navigate } from "react-router-dom";
 
 export default function VendorPortal() {
+  const [search] = useSearchParams();
+  const accountId = search.get("account");
+  const [balance, setBalance] = useState(null);
+
+  useEffect(() => {
+    if (accountId) {
+      fetch(`/api/stripe/fetch-balance?account=${accountId}`)
+        .then((res) => res.json())
+        .then(setBalance)
+        .catch(console.error);
+    }
+  }, [accountId]);
+
+  if (!accountId) return <Navigate to="/onboarding" replace />;
+
   return (
     <main className="dashboard-page vendor-portal">
       <Helmet>
         <title>Vendor & Speaker Portal • Dani Declares</title>
         <meta
           name="description"
-          content="Manage your festival booth, speaker info, and payments here. Vendor dashboard for Dani Declares event partners."
+          content="Manage your festival booth, speaker info, and payouts as a Dani Declares event partner."
         />
       </Helmet>
 
       <h1>Vendor & Speaker Portal</h1>
-      <p>Welcome! Use this portal to manage your participation in the <strong>Declare Your Worth Festival</strong> and other Dani Declares events.</p>
 
-      <section className="portal-section">
-        <h2>Vendor Actions</h2>
+      {balance ? (
         <ul>
-          <li>✅ Upload your logo and booth info <em>(Coming Soon)</em></li>
-          <li>✅ Submit promotional materials for shoutouts <em>(Coming Soon)</em></li>
-          <li>✅ View your Stripe Connect payment status <em>(Coming Soon)</em></li>
-          <li>✅ Download your setup & arrival instructions <em>(Coming Soon)</em></li>
+          <li>
+            ✅ <strong>Available Funds</strong>: $
+            {(balance.available[0].amount / 100).toFixed(2)}
+          </li>
+          <li>
+            ✅ <strong>Pending Funds</strong>: $
+            {(balance.pending[0].amount / 100).toFixed(2)}
+          </li>
         </ul>
-      </section>
+      ) : (
+        <p>Loading your vendor balance…</p>
+      )}
 
       <section className="portal-section">
-        <h2>Speaker Actions</h2>
+        <h2>Actions</h2>
         <ul>
-          <li>✅ Upload headshot and bio <em>(Coming Soon)</em></li>
-          <li>✅ Confirm your speaking time slot <em>(Coming Soon)</em></li>
-          <li>✅ Submit your presentation slides or promo materials <em>(Coming Soon)</em></li>
+          <li>✅ Upload logo & booth info (Coming Soon)</li>
+          <li>✅ Submit promo materials (Coming Soon)</li>
+          <li>✅ Download setup instructions (Coming Soon)</li>
         </ul>
       </section>
 
       <section className="portal-section contact-support">
         <h2>Need Help?</h2>
-        <p>📧 Email: <a href="mailto:admin@danideclares.com">admin@danideclares.com</a></p>
-        <p>📞 Call/Text: <a href="tel:+14705234892">(470) 523-4892</a></p>
+        <p>
+          📧 <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
+        </p>
+        <p>
+          📞 <a href="tel:+14705234892">(470) 523-4892</a>
+        </p>
       </section>
     </main>
   );
