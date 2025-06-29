@@ -1,5 +1,6 @@
-/* index.css */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
 
 * {
   margin: 0;
@@ -8,14 +9,101 @@
 }
 
 body {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   background: #fff;
   color: #333;
+  line-height: 1.6;
 }
-/* at bottom */
+
+a {
+  color: #8B1E2E;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #D4AF37;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px rgba(139,30,46,0.08);
+}
+
+.btn--primary {
+  background-color: #8B1E2E;
+  color: #fff;
+}
+
+.btn--primary:hover {
+  background-color: #6f1824;
+  color: #FFD700;
+}
+
+.btn--secondary {
+  background-color: #D4AF37;
+  color: #222;
+}
+
+.btn--secondary:hover {
+  background-color: #bfa13a;
+  color: #fff;
+}
+
+.btn--accent {
+  background-color: #f8f5f1;
+  color: #8B1E2E;
+  border: 2px solid #8B1E2E;
+}
+
+.btn--accent:hover {
+  background-color: #8B1E2E;
+  color: #fff;
+}
+
 #snipcart {
   position: fixed;
   right: 0;
   top: 0;
   z-index: 1000;
+}
+
+/* General container spacing */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Form styles for Mailchimp / HubSpot embeds */
+form input, form textarea, form select {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+form button {
+  margin-top: 1rem;
+}
+
+/* Footer baseline */
+footer {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  font-size: 0.9rem;
+  background: #F8F5F1;
+  color: #5c4b4e;
+}
+
+@media (max-width: 700px) {
+  body {
+    font-size: 0.95rem;
+  }
 }

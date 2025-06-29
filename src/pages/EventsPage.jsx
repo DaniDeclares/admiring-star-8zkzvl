@@ -1,166 +1,89 @@
+import React from "react";
 // src/pages/EventsPage.jsx
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import "./EventsPage.css";
 
-const EVENTS = [
-  {
-    title: "Declare Your Worth Festival",
-    date: "November 29–30, 2025",
-    location: "Brook Run Park, Dunwoody, GA",
-    desc: `Two days of financial empowerment, vendor showcases, family fun, workshops, and entertainment. Free Kid Zone activities and vendor/sponsor opportunities available.`,
-    ctaLabel: "Festival Details",
-    ctaUrl: "/festival",
-  },
-  {
-    title: "Pop-Up Notary & Insurance Clinic",
-    date: "Saturdays (June–Aug 2025), 11 AM–2 PM",
-    location: "2060 Buford Hwy NE, Doraville, GA",
-    desc: `On-site notarizations + free life insurance quotes. Mobile notary, budgeting tips, and small business consults while you sip coffee.`,
-    ctaLabel: "View Notary Services",
-    ctaUrl: "/notary",
-  },
-  {
-    title: "Sip & Sign Social",
-    date: "3rd Thursday Monthly, 6–8 PM",
-    location: "Flow Yoga Center, Decatur, GA",
-    desc: `Social notary event with drinks and networking. Wills, POAs, budget reviews, and quick insurance quotes available.`,
-    ctaLabel: "Reserve Your Spot",
-    ctaUrl: "https://tidycal.com/danideclaresns/sip-sign",
-  },
-  {
-    title: "Pop-Up Wedding Ceremonies",
-    date: "Select Sundays, 1–3 PM",
-    location: "Doraville Public Library",
-    desc: `Affordable, intimate ceremonies with officiant, decor, and legal filing included. Quick and meaningful for busy couples.`,
-    ctaLabel: "Book Your Ceremony",
-    ctaUrl: "https://tidycal.com/danideclaresns/badge-pickup",
-  },
-  {
-    title: "Membership Onboarding",
-    date: "By Appointment",
-    location: "Virtual or In-Person",
-    desc: `Luxury and Event Membership onboarding sessions. Get instant access to perks, booths, and bonus guides.`,
-    ctaLabel: "View Membership Options",
-    ctaUrl: "/membership",
-  },
-];
-
-const TICKETS = [
-  {
-    label: "General Admission",
-    url: "https://buy.stripe.com/fZu28qdGhcTc2LBelr6kg02",
-    desc: "Access to all festival events and workshops.",
-  },
-  {
-    label: "VIP Admission",
-    url: "https://buy.stripe.com/6oU14m45H8CW1Hx9176kg03",
-    desc: "VIP access, exclusive sessions, and festival perks.",
-  },
-];
-
-const VENDORS = [
-  {
-    label: "Standard Vendor Table",
-    url: "https://buy.stripe.com/4gMaEWdGh6uO2LBgtz6kg07",
-    desc: "6-foot table in vendor zone.",
-  },
-  {
-    label: "Premium Vendor Booth",
-    url: "https://buy.stripe.com/3cI5kC6dP1auae3a5b6kg06",
-    desc: "High-traffic location with extra signage.",
-  },
-  {
-    label: "Double-Sized Booth",
-    url: "https://buy.stripe.com/3cI14mdGh6uO5XN1yF6kg05",
-    desc: "Largest space with prime positioning.",
-  },
-];
-
-const SPONSORS = [
-  {
-    label: "Bronze Sponsor (Monthly)",
-    url: "https://buy.stripe.com/14A8wO45H2eygCrcdj6kg0c",
-    desc: "Logo on event banners + vendor table + 2 GA tickets.",
-  },
-  {
-    label: "Gold Sponsor (Yearly)",
-    url: "https://buy.stripe.com/5kQ7sKgStdXg2LB3GN6kg0b",
-    desc: "Premium perks, 4 VIP tickets, and on-site mentions.",
-  },
-  {
-    label: "Platinum Partner (Yearly)",
-    url: "https://buy.stripe.com/00wdR86dP7yS4TJdhn6kg09",
-    desc: "Top-tier benefits, stage recognition, and full-page magazine ad.",
-  },
-];
-
 export default function EventsPage() {
   return (
     <>
       <Helmet>
-        <title>Events • Dani Declares</title>
-        <meta name="description" content="View all upcoming festivals, pop-ups, weddings, and special events with Dani Declares. Book tickets, booths, and sponsorships now." />
+        <title>Upcoming Events & Experiences • Dani Declares</title>
+        <meta name="description" content="Explore upcoming pop-up weddings, coaching clinics, financial workshops, and the Declare Your Worth Festival. Book your spot today." />
       </Helmet>
 
       <main className="events-page">
-        <h1>Upcoming Events & Experiences</h1>
+        <h1>Upcoming Events & Pop-Ups</h1>
+        <p className="intro">
+          From financial empowerment festivals to pop-up weddings and mobile notary clinics—Dani Declares brings life-changing experiences directly to you. Check out what’s coming up:
+        </p>
 
-        <section className="events-list">
-          {EVENTS.map((event, idx) => (
-            <div key={idx} className="event-card">
-              <h2>{event.title}</h2>
-              <p><b>{event.date}</b> | {event.location}</p>
-              <p>{event.desc}</p>
-              <a
-                href={event.ctaUrl}
-                className="btn btn--primary"
-                target={event.ctaUrl.startsWith("http") ? "_blank" : "_self"}
-                rel="noopener noreferrer"
-              >
-                {event.ctaLabel}
-              </a>
-            </div>
-          ))}
+        {/* Declare Your Worth Festival */}
+        <section className="event-card">
+          <h2>Declare Your Worth Festival</h2>
+          <p className="event-meta">📅 Nov 29–30, 2025 • Brook Run Park, Doraville, GA</p>
+          <p className="event-desc">
+            Two days of financial literacy, family fun, vendors, speakers, workshops, and live entertainment. FREE admission for kids!
+          </p>
+          <a href="/festival" className="btn btn--primary">Festival Details & Tickets</a>
         </section>
 
-        <section className="tickets-section">
-          <h2>Festival Tickets</h2>
-          <div className="ticket-grid">
-            {TICKETS.map((t, idx) => (
-              <div key={idx} className="ticket-card">
-                <h3>{t.label}</h3>
-                <p>{t.desc}</p>
-                <a href={t.url} className="btn btn--secondary" target="_blank" rel="noopener noreferrer">Buy {t.label}</a>
-              </div>
-            ))}
-          </div>
+        {/* Pop-Up Notary & Insurance */}
+        <section className="event-card">
+          <h2>Pop-Up Notary & Insurance Clinic</h2>
+          <p className="event-meta">📅 Every Saturday (Jun–Aug 2025) • 11 AM–2 PM • Starbucks, Doraville GA</p>
+          <p className="event-desc">
+            On-the-spot notarizations, life insurance quotes, and financial checkups—all while you sip your favorite coffee.
+          </p>
+          <a href="/notary" className="btn btn--primary">View Notary Services</a>
         </section>
 
-        <section className="vendor-section">
-          <h2>Vendor Opportunities</h2>
-          <div className="vendor-grid">
-            {VENDORS.map((v, idx) => (
-              <div key={idx} className="vendor-card">
-                <h3>{v.label}</h3>
-                <p>{v.desc}</p>
-                <a href={v.url} className="btn btn--secondary" target="_blank" rel="noopener noreferrer">Reserve {v.label}</a>
-              </div>
-            ))}
-          </div>
+        {/* Sip & Sign Social */}
+        <section className="event-card">
+          <h2>Sip & Sign Social</h2>
+          <p className="event-meta">📅 Third Thursday Monthly • 6–8 PM • Flow Yoga Center, Decatur GA</p>
+          <p className="event-desc">
+            Quick documents, light bites, and mini money talks. Get your wills, POAs, and contracts notarized on the spot.
+          </p>
+          <a href="https://tidycal.com/danideclaresns/sip-sign" target="_blank" rel="noopener noreferrer" className="btn btn--primary">Reserve Your Spot</a>
         </section>
 
-        <section className="sponsor-section">
-          <h2>Festival Sponsorship Packages</h2>
-          <div className="sponsor-grid">
-            {SPONSORS.map((s, idx) => (
-              <div key={idx} className="sponsor-card">
-                <h3>{s.label}</h3>
-                <p>{s.desc}</p>
-                <a href={s.url} className="btn btn--primary" target="_blank" rel="noopener noreferrer">Sponsor {s.label}</a>
-              </div>
-            ))}
-          </div>
+        {/* Pop-Up Weddings */}
+        <section className="event-card">
+          <h2>Pop-Up Wedding Ceremonies</h2>
+          <p className="event-meta">📅 Select Sundays • Doraville Public Library</p>
+          <p className="event-desc">
+            Elopement-style weddings with officiant, filing, music, and decor—all for one affordable flat fee.
+          </p>
+          <a href="/weddings" className="btn btn--primary">Explore Wedding Packages</a>
+        </section>
+
+        {/* Coaching & Financial Consults */}
+        <section className="event-card">
+          <h2>Coaching & Financial Consults</h2>
+          <p className="event-meta">📅 Flexible Scheduling • Virtual & In-Person</p>
+          <p className="event-desc">
+            Book a Discovery Session, Quick Consult, or VIP Intensive to level up your life and business.
+          </p>
+          <a href="/coaching" className="btn btn--primary">View Coaching Options</a>
+        </section>
+
+        {/* Vendor & Speaker Onboarding */}
+        <section className="event-card">
+          <h2>Vendor, Speaker & Membership Onboarding</h2>
+          <p className="event-meta">📅 Ongoing Enrollment</p>
+          <p className="event-desc">
+            Want to partner with us? Whether you're a vendor, speaker, or new event member, onboarding is open!
+          </p>
+          <a href="/membership" className="btn btn--secondary">Explore Membership Tiers</a>
+          <a href="/festival" className="btn btn--secondary">Become a Vendor/Speaker</a>
+        </section>
+
+        {/* Lead Capture */}
+        <section className="contact-info">
+          <h3>Don’t Miss Upcoming Events</h3>
+          <p>Subscribe to get first dibs on new pop-ups, workshops, and discounts:</p>
+          <a href="/contact" className="btn btn--primary">Join Our List</a>
         </section>
       </main>
     </>

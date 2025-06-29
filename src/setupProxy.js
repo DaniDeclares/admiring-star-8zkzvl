@@ -1,4 +1,3 @@
-// src/setupProxy.js
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function (app) {
@@ -9,10 +8,9 @@ module.exports = function (app) {
       changeOrigin: true,
       pathRewrite: { '^/printify': '' },
       onProxyReq: (proxyReq) => {
-        // inject your Printify token from .env into every proxied request
         proxyReq.setHeader(
           'Authorization',
-          `Bearer ${process.env.PRINTIFY_TOKEN}`
+          `Bearer ${process.env.PRINTIFY_API_TOKEN}`
         );
       },
     })

@@ -62,8 +62,7 @@ export default function FinancialPage() {
         <section className="insurance-cta">
           <h2>Book Your Free Financial Quote</h2>
           <p>
-            Get a personalized plan or life insurance quote.{" "}
-            <strong>No payment required.</strong>
+            Get a personalized plan or life insurance quote. <strong>No payment required.</strong>
           </p>
           <a
             href="https://tidycal.com/danideclaresns/15-minute-meeting"
@@ -74,36 +73,31 @@ export default function FinancialPage() {
             Book Free 15-Minute Call
           </a>
           <p className="disclaimer">
-            No pressure—just honest advice tailored to your goals.
+            No pressure—just real solutions for your goals.
           </p>
         </section>
 
         <section className="extra-info">
-          <p>
-            Primerica specializes in affordable term life insurance. We also
-            offer:
-          </p>
+          <h2>Why Choose Dani Declares?</h2>
+          <p>We’re not just selling policies. We’re giving you tools for generational wealth and peace of mind.</p>
           <ul className="info-list">
-            <li>Debt Elimination Plans</li>
-            <li>Mutual Funds & Retirement Accounts</li>
-            <li>529 Education Savings Plans</li>
-            <li>Credit Monitoring & ID Protection</li>
+            <li>Personalized Debt Elimination Plans</li>
+            <li>Term Life Insurance Tailored to You</li>
+            <li>Mutual Funds & Retirement Solutions</li>
+            <li>College Savings with 529 Plans</li>
+            <li>Credit Monitoring + Identity Protection</li>
           </ul>
           <p className="text-sm italic">
-            Primerica Financial Services is not a bank. Term life policies are underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Mutual funds offered through PFS Investments, Inc. Quotes and investment guidance provided by Dani Fong, licensed Primerica agent.
+            Primerica Financial Services is not a bank. Term life policies underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Mutual funds offered through PFS Investments, Inc. Quotes and investment guidance provided by Dani Fong, licensed Primerica agent.
           </p>
         </section>
 
         <section className="contact-info">
-          <h3>Have Questions?</h3>
+          <h3>Still Have Questions?</h3>
           <p>
-            Email{" "}
-            <a href="mailto:admin@danideclares.com">
-              admin@danideclares.com
-            </a>{" "}
-            or call/text{" "}
-            <a href="tel:+14705234892">(470) 523-4892</a> |{" "}
-            <a href="tel:+18643265362">(864) 326-5362</a>
+            Email <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
+            <br />
+            or call/text <a href="tel:+14705234892">(470) 523-4892</a> | <a href="tel:+18643265362">(864) 326-5362</a>
           </p>
         </section>
       </main>

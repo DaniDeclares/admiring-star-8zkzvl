@@ -120,19 +120,31 @@ const PRODUCTS = [
 export default function ShopPage() {
   return (
     <main className="shop-page">
+      <Helmet>
+        <title>Shop • Dani Declares</title>
+        <meta
+          name="description"
+          content="Shop inspirational merch, entrepreneur tools, digital downloads, and Father's Day gifts from Dani Declares. Fast shipping, instant downloads, and unique gifts for those declaring their worth."
+        />
+      </Helmet>
+
       <section className="shop-hero">
         <h1>Shop Dani Declares</h1>
-        <p>From inspiring merch to business tools — everything here is designed to help you declare your worth.</p>
+        <p>Merch, digital downloads, business tools, and gifts that help you Declare Your Worth—one milestone at a time.</p>
       </section>
 
       <section className="shop-feature-banner">
-        <p>🎁 Featured: Father’s Day Collection & Empowerment Essentials</p>
+        <p>🎁 Featured: Father’s Day Collection + Empowerment Essentials</p>
       </section>
 
       <div className="product-grid">
         {PRODUCTS.map((product) => (
           <div key={product.id} className="product-card">
-            <img src={product.image} alt={product.name} loading="lazy" />
+            <img
+              src={product.image}
+              alt={`Product: ${product.name}`}
+              loading="lazy"
+            />
             <h2>{product.name}</h2>
             <p>{product.desc}</p>
             <div className="price">${product.price.toFixed(2)}</div>
@@ -150,6 +162,14 @@ export default function ShopPage() {
           </div>
         ))}
       </div>
+
+      <section className="contact-info">
+        <h3>Need Help With Your Order?</h3>
+        <p>
+          Email <a href="mailto:admin@danideclares.com">admin@danideclares.com</a> or text us at{" "}
+          <a href="tel:+14705234892">(470) 523-4892</a>.
+        </p>
+      </section>
     </main>
   );
 }
