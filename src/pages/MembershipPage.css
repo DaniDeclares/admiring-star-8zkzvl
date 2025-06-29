@@ -2,7 +2,7 @@
 
 .membership-page {
   background: #F8F5F1;
-  padding: 2.6rem 1.2rem 3rem 1.2rem;
+  padding: 2.6rem 1.2rem 3rem;
   font-family: 'Montserrat', Arial, sans-serif;
   color: #333;
   max-width: 1200px;
@@ -25,6 +25,7 @@
   color: #D4AF37;
   font-weight: bold;
 }
+
 .billing-toggle {
   display: flex;
   justify-content: center;
@@ -57,20 +58,20 @@
   display: grid;
   gap: 2.1rem;
   grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  margin: 1.8rem 0 3rem 0;
+  margin: 1.8rem 0 3rem;
 }
 .tier-card {
   background: #fff;
   border-radius: 14px;
   border: 2px solid #f0eae2;
-  padding: 1.8rem 1.2rem 2.2rem 1.2rem;
-  box-shadow: 0 2px 10px rgba(139,30,46,0.07);
+  padding: 1.8rem 1.2rem 2.2rem;
+  box-shadow: 0 2px 10px rgba(139, 30, 46, 0.07);
   text-align: center;
   transition: 0.25s ease all;
 }
 .tier-card:hover {
   border-color: #D4AF37;
-  box-shadow: 0 6px 22px rgba(212,175,55,0.13);
+  box-shadow: 0 6px 22px rgba(212, 175, 55, 0.13);
 }
 .tier-card h3 {
   color: #8B1E2E;
@@ -97,7 +98,7 @@
 .perk-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 1.1rem 0;
+  margin: 0 0 1.1rem;
   color: #333;
   font-size: 0.95rem;
 }
@@ -106,6 +107,7 @@
   color: #D4AF37;
   margin-right: 0.4rem;
 }
+
 .btn {
   font-family: inherit;
   font-weight: 600;
@@ -143,6 +145,7 @@
   background: #D4AF37;
   color: #53313c;
 }
+
 .onboarding-info {
   margin-top: 0.65rem;
   font-size: 0.88rem;
@@ -169,7 +172,7 @@
   padding: 1.5rem 1rem;
   max-width: 320px;
   flex: 1;
-  box-shadow: 0 3px 14px rgba(212,175,55,0.08);
+  box-shadow: 0 3px 14px rgba(212, 175, 55, 0.08);
 }
 .membership-card h3 {
   color: #8B1E2E;
@@ -209,26 +212,74 @@
   text-align: center;
   margin-top: 2rem;
 }
+
+/* Compare Table Styles */
 .comparison-table-wrap {
   overflow-x: auto;
+  margin-top: 1.5rem;
 }
 .comparison-table {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 1.2rem;
-  font-size: 0.92rem;
+  border-collapse: separate;
+  border-spacing: 0 1rem;
   background: #fff;
+  font-size: 0.92rem;
 }
 .comparison-table th,
 .comparison-table td {
-  border: 1px solid #ccc;
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   text-align: center;
 }
 .comparison-table th {
   background-color: #f6f0e5;
   color: #8B1E2E;
   font-weight: bold;
+  position: relative;
+}
+.comparison-table th.featured-header {
+  background-color: #8B1E2E;
+  color: #fff;
+}
+.comparison-table th.featured-header::before {
+  content: "Best Value";
+  position: absolute;
+  top: -0.75rem;
+  left: 1rem;
+  background: #D4AF37;
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+.comparison-table tbody tr:hover {
+  background-color: rgba(212, 175, 55, 0.1);
+}
+.comparison-table tfoot td {
+  padding: 1rem;
+}
+.comparison-table tfoot .btn {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+.comparison-table tfoot .btn--primary {
+  background: #fff;
+  color: #8B1E2E;
+  border: 2px solid #8B1E2E;
+}
+.comparison-table tfoot .btn--primary:hover {
+  background: #8B1E2E;
+  color: #fff;
+}
+.comparison-table tfoot .btn--secondary {
+  background: #D4AF37;
+  color: #8B1E2E;
+  border: 2px solid #D4AF37;
+}
+.comparison-table tfoot .btn--secondary:hover {
+  background: #8B1E2E;
+  color: #fff;
 }
 
 @media (max-width: 700px) {
@@ -241,6 +292,6 @@
   }
   .comparison-table th,
   .comparison-table td {
-    padding: 0.55rem;
+    padding: 0.5rem;
   }
 }

@@ -74,7 +74,7 @@ const VENDOR_BOOTHS = [
   {
     id: "booth-table",
     name: "Shared Table Exhibit",
-    desc: "6ft shared table space in the lounge/gallery section.",
+    desc: "6-ft shared table space in the lounge/gallery section.",
     price: 400,
     perks: ["Lounge location", "Lower-cost option for startups"],
   },
@@ -95,7 +95,8 @@ const memberships = [
 
 const testimonials = [
   {
-    quote: "Joining Dani Declares as a Platinum Partner put our business in front of hundreds of ideal clients—we loved the hands-on support!",
+    quote:
+      "Joining Dani Declares as a Platinum Partner put our business in front of hundreds of ideal clients—we loved the hands-on support!",
     author: "Aria J.",
     logo: "/assets/partner-logos/ariaj-logo.png",
   },
@@ -105,6 +106,154 @@ const testimonials = [
     logo: "/assets/partner-logos/marcust-logo.png",
   },
 ];
+
+// New CompareTable component with featured styling and badges
+function CompareTable() {
+  const tiers = [
+    {
+      name: "VIP Platinum",
+      style: {
+        backgroundColor: "#8B1E2E",
+        color: "#fff",
+        position: "relative",
+      },
+      featured: true,
+    },
+    {
+      name: "VIP Gold",
+      style: { backgroundColor: "rgba(212,175,55,0.2)", color: "#000" },
+      featured: false,
+    },
+    {
+      name: "VIP Silver",
+      style: { backgroundColor: "#f0f0f0", color: "#000" },
+      featured: false,
+    },
+    {
+      name: "Event Gold",
+      style: { backgroundColor: "rgba(212,175,55,0.3)", color: "#000" },
+      featured: false,
+    },
+    {
+      name: "Event Silver",
+      style: { backgroundColor: "#f0f0f0", color: "#000" },
+      featured: false,
+    },
+    {
+      name: "Event Bronze",
+      style: { backgroundColor: "#fafafa", color: "#000" },
+      featured: false,
+    },
+  ];
+
+  const compareData = [
+    { label: "Magazine Cover", cols: [true, false, false, false, false, false] },
+    { label: "Magazine Spread", cols: [false, true, false, false, false, false] },
+    { label: "Magazine Mention", cols: [false, false, true, false, false, false] },
+    { label: "YouTube Cameo", cols: [true, false, false, false, false, false] },
+    { label: "VIP Booth", cols: [true, false, false, true, false, false] },
+    { label: "Standard Booth", cols: [false, true, false, false, true, false] },
+    { label: "Guide Listing", cols: [false, false, false, false, true, true] },
+    { label: "VIP Passes", cols: [2, 0, 0, 2, 1, 0] },
+  ];
+
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table
+        style={{
+          minWidth: "100%",
+          textAlign: "center",
+          borderSpacing: "0 1rem",
+        }}
+      >
+        <thead>
+          <tr>
+            <th style={{ textAlign: "left", padding: "0 1rem" }}>Perk</th>
+            {tiers.map((tier, i) => (
+              <th key={i} style={{ padding: "1rem", ...tier.style }}>
+                {tier.featured && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "-0.75rem",
+                      left: "1rem",
+                      backgroundColor: "#D4AF37",
+                      color: "#fff",
+                      padding: "0.25rem 0.5rem",
+                      borderRadius: "0.25rem",
+                      fontSize: "0.75rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Best Value
+                  </span>
+                )}
+                {tier.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {compareData.map((row, i) => (
+            <tr key={i} style={{ transition: "background 0.2s" }} /* add hover in CSS */>
+              <td
+                style={{
+                  textAlign: "left",
+                  padding: "0 1rem",
+                  fontWeight: "600",
+                }}
+              >
+                {row.label}
+              </td>
+              {row.cols.map((val, j) => (
+                <td key={j} style={{ padding: "0.5rem" }}>
+                  {typeof val === "number" ? (
+                    val > 0 ? (
+                      <span style={{ fontWeight: "600" }}>{val}×</span>
+                    ) : (
+                      "—"
+                    )
+                  ) : (
+                    <span
+                      style={{
+                        color: val ? "#28a745" : "#ccc",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {val ? "✓" : "✕"}
+                    </span>
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td />
+            {tiers.map((tier, i) => (
+              <td key={i} style={{ padding: "1rem" }}>
+                <button
+                  style={{
+                    padding: "0.5rem 1rem",
+                    borderRadius: "9999px",
+                    fontWeight: "600",
+                    backgroundColor: tier.featured ? "#D4AF37" : "#fff",
+                    color: tier.featured ? "#fff" : "#000",
+                    border: tier.featured ? "none" : "1px solid #ccc",
+                    cursor: "pointer",
+                  }}
+                >
+                  {tier.featured ? "Join Now" : "Select"}
+                </button>
+              </td>
+            ))}
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  );
+}
 
 export default function MembershipPage() {
   const [billing, setBilling] = useState("monthly");
@@ -121,19 +270,27 @@ export default function MembershipPage() {
 
       <h1>Partner, Sponsor, or Exhibit with Dani Declares</h1>
       <p className="subtitle">
-        Flexible options for luxury membership, event exposure, or vendor booths.<br />
+        Flexible options for luxury membership, event exposure, or vendor booths.
+        <br />
         <span className="urgent">Spots are limited for 2025!</span>
       </p>
 
       <div className="billing-toggle">
-        <button className={billing === "monthly" ? "active" : ""} onClick={() => setBilling("monthly")}>
+        <button
+          className={billing === "monthly" ? "active" : ""}
+          onClick={() => setBilling("monthly")}
+        >
           Monthly
         </button>
-        <button className={billing === "yearly" ? "active" : ""} onClick={() => setBilling("yearly")}>
+        <button
+          className={billing === "yearly" ? "active" : ""}
+          onClick={() => setBilling("yearly")}
+        >
           Yearly <span className="save">Save 15%</span>
         </button>
       </div>
 
+      {/* VIP & Event Tiers Sections (unchanged) */}
       <section>
         <h2>Luxury Membership Tiers</h2>
         <div className="tiers-grid">
@@ -162,7 +319,9 @@ export default function MembershipPage() {
                 >
                   {billing === "monthly" ? "Join Monthly" : "Pre-pay Yearly"}
                 </button>
-                <div className="onboarding-info">Instant onboarding & welcome kit after payment.</div>
+                <div className="onboarding-info">
+                  Instant onboarding & welcome kit after payment.
+                </div>
               </div>
             );
           })}
@@ -197,7 +356,9 @@ export default function MembershipPage() {
                 >
                   {billing === "monthly" ? "Subscribe Monthly" : "Pre-pay Yearly"}
                 </button>
-                <div className="onboarding-info">Event access & setup details emailed after payment.</div>
+                <div className="onboarding-info">
+                  Event access & setup details emailed after payment.
+                </div>
               </div>
             );
           })}
@@ -239,7 +400,12 @@ export default function MembershipPage() {
             <div key={m.label} className="membership-card">
               <h3>{m.label}</h3>
               <p>{m.desc}</p>
-              <a href={m.url} className="btn btn--primary" target="_blank" rel="noopener noreferrer">
+              <a
+                href={m.url}
+                className="btn btn--primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Sponsor: {m.label}
               </a>
             </div>
@@ -250,7 +416,9 @@ export default function MembershipPage() {
       <section className="testimonial-strip">
         {testimonials.map((t, i) => (
           <div key={i} className="testimonial-item">
-            {t.logo && <img src={t.logo} alt={`${t.author} logo`} className="testimonial-logo" />}
+            {t.logo && (
+              <img src={t.logo} alt={`${t.author} logo`} className="testimonial-logo" />
+            )}
             <blockquote>“{t.quote}”</blockquote>
             <div className="testimonial-author">{t.author}</div>
           </div>
@@ -259,43 +427,7 @@ export default function MembershipPage() {
 
       <section className="comparison-table-section">
         <h2>Compare Membership & Event Tiers</h2>
-        <div className="comparison-table-wrap">
-          <table className="comparison-table">
-            <thead>
-              <tr>
-                <th>Perk</th>
-                <th>VIP Platinum</th>
-                <th>VIP Gold</th>
-                <th>VIP Silver</th>
-                <th>Event Gold</th>
-                <th>Event Silver</th>
-                <th>Event Bronze</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                "Magazine Cover",
-                "Magazine Spread",
-                "Magazine Mention",
-                "YouTube Cameo",
-                "VIP Booth",
-                "Standard Booth",
-                "Guide Listing",
-                "VIP Passes",
-              ].map((perk) => (
-                <tr key={perk}>
-                  <td>{perk}</td>
-                  <td>{["Magazine Cover", "YouTube Cameo", "VIP Booth"].includes(perk) ? "✓" : ""}</td>
-                  <td>{["Magazine Spread", "Standard Booth"].includes(perk) ? "✓" : ""}</td>
-                  <td>{perk === "Magazine Mention" ? "✓" : ""}</td>
-                  <td>{perk === "VIP Booth" ? "✓" : ""}</td>
-                  <td>{perk === "Standard Booth" ? "✓" : ""}</td>
-                  <td>{perk === "Guide Listing" ? "✓" : ""}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <CompareTable />
       </section>
     </main>
   );
