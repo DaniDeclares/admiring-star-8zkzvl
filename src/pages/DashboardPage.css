@@ -1,0 +1,29 @@
+.dashboard-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem 1rem;
+  background: #F8F5F1;
+  color: #333;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+.dashboard-page h1 {
+  color: #8B1E2E;
+  margin-bottom: 1rem;
+  font-family: Georgia, serif;
+}
+
+.dashboard-page ul {
+  list-style: disc inside;
+  margin: 1rem 0 1.5rem 0;
+  padding-left: 1rem;
+}
+
+.dashboard-page a {
+  color: #D4AF37;
+  text-decoration: underline;
+}
+
+.dashboard-page a:hover {
+  color: #8B1E2E;
+}

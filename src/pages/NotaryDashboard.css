@@ -1,0 +1,19 @@
+.notary-dashboard-page {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #F8F5F1;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(139,30,46,0.07);
+}
+
+.notary-dashboard-page h1 {
+  color: #8B1E2E;
+  margin-bottom: 1rem;
+}
+
+.notary-dashboard-page ul {
+  list-style-type: disc;
+  margin-left: 1.2rem;
+  color: #444;
+}

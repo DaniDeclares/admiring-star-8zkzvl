@@ -8,7 +8,7 @@ import SocialLinks from "./components/SocialLinks.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import Footer from "./components/Footer.jsx";
 
-// Pages
+// Public Pages
 import Homepage from "./pages/HomePage.jsx";
 import CoachingPage from "./pages/CoachingPage.jsx";
 import EventsPage from "./pages/EventsPage.jsx";
@@ -22,11 +22,13 @@ import ShopPage from "./pages/ShopPage.jsx";
 import FestivalPage from "./pages/FestivalPage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 
-// Future: Phase 2 Private Pages (for Stripe Connect dashboard / onboarding flow)
+// Private / Future Pages (Phase 2)
 import DashboardPage from "./pages/DashboardPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
 import CancelPage from "./pages/CancelPage.jsx";
+import FestivalDashboard from "./pages/FestivalDashboard.jsx";
+import PartnerOnboarding from "./pages/PartnerOnboarding.jsx";
 
 export default function App() {
   useEffect(() => {
@@ -56,11 +58,13 @@ export default function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
-        {/* Future: Stripe Connect / Member-Only Pages */}
+        {/* Stripe Connect / Private Pages */}
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/cancel" element={<CancelPage />} />
+        <Route path="/festival-dashboard" element={<FestivalDashboard />} />
+        <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
       </Routes>
       <SocialLinks />
       <CookieConsent />

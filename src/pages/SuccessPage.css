@@ -1,0 +1,29 @@
+.success-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+  text-align: center;
+  background: #F8F5F1;
+  color: #333;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+.success-page h1 {
+  color: #8B1E2E;
+  margin-bottom: 1rem;
+}
+
+.success-page .btn {
+  background: #8B1E2E;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 1rem;
+}
+
+.success-page .btn:hover {
+  background: #D4AF37;
+  color: #8B1E2E;
+}
