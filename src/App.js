@@ -22,19 +22,23 @@ import ShopPage from "./pages/ShopPage.jsx";
 import FestivalPage from "./pages/FestivalPage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 
-// Private / Future Pages (Phase 2)
+// Phase-2 / Private Pages & Auth
+import LoginPage from "./pages/LoginPage.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
-import OnboardingPage from "./pages/OnboardingPage.jsx";
-import SuccessPage from "./pages/SuccessPage.jsx";
-import CancelPage from "./pages/CancelPage.jsx";
+import NotaryDashboard from "./pages/NotaryDashboard.jsx";
+import VendorPortal from "./pages/VendorPortal.jsx";
 import FestivalDashboard from "./pages/FestivalDashboard.jsx";
 import PartnerOnboarding from "./pages/PartnerOnboarding.jsx";
+import SuccessPage from "./pages/SuccessPage.jsx";
+import CancelPage from "./pages/CancelPage.jsx";
 
 export default function App() {
   useEffect(() => {
     const script = document.createElement("script");
     script.id = "mcjs";
-    script.src = "https://chimpstatic.com/mcjs-connected/js/users/a28036bff232caaa9e6879b80/db34d9bf94e068347531b6748.js";
+    script.src =
+      "https://chimpstatic.com/mcjs-connected/js/users/a28036bff232caaa9e6879b80/db34d9bf94e068347531b6748.js";
     script.async = true;
     document.body.appendChild(script);
   }, []);
@@ -43,8 +47,9 @@ export default function App() {
     <>
       <FestivalBanner />
       <Navbar />
+
       <Routes>
-        {/* Public Pages */}
+        {/* Public */}
         <Route path="/" element={<Homepage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/coaching" element={<CoachingPage />} />
@@ -58,14 +63,27 @@ export default function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
-        {/* Stripe Connect / Private Pages */}
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/onboarding" element={<OnboardingPage />} />
-        <Route path="/success" element={<SuccessPage />} />
-        <Route path="/cancel" element={<CancelPage />} />
-        <Route path="/festival-dashboard" element={<FestivalDashboard />} />
-        <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
+        {/* Authentication */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Protected Phase-2 Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/notary-dashboard" element={<NotaryDashboard />} />
+          <Route path="/vendor-portal" element={<VendorPortal />} />
+          <Route
+            path="/festival-dashboard"
+            element={<FestivalDashboard />}
+          />
+          <Route
+            path="/partner-onboarding"
+            element={<PartnerOnboarding />}
+          />
+          <Route path="/success" element={<SuccessPage />} />
+          <Route path="/cancel" element={<CancelPage />} />
+        </Route>
       </Routes>
+
       <SocialLinks />
       <CookieConsent />
       <Footer />
