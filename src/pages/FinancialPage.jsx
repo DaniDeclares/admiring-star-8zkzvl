@@ -5,31 +5,31 @@ import "./FinancialPage.css";
 const SERVICES = [
   {
     title: "Term Life Insurance",
-    desc: "Primerica offers affordable term policies (10–35 years) underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Ideal for families seeking protection during key years.",
+    desc: "Affordable term life policies (10–35 years) from Primerica Life Insurance Company or National Benefit Life Insurance Company. Ideal for family protection during key years.",
   },
   {
     title: "Debt Elimination Strategy",
-    desc: "We’ll create a personalized debt-stacking plan to pay off high-interest obligations in a targeted order—freeing up cash flow for savings and investments.",
+    desc: "We’ll build a custom debt-stacking plan to eliminate high-interest debt and free up your cash flow for savings and investments.",
   },
   {
     title: "Budget & Cash-Flow Review",
-    desc: "One-on-one session to audit your income, expenses, and savings. Identify where you can save more, reduce expenses, and build an emergency fund.",
+    desc: "1:1 session to analyze your income, expenses, and savings goals. Identify ways to save more, reduce spending, and build your emergency fund.",
   },
   {
     title: "Mutual Funds & Retirement Planning",
-    desc: "Access Primerica’s Lifetime Investment Program™: professionally managed portfolios tailored to your goals, time horizon, and risk tolerance. Includes IRAs, 401(k) rollovers, and education savings plans (529).",
+    desc: "Through Primerica’s Lifetime Investment Program™: managed portfolios for retirement, education, or long-term growth (IRAs, 401k rollovers, 529s).",
   },
   {
     title: "Credit Monitoring & Identity Protection",
-    desc: "Stay on top of your credit score and safeguard against identity theft. Receive alerts and guidance to help maintain a healthy credit profile.",
+    desc: "Protect your credit and identity. Get alerts, monthly score tracking, and fraud protection tools for peace of mind.",
   },
   {
-    title: "Education Savings Plans (529 Plans)",
-    desc: "Plan ahead for college: open and manage a 529 account to grow tax-advantaged savings for your child’s education.",
+    title: "Education Savings Plans (529)",
+    desc: "Plan for college with a tax-advantaged 529 account. Grow savings for tuition and education expenses with professional guidance.",
   },
   {
     title: "Life Insurance Policy Review",
-    desc: "Already have coverage? Let’s review your current policy to ensure it still meets your needs. We’ll compare options and recommend any adjustments.",
+    desc: "Already have a policy? Let us review your coverage to ensure it still meets your family’s needs and financial goals.",
   },
 ];
 
@@ -40,7 +40,7 @@ export default function FinancialPage() {
         <title>Financial Empowerment • Dani Declares</title>
         <meta
           name="description"
-          content="Book a free financial consult with Dani to explore Primerica term life insurance, debt elimination, and legacy-building strategies tailored to your goals."
+          content="Free financial consults on term life insurance, debt elimination, budgeting, retirement planning, and credit protection. Schedule your session with Dani today."
         />
       </Helmet>
 
@@ -59,49 +59,50 @@ export default function FinancialPage() {
           ))}
         </section>
 
-        {/* Direct, no-payment booking CTA */}
         <section className="insurance-cta">
           <h2>Book Your Free Financial Quote</h2>
           <p>
-            Get a custom plan or insurance quote—no payment required. <br />
-            <strong>Click below to book your free 15-minute session:</strong>
+            Get a personalized plan or life insurance quote.{" "}
+            <strong>No payment required.</strong>
           </p>
           <a
             href="https://tidycal.com/danideclaresns/15-minute-meeting"
             className="btn btn--primary"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ marginTop: 20, marginBottom: 16, display: "inline-block" }}
           >
-            Book Free 15-Minute Consult
+            Book Free 15-Minute Call
           </a>
-          <p style={{ color: "#888", fontSize: "0.96rem" }}>
-            No sales pressure—just honest advice for your family’s financial security.
+          <p className="disclaimer">
+            No pressure—just honest advice tailored to your goals.
           </p>
         </section>
 
-        <section className="extra-info text-center">
-          <p className="text-base mb-2">
-            Primerica focuses exclusively on affordable term life insurance. We also offer:
+        <section className="extra-info">
+          <p>
+            Primerica specializes in affordable term life insurance. We also
+            offer:
           </p>
           <ul className="info-list">
-            <li>Debt Elimination & Budget Planning</li>
-            <li>Mutual Funds & Retirement Planning (Lifetime Investment Program™)</li>
+            <li>Debt Elimination Plans</li>
+            <li>Mutual Funds & Retirement Accounts</li>
             <li>529 Education Savings Plans</li>
-            <li>Credit Monitoring & Identity Protection</li>
+            <li>Credit Monitoring & ID Protection</li>
           </ul>
           <p className="text-sm italic">
-            Primerica Financial Services is not a bank. Term life insurance is underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Mutual funds are offered through PFS Investments, Inc.<br/>
-            Quotes and investment advice provided by Dani Declares, a licensed Primerica agent.
+            Primerica Financial Services is not a bank. Term life policies are underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Mutual funds offered through PFS Investments, Inc. Quotes and investment guidance provided by Dani Fong, licensed Primerica agent.
           </p>
         </section>
 
         <section className="contact-info">
           <h3>Have Questions?</h3>
           <p>
-            Email <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
-            <br />
-            or call/text <a href="tel:+14705234892">(470) 523-4892</a> |{" "}
+            Email{" "}
+            <a href="mailto:admin@danideclares.com">
+              admin@danideclares.com
+            </a>{" "}
+            or call/text{" "}
+            <a href="tel:+14705234892">(470) 523-4892</a> |{" "}
             <a href="tel:+18643265362">(864) 326-5362</a>
           </p>
         </section>

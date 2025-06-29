@@ -63,9 +63,10 @@ export default function Homepage() {
         <title>Dani Declares • Coaching, Events, Weddings & More</title>
         <meta
           name="description"
-          content="Coaching, Events, and Financial services designed for women who know their worth. Book, shop, or declare it today."
+          content="Coaching, Events, Financial Services, and Empowerment for women and families who are ready to Declare Their Worth. Book a session, shop merch, or grab event tickets today."
         />
       </Helmet>
+
       <main className="homepage home-main">
         {/* HERO */}
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
@@ -79,6 +80,43 @@ export default function Homepage() {
             </div>
           </div>
         </section>
+
+        {/* ABOUT US */}
+        <section className="about-us-section">
+          <h2>About Dani Declares</h2>
+          <p>
+            At Dani Declares, we believe in simplifying life’s biggest milestones—whether it’s securing your family’s future, building a profitable side hustle, or celebrating love through weddings and events. 
+            Founded by Danielle Fong, our mission is to help everyday people feel empowered, seen, and financially prepared for whatever life brings.
+          </p>
+        </section>
+
+        {/* MISSION STATEMENT */}
+        <section className="mission-statement-section">
+          <h2>Our Mission</h2>
+          <p>
+            To empower individuals and families to unlock clarity, confidence, and cash flow. 
+            Whether through coaching, financial literacy events, life insurance, or mobile notary services—our goal is simple: Help you Declare Your Worth.
+          </p>
+        </section>
+
+        {/* WHY THIS FESTIVAL MATTERS */}
+        <section className="festival-purpose-section">
+          <h2>Why the Declare Your Worth Festival Matters</h2>
+          <p>
+            Growing up, financial literacy wasn’t something that was taught in my household—or in many others like mine. 
+            I know firsthand what it feels like to navigate adulthood without the tools, resources, or financial confidence needed to thrive.
+          </p>
+          <p>
+            This festival isn’t just another community event. It’s a movement to break generational cycles, create access to financial education, and give kids and adults a chance to learn, grow, and dream bigger—together.
+          </p>
+          <p>
+            From fun workshops and kid entrepreneur zones to budgeting bootcamps and real financial tools—this is my way of making sure no family has to go without the information that could change their life.
+          </p>
+          <Link to="/festival" className="btn burgundy">
+            Explore the Festival →
+          </Link>
+        </section>
+
         {/* FESTIVAL PROMO */}
         <section className="festival-banner" style={{ backgroundImage: `url(${eventBackground})` }}>
           <div className="festival-overlay">
@@ -89,6 +127,7 @@ export default function Homepage() {
             <p className="early-bird-note">Early Bird pricing ends soon!</p>
           </div>
         </section>
+
         {/* TESTIMONIAL CAROUSEL */}
         <section className="testimonial-carousel">
           <h2>Client Breakthroughs</h2>
@@ -99,6 +138,7 @@ export default function Homepage() {
             </div>
           </div>
         </section>
+
         {/* COACHING PACKAGES */}
         <section className="packages">
           <h2>Your Coaching Options</h2>
@@ -118,6 +158,7 @@ export default function Homepage() {
           </div>
           <Link to="/coaching" className="btn burgundy">Start Your Learning Journey Today</Link>
         </section>
+
         {/* OTHER SERVICES */}
         <section className="packages">
           <h2>More Ways to Work With Dani</h2>
@@ -145,6 +186,7 @@ export default function Homepage() {
             </div>
           </div>
         </section>
+
         {/* CONTACT CTA */}
         <section className="coaching-contact">
           <h2>Still Have Questions?</h2>

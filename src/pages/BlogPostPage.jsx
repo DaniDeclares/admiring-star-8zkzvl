@@ -1,7 +1,8 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import posts from "../posts/posts";
-import "./BlogPage.css"; // Reuse blog page styles
+import "./BlogPage.css";
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -14,26 +15,40 @@ export default function BlogPostPage() {
         .replace(/(^-|-$)/g, "") === slug
   );
 
-  if (!post)
+  if (!post) {
     return (
-      <main className="blog-post-page" style={{ padding: 40, textAlign: "center" }}>
-        <h2 style={{ color: "#8B1E2E" }}>Post not found.</h2>
-        <Link to="/blog" className="btn btn--secondary" style={{ marginTop: 20 }}>
+      <main className="blog-post-page not-found">
+        <Helmet>
+          <title>Post Not Found • Dani Declares Blog</title>
+        </Helmet>
+        <h2>Oops! Post Not Found.</h2>
+        <Link to="/blog" className="btn btn--secondary">
           ← Back to Blog
         </Link>
       </main>
     );
+  }
 
   return (
-    <main className="blog-post-page" style={{ maxWidth: 720, margin: "2rem auto", padding: 18 }}>
-      <Link to="/blog" className="btn btn--secondary" style={{ marginBottom: 24 }}>
+    <main className="blog-post-page">
+      <Helmet>
+        <title>{post.title} • Dani Declares Blog</title>
+      </Helmet>
+
+      <Link to="/blog" className="btn btn--secondary back-btn">
         ← Back to Blog
       </Link>
-      <h1 className="blog-title" style={{ marginTop: 10 }}>{post.title}</h1>
-      <div className="blog-meta" style={{ color: "#8B1E2E", marginBottom: 22 }}>
+
+      <h1 className="blog-title">{post.title}</h1>
+
+      <div className="blog-meta">
         {post.date} &nbsp;|&nbsp; {post.author}
       </div>
-      <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+
+      <div
+        className="blog-content"
+        dangerouslySetInnerHTML={{ __html: post.content }}
+      />
     </main>
   );
 }

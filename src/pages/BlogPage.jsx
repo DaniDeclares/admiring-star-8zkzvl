@@ -1,9 +1,10 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import posts from "../posts/posts";
 import "./BlogPage.css";
 
-// Mailchimp form (update action with your Mailchimp URL!)
+// Mailchimp form (✅ Replace with your actual Mailchimp list URL!)
 const MAILCHIMP_FORM = `
 <div id="mc_embed_signup">
   <form action="https://YOUR-USERNAME.usXX.list-manage.com/subscribe/post?u=XXXX&amp;id=XXXX" method="post" target="_blank" novalidate>
@@ -16,10 +17,20 @@ const MAILCHIMP_FORM = `
 export default function BlogPage() {
   return (
     <main className="blog-page">
-      <h1 className="blog-title">Dani Declares Blog</h1>
-      <p className="blog-tagline">Stories, strategies, and spotlight features for every life chapter.</p>
+      <Helmet>
+        <title>Dani Declares Blog</title>
+        <meta
+          name="description"
+          content="Stories, strategies, and spotlight interviews from the Dani Declares community. Read, learn, and stay inspired."
+        />
+      </Helmet>
 
-      {/* Mailchimp Subscribe */}
+      <h1 className="blog-title">Dani Declares Blog</h1>
+      <p className="blog-tagline">
+        Stories, strategies, and spotlights for every life chapter.
+      </p>
+
+      {/* Mailchimp Subscribe Form */}
       <div
         className="blog-mailchimp"
         dangerouslySetInnerHTML={{ __html: MAILCHIMP_FORM }}
@@ -35,7 +46,7 @@ export default function BlogPage() {
             <div key={p.title} className="blog-card">
               <h2 className="blog-card-title">{p.title}</h2>
               <p className="blog-meta">
-                <span>{p.date}</span> &nbsp;|&nbsp; {p.author}
+                {p.date} &nbsp;|&nbsp; {p.author}
               </p>
               <p className="blog-summary">{p.summary}</p>
               <Link className="btn btn--secondary" to={`/blog/${slug}`}>

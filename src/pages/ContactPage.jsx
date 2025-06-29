@@ -14,13 +14,16 @@ export default function ContactPage() {
         <title>Contact • Dani Declares</title>
         <meta
           name="description"
-          content="Have a question or want to work together? Reach out to Dani Declares today."
+          content="Questions, bookings, or collaborations? Reach out to Dani Declares for personalized support and next steps."
         />
       </Helmet>
 
       <main className="contact-page">
-        <h1>Get In Touch</h1>
-        <p>Have a question or want to work together? Drop your info below.</p>
+        <h1>Let’s Connect</h1>
+        <p>
+          Have questions about coaching, events, bookings, or partnership
+          opportunities? Fill out the form below and we’ll follow up shortly.
+        </p>
 
         <HubSpotForm
           region="na2"
@@ -29,11 +32,16 @@ export default function ContactPage() {
         />
 
         <section className="direct-contact">
-          <h3>Prefer email or phone?</h3>
+          <h3>Prefer Email or Phone?</h3>
           <p>
-            📧 <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
+            📧{" "}
+            <a href="mailto:admin@danideclares.com">
+              admin@danideclares.com
+            </a>
             <br />
-            📞 <a href="tel:+14707423930">(470) 742-3930</a> or <a href="tel:+18643265362">(864) 326-5362</a>
+            📞{" "}
+            <a href="tel:+14705234892">(470) 523-4892</a> |{" "}
+            <a href="tel:+18643265362">(864) 326-5362</a>
           </p>
         </section>
       </main>

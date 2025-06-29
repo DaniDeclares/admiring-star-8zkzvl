@@ -3,7 +3,6 @@ import { Helmet } from "react-helmet-async";
 import HubSpotForm from "../components/HubSpotForm.jsx";
 import "./CoachingPage.css";
 
-// Main coaching packages
 const PACKAGES = [
   {
     name: "Discovery Session",
@@ -28,10 +27,9 @@ const PACKAGES = [
     payUrl: "https://buy.stripe.com/4gMfZgcCdf1k1Hxdhn6kg0n",
     scheduleUrl: "https://tidycal.com/danideclaresns/vip-intensive",
     desc: "An all-day VIP experience. Reset your vision, build your system, solve roadblocks, and walk away with a rock-solid plan. Best for entrepreneurs and business owners ready for a leap."
-  },
+  }
 ];
 
-// Starter Kits
 const STARTER_KITS = [
   {
     name: "Pop-Up Wedding Starter Kit",
@@ -47,7 +45,6 @@ const STARTER_KITS = [
   }
 ];
 
-// Courses (examples—update name, price, link, desc as you build more!)
 const COURSES = [
   {
     name: "Digital Notary Empire: Get Booked Online",
@@ -79,10 +76,10 @@ export default function CoachingPage() {
   return (
     <main className="coaching-page">
       <Helmet>
-        <title>Coaching • Dani Declares</title>
+        <title>Business & Mindset Coaching • Dani Declares</title>
         <meta
           name="description"
-          content="Book a session with Dani to unlock confidence, cash flow, and clarity. Now offering coaching, pop-up starter kits, and business growth workshops."
+          content="Book a coaching session with Dani to unlock clarity, cash flow, and confidence. Packages include strategy calls, VIP intensives, and starter kits."
         />
       </Helmet>
 
@@ -102,106 +99,55 @@ export default function CoachingPage() {
         </a>
       </header>
 
-      <section className="testimonials testimonial-carousel">
+      <section className="testimonial-carousel">
         <h2>Client Breakthroughs</h2>
         <div className="carousel">
-          {[
-            { name: "Alex P.", text: "Dani helped me unlock my power and profit — I’m finally building the life I want." },
-            { name: "Morgan S.", text: "I gained so much clarity and confidence. My business is thriving!" },
-            { name: "Jamie L.", text: "The mindset shifts I experienced with Dani were game-changing." },
-            { name: "Taylor R.", text: "I left every session with a clear plan and renewed motivation." },
-            { name: "Jordan K.", text: "Dani’s coaching gave me the push I needed to take action." },
-            { name: "Casey M.", text: "I finally feel in control of my growth and direction." },
-          ].map((client, idx) => (
-            <div key={idx} className="carousel-item testimonial-slide">
-              <div className="testimonial-avatar" aria-label={`Avatar for ${client.name}`}>
-                <span>
-                  {client.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </span>
-              </div>
-              <p>“{client.text}”</p>
-              <span>— {client.name}</span>
+          {["Dani helped me unlock my power and profit — I’m finally building the life I want.", "I gained clarity and raised my rates.", "The mindset shifts were game-changing.", "I booked 5 new clients in 2 weeks.", "From scattered to strategic—thank you, Dani!"].map((text, idx) => (
+            <div key={idx} className="testimonial-slide">
+              <p>“{text}”</p>
             </div>
           ))}
         </div>
       </section>
 
       <section className="packages">
-        <h2>Coaching Options</h2>
+        <h2>1:1 Coaching Packages</h2>
         <div className="packages-grid">
           {PACKAGES.map((p) => (
             <div key={p.name} className="package-card">
               <h3>{p.name}</h3>
-              <p className="meta">
-                {p.duration} &nbsp;•&nbsp; <strong>${p.price}</strong>
-              </p>
+              <p className="meta">{p.duration} • <strong>${p.price}</strong></p>
               <p className="desc">{p.desc}</p>
-              {/* STEP 1: Pay on Stripe */}
-              <a
-                href={p.payUrl}
-                className="btn btn--primary"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ marginBottom: 8 }}
-              >
-                Pay & Secure Your Spot
-              </a>
-              {/* STEP 2: Schedule */}
-              <div className="schedule-note" style={{ marginTop: 8, fontSize: "0.93em", color: "#8B1E2E" }}>
-                <strong>After payment,</strong> you'll be redirected (or receive a link) to schedule your session.<br />
-                Trouble? <a href={p.scheduleUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "underline" }}>Click here to book.</a>
-              </div>
+              <a href={p.payUrl} className="btn btn--primary" target="_blank" rel="noopener noreferrer">Pay & Reserve</a>
+              <p className="after-pay">After payment, schedule your session: <a href={p.scheduleUrl} target="_blank" rel="noopener noreferrer">Book Here</a></p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Starter Kits Section */}
       <section className="packages starter-kits">
-        <h2>Pop-Up Starter Kits</h2>
+        <h2>Starter Kits</h2>
         <div className="packages-grid">
           {STARTER_KITS.map((kit) => (
             <div key={kit.name} className="package-card">
               <h3>{kit.name}</h3>
               <p className="desc">{kit.desc}</p>
-              <p className="meta">
-                <strong>${kit.price}</strong> (Instant Download)
-              </p>
-              <a
-                href={kit.buyUrl}
-                className="btn btn--secondary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Buy Now
-              </a>
+              <p className="meta">${kit.price} • Instant Download</p>
+              <a href={kit.buyUrl} className="btn btn--secondary" target="_blank" rel="noopener noreferrer">Buy Now</a>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Courses Section */}
       <section className="packages digital-courses">
-        <h2>Mini Courses & Digital Downloads</h2>
+        <h2>Digital Courses</h2>
         <div className="packages-grid">
           {COURSES.map((course) => (
             <div key={course.name} className="package-card">
               <h3>{course.name}</h3>
               <p className="desc">{course.desc}</p>
-              <p className="meta">
-                <strong>${course.price}</strong>
-              </p>
-              <a
-                href={course.buyUrl}
-                className="btn btn--secondary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Buy & Start Instantly
-              </a>
+              <p className="meta">${course.price}</p>
+              <a href={course.buyUrl} className="btn btn--secondary" target="_blank" rel="noopener noreferrer">Buy & Start Instantly</a>
             </div>
           ))}
         </div>
@@ -210,36 +156,17 @@ export default function CoachingPage() {
       <section className="benefits">
         <h2>What You’ll Gain</h2>
         <ul>
-          <li>💡 Clarity on your next steps</li>
-          <li>📈 A personalized growth strategy</li>
-          <li>🎯 Accountability and support</li>
-          <li>💬 Real-time mindset shifts</li>
-          <li>📚 Instant access to ready-to-sell digital kits & courses</li>
+          <li>✅ Clarity on next steps</li>
+          <li>✅ Strategy for growth</li>
+          <li>✅ Real-time mindset shifts</li>
+          <li>✅ Downloadable resources</li>
         </ul>
       </section>
 
       <section className="coaching-contact">
-        <h2>Still Have Questions?</h2>
-        <p>Drop your email and we’ll follow up with a personalized response:</p>
+        <h2>Questions Before You Book?</h2>
+        <p>Drop your email and we’ll follow up with personalized next steps:</p>
         <HubSpotForm />
-      </section>
-
-      <section className="coaching-session">
-        <h2>Power Coaching Session</h2>
-        <p>
-          A one-on-one breakthrough session: walk away with clarity, momentum, and a customized action plan. Perfect if you want deep, personalized strategy without a long-term commitment.
-        </p>
-        <a
-          href="https://buy.stripe.com/aFa5kC9q18CW2LBb9f6kg01"
-          className="btn btn--primary"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Pay & Book Power Session
-        </a>
-        <div style={{ fontSize: "0.93em", color: "#8B1E2E", marginTop: 8 }}>
-          After payment, you'll receive instructions to schedule your session.
-        </div>
       </section>
     </main>
   );
