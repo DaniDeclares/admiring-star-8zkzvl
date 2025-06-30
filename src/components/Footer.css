@@ -1,3 +1,5 @@
+/* src/components/Footer.css */
+
 .footer {
   background-color: #8b1e2e;
   color: #fff;
@@ -24,12 +26,34 @@
   color: #fff2b0;
 }
 
+/* Quick site links (Membership, Terms, Privacy) */
+.footer-site-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.footer-site-links a {
+  color: #ffd700;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-site-links a:hover {
+  color: #fff2b0;
+}
+
+/* Social media links */
 .footer-social {
   display: flex;
   justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .footer-social a {
@@ -42,6 +66,7 @@
   color: #ffd700;
 }
 
+/* Bottom copyright/legal */
 .footer-bottom {
   font-size: 0.85rem;
   opacity: 0.8;

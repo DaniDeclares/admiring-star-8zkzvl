@@ -1,3 +1,5 @@
+/* src/components/Navbar.css */
+
 .navbar {
   background: #fff;
   border-bottom: 2px solid #D4AF37;
@@ -30,17 +32,45 @@
   align-items: center;
 }
 
+/* Base link styles */
 .nav-link {
+  position: relative;
   text-decoration: none;
   color: #333;
   font-weight: 600;
   transition: color 0.3s;
 }
 
+/* Hover underline animation */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 0;
+  height: 2px;
+  background: #D4AF37;
+  transition: width 0.3s ease;
+}
+
 .nav-link:hover {
   color: #8B1E2E;
 }
 
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Active page styling */
+.nav-link.active {
+  color: #8B1E2E;
+}
+
+.nav-link.active::after {
+  width: 100%;
+}
+
+/* Cart icon */
 .cart-link {
   position: relative;
   color: #8B1E2E;
@@ -58,6 +88,7 @@
   font-weight: bold;
 }
 
+/* Mobile styles */
 @media (max-width: 768px) {
   .hamburger {
     display: block;
@@ -81,10 +112,4 @@
   .nav-link {
     margin: 0.5rem 0;
   }
-
-.nav-link.active {
-  font-weight: bold;
-  color: #D4AF37; /* Dani Declares gold accent */
-}
-
 }

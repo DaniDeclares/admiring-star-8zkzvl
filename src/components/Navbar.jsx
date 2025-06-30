@@ -1,3 +1,4 @@
+// src/components/Navbar.jsx
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
@@ -18,15 +19,16 @@ export default function Navbar() {
   };
 
   const links = [
-    ["/",         "Home"],
-    ["/shop",     "Shop"],
-    ["/coaching", "Coaching"],
-    ["/events",   "Events"],
-    ["/weddings", "Weddings"],
-    ["/notary",   "Notary"],
-    ["/financial","Financial"],
-    ["/blog",     "Blog"],
-    ["/festival", "Festival"],
+    ["/",          "Home"],
+    ["/shop",      "Shop"],
+    ["/coaching",  "Coaching"],
+    ["/events",    "Events"],
+    ["/weddings",  "Weddings"],
+    ["/notary",    "Notary"],
+    ["/financial", "Financial"],
+    ["/blog",      "Blog"],
+    ["/festival",  "Festival"],
+    ["/membership","Membership"],  // ← added
   ];
 
   return (
@@ -37,7 +39,11 @@ export default function Navbar() {
         </Link>
       </div>
 
-      <button className="hamburger" aria-label="Toggle menu" onClick={() => setMenuOpen(!menuOpen)}>
+      <button
+        className="hamburger"
+        aria-label="Toggle menu"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
         ☰
       </button>
 
@@ -68,5 +74,5 @@ export default function Navbar() {
         Book Now
       </a>
     </nav>
-  );
+);
 }
