@@ -1,217 +1,271 @@
-/* src/pages/FestivalPage.css — Dani Declares Festival Brand */
+/* src/pages/FestivalPage.css — Updated Dani Declares Festival Styles */
 
+:root {
+  --burgundy: #8B1E2E;
+  --gold: #D4AF37;
+  --ivory: #F8F5F1;
+  --dark: #333;
+  --light-pink: #f9f3f5;
+  --font-base: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+/* Page wrapper */
 .festival-page {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 2.2rem 1rem 3.2rem 1rem;
-  background: #F8F5F1;  /* Ivory for premium, festive energy */
+  padding: 2rem 1rem 3rem;
+  background: var(--ivory);
+  color: var(--dark);
+  font-family: var(--font-base);
 }
 
+/* Hero */
 .festival-hero {
-  background-size: cover;
-  background-position: center;
-  padding: 90px 20px 50px 20px; /* Slightly reduced for a cleaner hero */
-  text-align: center;
   position: relative;
-}
-.festival-hero-overlay {
-  background: rgba(139, 30, 46, 0.73); /* Richer burgundy overlay for contrast */
-  padding: 42px 20px;
-  border-radius: 18px;
-  display: inline-block;
+  background: url('/assets/festival/hero.jpg') center/cover no-repeat;
+  padding: 6rem 1rem 4rem;
+  text-align: center;
   color: #fff;
-  margin: 0 auto;
-  max-width: 700px;
-  box-shadow: 0 6px 24px rgba(139,30,46,0.10);
 }
-
-.festival-overview {
-  background: #fff;
-  border-radius: 1.1rem;
-  padding: 2.1rem 1.7rem;
-  margin-bottom: 2.2rem;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(212,175,55,0.07);
+.festival-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(139,30,46,0.6);
 }
-
-.festival-page h1,
-.festival-page h2 {
-  text-align: center;
-  color: #8B1E2E;
+.festival-hero > * {
+  position: relative;
+  z-index: 1;
+}
+.festival-hero h1 {
   font-family: 'Georgia', serif;
-  letter-spacing: 0.2px;
-  font-weight: bold;
-  text-shadow: 0 2px 12px #f9e7e7;
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
-.festival-page h3 {
-  color: #8B1E2E;
-  font-family: 'Merriweather', Georgia, serif;
+.festival-subtitle {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
 }
-.festival-page p,
-.festival-overview p {
-  font-size: 1.13rem;
-  margin-bottom: 2rem;
-  color: #353535;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+.festival-cta-hero {
+  display: inline-block;
+  margin-top: 0.5rem;
 }
 
-.festival-images-grid,
-.kid-images-grid,
-.workshop-images-grid {
-  display: flex;
-  gap: 1.3rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 1.4rem;
+/* Why section */
+.festival-why {
+  max-width: 800px;
+  margin: 3rem auto;
+  text-align: center;
 }
-.festival-images-grid img,
-.kid-images-grid img,
-.workshop-images-grid img {
-  width: 115px;
-  height: 115px;
+.festival-why h2 {
+  font-family: 'Georgia', serif;
+  color: var(--burgundy);
+  margin-bottom: 1rem;
+}
+.festival-why p {
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+}
+
+/* Highlights gallery */
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1.2rem;
+  margin: 2rem 0;
+  justify-items: center;
+}
+.highlight-item img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 1.1rem;
-  box-shadow: 0 2px 10px rgba(139,30,46,0.10);
-  border: 2.5px solid #D4AF37;
-  background: #fff;
+  border-radius: 1rem;
+  border: 3px solid var(--gold);
+  box-shadow: 0 2px 10px rgba(139,30,46,0.1);
 }
-@media (max-width: 700px) {
-  .festival-images-grid img,
-  .kid-images-grid img,
-  .workshop-images-grid img {
-    width: 88px;
-    height: 88px;
-  }
+.highlight-item figcaption {
+  margin-top: 0.5rem;
+  font-weight: 500;
+  color: var(--burgundy);
 }
 
-.schedule-card {
-  background: #fff;
+/* Schedule table */
+.festival-schedule {
+  margin: 3rem 0;
+}
+.festival-schedule h2 {
+  text-align: center;
+  font-family: 'Georgia', serif;
+  color: var(--burgundy);
+  margin-bottom: 1rem;
+}
+.festival-schedule table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.festival-schedule th,
+.festival-schedule td {
+  border: 1px solid #ccc;
+  padding: 0.75rem;
+  text-align: center;
+}
+.festival-schedule th {
+  background: var(--gold);
+  color: #000;
+  font-weight: 600;
+}
+
+/* Location & map */
+.festival-location {
+  margin: 3rem 0;
+  text-align: center;
+}
+.map-wrapper {
+  width: 100%;
+  height: 300px;
+  margin: 1rem 0 0.5rem;
+}
+.map-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
   border-radius: 1rem;
-  box-shadow: 0 2px 10px rgba(139,30,46,0.07);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Tickets & vendor booths */
+.ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+.ticket-card {
+  background: #fff;
+  border: 1px solid var(--ivory);
+  border-radius: 1rem;
   padding: 1.5rem 1rem;
-  margin-bottom: 2rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(139,30,46,0.07);
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
-.schedule-card ul {
-  list-style: disc;
-  margin: 0 0 1.2rem 1.1rem;
-  color: #555;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+.ticket-card:hover {
+  box-shadow: 0 6px 18px rgba(139,30,46,0.15);
+  border-color: var(--gold);
 }
-
-.vendor-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: center;
-  margin-bottom: 2.2rem;
-}
-.vendor-card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 2px 10px rgba(139,30,46,0.08);
-  padding: 1.5rem 1.1rem;
-  min-width: 240px;
-  max-width: 340px;
-  flex: 1 1 260px;
-  text-align: left;
-  border: 1.5px solid #F8F5F1;
-  transition: box-shadow 0.15s, border-color 0.13s;
-}
-.vendor-card:hover {
-  box-shadow: 0 6px 18px rgba(139,30,46,0.16);
-  border-color: #D4AF37;
-}
-
-.vendor-card h3 {
-  color: #8B1E2E;
+.ticket-card h3 {
+  color: var(--burgundy);
   margin-bottom: 0.5rem;
 }
-.vendor-card ul {
-  list-style: none;
-  padding-left: 0;
+.ticket-card p {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
 }
-.vendor-card ul ul {
-  margin-top: 0.5rem;
-  margin-left: 1.3rem;
-}
-.vendor-card li {
-  margin-bottom: 0.7rem;
-}
-.vendor-card a {
-  color: #D4AF37;
-  text-decoration: underline;
-  font-weight: 600;
-}
-.vendor-card a:hover {
-  color: #8B1E2E;
+.ticket-card .btn {
+  width: 100%;
 }
 
+/* Speakers & sponsors */
+.partner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin: 3rem 0;
+}
+.partner-card {
+  background: #fff;
+  border: 1px solid var(--ivory);
+  border-radius: 1rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(139,30,46,0.07);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.partner-card:hover {
+  box-shadow: 0 6px 18px rgba(139,30,46,0.15);
+  border-color: var(--gold);
+}
+.partner-card h3 {
+  color: var(--burgundy);
+  margin-bottom: 0.5rem;
+}
+.partner-card p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+/* FAQ */
 .festival-faq {
-  background: #f9f3f5;
+  background: var(--light-pink);
   border-radius: 1rem;
   padding: 2rem 1.5rem;
-  margin-bottom: 2.3rem;
   box-shadow: 0 2px 8px rgba(212,175,55,0.06);
+  margin: 3rem 0;
 }
-.faq-item {
-  margin-bottom: 1.2rem;
-}
-.faq-item h3 {
-  color: #8B1E2E;
-  margin-bottom: 0.2rem;
-  font-size: 1.15rem;
-}
-.faq-item p {
-  margin-bottom: 0.6rem;
-}
-
-.festival-cta {
+.festival-faq h2 {
   text-align: center;
-  padding: 2rem 1.5rem 1rem 1.5rem;
-  background: #fff5f7;
-  border-radius: 1.1rem;
-  box-shadow: 0 2px 10px rgba(212,175,55,0.05);
+  color: var(--burgundy);
+  font-family: 'Georgia', serif;
+  margin-bottom: 1rem;
 }
-.festival-cta-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.1rem;
-  justify-content: center;
-  margin-bottom: 1.2rem;
+.festival-faq dl {
+  max-width: 800px;
+  margin: 0 auto;
 }
-.btn, .btn.burgundy {
-  background: #8B1E2E;
-  color: #fff;
-  border: none;
-  border-radius: 0.7rem;
-  padding: 0.7rem 1.5rem;
-  font-size: 1.07rem;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  margin-top: 0.5rem;
-  font-family: inherit;
+.festival-faq dt {
   font-weight: 600;
-  transition: background 0.17s, color 0.16s, box-shadow 0.15s;
-  box-shadow: 0 2px 8px rgba(139,30,46,0.07);
+  color: var(--burgundy);
+  margin-top: 1rem;
 }
-.btn.burgundy,
-.btn--primary { background: #8B1E2E; }
-.btn.burgundy:hover,
-.btn--primary:hover { background: #D4AF37; color: #8B1E2E; }
-.btn--secondary { background: #D4AF37; color: #222; }
-.btn--secondary:hover { background: #b8952c; color: #fff; }
+.festival-faq dd {
+  margin: 0.25rem 0 0.75rem 1rem;
+  line-height: 1.5;
+}
 
-@media (max-width: 900px) {
-  .festival-images-grid,
-  .vendor-grid,
-  .festival-cta-buttons {
-    flex-direction: column;
-    gap: 1.2rem;
+/* Final CTA */
+.festival-cta-final {
+  background: #fff5f7;
+  border-radius: 1rem;
+  padding: 2rem 1.5rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(212,175,55,0.05);
+  margin: 3rem 0 1rem;
+}
+.festival-cta-final h2 {
+  color: var(--burgundy);
+  margin-bottom: 1rem;
+  font-family: 'Georgia', serif;
+}
+.festival-cta-final .btn.large {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+}
+.festival-help {
+  margin-top: 0.8rem;
+}
+.festival-warning {
+  margin-top: 1rem;
+  color: #a00;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .festival-hero {
+    padding: 4rem 1rem 2.5rem;
   }
-  .vendor-card {
-    max-width: 98vw;
-    min-width: 0;
-    padding: 1.2rem 0.7rem;
+  .festival-hero h1 {
+    font-size: 2.4rem;
+  }
+  .ticket-grid,
+  .partner-grid,
+  .highlights-grid {
+    grid-template-columns: 1fr;
+  }
+  .map-wrapper {
+    height: 200px;
   }
 }
