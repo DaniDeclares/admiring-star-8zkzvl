@@ -8,10 +8,6 @@ import highlight1 from "../assets/festival-images/istockphoto-147288826-612x612.
 import highlight2 from "../assets/festival-images/istockphoto-1048325338-612x612.webp";
 import highlight3 from "../assets/festival-images/istockphoto-1266364936-612x612.jpg";
 import highlight4 from "../assets/festival-images/istockphoto-1495159969-612x612.webp";
-
-// **NEW** import your hero image so Webpack bundles it
-import heroImage from "../assets/festival/hero.jpg";
-
 import "./FestivalPage.css";
 
 export default function FestivalPage() {
