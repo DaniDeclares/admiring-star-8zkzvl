@@ -95,11 +95,12 @@ export default function Homepage() {
           </p>
         </section>
 
-        {/* FESTIVAL PURPOSE */}
+        {/* WHY THIS FESTIVAL MATTERS */}
         <section className="festival-purpose-section">
           <h2>Why the Declare Your Worth Festival Matters</h2>
           <p>
-            I grew up without fun, hands-on financial education or entrepreneurial mentorship. This festival breaks generational cycles, providing families real money skills and community support.
+            Growing up, financial literacy wasn’t something that was taught in my household—or in many others like mine. 
+            I know firsthand what it feels like to navigate adulthood without the tools, resources, or financial confidence needed to thrive.
           </p>
           <p>
             From kid entrepreneur zones and budgeting bootcamps to interactive workshops and live entertainment—this event is a movement to empower every generation.
