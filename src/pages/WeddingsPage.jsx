@@ -1,65 +1,87 @@
+// src/pages/WeddingsPage.jsx
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import "./WeddingsPage.css";
 
+// import your gallery images via Webpack
+import barnCeiling from "../assets/weddings/barn-ceiling-drapery.jpg";
+import barnOrbs from "../assets/weddings/barn-hanging-glass-orbs.jpg";
+import dressArchway from "../assets/weddings/WeddingDress_Hanging_Archway.jpg";
+import rusticReception from "../assets/weddings/rustic-barn-wedding-reception-with-greenery-on-wooden-table.jpg";
+import floralCouple from "../assets/weddings/FloralWedding_Couple_GoldChairs.jpg";
+import lakefrontSetup from "../assets/weddings/LakefrontWedding_CeremonySetup.jpg";
+import bridePrep from "../assets/weddings/Bride_Mom_Veil_Prep.jpg";
+import vintageCar from "../assets/weddings/VintageCar_BrideGroom_BouquetKiss.jpg";
+import coffeeTable from "../assets/weddings/wooden-coffee-table.jpg";
+
+// constants for reuse
+const CONTACT_URL = "https://danideclares.com/contact";
+const HEADER_CTA_TEXT = "Book Your Free Wedding Call";
+const FINAL_CTA_TEXT = "Start Planning Today";
+
 // Core wedding packages
 const PACKAGES = [
+  /* ...same as before... */
   {
     title: "Simple Vows",
     price: "$199",
-    description: "Short and sweet legal ceremony. Perfect for elopements or vow renewals. Officiant & filing included.",
+    description:
+      "Short and sweet legal ceremony. Perfect for elopements or vow renewals. Officiant & filing included.",
     link: "https://buy.stripe.com/7sIg2M4WldBMd1G9AA",
   },
   {
     title: "Courthouse-Style Wedding",
     price: "$499",
-    description: "Skip the courthouse! A professional, styled ceremony with script, filing, and on-location service.",
+    description:
+      "Skip the courthouse! A professional, styled ceremony with script, filing, and on-location service.",
     link: "https://buy.stripe.com/fZeaG9feF5eAd1GcMO",
   },
   {
     title: "Intimate All-Inclusive Wedding",
     price: "$1,499",
-    description: "Venue, decor, music, photos, and officiant—all bundled for up to 25 guests. Stress-free & budget-friendly.",
+    description:
+      "Venue, decor, music, photos, and officiant—all bundled for up to 25 guests. Stress-free & budget-friendly.",
     link: "https://buy.stripe.com/bIY9CUeE9fYgd1GbIK",
   },
   {
     title: "Reception-Only Package",
     price: "$2,500+",
-    description: "Already married? Let’s party! Includes venue, decor, food coordination, DJ, and guest flow support.",
+    description:
+      "Already married? Let’s party! Includes venue, decor, food coordination, DJ, and guest flow support.",
     link: "https://buy.stripe.com/5kAeXfcYv9Yg0Ra3cd",
   },
   {
     title: "Full-Service Planning",
     price: "$4,999",
-    description: "From venue scouting to day-of coordination. Full-service planning with vendor management and timeline creation.",
+    description:
+      "From venue scouting to day-of coordination. Full-service planning with vendor management and timeline creation.",
     link: "https://buy.stripe.com/5kA6ph0A91jUcLu4gl",
   },
   {
     title: "Premium All-Inclusive Wedding",
     price: "$10,000+",
-    description: "The total package: venue, catering, decor, entertainment, guest logistics, and full planning team for large or destination weddings.",
+    description:
+      "The total package: venue, catering, decor, entertainment, guest logistics, and full planning team for large or destination weddings.",
     link: "https://buy.stripe.com/fZe9CU2A9eYg5cY3cd",
   },
 ];
 
-// Popular add-ons
-const ADDONS = [
-  { title: "Rehearsal Coordination Add-On", price: "$150", description: "Pre-ceremony walkthrough and coordination for smooth execution.", bookUrl: "https://tidycal.com/danideclaresns/rehearsal-coordination" },
-  { title: "Bouquet & Boutonniere", price: "$125", description: "Fresh florals for bride and groom—bouquet & boutonniere.", bookUrl: "https://tidycal.com/danideclaresns/flowers" },
-  { title: "Photography Add-On (1 hr)", price: "$250", description: "Professional photographer for one hour of your ceremony.", bookUrl: "https://tidycal.com/danideclaresns/photography" },
-  { title: "Live Streaming Add-On", price: "$399", description: "Stream your ceremony live for virtual guests.", bookUrl: "https://tidycal.com/danideclaresns/live-stream" },
-  { title: "Ceremony Script Customization", price: "$50", description: "Fully personalized ceremony script tailored to your story.", bookUrl: "https://tidycal.com/danideclaresns/script" },
-];
-
-// Bundled deals
-const BUNDLES = [
-  { title: "Wedding Essentials Bundle", price: "$1,650", description: "Intimate All-Inclusive + Photography Add-On + Bouquet & Boutonniere.", link: "https://buy.stripe.com/essentials-bundle" },
-  { title: "I Do & Done Micro-Wedding Bundle", price: "$799", description: "Simple Vows + Decor Setup + Photography + Filing.", link: "https://buy.stripe.com/micro-wedding-bundle" },
+// Gallery images array of objects
+const GALLERY = [
+  { src: barnCeiling, alt: "Barn ceiling drapery" },
+  { src: barnOrbs, alt: "Hanging glass orbs in barn" },
+  { src: dressArchway, alt: "Wedding dress hanging in archway" },
+  { src: rusticReception, alt: "Rustic barn reception with greenery" },
+  { src: floralCouple, alt: "Couple seated on gold chairs with florals" },
+  { src: lakefrontSetup, alt: "Lakefront wedding ceremony setup" },
+  { src: bridePrep, alt: "Bride and mom preparing veil" },
+  { src: vintageCar, alt: "Bride and groom kissing by vintage car" },
+  { src: coffeeTable, alt: "Wooden coffee table decor" },
 ];
 
 export default function WeddingsPage() {
   return (
-    <div className="weddings-page">
+    <main className="weddings-page">
       <Helmet>
         <title>Wedding Officiant, Planning & Packages • Dani Declares</title>
         <meta
@@ -70,70 +92,39 @@ export default function WeddingsPage() {
 
       <header className="weddings-hero">
         <h1>Weddings by Dani Declares</h1>
-        <p>
-          Stylish, affordable, and stress-free ceremonies & receptions across Georgia.
-        </p>
-        <a className="btn btn--primary" href="https://danideclares.com/contact">
-          Book Your Free Wedding Call
+        <p>Stylish, affordable, and stress-free ceremonies & receptions across Georgia.</p>
+        <a className="btn btn--primary" href={CONTACT_URL}>
+          {HEADER_CTA_TEXT}
         </a>
       </header>
 
       <section className="package-list">
         <h2>Core Wedding Packages</h2>
-        {PACKAGES.map((pkg, idx) => (
-          <div className="package-card" key={idx}>
-            <h2>{pkg.title}</h2>
-            <p className="package-price">{pkg.price}</p>
-            <p className="package-desc">{pkg.description}</p>
-            <a
-              className="btn btn--secondary"
-              href={pkg.link}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Reserve This Package
-            </a>
-          </div>
-        ))}
-      </section>
-
-      <section className="addons-section">
-        <h2>Popular Add-Ons</h2>
-        <div className="addons-grid">
-          {ADDONS.map((add, i) => (
-            <div className="addon-card" key={i}>
-              <h3>{add.title}</h3>
-              <p className="addon-price">{add.price}</p>
-              <p className="addon-desc">{add.description}</p>
+        <div className="packages-grid">
+          {PACKAGES.map((pkg) => (
+            <div className="package-card" key={pkg.title}>
+              <h3>{pkg.title}</h3>
+              <p className="package-price">{pkg.price}</p>
+              <p className="package-desc">{pkg.description}</p>
               <a
-                className="btn btn--primary"
-                href={add.bookUrl}
+                className="btn btn--secondary"
+                href={pkg.link}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Add On
+                Reserve This Package
               </a>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bundles-section">
-        <h2>Special Bundles</h2>
-        <div className="bundles-grid">
-          {BUNDLES.map((b, i) => (
-            <div className="bundle-card" key={i}>
-              <h3>{b.title}</h3>
-              <p className="bundle-price">{b.price}</p>
-              <p className="bundle-desc">{b.description}</p>
-              <a
-                className="btn btn--secondary"
-                href={b.link}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Reserve Bundle
-              </a>
+      <section className="gallery-section">
+        <h2>Real Weddings & Inspiration</h2>
+        <div className="gallery-grid">
+          {GALLERY.map(({ src, alt }) => (
+            <div className="gallery-img-wrapper" key={alt}>
+              <img src={src} alt={alt} className="gallery-img" loading="lazy" />
             </div>
           ))}
         </div>
@@ -155,10 +146,10 @@ export default function WeddingsPage() {
           Let’s create a wedding day that reflects your love and your story.
           Easy. Affordable. Unforgettable.
         </p>
-        <a className="btn btn--primary" href="https://danideclares.com/contact">
-          Start Planning Today
+        <a className="btn btn--primary" href={CONTACT_URL}>
+          {FINAL_CTA_TEXT}
         </a>
       </section>
-    </div>
+    </main>
   );
 }

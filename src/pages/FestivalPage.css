@@ -4,10 +4,9 @@
   --ivory: #F8F5F1;
   --dark: #333;
   --light-pink: #f9f3f5;
-  --font-base: 'Montserrat', Arial, Helvetica, sans-serif;
+  --font-base: 'Montserrat', Arial, sans-serif;
 }
 
-/* Page wrapper */
 .festival-page {
   max-width: 1100px;
   margin: 0 auto;
@@ -17,10 +16,11 @@
   font-family: var(--font-base);
 }
 
-/* Hero */
+/* HERO */
 .festival-hero {
   position: relative;
-  background: url('/assets/festival/hero.jpg') center/cover no-repeat;
+  background-size: cover;
+  background-position: center;
   padding: 6rem 1rem 4rem;
   text-align: center;
   color: #fff;
@@ -50,7 +50,7 @@
   margin-top: 0.5rem;
 }
 
-/* Why section */
+/* WHY */
 .festival-why {
   max-width: 800px;
   margin: 3rem auto;
@@ -66,7 +66,7 @@
   margin-bottom: 1.2rem;
 }
 
-/* Highlights gallery */
+/* HIGHLIGHTS */
 .highlights-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -76,7 +76,7 @@
 }
 .highlight-item img {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1/1;
   object-fit: cover;
   border-radius: 1rem;
   border: 3px solid var(--gold);
@@ -88,7 +88,7 @@
   color: var(--burgundy);
 }
 
-/* Schedule table */
+/* SCHEDULE */
 .festival-schedule {
   margin: 3rem 0;
 }
@@ -115,84 +115,66 @@
   font-weight: 600;
 }
 
-/* Location & map */
-.festival-location {
+/* TICKETS */
+.festival-tickets {
   margin: 3rem 0;
-  text-align: center;
 }
-.map-wrapper {
-  width: 100%;
-  height: 300px;
-  margin: 1rem 0 0.5rem;
-}
-.map-wrapper iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  border-radius: 1rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-/* Tickets & vendor booths */
 .ticket-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
-  margin: 2rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 .ticket-card {
   background: #fff;
-  border: 1px solid var(--ivory);
   border-radius: 1rem;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem;
   text-align: center;
   box-shadow: 0 2px 8px rgba(139,30,46,0.07);
   transition: box-shadow 0.2s, border-color 0.2s;
 }
 .ticket-card:hover {
   box-shadow: 0 6px 18px rgba(139,30,46,0.15);
-  border-color: var(--gold);
 }
 .ticket-card h3 {
   color: var(--burgundy);
   margin-bottom: 0.5rem;
 }
-.ticket-card p {
-  font-size: 1.3rem;
+.ticket-card .meta {
+  font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 1rem;
 }
-.ticket-card .btn {
-  width: 100%;
-}
 
-/* Speakers & sponsors */
+/* PARTNERS */
 .partner-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   margin: 3rem 0;
 }
-.partner-card {
+.vendor-card,
+.sponsor-card {
   background: #fff;
-  border: 1px solid var(--ivory);
   border-radius: 1rem;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem;
   text-align: center;
   box-shadow: 0 2px 8px rgba(139,30,46,0.07);
   transition: box-shadow 0.2s, border-color 0.2s;
 }
-.partner-card:hover {
+.vendor-card:hover,
+.sponsor-card:hover {
   box-shadow: 0 6px 18px rgba(139,30,46,0.15);
   border-color: var(--gold);
 }
-.partner-card h3 {
+.vendor-card h3,
+.sponsor-card h3 {
   color: var(--burgundy);
   margin-bottom: 0.5rem;
 }
-.partner-card p {
-  font-size: 1.1rem;
+.vendor-card .meta,
+.sponsor-card .meta {
   margin-bottom: 1rem;
+  font-weight: bold;
 }
 
 /* FAQ */
@@ -223,7 +205,7 @@
   line-height: 1.5;
 }
 
-/* Final CTA */
+/* FINAL CTA */
 .festival-cta-final {
   background: #fff5f7;
   border-radius: 1rem;
@@ -250,7 +232,7 @@
   font-weight: 600;
 }
 
-/* Responsive */
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .festival-hero {
     padding: 4rem 1rem 2.5rem;
@@ -262,8 +244,5 @@
   .partner-grid,
   .highlights-grid {
     grid-template-columns: 1fr;
-  }
-  .map-wrapper {
-    height: 200px;
   }
 }

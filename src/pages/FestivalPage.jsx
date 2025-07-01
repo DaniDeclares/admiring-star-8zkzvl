@@ -2,10 +2,16 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import FestivalBanner from "../components/FestivalBanner.jsx";
+
+// festival highlights
 import highlight1 from "../assets/festival-images/istockphoto-147288826-612x612.webp";
 import highlight2 from "../assets/festival-images/istockphoto-1048325338-612x612.webp";
 import highlight3 from "../assets/festival-images/istockphoto-1266364936-612x612.jpg";
 import highlight4 from "../assets/festival-images/istockphoto-1495159969-612x612.webp";
+
+// **NEW** import your hero image so Webpack bundles it
+import heroImage from "../assets/festival/hero.jpg";
+
 import "./FestivalPage.css";
 
 export default function FestivalPage() {
@@ -23,7 +29,10 @@ export default function FestivalPage() {
       <FestivalBanner />
 
       {/* Hero */}
-      <header className="festival-hero">
+      <header
+        className="festival-hero"
+        style={{ backgroundImage: `url(${heroImage})` }}
+      >
         <h1>Declare Your Worth Festival</h1>
         <p className="festival-subtitle">
           November 29–30, 2025 • Brook Run Park, Doraville GA
@@ -44,7 +53,8 @@ export default function FestivalPage() {
         </p>
         <p>
           Whether you’re a parent, an aspiring entrepreneur, or someone ready to
-          take control of your finances—this event was made for <strong>you</strong>.
+          take control of your finances—this event was made for{" "}
+          <strong>you</strong>.
         </p>
       </section>
 
@@ -100,7 +110,7 @@ export default function FestivalPage() {
             <tr>
               <td>2:00 PM</td>
               <td>Lemonade Stand Challenge</td>
-              <td>Chill & Budget Yoga</td>
+              <td>Chill &amp; Budget Yoga</td>
             </tr>
             <tr>
               <td>3:30 PM</td>
@@ -109,7 +119,7 @@ export default function FestivalPage() {
             </tr>
             <tr>
               <td>5:00 PM</td>
-              <td>Raffle & Free Wedding Giveaway</td>
+              <td>Raffle &amp; Free Wedding Giveaway</td>
               <td>Tug-of-War Team Activity</td>
             </tr>
           </tbody>
@@ -120,48 +130,22 @@ export default function FestivalPage() {
       <section id="tickets" className="festival-tickets">
         <h2>Tickets & Vendor Booths</h2>
         <div className="ticket-grid">
-          <div className="ticket-card">
-            <h3>General Admission</h3>
-            <p className="meta">$20</p>
-            <a href="#" className="btn btn--primary">
-              Buy Now
-            </a>
-          </div>
-          <div className="ticket-card">
-            <h3>VIP Admission</h3>
-            <p className="meta">$65</p>
-            <a href="#" className="btn btn--primary">
-              Buy Now
-            </a>
-          </div>
-          <div className="ticket-card">
-            <h3>Standard Vendor Booth</h3>
-            <p className="meta">$150</p>
-            <a href="#" className="btn btn--secondary">
-              Reserve Booth
-            </a>
-          </div>
-          <div className="ticket-card">
-            <h3>Premium Vendor Booth</h3>
-            <p className="meta">$250</p>
-            <a href="#" className="btn btn--secondary">
-              Reserve Booth
-            </a>
-          </div>
-          <div className="ticket-card">
-            <h3>Double-Sized Booth</h3>
-            <p className="meta">$300</p>
-            <a href="#" className="btn btn--secondary">
-              Reserve Booth
-            </a>
-          </div>
-          <div className="ticket-card">
-            <h3>Virtual Vendor</h3>
-            <p className="meta">$75</p>
-            <a href="#" className="btn btn--secondary">
-              Reserve Virtual Booth
-            </a>
-          </div>
+          {[
+            ["General Admission", "$20", "btn--primary"],
+            ["VIP Admission", "$65", "btn--primary"],
+            ["Standard Vendor Booth", "$150", "btn--secondary"],
+            ["Premium Vendor Booth", "$250", "btn--secondary"],
+            ["Double-Sized Booth", "$300", "btn--secondary"],
+            ["Virtual Vendor", "$75", "btn--secondary"]
+          ].map(([name, price, btnClass]) => (
+            <div key={name} className="ticket-card">
+              <h3>{name}</h3>
+              <p className="meta">{price}</p>
+              <a href="#" className={`btn ${btnClass}`}>
+                {name.startsWith("General") ? "Buy Now" : name.includes("Virtual") ? "Reserve Virtual Booth" : "Reserve Booth"}
+              </a>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -169,48 +153,22 @@ export default function FestivalPage() {
       <section className="festival-partners">
         <h2>Speaker & Sponsorship Opportunities</h2>
         <div className="partner-grid">
-          <div className="vendor-card">
-            <h3>Speaker Slot</h3>
-            <p className="meta">$75</p>
-            <a href="#" className="btn btn--secondary">
-              Apply Now
-            </a>
-          </div>
-          <div className="vendor-card">
-            <h3>Premium Speaker Slot</h3>
-            <p className="meta">$250</p>
-            <a href="#" className="btn btn--secondary">
-              Apply Now
-            </a>
-          </div>
-          <div className="sponsor-card">
-            <h3>Bronze Sponsor</h3>
-            <p className="meta">$250 / $50 mo</p>
-            <a href="#" className="btn btn--secondary">
-              Partner Now
-            </a>
-          </div>
-          <div className="sponsor-card">
-            <h3>Gold Sponsor</h3>
-            <p className="meta">$500 / $100 mo</p>
-            <a href="#" className="btn btn--secondary">
-              Partner Now
-            </a>
-          </div>
-          <div className="sponsor-card">
-            <h3>Platinum Sponsor</h3>
-            <p className="meta">$1,000 / $250 mo</p>
-            <a href="#" className="btn btn--secondary">
-              Partner Now
-            </a>
-          </div>
-          <div className="sponsor-card">
-            <h3>Company Sponsor</h3>
-            <p className="meta">$997 / yr or $97 mo</p>
-            <a href="#" className="btn btn--secondary">
-              Partner Now
-            </a>
-          </div>
+          {[
+            ["Speaker Slot", "$75", "btn--secondary", "Apply Now"],
+            ["Premium Speaker Slot", "$250", "btn--secondary", "Apply Now"],
+            ["Bronze Sponsor", "$250 / $50 mo", "btn--secondary", "Partner Now"],
+            ["Gold Sponsor", "$500 / $100 mo", "btn--secondary", "Partner Now"],
+            ["Platinum Sponsor", "$1,000 / $250 mo", "btn--secondary", "Partner Now"],
+            ["Company Sponsor", "$997 / yr or $97 mo", "btn--secondary", "Partner Now"]
+          ].map(([title, meta, btnClass, cta]) => (
+            <div key={title} className={cta.includes("Speaker") ? "vendor-card" : "sponsor-card"}>
+              <h3>{title}</h3>
+              <p className="meta">{meta}</p>
+              <a href="#" className={`btn ${btnClass}`}>
+                {cta}
+              </a>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -223,7 +181,7 @@ export default function FestivalPage() {
           <dt>Refund policy?</dt>
           <dd>Tickets are non-refundable but transferable up to 48 hrs before the event.</dd>
           <dt>Outside food?</dt>
-          <dd>Please enjoy on-site vendors and food trucks for safety.</dd>
+          <dd>Please enjoy our on-site vendors and food trucks for safety.</dd>
           <dt>ADA accessible?</dt>
           <dd>Yes—accessible paths, restrooms, and parking are provided.</dd>
         </dl>
