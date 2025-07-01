@@ -4,19 +4,19 @@ import { Link } from "react-router-dom";
 import "./FestivalBanner.css";
 
 export default function FestivalBanner() {
-  // Festival kickoff at 9 AM on November 27, 2025
-  const festivalDate = new Date("2025-11-27T09:00:00");
+  // Festival kickoff at 9 AM on November 29, 2025
+  const festivalDate = new Date("2025-11-29T09:00:00");
 
-  function getDelta() {
+  const getDelta = () => {
     const now = new Date();
-    const delta = festivalDate - now;
-    if (delta <= 0) return null;
+    const diff = festivalDate - now;
+    if (diff <= 0) return null;
     return {
-      days:  Math.floor(delta / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((delta / (1000 * 60 * 60)) % 24),
-      mins:  Math.floor((delta / (1000 * 60)) % 60),
+      days:  Math.floor(diff / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+      mins:  Math.floor((diff / (1000 * 60)) % 60),
     };
-  }
+  };
 
   const [timeLeft, setTimeLeft] = useState(getDelta());
 
@@ -31,10 +31,9 @@ export default function FestivalBanner() {
         <span className="festival-emoji" role="img" aria-label="Festival Tent">
           🎪
         </span>
-
         <span className="festival-text">
           Declare Your Worth Festival&nbsp;
-          <strong>November 27–28, 2025</strong>
+          <strong>November 29–30, 2025</strong>
         </span>
 
         {timeLeft && (
