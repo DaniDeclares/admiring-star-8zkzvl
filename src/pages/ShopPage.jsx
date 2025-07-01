@@ -1,5 +1,6 @@
+// src/pages/ShopPage.jsx
 import React from "react";
-import { Helmet } from "react-helmet-async";  // ✅ This was missing!
+import { Helmet } from "react-helmet-async";
 import "./ShopPage.css";
 
 const PRODUCTS = [
@@ -130,7 +131,10 @@ export default function ShopPage() {
 
       <section className="shop-hero">
         <h1>Shop Dani Declares</h1>
-        <p>Merch, digital downloads, business tools, and gifts that help you Declare Your Worth—one milestone at a time.</p>
+        <p>
+          Merch, digital downloads, business tools, and gifts that help you
+          Declare Your Worth—one milestone at a time.
+        </p>
       </section>
 
       <section className="shop-feature-banner">
@@ -142,7 +146,7 @@ export default function ShopPage() {
           <div key={product.id} className="product-card">
             <img
               src={product.image}
-              alt={`Product: ${product.name}`}
+              alt={product.name}
               loading="lazy"
             />
             <h2>{product.name}</h2>

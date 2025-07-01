@@ -3,25 +3,8 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import "./WeddingsPage.css";
 
-// import your gallery images via Webpack
-import barnCeiling from "../assets/weddings/barn-ceiling-drapery.jpg";
-import barnOrbs from "../assets/weddings/barn-hanging-glass-orbs.jpg";
-import dressArchway from "../assets/weddings/WeddingDress_Hanging_Archway.jpg";
-import rusticReception from "../assets/weddings/rustic-barn-wedding-reception-with-greenery-on-wooden-table.jpg";
-import floralCouple from "../assets/weddings/FloralWedding_Couple_GoldChairs.jpg";
-import lakefrontSetup from "../assets/weddings/LakefrontWedding_CeremonySetup.jpg";
-import bridePrep from "../assets/weddings/Bride_Mom_Veil_Prep.jpg";
-import vintageCar from "../assets/weddings/VintageCar_BrideGroom_BouquetKiss.jpg";
-import coffeeTable from "../assets/weddings/wooden-coffee-table.jpg";
-
-// constants for reuse
-const CONTACT_URL = "https://danideclares.com/contact";
-const HEADER_CTA_TEXT = "Book Your Free Wedding Call";
-const FINAL_CTA_TEXT = "Start Planning Today";
-
 // Core wedding packages
 const PACKAGES = [
-  /* ...same as before... */
   {
     title: "Simple Vows",
     price: "$199",
@@ -66,17 +49,17 @@ const PACKAGES = [
   },
 ];
 
-// Gallery images array of objects
-const GALLERY = [
-  { src: barnCeiling, alt: "Barn ceiling drapery" },
-  { src: barnOrbs, alt: "Hanging glass orbs in barn" },
-  { src: dressArchway, alt: "Wedding dress hanging in archway" },
-  { src: rusticReception, alt: "Rustic barn reception with greenery" },
-  { src: floralCouple, alt: "Couple seated on gold chairs with florals" },
-  { src: lakefrontSetup, alt: "Lakefront wedding ceremony setup" },
-  { src: bridePrep, alt: "Bride and mom preparing veil" },
-  { src: vintageCar, alt: "Bride and groom kissing by vintage car" },
-  { src: coffeeTable, alt: "Wooden coffee table decor" },
+// These filenames must live under public/images/weddings/
+const GALLERY_IMAGES = [
+  "barn-ceiling-drapery.jpg",
+  "barn-hanging-glass-orbs.jpg",
+  "WeddingDress_Hanging_Archway.jpg",
+  "rustic-barn-wedding-reception-with-greenery-on-wooden-table.jpg",
+  "FloralWedding_Couple_GoldChairs.jpg",
+  "LakefrontWedding_CeremonySetup.jpg",
+  "Bride_Mom_Veil_Prep.jpg",
+  "VintageCar_BrideGroom_BouquetKiss.jpg",
+  "wooden-coffee-table.jpg",
 ];
 
 export default function WeddingsPage() {
@@ -93,16 +76,16 @@ export default function WeddingsPage() {
       <header className="weddings-hero">
         <h1>Weddings by Dani Declares</h1>
         <p>Stylish, affordable, and stress-free ceremonies & receptions across Georgia.</p>
-        <a className="btn btn--primary" href={CONTACT_URL}>
-          {HEADER_CTA_TEXT}
+        <a className="btn btn--primary" href="https://danideclares.com/contact">
+          Book Your Free Wedding Call
         </a>
       </header>
 
       <section className="package-list">
         <h2>Core Wedding Packages</h2>
         <div className="packages-grid">
-          {PACKAGES.map((pkg) => (
-            <div className="package-card" key={pkg.title}>
+          {PACKAGES.map((pkg, idx) => (
+            <div className="package-card" key={idx}>
               <h3>{pkg.title}</h3>
               <p className="package-price">{pkg.price}</p>
               <p className="package-desc">{pkg.description}</p>
@@ -122,9 +105,14 @@ export default function WeddingsPage() {
       <section className="gallery-section">
         <h2>Real Weddings & Inspiration</h2>
         <div className="gallery-grid">
-          {GALLERY.map(({ src, alt }) => (
-            <div className="gallery-img-wrapper" key={alt}>
-              <img src={src} alt={alt} className="gallery-img" loading="lazy" />
+          {GALLERY_IMAGES.map((filename) => (
+            <div className="gallery-img-wrapper" key={filename}>
+              <img
+                src={`${process.env.PUBLIC_URL}/images/weddings/${filename}`}
+                alt={`Wedding inspiration ${filename}`}
+                className="gallery-img"
+                loading="lazy"
+              />
             </div>
           ))}
         </div>
@@ -146,8 +134,8 @@ export default function WeddingsPage() {
           Let’s create a wedding day that reflects your love and your story.
           Easy. Affordable. Unforgettable.
         </p>
-        <a className="btn btn--primary" href={CONTACT_URL}>
-          {FINAL_CTA_TEXT}
+        <a className="btn btn--primary" href="https://danideclares.com/contact">
+          Start Planning Today
         </a>
       </section>
     </main>
