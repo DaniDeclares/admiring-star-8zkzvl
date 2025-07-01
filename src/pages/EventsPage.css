@@ -4,7 +4,10 @@
   max-width: 1100px;
   margin: 0 auto;
   padding: 2.2rem 1rem 3.4rem 1rem;
-  background: #F8F5F1;    /* Ivory for premium, cohesive look */
+  background: #F8F5F1;    /* Ivory */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .events-page h1 {
@@ -25,48 +28,38 @@
   color: #474343;
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   line-height: 1.5;
+  max-width: 800px;
 }
 
-/* Grid layouts for all sections */
-.event-grid,
-.tickets-section .ticket-grid,
-.vendor-section .vendor-grid,
-.sponsor-section .sponsor-grid {
+/* Event Cards Grid */
+.events-page .event-card {
+  background: #fff;
+  border-radius: 1.2rem;
+  padding: 2.1rem 1.4rem;
+  width: 100%;
+  max-width: 345px;
+  box-shadow: 0 2px 13px rgba(139,30,46,0.11);
+  border: 1.5px solid #F8F5F1;
+  text-align: center;
+  transition: box-shadow 0.19s, transform 0.18s;
+  margin: 1rem;
+  flex: 1 1 260px;
+}
+
+.events-page {
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
   justify-content: center;
 }
 
-/* Shared card styles */
-.event-card,
-.ticket-card,
-.vendor-card,
-.sponsor-card {
-  background: #fff;
-  border-radius: 1.2rem;
-  padding: 2.1rem 1.4rem;
-  min-width: 240px;
-  max-width: 345px;
-  flex: 1 1 260px;
-  box-shadow: 0 2px 13px rgba(139,30,46,0.11);
-  border: 1.5px solid #F8F5F1;
-  text-align: center;
-  transition: box-shadow 0.19s, transform 0.18s;
-}
-.event-card:hover,
-.ticket-card:hover,
-.vendor-card:hover,
-.sponsor-card:hover {
+.event-card:hover {
   box-shadow: 0 7px 22px rgba(139,30,46,0.17);
   transform: translateY(-2px) scale(1.018);
   border-color: #D4AF37;
 }
 
-.event-card h2,
-.ticket-card h3,
-.vendor-card h3,
-.sponsor-card h3 {
+.event-card h2 {
   color: #8B1E2E;
   margin-bottom: 0.5rem;
   font-size: 1.33rem;
@@ -75,10 +68,8 @@
   letter-spacing: 0.2px;
 }
 
-.event-card .event-meta,
-.ticket-card p,
-.vendor-card p,
-.sponsor-card p {
+.event-meta,
+.event-desc {
   color: #555;
   font-size: 1rem;
   margin-bottom: 0.9rem;
@@ -86,15 +77,6 @@
   line-height: 1.5;
 }
 
-.event-card pre {
-  white-space: pre-line;
-  text-align: left;
-  font-size: 1.05rem;
-  color: #333;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-}
-
-/* Button styles */
 .btn {
   background: #8B1E2E;
   color: #fff;
@@ -111,6 +93,7 @@
   transition: background 0.19s, color 0.17s, box-shadow 0.16s;
   box-shadow: 0 2px 7px rgba(212,175,55,0.08);
 }
+
 .btn--primary { background: #8B1E2E; color: #fff; }
 .btn--primary:hover { background: #D4AF37; color: #8B1E2E; }
 .btn--secondary { background: #D4AF37; color: #222; }
@@ -120,28 +103,40 @@
 .btn--tertiary:hover,
 .btn--tertiary:focus { background: #f9f3f5; color: #8B1E2E; }
 
-.event-cta-multiple {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 0.6rem;
+/* Contact (Lead Capture) Card */
+.contact-info {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 13px rgba(139,30,46,0.11);
+  padding: 2rem 1.4rem;
+  margin: 2rem;
+  text-align: center;
+  border: 1.5px solid #F8F5F1;
+  max-width: 345px;
+}
+
+.contact-info h3 {
+  color: #8B1E2E;
+  font-family: 'Merriweather', Georgia, serif;
+  margin-bottom: 0.6rem;
+  font-size: 1.26rem;
+}
+
+.contact-info p {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
 @media (max-width: 900px) {
-  .event-grid,
-  .ticket-grid,
-  .vendor-grid,
-  .sponsor-grid {
-    flex-direction: column;
-    gap: 1.1rem;
+  .events-page {
+    padding: 1rem 0.5rem 2rem 0.5rem;
   }
   .event-card,
-  .ticket-card,
-  .vendor-card,
-  .sponsor-card {
+  .contact-info {
     max-width: 98vw;
-    min-width: 0;
     padding: 1.2rem 0.7rem;
   }
   .events-page h1 {

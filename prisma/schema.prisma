@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -7,13 +9,76 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  role          UserRole  @default(VISITOR)
+  stripeAccount String?   // for Stripe Connect partners
+  orders        Order[]   @relation("UserOrders")
+  posts         BlogPost[]@relation("AuthorPosts")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Product {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  price         Int       // in cents
+  stripePriceId String    @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
 model Order {
-  id         String   @id @default(cuid())
-  sessionId  String   @unique
+  id         String    @id @default(cuid())
+  sessionId  String    @unique
   customer   String
   email      String
-  amount     Int
+  amount     Int       // in cents
   currency   String
-  createdAt  DateTime @default(now())
   status     String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // link back to the purchasing user, if applicable
+  user     User?   @relation("UserOrders", fields: [userId], references: [id])
+  userId   String?
+}
+
+model BlogPost {
+  id         String    @id @default(cuid())
+  slug       String    @unique
+  title      String
+  content    String    // markdown or HTML
+  published  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // optional relation to an author
+  author    User?     @relation("AuthorPosts", fields: [authorId], references: [id])
+  authorId  String?
+}
+
+model Membership {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  stripePriceId String    @unique
+  billingCycle  Billing   @default(MONTHLY)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  CUSTOMER
+  VISITOR
+}
+
+enum Billing {
+  MONTHLY
+  YEARLY
 }

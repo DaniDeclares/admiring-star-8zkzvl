@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -10,19 +11,26 @@ import Footer from "./components/Footer.jsx";
 
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
-import CoachingPage from "./pages/CoachingPage.jsx";
-import EventsPage from "./pages/EventsPage.jsx";
-import WeddingsPage from "./pages/WeddingsPage.jsx";
-import NotaryPage from "./pages/NotaryPage.jsx";
-import ContactPage from "./pages/ContactPage.jsx";
-import FinancialPage from "./pages/FinancialPage.jsx";
-import BlogPage from "./pages/BlogPage.jsx";
-import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
+import CoachingPage from "./pages/CoachingPage.jsx";
+import FinancialPage from "./pages/FinancialPage.jsx";
+import WeddingsPage from "./pages/WeddingsPage.jsx";
+import EventsPage from "./pages/EventsPage.jsx";
+import NotaryPage from "./pages/NotaryPage.jsx";
 import FestivalPage from "./pages/FestivalPage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
+import BlogPage from "./pages/BlogPage.jsx";
+import BlogPostPage from "./pages/BlogPostPage.jsx";
 
-// Phase-2 / Private Pages & Auth
+// Newly created Public Pages
+import PackagesPage from "./pages/PackagesPage.jsx";
+import RealEstatePage from "./pages/RealEstatePage.jsx";
+import LegalServicesPage from "./pages/LegalServicesPage.jsx";
+import PaymentCancel from "./pages/PaymentCancel.jsx";
+import PaymentSuccess from "./pages/PaymentSuccess.jsx";
+
+// Auth & Dashboard
 import LoginPage from "./pages/LoginPage.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
@@ -30,6 +38,7 @@ import NotaryDashboard from "./pages/NotaryDashboard.jsx";
 import VendorPortal from "./pages/VendorPortal.jsx";
 import FestivalDashboard from "./pages/FestivalDashboard.jsx";
 import PartnerOnboarding from "./pages/PartnerOnboarding.jsx";
+// You can remove SuccessPage/CancelPage if you fully switch to PaymentSuccess/PaymentCancel
 import SuccessPage from "./pages/SuccessPage.jsx";
 import CancelPage from "./pages/CancelPage.jsx";
 
@@ -63,6 +72,13 @@ export default function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
+        {/* Newly added service pages */}
+        <Route path="/packages" element={<PackagesPage />} />
+        <Route path="/real-estate" element={<RealEstatePage />} />
+        <Route path="/legal-services" element={<LegalServicesPage />} />
+        <Route path="/payment-cancel" element={<PaymentCancel />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+
         {/* Authentication */}
         <Route path="/login" element={<LoginPage />} />
 
@@ -79,6 +95,7 @@ export default function App() {
             path="/partner-onboarding"
             element={<PartnerOnboarding />}
           />
+          {/* legacy or alternate success/cancel */}
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
         </Route>

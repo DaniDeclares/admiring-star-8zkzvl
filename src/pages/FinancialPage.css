@@ -1,10 +1,19 @@
-/* src/pages/FinancialPage.css — Dani Declares Financial */
+/* src/pages/FinancialPage.css — Updated Dani Declares Financial */
+
+:root {
+  --burgundy: #8B1E2E;
+  --gold: #D4AF37;
+  --ivory: #F8F5F1;
+  --dark: #333;
+  --light-pink: #f9f3f5;
+  --font-base: 'Montserrat', Arial, Helvetica, sans-serif;
+}
 
 .financial-page {
-  background: #F8F5F1;
+  background: var(--ivory);
   padding: 2.3rem 1rem 2.7rem 1rem;
-  font-family: "Montserrat", Arial, Helvetica, sans-serif;
-  color: #333;
+  font-family: var(--font-base);
+  color: var(--dark);
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -15,7 +24,7 @@
 }
 .financial-hero h1 {
   font-size: 2.5rem;
-  color: #8B1E2E;
+  color: var(--burgundy);
   font-family: Georgia, serif;
   font-weight: bold;
   letter-spacing: 1.2px;
@@ -37,24 +46,30 @@
   background: #fff;
   border-radius: 1.1rem;
   box-shadow: 0 2px 12px rgba(139,30,46,0.07);
-  padding: 1.7rem 1.25rem 2rem 1.25rem;
+  padding: 1.7rem 1.25rem 2rem;
+  flex: 1 1 270px;
   min-width: 260px;
   max-width: 350px;
-  flex: 1 1 270px;
   text-align: left;
   border: 2px solid #f6f0e5;
   transition: box-shadow 0.18s, border-color 0.17s;
 }
 .service-card:hover {
   box-shadow: 0 6px 18px rgba(212,175,55,0.15);
-  border-color: #D4AF37;
+  border-color: var(--gold);
 }
 .service-card h2 {
-  color: #8B1E2E;
+  color: var(--burgundy);
   font-size: 1.19rem;
   margin-bottom: 0.38rem;
   font-family: Merriweather, Georgia, serif;
   font-weight: 700;
+}
+.service-card .meta {
+  color: var(--burgundy);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
 }
 .service-card .desc {
   color: #555;
@@ -66,20 +81,20 @@
   text-align: center;
   background: #fff;
   padding: 2.2rem 1.2rem;
-  border: 2px solid #D4AF37;
+  border: 2px solid var(--gold);
   border-radius: 14px;
   box-shadow: 0 4px 14px rgba(212,175,55,0.06);
   max-width: 700px;
-  margin: 0 auto 2.3rem auto;
+  margin: 0 auto 2.3rem;
 }
 .insurance-cta h2 {
-  color: #8B1E2E;
+  color: var(--burgundy);
   margin-bottom: 1.1rem;
   font-family: Georgia, serif;
   font-size: 1.35rem;
 }
 .insurance-cta .btn {
-  background-color: #8B1E2E;
+  background-color: var(--burgundy);
   color: #fff;
   padding: 0.8rem 1.55rem;
   border: none;
@@ -87,16 +102,15 @@
   font-weight: 700;
   text-decoration: none;
   font-size: 1rem;
-  margin-right: 1rem;
-  margin-bottom: 0.7rem;
+  margin: 0 0.5rem 0.7rem;
   display: inline-block;
   transition: background 0.23s;
   box-shadow: 0 2px 10px rgba(139,30,46,0.08);
 }
 .insurance-cta .btn:hover,
 .insurance-cta .btn:focus {
-  background-color: #D4AF37;
-  color: #8B1E2E;
+  background-color: var(--gold);
+  color: var(--burgundy);
 }
 .disclaimer {
   font-size: 0.96rem;
@@ -106,14 +120,14 @@
 
 .extra-info {
   text-align: center;
-  margin: 2rem auto 1.7rem auto;
+  margin: 2rem auto 1.7rem;
   max-width: 700px;
   background: #fff5f7;
   border-radius: 14px;
-  padding: 1.3rem 1.5rem 1.5rem 1.5rem;
+  padding: 1.3rem 1.5rem;
 }
 .info-list {
-  margin: 1rem auto 0.8rem auto;
+  margin: 1rem auto 0.8rem;
   padding-left: 0;
   list-style: none;
   text-align: left;
@@ -127,7 +141,7 @@
 }
 .info-list li:before {
   content: "•";
-  color: #D4AF37;
+  color: var(--gold);
   position: absolute;
   left: 0;
   font-size: 1.2rem;
@@ -138,7 +152,7 @@
 }
 .italic {
   font-style: italic;
-  color: #8B1E2E;
+  color: var(--burgundy);
 }
 
 .contact-info {
@@ -147,24 +161,23 @@
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 2px 10px rgba(139,30,46,0.06);
-  padding: 1.5rem 1.2rem;
+  padding: 1.5rem;
   max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 2.4rem auto 0;
 }
 .contact-info h3 {
-  color: #8B1E2E;
+  color: var(--burgundy);
   margin-bottom: 0.3rem;
   font-size: 1.15rem;
 }
 .contact-info a {
-  color: #8B1E2E;
+  color: var(--burgundy);
   text-decoration: underline;
   font-weight: 600;
   transition: color 0.17s;
 }
 .contact-info a:hover {
-  color: #D4AF37;
+  color: var(--gold);
 }
 
 @media (max-width: 900px) {
@@ -174,12 +187,11 @@
   }
   .service-card {
     max-width: 98vw;
-    min-width: 0;
     padding: 1.1rem 0.7rem 1.3rem 0.7rem;
   }
   .insurance-cta,
   .extra-info,
   .contact-info {
-    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+    padding: 1.2rem 0.5rem;
   }
 }

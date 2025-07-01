@@ -1,4 +1,5 @@
-/* WeddingsPage.css */
+/* src/pages/WeddingsPage.css — Dani Declares Brand */
+
 .weddings-page {
   background: #F8F5F1;
   color: #222;
@@ -141,7 +142,7 @@
   transform: scale(1.03);
 }
 
-/* "WHY CHOOSE US" */
+/* WHY CHOOSE US */
 .why-choose {
   background: #fff;
   padding: 2.5rem 1.2rem 2rem 1.2rem;

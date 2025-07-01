@@ -1,0 +1,97 @@
+/* src/pages/RealEstatePage.css */
+
+.realestate-page {
+  background: #F8F5F1;
+  color: #2a2222;
+  font-family: 'Montserrat', Arial, sans-serif;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+.hero h1 {
+  font-size: 2.4rem;
+  color: #8B1E2E;
+  font-family: Georgia, serif;
+  margin-bottom: 0.6rem;
+}
+.hero p {
+  font-size: 1.12rem;
+  color: #444;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.8rem;
+}
+
+.service-card {
+  background: #fff;
+  border: 1.5px solid #D4AF37;
+  border-radius: 12px;
+  padding: 1.8rem 1.2rem;
+  box-shadow: 0 2px 12px rgba(212,175,55,0.07);
+  text-align: center;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.service-card:hover {
+  box-shadow: 0 6px 20px rgba(212,175,55,0.15);
+  border-color: #8B1E2E;
+}
+.service-card h2 {
+  color: #8B1E2E;
+  font-size: 1.2rem;
+  margin-bottom: 0.4rem;
+  font-family: Merriweather, Georgia, serif;
+}
+.service-card .meta {
+  font-weight: bold;
+  color: #D4AF37;
+  margin-bottom: 0.8rem;
+}
+.service-card .desc {
+  color: #555;
+  font-size: 0.96rem;
+  line-height: 1.5;
+  margin-bottom: 1.2rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.65rem 1.4rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn--primary {
+  background: #8B1E2E;
+  color: #fff;
+  border: none;
+}
+.btn--primary:hover {
+  background: #6f1824;
+  color: #FFD700;
+}
+.btn--secondary {
+  background: #D4AF37;
+  color: #8B1E2E;
+}
+.btn--secondary:hover {
+  background: #bfa13a;
+  color: #fff;
+}
+
+.cta {
+  text-align: center;
+  margin-top: 3rem;
+}
+.cta p {
+  font-size: 1rem;
+}

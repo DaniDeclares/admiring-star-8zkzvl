@@ -36,25 +36,23 @@ const testimonials = [
 function CountdownTimer() {
   const festivalDate = new Date("2025-07-28T09:00:00-04:00");
   const renderer = ({ days, hours, minutes, seconds }) => (
-    <div>
-      {days}d {hours}h {minutes}m {seconds}s
+    <div className="countdown-values">
+      <span>{days}d</span> <span>{hours}h</span> <span>{minutes}m</span> <span>{seconds}s</span>
     </div>
   );
   return (
     <div className="festival-countdown">
-      <h3>Declare Your Worth Festival starts in:</h3>
+      <h3>Festival starts in:</h3>
       <Countdown date={festivalDate} renderer={renderer} />
     </div>
   );
 }
 
 export default function Homepage() {
-  const [testimonialIdx, setTestimonialIdx] = useState(0);
+  const [idx, setIdx] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTestimonialIdx((idx) => (idx + 1) % testimonials.length);
-    }, 4000);
-    return () => clearInterval(interval);
+    const iv = setInterval(() => setIdx(i => (i + 1) % testimonials.length), 4000);
+    return () => clearInterval(iv);
   }, []);
 
   return (
@@ -72,11 +70,11 @@ export default function Homepage() {
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="hero-overlay">
             <h1>Declare Your Worth</h1>
-            <p className="hero-subtitle">Life Coaching. Celebrations. Financial Empowerment.</p>
+            <p className="hero-subtitle">Life Coaching • Celebrations • Financial Empowerment</p>
             <div className="hero-cta">
-              <Link to="/coaching" className="btn burgundy">Start Your Learning Journey</Link>
-              <Link to="/financial" className="btn burgundy">Get a Free Quote</Link>
-              <Link to="/festival" className="btn burgundy">Early-Bird Festival Tickets</Link>
+              <Link to="/coaching" className="btn btn--primary">Start Your Coaching Journey</Link>
+              <Link to="/financial" className="btn btn--primary">Get a Free Quote</Link>
+              <Link to="/festival" className="btn btn--primary">Early Bird Festival Tickets</Link>
             </div>
           </div>
         </section>
@@ -85,8 +83,7 @@ export default function Homepage() {
         <section className="about-us-section">
           <h2>About Dani Declares</h2>
           <p>
-            At Dani Declares, we believe in simplifying life’s biggest milestones—whether it’s securing your family’s future, building a profitable side hustle, or celebrating love through weddings and events. 
-            Founded by Danielle Fong, our mission is to help everyday people feel empowered, seen, and financially prepared for whatever life brings.
+            At Dani Declares, we simplify life’s biggest milestones—whether it’s securing your family’s future, building a profitable side hustle, or celebrating love. Founded by Danielle Fong, our mission is to empower everyday people with clarity, confidence, and cash flow.
           </p>
         </section>
 
@@ -94,27 +91,20 @@ export default function Homepage() {
         <section className="mission-statement-section">
           <h2>Our Mission</h2>
           <p>
-            To empower individuals and families to unlock clarity, confidence, and cash flow. 
-            Whether through coaching, financial literacy events, life insurance, or mobile notary services—our goal is simple: Help you Declare Your Worth.
+            To help you unlock clarity, confidence, and cash flow through coaching, financial education, notary & legal support, and unforgettable experiences.
           </p>
         </section>
 
-        {/* WHY THIS FESTIVAL MATTERS */}
+        {/* FESTIVAL PURPOSE */}
         <section className="festival-purpose-section">
           <h2>Why the Declare Your Worth Festival Matters</h2>
           <p>
-            Growing up, financial literacy wasn’t something that was taught in my household—or in many others like mine. 
-            I know firsthand what it feels like to navigate adulthood without the tools, resources, or financial confidence needed to thrive.
+            I grew up without fun, hands-on financial education or entrepreneurial mentorship. This festival breaks generational cycles, providing families real money skills and community support.
           </p>
           <p>
-            This festival isn’t just another community event. It’s a movement to break generational cycles, create access to financial education, and give kids and adults a chance to learn, grow, and dream bigger—together.
+            From kid entrepreneur zones and budgeting bootcamps to interactive workshops and live entertainment—this event is a movement to empower every generation.
           </p>
-          <p>
-            From fun workshops and kid entrepreneur zones to budgeting bootcamps and real financial tools—this is my way of making sure no family has to go without the information that could change their life.
-          </p>
-          <Link to="/festival" className="btn burgundy">
-            Explore the Festival →
-          </Link>
+          <Link to="/festival" className="btn btn--primary">Explore the Festival →</Link>
         </section>
 
         {/* FESTIVAL PROMO */}
@@ -123,7 +113,7 @@ export default function Homepage() {
             <h2>Declare Your Worth Festival</h2>
             <p><strong>July 28–29, 2025 • Atlanta, GA</strong></p>
             <CountdownTimer />
-            <Link to="/festival" className="btn burgundy">Get Early Bird Tickets</Link>
+            <Link to="/festival" className="btn btn--primary">Get Early Bird Tickets</Link>
             <p className="early-bird-note">Early Bird pricing ends soon!</p>
           </div>
         </section>
@@ -133,56 +123,46 @@ export default function Homepage() {
           <h2>Client Breakthroughs</h2>
           <div className="carousel">
             <div className="testimonial-slide">
-              <p>“{testimonials[testimonialIdx].quote}”</p>
-              <span>— {testimonials[testimonialIdx].author}</span>
+              <p>“{testimonials[idx].quote}”</p>
+              <span>— {testimonials[idx].author}</span>
             </div>
           </div>
         </section>
 
         {/* COACHING PACKAGES */}
-        <section className="packages">
+        <section className="packages coaching-summary">
           <h2>Your Coaching Options</h2>
           <ul className="coaching-list">
-            <li>Discovery Session – 30 mins • $99</li>
-            <li>1:1 Coaching – 4×1 hr sessions • $499</li>
-            <li>VIP Intensive – 6 hrs • $1200</li>
+            <li>Discovery Session – 30 min • $99</li>
+            <li>1:1 Coaching – 4 × 1 hr sessions • $499</li>
+            <li>VIP Intensive – 6 hrs • $1,200</li>
           </ul>
-          <div className="coaching-benefits">
-            <h3>What You’ll Walk Away With</h3>
-            <ul>
-              <li>💡 Clarity on your next move</li>
-              <li>📈 Strategy for growth</li>
-              <li>🎯 Accountability to take action</li>
-              <li>💬 Real-time mindset shifts</li>
-            </ul>
-          </div>
-          <Link to="/coaching" className="btn burgundy">Start Your Learning Journey Today</Link>
+          <Link to="/coaching" className="btn btn--secondary">View All Coaching Packages</Link>
         </section>
 
-        {/* OTHER SERVICES */}
-        <section className="packages">
+        {/* MORE SERVICES */}
+        <section className="packages other-services">
           <h2>More Ways to Work With Dani</h2>
           <div className="packages-grid">
             <div className="package-card">
               <h3>Weddings & Events</h3>
-              <Link to="/weddings" className="btn">Explore Weddings</Link>
+              <Link to="/weddings" className="btn btn--primary">Explore Weddings</Link>
             </div>
             <div className="package-card">
-              <h3>Event Membership Onboarding</h3>
-              <Link to="/events" className="btn">View Event Membership</Link>
+              <h3>Notary & Legal Support</h3>
+              <Link to="/notary" className="btn btn--primary">Learn About Notary</Link>
             </div>
             <div className="package-card">
-              <h3>Vendor Booths</h3>
-              <Link to="/events" className="btn">Standard Booth</Link>
-              <Link to="/events" className="btn">Premium Booth</Link>
+              <h3>Merch & Digital Products</h3>
+              <Link to="/shop" className="btn btn--primary">Shop Now</Link>
             </div>
             <div className="package-card">
-              <h3>Notary Services (GA/SC)</h3>
-              <Link to="/notary" className="btn">Learn About Notary</Link>
+              <h3>All Services & Bundles</h3>
+              <Link to="/packages" className="btn btn--secondary">View Packages</Link>
             </div>
             <div className="package-card">
               <h3>Refer a Pro</h3>
-              <Link to="/contact" className="btn">Contact Us</Link>
+              <Link to="/contact" className="btn btn--secondary">Contact Us</Link>
             </div>
           </div>
         </section>
@@ -191,7 +171,7 @@ export default function Homepage() {
         <section className="coaching-contact">
           <h2>Still Have Questions?</h2>
           <p>Drop your email and we’ll follow up with a personalized response:</p>
-          <Link to="/contact" className="btn burgundy">Contact Us</Link>
+          <Link to="/contact" className="btn btn--primary">Contact Us</Link>
         </section>
       </main>
     </>

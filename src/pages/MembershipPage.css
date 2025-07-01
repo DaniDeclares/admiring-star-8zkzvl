@@ -1,16 +1,25 @@
-/* src/pages/MembershipPage.css — Dani Declares Membership */
+/* src/pages/MembershipPage.css — Updated Dani Declares Membership */
+
+:root {
+  --burgundy: #8B1E2E;
+  --gold: #D4AF37;
+  --ivory: #F8F5F1;
+  --dark: #333;
+  --light-bg: #fffbe7;
+  --font-base: 'Montserrat', Arial, sans-serif;
+}
 
 .membership-page {
-  background: #F8F5F1;
+  background: var(--ivory);
   padding: 2.6rem 1.2rem 3rem;
-  font-family: 'Montserrat', Arial, sans-serif;
-  color: #333;
+  font-family: var(--font-base);
+  color: var(--dark);
   max-width: 1200px;
   margin: 0 auto;
 }
 .membership-page h1 {
   font-size: 2.5rem;
-  color: #8B1E2E;
+  color: var(--burgundy);
   text-align: center;
   font-family: Georgia, serif;
   margin-bottom: 0.8rem;
@@ -22,35 +31,35 @@
   margin-bottom: 2.3rem;
 }
 .membership-page .urgent {
-  color: #D4AF37;
+  color: var(--gold);
   font-weight: bold;
 }
 
 .billing-toggle {
   display: flex;
   justify-content: center;
-  margin-bottom: 2.2rem;
   gap: 1rem;
+  margin-bottom: 2.2rem;
 }
 .billing-toggle button {
   background: #fff;
-  border: 2px solid #8B1E2E;
-  color: #8B1E2E;
+  border: 2px solid var(--burgundy);
+  color: var(--burgundy);
   padding: 0.55rem 1.3rem;
   font-weight: bold;
   border-radius: 8px;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s, color 0.2s;
 }
 .billing-toggle button.active,
 .billing-toggle button:hover {
-  background: #8B1E2E;
+  background: var(--burgundy);
   color: #fff;
 }
 .billing-toggle .save {
   margin-left: 0.4rem;
-  color: #D4AF37;
+  color: var(--gold);
   font-weight: bold;
 }
 
@@ -67,14 +76,14 @@
   padding: 1.8rem 1.2rem 2.2rem;
   box-shadow: 0 2px 10px rgba(139, 30, 46, 0.07);
   text-align: center;
-  transition: 0.25s ease all;
+  transition: border-color 0.25s, box-shadow 0.25s;
 }
 .tier-card:hover {
-  border-color: #D4AF37;
+  border-color: var(--gold);
   box-shadow: 0 6px 22px rgba(212, 175, 55, 0.13);
 }
 .tier-card h3 {
-  color: #8B1E2E;
+  color: var(--burgundy);
   font-size: 1.3rem;
   margin-bottom: 0.4rem;
   font-family: Merriweather, Georgia, serif;
@@ -86,25 +95,25 @@
 }
 .tier-price {
   font-size: 1.15rem;
-  color: #D4AF37;
+  color: var(--gold);
   font-weight: bold;
   margin-bottom: 0.8rem;
 }
 .tier-price span {
   font-size: 0.9rem;
-  color: #8B1E2E;
+  color: var(--burgundy);
   font-weight: normal;
 }
 .perk-list {
   list-style: none;
   padding: 0;
   margin: 0 0 1.1rem;
-  color: #333;
+  color: var(--dark);
   font-size: 0.95rem;
 }
 .perk-list li::before {
   content: "✔";
-  color: #D4AF37;
+  color: var(--gold);
   margin-right: 0.4rem;
 }
 
@@ -116,33 +125,34 @@
   text-decoration: none;
   font-size: 1rem;
   cursor: pointer;
+  border: 2px solid transparent;
 }
 .btn--primary {
-  background: #8B1E2E;
+  background: var(--burgundy);
   color: #fff;
-  border: 2px solid #8B1E2E;
+  border-color: var(--burgundy);
 }
 .btn--primary:hover {
-  background: #D4AF37;
-  color: #8B1E2E;
-  border-color: #D4AF37;
+  background: var(--gold);
+  color: var(--burgundy);
+  border-color: var(--gold);
 }
 .btn--secondary {
-  background: #D4AF37;
-  color: #8B1E2E;
-  border: 2px solid #D4AF37;
+  background: var(--gold);
+  color: var(--burgundy);
+  border-color: var(--gold);
 }
 .btn--secondary:hover {
-  background: #8B1E2E;
+  background: var(--burgundy);
   color: #fff;
 }
-.btn--accent {
+.btn--tertiary {
   background: #53313c;
   color: #fff;
-  border: 2px solid #53313c;
+  border-color: #53313c;
 }
-.btn--accent:hover {
-  background: #D4AF37;
+.btn--tertiary:hover {
+  background: var(--gold);
   color: #53313c;
 }
 
@@ -168,14 +178,14 @@
 .membership-card {
   background: #fff;
   border-radius: 12px;
-  border: 1.5px solid #D4AF37;
+  border: 1.5px solid var(--gold);
   padding: 1.5rem 1rem;
   max-width: 320px;
   flex: 1;
   box-shadow: 0 3px 14px rgba(212, 175, 55, 0.08);
 }
 .membership-card h3 {
-  color: #8B1E2E;
+  color: var(--burgundy);
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
 }
@@ -185,7 +195,7 @@
   flex-wrap: wrap;
   gap: 1.5rem;
   justify-content: center;
-  background: #fffbe7;
+  background: var(--light-bg);
   border-top: 1px solid #ddd5c1;
   padding: 2rem 1rem;
   margin-top: 3.5rem;
@@ -204,7 +214,7 @@
 .testimonial-author {
   margin-top: 0.4rem;
   font-weight: bold;
-  color: #8B1E2E;
+  color: var(--burgundy);
 }
 
 .comparison-table-section {
@@ -212,8 +222,6 @@
   text-align: center;
   margin-top: 2rem;
 }
-
-/* Compare Table Styles */
 .comparison-table-wrap {
   overflow-x: auto;
   margin-top: 1.5rem;
@@ -232,12 +240,12 @@
 }
 .comparison-table th {
   background-color: #f6f0e5;
-  color: #8B1E2E;
+  color: var(--burgundy);
   font-weight: bold;
   position: relative;
 }
 .comparison-table th.featured-header {
-  background-color: #8B1E2E;
+  background-color: var(--burgundy);
   color: #fff;
 }
 .comparison-table th.featured-header::before {
@@ -245,7 +253,7 @@
   position: absolute;
   top: -0.75rem;
   left: 1rem;
-  background: #D4AF37;
+  background: var(--gold);
   color: #fff;
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
@@ -265,23 +273,24 @@
 }
 .comparison-table tfoot .btn--primary {
   background: #fff;
-  color: #8B1E2E;
-  border: 2px solid #8B1E2E;
+  color: var(--burgundy);
+  border: 2px solid var(--burgundy);
 }
 .comparison-table tfoot .btn--primary:hover {
-  background: #8B1E2E;
+  background: var(--burgundy);
   color: #fff;
 }
 .comparison-table tfoot .btn--secondary {
-  background: #D4AF37;
-  color: #8B1E2E;
-  border: 2px solid #D4AF37;
+  background: var(--gold);
+  color: var(--burgundy);
+  border: 2px solid var(--gold);
 }
 .comparison-table tfoot .btn--secondary:hover {
-  background: #8B1E2E;
+  background: var(--burgundy);
   color: #fff;
 }
 
+/* Responsive */
 @media (max-width: 700px) {
   .billing-toggle {
     flex-direction: column;

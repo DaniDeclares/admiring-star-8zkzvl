@@ -2,279 +2,117 @@ import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import "./MembershipPage.css";
 
-const VIP_TIERS = [
+// Sponsorship tiers as per Master Service Catalog
+const SPONSOR_TIERS = [
   {
-    id: "vip-platinum",
-    name: "Platinum",
-    desc: "Magazine cover, prime YouTube cameo, premium corner booth.",
-    monthly: 499,
-    yearly: 4999,
-    perks: ["Magazine cover", "Prime YouTube cameo", "Premium corner booth", "VIP mixer invites"],
+    id: "bronze-sponsor",
+    name: "Bronze Sponsor",
+    desc: "Basic support: directory listing & community recognition.",
+    monthly: 25,
+    yearly: 250,
+    perks: ["Directory listing", "Community recognition"],
   },
   {
-    id: "vip-gold",
-    name: "Gold",
-    desc: "Magazine spread, YouTube highlight, standard booth access.",
-    monthly: 299,
-    yearly: 2999,
-    perks: ["Magazine spread", "YouTube highlight", "Standard booth access"],
-  },
-  {
-    id: "vip-silver",
-    name: "Silver",
-    desc: "Magazine mention, YouTube credits, networking invites.",
-    monthly: 199,
-    yearly: 1999,
-    perks: ["Magazine mention", "YouTube credits", "Networking invites"],
-  },
-];
-
-const EVENT_TIERS = [
-  {
-    id: "event-gold",
-    name: "Event Gold",
-    desc: "Premium booth, logo on screens, 2 VIP passes.",
-    monthly: 149,
-    yearly: 1499,
-    perks: ["Premium booth", "Logo on screens", "2 VIP passes"],
-  },
-  {
-    id: "event-silver",
-    name: "Event Silver",
-    desc: "Standard booth, guide listing, 1 VIP pass.",
-    monthly: 99,
-    yearly: 999,
-    perks: ["Standard booth", "Guide listing", "1 VIP pass"],
-  },
-  {
-    id: "event-bronze",
-    name: "Event Bronze",
+    id: "silver-sponsor",
+    name: "Silver Sponsor",
     desc: "Shared table space, directory listing, general admission.",
     monthly: 49,
     yearly: 499,
     perks: ["Shared table", "Directory listing", "General admission"],
   },
-];
-
-const VENDOR_BOOTHS = [
   {
-    id: "booth-premium",
-    name: "Premium Vendor Booth",
-    desc: "Corner 10×10 booth in a high-traffic area near the main stage.",
-    price: 1200,
-    perks: ["Corner placement", "Maximum visibility", "High foot traffic"],
+    id: "gold-sponsor",
+    name: "Gold Sponsor",
+    desc: "Premium booth, logo on screens, and 2 VIP passes.",
+    monthly: 100,
+    yearly: 500,
+    perks: ["Premium booth", "Logo on screens", "2 VIP passes"],
   },
   {
-    id: "booth-standard",
+    id: "platinum-sponsor",
+    name: "Platinum Sponsor",
+    desc: "Corner booth, event-wide branding, and 2 VIP passes.",
+    monthly: 250,
+    yearly: 1000,
+    perks: ["Corner booth", "Event-wide branding", "2 VIP passes"],
+  },
+  {
+    id: "company-sponsor",
+    name: "Company Sponsor",
+    desc: "Flagship sponsor: top-tier branding & multi-event marketing.",
+    monthly: 97,
+    yearly: 997,
+    perks: ["Featured branding", "Newsletter feature"],
+  }
+];
+
+// Vendor booth options
+const VENDOR_BOOTHS = [
+  {
+    id: "standard-booth",
     name: "Standard Vendor Booth",
     desc: "10×10 aisle booth with strong attendee flow.",
-    price: 700,
+    price: 150,
     perks: ["Aisle placement", "Great foot traffic"],
   },
   {
-    id: "booth-table",
-    name: "Shared Table Exhibit",
-    desc: "6-ft shared table space in the lounge/gallery section.",
-    price: 400,
-    perks: ["Lounge location", "Lower-cost option for startups"],
+    id: "premium-booth",
+    name: "Premium Vendor Booth",
+    desc: "Corner 10×10 booth in a high-traffic area near the main stage.",
+    price: 250,
+    perks: ["Corner placement", "Maximum visibility", "High foot traffic"],
   },
+  {
+    id: "double-booth",
+    name: "Double-Sized Vendor Booth",
+    desc: "20×10 booth space for added presence.",
+    price: 300,
+    perks: ["Double space", "Prominent location"],
+  },
+  {
+    id: "virtual-booth",
+    name: "Virtual Vendor Booth",
+    desc: "Online booth listing with event promotion.",
+    price: 75,
+    perks: ["Online listing", "Social media shoutout"],
+  }
 ];
 
-const memberships = [
+// Speaker slot options
+const SPEAKER_PACKAGES = [
   {
-    label: "Platinum Partner (Monthly)",
-    url: "https://buy.stripe.com/14A5kCfOp3iC85V9176kg08",
-    desc: "Top-tier partner package with maximum exposure, stage mentions, and event-wide branding perks.",
+    id: "speaker-slot",
+    name: "Speaker Slot",
+    desc: "Host a standard speaking session.",
+    price: 75
   },
   {
-    label: "Platinum Partner (Yearly)",
-    url: "https://buy.stripe.com/00wdR86dP7yS4TJdhn6kg09",
-    desc: "Save with annual billing. Enjoy all Platinum Partner perks for a full year across multiple events.",
-  },
+    id: "premium-speaker-slot",
+    name: "Premium Speaker Slot",
+    desc: "Featured session with marketing promotion.",
+    price: 250
+  }
 ];
-
-const testimonials = [
-  {
-    quote:
-      "Joining Dani Declares as a Platinum Partner put our business in front of hundreds of ideal clients—we loved the hands-on support!",
-    author: "Aria J.",
-    logo: "/assets/partner-logos/ariaj-logo.png",
-  },
-  {
-    quote: "I’ve never had so many leads from a single event. The onboarding was seamless.",
-    author: "Marcus T.",
-    logo: "/assets/partner-logos/marcust-logo.png",
-  },
-];
-
-// New CompareTable component with featured styling and badges
-function CompareTable() {
-  const tiers = [
-    {
-      name: "VIP Platinum",
-      style: {
-        backgroundColor: "#8B1E2E",
-        color: "#fff",
-        position: "relative",
-      },
-      featured: true,
-    },
-    {
-      name: "VIP Gold",
-      style: { backgroundColor: "rgba(212,175,55,0.2)", color: "#000" },
-      featured: false,
-    },
-    {
-      name: "VIP Silver",
-      style: { backgroundColor: "#f0f0f0", color: "#000" },
-      featured: false,
-    },
-    {
-      name: "Event Gold",
-      style: { backgroundColor: "rgba(212,175,55,0.3)", color: "#000" },
-      featured: false,
-    },
-    {
-      name: "Event Silver",
-      style: { backgroundColor: "#f0f0f0", color: "#000" },
-      featured: false,
-    },
-    {
-      name: "Event Bronze",
-      style: { backgroundColor: "#fafafa", color: "#000" },
-      featured: false,
-    },
-  ];
-
-  const compareData = [
-    { label: "Magazine Cover", cols: [true, false, false, false, false, false] },
-    { label: "Magazine Spread", cols: [false, true, false, false, false, false] },
-    { label: "Magazine Mention", cols: [false, false, true, false, false, false] },
-    { label: "YouTube Cameo", cols: [true, false, false, false, false, false] },
-    { label: "VIP Booth", cols: [true, false, false, true, false, false] },
-    { label: "Standard Booth", cols: [false, true, false, false, true, false] },
-    { label: "Guide Listing", cols: [false, false, false, false, true, true] },
-    { label: "VIP Passes", cols: [2, 0, 0, 2, 1, 0] },
-  ];
-
-  return (
-    <div style={{ overflowX: "auto" }}>
-      <table
-        style={{
-          minWidth: "100%",
-          textAlign: "center",
-          borderSpacing: "0 1rem",
-        }}
-      >
-        <thead>
-          <tr>
-            <th style={{ textAlign: "left", padding: "0 1rem" }}>Perk</th>
-            {tiers.map((tier, i) => (
-              <th key={i} style={{ padding: "1rem", ...tier.style }}>
-                {tier.featured && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: "-0.75rem",
-                      left: "1rem",
-                      backgroundColor: "#D4AF37",
-                      color: "#fff",
-                      padding: "0.25rem 0.5rem",
-                      borderRadius: "0.25rem",
-                      fontSize: "0.75rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Best Value
-                  </span>
-                )}
-                {tier.name}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {compareData.map((row, i) => (
-            <tr key={i} style={{ transition: "background 0.2s" }} /* add hover in CSS */>
-              <td
-                style={{
-                  textAlign: "left",
-                  padding: "0 1rem",
-                  fontWeight: "600",
-                }}
-              >
-                {row.label}
-              </td>
-              {row.cols.map((val, j) => (
-                <td key={j} style={{ padding: "0.5rem" }}>
-                  {typeof val === "number" ? (
-                    val > 0 ? (
-                      <span style={{ fontWeight: "600" }}>{val}×</span>
-                    ) : (
-                      "—"
-                    )
-                  ) : (
-                    <span
-                      style={{
-                        color: val ? "#28a745" : "#ccc",
-                        fontWeight: "600",
-                      }}
-                    >
-                      {val ? "✓" : "✕"}
-                    </span>
-                  )}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td />
-            {tiers.map((tier, i) => (
-              <td key={i} style={{ padding: "1rem" }}>
-                <button
-                  style={{
-                    padding: "0.5rem 1rem",
-                    borderRadius: "9999px",
-                    fontWeight: "600",
-                    backgroundColor: tier.featured ? "#D4AF37" : "#fff",
-                    color: tier.featured ? "#fff" : "#000",
-                    border: tier.featured ? "none" : "1px solid #ccc",
-                    cursor: "pointer",
-                  }}
-                >
-                  {tier.featured ? "Join Now" : "Select"}
-                </button>
-              </td>
-            ))}
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  );
-}
 
 export default function MembershipPage() {
   const [billing, setBilling] = useState("monthly");
 
   return (
-    <main className="page membership-page">
+    <main className="membership-page">
       <Helmet>
-        <title>Membership Tiers, Vendor Booths & Sponsorships | Dani Declares</title>
+        <title>Partner, Sponsor, & Exhibit • Dani Declares</title>
         <meta
           name="description"
-          content="Choose from VIP memberships, event sponsor packages, or vendor booth options with Dani Declares. Boost your brand visibility and reach new audiences today."
+          content="Choose sponsorship packages, vendor booths, or speaker slots at Dani Declares events."
         />
       </Helmet>
 
       <h1>Partner, Sponsor, or Exhibit with Dani Declares</h1>
       <p className="subtitle">
-        Flexible options for luxury membership, event exposure, or vendor booths.
-        <br />
-        <span className="urgent">Spots are limited for 2025!</span>
+        Flexible options for sponsorship, vendor booths, and speaking opportunities. Spots are limited for 2025!
       </p>
 
+      {/* Billing toggle */}
       <div className="billing-toggle">
         <button
           className={billing === "monthly" ? "active" : ""}
@@ -290,17 +128,19 @@ export default function MembershipPage() {
         </button>
       </div>
 
-      {/* VIP & Event Tiers Sections (unchanged) */}
+      {/* Sponsorship Packages */}
       <section>
-        <h2>Luxury Membership Tiers</h2>
+        <h2>Sponsorship Packages</h2>
         <div className="tiers-grid">
-          {VIP_TIERS.map((tier) => {
+          {SPONSOR_TIERS.map((tier) => {
             const price = billing === "monthly" ? tier.monthly : tier.yearly;
             return (
               <div key={tier.id} className="tier-card">
                 <h3>{tier.name}</h3>
                 <p className="tier-desc">{tier.desc}</p>
-                <p className="tier-price">${price} <span>/{billing}</span></p>
+                <p className="tier-price">
+                  ${price} <span>/{billing}</span>
+                </p>
                 <ul className="perk-list">
                   {tier.perks.map((perk) => (
                     <li key={perk}>{perk}</li>
@@ -309,7 +149,7 @@ export default function MembershipPage() {
                 <button
                   className="snipcart-add-item btn btn--primary"
                   data-item-id={tier.id}
-                  data-item-name={`${tier.name} Membership`}
+                  data-item-name={tier.name}
                   data-item-price={price}
                   data-item-url="/membership"
                   data-item-description={tier.desc}
@@ -317,10 +157,12 @@ export default function MembershipPage() {
                   data-item-custom1-options="Monthly,Yearly"
                   data-item-custom1-value={billing}
                 >
-                  {billing === "monthly" ? "Join Monthly" : "Pre-pay Yearly"}
+                  {billing === "monthly"
+                    ? "Sponsor Monthly"
+                    : "Pre-pay Yearly"}
                 </button>
                 <div className="onboarding-info">
-                  Instant onboarding & welcome kit after payment.
+                  Instant onboarding & sponsor kit after payment.
                 </div>
               </div>
             );
@@ -328,45 +170,9 @@ export default function MembershipPage() {
         </div>
       </section>
 
+      {/* Vendor Booth Options */}
       <section>
-        <h2>Event-Only Membership Tiers</h2>
-        <div className="tiers-grid">
-          {EVENT_TIERS.map((tier) => {
-            const price = billing === "monthly" ? tier.monthly : tier.yearly;
-            return (
-              <div key={tier.id} className="tier-card">
-                <h3>{tier.name}</h3>
-                <p className="tier-desc">{tier.desc}</p>
-                <p className="tier-price">${price} <span>/{billing}</span></p>
-                <ul className="perk-list">
-                  {tier.perks.map((perk) => (
-                    <li key={perk}>{perk}</li>
-                  ))}
-                </ul>
-                <button
-                  className="snipcart-add-item btn btn--secondary"
-                  data-item-id={tier.id}
-                  data-item-name={`${tier.name} Event Membership`}
-                  data-item-price={price}
-                  data-item-url="/membership"
-                  data-item-description={tier.desc}
-                  data-item-custom1-name="Billing Cycle"
-                  data-item-custom1-options="Monthly,Yearly"
-                  data-item-custom1-value={billing}
-                >
-                  {billing === "monthly" ? "Subscribe Monthly" : "Pre-pay Yearly"}
-                </button>
-                <div className="onboarding-info">
-                  Event access & setup details emailed after payment.
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      <section>
-        <h2>Festival & Vendor Booth Options</h2>
+        <h2>Vendor Booth Options</h2>
         <div className="tiers-grid">
           {VENDOR_BOOTHS.map((booth) => (
             <div key={booth.id} className="tier-card">
@@ -379,7 +185,7 @@ export default function MembershipPage() {
                 ))}
               </ul>
               <button
-                className="snipcart-add-item btn btn--accent"
+                className="snipcart-add-item btn btn--secondary"
                 data-item-id={booth.id}
                 data-item-name={booth.name}
                 data-item-price={booth.price}
@@ -393,41 +199,36 @@ export default function MembershipPage() {
         </div>
       </section>
 
+      {/* Speaker Opportunities */}
       <section>
-        <h2>Event Sponsorship Packages</h2>
-        <div className="membership-buttons">
-          {memberships.map((m) => (
-            <div key={m.label} className="membership-card">
-              <h3>{m.label}</h3>
-              <p>{m.desc}</p>
-              <a
-                href={m.url}
-                className="btn btn--primary"
-                target="_blank"
-                rel="noopener noreferrer"
+        <h2>Speaker Opportunities</h2>
+        <div className="tiers-grid">
+          {SPEAKER_PACKAGES.map((pkg) => (
+            <div key={pkg.id} className="tier-card">
+              <h3>{pkg.name}</h3>
+              <p className="tier-desc">{pkg.desc}</p>
+              <p className="tier-price">${pkg.price}</p>
+              <button
+                className="snipcart-add-item btn btn--tertiary"
+                data-item-id={pkg.id}
+                data-item-name={pkg.name}
+                data-item-price={pkg.price}
+                data-item-url="/membership"
+                data-item-description={pkg.desc}
               >
-                Sponsor: {m.label}
-              </a>
+                Apply Now
+              </button>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="testimonial-strip">
-        {testimonials.map((t, i) => (
-          <div key={i} className="testimonial-item">
-            {t.logo && (
-              <img src={t.logo} alt={`${t.author} logo`} className="testimonial-logo" />
-            )}
-            <blockquote>“{t.quote}”</blockquote>
-            <div className="testimonial-author">{t.author}</div>
-          </div>
-        ))}
-      </section>
-
-      <section className="comparison-table-section">
-        <h2>Compare Membership & Event Tiers</h2>
-        <CompareTable />
+      {/* Contact CTA */}
+      <section className="contact-cta">
+        <h2>Have Questions?</h2>
+        <p>
+          Email <a href="mailto:admin@danideclares.com">admin@danideclares.com</a> or call <a href="tel:+14705234892">(470) 523-4892</a>
+        </p>
       </section>
     </main>
   );

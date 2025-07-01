@@ -1,0 +1,76 @@
+/* src/pages/PaymentCancel.css — Dani Declares Payment Canceled Page */
+
+.payment-cancel-page {
+  background-color: #F8F5F1;
+  color: #2a2222;
+  font-family: 'Montserrat', Arial, sans-serif;
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.payment-cancel-page h1 {
+  font-size: 2.4rem;
+  color: #8B1E2E;
+  margin-bottom: 1rem;
+  font-family: Georgia, serif;
+  letter-spacing: 1px;
+}
+
+.payment-cancel-page p {
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+  max-width: 480px;
+  color: #444;
+}
+
+.payment-cancel-page .btn {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.payment-cancel-page .btn--primary {
+  background-color: #8B1E2E;
+  color: #fff;
+  margin-right: 1rem;
+}
+
+.payment-cancel-page .btn--primary:hover {
+  background-color: #6f1824;
+  color: #FFD700;
+}
+
+.payment-cancel-page .btn--secondary {
+  background-color: #D4AF37;
+  color: #8B1E2E;
+}
+
+.payment-cancel-page .btn--secondary:hover {
+  background-color: #bfa13a;
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .payment-cancel-page h1 {
+    font-size: 2rem;
+  }
+  .payment-cancel-page p {
+    font-size: 1rem;
+  }
+  .payment-cancel-page .btn {
+    width: 100%;
+    margin: 0.75rem 0;
+  }
+}

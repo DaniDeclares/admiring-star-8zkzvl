@@ -4,33 +4,45 @@ import "./FinancialPage.css";
 
 const SERVICES = [
   {
-    title: "Term Life Insurance",
-    desc: "Affordable term life policies (10–35 years) from Primerica Life Insurance Company or National Benefit Life Insurance Company. Ideal for family protection during key years.",
+    title: "Free Term Life Insurance Quote",
+    price: "FREE",
+    desc: "Affordable term life policies (10–35 years) from Primerica Life Insurance Company or National Benefit Life Insurance Company. Ideal for family protection during key years."
   },
   {
-    title: "Debt Elimination Strategy",
-    desc: "We’ll build a custom debt-stacking plan to eliminate high-interest debt and free up your cash flow for savings and investments.",
+    title: "Debt Elimination Strategy Session",
+    price: "FREE",
+    desc: "We’ll build a custom debt-stacking plan to eliminate high-interest debt and free up your cash flow for savings and investments."
   },
   {
     title: "Budget & Cash-Flow Review",
-    desc: "1:1 session to analyze your income, expenses, and savings goals. Identify ways to save more, reduce spending, and build your emergency fund.",
+    price: "$99",
+    desc: "One-on-one session to analyze your income, expenses, and savings goals. Identify ways to save more, reduce spending, and build your emergency fund."
   },
   {
     title: "Mutual Funds & Retirement Planning",
-    desc: "Through Primerica’s Lifetime Investment Program™: managed portfolios for retirement, education, or long-term growth (IRAs, 401k rollovers, 529s).",
+    price: "Commission Based",
+    desc: "Through Primerica’s Lifetime Investment Program™: managed portfolios for retirement, education, or long-term growth (IRAs, 401(k) rollovers, 529s)."
   },
   {
     title: "Credit Monitoring & Identity Protection",
-    desc: "Protect your credit and identity. Get alerts, monthly score tracking, and fraud protection tools for peace of mind.",
+    price: "$25+/mo",
+    desc: "Protect your credit and identity. Get alerts, monthly score tracking, and fraud protection tools for peace of mind."
   },
   {
-    title: "Education Savings Plans (529)",
-    desc: "Plan for college with a tax-advantaged 529 account. Grow savings for tuition and education expenses with professional guidance.",
+    title: "Education Savings Plan (529)",
+    price: "FREE Consultation",
+    desc: "Plan for college with a tax-advantaged 529 account. Grow savings for tuition and education expenses with professional guidance."
+  },
+  {
+    title: "Financial Literacy Workshop",
+    price: "Custom Quote",
+    desc: "Tailored programs for schools, nonprofits, and corporate groups to empower smarter money decisions."
   },
   {
     title: "Life Insurance Policy Review",
-    desc: "Already have a policy? Let us review your coverage to ensure it still meets your family’s needs and financial goals.",
-  },
+    price: "FREE",
+    desc: "Already have a policy? We’ll review your coverage to ensure it still meets your family’s needs and financial goals."
+  }
 ];
 
 export default function FinancialPage() {
@@ -54,6 +66,7 @@ export default function FinancialPage() {
           {SERVICES.map((service, idx) => (
             <div key={idx} className="service-card">
               <h2>{service.title}</h2>
+              <p className="meta">{service.price}</p>
               <p className="desc">{service.desc}</p>
             </div>
           ))}
@@ -79,13 +92,13 @@ export default function FinancialPage() {
 
         <section className="extra-info">
           <h2>Why Choose Dani Declares?</h2>
-          <p>We’re not just selling policies. We’re giving you tools for generational wealth and peace of mind.</p>
+          <p>We’re not just selling policies. We’re equipping you with tools for generational wealth and peace of mind.</p>
           <ul className="info-list">
             <li>Personalized Debt Elimination Plans</li>
             <li>Term Life Insurance Tailored to You</li>
             <li>Mutual Funds & Retirement Solutions</li>
             <li>College Savings with 529 Plans</li>
-            <li>Credit Monitoring + Identity Protection</li>
+            <li>Credit Monitoring & Identity Protection</li>
           </ul>
           <p className="text-sm italic">
             Primerica Financial Services is not a bank. Term life policies underwritten by Primerica Life Insurance Company or National Benefit Life Insurance Company. Mutual funds offered through PFS Investments, Inc. Quotes and investment guidance provided by Dani Fong, licensed Primerica agent.
