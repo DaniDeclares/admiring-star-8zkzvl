@@ -2,6 +2,7 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import "./PackagesPage.css";
 import { Link } from "react-router-dom";
+import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 
 // Master Service Catalog Data
 const CATEGORIES = [
@@ -100,13 +101,24 @@ const BUNDLES = [
 ];
 
 export default function PackagesPage() {
+  const visibleCategories = SHOW_FESTIVAL
+    ? CATEGORIES
+    : CATEGORIES.filter((cat) => cat.title !== "Festival & Vendor Opportunities");
+  const visibleBundles = SHOW_FESTIVAL
+    ? BUNDLES
+    : BUNDLES.filter((bundle) => bundle.name !== "Vendor VIP Bundle");
+
   return (
     <main className="packages-page">
       <Helmet>
         <title>All Services & Pricing • Dani Declares</title>
         <meta
           name="description"
-          content="Explore Dani Declares full service catalog: notary, real estate, legal, wedding, coaching, financial, festival, merch & bundles."
+          content={
+            SHOW_FESTIVAL
+              ? "Explore Dani Declares full service catalog: notary, real estate, legal, wedding, coaching, financial, festival, merch & bundles."
+              : "Explore Dani Declares full service catalog: notary, real estate, legal, wedding, coaching, financial, merch & bundles."
+          }
         />
       </Helmet>
 
@@ -115,7 +127,7 @@ export default function PackagesPage() {
         <p>Browse every service, package, and bundle offered by Dani Declares LLC.</p>
       </header>
 
-      {CATEGORIES.map((cat) => (
+      {visibleCategories.map((cat) => (
         <section key={cat.title} className="category-section">
           <h2>{cat.title}</h2>
           <div className="items-grid">
@@ -133,7 +145,7 @@ export default function PackagesPage() {
       <section className="bundles-section">
         <h2>Bundled Packages</h2>
         <div className="bundles-grid">
-          {BUNDLES.map((b) => (
+          {visibleBundles.map((b) => (
             <div key={b.name} className="bundle-card">
               <h3>{b.name}</h3>
               <p className="bundle-price">{b.price}</p>

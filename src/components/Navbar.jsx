@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
+import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 
 import logoSeal from "../assets/logo/logo-gold-seal.png";
 import "./Navbar.css";
@@ -80,7 +81,9 @@ export default function Navbar() {
           </button>
           <ul className={`dropdown-menu ${eventsOpen ? "open" : ""}`}>
             <li><Link to="/events" onClick={handleLinkClick}>Pop-Up Events</Link></li>
-            <li><Link to="/festival" onClick={handleLinkClick}>Festival</Link></li>
+            {SHOW_FESTIVAL && (
+              <li><Link to="/festival" onClick={handleLinkClick}>Festival</Link></li>
+            )}
             <li><Link to="/membership" onClick={handleLinkClick}>Vendor & Speaker</Link></li>
           </ul>
         </div>

@@ -3,6 +3,7 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import FestivalBanner from "../components/FestivalBanner.jsx";
+import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 
 // festival highlights
 import highlight1 from "../assets/festival-images/istockphoto-147288826-612x612.webp";
@@ -12,6 +13,32 @@ import highlight4 from "../assets/festival-images/istockphoto-1495159969-612x612
 import "./FestivalPage.css";
 
 export default function FestivalPage() {
+  if (!SHOW_FESTIVAL) {
+    return (
+      <main className="festival-page">
+        <Helmet>
+          <title>Festival Updates • Coming Soon</title>
+          <meta
+            name="description"
+            content="Festival updates are coming soon. Join the waitlist to be notified when new details are available."
+          />
+        </Helmet>
+
+        <header className="festival-hero">
+          <div className="festival-hero-overlay">
+            <h1>Festival Updates Coming Soon</h1>
+            <p className="festival-subtitle">
+              We’ll share dates, partners, and ticket info once they’re ready.
+            </p>
+            <Link to="/contact" className="btn btn--primary festival-cta-hero">
+              Join the Waitlist
+            </Link>
+          </div>
+        </header>
+      </main>
+    );
+  }
+
   return (
     <main className="festival-page">
       <Helmet>

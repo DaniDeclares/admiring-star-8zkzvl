@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar.jsx";
 import SocialLinks from "./components/SocialLinks.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import Footer from "./components/Footer.jsx";
+import { SHOW_FESTIVAL } from "./data/siteConfig.js";
 
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
@@ -54,7 +55,7 @@ export default function App() {
 
   return (
     <>
-      <FestivalBanner />
+      {SHOW_FESTIVAL && <FestivalBanner />}
       <Navbar />
 
       <Routes>

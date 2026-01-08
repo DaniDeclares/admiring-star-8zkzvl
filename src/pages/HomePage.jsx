@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import Countdown from "react-countdown";
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
+import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 const eventBackground = process.env.PUBLIC_URL + "/images/festival/pexels-fang-liu-1996637-3617724.jpg";
 import "./Homepage.css";
 
@@ -74,7 +75,9 @@ export default function Homepage() {
             <div className="hero-cta">
               <Link to="/coaching" className="btn btn--primary">Start Your Coaching Journey</Link>
               <Link to="/financial" className="btn btn--primary">Get a Free Quote</Link>
-              <Link to="/festival" className="btn btn--primary">Early Bird Festival Tickets</Link>
+              {SHOW_FESTIVAL && (
+                <Link to="/festival" className="btn btn--primary">Early Bird Festival Tickets</Link>
+              )}
             </div>
           </div>
         </section>
@@ -96,28 +99,32 @@ export default function Homepage() {
         </section>
 
         {/* WHY THIS FESTIVAL MATTERS */}
-        <section className="festival-purpose-section">
-          <h2>Why the Declare Your Worth Festival Matters</h2>
-          <p>
-            Growing up, financial literacy wasn’t something that was taught in my household—or in many others like mine. 
-            I know firsthand what it feels like to navigate adulthood without the tools, resources, or financial confidence needed to thrive.
-          </p>
-          <p>
-            From kid entrepreneur zones and budgeting bootcamps to interactive workshops and live entertainment—this event is a movement to empower every generation.
-          </p>
-          <Link to="/festival" className="btn btn--primary">Explore the Festival →</Link>
-        </section>
+        {SHOW_FESTIVAL && (
+          <section className="festival-purpose-section">
+            <h2>Why the Declare Your Worth Festival Matters</h2>
+            <p>
+              Growing up, financial literacy wasn’t something that was taught in my household—or in many others like mine.
+              I know firsthand what it feels like to navigate adulthood without the tools, resources, or financial confidence needed to thrive.
+            </p>
+            <p>
+              From kid entrepreneur zones and budgeting bootcamps to interactive workshops and live entertainment—this event is a movement to empower every generation.
+            </p>
+            <Link to="/festival" className="btn btn--primary">Explore the Festival →</Link>
+          </section>
+        )}
 
         {/* FESTIVAL PROMO */}
-        <section className="festival-banner" style={{ backgroundImage: `url(${eventBackground})` }}>
-          <div className="festival-overlay">
-            <h2>Declare Your Worth Festival</h2>
-            <p><strong>July 28–29, 2025 • Atlanta, GA</strong></p>
-            <CountdownTimer />
-            <Link to="/festival" className="btn btn--primary">Get Early Bird Tickets</Link>
-            <p className="early-bird-note">Early Bird pricing ends soon!</p>
-          </div>
-        </section>
+        {SHOW_FESTIVAL && (
+          <section className="festival-banner" style={{ backgroundImage: `url(${eventBackground})` }}>
+            <div className="festival-overlay">
+              <h2>Declare Your Worth Festival</h2>
+              <p><strong>July 28–29, 2025 • Atlanta, GA</strong></p>
+              <CountdownTimer />
+              <Link to="/festival" className="btn btn--primary">Get Early Bird Tickets</Link>
+              <p className="early-bird-note">Early Bird pricing ends soon!</p>
+            </div>
+          </section>
+        )}
 
         {/* TESTIMONIAL CAROUSEL */}
         <section className="testimonial-carousel">
