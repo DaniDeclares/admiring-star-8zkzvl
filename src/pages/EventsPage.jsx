@@ -2,6 +2,7 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import "./EventsPage.css";
+import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 
 export default function EventsPage() {
   return (
@@ -10,29 +11,37 @@ export default function EventsPage() {
         <title>Upcoming Events & Experiences • Dani Declares</title>
         <meta
           name="description"
-          content="Explore upcoming pop-up weddings, notary clinics, coaching sessions, financial workshops, and the Declare Your Worth Festival. Save your spot today!"
+          content={
+            SHOW_FESTIVAL
+              ? "Explore upcoming pop-up weddings, notary clinics, coaching sessions, financial workshops, and the Declare Your Worth Festival. Save your spot today!"
+              : "Explore upcoming pop-up weddings, notary clinics, coaching sessions, and financial workshops. Save your spot today!"
+          }
         />
       </Helmet>
 
       <main className="events-page">
         <h1>Upcoming Events & Pop-Ups</h1>
         <p className="intro">
-          From financial literacy festivals to pop-up weddings and mobile notary clinics—Dani Declares brings life-changing experiences to you. Here’s what’s on the calendar:
+          {SHOW_FESTIVAL
+            ? "From financial literacy festivals to pop-up weddings and mobile notary clinics—Dani Declares brings life-changing experiences to you. Here’s what’s on the calendar:"
+            : "From pop-up weddings and mobile notary clinics to coaching sessions—Dani Declares brings life-changing experiences to you. Here’s what’s on the calendar:"}
         </p>
 
         {/* Declare Your Worth Festival */}
-        <section className="event-card">
-          <h2>Declare Your Worth Festival</h2>
-          <p className="event-meta">
-            📅 Nov 29–30, 2025 • Brook Run Park, Doraville GA
-          </p>
-          <p className="event-desc">
-            Two days of financial literacy, family fun, interactive workshops, top speakers, vendor marketplace, and live entertainment. FREE for kids & students!
-          </p>
-          <Link to="/festival" className="btn btn--primary">
-            Festival Details & Tickets
-          </Link>
-        </section>
+        {SHOW_FESTIVAL && (
+          <section className="event-card">
+            <h2>Declare Your Worth Festival</h2>
+            <p className="event-meta">
+              📅 Nov 29–30, 2025 • Brook Run Park, Doraville GA
+            </p>
+            <p className="event-desc">
+              Two days of financial literacy, family fun, interactive workshops, top speakers, vendor marketplace, and live entertainment. FREE for kids & students!
+            </p>
+            <Link to="/festival" className="btn btn--primary">
+              Festival Details & Tickets
+            </Link>
+          </section>
+        )}
 
         {/* Pop-Up Notary & Insurance Clinic */}
         <section className="event-card">
@@ -96,19 +105,21 @@ export default function EventsPage() {
         </section>
 
         {/* Vendor & Speaker Onboarding */}
-        <section className="event-card">
-          <h2>Vendor, Speaker & Sponsor Onboarding</h2>
-          <p className="event-meta">📅 Ongoing Enrollment</p>
-          <p className="event-desc">
-            Ready to join the Declare Your Worth Festival? Apply now as a vendor, speaker, or sponsor to secure your spot and marketing perks.
-          </p>
-          <Link to="/membership" className="btn btn--secondary">
-            Membership Tiers & Perks
-          </Link>
-          <Link to="/festival" className="btn btn--secondary">
-            Become a Vendor/Speaker
-          </Link>
-        </section>
+        {SHOW_FESTIVAL && (
+          <section className="event-card">
+            <h2>Vendor, Speaker & Sponsor Onboarding</h2>
+            <p className="event-meta">📅 Ongoing Enrollment</p>
+            <p className="event-desc">
+              Ready to join the Declare Your Worth Festival? Apply now as a vendor, speaker, or sponsor to secure your spot and marketing perks.
+            </p>
+            <Link to="/membership" className="btn btn--secondary">
+              Membership Tiers & Perks
+            </Link>
+            <Link to="/festival" className="btn btn--secondary">
+              Become a Vendor/Speaker
+            </Link>
+          </section>
+        )}
 
         {/* Lead Capture */}
         <section className="contact-info">

@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import HubSpotForm from "../components/HubSpotForm.jsx";
 import "./ContactPage.css";
+import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 
 export default function ContactPage() {
   return (
@@ -20,8 +21,9 @@ export default function ContactPage() {
         <p>
           Have questions about our services—Notary & Legal Support, Real Estate,
           Weddings & Events, Coaching & Consulting, Financial Empowerment,
-          Festival & Vendor Opportunities, or Merch? Fill out the form below, and
-          we’ll follow up with personalized next steps or a custom quote.
+          {SHOW_FESTIVAL ? " Festival & Vendor Opportunities, or Merch? " : " or Merch? "}
+          Fill out the form below, and we’ll follow up with personalized next
+          steps or a custom quote.
         </p>
 
         <HubSpotForm
@@ -56,7 +58,9 @@ export default function ContactPage() {
             <li><Link to="/weddings">Wedding & Event Services</Link></li>
             <li><Link to="/coaching">Coaching & Consulting</Link></li>
             <li><Link to="/financial">Financial Empowerment</Link></li>
-            <li><Link to="/festival">Festival & Vendor Info</Link></li>
+            {SHOW_FESTIVAL && (
+              <li><Link to="/festival">Festival & Vendor Info</Link></li>
+            )}
             <li><Link to="/shop">Merch & Digital Products</Link></li>
             <li><Link to="/packages">All Services & Bundles</Link></li>
           </ul>
