@@ -1,6 +1,8 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import HubSpotForm from "../components/HubSpotForm.jsx";
+import { paymentLinks } from "../data/paymentLinks.js";
+import { siteConfig } from "../data/siteConfig.js";
 import "./CoachingPage.css";
 
 const PACKAGES = [
@@ -8,7 +10,7 @@ const PACKAGES = [
     name: "Discovery Session",
     duration: "30 min",
     price: 99,
-    payUrl: "https://buy.stripe.com/28E6oGeKldXg71R7X36kg0p",
+    payUrl: paymentLinks.coaching.discoverySession,
     scheduleUrl: "https://tidycal.com/danideclaresns/discovery-session",
     desc: "A powerful intro call to identify your goals, obstacles, and design your breakthrough roadmap. Perfect for new clients or those looking for clarity FAST."
   },
@@ -16,7 +18,7 @@ const PACKAGES = [
     name: "1:1 Coaching (4 Sessions)",
     duration: "4 sessions (1 hr each)",
     price: 499,
-    payUrl: "https://buy.stripe.com/28E3cu0Tvg5ofyn3GN6kg0o",
+    payUrl: paymentLinks.coaching.oneOnOne,
     scheduleUrl: "https://tidycal.com/danideclaresns/one-on-one-coaching",
     desc: "Deep-dive transformation—get ongoing accountability, custom action plans, and real results. We’ll tackle business, mindset, or money goals step by step."
   },
@@ -24,7 +26,7 @@ const PACKAGES = [
     name: "VIP Intensive",
     duration: "6 hrs",
     price: 1200,
-    payUrl: "https://buy.stripe.com/4gMfZgcCdf1k1Hxdhn6kg0n",
+    payUrl: paymentLinks.coaching.vipIntensive,
     scheduleUrl: "https://tidycal.com/danideclaresns/vip-intensive",
     desc: "An all-day VIP experience. Reset your vision, build your system, solve roadblocks, and walk away with a rock-solid plan. Best for entrepreneurs and business owners ready for a leap."
   }
@@ -34,13 +36,13 @@ const STARTER_KITS = [
   {
     name: "Pop-Up Wedding Starter Kit",
     price: 79,
-    buyUrl: "https://buy.stripe.com/00w5kCby92eyeujb9f6kg0y",
+    buyUrl: paymentLinks.coaching.starterKits.popUpWedding,
     desc: "Everything you need to launch and book pop-up weddings: contracts, checklists, ceremony scripts, marketing templates, and bonus decor ideas."
   },
   {
     name: "Pop-Up Notary Starter Kit",
     price: 59,
-    buyUrl: "https://buy.stripe.com/3cI28q9q13iC3PF2CJ6kg0z",
+    buyUrl: paymentLinks.coaching.starterKits.popUpNotary,
     desc: "Your step-by-step playbook to running profitable pop-up notary events. Includes supply lists, pricing sheets, scripts, Canva flyers, logs, and how to get clients."
   }
 ];
@@ -49,25 +51,25 @@ const COURSES = [
   {
     name: "Digital Notary Empire: Get Booked Online",
     price: 149,
-    buyUrl: "https://buy.stripe.com/00w8wO45HaL40Dt0uB6kg0A",
+    buyUrl: paymentLinks.coaching.courses.digitalNotaryEmpire,
     desc: "A start-to-finish video course for building your online/mobile notary business. Get paid bookings, automate follow-up, and attract clients on autopilot."
   },
   {
     name: "Appointment Freedom: Master Remote Online Notary",
     price: 99,
-    buyUrl: "https://buy.stripe.com/5kQaEWdGhaL471R2CJ6kg0B",
+    buyUrl: paymentLinks.coaching.courses.appointmentFreedom,
     desc: "Learn how to run virtual signings, accept remote clients nationwide, and leverage e-notary platforms for recurring income."
   },
   {
     name: "Eventpreneur: Start a Profitable Pop-Up Wedding or Notary Brand",
     price: 129,
-    buyUrl: "https://buy.stripe.com/cNi14mgStbP82LB0uB6kg0C",
+    buyUrl: paymentLinks.coaching.courses.eventpreneur,
     desc: "Mini course for launching your first profitable pop-up event business, complete with ready-to-edit contracts, pricing formulas, and social media templates."
   },
   {
     name: "Legacy Vault Partner Playbook (with My Life & Wishes)",
     price: 79,
-    buyUrl: "https://buy.stripe.com/9B6bJ031D4mGcmbb9f6kg0D",
+    buyUrl: paymentLinks.coaching.courses.legacyVault,
     desc: "Learn to offer the exclusive digital legacy product. Step-by-step guide to selling, onboarding clients, and setting up your own white-labeled portal."
   }
 ];
@@ -118,7 +120,7 @@ export default function CoachingPage() {
           Partner with Dani to transform your business, brand, and money mindset.
         </p>
         <a
-          href="https://tidycal.com/danideclaresns"
+          href={siteConfig.bookingUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn--primary"

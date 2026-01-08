@@ -1,6 +1,7 @@
 // src/pages/ShopPage.jsx
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { siteConfig } from "../data/siteConfig.js";
 import "./ShopPage.css";
 
 const PRODUCTS = [
@@ -152,17 +153,14 @@ export default function ShopPage() {
             <h2>{product.name}</h2>
             <p>{product.desc}</p>
             <div className="price">${product.price.toFixed(2)}</div>
-            <button
-              className="snipcart-add-item btn btn--primary"
-              data-item-id={product.id}
-              data-item-price={product.price}
-              data-item-url="/shop"
-              data-item-description={product.desc}
-              data-item-image={product.image}
-              data-item-name={product.name}
+            <a
+              className="btn btn--primary"
+              href={product.link ?? product.image}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Add to Cart
-            </button>
+              View Product
+            </a>
           </div>
         ))}
       </div>
@@ -170,8 +168,15 @@ export default function ShopPage() {
       <section className="contact-info">
         <h3>Need Help With Your Order?</h3>
         <p>
-          Email <a href="mailto:admin@danideclares.com">admin@danideclares.com</a> or text us at{" "}
-          <a href="tel:+14705234892">(470) 523-4892</a>.
+          Email{" "}
+          <a href={`mailto:${siteConfig.emails.admin}`}>
+            {siteConfig.emails.admin}
+          </a>{" "}
+          or text us at{" "}
+          <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
+            {siteConfig.phoneNumbers.primary.display}
+          </a>
+          .
         </p>
       </section>
     </main>

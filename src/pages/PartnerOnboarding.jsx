@@ -1,7 +1,14 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { siteConfig } from "../data/siteConfig.js";
 
 export default function PartnerOnboarding() {
+  const stripeConnectClientId =
+    process.env.REACT_APP_STRIPE_CONNECT_CLIENT_ID || "";
+  const stripeConnectRedirect =
+    process.env.REACT_APP_STRIPE_CONNECT_REDIRECT_URL || "";
+  const stripeConnectUrl = `https://connect.stripe.com/express/oauth/authorize?client_id=${stripeConnectClientId}&scope=read_write${stripeConnectRedirect ? `&redirect_uri=${stripeConnectRedirect}` : ""}`;
+
   return (
     <main className="partner-onboarding-page">
       <Helmet>
@@ -15,7 +22,7 @@ export default function PartnerOnboarding() {
         Click below to connect your bank account securely via Stripe:
       </p>
       <a
-        href="https://connect.stripe.com/express/oauth/authorize?client_id=YOUR_STRIPE_CLIENT_ID&redirect_uri=https://danideclares.com/success"
+        href={stripeConnectUrl}
         className="btn btn--primary"
         target="_blank"
         rel="noopener noreferrer"
@@ -28,7 +35,12 @@ export default function PartnerOnboarding() {
         After setting up payouts, email us your headshot, bio, and any special
         requests for your event appearance.
       </p>
-      <p>Email: <a href="mailto:admin@danideclares.com">admin@danideclares.com</a></p>
+      <p>
+        Email:{" "}
+        <a href={`mailto:${siteConfig.emails.admin}`}>
+          {siteConfig.emails.admin}
+        </a>
+      </p>
 
       <h2>Step 3: Next Steps</h2>
       <ul>

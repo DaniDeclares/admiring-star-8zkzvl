@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { siteConfig } from "../data/siteConfig.js";
 import "./MembershipPage.css";
 
 // Sponsorship tiers as per Master Service Catalog
@@ -146,21 +147,14 @@ export default function MembershipPage() {
                     <li key={perk}>{perk}</li>
                   ))}
                 </ul>
-                <button
-                  className="snipcart-add-item btn btn--primary"
-                  data-item-id={tier.id}
-                  data-item-name={tier.name}
-                  data-item-price={price}
-                  data-item-url="/membership"
-                  data-item-description={tier.desc}
-                  data-item-custom1-name="Billing Cycle"
-                  data-item-custom1-options="Monthly,Yearly"
-                  data-item-custom1-value={billing}
+                <a
+                  className="btn btn--primary"
+                  href="/contact"
                 >
                   {billing === "monthly"
                     ? "Sponsor Monthly"
                     : "Pre-pay Yearly"}
-                </button>
+                </a>
                 <div className="onboarding-info">
                   Instant onboarding & sponsor kit after payment.
                 </div>
@@ -184,16 +178,12 @@ export default function MembershipPage() {
                   <li key={perk}>{perk}</li>
                 ))}
               </ul>
-              <button
-                className="snipcart-add-item btn btn--secondary"
-                data-item-id={booth.id}
-                data-item-name={booth.name}
-                data-item-price={booth.price}
-                data-item-url="/membership"
-                data-item-description={booth.desc}
+              <a
+                className="btn btn--secondary"
+                href="/contact"
               >
                 Reserve Booth
-              </button>
+              </a>
             </div>
           ))}
         </div>
@@ -208,16 +198,12 @@ export default function MembershipPage() {
               <h3>{pkg.name}</h3>
               <p className="tier-desc">{pkg.desc}</p>
               <p className="tier-price">${pkg.price}</p>
-              <button
-                className="snipcart-add-item btn btn--tertiary"
-                data-item-id={pkg.id}
-                data-item-name={pkg.name}
-                data-item-price={pkg.price}
-                data-item-url="/membership"
-                data-item-description={pkg.desc}
+              <a
+                className="btn btn--tertiary"
+                href="/contact"
               >
                 Apply Now
-              </button>
+              </a>
             </div>
           ))}
         </div>
@@ -227,7 +213,14 @@ export default function MembershipPage() {
       <section className="contact-cta">
         <h2>Have Questions?</h2>
         <p>
-          Email <a href="mailto:admin@danideclares.com">admin@danideclares.com</a> or call <a href="tel:+14705234892">(470) 523-4892</a>
+          Email{" "}
+          <a href={`mailto:${siteConfig.emails.admin}`}>
+            {siteConfig.emails.admin}
+          </a>{" "}
+          or call{" "}
+          <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
+            {siteConfig.phoneNumbers.primary.display}
+          </a>
         </p>
       </section>
     </main>

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
+import { paymentLinks } from "../data/paymentLinks.js";
 
 import logoSeal from "../assets/logo/logo-gold-seal.png";
 import "./Navbar.css";
@@ -110,7 +111,7 @@ export default function Navbar() {
       </div>
 
       <a
-        href="https://buy.stripe.com/aFa5kC9q18CW2LBb9f6kg01"
+        href={paymentLinks.bookNow}
         className="btn btn--primary book-btn"
         target="_blank"
         rel="noopener noreferrer"

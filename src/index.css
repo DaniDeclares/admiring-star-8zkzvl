@@ -66,13 +66,6 @@ a:hover {
   color: #fff;
 }
 
-#snipcart {
-  position: fixed;
-  right: 0;
-  top: 0;
-  z-index: 1000;
-}
-
 /* General container spacing */
 .container {
   max-width: 1200px;

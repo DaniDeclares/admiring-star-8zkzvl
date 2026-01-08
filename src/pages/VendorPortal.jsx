@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams, Navigate } from "react-router-dom";
+import { siteConfig } from "../data/siteConfig.js";
 
 export default function VendorPortal() {
   const [search] = useSearchParams();
@@ -57,10 +58,16 @@ export default function VendorPortal() {
       <section className="portal-section contact-support">
         <h2>Need Help?</h2>
         <p>
-          📧 <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
+          📧{" "}
+          <a href={`mailto:${siteConfig.emails.admin}`}>
+            {siteConfig.emails.admin}
+          </a>
         </p>
         <p>
-          📞 <a href="tel:+14705234892">(470) 523-4892</a>
+          📞{" "}
+          <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
+            {siteConfig.phoneNumbers.primary.display}
+          </a>
         </p>
       </section>
     </main>
