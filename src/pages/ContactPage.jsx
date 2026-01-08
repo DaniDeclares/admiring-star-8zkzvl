@@ -54,7 +54,7 @@ export default function ContactPage() {
           <h3>Explore Our Services</h3>
           <ul>
             <li><Link to="/notary">Notary & Legal Support</Link></li>
-            <li><Link to="/realestate">Real Estate Services</Link></li>
+            <li><Link to="/real-estate">Real Estate Services</Link></li>
             <li><Link to="/weddings">Wedding & Event Services</Link></li>
             <li><Link to="/coaching">Coaching & Consulting</Link></li>
             <li><Link to="/financial">Financial Empowerment</Link></li>
