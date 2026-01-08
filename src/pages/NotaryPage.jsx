@@ -197,7 +197,7 @@ export default function NotaryPage() {
       <section className="dashboard-cta">
         <h3>Notary Partners</h3>
         <p>Join our network to earn through the Dani Declares platform.</p>
-        <a href="/onboarding" className="btn btn--primary" style={{ marginRight: '1rem' }}>
+        <a href="/partner-onboarding" className="btn btn--primary" style={{ marginRight: '1rem' }}>
           Become a Partner
         </a>
         <a href="/dashboard" className="btn btn--secondary">
