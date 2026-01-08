@@ -40,12 +40,12 @@
 
 ## 4. Upcoming Events & Milestones
 
-| Date        | Event                                           | Folder / Design Path           |
-| ----------- | ----------------------------------------------- | ------------------------------ |
-| Jun 2 2025  | Sign & Sip: Notary + Networking Pop-Up          | `src/pages/SignSipPage.jsx`    |
-| Jul 13 2025 | Love & Legalities: Wedding Mixer                | `src/pages/LoveLegalities.jsx` |
-| Sept 2025   | Declare Your Worth Festival (Brook Run)         | `src/pages/FestivalPage.jsx`   |
-| Jan 1 2026  | Start filming ‘WedFest: Battle for the Big Day’ | —                              |
+| Date        | Event                                           | Folder / Design Path          |
+| ----------- | ----------------------------------------------- | ----------------------------- |
+| Jun 2 2025  | Sign & Sip: Notary + Networking Pop-Up          | `src/pages/EventsPage.jsx`    |
+| Jul 13 2025 | Love & Legalities: Wedding Mixer                | `src/pages/WeddingsPage.jsx`  |
+| Sept 2025   | Declare Your Worth Festival (Brook Run)         | `src/pages/FestivalPage.jsx`  |
+| Jan 1 2026  | Start filming ‘WedFest: Battle for the Big Day’ | —                             |
 
 ---
 
