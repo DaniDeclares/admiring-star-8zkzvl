@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import HubSpotForm from "../components/HubSpotForm.jsx";
 import "./ContactPage.css";
-import { SHOW_FESTIVAL } from "../data/siteConfig.js";
+import { SHOW_FESTIVAL, siteConfig } from "../data/siteConfig.js";
 
 export default function ContactPage() {
   return (
@@ -36,17 +36,22 @@ export default function ContactPage() {
           <h3>Prefer Email or Phone?</h3>
           <p>
             📧{" "}
-            <a href="mailto:admin@danideclares.com">
-              admin@danideclares.com
+            <a href={`mailto:${siteConfig.emails.admin}`}>
+              {siteConfig.emails.admin}
             </a>{" "}
             |{" "}
-            <a href="mailto:events@danideclares.com">
-              events@danideclares.com
+            <a href={`mailto:${siteConfig.emails.events}`}>
+              {siteConfig.emails.events}
             </a>
             <br />
             📞{" "}
-            <a href="tel:+14705234892">(470) 523-4892</a> |{" "}
-            <a href="tel:+18643265362">(864) 326-5362</a>
+            <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
+              {siteConfig.phoneNumbers.primary.display}
+            </a>{" "}
+            |{" "}
+            <a href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}>
+              {siteConfig.phoneNumbers.secondary.display}
+            </a>
           </p>
         </section>
 

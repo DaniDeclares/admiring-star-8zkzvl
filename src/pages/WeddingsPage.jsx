@@ -1,6 +1,7 @@
 // src/pages/WeddingsPage.jsx
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { paymentLinks } from "../data/paymentLinks.js";
 import "./WeddingsPage.css";
 
 // Core wedding packages
@@ -10,42 +11,42 @@ const PACKAGES = [
     price: "$199",
     description:
       "Short and sweet legal ceremony. Perfect for elopements or vow renewals. Officiant & filing included.",
-    link: "https://buy.stripe.com/7sIg2M4WldBMd1G9AA",
+    link: paymentLinks.weddings.simpleVows,
   },
   {
     title: "Courthouse-Style Wedding",
     price: "$499",
     description:
       "Skip the courthouse! A professional, styled ceremony with script, filing, and on-location service.",
-    link: "https://buy.stripe.com/fZeaG9feF5eAd1GcMO",
+    link: paymentLinks.weddings.courthouseStyle,
   },
   {
     title: "Intimate All-Inclusive Wedding",
     price: "$1,499",
     description:
       "Venue, decor, music, photos, and officiant—all bundled for up to 25 guests. Stress-free & budget-friendly.",
-    link: "https://buy.stripe.com/bIY9CUeE9fYgd1GbIK",
+    link: paymentLinks.weddings.intimateAllInclusive,
   },
   {
     title: "Reception-Only Package",
     price: "$2,500+",
     description:
       "Already married? Let’s party! Includes venue, decor, food coordination, DJ, and guest flow support.",
-    link: "https://buy.stripe.com/5kAeXfcYv9Yg0Ra3cd",
+    link: paymentLinks.weddings.receptionOnly,
   },
   {
     title: "Full-Service Planning",
     price: "$4,999",
     description:
       "From venue scouting to day-of coordination. Full-service planning with vendor management and timeline creation.",
-    link: "https://buy.stripe.com/5kA6ph0A91jUcLu4gl",
+    link: paymentLinks.weddings.fullServicePlanning,
   },
   {
     title: "Premium All-Inclusive Wedding",
     price: "$10,000+",
     description:
       "The total package: venue, catering, decor, entertainment, guest logistics, and full planning team for large or destination weddings.",
-    link: "https://buy.stripe.com/fZe9CU2A9eYg5cY3cd",
+    link: paymentLinks.weddings.premiumAllInclusive,
   },
 ];
 

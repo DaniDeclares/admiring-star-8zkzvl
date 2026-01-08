@@ -1,5 +1,6 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { siteConfig } from "../data/siteConfig.js";
 import "./FinancialPage.css";
 
 const SERVICES = [
@@ -108,9 +109,16 @@ export default function FinancialPage() {
         <section className="contact-info">
           <h3>Still Have Questions?</h3>
           <p>
-            Email <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
+            Email <a href={`mailto:${siteConfig.emails.admin}`}>{siteConfig.emails.admin}</a>
             <br />
-            or call/text <a href="tel:+14705234892">(470) 523-4892</a> | <a href="tel:+18643265362">(864) 326-5362</a>
+            or call/text{" "}
+            <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
+              {siteConfig.phoneNumbers.primary.display}
+            </a>{" "}
+            |{" "}
+            <a href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}>
+              {siteConfig.phoneNumbers.secondary.display}
+            </a>
           </p>
         </section>
       </main>

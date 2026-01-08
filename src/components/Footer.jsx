@@ -1,6 +1,7 @@
 // src/components/Footer.jsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { siteConfig } from "../data/siteConfig.js";
 import "./Footer.css";
 
 export default function Footer() {
@@ -11,22 +12,27 @@ export default function Footer() {
         <p>
           <strong>Consultation:</strong>{" "}
           <a
-            href="https://tidycal.com/danideclaresns"
+            href={siteConfig.bookingUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
-            tidycal.com/danideclaresns
+            {siteConfig.bookingUrl.replace("https://", "")}
           </a>
         </p>
         <p>
           <strong>Email:</strong>{" "}
-          <a href="mailto:admin@danideclares.com">admin@danideclares.com</a> |{" "}
-          <a href="mailto:danideclaresns@gmail.com">danideclaresns@gmail.com</a>
+          <a href={`mailto:${siteConfig.emails.admin}`}>{siteConfig.emails.admin}</a> |{" "}
+          <a href={`mailto:${siteConfig.emails.notary}`}>{siteConfig.emails.notary}</a>
         </p>
         <p>
           <strong>Call:</strong>{" "}
-          <a href="tel:+14705234892">(470) 523-4892</a> |{" "}
-          <a href="tel:+18643265362">(864) 326-5362</a>
+          <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
+            {siteConfig.phoneNumbers.primary.display}
+          </a>{" "}
+          |{" "}
+          <a href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}>
+            {siteConfig.phoneNumbers.secondary.display}
+          </a>
         </p>
       </div>
 

@@ -1,5 +1,8 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { siteConfig } from "../data/siteConfig.js";
+import { pricingConfig } from "../data/pricingConfig.js";
+import { paymentLinks } from "../data/paymentLinks.js";
 import "./NotaryPage.css";
 
 // Full Notary & Signing Services
@@ -8,8 +11,8 @@ const SERVICES = [
     title: "Mobile Notary Visit",
     duration: "Up to 3 signatures",
     price: "$50",
-    desc: "We come to you—home, office, hospital, or café. Extra signatures $5 each. Evening/weekend +$20. Travel outside Doraville +$1/mile.",
-    payUrl: "https://buy.stripe.com/5kQ4gOf0H9H08dq6oq",
+    desc: `We come to you—home, office, hospital, or café. ${pricingConfig.notary.extraSignatureFee} ${pricingConfig.notary.afterHoursFeeNote} ${pricingConfig.notary.travelFeeNote}`,
+    payUrl: paymentLinks.notary.mobileNotaryVisit,
     bookUrl: "https://tidycal.com/danideclaresns",
   },
   {
@@ -17,14 +20,14 @@ const SERVICES = [
     duration: "All closing types",
     price: "$150",
     desc: "Refinance, HELOCs, purchase closings—insured and NNA-certified. Includes scanbacks & printing.",
-    payUrl: "https://buy.stripe.com/6oU6oGdGh9H0ebO28g",
+    payUrl: paymentLinks.notary.loanSigningAgent,
     bookUrl: "https://tidycal.com/danideclaresns/loan-signing",
   },
   {
     title: "Trust Signing Agent",
     duration: "Trust & estate document signings",
     price: "$150",
-    desc: "Certified trust-signing specialist for estate, trust, and fiduciary documents. Witness coordination $35, flat gas/travel fee $35.",
+    desc: `Certified trust-signing specialist for estate, trust, and fiduciary documents. ${pricingConfig.notary.witnessFee}, ${pricingConfig.notary.gasTravelFee}.`,
     payUrl: "",
     bookUrl: "https://tidycal.com/danideclaresns/trust-signing",
   },
@@ -32,7 +35,7 @@ const SERVICES = [
     title: "General Document Signing Agent",
     duration: "Non-loan legal doc signings",
     price: "$125",
-    desc: "Wills, POAs, contracts, affidavits—professional signings with witnesses ($35) and gas fee ($35).",
+    desc: `Wills, POAs, contracts, affidavits—professional signings with witnesses (${pricingConfig.notary.witnessFee}) and gas fee (${pricingConfig.notary.gasTravelFee}).`,
     payUrl: "",
     bookUrl: "https://tidycal.com/danideclaresns/general-signing",
   },
@@ -41,7 +44,7 @@ const SERVICES = [
     duration: "Per document",
     price: "$175",
     desc: "U.S. or international apostilles handled start-to-finish. Courier & expedited options available.",
-    payUrl: "https://buy.stripe.com/3cs14mbGh6uOaU85k9",
+    payUrl: paymentLinks.notary.apostilleFacilitation,
     bookUrl: "https://tidycal.com/danideclaresns/apostille",
   },
   {
@@ -49,7 +52,7 @@ const SERVICES = [
     duration: "First card $50, each additional $20",
     price: "$50+",
     desc: "FD-258 fingerprinting for employment, licensing, or background checks—equipment provided on-site.",
-    payUrl: "https://buy.stripe.com/aEU4gOeY6b9acbO28g",
+    payUrl: paymentLinks.notary.mobileFingerprinting,
     bookUrl: "https://tidycal.com/danideclaresns/fingerprinting",
   },
   {
@@ -57,7 +60,7 @@ const SERVICES = [
     duration: "Standard session",
     price: "$50",
     desc: "Remote hire I-9 verification. HR-friendly, fast turnaround, covers new hires relocating to GA.",
-    payUrl: "https://buy.stripe.com/9AQg2vf0H6uO2LBb9e",
+    payUrl: paymentLinks.notary.i9Verification,
     bookUrl: "https://tidycal.com/danideclaresns/i9",
   },
   {
@@ -65,7 +68,7 @@ const SERVICES = [
     duration: "1 hr bundled session",
     price: "$135",
     desc: "Notarize your docs and receive a budget & credit review in one convenient meeting.",
-    payUrl: "https://buy.stripe.com/aEUg28dGh5qKcyI5k3",
+    payUrl: paymentLinks.notary.notaryFinanceSession,
     bookUrl: "https://tidycal.com/danideclaresns/finance-bundle",
   },
   {
@@ -132,7 +135,7 @@ export default function NotaryPage() {
       <header className="notary-hero">
         <h1>Trusted Mobile Notary & Signing Services</h1>
         <p>
-          Serving Atlanta, Doraville, Dunwoody, and beyond.
+          {siteConfig.serviceAreaText}
           <br />
           <strong>Same-day, evening & weekend appointments available.</strong>
         </p>
@@ -174,11 +177,11 @@ export default function NotaryPage() {
 
       <section className="extra-info">
         <p>
-          <strong>Travel outside Doraville:</strong> +$1/mile. After-hours or same-day bookings +$20.
+          <strong>{pricingConfig.notary.travelFeeNote}</strong> {pricingConfig.notary.afterHoursFeeNote}
           <br />
           <strong>Discounts:</strong> Ask about volume plans and corporate rates.
           <br />
-          <em>Cash, card, PayPal, and Zelle accepted.</em>
+          <em>{pricingConfig.notary.actFeeDisclosure}</em>
         </p>
       </section>
 
@@ -186,11 +189,16 @@ export default function NotaryPage() {
         <h3>Questions? Text or Email:</h3>
         <p>
           📧{' '}
-          <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>
+          <a href={`mailto:${siteConfig.emails.admin}`}>{siteConfig.emails.admin}</a>
           <br />
           📱{' '}
-          <a href="tel:+14705234892">(470) 523-4892</a> |{' '}
-          <a href="tel:+18643265362">(864) 326-5362</a>
+          <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
+            {siteConfig.phoneNumbers.primary.display}
+          </a>{" "}
+          |{" "}
+          <a href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}>
+            {siteConfig.phoneNumbers.secondary.display}
+          </a>
         </p>
       </section>
 

@@ -3,9 +3,15 @@ import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 
 export default function OnboardingPage() {
+  const stripeConnectClientId =
+    process.env.REACT_APP_STRIPE_CONNECT_CLIENT_ID || "";
+  const stripeConnectRedirect =
+    process.env.REACT_APP_STRIPE_CONNECT_REDIRECT_URL || "";
+  const stripeConnectUrl = `https://connect.stripe.com/express/oauth/authorize?client_id=${stripeConnectClientId}&scope=read_write${stripeConnectRedirect ? `&redirect_uri=${stripeConnectRedirect}` : ""}`;
+
   useEffect(() => {
     // Example: Simulate redirect to Stripe Connect onboarding link
-    window.location.href = "https://connect.stripe.com/express/oauth/authorize?client_id=YOUR_CLIENT_ID&scope=read_write";
+    window.location.href = stripeConnectUrl;
   }, []);
 
   return (
@@ -16,7 +22,10 @@ export default function OnboardingPage() {
       </Helmet>
 
       <h1>Redirecting to Stripe Onboarding...</h1>
-      <p>If you aren’t redirected in a few seconds, <a href="https://connect.stripe.com/express/oauth/authorize?client_id=YOUR_CLIENT_ID&scope=read_write">click here</a>.</p>
+      <p>
+        If you aren’t redirected in a few seconds,{" "}
+        <a href={stripeConnectUrl}>click here</a>.
+      </p>
     </main>
   );
 }
