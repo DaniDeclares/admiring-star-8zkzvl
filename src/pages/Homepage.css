@@ -1,242 +1,213 @@
-/* src/pages/Homepage.css — Dani Declares Site */
+/* src/pages/Homepage.css — Dani Declares modern homepage */
 
-/* GENERAL */
 .home-main {
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  color: #2a2222; /* Deep, rich brown for elegant contrast */
-  background: #F8F5F1;
-  margin: 0;
-  padding: 0;
+  background: var(--ivory);
+  color: var(--ink);
 }
 
-/* HERO SECTION */
 .hero {
   background-size: cover;
   background-position: center;
-  padding: 62px 16px 52px;
-  text-align: center;
+  padding: 4.5rem 1.5rem 5rem;
   position: relative;
 }
+
 .hero-overlay {
-  background-color: rgba(95, 18, 33, 0.88); /* Deeper, almost oxblood for highest contrast */
-  padding: 40px 18px 28px;
-  border-radius: 18px;
+  background: rgba(41, 9, 14, 0.78);
+  padding: 2.5rem;
+  border-radius: 24px;
   color: #fff;
-  max-width: 540px;
+  max-width: 640px;
   margin: 0 auto;
-  box-shadow: 0 4px 28px rgba(139,30,46,0.13);
-}
-.hero h1 {
-  font-family: 'Georgia', 'Roboto', serif;
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: #F8F5F1; /* Ivory/white, for highest contrast */
-  letter-spacing: 2px;
-  font-weight: bold;
-  text-shadow: 0 2px 10px rgba(139,30,46,0.20), 0 1px 0 #721623;
-}
-.hero-highlight {
-  color: #D4AF37; /* Gold for accent words only */
-  font-weight: bold;
-}
-.hero-subtitle {
-  font-size: 1.12rem;
-  color: #f3e7d1; /* Softer light ivory/gold */
-  margin-bottom: 1.2rem;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-}
-.hero-cta .btn {
-  margin: 8px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
 }
 
-/* BUTTONS */
-.btn {
-  display: inline-block;
-  padding: 14px 30px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  margin: 4px 0;
+.hero-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  font-size: 0.7rem;
   font-weight: 600;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 3px 8px rgba(139,30,46,0.08);
+  color: var(--gold);
+  margin-bottom: 0.8rem;
 }
-.burgundy { background-color: #8B1E2E; color: #fff; }
-.burgundy:hover { background: #721623; color: #D4AF37; }
-.gold { background-color: #D4AF37; color: #8B1E2E; }
-.gold:hover { background: #bfa13a; color: #fff; }
 
-/* ABOUT US, MISSION, FESTIVAL PURPOSE */
-.about-us-section,
-.mission-statement-section,
-.festival-purpose-section {
+.hero h1 {
+  font-family: var(--font-secondary);
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  margin-bottom: 0.9rem;
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 1.5rem;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero-footnote {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.about-us-section {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 2.5rem;
   background: #fff;
-  padding: 2.2rem 1.5rem;
-  border-radius: 14px;
-  margin: 2.2rem auto;
-  max-width: 1000px;
-  box-shadow: 0 2px 12px rgba(139,30,46,0.07);
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: var(--card-shadow);
+}
+
+.about-us-section h2 {
+  font-family: var(--font-secondary);
+  color: var(--burgundy);
+  margin-bottom: 0.75rem;
+}
+
+.about-us-section p {
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+}
+
+.testimonial-carousel {
+  padding: 3.5rem 1.5rem;
+  background: #fff;
   text-align: center;
 }
-.about-us-section h2,
-.mission-statement-section h2,
-.festival-purpose-section h2 {
-  color: #8B1E2E;
-  font-family: 'Georgia', serif;
+
+.testimonial-carousel h2 {
+  color: var(--burgundy);
   margin-bottom: 1rem;
-  font-size: 1.9rem;
-  text-shadow: 0 1px 8px #f9e7e7;
-}
-.about-us-section p,
-.mission-statement-section p,
-.festival-purpose-section p {
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  font-size: 1.06rem;
-  color: #453839;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-.festival-purpose-section .btn {
-  margin-top: 1.1rem;
-  padding: 0.65rem 1.35rem;
-  font-size: 1.02rem;
 }
 
-/* FESTIVAL BANNER */
+.carousel {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.testimonial-slide {
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.testimonial-slide span {
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--burgundy);
+  font-weight: 600;
+}
+
 .festival-banner {
   background-size: cover;
   background-position: center;
-  position: relative;
-  padding: 28px 14px;
+  padding: 3rem 1.5rem;
   text-align: center;
   color: #fff;
 }
+
 .festival-overlay {
-  background: rgba(95, 18, 33, 0.93); /* Even deeper overlay */
-  padding: 22px 12px 20px;
-  border-radius: 12px;
+  background: rgba(41, 9, 14, 0.8);
+  padding: 1.75rem;
+  border-radius: 20px;
   display: inline-block;
-  max-width: 410px;
-  margin: 0 auto;
+  max-width: 420px;
 }
+
 .festival-overlay h2 {
-  font-family: 'Georgia', 'Roboto', serif;
-  color: #D4AF37; /* Gold headline */
-  font-size: 1.15rem;
-  margin-bottom: 0.3rem;
-  letter-spacing: 1.2px;
-  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
 }
-.festival-countdown { margin: 11px 0 13px; color: #ffeac2; }
+
+.festival-countdown {
+  margin: 1rem 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .early-bird-note {
-  color: #D4AF37;
-  margin-top: 0.2rem;
-  font-size: 0.95rem;
-  font-style: italic;
+  color: var(--gold);
+  margin-top: 0.5rem;
 }
 
-/* TESTIMONIALS */
-.testimonial-carousel {
-  padding: 34px 8px;
-  background: #fff;
-  text-align: center;
-}
-.testimonial-carousel h2 { color: #8B1E2E; margin-bottom: 14px; }
-.carousel {
-  max-width: 540px;
-  margin: 0 auto;
-}
-.testimonial-slide {
-  font-style: italic;
-  font-size: 1.04rem;
-  margin-bottom: 0.8rem;
-  min-height: 54px;
-  color: #333;
-}
-.testimonial-slide span {
-  display: block;
-  font-size: 0.93rem;
-  color: #8B1E2E;
-  margin-top: 0.3rem;
-}
-
-/* SERVICE HIGHLIGHTS */
 .packages {
-  padding: 34px 7px;
-  text-align: center;
-  background: #FFF5F7;
+  padding: 3.5rem 1.5rem;
 }
-.packages h2 { color: #8B1E2E; font-size: 1.22rem; }
 
-/* OTHER SERVICES */
-.packages-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center;
-  margin-top: 12px;
+.section-heading {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 2rem;
 }
+
+.section-heading h2 {
+  font-family: var(--font-secondary);
+  color: var(--burgundy);
+  margin-bottom: 0.6rem;
+}
+
+.section-heading p {
+  color: var(--ink-muted);
+}
+
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
 .package-card {
-  background: #fff5f7;
-  padding: 17px 8px;
-  border-radius: 10px;
-  width: 212px;
-  min-height: 112px;
-  box-shadow: 0 0 6px rgba(139,30,46,0.03);
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  border: 1px solid rgba(139, 30, 46, 0.08);
 }
+
 .package-card h3 {
-  color: #8B1E2E;
-  margin-bottom: 7px;
-  font-size: 0.99rem;
+  margin-bottom: 0.4rem;
 }
 
-/* CONTACT SECTION */
-.contact-cta {
+.package-card p {
+  color: var(--ink-muted);
+}
+
+.services-footer {
+  margin-top: 2rem;
   text-align: center;
-  padding: 30px 6px;
-  background: #f2f2f2;
 }
+
+.contact-cta {
+  background: var(--burgundy);
+  color: #fff;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
 .contact-cta h2 {
-  color: #8B1E2E;
-  margin-bottom: 8px;
+  font-family: var(--font-secondary);
+  margin-bottom: 0.6rem;
 }
+
 .contact-cta p {
-  margin-bottom: 11px;
+  margin-bottom: 1.2rem;
+  color: rgba(255, 255, 255, 0.85);
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .hero, .festival-banner, .packages, .testimonial-carousel, .contact-cta {
-    padding-left: 4px;
-    padding-right: 4px;
-  }
-  .packages-grid, .package-card {
-    flex-direction: column;
-    width: 100%;
-    gap: 10px;
-  }
-  .hero-overlay, .festival-overlay {
-    max-width: 98vw;
+@media (max-width: 700px) {
+  .hero-overlay {
+    padding: 2rem 1.5rem;
   }
 }
-
-@media (max-width: 600px) {
-  .hero-overlay, .festival-overlay {
-    padding: 13px 3px;
-    border-radius: 8px;
-  }
-  .hero h1, .festival-overlay h2 {
-    font-size: 1rem;
-  }
-  .package-card {
-    padding: 7px 3px;
-    min-width: 90vw;
-    width: 100%;
-  }
-}/**/

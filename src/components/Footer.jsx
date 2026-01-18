@@ -2,25 +2,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
-import { buildTidyCalUrl, tidyCalEvents } from "../data/tidycal.js";
 import "./Footer.css";
 
 export default function Footer() {
-  const bookingUrl = buildTidyCalUrl(tidyCalEvents.generalNotary.slug);
-
   return (
     <footer className="footer">
       {/* Top contact info */}
       <div className="footer-top">
         <p>
-          <strong>Consultation:</strong>{" "}
-          <a
-            href={bookingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {bookingUrl.replace("https://", "")}
-          </a>
+          <strong>Book:</strong>{" "}
+          <Link to="/book?service=notary">Book a notary appointment</Link>
         </p>
         <p>
           <strong>Email:</strong>{" "}
@@ -41,7 +32,7 @@ export default function Footer() {
 
       {/* Quick site links */}
       <nav className="footer-site-links" aria-label="Site links">
-        <Link to="/membership">Membership</Link>
+        <Link to="/services">Services</Link>
         <Link to="/terms">Terms of Service</Link>
         <Link to="/privacy">Privacy Policy</Link>
       </nav>

@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 // Global Components
 import FestivalBanner from "./components/FestivalBanner.jsx";
@@ -13,11 +13,9 @@ import { SHOW_FESTIVAL } from "./data/siteConfig.js";
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
-import FinancialPage from "./pages/FinancialPage.jsx";
-import WeddingsPage from "./pages/WeddingsPage.jsx";
+import BookPage from "./pages/BookPage.jsx";
+import PayPage from "./pages/PayPage.jsx";
 import EventsPage from "./pages/EventsPage.jsx";
-import NotaryPage from "./pages/NotaryPage.jsx";
-import BookingPage from "./pages/BookingPage.jsx";
 import FestivalPage from "./pages/FestivalPage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
@@ -26,8 +24,6 @@ import BlogPostPage from "./pages/BlogPostPage.jsx";
 
 // Newly created Public Pages
 import PackagesPage from "./pages/PackagesPage.jsx";
-import RealEstatePage from "./pages/RealEstatePage.jsx";
-import LegalServicesPage from "./pages/LegalServicesPage.jsx";
 import PaymentCancel from "./pages/PaymentCancel.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
@@ -108,11 +104,17 @@ export default function App() {
         {/* Public */}
         <Route path="/" element={<Homepage />} />
         <Route path="/shop" element={<ShopPage />} />
-        <Route path="/financial" element={<FinancialPage />} />
-        <Route path="/weddings" element={<WeddingsPage />} />
+        <Route path="/services" element={<PackagesPage />} />
+        <Route path="/book" element={<BookPage />} />
+        <Route path="/pay" element={<PayPage />} />
         <Route path="/events" element={<EventsPage />} />
-        <Route path="/notary" element={<NotaryPage />} />
-        <Route path="/bookings" element={<BookingPage />} />
+        <Route path="/notary" element={<Navigate to="/services" replace />} />
+        <Route path="/weddings" element={<Navigate to="/services" replace />} />
+        <Route path="/financial" element={<Navigate to="/services" replace />} />
+        <Route path="/real-estate" element={<Navigate to="/services" replace />} />
+        <Route path="/legal-services" element={<Navigate to="/services" replace />} />
+        <Route path="/packages" element={<Navigate to="/services" replace />} />
+        <Route path="/bookings" element={<Navigate to="/book" replace />} />
         <Route path="/travel-quote" element={<TravelQuotePage />} />
         <Route path="/festival" element={<FestivalPage />} />
         <Route path="/membership" element={<MembershipPage />} />
@@ -121,9 +123,6 @@ export default function App() {
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
         {/* Newly added service pages */}
-        <Route path="/packages" element={<PackagesPage />} />
-        <Route path="/real-estate" element={<RealEstatePage />} />
-        <Route path="/legal-services" element={<LegalServicesPage />} />
         <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
 

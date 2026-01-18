@@ -2,16 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
-import { SHOW_FESTIVAL } from "../data/siteConfig.js";
-import { tidyCalEvents } from "../data/tidycal.js";
 
 import logoSeal from "../assets/logo/logo-gold-seal.png";
 import "./Navbar.css";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [servicesOpen, setServicesOpen] = useState(false);
-  const [eventsOpen, setEventsOpen] = useState(false);
   const { cart } = useCart();
   const location = useLocation();
   const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -20,16 +16,13 @@ export default function Navbar() {
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setMenuOpen(false);
-    setServicesOpen(false);
-    setEventsOpen(false);
   };
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (navRef.current && !navRef.current.contains(e.target)) {
-        setServicesOpen(false);
-        setEventsOpen(false);
+        setMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -53,42 +46,35 @@ export default function Navbar() {
       </button>
 
       <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
-        {/* Services Dropdown */}
-        <div className="nav-item dropdown">
-          <button
-            className="drop-btn"
-            onClick={() => setServicesOpen((open) => !open)}
-          >
-            Services ▾
-          </button>
-          <ul className={`dropdown-menu ${servicesOpen ? "open" : ""}`}>
-            <li><Link to="/notary" onClick={handleLinkClick}>Notary & Legal</Link></li>
-            <li><Link to="/real-estate" onClick={handleLinkClick}>Real Estate</Link></li>
-            <li><Link to="/legal-services" onClick={handleLinkClick}>Court & Legal</Link></li>
-            <li><Link to="/weddings" onClick={handleLinkClick}>Officiant Services</Link></li>
-            <li><Link to="/financial" onClick={handleLinkClick}>Financial</Link></li>
-            <li><Link to="/packages" onClick={handleLinkClick}>All Services</Link></li>
-          </ul>
-        </div>
-
-        {/* Events Dropdown */}
-        <div className="nav-item dropdown">
-          <button
-            className="drop-btn"
-            onClick={() => setEventsOpen((open) => !open)}
-          >
-            Events ▾
-          </button>
-          <ul className={`dropdown-menu ${eventsOpen ? "open" : ""}`}>
-            <li><Link to="/events" onClick={handleLinkClick}>Pop-Up Events</Link></li>
-            {SHOW_FESTIVAL && (
-              <li><Link to="/festival" onClick={handleLinkClick}>Festival</Link></li>
-            )}
-            <li><Link to="/membership" onClick={handleLinkClick}>Vendor & Speaker</Link></li>
-          </ul>
-        </div>
-
         {/* Primary Links */}
+        <Link
+          to="/services"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/services" ? "active" : ""}`}
+        >
+          Services
+        </Link>
+        <Link
+          to="/book"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/book" ? "active" : ""}`}
+        >
+          Book
+        </Link>
+        <Link
+          to="/pay"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/pay" ? "active" : ""}`}
+        >
+          Pay
+        </Link>
+        <Link
+          to="/contact"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/contact" ? "active" : ""}`}
+        >
+          Contact
+        </Link>
         <Link
           to="/shop"
           onClick={handleLinkClick}
@@ -110,10 +96,10 @@ export default function Navbar() {
       </div>
 
       <a
-        href={`/bookings#booking-${tidyCalEvents.generalNotary.slug}`}
+        href="/book?service=notary"
         className="btn btn--primary book-btn"
       >
-        Book Now
+        Book Notary
       </a>
     </nav>
   );

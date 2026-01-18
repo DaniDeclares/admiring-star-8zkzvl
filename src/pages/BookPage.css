@@ -1,0 +1,115 @@
+.book-page {
+  background: var(--ivory);
+  color: var(--ink);
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.book-hero {
+  max-width: 760px;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+.book-hero .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  color: var(--burgundy);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.book-hero h1 {
+  font-family: var(--font-secondary);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  margin-bottom: 0.75rem;
+}
+
+.book-hero p {
+  font-size: 1.05rem;
+  color: var(--ink-muted);
+}
+
+.book-service-selector {
+  max-width: 960px;
+  margin: 0 auto 2.5rem;
+}
+
+.book-service-selector h2 {
+  font-size: 1.35rem;
+  margin-bottom: 1rem;
+  color: var(--burgundy);
+}
+
+.service-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.service-chip {
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(139, 30, 46, 0.2);
+  background: #fff;
+  color: var(--burgundy);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.service-chip:hover,
+.service-chip.active {
+  background: var(--burgundy);
+  color: #fff;
+}
+
+.booking-embeds {
+  display: grid;
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.booking-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(139, 30, 46, 0.08);
+}
+
+.booking-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.booking-card__header h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.booking-card__header p {
+  color: var(--ink-muted);
+}
+
+.booking-card .tidycal-embed {
+  min-height: 640px;
+}
+
+.price-pill {
+  background: rgba(212, 175, 55, 0.18);
+  color: var(--burgundy);
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .booking-card__header {
+    flex-direction: column;
+  }
+}

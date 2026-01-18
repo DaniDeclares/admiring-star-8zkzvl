@@ -12,15 +12,15 @@ export default function ContactPage() {
         <title>Contact & Quotes • Dani Declares</title>
         <meta
           name="description"
-          content="Questions, bookings, or custom service quotes? Reach out to Dani Declares for notary, legal, wedding, financial, event, and merch inquiries."
+          content="Questions, bookings, or custom service quotes? Reach out to Dani Declares for notary, apostille, officiant, and event inquiries."
         />
       </Helmet>
 
       <main className="contact-page">
         <h1>Let’s Connect & Get You Started</h1>
         <p>
-          Have questions about our services—Notary & Legal Support, Real Estate,
-          Weddings & Events, Financial Empowerment,
+          Have questions about our services—Notary & Legal Support, Apostille,
+          Officiant Services,
           {SHOW_FESTIVAL ? " Festival & Vendor Opportunities, or Merch? " : " or Merch? "}
           Fill out the form below, and we’ll follow up with personalized next
           steps or a custom quote.
@@ -58,15 +58,13 @@ export default function ContactPage() {
         <section className="quick-links">
           <h3>Explore Our Services</h3>
           <ul>
-            <li><Link to="/notary">Notary & Legal Support</Link></li>
-            <li><Link to="/real-estate">Real Estate Services</Link></li>
-            <li><Link to="/weddings">Wedding & Event Services</Link></li>
-            <li><Link to="/financial">Financial Empowerment</Link></li>
+            <li><Link to="/services">Service Catalog</Link></li>
+            <li><Link to="/book">Book an Appointment</Link></li>
+            <li><Link to="/pay">Complete Payment</Link></li>
             {SHOW_FESTIVAL && (
               <li><Link to="/festival">Festival & Vendor Info</Link></li>
             )}
             <li><Link to="/shop">Merch & Digital Products</Link></li>
-            <li><Link to="/packages">All Services & Bundles</Link></li>
           </ul>
         </section>
       </main>

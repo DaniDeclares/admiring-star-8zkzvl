@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Countdown from "react-countdown";
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
+import { bookingServices } from "../data/services.js";
 const eventBackground =
   process.env.PUBLIC_URL + "/images/festival/pexels-fang-liu-1996637-3617724.jpg";
 import "./Homepage.css";
@@ -75,43 +76,33 @@ export default function Homepage() {
         {/* HERO */}
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="hero-overlay">
-            <h1>Declare Your Worth</h1>
+            <p className="hero-eyebrow">Mobile Notary & Officiant Services</p>
+            <h1>Book Notary Appointments in Minutes.</h1>
             <p className="hero-subtitle">
-              Mobile Notary • Real Estate Support • Courier Services
+              Premium, mobile-first service across Metro Atlanta. Book first, pay
+              to confirm, and we bring the experience to you.
             </p>
             <div className="hero-cta">
-              <Link to="/packages" className="btn btn--primary">
-                View Services & Pricing
+              <Link to="/book?service=notary" className="btn btn--primary">
+                Book Notary
               </Link>
-              <Link to="/travel-quote" className="btn btn--primary">
-                Calculate Travel Fee
+              <Link to="/services" className="btn btn--secondary">
+                View Services
               </Link>
-              {SHOW_FESTIVAL && (
-                <Link to="/festival" className="btn btn--primary">
-                  Early Bird Festival Tickets
-                </Link>
-              )}
             </div>
+            <p className="hero-footnote">
+              Your appointment is pending until payment is completed.
+            </p>
           </div>
         </section>
 
         {/* ABOUT US */}
         <section className="about-us-section">
-          <h2>About Dani Declares</h2>
+          <h2>Premium mobile services, built for ease.</h2>
           <p>
-            At Dani Declares, we simplify life’s biggest milestones with revenue-first
-            mobile services—helping you sign, close, and celebrate without the stress.
-            Founded by Danielle Fong, our mission is to deliver reliable, on-site
-            support for busy families and professionals.
-          </p>
-        </section>
-
-        {/* MISSION STATEMENT */}
-        <section className="mission-statement-section">
-          <h2>Our Mission</h2>
-          <p>
-            To provide transparent pricing, fast scheduling, and trusted mobile
-            services across notary, real estate, and officiant support.
+            Dani Declares delivers trusted notary, apostille, and officiant support
+            with transparent pricing and quick scheduling. Book your appointment,
+            then confirm payment to lock in your time.
           </p>
         </section>
 
@@ -169,45 +160,40 @@ export default function Homepage() {
 
         {/* SERVICE HIGHLIGHTS */}
         <section className="packages other-services">
-          <h2>Mobile Services at a Glance</h2>
+          <div className="section-heading">
+            <h2>Services designed for busy schedules</h2>
+            <p>
+              Choose the service you need and book right away. We’ll guide you to
+              payment after scheduling so you avoid double-booking.
+            </p>
+          </div>
           <div className="packages-grid">
-            <div className="package-card">
-              <h3>Notary & Signing Services</h3>
-              <Link to="/notary" className="btn btn--primary">
-                Explore Notary
-              </Link>
-            </div>
-            <div className="package-card">
-              <h3>Real Estate Support</h3>
-              <Link to="/real-estate" className="btn btn--primary">
-                View Real Estate Support
-              </Link>
-            </div>
-            <div className="package-card">
-              <h3>Officiant Services</h3>
-              <Link to="/weddings" className="btn btn--secondary">
-                See Officiant Packages
-              </Link>
-            </div>
-            <div className="package-card">
-              <h3>All Services & Pricing</h3>
-              <Link to="/packages" className="btn btn--secondary">
-                View Full Catalog
-              </Link>
-            </div>
-            <div className="package-card">
-              <h3>Book or Request a Quote</h3>
-              <Link to="/contact" className="btn btn--secondary">
-                Contact Us
-              </Link>
-            </div>
+            {bookingServices.map((service) => (
+              <div key={service.id} className="package-card">
+                <div>
+                  <h3>{service.title}</h3>
+                  <p>{service.shortDescription}</p>
+                </div>
+                <Link
+                  to={`/book?service=${service.id}`}
+                  className="btn btn--primary"
+                >
+                  Book
+                </Link>
+              </div>
+            ))}
+          </div>
+          <div className="services-footer">
+            <Link to="/services" className="btn btn--secondary">
+              See all services & pricing
+            </Link>
           </div>
         </section>
 
         {/* CONTACT CTA */}
         <section className="contact-cta">
-          <h2>Need help planning?</h2>
-          <p>Let us know what you need and we’ll follow up quickly.</p>
+          <h2>Need help selecting a service?</h2>
+          <p>Tell us what you need and we’ll follow up quickly.</p>
           <Link to="/contact" className="btn btn--primary">
             Contact Us
           </Link>
