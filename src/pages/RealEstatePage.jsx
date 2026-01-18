@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { getServiceSections, servicePages } from "../data/services.js";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
-import { tidyCalEvents } from "../data/tidycal.js";
 import "./RealEstatePage.css";
 
 export default function RealEstatePage() {
@@ -53,7 +52,7 @@ export default function RealEstatePage() {
       </section>
 
       <ServiceCta
-        bookingSlug={tidyCalEvents.loanSigning.slug}
+        serviceId="loansigning"
         bookingLabel="Book Loan Signing"
       />
     </main>

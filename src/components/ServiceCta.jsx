@@ -1,27 +1,25 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
-import { buildTidyCalUrl, tidyCalEvents } from "../data/tidycal.js";
+import { getBookingServiceById } from "../data/bookingServices.js";
 import "./ServiceCta.css";
 
 export default function ServiceCta({
-  bookingSlug = tidyCalEvents.generalNotary.slug,
+  serviceId = "notary",
   bookingLabel = "Book Appointment",
+  link,
 }) {
-  const bookingUrl = buildTidyCalUrl(bookingSlug);
+  const service = getBookingServiceById(serviceId);
+  const bookingUrl = link || `/book?service=${service?.id || "notary"}`;
 
   return (
     <section className="service-cta">
       <h2>Ready to book?</h2>
       <p>We make scheduling easy—choose your appointment time and we will come to you.</p>
       <div className="service-cta__actions">
-        <a
-          className="btn btn--primary"
-          href={bookingUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <Link className="btn btn--primary" to={bookingUrl}>
           {bookingLabel}
-        </a>
+        </Link>
         <div className="service-cta__contact">
           <p>
             <strong>Call/Text:</strong>{" "}

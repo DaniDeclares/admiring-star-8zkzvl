@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
-import { tidyCalEvents } from "../data/tidycal.js";
 
 import logoSeal from "../assets/logo/logo-gold-seal.png";
 import "./Navbar.css";
@@ -109,12 +108,9 @@ export default function Navbar() {
         </Link>
       </div>
 
-      <a
-        href={`/bookings#booking-${tidyCalEvents.generalNotary.slug}`}
-        className="btn btn--primary book-btn"
-      >
+      <Link to="/book" className="btn btn--primary book-btn" onClick={handleLinkClick}>
         Book Now
-      </a>
+      </Link>
     </nav>
   );
 }

@@ -11,14 +11,12 @@ export default function TidyCalEmbed({ path, className }) {
     }
 
     const script = document.createElement("script");
-    script.src = "https://assets.tidycal.com/embed.js";
+    script.src = "https://asset-tidycal.b-cdn.net/js/embed.js";
     script.async = true;
     script.dataset.tidycalEmbed = "true";
     document.body.appendChild(script);
 
-    return () => {
-      document.body.removeChild(script);
-    };
+    return undefined;
   }, []);
 
   return <div className={`tidycal-embed ${className || ""}`.trim()} data-path={path} />;
