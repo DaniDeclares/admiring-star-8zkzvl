@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { getServiceSections, servicePages } from "../data/services.js";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
+import { tidyCalEvents } from "../data/tidycal.js";
 import "./LegalServicesPage.css";
 
 export default function LegalServicesPage() {
@@ -51,7 +52,10 @@ export default function LegalServicesPage() {
         </p>
       </section>
 
-      <ServiceCta />
+      <ServiceCta
+        bookingSlug={tidyCalEvents.apostille.slug}
+        bookingLabel="Book Apostille Intake"
+      />
     </main>
   );
 }

@@ -7,6 +7,7 @@ import {
 } from "../data/services.js";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
+import { tidyCalEvents } from "../data/tidycal.js";
 import "./NotaryPage.css";
 
 export default function NotaryPage() {
@@ -78,7 +79,10 @@ export default function NotaryPage() {
         </p>
       </section>
 
-      <ServiceCta />
+      <ServiceCta
+        bookingSlug={tidyCalEvents.generalNotary.slug}
+        bookingLabel="Book Notary Appointment"
+      />
 
       <section className="dashboard-cta">
         <h3>Notary Partners</h3>
