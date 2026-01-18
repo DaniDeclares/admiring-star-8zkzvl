@@ -1,20 +1,5 @@
 export const paymentLinks = {
   bookNow: "https://buy.stripe.com/aFa5kC9q18CW2LBb9f6kg01",
-  coaching: {
-    discoverySession: "https://buy.stripe.com/28E6oGeKldXg71R7X36kg0p",
-    oneOnOne: "https://buy.stripe.com/28E3cu0Tvg5ofyn3GN6kg0o",
-    vipIntensive: "https://buy.stripe.com/4gMfZgcCdf1k1Hxdhn6kg0n",
-    starterKits: {
-      popUpWedding: "https://buy.stripe.com/00w5kCby92eyeujb9f6kg0y",
-      popUpNotary: "https://buy.stripe.com/3cI28q9q13iC3PF2CJ6kg0z",
-    },
-    courses: {
-      digitalNotaryEmpire: "https://buy.stripe.com/00w8wO45HaL40Dt0uB6kg0A",
-      appointmentFreedom: "https://buy.stripe.com/5kQaEWdGhaL471R2CJ6kg0B",
-      eventpreneur: "https://buy.stripe.com/cNi14mgStbP82LB0uB6kg0C",
-      legacyVault: "https://buy.stripe.com/9B6bJ031D4mGcmbb9f6kg0D",
-    },
-  },
   notary: {
     mobileNotaryVisit: "https://buy.stripe.com/5kQ4gOf0H9H08dq6oq",
     loanSigningAgent: "https://buy.stripe.com/6oU6oGdGh9H0ebO28g",

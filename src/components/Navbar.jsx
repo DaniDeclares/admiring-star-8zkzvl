@@ -65,8 +65,7 @@ export default function Navbar() {
             <li><Link to="/notary" onClick={handleLinkClick}>Notary & Legal</Link></li>
             <li><Link to="/real-estate" onClick={handleLinkClick}>Real Estate</Link></li>
             <li><Link to="/legal-services" onClick={handleLinkClick}>Court & Legal</Link></li>
-            <li><Link to="/weddings" onClick={handleLinkClick}>Weddings</Link></li>
-            <li><Link to="/coaching" onClick={handleLinkClick}>Coaching</Link></li>
+            <li><Link to="/weddings" onClick={handleLinkClick}>Officiant Services</Link></li>
             <li><Link to="/financial" onClick={handleLinkClick}>Financial</Link></li>
             <li><Link to="/packages" onClick={handleLinkClick}>All Services</Link></li>
           </ul>

@@ -45,7 +45,7 @@ export default [
         <li>Say yes to bigger opportunities.</li>
         <li>Surround yourself with people who believe in you.</li>
       </ul>
-      <p>Ready to make that leap? <a href="/coaching">Let’s talk</a> about your goals.</p>
+      <p>Ready to make that leap? <a href="/contact">Let’s talk</a> about your next steps.</p>
     `,
   },
   // Add more posts as needed...

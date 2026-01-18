@@ -24,6 +24,22 @@
   margin-top: 0.6rem;
 }
 
+.service-section {
+  margin-bottom: 2.5rem;
+}
+
+.service-section h2 {
+  color: #8B1E2E;
+  font-size: 1.6rem;
+  margin-bottom: 0.35rem;
+  font-family: Merriweather, Georgia, serif;
+}
+
+.section-desc {
+  color: #555;
+  margin-bottom: 1.2rem;
+}
+
 .services-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -42,7 +58,7 @@
   box-shadow: 0 6px 20px rgba(212,175,55,0.15);
   border-color: #8B1E2E;
 }
-.service-card h2 {
+.service-card h3 {
   color: #8B1E2E;
   font-size: 1.18rem;
   margin-bottom: 0.4rem;
