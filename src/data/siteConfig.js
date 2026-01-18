@@ -1,7 +1,7 @@
 export const SHOW_FESTIVAL = false;
 
 export const siteConfig = {
-  serviceAreaText: "Serving Atlanta, Doraville, Dunwoody, and beyond.",
+  serviceAreaText: "Serving Georgia & South Carolina with mobile appointments.",
   phoneNumbers: {
     primary: {
       display: "(470) 523-4892",

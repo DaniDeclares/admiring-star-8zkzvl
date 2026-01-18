@@ -85,54 +85,6 @@ export const serviceCatalog = [
       { name: "Custom ceremony", price: "$500+" },
     ],
   },
-  {
-    id: "financial-empowerment",
-    title: "Financial Empowerment",
-    description: "Consultations and planning to strengthen your financial foundation.",
-    items: [
-      {
-        name: "Free term life insurance quote",
-        price: "FREE",
-        details:
-          "Affordable term policies from Primerica Life Insurance Company or National Benefit Life Insurance Company.",
-      },
-      {
-        name: "Debt elimination strategy session",
-        price: "FREE",
-        details: "Custom debt-stacking plan to reduce high-interest balances.",
-      },
-      {
-        name: "Budget & cash-flow review",
-        price: "$99",
-        details: "One-on-one session to build a smarter budget.",
-      },
-      {
-        name: "Mutual funds & retirement planning",
-        price: "Commission based",
-        details: "IRAs, 401(k) rollovers, and education savings options.",
-      },
-      {
-        name: "Credit monitoring & identity protection",
-        price: "$25+/mo",
-        details: "Alerts, monthly score tracking, and fraud protection.",
-      },
-      {
-        name: "Education savings plan (529)",
-        price: "FREE consultation",
-        details: "Tax-advantaged college savings guidance.",
-      },
-      {
-        name: "Financial literacy workshop",
-        price: "Custom quote",
-        details: "Programs for schools, nonprofits, and corporate groups.",
-      },
-      {
-        name: "Life insurance policy review",
-        price: "FREE",
-        details: "Review existing coverage for gaps and updates.",
-      },
-    ],
-  },
 ];
 
 export const serviceBundles = [
@@ -153,7 +105,6 @@ export const servicePages = {
   legal: ["courier"],
   realEstate: ["real-estate-support"],
   weddings: ["officiant-services"],
-  financial: ["financial-empowerment"],
   packages: [
     "notary",
     "loan-signing",
@@ -162,7 +113,6 @@ export const servicePages = {
     "courier",
     "real-estate-support",
     "officiant-services",
-    "financial-empowerment",
   ],
 };
 

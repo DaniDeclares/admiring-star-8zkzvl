@@ -1,25 +1,21 @@
 import React from "react";
 import { siteConfig } from "../data/siteConfig.js";
-import { buildTidyCalUrl, tidyCalEvents } from "../data/tidycal.js";
+import { bookingPolicyText } from "../data/serviceRoutes.js";
 import "./ServiceCta.css";
 
 export default function ServiceCta({
-  bookingSlug = tidyCalEvents.generalNotary.slug,
   bookingLabel = "Book Appointment",
+  bookingServiceId = "notary",
 }) {
-  const bookingUrl = buildTidyCalUrl(bookingSlug);
-
   return (
     <section className="service-cta">
       <h2>Ready to book?</h2>
-      <p>We make scheduling easy—choose your appointment time and we will come to you.</p>
+      <p>
+        Schedule your appointment in minutes and we will confirm the details by
+        text.
+      </p>
       <div className="service-cta__actions">
-        <a
-          className="btn btn--primary"
-          href={bookingUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a className="btn btn--primary" href={`/book?service=${bookingServiceId}`}>
           {bookingLabel}
         </a>
         <div className="service-cta__contact">
@@ -35,6 +31,7 @@ export default function ServiceCta({
               {siteConfig.emails.admin}
             </a>
           </p>
+          <p className="service-cta__policy">{bookingPolicyText}</p>
         </div>
       </div>
     </section>

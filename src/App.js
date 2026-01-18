@@ -1,36 +1,22 @@
 // src/App.js
 import React, { useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
-// Global Components
-import FestivalBanner from "./components/FestivalBanner.jsx";
 import Navbar from "./components/Navbar.jsx";
 import SocialLinks from "./components/SocialLinks.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import Footer from "./components/Footer.jsx";
-import { SHOW_FESTIVAL } from "./data/siteConfig.js";
 
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
-import ShopPage from "./pages/ShopPage.jsx";
-import FinancialPage from "./pages/FinancialPage.jsx";
-import WeddingsPage from "./pages/WeddingsPage.jsx";
-import EventsPage from "./pages/EventsPage.jsx";
-import NotaryPage from "./pages/NotaryPage.jsx";
+import ServicesPage from "./pages/ServicesPage.jsx";
+import ApostillePage from "./pages/ApostillePage.jsx";
+import OfficiantPage from "./pages/OfficiantPage.jsx";
 import BookingPage from "./pages/BookingPage.jsx";
-import FestivalPage from "./pages/FestivalPage.jsx";
-import MembershipPage from "./pages/MembershipPage.jsx";
+import PayPage from "./pages/PayPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
-
-// Newly created Public Pages
-import PackagesPage from "./pages/PackagesPage.jsx";
-import RealEstatePage from "./pages/RealEstatePage.jsx";
-import LegalServicesPage from "./pages/LegalServicesPage.jsx";
-import PaymentCancel from "./pages/PaymentCancel.jsx";
-import PaymentSuccess from "./pages/PaymentSuccess.jsx";
-import TravelQuotePage from "./pages/TravelQuotePage.jsx";
 
 // Auth & Dashboard
 import LoginPage from "./pages/LoginPage.jsx";
@@ -40,9 +26,10 @@ import NotaryDashboard from "./pages/NotaryDashboard.jsx";
 import VendorPortal from "./pages/VendorPortal.jsx";
 import FestivalDashboard from "./pages/FestivalDashboard.jsx";
 import PartnerOnboarding from "./pages/PartnerOnboarding.jsx";
-// You can remove SuccessPage/CancelPage if you fully switch to PaymentSuccess/PaymentCancel
 import SuccessPage from "./pages/SuccessPage.jsx";
 import CancelPage from "./pages/CancelPage.jsx";
+import PaymentCancel from "./pages/PaymentCancel.jsx";
+import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 
 export default function App() {
   const location = useLocation();
@@ -101,29 +88,31 @@ export default function App() {
 
   return (
     <>
-      {SHOW_FESTIVAL && <FestivalBanner />}
       <Navbar />
 
       <Routes>
         {/* Public */}
         <Route path="/" element={<Homepage />} />
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/financial" element={<FinancialPage />} />
-        <Route path="/weddings" element={<WeddingsPage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/notary" element={<NotaryPage />} />
-        <Route path="/bookings" element={<BookingPage />} />
-        <Route path="/travel-quote" element={<TravelQuotePage />} />
-        <Route path="/festival" element={<FestivalPage />} />
-        <Route path="/membership" element={<MembershipPage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/apostille" element={<ApostillePage />} />
+        <Route path="/officiant" element={<OfficiantPage />} />
+        <Route path="/book" element={<BookingPage />} />
+        <Route path="/pay" element={<PayPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
-        {/* Newly added service pages */}
-        <Route path="/packages" element={<PackagesPage />} />
-        <Route path="/real-estate" element={<RealEstatePage />} />
-        <Route path="/legal-services" element={<LegalServicesPage />} />
+        <Route path="/bookings" element={<Navigate to="/book" replace />} />
+        <Route path="/packages" element={<Navigate to="/services" replace />} />
+        <Route path="/notary" element={<Navigate to="/services" replace />} />
+        <Route path="/real-estate" element={<Navigate to="/services" replace />} />
+        <Route path="/legal-services" element={<Navigate to="/services" replace />} />
+        <Route path="/financial" element={<Navigate to="/services" replace />} />
+        <Route path="/events" element={<Navigate to="/services" replace />} />
+        <Route path="/festival" element={<Navigate to="/services" replace />} />
+        <Route path="/membership" element={<Navigate to="/services" replace />} />
+        <Route path="/shop" element={<Navigate to="/services" replace />} />
+        <Route path="/weddings" element={<Navigate to="/officiant" replace />} />
         <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
 
@@ -135,15 +124,11 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/notary-dashboard" element={<NotaryDashboard />} />
           <Route path="/vendor-portal" element={<VendorPortal />} />
-          <Route
-            path="/festival-dashboard"
-            element={<FestivalDashboard />}
-          />
+          <Route path="/festival-dashboard" element={<FestivalDashboard />} />
           <Route
             path="/partner-onboarding"
             element={<PartnerOnboarding />}
           />
-          {/* legacy or alternate success/cancel */}
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
         </Route>

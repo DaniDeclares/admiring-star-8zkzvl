@@ -1,216 +1,133 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import Countdown from "react-countdown";
+import {
+  FiFileText,
+  FiShield,
+  FiHeart,
+  FiHome,
+  FiTruck,
+  FiCheckCircle,
+} from "react-icons/fi";
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
-import { SHOW_FESTIVAL } from "../data/siteConfig.js";
-const eventBackground =
-  process.env.PUBLIC_URL + "/images/festival/pexels-fang-liu-1996637-3617724.jpg";
+import {
+  serviceRoutes,
+  bookingPolicyText,
+  buildServiceActionPath,
+} from "../data/serviceRoutes.js";
+import { siteConfig } from "../data/siteConfig.js";
 import "./Homepage.css";
 
-const testimonials = [
-  {
-    quote: "Fast, professional, and on time—exactly what we needed for our signing.",
-    author: "Alex R.",
-  },
-  {
-    quote: "The travel fee estimate was clear and the appointment was smooth.",
-    author: "Monica L.",
-  },
-  {
-    quote: "Our open house was covered flawlessly. Great support for busy agents.",
-    author: "Jasmine M.",
-  },
-  {
-    quote: "Efficient courier service saved us a trip to the courthouse.",
-    author: "Erika W.",
-  },
-  {
-    quote: "Simple, elegant ceremony and quick filing. Highly recommend.",
-    author: "Taylor C.",
-  },
-  {
-    quote: "We booked same-day notarization and everything was handled with care.",
-    author: "Brianna S.",
-  },
-];
-
-function CountdownTimer() {
-  const festivalDate = new Date("2025-07-28T09:00:00-04:00");
-  const renderer = ({ days, hours, minutes, seconds }) => (
-    <div className="countdown-values">
-      <span>{days}d</span> <span>{hours}h</span> <span>{minutes}m</span>{" "}
-      <span>{seconds}s</span>
-    </div>
-  );
-  return (
-    <div className="festival-countdown">
-      <h3>Festival starts in:</h3>
-      <Countdown date={festivalDate} renderer={renderer} />
-    </div>
-  );
-}
+const iconMap = {
+  notary: FiFileText,
+  apostille: FiShield,
+  officiant: FiHeart,
+  loansigning: FiHome,
+  fingerprinting: FiCheckCircle,
+  courier: FiTruck,
+  "real-estate-support": FiHome,
+};
 
 export default function Homepage() {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const iv = setInterval(
-      () => setIdx((i) => (i + 1) % testimonials.length),
-      4000
-    );
-    return () => clearInterval(iv);
-  }, []);
-
   return (
     <>
       <Helmet>
-        <title>Dani Declares • Mobile Notary, Real Estate & Officiant Services</title>
+        <title>Dani Declares • Mobile Notary & Officiant Services</title>
         <meta
           name="description"
-          content="Mobile notary, real estate support, courier services, and officiant ceremonies across Metro Atlanta. Transparent pricing and easy booking."
+          content="Premium mobile notary, apostille, and officiant services across Georgia and South Carolina. Book appointments and pay to confirm in minutes."
         />
       </Helmet>
 
-      <main className="homepage home-main">
-        {/* HERO */}
+      <main className="homepage">
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="hero-overlay">
-            <h1>Declare Your Worth</h1>
+            <p className="eyebrow">Dani Declares</p>
+            <h1>Premium mobile notary & officiant services.</h1>
             <p className="hero-subtitle">
-              Mobile Notary • Real Estate Support • Courier Services
+              Fast scheduling, clear pricing, and on-site support for life’s most
+              important paperwork.
             </p>
             <div className="hero-cta">
-              <Link to="/packages" className="btn btn--primary">
-                View Services & Pricing
+              <Link to="/book?service=notary" className="btn btn--primary">
+                Book Notary
               </Link>
-              <Link to="/travel-quote" className="btn btn--primary">
-                Calculate Travel Fee
-              </Link>
-              {SHOW_FESTIVAL && (
-                <Link to="/festival" className="btn btn--primary">
-                  Early Bird Festival Tickets
-                </Link>
-              )}
+              <a
+                href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}
+                className="btn btn--accent"
+              >
+                Call/Text {siteConfig.phoneNumbers.secondary.display}
+              </a>
             </div>
           </div>
         </section>
 
-        {/* ABOUT US */}
-        <section className="about-us-section">
-          <h2>About Dani Declares</h2>
-          <p>
-            At Dani Declares, we simplify life’s biggest milestones with revenue-first
-            mobile services—helping you sign, close, and celebrate without the stress.
-            Founded by Danielle Fong, our mission is to deliver reliable, on-site
-            support for busy families and professionals.
-          </p>
+        <section className="services-preview">
+          <div className="section-header">
+            <h2>Services</h2>
+            <p>
+              Choose a service below to book or submit payment. {bookingPolicyText}
+            </p>
+          </div>
+          <div className="services-grid">
+            {serviceRoutes.map((service) => {
+              const Icon = iconMap[service.id] || FiCheckCircle;
+              return (
+                <article key={service.id} className="service-card">
+                  <div className="service-card__icon">
+                    <Icon size={26} />
+                  </div>
+                  <h3>{service.title}</h3>
+                  <p>{service.shortDesc}</p>
+                  <p className="service-card__policy">{bookingPolicyText}</p>
+                  <Link
+                    to={buildServiceActionPath(service)}
+                    className="btn btn--secondary"
+                  >
+                    {service.primaryActionType === "pay" ? "Pay to Confirm" : "Book Now"}
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
         </section>
 
-        {/* MISSION STATEMENT */}
-        <section className="mission-statement-section">
-          <h2>Our Mission</h2>
-          <p>
-            To provide transparent pricing, fast scheduling, and trusted mobile
-            services across notary, real estate, and officiant support.
-          </p>
-        </section>
-
-        {/* WHY THIS FESTIVAL MATTERS */}
-        {SHOW_FESTIVAL && (
-          <section className="festival-purpose-section">
-            <h2>Why the Declare Your Worth Festival Matters</h2>
-            <p>
-              Growing up, financial literacy wasn’t something that was taught in my
-              household—or in many others like mine.
-              I know firsthand what it feels like to navigate adulthood without the
-              tools, resources, or financial confidence needed to thrive.
-            </p>
-            <p>
-              From kid entrepreneur zones and budgeting bootcamps to interactive
-              workshops and live entertainment—this event is a movement to empower
-              every generation.
-            </p>
-            <Link to="/festival" className="btn btn--primary">
-              Explore the Festival →
+        <section className="trust-section">
+          <div>
+            <h2>Trusted across GA & SC</h2>
+            <ul>
+              <li>Serving Georgia & South Carolina with mobile appointments.</li>
+              <li>Same-day and after-hours scheduling when available.</li>
+              <li>Real-time booking confirmations and text updates.</li>
+            </ul>
+          </div>
+          <div className="trust-card">
+            <h3>How it works</h3>
+            <ol>
+              <li>Book the service you need.</li>
+              <li>Complete payment to confirm.</li>
+              <li>We travel to you at the scheduled time.</li>
+            </ol>
+            <Link to="/services" className="btn btn--primary">
+              Explore Services
             </Link>
-          </section>
-        )}
-
-        {/* FESTIVAL PROMO */}
-        {SHOW_FESTIVAL && (
-          <section
-            className="festival-banner"
-            style={{ backgroundImage: `url(${eventBackground})` }}
-          >
-            <div className="festival-overlay">
-              <h2>Declare Your Worth Festival</h2>
-              <p>
-                <strong>July 28–29, 2025 • Atlanta, GA</strong>
-              </p>
-              <CountdownTimer />
-              <Link to="/festival" className="btn btn--primary">
-                Get Early Bird Tickets
-              </Link>
-              <p className="early-bird-note">Early Bird pricing ends soon!</p>
-            </div>
-          </section>
-        )}
-
-        {/* TESTIMONIAL CAROUSEL */}
-        <section className="testimonial-carousel">
-          <h2>Client Feedback</h2>
-          <div className="carousel">
-            <div className="testimonial-slide">
-              <p>“{testimonials[idx].quote}”</p>
-              <span>— {testimonials[idx].author}</span>
-            </div>
           </div>
         </section>
 
-        {/* SERVICE HIGHLIGHTS */}
-        <section className="packages other-services">
-          <h2>Mobile Services at a Glance</h2>
-          <div className="packages-grid">
-            <div className="package-card">
-              <h3>Notary & Signing Services</h3>
-              <Link to="/notary" className="btn btn--primary">
-                Explore Notary
-              </Link>
-            </div>
-            <div className="package-card">
-              <h3>Real Estate Support</h3>
-              <Link to="/real-estate" className="btn btn--primary">
-                View Real Estate Support
-              </Link>
-            </div>
-            <div className="package-card">
-              <h3>Officiant Services</h3>
-              <Link to="/weddings" className="btn btn--secondary">
-                See Officiant Packages
-              </Link>
-            </div>
-            <div className="package-card">
-              <h3>All Services & Pricing</h3>
-              <Link to="/packages" className="btn btn--secondary">
-                View Full Catalog
-              </Link>
-            </div>
-            <div className="package-card">
-              <h3>Book or Request a Quote</h3>
-              <Link to="/contact" className="btn btn--secondary">
-                Contact Us
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* CONTACT CTA */}
         <section className="contact-cta">
-          <h2>Need help planning?</h2>
-          <p>Let us know what you need and we’ll follow up quickly.</p>
-          <Link to="/contact" className="btn btn--primary">
-            Contact Us
-          </Link>
+          <h2>Need help fast?</h2>
+          <p>Reach out for same-day availability or special requests.</p>
+          <div className="contact-actions">
+            <Link to="/contact" className="btn btn--primary">
+              Contact Us
+            </Link>
+            <a
+              href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}
+              className="btn btn--accent"
+            >
+              Call/Text Now
+            </a>
+          </div>
         </section>
       </main>
     </>

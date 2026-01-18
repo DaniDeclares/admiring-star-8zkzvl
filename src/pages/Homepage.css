@@ -1,242 +1,162 @@
-/* src/pages/Homepage.css — Dani Declares Site */
-
-/* GENERAL */
-.home-main {
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  color: #2a2222; /* Deep, rich brown for elegant contrast */
-  background: #F8F5F1;
-  margin: 0;
-  padding: 0;
-}
-
-/* HERO SECTION */
-.hero {
-  background-size: cover;
-  background-position: center;
-  padding: 62px 16px 52px;
-  text-align: center;
-  position: relative;
-}
-.hero-overlay {
-  background-color: rgba(95, 18, 33, 0.88); /* Deeper, almost oxblood for highest contrast */
-  padding: 40px 18px 28px;
-  border-radius: 18px;
-  color: #fff;
-  max-width: 540px;
-  margin: 0 auto;
-  box-shadow: 0 4px 28px rgba(139,30,46,0.13);
-}
-.hero h1 {
-  font-family: 'Georgia', 'Roboto', serif;
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: #F8F5F1; /* Ivory/white, for highest contrast */
-  letter-spacing: 2px;
-  font-weight: bold;
-  text-shadow: 0 2px 10px rgba(139,30,46,0.20), 0 1px 0 #721623;
-}
-.hero-highlight {
-  color: #D4AF37; /* Gold for accent words only */
-  font-weight: bold;
-}
-.hero-subtitle {
-  font-size: 1.12rem;
-  color: #f3e7d1; /* Softer light ivory/gold */
-  margin-bottom: 1.2rem;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-}
-.hero-cta .btn {
-  margin: 8px;
-}
-
-/* BUTTONS */
-.btn {
-  display: inline-block;
-  padding: 14px 30px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  margin: 4px 0;
-  font-weight: 600;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 3px 8px rgba(139,30,46,0.08);
-}
-.burgundy { background-color: #8B1E2E; color: #fff; }
-.burgundy:hover { background: #721623; color: #D4AF37; }
-.gold { background-color: #D4AF37; color: #8B1E2E; }
-.gold:hover { background: #bfa13a; color: #fff; }
-
-/* ABOUT US, MISSION, FESTIVAL PURPOSE */
-.about-us-section,
-.mission-statement-section,
-.festival-purpose-section {
-  background: #fff;
-  padding: 2.2rem 1.5rem;
-  border-radius: 14px;
-  margin: 2.2rem auto;
-  max-width: 1000px;
-  box-shadow: 0 2px 12px rgba(139,30,46,0.07);
-  text-align: center;
-}
-.about-us-section h2,
-.mission-statement-section h2,
-.festival-purpose-section h2 {
-  color: #8B1E2E;
-  font-family: 'Georgia', serif;
-  margin-bottom: 1rem;
-  font-size: 1.9rem;
-  text-shadow: 0 1px 8px #f9e7e7;
-}
-.about-us-section p,
-.mission-statement-section p,
-.festival-purpose-section p {
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  font-size: 1.06rem;
-  color: #453839;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-.festival-purpose-section .btn {
-  margin-top: 1.1rem;
-  padding: 0.65rem 1.35rem;
-  font-size: 1.02rem;
-}
-
-/* FESTIVAL BANNER */
-.festival-banner {
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  padding: 28px 14px;
-  text-align: center;
-  color: #fff;
-}
-.festival-overlay {
-  background: rgba(95, 18, 33, 0.93); /* Even deeper overlay */
-  padding: 22px 12px 20px;
-  border-radius: 12px;
-  display: inline-block;
-  max-width: 410px;
-  margin: 0 auto;
-}
-.festival-overlay h2 {
-  font-family: 'Georgia', 'Roboto', serif;
-  color: #D4AF37; /* Gold headline */
-  font-size: 1.15rem;
-  margin-bottom: 0.3rem;
-  letter-spacing: 1.2px;
-  font-weight: 700;
-}
-.festival-countdown { margin: 11px 0 13px; color: #ffeac2; }
-.early-bird-note {
-  color: #D4AF37;
-  margin-top: 0.2rem;
-  font-size: 0.95rem;
-  font-style: italic;
-}
-
-/* TESTIMONIALS */
-.testimonial-carousel {
-  padding: 34px 8px;
-  background: #fff;
-  text-align: center;
-}
-.testimonial-carousel h2 { color: #8B1E2E; margin-bottom: 14px; }
-.carousel {
-  max-width: 540px;
-  margin: 0 auto;
-}
-.testimonial-slide {
-  font-style: italic;
-  font-size: 1.04rem;
-  margin-bottom: 0.8rem;
-  min-height: 54px;
-  color: #333;
-}
-.testimonial-slide span {
-  display: block;
-  font-size: 0.93rem;
-  color: #8B1E2E;
-  margin-top: 0.3rem;
-}
-
-/* SERVICE HIGHLIGHTS */
-.packages {
-  padding: 34px 7px;
-  text-align: center;
-  background: #FFF5F7;
-}
-.packages h2 { color: #8B1E2E; font-size: 1.22rem; }
-
-/* OTHER SERVICES */
-.packages-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center;
-  margin-top: 12px;
-}
-.package-card {
-  background: #fff5f7;
-  padding: 17px 8px;
-  border-radius: 10px;
-  width: 212px;
-  min-height: 112px;
-  box-shadow: 0 0 6px rgba(139,30,46,0.03);
+.homepage {
   display: flex;
   flex-direction: column;
+  gap: 3.5rem;
+  padding-bottom: 4rem;
+}
+
+.hero {
+  min-height: 70vh;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  border-bottom-left-radius: 36px;
+  border-bottom-right-radius: 36px;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  background: linear-gradient(120deg, rgba(27, 13, 16, 0.78), rgba(139, 30, 46, 0.6));
+  color: #f8f5f1;
+  padding: 4.5rem 1.5rem 5rem;
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.hero-overlay .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.8rem;
+  color: #f8f5f1;
+}
+
+.hero-overlay h1 {
+  font-size: clamp(2.3rem, 3.4vw, 3.6rem);
+}
+
+.hero-subtitle {
+  max-width: 620px;
+  font-size: 1.1rem;
+}
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.services-preview {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.section-header h2 {
+  color: #8b1e2e;
+  margin-bottom: 0.5rem;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.5rem;
+}
+
+.service-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 18px 40px rgba(27, 13, 16, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.service-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(212, 175, 55, 0.18);
+  color: #8b1e2e;
+}
+
+.service-card__policy {
+  font-size: 0.85rem;
+  color: #5b3b40;
+}
+
+.trust-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
   align-items: center;
 }
-.package-card h3 {
-  color: #8B1E2E;
-  margin-bottom: 7px;
-  font-size: 0.99rem;
+
+.trust-section ul {
+  list-style: none;
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.6rem;
 }
 
-/* CONTACT SECTION */
+.trust-section li::before {
+  content: "✓";
+  color: #d4af37;
+  margin-right: 0.5rem;
+}
+
+.trust-card {
+  background: #1b0d10;
+  color: #f8f5f1;
+  padding: 2rem;
+  border-radius: 20px;
+}
+
+.trust-card h3 {
+  color: #d4af37;
+  margin-bottom: 0.75rem;
+}
+
+.trust-card ol {
+  margin: 0 0 1.5rem 1.2rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
 .contact-cta {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
   text-align: center;
-  padding: 30px 6px;
-  background: #f2f2f2;
-}
-.contact-cta h2 {
-  color: #8B1E2E;
-  margin-bottom: 8px;
-}
-.contact-cta p {
-  margin-bottom: 11px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(27, 13, 16, 0.08);
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .hero, .festival-banner, .packages, .testimonial-carousel, .contact-cta {
-    padding-left: 4px;
-    padding-right: 4px;
-  }
-  .packages-grid, .package-card {
-    flex-direction: column;
-    width: 100%;
-    gap: 10px;
-  }
-  .hero-overlay, .festival-overlay {
-    max-width: 98vw;
-  }
+.contact-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
 }
 
-@media (max-width: 600px) {
-  .hero-overlay, .festival-overlay {
-    padding: 13px 3px;
-    border-radius: 8px;
+@media (max-width: 700px) {
+  .hero-overlay {
+    padding: 4rem 1.5rem;
   }
-  .hero h1, .festival-overlay h2 {
-    font-size: 1rem;
-  }
-  .package-card {
-    padding: 7px 3px;
-    min-width: 90vw;
-    width: 100%;
-  }
-}/**/
+}

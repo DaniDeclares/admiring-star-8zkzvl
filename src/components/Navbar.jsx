@@ -1,48 +1,22 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { FiShoppingCart } from "react-icons/fi";
-import { useCart } from "../context/CartContext.jsx";
-import { SHOW_FESTIVAL } from "../data/siteConfig.js";
-import { tidyCalEvents } from "../data/tidycal.js";
-
+import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
 import logoSeal from "../assets/logo/logo-gold-seal.png";
 import "./Navbar.css";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [servicesOpen, setServicesOpen] = useState(false);
-  const [eventsOpen, setEventsOpen] = useState(false);
-  const { cart } = useCart();
-  const location = useLocation();
-  const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-  const navRef = useRef();
 
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setMenuOpen(false);
-    setServicesOpen(false);
-    setEventsOpen(false);
   };
 
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target)) {
-        setServicesOpen(false);
-        setEventsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
-    <nav className="navbar" ref={navRef}>
-      <div className="navbar-brand">
-        <Link to="/" onClick={handleLinkClick}>
-          <img src={logoSeal} alt="Dani Declares Logo" className="navbar-logo" />
-        </Link>
-      </div>
+    <nav className="navbar">
+      <NavLink to="/" className="navbar-brand" onClick={handleLinkClick}>
+        <img src={logoSeal} alt="Dani Declares" className="navbar-logo" />
+        <span className="navbar-title">Dani Declares</span>
+      </NavLink>
 
       <button
         className="hamburger"
@@ -53,68 +27,55 @@ export default function Navbar() {
       </button>
 
       <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
-        {/* Services Dropdown */}
-        <div className="nav-item dropdown">
-          <button
-            className="drop-btn"
-            onClick={() => setServicesOpen((open) => !open)}
-          >
-            Services ▾
-          </button>
-          <ul className={`dropdown-menu ${servicesOpen ? "open" : ""}`}>
-            <li><Link to="/notary" onClick={handleLinkClick}>Notary & Legal</Link></li>
-            <li><Link to="/real-estate" onClick={handleLinkClick}>Real Estate</Link></li>
-            <li><Link to="/legal-services" onClick={handleLinkClick}>Court & Legal</Link></li>
-            <li><Link to="/weddings" onClick={handleLinkClick}>Officiant Services</Link></li>
-            <li><Link to="/financial" onClick={handleLinkClick}>Financial</Link></li>
-            <li><Link to="/packages" onClick={handleLinkClick}>All Services</Link></li>
-          </ul>
-        </div>
-
-        {/* Events Dropdown */}
-        <div className="nav-item dropdown">
-          <button
-            className="drop-btn"
-            onClick={() => setEventsOpen((open) => !open)}
-          >
-            Events ▾
-          </button>
-          <ul className={`dropdown-menu ${eventsOpen ? "open" : ""}`}>
-            <li><Link to="/events" onClick={handleLinkClick}>Pop-Up Events</Link></li>
-            {SHOW_FESTIVAL && (
-              <li><Link to="/festival" onClick={handleLinkClick}>Festival</Link></li>
-            )}
-            <li><Link to="/membership" onClick={handleLinkClick}>Vendor & Speaker</Link></li>
-          </ul>
-        </div>
-
-        {/* Primary Links */}
-        <Link
-          to="/shop"
+        <NavLink
+          to="/"
+          className="nav-link"
           onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/shop" ? "active" : ""}`}>
-          Shop
-        </Link>
-        <Link
-          to="/blog"
+        >
+          Home
+        </NavLink>
+        <NavLink
+          to="/services"
+          className="nav-link"
           onClick={handleLinkClick}
-          className={`nav-link ${location.pathname.startsWith("/blog") ? "active" : ""}`}>
-          Blog
-        </Link>
-
-        {/* Cart */}
-        <Link to="/cart" className="cart-link" onClick={handleLinkClick}>
-          <FiShoppingCart size={20} />
-          {totalQty > 0 && <span className="cart-badge">{totalQty}</span>}
-        </Link>
+        >
+          Services
+        </NavLink>
+        <NavLink
+          to="/apostille"
+          className="nav-link"
+          onClick={handleLinkClick}
+        >
+          Apostille
+        </NavLink>
+        <NavLink
+          to="/officiant"
+          className="nav-link"
+          onClick={handleLinkClick}
+        >
+          Officiant
+        </NavLink>
+        <NavLink
+          to="/book"
+          className="nav-link"
+          onClick={handleLinkClick}
+        >
+          Book
+        </NavLink>
+        <NavLink
+          to="/contact"
+          className="nav-link"
+          onClick={handleLinkClick}
+        >
+          Contact
+        </NavLink>
       </div>
 
-      <a
-        href={`/bookings#booking-${tidyCalEvents.generalNotary.slug}`}
-        className="btn btn--primary book-btn"
-      >
-        Book Now
-      </a>
+      <div className="navbar-cta">
+        <NavLink to="/book?service=notary" className="btn btn--primary">
+          Book Notary
+        </NavLink>
+      </div>
     </nav>
   );
 }
