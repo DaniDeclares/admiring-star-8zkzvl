@@ -22,6 +22,7 @@ import MembershipPage from "./pages/MembershipPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
+import ServicesPage from "./pages/ServicesPage.jsx";
 
 // Newly created Public Pages
 import PackagesPage from "./pages/PackagesPage.jsx";
@@ -71,6 +72,8 @@ export default function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/pricing" element={<PackagesPage />} />
 
         {/* Newly added service pages */}
         <Route path="/packages" element={<PackagesPage />} />
