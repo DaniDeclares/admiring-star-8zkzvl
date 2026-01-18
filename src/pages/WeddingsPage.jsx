@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { getServiceSections, servicePages } from "../data/services.js";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
-import { tidyCalEvents } from "../data/tidycal.js";
 import "./WeddingsPage.css";
 
 // These filenames must live under public/images/weddings/
@@ -84,7 +83,7 @@ export default function WeddingsPage() {
       </section>
 
       <ServiceCta
-        bookingSlug={tidyCalEvents.officiantConsultation.slug}
+        serviceId="officiant"
         bookingLabel="Book Officiant Consultation"
       />
     </main>

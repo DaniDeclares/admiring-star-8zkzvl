@@ -1,0 +1,39 @@
+.pay-page {
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.pay-hero {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 2.5rem;
+}
+
+.pay-hero p {
+  margin-top: 0.75rem;
+}
+
+.pay-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.pay-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pay-card__badge {
+  align-self: flex-start;
+  background: #fde68a;
+  color: #7c2d12;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}

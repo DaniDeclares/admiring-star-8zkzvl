@@ -1,9 +1,9 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
 import { getServiceSections, servicePages } from "../data/services.js";
 import ServiceCta from "../components/ServiceCta.jsx";
-import { buildTidyCalUrl, tidyCalEvents } from "../data/tidycal.js";
 import "./FinancialPage.css";
 
 export default function FinancialPage() {
@@ -41,14 +41,9 @@ export default function FinancialPage() {
           <p>
             Get a personalized plan or life insurance quote. <strong>No payment required.</strong>
           </p>
-          <a
-            href={buildTidyCalUrl(tidyCalEvents.financialQuote.slug)}
-            className="btn btn--primary"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Book Free 15-Minute Call
-          </a>
+          <Link to="/contact" className="btn btn--primary">
+            Request a Free Financial Call
+          </Link>
           <p className="disclaimer">
             No pressure—just real solutions for your goals.
           </p>
@@ -86,8 +81,8 @@ export default function FinancialPage() {
         </section>
 
         <ServiceCta
-          bookingSlug={tidyCalEvents.financialQuote.slug}
-          bookingLabel="Book Financial Call"
+          link="/contact"
+          bookingLabel="Request a Financial Call"
         />
       </main>
     </>

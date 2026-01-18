@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 // Global Components
 import FestivalBanner from "./components/FestivalBanner.jsx";
@@ -18,6 +18,7 @@ import WeddingsPage from "./pages/WeddingsPage.jsx";
 import EventsPage from "./pages/EventsPage.jsx";
 import NotaryPage from "./pages/NotaryPage.jsx";
 import BookingPage from "./pages/BookingPage.jsx";
+import PayPage from "./pages/PayPage.jsx";
 import FestivalPage from "./pages/FestivalPage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
@@ -112,7 +113,9 @@ export default function App() {
         <Route path="/weddings" element={<WeddingsPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/notary" element={<NotaryPage />} />
-        <Route path="/bookings" element={<BookingPage />} />
+        <Route path="/book" element={<BookingPage />} />
+        <Route path="/bookings" element={<Navigate to="/book" replace />} />
+        <Route path="/pay" element={<PayPage />} />
         <Route path="/travel-quote" element={<TravelQuotePage />} />
         <Route path="/festival" element={<FestivalPage />} />
         <Route path="/membership" element={<MembershipPage />} />

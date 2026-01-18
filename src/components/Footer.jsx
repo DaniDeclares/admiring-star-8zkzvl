@@ -2,25 +2,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
-import { buildTidyCalUrl, tidyCalEvents } from "../data/tidycal.js";
 import "./Footer.css";
 
 export default function Footer() {
-  const bookingUrl = buildTidyCalUrl(tidyCalEvents.generalNotary.slug);
-
   return (
     <footer className="footer">
       {/* Top contact info */}
       <div className="footer-top">
         <p>
           <strong>Consultation:</strong>{" "}
-          <a
-            href={bookingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {bookingUrl.replace("https://", "")}
-          </a>
+          <Link to="/book">danideclares.com/book</Link>
         </p>
         <p>
           <strong>Email:</strong>{" "}

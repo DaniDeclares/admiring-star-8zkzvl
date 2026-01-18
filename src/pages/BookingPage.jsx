@@ -1,74 +1,106 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { Link, useLocation } from "react-router-dom";
 import TidyCalEmbed from "../components/TidyCalEmbed.jsx";
 import {
-  buildTidyCalPath,
-  buildTidyCalUrl,
-  tidyCalEvents,
-} from "../data/tidycal.js";
+  availabilityPolicy,
+  bookingServices,
+  calendarPolicy,
+  getBookingServiceById,
+  pendingPaymentNotice,
+} from "../data/bookingServices.js";
 import "./BookingPage.css";
 
-const bookingOptions = [
-  tidyCalEvents.generalNotary,
-  tidyCalEvents.loanSigning,
-  tidyCalEvents.apostille,
-  tidyCalEvents.officiantConsultation,
-];
-
 export default function BookingPage() {
+  const location = useLocation();
+  const embedRef = useRef(null);
+  const defaultServiceId = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const serviceId = params.get("service");
+    return getBookingServiceById(serviceId)?.id || bookingServices[0]?.id;
+  }, [location.search]);
+
+  const [activeServiceId, setActiveServiceId] = useState(defaultServiceId);
+
+  useEffect(() => {
+    setActiveServiceId(defaultServiceId);
+  }, [defaultServiceId]);
+
+  const activeService =
+    getBookingServiceById(activeServiceId) || bookingServices[0];
+
+  const handleSelectService = (serviceId) => {
+    setActiveServiceId(serviceId);
+    setTimeout(() => {
+      embedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  };
+
   return (
     <>
       <Helmet>
-        <title>Book an Appointment • Dani Declares</title>
+        <title>Book a Service • Dani Declares</title>
         <meta
           name="description"
-          content="Book a notary appointment, loan signing, apostille intake, or officiant consultation with Dani Declares."
+          content="Book a mobile notary, apostille, officiant, or loan signing appointment with immediate payment to confirm."
         />
       </Helmet>
 
       <main className="booking-page">
         <header className="booking-hero">
-          <h1>Book an Appointment</h1>
+          <h1>Book a Service</h1>
           <p>
-            Choose the service that fits your needs and reserve a time that works
-            for you.
+            Select a service to book your appointment, then complete payment to
+            confirm your time.
           </p>
+          <p className="booking-hero__notice">{pendingPaymentNotice}</p>
         </header>
 
         <section className="booking-options">
-          {bookingOptions.map((option) => (
-            <article key={option.slug} className="booking-card">
-              <h2>{option.label}</h2>
-              <p>
-                Select an available time for your {option.label.toLowerCase()}.
-              </p>
+          {bookingServices.map((service) => (
+            <article key={service.id} className="booking-card">
+              <h2>{service.name}</h2>
+              <p>{service.description}</p>
+              <p className="booking-card__notice">{pendingPaymentNotice}</p>
               <div className="booking-card__actions">
-                <a
+                <button
+                  type="button"
                   className="btn btn--primary"
-                  href={`#booking-${option.slug}`}
+                  onClick={() => handleSelectService(service.id)}
                 >
                   Book Now
-                </a>
-                <a
-                  className="btn btn--secondary"
-                  href={buildTidyCalUrl(option.slug)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open in new tab
-                </a>
+                </button>
+                <Link className="btn btn--secondary" to={`/pay?service=${service.id}`}>
+                  Pay to Confirm
+                </Link>
               </div>
             </article>
           ))}
         </section>
 
-        <section className="booking-embeds">
-          {bookingOptions.map((option) => (
-            <div key={option.slug} id={`booking-${option.slug}`} className="booking-embed">
-              <h3>{option.label}</h3>
-              <TidyCalEmbed path={buildTidyCalPath(option.slug)} />
-            </div>
-          ))}
+        <section className="booking-details" ref={embedRef}>
+          <div className="booking-details__header">
+            <h2>Step 1: Book {activeService?.name}</h2>
+            <p>{pendingPaymentNotice}</p>
+            <p className="booking-details__policy">{availabilityPolicy}</p>
+            <p className="booking-details__policy">{calendarPolicy}</p>
+          </div>
+          <div className="booking-embed">
+            <TidyCalEmbed path={activeService?.tidyCalPath} />
+          </div>
+          <div className="booking-confirmation">
+            <h3>Step 2: Pay to Confirm</h3>
+            <p>
+              Complete payment right after booking to lock in your appointment.
+              You can also head straight to the payment page now.
+            </p>
+            <Link
+              className="btn btn--primary"
+              to={`/pay?service=${activeService?.id}`}
+            >
+              Pay to Confirm {activeService?.name}
+            </Link>
+          </div>
         </section>
       </main>
     </>
