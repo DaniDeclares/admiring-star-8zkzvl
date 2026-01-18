@@ -83,13 +83,6 @@ const PRODUCTS = [
     image: "/images/products/dad-documents-laptop-sleeve/404397518277071714_2048_800x800.jpg",
   },
   {
-    id: "desk-mat-coach-counselor-officiant-dad",
-    name: "Desk Mat for Coach Counselor Officiant Dad",
-    price: 29.99,
-    desc: "Large, smooth desk mat with 'Coach. Counselor. Officiant. Dad.' design. Inspiring office accessory.",
-    image: "/images/products/desk-mat-coach-counselor-officiant-dad/404397518277071714_2048_800x800.jpg",
-  },
-  {
     id: "unisex-garment-dyed-tshirt",
     name: "Unisex Garment-Dyed T-shirt",
     price: 22.99,
