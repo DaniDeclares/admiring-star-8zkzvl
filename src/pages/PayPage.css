@@ -1,28 +1,39 @@
 .pay-page {
   padding: 2.5rem 1.5rem 4rem;
+  background: #f8f5f1;
 }
 
 .pay-hero {
   text-align: center;
-  max-width: 720px;
+  max-width: 820px;
   margin: 0 auto 2.5rem;
+}
+
+.pay-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: #8b1e2e;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
 }
 
 .pay-hero p {
   margin-top: 0.75rem;
+  color: #4b3a3f;
 }
 
 .pay-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }
 
 .pay-card {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 1.5rem;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -30,10 +41,27 @@
 
 .pay-card__badge {
   align-self: flex-start;
-  background: #fde68a;
-  color: #7c2d12;
+  background: rgba(212, 175, 55, 0.2);
+  color: #8b1e2e;
   font-weight: 600;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+}
+
+.pay-card__disclaimer {
+  background: #fff6ec;
+  border-radius: 12px;
+  padding: 0.75rem;
+  color: #5a2e36;
+  font-size: 0.9rem;
+}
+
+.pay-card__placeholder {
+  background: rgba(139, 30, 46, 0.08);
+  border-radius: 12px;
+  padding: 0.85rem;
+  color: #8b1e2e;
+  font-weight: 600;
+  text-align: center;
 }

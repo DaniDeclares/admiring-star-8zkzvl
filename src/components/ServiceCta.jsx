@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
-import { getBookingServiceById } from "../data/bookingServices.js";
+import { getServiceById } from "../data/services.js";
 import "./ServiceCta.css";
 
 export default function ServiceCta({
@@ -9,7 +9,7 @@ export default function ServiceCta({
   bookingLabel = "Book Appointment",
   link,
 }) {
-  const service = getBookingServiceById(serviceId);
+  const service = getServiceById(serviceId);
   const bookingUrl = link || `/book?service=${service?.id || "notary"}`;
 
   return (

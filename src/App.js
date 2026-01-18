@@ -13,10 +13,6 @@ import { SHOW_FESTIVAL } from "./data/siteConfig.js";
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
-import FinancialPage from "./pages/FinancialPage.jsx";
-import WeddingsPage from "./pages/WeddingsPage.jsx";
-import EventsPage from "./pages/EventsPage.jsx";
-import NotaryPage from "./pages/NotaryPage.jsx";
 import BookingPage from "./pages/BookingPage.jsx";
 import PayPage from "./pages/PayPage.jsx";
 import FestivalPage from "./pages/FestivalPage.jsx";
@@ -24,11 +20,9 @@ import MembershipPage from "./pages/MembershipPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
+import ServicesPage from "./pages/ServicesPage.jsx";
 
 // Newly created Public Pages
-import PackagesPage from "./pages/PackagesPage.jsx";
-import RealEstatePage from "./pages/RealEstatePage.jsx";
-import LegalServicesPage from "./pages/LegalServicesPage.jsx";
 import PaymentCancel from "./pages/PaymentCancel.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
@@ -108,11 +102,8 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<Homepage />} />
+        <Route path="/services" element={<ServicesPage />} />
         <Route path="/shop" element={<ShopPage />} />
-        <Route path="/financial" element={<FinancialPage />} />
-        <Route path="/weddings" element={<WeddingsPage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/notary" element={<NotaryPage />} />
         <Route path="/book" element={<BookingPage />} />
         <Route path="/bookings" element={<Navigate to="/book" replace />} />
         <Route path="/pay" element={<PayPage />} />
@@ -123,10 +114,14 @@ export default function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
-        {/* Newly added service pages */}
-        <Route path="/packages" element={<PackagesPage />} />
-        <Route path="/real-estate" element={<RealEstatePage />} />
-        <Route path="/legal-services" element={<LegalServicesPage />} />
+        {/* Legacy service routes */}
+        <Route path="/notary" element={<Navigate to="/services" replace />} />
+        <Route path="/packages" element={<Navigate to="/services" replace />} />
+        <Route path="/real-estate" element={<Navigate to="/services" replace />} />
+        <Route path="/legal-services" element={<Navigate to="/services" replace />} />
+        <Route path="/weddings" element={<Navigate to="/services" replace />} />
+        <Route path="/financial" element={<Navigate to="/services" replace />} />
+        <Route path="/events" element={<Navigate to="/services" replace />} />
         <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
 

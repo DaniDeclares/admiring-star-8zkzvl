@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import HubSpotForm from "../components/HubSpotForm.jsx";
 import "./ContactPage.css";
-import { SHOW_FESTIVAL, siteConfig } from "../data/siteConfig.js";
+import { siteConfig } from "../data/siteConfig.js";
 
 export default function ContactPage() {
   return (
@@ -12,28 +12,30 @@ export default function ContactPage() {
         <title>Contact & Quotes • Dani Declares</title>
         <meta
           name="description"
-          content="Questions, bookings, or custom service quotes? Reach out to Dani Declares for notary, legal, wedding, financial, event, and merch inquiries."
+          content="Questions, bookings, or custom quotes? Reach out to Dani Declares for mobile notary, apostille, loan signing, and officiant services."
         />
       </Helmet>
 
       <main className="contact-page">
-        <h1>Let’s Connect & Get You Started</h1>
-        <p>
-          Have questions about our services—Notary & Legal Support, Real Estate,
-          Weddings & Events, Financial Empowerment,
-          {SHOW_FESTIVAL ? " Festival & Vendor Opportunities, or Merch? " : " or Merch? "}
-          Fill out the form below, and we’ll follow up with personalized next
-          steps or a custom quote.
-        </p>
+        <header className="contact-hero">
+          <p className="contact-eyebrow">Contact</p>
+          <h1>Let’s plan your appointment.</h1>
+          <p>
+            Share your service needs and ideal time. We will confirm availability,
+            travel coverage, and deposit details quickly.
+          </p>
+        </header>
 
-        <HubSpotForm
-          region="na2"
-          portalId="242764935"
-          formId="d4cd290e-7766-4bf5-91a2-c1274ddd882e"
-        />
+        <section className="contact-form">
+          <HubSpotForm
+            region="na2"
+            portalId="242764935"
+            formId="d4cd290e-7766-4bf5-91a2-c1274ddd882e"
+          />
+        </section>
 
         <section className="direct-contact">
-          <h3>Prefer Email or Phone?</h3>
+          <h3>Prefer email or phone?</h3>
           <p>
             📧{" "}
             <a href={`mailto:${siteConfig.emails.admin}`}>
@@ -56,17 +58,14 @@ export default function ContactPage() {
         </section>
 
         <section className="quick-links">
-          <h3>Explore Our Services</h3>
+          <h3>Quick Links</h3>
           <ul>
-            <li><Link to="/notary">Notary & Legal Support</Link></li>
-            <li><Link to="/real-estate">Real Estate Services</Link></li>
-            <li><Link to="/weddings">Wedding & Event Services</Link></li>
-            <li><Link to="/financial">Financial Empowerment</Link></li>
-            {SHOW_FESTIVAL && (
-              <li><Link to="/festival">Festival & Vendor Info</Link></li>
-            )}
-            <li><Link to="/shop">Merch & Digital Products</Link></li>
-            <li><Link to="/packages">All Services & Bundles</Link></li>
+            <li><Link to="/services">All Services</Link></li>
+            <li><Link to="/book?service=notary">Book Notary</Link></li>
+            <li><Link to="/book?service=apostille">Book Apostille</Link></li>
+            <li><Link to="/book?service=loansigning">Book Loan Signing</Link></li>
+            <li><Link to="/book?service=officiant">Book Officiant</Link></li>
+            <li><Link to="/pay">Pay to Confirm</Link></li>
           </ul>
         </section>
       </main>

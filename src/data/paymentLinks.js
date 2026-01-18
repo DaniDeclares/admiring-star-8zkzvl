@@ -9,6 +9,7 @@ export const paymentLinks = {
     notaryFinanceSession: "https://buy.stripe.com/aEUg28dGh5qKcyI5k3",
   },
   weddings: {
+    officiant: "https://buy.stripe.com/aFa7sKdGhcTc71Rfpv6kg14",
     simpleVows: "https://buy.stripe.com/7sIg2M4WldBMd1G9AA",
     courthouseStyle: "https://buy.stripe.com/fZeaG9feF5eAd1GcMO",
     intimateAllInclusive: "https://buy.stripe.com/bIY9CUeE9fYgd1GbIK",
