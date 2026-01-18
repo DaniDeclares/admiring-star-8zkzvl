@@ -32,7 +32,10 @@ export default function Footer() {
 
       {/* Quick site links */}
       <nav className="footer-site-links" aria-label="Site links">
-        <Link to="/membership">Membership</Link>
+        <Link to="/services">Services</Link>
+        <Link to="/book?service=notary">Book</Link>
+        <Link to="/pay">Pay</Link>
+        <Link to="/contact">Contact</Link>
         <Link to="/terms">Terms of Service</Link>
         <Link to="/privacy">Privacy Policy</Link>
       </nav>
