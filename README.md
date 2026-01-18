@@ -29,12 +29,13 @@
 
 ## 3. Services & Packages
 
-| Service                          | URL Slug    |         Starting Price | Notes                                             |
-| -------------------------------- | ----------- | ---------------------: | ------------------------------------------------- |
-| Mobile Notary                    | `/notary`   |                   \$50 | Apostille, fingerprinting                         |
-| Wedding Officiant                | `/weddings` |                  \$150 | Elopement → Full planning                         |
-| Coaching (DIY / Group / 1:1 VIP) | `/coaching` | \$99 / \$499 / \$2,500 | Funnel: eBook → Webinar → VIP                     |
-| Events                           | `/events`   |           See calendar | Sign & Sip, Love & Legalities, Declare Your Worth |
+| Service               | URL Slug    | Starting Price | Notes                                             |
+| --------------------- | ----------- | -------------: | ------------------------------------------------- |
+| Mobile Notary         | `/notary`   |           \$35 | General notary, loan signings, apostille          |
+| Real Estate Support   | `/real-estate` |       \$50 | Open house host, inspections, coordination        |
+| Officiant Services    | `/weddings` |          \$200 | Elopement, courthouse-style, custom ceremonies    |
+| Courier Services      | `/legal-services` |      \$65 | Same-day local, rush, multi-stop                  |
+| Events                | `/events`   |   See calendar | Pop-ups, clinics, and seasonal activations        |
 
 ---
 
@@ -70,6 +71,11 @@ PRINTIFY_STORE_ID=your-store-id
 REACT_APP_PAYPAL_CLIENT_ID=your-client-id
 REACT_APP_GA_MEASUREMENT_ID=your-ga-id
 REACT_APP_FB_PIXEL_ID=your-pixel-id
+GOOGLE_MAPS_API_KEY=your-server-api-key
+ORIGIN_ADDRESS=your-business-address
+BASE_RADIUS_MILES=10
+MILEAGE_RATE=1.0
+BASE_TRAVEL_FEE=25
 ```
 
 *If you've accidentally committed secrets, revoke and rotate them immediately.*

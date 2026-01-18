@@ -3,6 +3,8 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import "./EventsPage.css";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
+import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
+import ServiceCta from "../components/ServiceCta.jsx";
 
 export default function EventsPage() {
   return (
@@ -13,8 +15,8 @@ export default function EventsPage() {
           name="description"
           content={
             SHOW_FESTIVAL
-              ? "Explore upcoming pop-up weddings, notary clinics, coaching sessions, financial workshops, and the Declare Your Worth Festival. Save your spot today!"
-              : "Explore upcoming pop-up weddings, notary clinics, coaching sessions, and financial workshops. Save your spot today!"
+              ? "Explore upcoming pop-up weddings, notary clinics, financial workshops, and the Declare Your Worth Festival. Save your spot today!"
+              : "Explore upcoming pop-up weddings, notary clinics, and financial workshops. Save your spot today!"
           }
         />
       </Helmet>
@@ -23,8 +25,8 @@ export default function EventsPage() {
         <h1>Upcoming Events & Pop-Ups</h1>
         <p className="intro">
           {SHOW_FESTIVAL
-            ? "From financial literacy festivals to pop-up weddings and mobile notary clinics—Dani Declares brings life-changing experiences to you. Here’s what’s on the calendar:"
-            : "From pop-up weddings and mobile notary clinics to coaching sessions—Dani Declares brings life-changing experiences to you. Here’s what’s on the calendar:"}
+            ? "From financial literacy festivals to pop-up weddings and mobile notary clinics—Dani Declares brings mobile services to you. Here’s what’s on the calendar:"
+            : "From pop-up weddings and mobile notary clinics to financial workshops—Dani Declares brings mobile services to you. Here’s what’s on the calendar:"}
         </p>
 
         {/* Declare Your Worth Festival */}
@@ -79,28 +81,12 @@ export default function EventsPage() {
         {/* Pop-Up Wedding Ceremonies */}
         <section className="event-card">
           <h2>Pop-Up Wedding Ceremonies</h2>
-          <p className="event-meta">
-            📅 Select Sundays • Doraville Public Library
-          </p>
+          <p className="event-meta">📅 Select Sundays • Doraville Public Library</p>
           <p className="event-desc">
             Affordable elopement-style ceremonies with officiant, decorative setup, filing, and music—all in one streamlined package.
           </p>
           <Link to="/weddings" className="btn btn--primary">
-            Explore Wedding Packages
-          </Link>
-        </section>
-
-        {/* Coaching & Financial Consults */}
-        <section className="event-card">
-          <h2>Coaching & Financial Consults</h2>
-          <p className="event-meta">
-            📅 Flexible Scheduling • Virtual & In-Person
-          </p>
-          <p className="event-desc">
-            Book a Discovery Session, 1:1 coaching block, or VIP intensive to transform your mindset, business, or money strategy.
-          </p>
-          <Link to="/coaching" className="btn btn--primary">
-            View Coaching Options
+            Explore Officiant Services
           </Link>
         </section>
 
@@ -121,6 +107,8 @@ export default function EventsPage() {
           </section>
         )}
 
+        <TravelFeesBlock />
+
         {/* Lead Capture */}
         <section className="contact-info">
           <h3>Stay in the Loop</h3>
@@ -131,6 +119,8 @@ export default function EventsPage() {
             Join Our List
           </Link>
         </section>
+
+        <ServiceCta />
       </main>
     </>
   );

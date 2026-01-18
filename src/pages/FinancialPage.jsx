@@ -1,52 +1,14 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { siteConfig } from "../data/siteConfig.js";
+import { getServiceSections, servicePages } from "../data/services.js";
+import ServiceCta from "../components/ServiceCta.jsx";
 import "./FinancialPage.css";
 
-const SERVICES = [
-  {
-    title: "Free Term Life Insurance Quote",
-    price: "FREE",
-    desc: "Affordable term life policies (10–35 years) from Primerica Life Insurance Company or National Benefit Life Insurance Company. Ideal for family protection during key years."
-  },
-  {
-    title: "Debt Elimination Strategy Session",
-    price: "FREE",
-    desc: "We’ll build a custom debt-stacking plan to eliminate high-interest debt and free up your cash flow for savings and investments."
-  },
-  {
-    title: "Budget & Cash-Flow Review",
-    price: "$99",
-    desc: "One-on-one session to analyze your income, expenses, and savings goals. Identify ways to save more, reduce spending, and build your emergency fund."
-  },
-  {
-    title: "Mutual Funds & Retirement Planning",
-    price: "Commission Based",
-    desc: "Through Primerica’s Lifetime Investment Program™: managed portfolios for retirement, education, or long-term growth (IRAs, 401(k) rollovers, 529s)."
-  },
-  {
-    title: "Credit Monitoring & Identity Protection",
-    price: "$25+/mo",
-    desc: "Protect your credit and identity. Get alerts, monthly score tracking, and fraud protection tools for peace of mind."
-  },
-  {
-    title: "Education Savings Plan (529)",
-    price: "FREE Consultation",
-    desc: "Plan for college with a tax-advantaged 529 account. Grow savings for tuition and education expenses with professional guidance."
-  },
-  {
-    title: "Financial Literacy Workshop",
-    price: "Custom Quote",
-    desc: "Tailored programs for schools, nonprofits, and corporate groups to empower smarter money decisions."
-  },
-  {
-    title: "Life Insurance Policy Review",
-    price: "FREE",
-    desc: "Already have a policy? We’ll review your coverage to ensure it still meets your family’s needs and financial goals."
-  }
-];
-
 export default function FinancialPage() {
+  const sections = getServiceSections(servicePages.financial);
+  const services = sections.flatMap((section) => section.items);
+
   return (
     <>
       <Helmet>
@@ -64,11 +26,11 @@ export default function FinancialPage() {
         </header>
 
         <section className="services-grid">
-          {SERVICES.map((service, idx) => (
-            <div key={idx} className="service-card">
-              <h2>{service.title}</h2>
+          {services.map((service) => (
+            <div key={service.name} className="service-card">
+              <h2>{service.name}</h2>
               <p className="meta">{service.price}</p>
-              <p className="desc">{service.desc}</p>
+              <p className="desc">{service.details}</p>
             </div>
           ))}
         </section>
@@ -121,6 +83,8 @@ export default function FinancialPage() {
             </a>
           </p>
         </section>
+
+        <ServiceCta />
       </main>
     </>
   );

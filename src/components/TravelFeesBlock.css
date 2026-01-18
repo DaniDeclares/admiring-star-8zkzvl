@@ -1,0 +1,17 @@
+.travel-fees {
+  margin: 3rem auto;
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  max-width: 960px;
+}
+
+.travel-fees ul {
+  margin: 1rem 0 1.5rem;
+  padding-left: 1.2rem;
+}
+
+.travel-fees li {
+  margin-bottom: 0.5rem;
+}

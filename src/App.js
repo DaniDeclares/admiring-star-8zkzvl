@@ -13,7 +13,6 @@ import { SHOW_FESTIVAL } from "./data/siteConfig.js";
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
-import CoachingPage from "./pages/CoachingPage.jsx";
 import FinancialPage from "./pages/FinancialPage.jsx";
 import WeddingsPage from "./pages/WeddingsPage.jsx";
 import EventsPage from "./pages/EventsPage.jsx";
@@ -30,6 +29,7 @@ import RealEstatePage from "./pages/RealEstatePage.jsx";
 import LegalServicesPage from "./pages/LegalServicesPage.jsx";
 import PaymentCancel from "./pages/PaymentCancel.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
+import TravelQuotePage from "./pages/TravelQuotePage.jsx";
 
 // Auth & Dashboard
 import LoginPage from "./pages/LoginPage.jsx";
@@ -62,11 +62,11 @@ export default function App() {
         {/* Public */}
         <Route path="/" element={<Homepage />} />
         <Route path="/shop" element={<ShopPage />} />
-        <Route path="/coaching" element={<CoachingPage />} />
         <Route path="/financial" element={<FinancialPage />} />
         <Route path="/weddings" element={<WeddingsPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/notary" element={<NotaryPage />} />
+        <Route path="/travel-quote" element={<TravelQuotePage />} />
         <Route path="/festival" element={<FestivalPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/contact" element={<ContactPage />} />

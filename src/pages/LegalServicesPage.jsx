@@ -1,49 +1,21 @@
 // src/pages/LegalServicesPage.jsx
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { getServiceSections, servicePages } from "../data/services.js";
+import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
+import ServiceCta from "../components/ServiceCta.jsx";
 import "./LegalServicesPage.css";
 
-const SERVICES = [
-  {
-    title: "Digital Court Reporting",
-    price: "$150/hr",
-    desc: "Certified reporters, virtual deposition & hearing transcripts within 3–5 days.",
-  },
-  {
-    title: "Court Filing Courier",
-    price: "$85+",
-    desc: "Same-day runs to local courthouses for filings, returns, and pick-ups.",
-  },
-  {
-    title: "Process Serving",
-    price: "$95–$125",
-    desc: "Document service with rush options and proof of service affidavit.",
-  },
-  {
-    title: "Legal Document Preparation",
-    price: "$100+",
-    desc: "Preparation of affidavits, POAs, simple contracts, and other non-attorney documents.",
-  },
-  {
-    title: "Witness Services",
-    price: "$50/hr",
-    desc: "Professional witness and attestation for depositions, affidavits, and signings.",
-  },
-  {
-    title: "Skip Trace & Asset Locate",
-    price: "$125",
-    desc: "Basic skip tracing to locate individuals or assets for legal matters.",
-  },
-];
-
 export default function LegalServicesPage() {
+  const sections = getServiceSections(servicePages.legal);
+
   return (
     <main className="legal-page">
       <Helmet>
         <title>Court & Legal Industry Services • Dani Declares</title>
         <meta
           name="description"
-          content="Court reporting, filings, process serving, document prep, witness services, and skip tracing for legal professionals."
+          content="Courier services and court support for legal professionals with transparent pricing."
         />
       </Helmet>
 
@@ -54,22 +26,32 @@ export default function LegalServicesPage() {
         </p>
       </header>
 
-      <section className="services-grid">
-        {SERVICES.map((s) => (
-          <div key={s.title} className="service-card">
-            <h2>{s.title}</h2>
-            <p className="meta">{s.price}</p>
-            <p className="desc">{s.desc}</p>
+      {sections.map((section) => (
+        <section key={section.id} className="service-section">
+          <h2>{section.title}</h2>
+          <p className="section-desc">{section.description}</p>
+          <div className="services-grid">
+            {section.items.map((service) => (
+              <div key={service.name} className="service-card">
+                <h3>{service.name}</h3>
+                <p className="meta">{service.price}</p>
+                {service.details && <p className="desc">{service.details}</p>}
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
+        </section>
+      ))}
+
+      <TravelFeesBlock />
 
       <section className="contact-cta">
         <p>
-          For complex or high-volume requests,{" "}
+          For complex or high-volume requests, {" "}
           <a href="mailto:admin@danideclares.com">email us</a> for a custom quote.
         </p>
       </section>
+
+      <ServiceCta />
     </main>
   );
 }

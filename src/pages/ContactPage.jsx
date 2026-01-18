@@ -12,7 +12,7 @@ export default function ContactPage() {
         <title>Contact & Quotes • Dani Declares</title>
         <meta
           name="description"
-          content="Questions, bookings, or custom service quotes? Reach out to Dani Declares for notary, legal, wedding, coaching, financial, event, and merch inquiries."
+          content="Questions, bookings, or custom service quotes? Reach out to Dani Declares for notary, legal, wedding, financial, event, and merch inquiries."
         />
       </Helmet>
 
@@ -20,7 +20,7 @@ export default function ContactPage() {
         <h1>Let’s Connect & Get You Started</h1>
         <p>
           Have questions about our services—Notary & Legal Support, Real Estate,
-          Weddings & Events, Coaching & Consulting, Financial Empowerment,
+          Weddings & Events, Financial Empowerment,
           {SHOW_FESTIVAL ? " Festival & Vendor Opportunities, or Merch? " : " or Merch? "}
           Fill out the form below, and we’ll follow up with personalized next
           steps or a custom quote.
@@ -61,7 +61,6 @@ export default function ContactPage() {
             <li><Link to="/notary">Notary & Legal Support</Link></li>
             <li><Link to="/real-estate">Real Estate Services</Link></li>
             <li><Link to="/weddings">Wedding & Event Services</Link></li>
-            <li><Link to="/coaching">Coaching & Consulting</Link></li>
             <li><Link to="/financial">Financial Empowerment</Link></li>
             {SHOW_FESTIVAL && (
               <li><Link to="/festival">Festival & Vendor Info</Link></li>

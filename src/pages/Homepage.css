@@ -163,35 +163,13 @@
   margin-top: 0.3rem;
 }
 
-/* COACHING PACKAGES */
+/* SERVICE HIGHLIGHTS */
 .packages {
   padding: 34px 7px;
   text-align: center;
   background: #FFF5F7;
 }
 .packages h2 { color: #8B1E2E; font-size: 1.22rem; }
-.coaching-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0 0 10px;
-  color: #2a2222;
-  font-size: 1.01rem;
-}
-.coaching-list li { margin-bottom: 6px; }
-.coaching-benefits h3 {
-  font-size: 1.05rem;
-  margin-bottom: 7px;
-  color: #D4AF37;
-}
-.coaching-benefits ul {
-  list-style: none;
-  padding: 0;
-  margin-bottom: 9px;
-}
-.coaching-benefits li {
-  margin: 6px 0;
-  font-size: 0.99rem;
-}
 
 /* OTHER SERVICES */
 .packages-grid {
@@ -219,22 +197,22 @@
 }
 
 /* CONTACT SECTION */
-.coaching-contact {
+.contact-cta {
   text-align: center;
   padding: 30px 6px;
   background: #f2f2f2;
 }
-.coaching-contact h2 {
+.contact-cta h2 {
   color: #8B1E2E;
   margin-bottom: 8px;
 }
-.coaching-contact p {
+.contact-cta p {
   margin-bottom: 11px;
 }
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
-  .hero, .festival-banner, .packages, .testimonial-carousel, .coaching-contact {
+  .hero, .festival-banner, .packages, .testimonial-carousel, .contact-cta {
     padding-left: 4px;
     padding-right: 4px;
   }

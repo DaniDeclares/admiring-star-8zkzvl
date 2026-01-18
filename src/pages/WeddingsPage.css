@@ -61,6 +61,12 @@
   margin-bottom: 1.8rem;
   font-family: 'Georgia', serif;
 }
+.package-list .section-desc {
+  text-align: center;
+  color: #555;
+  margin: -1rem auto 1.8rem;
+  max-width: 620px;
+}
 .packages-grid {
   display: grid;
   gap: 2.1rem;
