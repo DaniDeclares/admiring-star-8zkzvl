@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 // Global Components
 import FestivalBanner from "./components/FestivalBanner.jsx";
@@ -44,6 +44,12 @@ import SuccessPage from "./pages/SuccessPage.jsx";
 import CancelPage from "./pages/CancelPage.jsx";
 
 export default function App() {
+  const location = useLocation();
+  const gaMeasurementId =
+    process.env.NEXT_PUBLIC_GA_ID ||
+    process.env.REACT_APP_GA_MEASUREMENT_ID;
+  const isProduction = process.env.NODE_ENV === "production";
+
   useEffect(() => {
     const script = document.createElement("script");
     script.id = "mcjs";
@@ -52,6 +58,45 @@ export default function App() {
     script.async = true;
     document.body.appendChild(script);
   }, []);
+
+  useEffect(() => {
+    if (!isProduction || !gaMeasurementId) {
+      return;
+    }
+
+    if (!window.dataLayer) {
+      window.dataLayer = [];
+    }
+
+    if (!window.gtag) {
+      window.gtag = function gtag() {
+        window.dataLayer.push(arguments);
+      };
+    }
+
+    if (!document.getElementById("ga-script")) {
+      const gaScript = document.createElement("script");
+      gaScript.id = "ga-script";
+      gaScript.async = true;
+      gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`;
+      document.head.appendChild(gaScript);
+    }
+
+    window.gtag("js", new Date());
+    window.gtag("config", gaMeasurementId, { send_page_view: false });
+  }, [gaMeasurementId, isProduction]);
+
+  useEffect(() => {
+    if (!isProduction || !gaMeasurementId || !window.gtag) {
+      return;
+    }
+
+    window.gtag("event", "page_view", {
+      page_path: `${location.pathname}${location.search}`,
+      page_location: window.location.href,
+      page_title: document.title,
+    });
+  }, [gaMeasurementId, isProduction, location]);
 
   return (
     <>

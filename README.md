@@ -68,6 +68,7 @@
 REACT_APP_SNIPCART_API_KEY=your-public-api-key
 PRINTIFY_STORE_ID=your-store-id
 REACT_APP_PAYPAL_CLIENT_ID=your-client-id
+NEXT_PUBLIC_GA_ID=your-ga-id
 REACT_APP_GA_MEASUREMENT_ID=your-ga-id
 REACT_APP_FB_PIXEL_ID=your-pixel-id
 ```
