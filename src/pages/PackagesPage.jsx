@@ -9,6 +9,7 @@ import {
 } from "../data/services.js";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
+import { tidyCalEvents } from "../data/tidycal.js";
 
 export default function PackagesPage() {
   const categories = getServiceSections(servicePages.packages);
@@ -77,7 +78,10 @@ export default function PackagesPage() {
         </section>
       )}
 
-      <ServiceCta />
+      <ServiceCta
+        bookingSlug={tidyCalEvents.generalNotary.slug}
+        bookingLabel="Book an Appointment"
+      />
     </main>
   );
 }

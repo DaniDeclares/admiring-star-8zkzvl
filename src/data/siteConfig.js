@@ -1,7 +1,6 @@
 export const SHOW_FESTIVAL = false;
 
 export const siteConfig = {
-  bookingUrl: "https://tidycal.com/danideclaresns",
   serviceAreaText: "Serving Atlanta, Doraville, Dunwoody, and beyond.",
   phoneNumbers: {
     primary: {

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { travelFeeDefaults } from "../data/services.js";
 import ServiceCta from "../components/ServiceCta.jsx";
+import { tidyCalEvents } from "../data/tidycal.js";
 import "./TravelQuotePage.css";
 
 export default function TravelQuotePage() {
@@ -95,7 +96,10 @@ export default function TravelQuotePage() {
         )}
       </section>
 
-      <ServiceCta />
+      <ServiceCta
+        bookingSlug={tidyCalEvents.generalNotary.slug}
+        bookingLabel="Book a Mobile Appointment"
+      />
     </main>
   );
 }

@@ -5,6 +5,7 @@ import "./EventsPage.css";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
+import { buildTidyCalUrl, tidyCalEvents } from "../data/tidycal.js";
 
 export default function EventsPage() {
   return (
@@ -69,7 +70,7 @@ export default function EventsPage() {
             Light bites + mini money talks + quick documents. Get wills, POAs, contracts notarized in a relaxed social setting.
           </p>
           <a
-            href="https://tidycal.com/danideclaresns/sip-sign"
+            href={buildTidyCalUrl(tidyCalEvents.sipSignSocial.slug)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn--primary"

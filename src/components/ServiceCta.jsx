@@ -1,8 +1,14 @@
 import React from "react";
 import { siteConfig } from "../data/siteConfig.js";
+import { buildTidyCalUrl, tidyCalEvents } from "../data/tidycal.js";
 import "./ServiceCta.css";
 
-export default function ServiceCta() {
+export default function ServiceCta({
+  bookingSlug = tidyCalEvents.generalNotary.slug,
+  bookingLabel = "Book Appointment",
+}) {
+  const bookingUrl = buildTidyCalUrl(bookingSlug);
+
   return (
     <section className="service-cta">
       <h2>Ready to book?</h2>
@@ -10,11 +16,11 @@ export default function ServiceCta() {
       <div className="service-cta__actions">
         <a
           className="btn btn--primary"
-          href={siteConfig.bookingUrl}
+          href={bookingUrl}
           target="_blank"
           rel="noopener noreferrer"
         >
-          Book Appointment
+          {bookingLabel}
         </a>
         <div className="service-cta__contact">
           <p>

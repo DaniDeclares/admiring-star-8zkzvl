@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { siteConfig } from "../data/siteConfig.js";
 import { getServiceSections, servicePages } from "../data/services.js";
 import ServiceCta from "../components/ServiceCta.jsx";
+import { buildTidyCalUrl, tidyCalEvents } from "../data/tidycal.js";
 import "./FinancialPage.css";
 
 export default function FinancialPage() {
@@ -41,7 +42,7 @@ export default function FinancialPage() {
             Get a personalized plan or life insurance quote. <strong>No payment required.</strong>
           </p>
           <a
-            href="https://tidycal.com/danideclaresns/15-minute-meeting"
+            href={buildTidyCalUrl(tidyCalEvents.financialQuote.slug)}
             className="btn btn--primary"
             target="_blank"
             rel="noopener noreferrer"
@@ -84,7 +85,10 @@ export default function FinancialPage() {
           </p>
         </section>
 
-        <ServiceCta />
+        <ServiceCta
+          bookingSlug={tidyCalEvents.financialQuote.slug}
+          bookingLabel="Book Financial Call"
+        />
       </main>
     </>
   );
