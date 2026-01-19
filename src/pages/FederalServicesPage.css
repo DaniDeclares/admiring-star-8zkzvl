@@ -1,0 +1,50 @@
+.federal-page {
+  padding: 2.5rem 1.5rem 4rem;
+  background: var(--ivory);
+  color: var(--text-dark);
+}
+
+.federal-hero {
+  max-width: 900px;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+.federal-hero h1 {
+  font-size: clamp(2.2rem, 3.5vw, 3rem);
+  margin-bottom: 0.75rem;
+}
+
+.federal-section {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  margin: 0 auto 1.75rem;
+  max-width: 980px;
+}
+
+.federal-section ul {
+  margin-top: 1rem;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.federal-contact {
+  text-align: center;
+}
+
+.federal-contact__actions {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .federal-page {
+    padding: 2rem 1.25rem 3rem;
+  }
+}

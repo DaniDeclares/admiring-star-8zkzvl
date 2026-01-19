@@ -1,16 +1,12 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FiShoppingCart } from "react-icons/fi";
-import { useCart } from "../context/CartContext.jsx";
 
 import logoSeal from "../assets/logo/logo-gold-seal.png";
 import "./Navbar.css";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { cart } = useCart();
   const location = useLocation();
-  const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
 
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -35,6 +31,13 @@ export default function Navbar() {
 
       <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
         <Link
+          to="/"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
+        >
+          Home
+        </Link>
+        <Link
           to="/services"
           onClick={handleLinkClick}
           className={`nav-link ${location.pathname === "/services" ? "active" : ""}`}
@@ -42,25 +45,43 @@ export default function Navbar() {
           Services
         </Link>
         <Link
-          to="/federal"
+          to="/tax-services"
           onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/federal" ? "active" : ""}`}
+          className={`nav-link ${
+            location.pathname === "/tax-services" ? "active" : ""
+          }`}
+        >
+          Tax Season
+        </Link>
+        <Link
+          to="/federal-services"
+          onClick={handleLinkClick}
+          className={`nav-link ${
+            location.pathname === "/federal-services" ? "active" : ""
+          }`}
         >
           Federal
         </Link>
         <Link
-          to="/book?service=notary"
+          to="/apostille"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/apostille" ? "active" : ""}`}
+        >
+          Apostille
+        </Link>
+        <Link
+          to="/officiant"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/officiant" ? "active" : ""}`}
+        >
+          Officiant
+        </Link>
+        <Link
+          to="/book"
           onClick={handleLinkClick}
           className={`nav-link ${location.pathname === "/book" ? "active" : ""}`}
         >
           Book
-        </Link>
-        <Link
-          to="/pay"
-          onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/pay" ? "active" : ""}`}
-        >
-          Pay
         </Link>
         <Link
           to="/contact"
@@ -68,24 +89,6 @@ export default function Navbar() {
           className={`nav-link ${location.pathname === "/contact" ? "active" : ""}`}
         >
           Contact
-        </Link>
-        <Link
-          to="/shop"
-          onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/shop" ? "active" : ""}`}>
-          Shop
-        </Link>
-        <Link
-          to="/blog"
-          onClick={handleLinkClick}
-          className={`nav-link ${location.pathname.startsWith("/blog") ? "active" : ""}`}>
-          Blog
-        </Link>
-
-        {/* Cart */}
-        <Link to="/cart" className="cart-link" onClick={handleLinkClick}>
-          <FiShoppingCart size={20} />
-          {totalQty > 0 && <span className="cart-badge">{totalQty}</span>}
         </Link>
       </div>
 

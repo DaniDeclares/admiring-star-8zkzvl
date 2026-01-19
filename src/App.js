@@ -21,7 +21,7 @@ import ContactPage from "./pages/ContactPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
-import FederalPage from "./pages/FederalPage.jsx";
+import FederalServicesPage from "./pages/FederalServicesPage.jsx";
 import TaxServicesPage from "./pages/TaxServicesPage.jsx";
 
 // Newly created Public Pages
@@ -105,8 +105,12 @@ export default function App() {
         {/* Public */}
         <Route path="/" element={<Homepage />} />
         <Route path="/services" element={<ServicesPage />} />
-        <Route path="/federal" element={<FederalPage />} />
-        <Route path="/federal-services" element={<FederalPage />} />
+        <Route path="/federal" element={<Navigate to="/federal-services" replace />} />
+        <Route
+          path="/federal-services"
+          element={<FederalServicesPage />}
+        />
+        <Route path="/tax" element={<Navigate to="/tax-services" replace />} />
         <Route path="/tax-services" element={<TaxServicesPage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/book" element={<BookingPage />} />
@@ -121,6 +125,14 @@ export default function App() {
 
         {/* Legacy service routes */}
         <Route path="/notary" element={<Navigate to="/services" replace />} />
+        <Route
+          path="/apostille"
+          element={<Navigate to="/book?service=apostille" replace />}
+        />
+        <Route
+          path="/officiant"
+          element={<Navigate to="/book?service=officiant" replace />}
+        />
         <Route path="/packages" element={<Navigate to="/services" replace />} />
         <Route path="/real-estate" element={<Navigate to="/services" replace />} />
         <Route path="/legal-services" element={<Navigate to="/services" replace />} />

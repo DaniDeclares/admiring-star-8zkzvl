@@ -80,7 +80,7 @@ export default function Homepage() {
               <p>
                 Reliable execution for clients, filings, and time-sensitive documents.
               </p>
-              <Link to="/professional-services">Professional Services</Link>
+              <Link to="/services">Professional Services</Link>
             </div>
             <div>
               <h3>Government &amp; Agencies</h3>

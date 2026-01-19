@@ -59,14 +59,23 @@ export default function PayPage() {
               {service.id === "notary" && (
                 <p className="pay-card__disclaimer">{notaryFeeDisclaimer}</p>
               )}
-              <a
-                className="btn btn--primary btn--block"
-                href={service.paymentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {service.payLabel}
-              </a>
+              {service.paymentUrl ? (
+                <a
+                  className="btn btn--primary btn--block"
+                  href={service.paymentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {service.payLabel}
+                </a>
+              ) : (
+                <div className="pay-card__fallback">
+                  <p>Payment link coming soon. Please contact to invoice.</p>
+                  <Link className="btn btn--secondary btn--block" to="/contact">
+                    Contact
+                  </Link>
+                </div>
+              )}
             </article>
           ))}
         </section>
