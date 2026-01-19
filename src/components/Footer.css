@@ -1,7 +1,7 @@
 /* src/components/Footer.css */
 
 .footer {
-  background-color: #8b1e2e;
+  background-color: var(--burgundy);
   color: #fff;
   padding: 2rem 1rem;
   font-family: "Raleway", sans-serif;
@@ -18,12 +18,12 @@
 }
 
 .footer-top a {
-  color: #ffd700;
+  color: var(--gold);
   text-decoration: underline;
 }
 
 .footer-top a:hover {
-  color: #fff2b0;
+  color: #f7e3b7;
 }
 
 /* Quick site links (Membership, Terms, Privacy) */
@@ -37,14 +37,14 @@
 }
 
 .footer-site-links a {
-  color: #ffd700;
+  color: var(--gold);
   font-weight: 600;
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .footer-site-links a:hover {
-  color: #fff2b0;
+  color: #f7e3b7;
 }
 
 /* Social media links */
@@ -63,7 +63,18 @@
 }
 
 .footer-social a:hover {
-  color: #ffd700;
+  color: var(--gold);
+}
+
+.pricing-note {
+  max-width: 780px;
+  margin: 0 auto 1.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1.25rem 1.5rem;
+  border-radius: 14px;
+  display: grid;
+  gap: 0.75rem;
+  font-size: 0.95rem;
 }
 
 /* Bottom copyright/legal */

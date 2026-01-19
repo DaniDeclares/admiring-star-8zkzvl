@@ -61,6 +61,15 @@ export default function Footer() {
         ))}
       </nav>
 
+      <section className="pricing-note">
+        <p>
+          Preferred client rates, volume pricing, multi-appointment bundles, and
+          retainers are available for law firms, tax professionals, and recurring
+          clients.
+        </p>
+        <p>After-hours and urgent requests may include an expedited service fee.</p>
+      </section>
+
       {/* Bottom copyright */}
       <p className="footer-bottom">
         © {new Date().getFullYear()} Dani Declares. All rights reserved.

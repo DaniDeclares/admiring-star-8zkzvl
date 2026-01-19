@@ -7,104 +7,74 @@ export default function FederalPage() {
   return (
     <>
       <Helmet>
-        <title>Federal Contracting • Dani Declares</title>
+        <title>Federal Contracting &amp; Agency Support • Dani Declares</title>
         <meta
           name="description"
-          content="Government-ready mobile notary, loan signing, and apostille facilitation support across Georgia and South Carolina."
+          content="Professional notary, document handling, and administrative support services for government entities and contractors."
         />
       </Helmet>
 
       <main className="federal-page">
         <section className="federal-hero">
-          <p className="federal-eyebrow">Government-Ready</p>
-          <h1>Federal Contracting</h1>
+          <h1>Federal Contracting &amp; Agency Support Services</h1>
           <p>
-            Dani Declares provides compliance-minded mobile notary, loan signing, and
-            document support for federal, state, and local agencies.
+            Dani Declares provides professional notary, document handling, and
+            administrative support services for government entities and contractors.
           </p>
-          <div className="federal-hero__actions">
-            <Link className="btn btn--primary" to="/contact">
-              Request a Quote
-            </Link>
-            <a
-              className="btn btn--secondary"
-              href="/assets/capability-statement.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Download Capability Statement
-            </a>
-          </div>
         </section>
 
         <section className="federal-section">
-          <h2>Capabilities</h2>
-          <div className="federal-grid">
-            <div>
-              <h3>Mobile Notary</h3>
-              <p>On-site notarizations for government documents and field teams.</p>
-            </div>
-            <div>
-              <h3>Loan Signing Support</h3>
-              <p>Certified signing agent support for real estate and lending workflows.</p>
-            </div>
-            <div>
-              <h3>Apostille Facilitation</h3>
-              <p>Guided intake and document authentication coordination.</p>
-            </div>
-            <div>
-              <h3>Document Courier</h3>
-              <p>Secure pickup, delivery, and field support for time-sensitive files.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="federal-section federal-coverage">
-          <h2>Coverage</h2>
-          <p>
-            Serving agencies across Georgia and South Carolina with travel options for
-            mission-critical appointments. Extended travel is available by request.
-          </p>
-        </section>
-
-        <section className="federal-section federal-identifiers">
-          <h2>Identifiers</h2>
+          <h2>Core Capabilities</h2>
           <ul>
-            <li>UEI: TBD</li>
-            <li>CAGE: TBD</li>
-            <li>SAM.gov Status: TBD</li>
-            <li>NAICS: 541199, 561499, 531390 (editable)</li>
+            <li>Mobile and on-site notary services</li>
+            <li>Loan, trust, and legal document execution</li>
+            <li>Identity and employment verification</li>
+            <li>Apostille facilitation</li>
+            <li>Secure document courier and delivery</li>
+            <li>Document preparation, scanning, and compliance support</li>
           </ul>
         </section>
 
-        <section className="federal-section federal-differentiators">
-          <h2>Differentiators</h2>
+        <section className="federal-section">
+          <h2>NAICS Codes</h2>
           <ul>
-            <li>Fast response and flexible scheduling for urgent requests.</li>
-            <li>Compliance-minded approach with clear documentation.</li>
-            <li>Insured, bonded, and mobile-first where applicable.</li>
-            <li>Professional communication and status updates.</li>
+            <li>541120 – Offices of Notaries (Primary)</li>
+            <li>541199 – Other Legal Services</li>
+            <li>561611 – Investigation Services</li>
+            <li>541611 – Administrative &amp; Compliance Services</li>
+            <li>561410 – Document Preparation Services</li>
           </ul>
         </section>
 
-        <section className="federal-cta">
-          <h2>Ready to support your agency?</h2>
+        <section className="federal-section">
+          <h2>Service Area</h2>
+          <p>Georgia and South Carolina</p>
+          <p>Mobile, on-site, and remote coordination available.</p>
+        </section>
+
+        <section className="federal-section">
+          <h2>Compliance Snapshot</h2>
+          <ul>
+            <li>Commissioned Notary Public</li>
+            <li>Registered business entity</li>
+            <li>Insured</li>
+            <li>Available for direct contracts and subcontracting</li>
+          </ul>
+        </section>
+
+        <section className="federal-section federal-contact">
+          <h2>Contact</h2>
           <p>
-            Contact us to discuss requirements, timelines, and service details for your
-            federal or state contract.
+            Dani Declares LLC
+            <br />
+            Phone: (864) 326-5362
+            <br />
+            Email: admin@danideclares.com
           </p>
-          <div className="federal-cta__actions">
+          <div className="federal-contact__actions">
             <Link className="btn btn--primary" to="/contact">
-              Request a Quote
+              Request Support
             </Link>
-            <a
-              className="btn btn--accent"
-              href="/assets/capability-statement.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Download Capability Statement
-            </a>
           </div>
         </section>
       </main>
