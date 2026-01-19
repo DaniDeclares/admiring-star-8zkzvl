@@ -1,4 +1,14 @@
-import { paymentLinks } from "./paymentLinks.js";
+import { STRIPE_LINKS } from "./stripeLinks.js";
+
+const STRIPE_LINK_ALIASES = {
+  loansigning: "loan_signing",
+  officiant: "officiant_deposit",
+};
+
+const resolveStripeLink = (serviceId) => {
+  const resolvedId = STRIPE_LINK_ALIASES[serviceId] || serviceId;
+  return STRIPE_LINKS[resolvedId] ?? null;
+};
 
 export const bookingServices = [
   {
@@ -7,7 +17,7 @@ export const bookingServices = [
     description:
       "On-site notarizations for personal and business documents with flexible scheduling.",
     tidyCalPath: "danideclaresns/notary",
-    paymentUrl: paymentLinks.notary,
+    paymentUrl: resolveStripeLink("notary"),
     payLabel: "Pay Notary Deposit",
   },
   {
@@ -16,7 +26,7 @@ export const bookingServices = [
     description:
       "Document authentication support with clear guidance for domestic and international use.",
     tidyCalPath: "danideclaresns/apostille",
-    paymentUrl: paymentLinks.apostille,
+    paymentUrl: resolveStripeLink("apostille"),
     payLabel: "Pay Apostille Deposit",
   },
   {
@@ -25,7 +35,7 @@ export const bookingServices = [
     description:
       "Certified signing agent support for purchase, refinance, and loan packages.",
     tidyCalPath: "danideclaresns/loansigning",
-    paymentUrl: paymentLinks.loansigning,
+    paymentUrl: resolveStripeLink("loansigning"),
     payLabel: "Pay Loan Signing Deposit",
   },
   {
@@ -34,7 +44,7 @@ export const bookingServices = [
     description:
       "Ceremony officiation for elopements, courthouse-style vows, and custom celebrations.",
     tidyCalPath: "danideclaresns/officiant",
-    paymentUrl: paymentLinks.officiant,
+    paymentUrl: resolveStripeLink("officiant"),
     payLabel: "Pay Officiant Deposit",
   },
 ];

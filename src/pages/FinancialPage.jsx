@@ -30,7 +30,6 @@ export default function FinancialPage() {
           {services.map((service) => (
             <div key={service.name} className="service-card">
               <h2>{service.name}</h2>
-              <p className="meta">{service.price}</p>
               <p className="desc">{service.details}</p>
             </div>
           ))}

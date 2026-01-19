@@ -83,6 +83,12 @@
   gap: 1.25rem;
 }
 
+.service-card__price {
+  font-weight: 700;
+  color: #8b1e2e;
+  margin-top: 0.5rem;
+}
+
 .service-card__tag {
   background: rgba(139, 30, 46, 0.12);
   color: #8b1e2e;

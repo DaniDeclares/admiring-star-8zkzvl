@@ -45,7 +45,6 @@ export default function WeddingsPage() {
             {section.items.map((pkg) => (
               <div className="package-card" key={pkg.name}>
                 <h3>{pkg.name}</h3>
-                <p className="package-price">{pkg.price}</p>
                 {pkg.details && <p className="package-desc">{pkg.details}</p>}
               </div>
             ))}

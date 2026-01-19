@@ -1,11 +1,21 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import HubSpotForm from "../components/HubSpotForm.jsx";
 import "./ContactPage.css";
 import { siteConfig } from "../data/siteConfig.js";
+import { getPaymentServiceById } from "../data/services.js";
 
 export default function ContactPage() {
+  const location = useLocation();
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const serviceId = params.get("service");
+  const service = getPaymentServiceById(serviceId);
+  const serviceName = service?.name || service?.title || "Service";
+  const prefillMessage = serviceId
+    ? `Invoice request for: ${serviceName} (${serviceId})`
+    : "";
+
   return (
     <>
       <Helmet>
@@ -31,6 +41,8 @@ export default function ContactPage() {
             region="na2"
             portalId="242764935"
             formId="d4cd290e-7766-4bf5-91a2-c1274ddd882e"
+            targetId="contact-hubspot-form"
+            prefill={{ message: prefillMessage }}
           />
         </section>
 

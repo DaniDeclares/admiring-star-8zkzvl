@@ -9,6 +9,7 @@ import SocialLinks from "./components/SocialLinks.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import Footer from "./components/Footer.jsx";
 import { SHOW_FESTIVAL } from "./data/siteConfig.js";
+import { loadHubSpotTracking } from "./lib/loadHubSpot.js";
 
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
@@ -47,6 +48,10 @@ export default function App() {
     process.env.NEXT_PUBLIC_GA_ID ||
     process.env.REACT_APP_GA_MEASUREMENT_ID;
   const isProduction = process.env.NODE_ENV === "production";
+
+  useEffect(() => {
+    loadHubSpotTracking();
+  }, []);
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -95,6 +100,18 @@ export default function App() {
       page_title: document.title,
     });
   }, [gaMeasurementId, isProduction, location]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window._hsq = window._hsq || [];
+    window._hsq.push([
+      "setPath",
+      `${window.location.pathname}${window.location.search}`,
+    ]);
+    window._hsq.push(["trackPageView"]);
+  }, [location.pathname, location.search]);
 
   return (
     <>

@@ -34,7 +34,6 @@ export default function LegalServicesPage() {
             {section.items.map((service) => (
               <div key={service.name} className="service-card">
                 <h3>{service.name}</h3>
-                <p className="meta">{service.price}</p>
                 {service.details && <p className="desc">{service.details}</p>}
               </div>
             ))}

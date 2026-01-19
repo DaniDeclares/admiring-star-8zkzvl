@@ -40,7 +40,6 @@ export default function PackagesPage() {
             {category.items.map((item) => (
               <div key={item.name} className="item-card">
                 <h3>{item.name}</h3>
-                <p className="price">{item.price}</p>
                 {item.details && <p className="notes">{item.details}</p>}
               </div>
             ))}
@@ -51,7 +50,7 @@ export default function PackagesPage() {
               <ul>
                 {category.addOns.map((addon) => (
                   <li key={addon.name}>
-                    {addon.name}: <strong>{addon.price}</strong>
+                    {addon.name}
                   </li>
                 ))}
               </ul>
@@ -69,7 +68,6 @@ export default function PackagesPage() {
             {serviceBundles.map((bundle) => (
               <div key={bundle.name} className="bundle-card">
                 <h3>{bundle.name}</h3>
-                <p className="bundle-price">{bundle.price}</p>
                 <p className="bundle-notes">Includes: {bundle.includes}</p>
               </div>
             ))}

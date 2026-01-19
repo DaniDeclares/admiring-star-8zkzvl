@@ -5,6 +5,8 @@ export default function HubSpotForm({
   region = "na2",
   portalId = "242764935",
   formId = "d4cd290e-7766-4bf5-91a2-c1274ddd882e",
+  targetId = "hubspot-form",
+  prefill = {},
 }) {
   useEffect(() => {
     const script = document.createElement("script");
@@ -18,7 +20,18 @@ export default function HubSpotForm({
           region,
           portalId,
           formId,
-          target: "#hubspot-form",
+          target: `#${targetId}`,
+          onFormReady: (form) => {
+            if (prefill.message) {
+              const messageField = form.find(
+                "textarea[name='message'], input[name='message'], [name='message']"
+              );
+              if (messageField && messageField.length) {
+                messageField.val(prefill.message);
+                messageField.change();
+              }
+            }
+          },
         });
       }
     };
@@ -27,7 +40,7 @@ export default function HubSpotForm({
       const node = document.querySelector("script[src*='hsforms']");
       if (node) document.body.removeChild(node);
     };
-  }, [region, portalId, formId]);
+  }, [region, portalId, formId, targetId, prefill.message]);
 
-  return <div id="hubspot-form" className="hs-form-frame"></div>;
+  return <div id={targetId} className="hs-form-frame"></div>;
 }

@@ -61,6 +61,7 @@ export default function ServicesPage() {
                 <span className="service-card__tag">{service.category}</span>
                 <h2>{service.title}</h2>
                 <p>{service.shortDesc}</p>
+                <p className="service-card__price">{service.priceLabel}</p>
               </div>
               <ul className="service-card__highlights">
                 {service.highlights.map((item) => (

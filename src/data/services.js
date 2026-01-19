@@ -1,4 +1,15 @@
-import { paymentLinks } from "./paymentLinks.js";
+import { getPriceLabel } from "./pricingCanon.js";
+import { STRIPE_LINKS } from "./stripeLinks.js";
+
+const STRIPE_LINK_ALIASES = {
+  loansigning: "loan_signing",
+  officiant: "officiant_deposit",
+};
+
+const resolveStripeLink = (serviceId) => {
+  const resolvedId = STRIPE_LINK_ALIASES[serviceId] || serviceId;
+  return STRIPE_LINKS[resolvedId] ?? null;
+};
 
 export const travelFeeDefaults = {
   baseRadiusMiles: 10,
@@ -19,7 +30,8 @@ export const serviceCatalog = [
       "On-site notarizations for personal and business documents with flexible scheduling.",
     category: "Notary",
     tidycalSlug: "danideclaresns/notary",
-    stripePaymentLink: paymentLinks.notary,
+    priceLabel: getPriceLabel("notary"),
+    stripePaymentLink: resolveStripeLink("notary"),
     actionLabels: {
       book: "Book Notary",
       pay: "Pay to Confirm (Deposit)",
@@ -37,7 +49,8 @@ export const serviceCatalog = [
       "Document authentication support with clear guidance for domestic and international use.",
     category: "Apostille",
     tidycalSlug: "danideclaresns/apostille",
-    stripePaymentLink: paymentLinks.apostille,
+    priceLabel: getPriceLabel("apostille"),
+    stripePaymentLink: resolveStripeLink("apostille"),
     actionLabels: {
       book: "Book Apostille",
       pay: "Pay to Confirm (Deposit)",
@@ -55,7 +68,8 @@ export const serviceCatalog = [
       "Certified signing agent support for purchase, refinance, and loan packages.",
     category: "Loan Signing",
     tidycalSlug: "danideclaresns/loansigning",
-    stripePaymentLink: paymentLinks.loansigning,
+    priceLabel: getPriceLabel("loansigning"),
+    stripePaymentLink: resolveStripeLink("loansigning"),
     actionLabels: {
       book: "Book Loan Signing",
       pay: "Pay to Confirm (Deposit)",
@@ -73,7 +87,8 @@ export const serviceCatalog = [
       "Ceremony officiation for elopements, courthouse-style vows, and custom celebrations.",
     category: "Officiant",
     tidycalSlug: "danideclaresns/officiant",
-    stripePaymentLink: paymentLinks.officiant,
+    priceLabel: getPriceLabel("officiant"),
+    stripePaymentLink: resolveStripeLink("officiant"),
     actionLabels: {
       book: "Book Officiant",
       pay: "Pay to Confirm (Deposit)",
@@ -88,3 +103,80 @@ export const serviceCatalog = [
 
 export const getServiceById = (serviceId) =>
   serviceCatalog.find((service) => service.id === serviceId);
+
+export const paymentServices = [
+  {
+    id: "officiant_deposit",
+    name: "Officiant Deposit",
+    description: "Deposit to confirm officiant services and ceremony support.",
+    bookingServiceId: "officiant",
+    priceLabel: getPriceLabel("officiant_deposit"),
+    stripePaymentLink: resolveStripeLink("officiant_deposit"),
+  },
+  {
+    id: "notary",
+    name: "Mobile Notary",
+    description:
+      "On-site notarizations for personal and business documents with flexible scheduling.",
+    bookingServiceId: "notary",
+    priceLabel: getPriceLabel("notary"),
+    stripePaymentLink: resolveStripeLink("notary"),
+  },
+  {
+    id: "poa",
+    name: "Power of Attorney (POA) Notarization",
+    description: "Notary support for power of attorney document execution.",
+    priceLabel: getPriceLabel("poa"),
+    stripePaymentLink: resolveStripeLink("poa"),
+  },
+  {
+    id: "i9",
+    name: "I-9 Employment Verification",
+    description: "Authorized representative service for I-9 employment verification.",
+    priceLabel: getPriceLabel("i9"),
+    stripePaymentLink: resolveStripeLink("i9"),
+  },
+  {
+    id: "apostille",
+    name: "Apostille Facilitation",
+    description:
+      "Document authentication support with clear guidance for domestic and international use.",
+    bookingServiceId: "apostille",
+    priceLabel: getPriceLabel("apostille"),
+    stripePaymentLink: resolveStripeLink("apostille"),
+  },
+  {
+    id: "loan_signing",
+    name: "Loan Signing",
+    description:
+      "Certified signing agent support for purchase, refinance, and loan packages.",
+    bookingServiceId: "loansigning",
+    priceLabel: getPriceLabel("loan_signing"),
+    stripePaymentLink: resolveStripeLink("loan_signing"),
+  },
+  {
+    id: "trust_signing",
+    name: "Trust Signing",
+    description: "Support for trust signing appointments and document execution.",
+    priceLabel: getPriceLabel("trust_signing"),
+    stripePaymentLink: resolveStripeLink("trust_signing"),
+  },
+  {
+    id: "courier",
+    name: "Courier & Court Runs",
+    description: "Document courier, court filings, and delivery coordination.",
+    priceLabel: getPriceLabel("courier"),
+    stripePaymentLink: resolveStripeLink("courier"),
+  },
+];
+
+const PAYMENT_SERVICE_ALIASES = {
+  officiant: "officiant_deposit",
+  loansigning: "loan_signing",
+};
+
+export const getPaymentServiceById = (serviceId) => {
+  if (!serviceId) return undefined;
+  const resolvedId = PAYMENT_SERVICE_ALIASES[serviceId] || serviceId;
+  return paymentServices.find((service) => service.id === resolvedId);
+};
