@@ -1,26 +1,58 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
+import { PRICING_CANON } from "../config/pricingCanon.js";
 import { STRIPE_LINKS } from "../config/stripeLinks.js";
 import { getPriceLabel } from "../data/pricingCanon.js";
 import { getServiceById } from "../data/services.js";
 import { siteConfig } from "../data/siteConfig.js";
 import "./PayPage.css";
 
+const SERVICE_KEY_MAP = {
+  loan_signing: "loansigning",
+  trust_signing: "trust",
+  officiant_deposit: "officiant",
+  advanced_legal: "advanced",
+  federal_support: "advanced",
+};
+
+const SERVICE_ID_ALIASES = {
+  loansigning: "loan_signing",
+  trust: "trust_signing",
+  officiant: "officiant_deposit",
+};
+
 export default function PayPage() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const selectedServiceId = params.get("service");
+  const rawServiceId = params.get("service") || "notary";
+  const resolvedServiceId = SERVICE_ID_ALIASES[rawServiceId] || rawServiceId;
+  const selectedServiceId = getServiceById(resolvedServiceId)
+    ? resolvedServiceId
+    : "notary";
+  const canonServiceKey = SERVICE_KEY_MAP[selectedServiceId] || selectedServiceId;
   const selectedService = useMemo(
     () => getServiceById(selectedServiceId),
     [selectedServiceId]
   );
   const invoiceRef = useRef(null);
-  const stripeLink = selectedServiceId ? STRIPE_LINKS[selectedServiceId] : "";
-  const showInvoiceFallback = Boolean(selectedService && !stripeLink);
-  const priceLabel = selectedService?.priceLabel
-    || (selectedServiceId ? getPriceLabel(selectedServiceId) : null);
+  const pricingEntry = PRICING_CANON[canonServiceKey] || PRICING_CANON.notary;
+  const stripeLink = STRIPE_LINKS[canonServiceKey] || "";
+  const showInvoiceFallback = Boolean(
+    selectedService && !stripeLink && pricingEntry?.paymentType === "quote"
+  );
+  const showMissingPaymentLink = Boolean(
+    selectedService && !stripeLink && pricingEntry?.paymentType !== "quote"
+  );
+  const priceLabel =
+    selectedService?.priceLabel || (selectedServiceId ? getPriceLabel(selectedServiceId) : null);
   const hasValidService = Boolean(selectedService);
+  const paymentStepLabel =
+    pricingEntry?.paymentType === "deposit"
+      ? "Step 2 — Pay deposit to confirm"
+      : pricingEntry?.paymentType === "full"
+        ? "Step 2 — Pay in full to confirm"
+        : null;
 
   const handleInvoiceScroll = () => {
     invoiceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -129,20 +161,38 @@ export default function PayPage() {
                 <h2>{selectedService.name}</h2>
                 <p>{selectedService.shortDesc}</p>
                 {priceLabel && <p className="pay-card__price">{priceLabel}</p>}
-                {stripeLink && (
-                  <p className="pay-card__stripe-note">
-                    Secure payment powered by Stripe.
-                  </p>
+                {stripeLink && paymentStepLabel && (
+                  <p className="pay-card__stripe-note">{paymentStepLabel}</p>
                 )}
                 {stripeLink && (
                   <a
                     className="btn btn--primary btn--block"
                     href={stripeLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
                   >
                     Pay Now
                   </a>
+                )}
+                {showMissingPaymentLink && (
+                  <div className="pay-card__fallback">
+                    <p>Payment link not configured. Please contact us.</p>
+                    <div className="pay-card__fallback-actions">
+                      <a
+                        className="btn btn--secondary"
+                        href={`tel:${siteConfig.phoneNumbers.primary.tel}`}
+                      >
+                        Call/Text {siteConfig.phoneNumbers.primary.display}
+                      </a>
+                      <a
+                        className="btn btn--secondary"
+                        href={`mailto:${siteConfig.emails.admin}`}
+                      >
+                        Email {siteConfig.emails.admin}
+                      </a>
+                      <Link className="btn btn--tertiary" to="/services">
+                        Back to Services
+                      </Link>
+                    </div>
+                  </div>
                 )}
                 {showInvoiceFallback && (
                   <div className="pay-card__fallback">

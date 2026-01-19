@@ -96,7 +96,7 @@ export const serviceCatalog = [
     category: "Loan Signing",
     actionType: "book",
     priceLabel: getPriceLabel("loan_signing"),
-    stripePaymentLink: STRIPE_LINKS.loan_signing || null,
+    stripePaymentLink: STRIPE_LINKS.loansigning || null,
     highlights: [
       "NNA-certified signing agent",
       "Detailed document walkthroughs",
@@ -111,7 +111,7 @@ export const serviceCatalog = [
     category: "Legal",
     actionType: "book",
     priceLabel: getPriceLabel("trust_signing"),
-    stripePaymentLink: STRIPE_LINKS.trust_signing || null,
+    stripePaymentLink: STRIPE_LINKS.trust || null,
     highlights: [
       "Trusted for sensitive documents",
       "Flexible on-site scheduling",
@@ -126,7 +126,7 @@ export const serviceCatalog = [
     category: "Officiant",
     actionType: "book",
     priceLabel: getPriceLabel("officiant_deposit"),
-    stripePaymentLink: STRIPE_LINKS.officiant_deposit || null,
+    stripePaymentLink: STRIPE_LINKS.officiant || null,
     highlights: [
       "Personalized ceremony flow",
       "Support with filing guidance",
