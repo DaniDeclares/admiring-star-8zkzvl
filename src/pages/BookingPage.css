@@ -55,6 +55,14 @@
   font-weight: 600;
 }
 
+.booking-requirements__note p {
+  margin: 0 0 0.75rem;
+}
+
+.booking-requirements__note p:last-child {
+  margin-bottom: 0;
+}
+
 .booking-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

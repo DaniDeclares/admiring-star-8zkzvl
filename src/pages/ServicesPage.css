@@ -133,6 +133,11 @@
   color: #5a2e36;
 }
 
+.services-discount-note {
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+
 .services-contact-bar {
   background: #8b1e2e;
   color: #fff;
