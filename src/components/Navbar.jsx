@@ -42,6 +42,13 @@ export default function Navbar() {
           Services
         </Link>
         <Link
+          to="/federal"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/federal" ? "active" : ""}`}
+        >
+          Federal
+        </Link>
+        <Link
           to="/book?service=notary"
           onClick={handleLinkClick}
           className={`nav-link ${location.pathname === "/book" ? "active" : ""}`}

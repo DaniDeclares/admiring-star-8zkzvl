@@ -24,6 +24,10 @@ export default function ServicesPage() {
             Book your appointment in minutes, then confirm with a secure deposit.
             We serve Georgia and South Carolina with flexible, mobile-first scheduling.
           </p>
+          <p className="services-hero__notice">
+            Appointments are pending until payment is completed. Unpaid bookings may be
+            released.
+          </p>
           <div className="services-hero__actions">
             <Link to="/book?service=notary" className="btn btn--primary">
               Book Notary

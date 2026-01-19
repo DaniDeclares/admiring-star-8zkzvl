@@ -21,6 +21,7 @@ import ContactPage from "./pages/ContactPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
+import FederalPage from "./pages/FederalPage.jsx";
 
 // Newly created Public Pages
 import PaymentCancel from "./pages/PaymentCancel.jsx";
@@ -103,6 +104,7 @@ export default function App() {
         {/* Public */}
         <Route path="/" element={<Homepage />} />
         <Route path="/services" element={<ServicesPage />} />
+        <Route path="/federal" element={<FederalPage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/book" element={<BookingPage />} />
         <Route path="/bookings" element={<Navigate to="/book" replace />} />

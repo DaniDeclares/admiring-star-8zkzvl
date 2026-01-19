@@ -1,28 +1,30 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
 import TidyCalEmbed from "../components/TidyCalEmbed.jsx";
-import { getServiceById, serviceCatalog } from "../data/services.js";
+import {
+  bookingServices,
+  getBookingServiceById,
+} from "../data/bookingServices.js";
+import { notaryFeeDisclaimer } from "../data/services.js";
 import "./BookingPage.css";
 
 export default function BookingPage() {
   const location = useLocation();
-  const sectionRefs = useRef({});
+  const sectionRef = useRef(null);
   const params = new URLSearchParams(location.search);
   const selectedServiceId = params.get("service");
-  const selectedService =
-    getServiceById(selectedServiceId) || serviceCatalog[0];
+  const selectedService = useMemo(
+    () => getBookingServiceById(selectedServiceId) || bookingServices[0],
+    [selectedServiceId]
+  );
 
   useEffect(() => {
-    if (!selectedService?.id) {
-      return;
-    }
-    const section = sectionRefs.current[selectedService.id];
-    if (!section) {
+    if (!sectionRef.current) {
       return;
     }
     const timer = setTimeout(() => {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
+      sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
     return () => clearTimeout(timer);
   }, [selectedService?.id]);
@@ -51,13 +53,27 @@ export default function BookingPage() {
           </p>
         </header>
 
+        <section className="booking-requirements">
+          <div>
+            <h2>Booking Requirements</h2>
+            <ul>
+              <li>All services book against the same calendar to prevent double-booking.</li>
+              <li>Please complete payment immediately after booking to confirm.</li>
+              <li>If you do not see times, call/text and we will assist.</li>
+            </ul>
+          </div>
+          <div className="booking-requirements__note">
+            <p>{notaryFeeDisclaimer}</p>
+          </div>
+        </section>
+
         <section className="booking-options">
-          {serviceCatalog.map((service) => (
+          {bookingServices.map((service) => (
             <article key={service.id} className="booking-card">
-              <h2>{service.title}</h2>
-              <p>{service.shortDesc}</p>
+              <h2>{service.name}</h2>
+              <p>{service.description}</p>
               <p className="booking-card__notice">
-                Your appointment is pending until payment is completed. Unpaid bookings
+                Appointment is pending until payment is completed. Unpaid bookings
                 may be released.
               </p>
               <div className="booking-card__actions">
@@ -65,53 +81,47 @@ export default function BookingPage() {
                   className="btn btn--primary"
                   to={`/book?service=${service.id}`}
                 >
-                  {service.actionLabels.book}
+                  Book Now
                 </Link>
                 <Link className="btn btn--secondary" to={`/pay?service=${service.id}`}>
-                  {service.actionLabels.pay}
+                  Pay to Confirm
                 </Link>
               </div>
             </article>
           ))}
         </section>
 
-        <section className="booking-details">
-          {serviceCatalog.map((service) => (
-            <div
-              key={service.id}
-              className={`booking-embed-section ${
-                selectedService?.id === service.id ? "is-active" : ""
-              }`}
-              ref={(node) => {
-                sectionRefs.current[service.id] = node;
-              }}
-            >
-              <div className="booking-details__header">
-                <p className="booking-section__eyebrow">Book {service.title}</p>
-                <h2>{service.title} Booking</h2>
-                <p className="booking-details__policy">
-                  Your appointment is pending until payment is completed. Unpaid bookings
-                  may be released.
-                </p>
-              </div>
-              <div className="booking-embed">
-                <TidyCalEmbed path={service.tidycalSlug} />
-              </div>
-              <div className="booking-confirmation">
-                <h3>Step 2: Pay to Confirm</h3>
-                <p>
-                  Complete payment right after booking to secure your appointment. If
-                  you need to pay first, you can do that now.
-                </p>
-                <Link
-                  className="btn btn--primary"
-                  to={`/pay?service=${service.id}`}
-                >
-                  {service.actionLabels.pay}
-                </Link>
-              </div>
+        <section className="booking-details" ref={sectionRef}>
+          <div className="booking-embed-section is-active">
+            <div className="booking-details__header">
+              <p className="booking-section__eyebrow">
+                Book {selectedService.name}
+              </p>
+              <h2>{selectedService.name} Booking</h2>
+              <p className="booking-details__policy">
+                Appointment is pending until payment is completed. Unpaid bookings may
+                be released. Deposits are applied to your total. Travel/after-hours
+                adjustments are disclosed before service. If you need to reschedule,
+                contact us ASAP.
+              </p>
             </div>
-          ))}
+            <div className="booking-embed">
+              <TidyCalEmbed path={selectedService.tidyCalPath} />
+            </div>
+            <div className="booking-confirmation">
+              <h3>Step 2: Pay to Confirm</h3>
+              <p>
+                Complete payment right after booking to secure your appointment. Unpaid
+                bookings are released.
+              </p>
+              <Link
+                className="btn btn--primary"
+                to={`/pay?service=${selectedService.id}`}
+              >
+                Pay to Confirm
+              </Link>
+            </div>
+          </div>
         </section>
       </main>
     </>
