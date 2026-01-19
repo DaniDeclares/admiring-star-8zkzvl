@@ -63,8 +63,8 @@ export default function ContactPage() {
             <li><Link to="/services">All Services</Link></li>
             <li><Link to="/book?service=notary">Book Notary</Link></li>
             <li><Link to="/book?service=apostille">Book Apostille</Link></li>
-            <li><Link to="/book?service=loansigning">Book Loan Signing</Link></li>
-            <li><Link to="/book?service=officiant">Book Officiant</Link></li>
+            <li><Link to="/book?service=loan_signing">Book Loan Signing</Link></li>
+            <li><Link to="/book?service=officiant_deposit">Book Officiant</Link></li>
             <li><Link to="/pay">Pay to Confirm</Link></li>
           </ul>
         </section>

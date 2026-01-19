@@ -15,19 +15,20 @@ export default function BookingPage() {
   const params = new URLSearchParams(location.search);
   const selectedServiceId = params.get("service");
   const selectedService = useMemo(
-    () => getBookingServiceById(selectedServiceId) || bookingServices[0],
+    () => getBookingServiceById(selectedServiceId),
     [selectedServiceId]
   );
+  const hasSelection = Boolean(selectedService);
 
   useEffect(() => {
-    if (!sectionRef.current) {
+    if (!sectionRef.current || !hasSelection) {
       return;
     }
     const timer = setTimeout(() => {
       sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
     return () => clearTimeout(timer);
-  }, [selectedService?.id]);
+  }, [hasSelection, selectedService?.id]);
 
   return (
     <>
@@ -35,7 +36,7 @@ export default function BookingPage() {
         <title>Book a Service • Dani Declares</title>
         <meta
           name="description"
-          content="Book a mobile notary, apostille, officiant, or loan signing appointment with immediate payment to confirm."
+          content="Book a mobile notary, apostille, or loan signing appointment with immediate payment to confirm."
         />
       </Helmet>
 
@@ -77,7 +78,7 @@ export default function BookingPage() {
           {bookingServices.map((service) => (
             <article key={service.id} className="booking-card">
               <h2>{service.name}</h2>
-              <p>{service.description}</p>
+              <p>{service.shortDesc}</p>
               <p className="booking-card__notice">
                 Appointment is pending until payment is completed. Unpaid bookings
                 may be released.
@@ -97,38 +98,40 @@ export default function BookingPage() {
           ))}
         </section>
 
-        <section className="booking-details" ref={sectionRef}>
-          <div className="booking-embed-section is-active">
-            <div className="booking-details__header">
-              <p className="booking-section__eyebrow">
-                Book {selectedService.name}
-              </p>
-              <h2>{selectedService.name} Booking</h2>
-              <p className="booking-details__policy">
-                Appointment is pending until payment is completed. Unpaid bookings may
-                be released. Deposits are applied to your total. Travel/after-hours
-                adjustments are disclosed before service. If you need to reschedule,
-                contact us ASAP.
-              </p>
+        {hasSelection && (
+          <section className="booking-details" ref={sectionRef}>
+            <div className="booking-embed-section is-active">
+              <div className="booking-details__header">
+                <p className="booking-section__eyebrow">
+                  Book {selectedService.name}
+                </p>
+                <h2>{selectedService.name} Booking</h2>
+                <p className="booking-details__policy">
+                  Appointment is pending until payment is completed. Unpaid bookings
+                  may be released. Deposits are applied to your total. Travel/after-hours
+                  adjustments are disclosed before service. If you need to reschedule,
+                  contact us ASAP.
+                </p>
+              </div>
+              <div className="booking-embed">
+                <TidyCalEmbed path={selectedService.tidycalSlug} />
+              </div>
+              <div className="booking-confirmation">
+                <h3>Step 2: Pay to Confirm</h3>
+                <p>
+                  Complete payment right after booking to secure your appointment. Unpaid
+                  bookings are released.
+                </p>
+                <Link
+                  className="btn btn--primary"
+                  to={`/pay?service=${selectedService.id}`}
+                >
+                  Pay to Confirm
+                </Link>
+              </div>
             </div>
-            <div className="booking-embed">
-              <TidyCalEmbed path={selectedService.tidyCalPath} />
-            </div>
-            <div className="booking-confirmation">
-              <h3>Step 2: Pay to Confirm</h3>
-              <p>
-                Complete payment right after booking to secure your appointment. Unpaid
-                bookings are released.
-              </p>
-              <Link
-                className="btn btn--primary"
-                to={`/pay?service=${selectedService.id}`}
-              >
-                Pay to Confirm
-              </Link>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
     </>
   );

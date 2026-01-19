@@ -13,7 +13,7 @@ export default function ServicesPage() {
         <title>Services • Dani Declares</title>
         <meta
           name="description"
-          content="Mobile notary, apostille facilitation, loan signing, and officiant services with clear booking and payment steps."
+          content="Mobile notary, apostille facilitation, tax-season services, and loan signing support with clear booking and payment steps."
         />
       </Helmet>
 
@@ -59,8 +59,11 @@ export default function ServicesPage() {
             <article key={service.id} className="service-card">
               <div className="service-card__header">
                 <span className="service-card__tag">{service.category}</span>
-                <h2>{service.title}</h2>
+                <h2>{service.name}</h2>
                 <p>{service.shortDesc}</p>
+                {service.priceDisplay && (
+                  <p className="service-card__price">{service.priceDisplay}</p>
+                )}
               </div>
               <ul className="service-card__highlights">
                 {service.highlights.map((item) => (
@@ -70,15 +73,9 @@ export default function ServicesPage() {
               <div className="service-card__actions">
                 <Link
                   className="btn btn--primary"
-                  to={buildServiceActionPath(service.id, "book")}
+                  to={buildServiceActionPath(service.id, service.actionType)}
                 >
-                  {service.actionLabels.book}
-                </Link>
-                <Link
-                  className="btn btn--accent"
-                  to={buildServiceActionPath(service.id, "pay")}
-                >
-                  {service.actionLabels.pay}
+                  {service.actionType === "pay" ? "Pay Now" : "Book Now"}
                 </Link>
               </div>
             </article>

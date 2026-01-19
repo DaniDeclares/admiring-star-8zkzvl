@@ -1,24 +1,71 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
-import {
-  bookingServices,
-  getBookingServiceById,
-} from "../data/bookingServices.js";
-import { notaryFeeDisclaimer } from "../data/services.js";
+import { getServiceById } from "../data/services.js";
+import { siteConfig } from "../data/siteConfig.js";
 import "./PayPage.css";
 
 export default function PayPage() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const selectedServiceId = params.get("service");
-  const selectedService = getBookingServiceById(selectedServiceId);
-  const orderedServices = selectedService
-    ? [
-        selectedService,
-        ...bookingServices.filter((service) => service.id !== selectedService.id),
-      ]
-    : bookingServices;
+  const selectedService = useMemo(
+    () => getServiceById(selectedServiceId),
+    [selectedServiceId]
+  );
+  const invoiceRef = useRef(null);
+  const [formReady, setFormReady] = useState(false);
+  const stripeLink = selectedService?.stripePaymentLink;
+  const showInvoiceFallback = !stripeLink;
+  const portalId = process.env.REACT_APP_HUBSPOT_PORTAL_ID;
+  const formId = process.env.REACT_APP_HUBSPOT_INVOICE_FORM_ID;
+  const showInvoiceForm = Boolean(showInvoiceFallback && portalId && formId);
+
+  useEffect(() => {
+    if (!showInvoiceFallback) {
+      return;
+    }
+
+    if (!portalId || !formId) {
+      console.warn(
+        "HubSpot invoice form env vars are missing. Skipping form embed."
+      );
+      return;
+    }
+
+    if (!document.getElementById("hs-forms-script")) {
+      const script = document.createElement("script");
+      script.id = "hs-forms-script";
+      script.src = "https://js.hsforms.net/forms/v2.js";
+      script.async = true;
+      script.defer = true;
+      script.onload = () => setFormReady(true);
+      document.body.appendChild(script);
+    } else {
+      setFormReady(true);
+    }
+  }, [formId, portalId, showInvoiceFallback]);
+
+  useEffect(() => {
+    if (!showInvoiceForm || !formReady || !window.hbspt?.forms) {
+      return;
+    }
+
+    const target = document.getElementById("hs-invoice-form");
+    if (!target || target.childElementCount > 0) {
+      return;
+    }
+
+    window.hbspt.forms.create({
+      portalId,
+      formId,
+      target: "#hs-invoice-form",
+    });
+  }, [formId, formReady, portalId, showInvoiceForm]);
+
+  const handleInvoiceScroll = () => {
+    invoiceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <>
@@ -39,46 +86,89 @@ export default function PayPage() {
             may be released.
           </p>
           <p>
-            Select your service below to complete payment. If you still need to
-            book a time, start on the{" "}
-            <Link to={selectedService ? `/book?service=${selectedService.id}` : "/book"}>
+            Select your service to complete payment. If you still need to book a
+            time, start on the{" "}
+            <Link
+              to={selectedService ? `/book?service=${selectedService.id}` : "/book"}
+            >
               booking page
             </Link>
             .
           </p>
         </header>
 
-        <section className="pay-options">
-          {orderedServices.map((service, index) => (
-            <article key={service.id} className="pay-card">
-              {index === 0 && selectedService && (
-                <span className="pay-card__badge">Selected Service</span>
-              )}
-              <h2>{service.name}</h2>
-              <p>{service.description}</p>
-              {service.id === "notary" && (
-                <p className="pay-card__disclaimer">{notaryFeeDisclaimer}</p>
-              )}
-              {service.paymentUrl ? (
-                <a
-                  className="btn btn--primary btn--block"
-                  href={service.paymentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {service.payLabel}
-                </a>
-              ) : (
-                <div className="pay-card__fallback">
-                  <p>Payment link coming soon. Please contact to invoice.</p>
-                  <Link className="btn btn--secondary btn--block" to="/contact">
-                    Contact
+        <section className="pay-details">
+          <article className="pay-card">
+            <h2>{selectedService?.name || "Service Not Found"}</h2>
+            <p>
+              {selectedService?.shortDesc ||
+                "We could not locate the selected service. Please request an invoice or browse the services list."}
+            </p>
+            {selectedService?.priceDisplay && (
+              <p className="pay-card__price">{selectedService.priceDisplay}</p>
+            )}
+            {stripeLink && (
+              <p className="pay-card__stripe-note">
+                Secure payment powered by Stripe.
+              </p>
+            )}
+            {stripeLink && (
+              <a
+                className="btn btn--primary btn--block"
+                href={stripeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Pay Now
+              </a>
+            )}
+            {showInvoiceFallback && (
+              <div className="pay-card__fallback">
+                <p>
+                  Online payment for this service is currently unavailable. Request
+                  an invoice and we’ll send a secure payment link.
+                </p>
+                <div className="pay-card__fallback-actions">
+                  {showInvoiceForm && (
+                    <button
+                      type="button"
+                      className="btn btn--primary"
+                      onClick={handleInvoiceScroll}
+                    >
+                      Request an Invoice
+                    </button>
+                  )}
+                  <a
+                    className="btn btn--secondary"
+                    href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}
+                  >
+                    Call/Text {siteConfig.phoneNumbers.secondary.display}
+                  </a>
+                  <a
+                    className="btn btn--secondary"
+                    href={`mailto:${siteConfig.emails.admin}`}
+                  >
+                    Email {siteConfig.emails.admin}
+                  </a>
+                  <Link className="btn btn--tertiary" to="/services">
+                    Back to Services
                   </Link>
                 </div>
-              )}
-            </article>
-          ))}
+              </div>
+            )}
+          </article>
         </section>
+
+        {showInvoiceForm && (
+          <section className="pay-invoice" ref={invoiceRef}>
+            <h3>Request an Invoice</h3>
+            <p>
+              Share your service details below and we will send a secure invoice
+              link.
+            </p>
+            <div id="hs-invoice-form" className="pay-invoice__form"></div>
+          </section>
+        )}
       </main>
     </>
   );

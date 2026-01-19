@@ -96,6 +96,12 @@
   margin-bottom: 0.75rem;
 }
 
+.service-card__price {
+  font-weight: 700;
+  color: #5a2e36;
+  margin-top: 0.5rem;
+}
+
 .service-card__highlights {
   list-style: none;
   padding: 0;
