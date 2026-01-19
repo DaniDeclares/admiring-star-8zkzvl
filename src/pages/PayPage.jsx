@@ -110,7 +110,7 @@ export default function PayPage() {
           </p>
         </header>
 
-        <section className="pay-details">
+        <section className="pay-details pay-cards">
           <article className="pay-card">
             {!hasValidService && (
               <>
@@ -188,7 +188,7 @@ export default function PayPage() {
               Tell us what you need and we’ll send the correct invoice or payment
               link.
             </p>
-            <div className="hsFormWrap">
+            <div className="hsFormWrap embed-wrap">
               <div id="hs-invoice-form" />
             </div>
           </section>

@@ -27,11 +27,13 @@ export default function ContactPage() {
         </header>
 
         <section className="contact-form">
-          <HubSpotForm
-            region="na2"
-            portalId="242764935"
-            formId="d4cd290e-7766-4bf5-91a2-c1274ddd882e"
-          />
+          <div className="embed-wrap">
+            <HubSpotForm
+              region="na2"
+              portalId="242764935"
+              formId="d4cd290e-7766-4bf5-91a2-c1274ddd882e"
+            />
+          </div>
         </section>
 
         <section className="direct-contact">

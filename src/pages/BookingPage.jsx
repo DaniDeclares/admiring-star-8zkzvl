@@ -80,7 +80,7 @@ export default function BookingPage() {
           </div>
         </section>
 
-        <section className="booking-options">
+        <section className="booking-options booking-cards">
           {bookingServices.map((service) => (
             <article key={service.id} className="booking-card">
               <h2>{service.name}</h2>
@@ -124,7 +124,9 @@ export default function BookingPage() {
             </div>
               {tidycalLink ? (
                 <div className="booking-embed">
-                  <TidyCalEmbed path={tidycalPath} />
+                  <div className="embed-wrap">
+                    <TidyCalEmbed path={tidycalPath} />
+                  </div>
                   <div className="booking-embed__fallback">
                     <p>
                       If the calendar does not load or shows as disabled, use the
