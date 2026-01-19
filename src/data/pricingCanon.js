@@ -3,6 +3,9 @@ import { PRICING_CANON } from "../config/pricingCanon.js";
 const SERVICE_KEY_MAP = {
   advanced_legal: "advanced",
   federal_support: "advanced",
+  loan_signing: "loansigning",
+  trust_signing: "trust",
+  officiant_deposit: "officiant",
 };
 
 const formatPrice = (price) => {

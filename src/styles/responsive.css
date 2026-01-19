@@ -65,6 +65,22 @@ img {
   :root { --pad: 14px; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
 
+  .cta-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .btn, .btn-primary, .btn-secondary, .btn-outline, button,
+  .btn--primary, .btn--secondary, .btn--outline, .btn--accent {
+    width: 100% !important;
+  }
+
+  .tidycal-embed {
+    width: 100%;
+    max-width: 100%;
+  }
+
   /* Hero */
   .hero, .hero-section {
     padding: 28px 0 !important;
