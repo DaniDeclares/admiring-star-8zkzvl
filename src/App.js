@@ -9,6 +9,7 @@ import SocialLinks from "./components/SocialLinks.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import Footer from "./components/Footer.jsx";
 import { SHOW_FESTIVAL } from "./data/siteConfig.js";
+import { loadHubSpotTracking } from "./lib/hubspot.js";
 
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
@@ -47,6 +48,7 @@ export default function App() {
     process.env.NEXT_PUBLIC_GA_ID ||
     process.env.REACT_APP_GA_MEASUREMENT_ID;
   const isProduction = process.env.NODE_ENV === "production";
+  const hubspotPortalId = process.env.REACT_APP_HUBSPOT_PORTAL_ID;
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -56,6 +58,10 @@ export default function App() {
     script.async = true;
     document.body.appendChild(script);
   }, []);
+
+  useEffect(() => {
+    loadHubSpotTracking(hubspotPortalId);
+  }, [hubspotPortalId]);
 
   useEffect(() => {
     if (!isProduction || !gaMeasurementId) {
@@ -96,6 +102,12 @@ export default function App() {
     });
   }, [gaMeasurementId, isProduction, location]);
 
+  useEffect(() => {
+    window._hsq = window._hsq || [];
+    window._hsq.push(["setPath", `${location.pathname}${location.search}`]);
+    window._hsq.push(["trackPageView"]);
+  }, [location]);
+
   return (
     <>
       {SHOW_FESTIVAL && <FestivalBanner />}
@@ -131,7 +143,7 @@ export default function App() {
         />
         <Route
           path="/officiant"
-          element={<Navigate to="/book?service=officiant" replace />}
+          element={<Navigate to="/book?service=officiant_deposit" replace />}
         />
         <Route path="/packages" element={<Navigate to="/services" replace />} />
         <Route path="/real-estate" element={<Navigate to="/services" replace />} />

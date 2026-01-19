@@ -70,13 +70,6 @@ export default function Navbar() {
           Apostille
         </Link>
         <Link
-          to="/officiant"
-          onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/officiant" ? "active" : ""}`}
-        >
-          Officiant
-        </Link>
-        <Link
           to="/book"
           onClick={handleLinkClick}
           className={`nav-link ${location.pathname === "/book" ? "active" : ""}`}
