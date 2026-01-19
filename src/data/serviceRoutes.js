@@ -1,7 +1,7 @@
-export const buildServiceActionPath = (serviceId, action = "book") => {
+export const buildServiceActionPath = (serviceId) => {
   if (!serviceId) {
-    return action === "pay" ? "/pay" : "/book";
+    return "/book";
   }
 
-  return action === "pay" ? `/pay?service=${serviceId}` : `/book?service=${serviceId}`;
+  return `/book?service=${serviceId}`;
 };

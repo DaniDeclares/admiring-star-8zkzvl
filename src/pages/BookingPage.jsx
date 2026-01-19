@@ -2,11 +2,14 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
 import TidyCalEmbed from "../components/TidyCalEmbed.jsx";
+import { TIDYCAL_LINKS } from "../config/tidycalLinks.js";
 import {
   bookingServices,
   getBookingServiceById,
 } from "../data/bookingServices.js";
+import { getPriceLabel } from "../data/pricingCanon.js";
 import { notaryFeeDisclaimer } from "../data/services.js";
+import { siteConfig } from "../data/siteConfig.js";
 import "./BookingPage.css";
 
 export default function BookingPage() {
@@ -19,6 +22,9 @@ export default function BookingPage() {
     [selectedServiceId]
   );
   const hasSelection = Boolean(selectedService);
+  const tidycalLink = selectedServiceId ? TIDYCAL_LINKS[selectedServiceId] : "";
+  const tidycalPath = tidycalLink?.replace("https://tidycal.com/", "");
+  const priceLabel = selectedServiceId ? getPriceLabel(selectedServiceId) : null;
 
   useEffect(() => {
     if (!sectionRef.current || !hasSelection) {
@@ -106,18 +112,58 @@ export default function BookingPage() {
                   Book {selectedService.name}
                 </p>
                 <h2>{selectedService.name} Booking</h2>
-                <p className="booking-details__policy">
-                  Appointment is pending until payment is completed. Unpaid bookings
-                  may be released. Deposits are applied to your total. Travel/after-hours
-                  adjustments are disclosed before service. If you need to reschedule,
-                  contact us ASAP.
-                </p>
-              </div>
-              <div className="booking-embed">
-                <TidyCalEmbed path={selectedService.tidycalSlug} />
-              </div>
+              <p className="booking-details__policy">
+                Appointment is pending until payment is completed. Unpaid bookings
+                may be released. Deposits are applied to your total. Travel/after-hours
+                adjustments are disclosed before service. If you need to reschedule,
+                contact us ASAP.
+              </p>
+              {priceLabel && (
+                <p className="booking-details__price">{priceLabel}</p>
+              )}
+            </div>
+              {tidycalLink ? (
+                <div className="booking-embed">
+                  <TidyCalEmbed path={tidycalPath} />
+                  <div className="booking-embed__fallback">
+                    <p>
+                      If the calendar does not load or shows as disabled, use the
+                      direct link below to schedule your appointment.
+                    </p>
+                    <a
+                      className="btn btn--secondary"
+                      href={tidycalLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open TidyCal Scheduling
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="booking-embed booking-embed--missing">
+                  <p>
+                    Scheduling for this service is handled directly. Please contact
+                    us and we’ll coordinate the calendar for you.
+                  </p>
+                  <div className="booking-embed__actions">
+                    <a
+                      className="btn btn--primary"
+                      href={`tel:${siteConfig.phoneNumbers.primary.tel}`}
+                    >
+                      Call/Text {siteConfig.phoneNumbers.primary.display}
+                    </a>
+                    <a
+                      className="btn btn--secondary"
+                      href={`mailto:${siteConfig.emails.admin}`}
+                    >
+                      Email {siteConfig.emails.admin}
+                    </a>
+                  </div>
+                </div>
+              )}
               <div className="booking-confirmation">
-                <h3>Step 2: Pay to Confirm</h3>
+                <h3>Step 2: Continue to Payment</h3>
                 <p>
                   Complete payment right after booking to secure your appointment. Unpaid
                   bookings are released.

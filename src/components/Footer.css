@@ -17,6 +17,11 @@
   margin: 0.4rem 0;
 }
 
+.footer-secondary-phone {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
 .footer-top a {
   color: var(--gold);
   text-decoration: underline;

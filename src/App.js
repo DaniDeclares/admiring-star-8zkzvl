@@ -5,7 +5,6 @@ import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 // Global Components
 import FestivalBanner from "./components/FestivalBanner.jsx";
 import Navbar from "./components/Navbar.jsx";
-import SocialLinks from "./components/SocialLinks.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import Footer from "./components/Footer.jsx";
 import { SHOW_FESTIVAL } from "./data/siteConfig.js";
@@ -179,7 +178,6 @@ export default function App() {
         </Route>
       </Routes>
 
-      <SocialLinks />
       <CookieConsent />
       <Footer />
     </>

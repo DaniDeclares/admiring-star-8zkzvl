@@ -1,18 +1,29 @@
-export function getPriceLabel(serviceId) {
-  switch (serviceId) {
-    case "poa":
-      return "$35";
-    case "i9":
-      return "$50";
-    case "apostille":
-      return "$175";
-    case "loan_signing":
-      return "$150";
-    case "trust_signing":
-      return "$150";
-    case "courier":
-      return "$65+ / actual cost";
-    default:
-      return "Starting at / Quoted";
+import { PRICING_CANON } from "../config/pricingCanon.js";
+
+const SERVICE_KEY_MAP = {
+  advanced_legal: "advanced",
+  federal_support: "advanced",
+};
+
+const formatPrice = (price) => {
+  if (typeof price === "number") {
+    return `$${price}`;
   }
+
+  return price;
+};
+
+export function getPriceLabel(serviceId) {
+  if (!serviceId) {
+    return "Starting at / Quoted";
+  }
+
+  const canonKey = SERVICE_KEY_MAP[serviceId] || serviceId;
+  const canonEntry = PRICING_CANON[canonKey];
+
+  if (!canonEntry) {
+    return "Starting at / Quoted";
+  }
+
+  return formatPrice(canonEntry.price);
 }
