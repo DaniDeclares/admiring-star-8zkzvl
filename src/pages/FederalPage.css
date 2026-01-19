@@ -6,30 +6,13 @@
 
 .federal-hero {
   max-width: 900px;
-  margin: 0 auto 3rem;
+  margin: 0 auto 2.5rem;
   text-align: center;
-}
-
-.federal-eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.75rem;
-  color: var(--burgundy);
-  font-weight: 700;
-  margin-bottom: 0.75rem;
 }
 
 .federal-hero h1 {
   font-size: clamp(2.2rem, 3.5vw, 3rem);
   margin-bottom: 0.75rem;
-}
-
-.federal-hero__actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
 }
 
 .federal-section {
@@ -41,37 +24,19 @@
   max-width: 980px;
 }
 
-.federal-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.25rem;
-}
-
-.federal-identifiers ul,
-.federal-differentiators ul {
+.federal-section ul {
   margin-top: 1rem;
   padding-left: 1.2rem;
   display: grid;
   gap: 0.5rem;
 }
 
-.federal-coverage {
-  border-left: 4px solid var(--gold);
-}
-
-.federal-cta {
+.federal-contact {
   text-align: center;
-  max-width: 900px;
-  margin: 2.5rem auto 0;
 }
 
-.federal-cta__actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
+.federal-contact__actions {
+  margin-top: 1.25rem;
 }
 
 @media (max-width: 600px) {

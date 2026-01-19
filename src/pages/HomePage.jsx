@@ -2,115 +2,100 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
-import { serviceCatalog, notaryFeeDisclaimer } from "../data/services.js";
-import { siteConfig } from "../data/siteConfig.js";
 import "./Homepage.css";
 
 export default function Homepage() {
   return (
     <>
       <Helmet>
-        <title>Dani Declares • Mobile Notary & Officiant Services</title>
+        <title>Dani Declares • Tax Season Notary & Federal Ready Services</title>
         <meta
           name="description"
-          content="Book mobile notary, apostille, loan signing, and officiant services with clear booking and payment steps."
+          content="Same-day mobile notary support for tax, legal, and government documents across Georgia and South Carolina."
         />
       </Helmet>
 
       <main className="homepage home-main">
         <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
           <div className="hero-overlay">
-            <p className="hero-eyebrow">Dani Declares</p>
-            <h1>Premium mobile notary and ceremony services.</h1>
+            <h1>
+              Reliable Notary &amp; Document Services for Tax, Legal, and Government
+              Needs
+            </h1>
             <p className="hero-subtitle">
-              Book your appointment in minutes. Confirm with a secure deposit. We
-              bring the service to you across Georgia and South Carolina.
+              Same-day mobile service for individuals, tax professionals, law firms, and
+              agencies across Georgia and South Carolina.
             </p>
             <div className="hero-cta">
-              <Link to="/book?service=notary" className="btn btn--primary">
-                Book Notary
+              <Link to="/book" className="btn btn--primary">
+                Book a Notary Now
               </Link>
-              <Link to="/services" className="btn btn--secondary">
-                View Services
+              <Link to="/tax-services" className="btn btn--secondary">
+                Tax &amp; IRS Document Help
+              </Link>
+              <Link to="/federal-services" className="btn btn--outline">
+                Federal &amp; Agency Services
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="trust-strip">
-          <div>
-            <h3>Mobile Convenience</h3>
-            <p>On-site appointments at homes, offices, and venues.</p>
-          </div>
-          <div>
-            <h3>Secure Confirmation</h3>
-            <p>Appointments are confirmed after your deposit is received.</p>
-          </div>
-          <div>
-            <h3>Professional Care</h3>
-            <p>NNA certified, bonded, and insured.</p>
-          </div>
+        <section className="tax-season">
+          <h2>Tax Season Services</h2>
+          <ul>
+            <li>IRS letters, notices, and sworn statements</li>
+            <li>Power of Attorney (POA) for tax representatives</li>
+            <li>I-9 and identity verification</li>
+            <li>Affidavits and declarations</li>
+            <li>Apostille facilitation for foreign income or dependents</li>
+            <li>Same-day mobile and after-hours availability</li>
+          </ul>
+          <Link to="/book" className="btn btn--primary">
+            Schedule Tax-Related Notary Service
+          </Link>
         </section>
 
-        <section className="service-showcase">
-          <div className="section-heading">
-            <h2>Services</h2>
-            <p>Four focused offerings with clear booking and payment steps.</p>
-          </div>
-          <div className="service-showcase__grid">
-            {serviceCatalog.map((service) => (
-              <article key={service.id} className="service-showcase__card">
-                <span className="service-showcase__tag">{service.category}</span>
-                <h3>{service.title}</h3>
-                <p>{service.shortDesc}</p>
-                <div className="service-showcase__actions">
-                  <Link className="btn btn--primary" to={`/book?service=${service.id}`}>
-                    {service.actionLabels.book}
-                  </Link>
-                  <Link className="btn btn--accent" to={`/pay?service=${service.id}`}>
-                    {service.actionLabels.pay}
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="service-disclaimer">
-            <p>{notaryFeeDisclaimer}</p>
-          </div>
+        <section className="trust">
+          <ul className="trust-list">
+            <li>Commissioned Notary Public (GA &amp; SC)</li>
+            <li>Experienced with legal, real estate, and government documents</li>
+            <li>Mobile, on-site, and on-call availability</li>
+            <li>Insured and compliant business entity</li>
+          </ul>
         </section>
 
-        <section className="how-it-works">
-          <div>
-            <h2>How it works</h2>
-            <ol>
-              <li>Select your service and book a time.</li>
-              <li>Complete your deposit payment to confirm.</li>
-              <li>Receive a confirmation and we arrive at your location.</li>
-            </ol>
-          </div>
-          <div className="how-it-works__contact">
-            <h3>Need a quick response?</h3>
-            <p>Call or text and we will confirm availability quickly.</p>
-            <a
-              className="btn btn--primary"
-              href={`tel:${siteConfig.phoneNumbers.primary.tel}`}
-            >
-              Call {siteConfig.phoneNumbers.primary.display}
-            </a>
+        <section className="who-we-serve">
+          <h2>Who We Serve</h2>
+          <div className="grid-3">
+            <div>
+              <h3>Individuals &amp; Families</h3>
+              <p>
+                Fast, professional notary support for personal, tax, and legal
+                documents.
+              </p>
+              <Link to="/book">Book Service</Link>
+            </div>
+            <div>
+              <h3>Tax &amp; Legal Professionals</h3>
+              <p>
+                Reliable execution for clients, filings, and time-sensitive documents.
+              </p>
+              <Link to="/professional-services">Professional Services</Link>
+            </div>
+            <div>
+              <h3>Government &amp; Agencies</h3>
+              <p>Contract-ready document, notary, and administrative support.</p>
+              <Link to="/federal-services">Federal Services</Link>
+            </div>
           </div>
         </section>
 
         <section className="contact-cta">
-          <h2>Ready to schedule?</h2>
-          <p>We will meet you where you are with a premium, mobile-first experience.</p>
-          <div className="contact-cta__actions">
-            <Link to="/book?service=notary" className="btn btn--primary">
-              Book Notary
-            </Link>
-            <Link to="/contact" className="btn btn--secondary">
-              Contact Us
-            </Link>
-          </div>
+          <h2>Need help planning?</h2>
+          <p>Let us know what you need and we’ll follow up quickly.</p>
+          <Link to="/contact" className="btn btn--primary">
+            Contact Us
+          </Link>
         </section>
       </main>
     </>

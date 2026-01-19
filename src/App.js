@@ -22,6 +22,7 @@ import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
 import FederalPage from "./pages/FederalPage.jsx";
+import TaxServicesPage from "./pages/TaxServicesPage.jsx";
 
 // Newly created Public Pages
 import PaymentCancel from "./pages/PaymentCancel.jsx";
@@ -105,6 +106,8 @@ export default function App() {
         <Route path="/" element={<Homepage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/federal" element={<FederalPage />} />
+        <Route path="/federal-services" element={<FederalPage />} />
+        <Route path="/tax-services" element={<TaxServicesPage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/book" element={<BookingPage />} />
         <Route path="/bookings" element={<Navigate to="/book" replace />} />
@@ -121,6 +124,10 @@ export default function App() {
         <Route path="/packages" element={<Navigate to="/services" replace />} />
         <Route path="/real-estate" element={<Navigate to="/services" replace />} />
         <Route path="/legal-services" element={<Navigate to="/services" replace />} />
+        <Route
+          path="/professional-services"
+          element={<Navigate to="/services" replace />}
+        />
         <Route path="/weddings" element={<Navigate to="/services" replace />} />
         <Route path="/financial" element={<Navigate to="/services" replace />} />
         <Route path="/events" element={<Navigate to="/services" replace />} />
