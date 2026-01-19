@@ -1,6 +1,6 @@
 .pay-page {
   padding: 2.5rem 1.5rem 4rem;
-  background: #f8f5f1;
+  background: var(--ivory);
 }
 
 .pay-hero {
@@ -13,7 +13,7 @@
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 0.75rem;
-  color: #8b1e2e;
+  color: var(--burgundy);
   font-weight: 700;
   margin-bottom: 0.75rem;
 }
@@ -23,9 +23,13 @@
   color: #4b3a3f;
 }
 
+.pay-hero a {
+  font-weight: 700;
+}
+
 .pay-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
 }
 
@@ -41,8 +45,8 @@
 
 .pay-card__badge {
   align-self: flex-start;
-  background: rgba(212, 175, 55, 0.2);
-  color: #8b1e2e;
+  background: rgba(201, 162, 39, 0.2);
+  color: var(--burgundy);
   font-weight: 600;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
@@ -57,11 +61,13 @@
   font-size: 0.9rem;
 }
 
-.pay-card__placeholder {
-  background: rgba(139, 30, 46, 0.08);
-  border-radius: 12px;
-  padding: 0.85rem;
-  color: #8b1e2e;
-  font-weight: 600;
+.btn--block {
+  width: 100%;
   text-align: center;
+}
+
+@media (max-width: 600px) {
+  .pay-page {
+    padding: 2rem 1.25rem 3rem;
+  }
 }

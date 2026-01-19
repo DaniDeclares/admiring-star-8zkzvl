@@ -33,6 +33,11 @@
   color: #4b3a3f;
 }
 
+.services-hero__notice {
+  font-weight: 600;
+  color: #8b1e2e;
+}
+
 .services-hero__actions {
   display: flex;
   gap: 1rem;

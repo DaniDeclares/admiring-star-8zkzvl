@@ -2,23 +2,23 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
 import {
-  getServiceById,
-  notaryFeeDisclaimer,
-  serviceCatalog,
-} from "../data/services.js";
+  bookingServices,
+  getBookingServiceById,
+} from "../data/bookingServices.js";
+import { notaryFeeDisclaimer } from "../data/services.js";
 import "./PayPage.css";
 
 export default function PayPage() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const selectedServiceId = params.get("service");
-  const selectedService = getServiceById(selectedServiceId);
+  const selectedService = getBookingServiceById(selectedServiceId);
   const orderedServices = selectedService
     ? [
         selectedService,
-        ...serviceCatalog.filter((service) => service.id !== selectedService.id),
+        ...bookingServices.filter((service) => service.id !== selectedService.id),
       ]
-    : serviceCatalog;
+    : bookingServices;
 
   return (
     <>
@@ -54,25 +54,19 @@ export default function PayPage() {
               {index === 0 && selectedService && (
                 <span className="pay-card__badge">Selected Service</span>
               )}
-              <h2>{service.title}</h2>
-              <p>{service.shortDesc}</p>
+              <h2>{service.name}</h2>
+              <p>{service.description}</p>
               {service.id === "notary" && (
                 <p className="pay-card__disclaimer">{notaryFeeDisclaimer}</p>
               )}
-              {service.stripePaymentLink ? (
-                <a
-                  className="btn btn--primary"
-                  href={service.stripePaymentLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {service.actionLabels.pay}
-                </a>
-              ) : (
-                <div className="pay-card__placeholder">
-                  Officiant deposit link pending — call/text to pay.
-                </div>
-              )}
+              <a
+                className="btn btn--primary btn--block"
+                href={service.paymentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {service.payLabel}
+              </a>
             </article>
           ))}
         </section>

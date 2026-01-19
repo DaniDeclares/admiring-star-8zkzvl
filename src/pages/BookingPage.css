@@ -1,6 +1,6 @@
 .booking-page {
   padding: 2.5rem 1.5rem 4rem;
-  background: #f8f5f1;
+  background: var(--ivory);
 }
 
 .booking-hero {
@@ -13,13 +13,12 @@
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 0.75rem;
-  color: #8b1e2e;
+  color: var(--burgundy);
   font-weight: 700;
   margin-bottom: 0.75rem;
 }
 
 .booking-hero h1 {
-  font-family: "Merriweather", serif;
   font-size: clamp(2rem, 3vw, 2.8rem);
   margin-bottom: 0.75rem;
 }
@@ -27,12 +26,38 @@
 .booking-hero__notice {
   margin-top: 1rem;
   font-weight: 600;
-  color: #8b1e2e;
+  color: var(--burgundy);
+}
+
+.booking-requirements {
+  display: grid;
+  gap: 1.5rem;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  margin-bottom: 2.5rem;
+}
+
+.booking-requirements ul {
+  margin: 1rem 0 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+  color: #4b3a3f;
+}
+
+.booking-requirements__note {
+  background: rgba(201, 162, 39, 0.12);
+  padding: 1rem;
+  border-radius: 14px;
+  color: #5a2e36;
+  font-weight: 600;
 }
 
 .booking-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
   margin-bottom: 3rem;
 }
@@ -44,12 +69,12 @@
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .booking-card__notice {
   font-weight: 600;
-  color: #8b1e2e;
+  color: var(--burgundy);
 }
 
 .booking-card__actions {
@@ -69,25 +94,16 @@
   border-radius: 22px;
   padding: 2rem;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
-  border: 2px solid transparent;
-}
-
-.booking-embed-section.is-active {
-  border-color: rgba(212, 175, 55, 0.7);
+  border: 2px solid rgba(201, 162, 39, 0.4);
 }
 
 .booking-section__eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: 0.7rem;
-  color: #8b1e2e;
+  color: var(--burgundy);
   font-weight: 700;
   margin-bottom: 0.5rem;
-}
-
-.booking-details__header h2 {
-  font-family: "Merriweather", serif;
-  margin-bottom: 0.75rem;
 }
 
 .booking-details__policy {
@@ -96,9 +112,10 @@
 }
 
 .booking-embed {
-  background: #f8f5f1;
+  background: var(--ivory);
   border-radius: 18px;
   padding: 1.5rem 0;
+  overflow: hidden;
 }
 
 .booking-embed .tidycal-embed {
@@ -114,5 +131,20 @@
 @media (min-width: 768px) {
   .booking-card__actions {
     flex-direction: row;
+  }
+
+  .booking-requirements {
+    grid-template-columns: 1.2fr 0.8fr;
+    align-items: start;
+  }
+}
+
+@media (max-width: 600px) {
+  .booking-page {
+    padding: 2rem 1.25rem 3rem;
+  }
+
+  .booking-embed-section {
+    padding: 1.5rem;
   }
 }

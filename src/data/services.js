@@ -1,3 +1,5 @@
+import { paymentLinks } from "./paymentLinks.js";
+
 export const travelFeeDefaults = {
   baseRadiusMiles: 10,
   mileageRate: 1.0,
@@ -17,10 +19,10 @@ export const serviceCatalog = [
       "On-site notarizations for personal and business documents with flexible scheduling.",
     category: "Notary",
     tidycalSlug: "danideclaresns/notary",
-    stripePaymentLink: "https://buy.stripe.com/5kQ4gOf0H9H08dq6oq",
+    stripePaymentLink: paymentLinks.notary,
     actionLabels: {
       book: "Book Notary",
-      pay: "Mobile Notary Service – Deposit to Confirm Appointment",
+      pay: "Pay to Confirm (Deposit)",
     },
     highlights: [
       "State-compliant notarial acts",
@@ -35,7 +37,7 @@ export const serviceCatalog = [
       "Document authentication support with clear guidance for domestic and international use.",
     category: "Apostille",
     tidycalSlug: "danideclaresns/apostille",
-    stripePaymentLink: "https://buy.stripe.com/3cs14mbGh6uOaU85k9",
+    stripePaymentLink: paymentLinks.apostille,
     actionLabels: {
       book: "Book Apostille",
       pay: "Pay to Confirm (Deposit)",
@@ -53,7 +55,7 @@ export const serviceCatalog = [
       "Certified signing agent support for purchase, refinance, and loan packages.",
     category: "Loan Signing",
     tidycalSlug: "danideclaresns/loansigning",
-    stripePaymentLink: "https://buy.stripe.com/6oU6oGdGh9H0ebO28g",
+    stripePaymentLink: paymentLinks.loansigning,
     actionLabels: {
       book: "Book Loan Signing",
       pay: "Pay to Confirm (Deposit)",
@@ -71,7 +73,7 @@ export const serviceCatalog = [
       "Ceremony officiation for elopements, courthouse-style vows, and custom celebrations.",
     category: "Officiant",
     tidycalSlug: "danideclaresns/officiant",
-    stripePaymentLink: "https://buy.stripe.com/aFa7sKdGhcTc71Rfpv6kg14",
+    stripePaymentLink: paymentLinks.officiant,
     actionLabels: {
       book: "Book Officiant",
       pay: "Pay to Confirm (Deposit)",

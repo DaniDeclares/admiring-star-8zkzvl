@@ -11,7 +11,7 @@ export default function Footer() {
       <div className="footer-top">
         <p>
           <strong>Consultation:</strong>{" "}
-          <Link to="/book">danideclares.com/book</Link>
+          <Link to="/book?service=notary">danideclares.com/book</Link>
         </p>
         <p>
           <strong>Email:</strong>{" "}
@@ -33,6 +33,7 @@ export default function Footer() {
       {/* Quick site links */}
       <nav className="footer-site-links" aria-label="Site links">
         <Link to="/services">Services</Link>
+        <Link to="/federal">Federal</Link>
         <Link to="/book?service=notary">Book</Link>
         <Link to="/pay">Pay</Link>
         <Link to="/contact">Contact</Link>
