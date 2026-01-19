@@ -1,6 +1,7 @@
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
+import { STRIPE_LINKS } from "../config/stripeLinks.js";
 import { getPriceLabel } from "../data/pricingCanon.js";
 import { getServiceById } from "../data/services.js";
 import { siteConfig } from "../data/siteConfig.js";
@@ -15,7 +16,7 @@ export default function PayPage() {
     [selectedServiceId]
   );
   const invoiceRef = useRef(null);
-  const stripeLink = selectedService?.stripePaymentLink;
+  const stripeLink = selectedServiceId ? STRIPE_LINKS[selectedServiceId] : "";
   const showInvoiceFallback = Boolean(selectedService && !stripeLink);
   const priceLabel = selectedService?.priceLabel
     || (selectedServiceId ? getPriceLabel(selectedServiceId) : null);
@@ -24,6 +25,60 @@ export default function PayPage() {
   const handleInvoiceScroll = () => {
     invoiceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  useEffect(() => {
+    if (!showInvoiceFallback) {
+      return;
+    }
+
+    const targetId = "hs-invoice-form";
+    const ensureForm = () => {
+      if (!window.hbspt || !document.getElementById(targetId)) {
+        return;
+      }
+
+      if (document.querySelector(`#${targetId} .hs-form`)) {
+        return;
+      }
+
+      window.hbspt.forms.create({
+        portalId: "242764935",
+        formId: "cd04ab8c-3203-43e8-b634-7e2a1daefd36",
+        region: "na2",
+        target: `#${targetId}`,
+        onFormReady: () => {
+          const container = document.getElementById(targetId);
+          if (!container) return;
+          const serviceField = container.querySelector(
+            'input[name="serviceKey"]'
+          );
+          if (serviceField && selectedServiceId) {
+            serviceField.value = selectedServiceId;
+          }
+          const pageField = container.querySelector('input[name="pageUrl"]');
+          if (pageField) {
+            pageField.value = window.location.href;
+          }
+        },
+      });
+    };
+
+    const scriptId = "hs-form-embed-script";
+    const existingScript = document.getElementById(scriptId);
+
+    if (existingScript) {
+      ensureForm();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = "//js-na2.hsforms.net/forms/embed/v2.js";
+    script.async = true;
+    script.charset = "utf-8";
+    script.onload = ensureForm;
+    document.body.appendChild(script);
+  }, [selectedServiceId, showInvoiceFallback]);
 
   return (
     <>
@@ -105,9 +160,9 @@ export default function PayPage() {
                       </button>
                       <a
                         className="btn btn--secondary"
-                        href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}
+                        href={`tel:${siteConfig.phoneNumbers.primary.tel}`}
                       >
-                        Call/Text {siteConfig.phoneNumbers.secondary.display}
+                        Call/Text {siteConfig.phoneNumbers.primary.display}
                       </a>
                       <a
                         className="btn btn--secondary"
@@ -134,15 +189,7 @@ export default function PayPage() {
               link.
             </p>
             <div className="hsFormWrap">
-              <iframe
-                title="Invoice Request Form"
-                src="https://share-na2.hsforms.com/1zQSrjDIDQ-i2NH4qHa79Ng40jamf"
-                width="100%"
-                height="750"
-                style={{ border: "0" }}
-                loading="lazy"
-                allow="clipboard-write; encrypted-media"
-              />
+              <div id="hs-invoice-form" />
             </div>
           </section>
         )}

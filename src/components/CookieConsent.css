@@ -1,13 +1,16 @@
 .cookie-consent {
   position: fixed;
-  bottom: 0;
-  width: 100%;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 2rem), 960px);
   background: #f8f5f1;
   border-top: 3px solid #d4af37;
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 1rem;
   box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.15);
-  z-index: 9999;
+  z-index: 1000;
   font-family: "Montserrat", sans-serif;
+  border-radius: 16px;
 }
 
 .cookie-banner {

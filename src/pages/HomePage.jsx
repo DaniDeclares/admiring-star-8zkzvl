@@ -1,7 +1,6 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
 import "./Homepage.css";
 
 export default function Homepage() {
@@ -16,7 +15,7 @@ export default function Homepage() {
       </Helmet>
 
       <main className="homepage home-main">
-        <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
+        <section className="hero">
           <div className="hero-overlay">
             <h1>
               Reliable Notary &amp; Document Services for Tax, Legal, and Government
@@ -27,7 +26,7 @@ export default function Homepage() {
               agencies across Georgia and South Carolina.
             </p>
             <div className="hero-cta">
-              <Link to="/book" className="btn btn--primary">
+              <Link to="/book?service=notary" className="btn btn--primary">
                 Book a Notary Now
               </Link>
               <Link to="/tax-services" className="btn btn--secondary">

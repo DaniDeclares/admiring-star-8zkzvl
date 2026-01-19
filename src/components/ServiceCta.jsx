@@ -23,8 +23,8 @@ export default function ServiceCta({
         <div className="service-cta__contact">
           <p>
             <strong>Call/Text:</strong>{" "}
-            <a href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}>
-              {siteConfig.phoneNumbers.secondary.display}
+            <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
+              {siteConfig.phoneNumbers.primary.display}
             </a>
           </p>
           <p>

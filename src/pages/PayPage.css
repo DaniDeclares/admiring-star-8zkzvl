@@ -89,7 +89,7 @@
   width: 100%;
 }
 
-.hsFormWrap iframe {
+.hsFormWrap form {
   width: 100%;
   min-height: 700px;
 }

@@ -1,32 +1,50 @@
 // src/components/Footer.jsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { SOCIAL_LINKS } from "../config/socialLinks.js";
 import { siteConfig } from "../data/siteConfig.js";
 import "./Footer.css";
 
+const SOCIAL_LABELS = {
+  instagram: "Instagram",
+  facebook: "Facebook",
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  linkedin: "LinkedIn",
+  pinterest: "Pinterest",
+  yelp: "Yelp",
+};
+
 export default function Footer() {
+  const socialEntries = Object.entries(SOCIAL_LINKS).filter(
+    ([, url]) => url
+  );
+
   return (
     <footer className="footer">
       {/* Top contact info */}
       <div className="footer-top">
         <p>
           <strong>Consultation:</strong>{" "}
-          <Link to="/book?service=notary">danideclares.com/book</Link>
+          <Link to="/book">danideclares.com/book</Link>
         </p>
         <p>
           <strong>Email:</strong>{" "}
-          <a href={`mailto:${siteConfig.emails.admin}`}>{siteConfig.emails.admin}</a> |{" "}
-          <a href={`mailto:${siteConfig.emails.notary}`}>{siteConfig.emails.notary}</a>
+          <a href={`mailto:${siteConfig.emails.admin}`}>{siteConfig.emails.admin}</a>
         </p>
         <p>
           <strong>Call:</strong>{" "}
           <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
             {siteConfig.phoneNumbers.primary.display}
           </a>{" "}
-          |{" "}
-          <a href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}>
-            {siteConfig.phoneNumbers.secondary.display}
-          </a>
+          {siteConfig.phoneNumbers.secondary && (
+            <>
+              {" "}
+              <span className="footer-secondary-phone">
+                ({siteConfig.phoneNumbers.secondary.display})
+              </span>
+            </>
+          )}
         </p>
       </div>
 
@@ -43,20 +61,9 @@ export default function Footer() {
 
       {/* Social media */}
       <nav className="footer-social" aria-label="Social media">
-        {[
-          ["Instagram", "https://www.instagram.com/danideclares"],
-          ["Facebook", "https://www.facebook.com/danideclares"],
-          ["TikTok", "https://www.tiktok.com/@danideclares"],
-          ["YouTube", "https://www.youtube.com/@danideclares"],
-          ["LinkedIn", "https://www.linkedin.com/in/danielle-williams-2129aaa5/"],
-        ].map(([label, url]) => (
-          <a
-            key={label}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {label}
+        {socialEntries.map(([key, url]) => (
+          <a key={key} href={url} target="_blank" rel="noopener noreferrer">
+            {SOCIAL_LABELS[key] || key}
           </a>
         ))}
       </nav>

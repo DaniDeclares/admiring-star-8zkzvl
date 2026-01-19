@@ -1,5 +1,5 @@
 import { getPriceLabel } from "./pricingCanon.js";
-import { STRIPE_LINKS } from "./stripeLinks.js";
+import { STRIPE_LINKS } from "../config/stripeLinks.js";
 
 export const travelFeeDefaults = {
   baseRadiusMiles: 10,
@@ -19,7 +19,6 @@ export const serviceCatalog = [
     shortDesc:
       "On-site notarizations for personal and business documents with flexible scheduling.",
     category: "Notary",
-    tidycalSlug: "danideclaresns/notary",
     actionType: "book",
     priceLabel: getPriceLabel("notary"),
     stripePaymentLink: STRIPE_LINKS.notary || null,
@@ -35,7 +34,7 @@ export const serviceCatalog = [
     shortDesc:
       "Notary support for IRS power of attorney filings and tax representation paperwork.",
     category: "Tax Season",
-    actionType: "pay",
+    actionType: "book",
     priceLabel: getPriceLabel("poa"),
     stripePaymentLink: STRIPE_LINKS.poa || null,
     highlights: [
@@ -50,7 +49,7 @@ export const serviceCatalog = [
     shortDesc:
       "Mobile I-9 verification for employers, HR teams, and remote hires.",
     category: "Tax Season",
-    actionType: "pay",
+    actionType: "book",
     priceLabel: getPriceLabel("i9"),
     stripePaymentLink: STRIPE_LINKS.i9 || null,
     highlights: [
@@ -65,7 +64,6 @@ export const serviceCatalog = [
     shortDesc:
       "Document authentication support with clear guidance for domestic and international use.",
     category: "Apostille",
-    tidycalSlug: "danideclaresns/apostille",
     actionType: "book",
     priceLabel: getPriceLabel("apostille"),
     stripePaymentLink: STRIPE_LINKS.apostille || null,
@@ -81,7 +79,7 @@ export const serviceCatalog = [
     shortDesc:
       "Secure pickup, delivery, and document handoff with real-time updates.",
     category: "Courier",
-    actionType: "pay",
+    actionType: "book",
     priceLabel: getPriceLabel("courier"),
     stripePaymentLink: STRIPE_LINKS.courier || null,
     highlights: [
@@ -96,7 +94,6 @@ export const serviceCatalog = [
     shortDesc:
       "Certified signing agent support for purchase, refinance, and loan packages.",
     category: "Loan Signing",
-    tidycalSlug: "danideclaresns/loansigning",
     actionType: "book",
     priceLabel: getPriceLabel("loan_signing"),
     stripePaymentLink: STRIPE_LINKS.loan_signing || null,
@@ -112,7 +109,6 @@ export const serviceCatalog = [
     shortDesc:
       "Mobile signing support for trusts, estate plans, and legal packets.",
     category: "Legal",
-    tidycalSlug: "danideclaresns/loansigning",
     actionType: "book",
     priceLabel: getPriceLabel("trust_signing"),
     stripePaymentLink: STRIPE_LINKS.trust_signing || null,
@@ -128,7 +124,6 @@ export const serviceCatalog = [
     shortDesc:
       "Ceremony officiation for elopements, courthouse-style vows, and custom celebrations.",
     category: "Officiant",
-    tidycalSlug: "danideclaresns/officiant",
     actionType: "book",
     priceLabel: getPriceLabel("officiant_deposit"),
     stripePaymentLink: STRIPE_LINKS.officiant_deposit || null,
@@ -144,7 +139,7 @@ export const serviceCatalog = [
     shortDesc:
       "Complex legal document execution, witness coordination, and compliance support.",
     category: "Legal",
-    actionType: "pay",
+    actionType: "book",
     priceLabel: getPriceLabel("advanced_legal"),
     stripePaymentLink: STRIPE_LINKS.advanced_legal || null,
     highlights: [
@@ -159,7 +154,7 @@ export const serviceCatalog = [
     shortDesc:
       "Document handling, verification, and compliance support for federal partners.",
     category: "Federal",
-    actionType: "pay",
+    actionType: "book",
     priceLabel: getPriceLabel("federal_support"),
     stripePaymentLink: STRIPE_LINKS.federal_support || null,
     highlights: [

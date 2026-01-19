@@ -119,15 +119,41 @@
   margin-bottom: 1rem;
 }
 
+.booking-details__price {
+  font-weight: 700;
+  color: var(--burgundy);
+  margin-bottom: 1.25rem;
+}
+
 .booking-embed {
   background: var(--ivory);
   border-radius: 18px;
-  padding: 1.5rem 0;
+  padding: 1.5rem;
   overflow: hidden;
 }
 
 .booking-embed .tidycal-embed {
   min-height: 640px;
+}
+
+.booking-embed__fallback {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.booking-embed--missing {
+  padding: 1.5rem;
+  text-align: center;
+  display: grid;
+  gap: 1rem;
+}
+
+.booking-embed__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
 }
 
 .booking-confirmation {

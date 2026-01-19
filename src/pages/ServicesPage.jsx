@@ -73,9 +73,9 @@ export default function ServicesPage() {
               <div className="service-card__actions">
                 <Link
                   className="btn btn--primary"
-                  to={buildServiceActionPath(service.id, service.actionType)}
+                  to={buildServiceActionPath(service.id)}
                 >
-                  {service.actionType === "pay" ? "Pay Now" : "Book Now"}
+                  Book Now
                 </Link>
               </div>
             </article>
