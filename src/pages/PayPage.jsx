@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
+import { getPriceLabel } from "../data/pricingCanon.js";
 import { getServiceById } from "../data/services.js";
 import { siteConfig } from "../data/siteConfig.js";
 import "./PayPage.css";
@@ -14,54 +15,11 @@ export default function PayPage() {
     [selectedServiceId]
   );
   const invoiceRef = useRef(null);
-  const [formReady, setFormReady] = useState(false);
   const stripeLink = selectedService?.stripePaymentLink;
-  const showInvoiceFallback = !stripeLink;
-  const portalId = process.env.REACT_APP_HUBSPOT_PORTAL_ID;
-  const formId = process.env.REACT_APP_HUBSPOT_INVOICE_FORM_ID;
-  const showInvoiceForm = Boolean(showInvoiceFallback && portalId && formId);
-
-  useEffect(() => {
-    if (!showInvoiceFallback) {
-      return;
-    }
-
-    if (!portalId || !formId) {
-      console.warn(
-        "HubSpot invoice form env vars are missing. Skipping form embed."
-      );
-      return;
-    }
-
-    if (!document.getElementById("hs-forms-script")) {
-      const script = document.createElement("script");
-      script.id = "hs-forms-script";
-      script.src = "https://js.hsforms.net/forms/v2.js";
-      script.async = true;
-      script.defer = true;
-      script.onload = () => setFormReady(true);
-      document.body.appendChild(script);
-    } else {
-      setFormReady(true);
-    }
-  }, [formId, portalId, showInvoiceFallback]);
-
-  useEffect(() => {
-    if (!showInvoiceForm || !formReady || !window.hbspt?.forms) {
-      return;
-    }
-
-    const target = document.getElementById("hs-invoice-form");
-    if (!target || target.childElementCount > 0) {
-      return;
-    }
-
-    window.hbspt.forms.create({
-      portalId,
-      formId,
-      target: "#hs-invoice-form",
-    });
-  }, [formId, formReady, portalId, showInvoiceForm]);
+  const showInvoiceFallback = Boolean(selectedService && !stripeLink);
+  const priceLabel = selectedService?.priceLabel
+    || (selectedServiceId ? getPriceLabel(selectedServiceId) : null);
+  const hasValidService = Boolean(selectedService);
 
   const handleInvoiceScroll = () => {
     invoiceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -99,74 +57,93 @@ export default function PayPage() {
 
         <section className="pay-details">
           <article className="pay-card">
-            <h2>{selectedService?.name || "Service Not Found"}</h2>
-            <p>
-              {selectedService?.shortDesc ||
-                "We could not locate the selected service. Please request an invoice or browse the services list."}
-            </p>
-            {selectedService?.priceDisplay && (
-              <p className="pay-card__price">{selectedService.priceDisplay}</p>
-            )}
-            {stripeLink && (
-              <p className="pay-card__stripe-note">
-                Secure payment powered by Stripe.
-              </p>
-            )}
-            {stripeLink && (
-              <a
-                className="btn btn--primary btn--block"
-                href={stripeLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pay Now
-              </a>
-            )}
-            {showInvoiceFallback && (
-              <div className="pay-card__fallback">
+            {!hasValidService && (
+              <>
+                <h2>Select a service to pay for</h2>
                 <p>
-                  Online payment for this service is currently unavailable. Request
-                  an invoice and we’ll send a secure payment link.
+                  Choose a service to see the payment options and confirmation
+                  steps.
                 </p>
-                <div className="pay-card__fallback-actions">
-                  {showInvoiceForm && (
-                    <button
-                      type="button"
-                      className="btn btn--primary"
-                      onClick={handleInvoiceScroll}
-                    >
-                      Request an Invoice
-                    </button>
-                  )}
+                <Link className="btn btn--primary btn--block" to="/services">
+                  Browse Services
+                </Link>
+              </>
+            )}
+            {hasValidService && (
+              <>
+                <h2>{selectedService.name}</h2>
+                <p>{selectedService.shortDesc}</p>
+                {priceLabel && <p className="pay-card__price">{priceLabel}</p>}
+                {stripeLink && (
+                  <p className="pay-card__stripe-note">
+                    Secure payment powered by Stripe.
+                  </p>
+                )}
+                {stripeLink && (
                   <a
-                    className="btn btn--secondary"
-                    href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}
+                    className="btn btn--primary btn--block"
+                    href={stripeLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    Call/Text {siteConfig.phoneNumbers.secondary.display}
+                    Pay Now
                   </a>
-                  <a
-                    className="btn btn--secondary"
-                    href={`mailto:${siteConfig.emails.admin}`}
-                  >
-                    Email {siteConfig.emails.admin}
-                  </a>
-                  <Link className="btn btn--tertiary" to="/services">
-                    Back to Services
-                  </Link>
-                </div>
-              </div>
+                )}
+                {showInvoiceFallback && (
+                  <div className="pay-card__fallback">
+                    <p>
+                      Online payment for this service is currently unavailable.
+                      Request an invoice or contact us to proceed.
+                    </p>
+                    <div className="pay-card__fallback-actions">
+                      <button
+                        type="button"
+                        className="btn btn--primary"
+                        onClick={handleInvoiceScroll}
+                      >
+                        Request an Invoice
+                      </button>
+                      <a
+                        className="btn btn--secondary"
+                        href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}
+                      >
+                        Call/Text {siteConfig.phoneNumbers.secondary.display}
+                      </a>
+                      <a
+                        className="btn btn--secondary"
+                        href={`mailto:${siteConfig.emails.admin}`}
+                      >
+                        Email {siteConfig.emails.admin}
+                      </a>
+                      <Link className="btn btn--tertiary" to="/services">
+                        Back to Services
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </article>
         </section>
 
-        {showInvoiceForm && (
-          <section className="pay-invoice" ref={invoiceRef}>
+        {showInvoiceFallback && (
+          <section id="invoice" className="pay-invoice" ref={invoiceRef}>
             <h3>Request an Invoice</h3>
             <p>
-              Share your service details below and we will send a secure invoice
+              Tell us what you need and we’ll send the correct invoice or payment
               link.
             </p>
-            <div id="hs-invoice-form" className="pay-invoice__form"></div>
+            <div className="hsFormWrap">
+              <iframe
+                title="Invoice Request Form"
+                src="https://share-na2.hsforms.com/1zQSrjDIDQ-i2NH4qHa79Ng40jamf"
+                width="100%"
+                height="750"
+                style={{ border: "0" }}
+                loading="lazy"
+                allow="clipboard-write; encrypted-media"
+              />
+            </div>
           </section>
         )}
       </main>

@@ -1,26 +1,18 @@
-export const CANON_PRICES = {
-  poa: 35,
-  i9: 50,
-  apostille: 175,
-  courier: "COURIER",
-  advanced_legal: "QUOTE",
-  federal_support: "QUOTE",
-};
-
-export const getDisplayPrice = (serviceId) => {
-  const price = CANON_PRICES[serviceId];
-
-  if (typeof price === "number") {
-    return `$${price}`;
+export function getPriceLabel(serviceId) {
+  switch (serviceId) {
+    case "poa":
+      return "$35";
+    case "i9":
+      return "$50";
+    case "apostille":
+      return "$175";
+    case "loan_signing":
+      return "$150";
+    case "trust_signing":
+      return "$150";
+    case "courier":
+      return "$65+ / actual cost";
+    default:
+      return "Starting at / Quoted";
   }
-
-  if (price === "COURIER") {
-    return "$65+ / actual cost";
-  }
-
-  if (price === "QUOTE") {
-    return "Starting at / Quoted";
-  }
-
-  return "";
-};
+}
