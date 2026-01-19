@@ -1,4 +1,4 @@
-import { getDisplayPrice } from "./pricingCanon.js";
+import { getPriceLabel } from "./pricingCanon.js";
 import { STRIPE_LINKS } from "./stripeLinks.js";
 
 export const travelFeeDefaults = {
@@ -21,8 +21,8 @@ export const serviceCatalog = [
     category: "Notary",
     tidycalSlug: "danideclaresns/notary",
     actionType: "book",
-    priceDisplay: getDisplayPrice("notary"),
-    stripePaymentLink: STRIPE_LINKS.notary,
+    priceLabel: getPriceLabel("notary"),
+    stripePaymentLink: STRIPE_LINKS.notary || null,
     highlights: [
       "State-compliant notarial acts",
       "Evening & weekend availability",
@@ -36,8 +36,8 @@ export const serviceCatalog = [
       "Notary support for IRS power of attorney filings and tax representation paperwork.",
     category: "Tax Season",
     actionType: "pay",
-    priceDisplay: getDisplayPrice("poa"),
-    stripePaymentLink: STRIPE_LINKS.poa,
+    priceLabel: getPriceLabel("poa"),
+    stripePaymentLink: STRIPE_LINKS.poa || null,
     highlights: [
       "Same-day mobile appointments",
       "Ideal for tax professionals and firms",
@@ -51,8 +51,8 @@ export const serviceCatalog = [
       "Mobile I-9 verification for employers, HR teams, and remote hires.",
     category: "Tax Season",
     actionType: "pay",
-    priceDisplay: getDisplayPrice("i9"),
-    stripePaymentLink: STRIPE_LINKS.i9,
+    priceLabel: getPriceLabel("i9"),
+    stripePaymentLink: STRIPE_LINKS.i9 || null,
     highlights: [
       "In-person identity verification",
       "Flexible scheduling for teams",
@@ -67,8 +67,8 @@ export const serviceCatalog = [
     category: "Apostille",
     tidycalSlug: "danideclaresns/apostille",
     actionType: "book",
-    priceDisplay: getDisplayPrice("apostille"),
-    stripePaymentLink: STRIPE_LINKS.apostille,
+    priceLabel: getPriceLabel("apostille"),
+    stripePaymentLink: STRIPE_LINKS.apostille || null,
     highlights: [
       "Step-by-step intake",
       "Drop-off coordination",
@@ -82,8 +82,8 @@ export const serviceCatalog = [
       "Secure pickup, delivery, and document handoff with real-time updates.",
     category: "Courier",
     actionType: "pay",
-    priceDisplay: getDisplayPrice("courier"),
-    stripePaymentLink: STRIPE_LINKS.courier,
+    priceLabel: getPriceLabel("courier"),
+    stripePaymentLink: STRIPE_LINKS.courier || null,
     highlights: [
       "Same-day delivery options",
       "Chain-of-custody handling",
@@ -98,8 +98,8 @@ export const serviceCatalog = [
     category: "Loan Signing",
     tidycalSlug: "danideclaresns/loansigning",
     actionType: "book",
-    priceDisplay: getDisplayPrice("loan_signing"),
-    stripePaymentLink: STRIPE_LINKS.loan_signing,
+    priceLabel: getPriceLabel("loan_signing"),
+    stripePaymentLink: STRIPE_LINKS.loan_signing || null,
     highlights: [
       "NNA-certified signing agent",
       "Detailed document walkthroughs",
@@ -114,8 +114,8 @@ export const serviceCatalog = [
     category: "Legal",
     tidycalSlug: "danideclaresns/loansigning",
     actionType: "book",
-    priceDisplay: getDisplayPrice("trust_signing"),
-    stripePaymentLink: STRIPE_LINKS.trust_signing,
+    priceLabel: getPriceLabel("trust_signing"),
+    stripePaymentLink: STRIPE_LINKS.trust_signing || null,
     highlights: [
       "Trusted for sensitive documents",
       "Flexible on-site scheduling",
@@ -130,8 +130,8 @@ export const serviceCatalog = [
     category: "Officiant",
     tidycalSlug: "danideclaresns/officiant",
     actionType: "book",
-    priceDisplay: getDisplayPrice("officiant_deposit"),
-    stripePaymentLink: STRIPE_LINKS.officiant_deposit,
+    priceLabel: getPriceLabel("officiant_deposit"),
+    stripePaymentLink: STRIPE_LINKS.officiant_deposit || null,
     highlights: [
       "Personalized ceremony flow",
       "Support with filing guidance",
@@ -145,8 +145,8 @@ export const serviceCatalog = [
       "Complex legal document execution, witness coordination, and compliance support.",
     category: "Legal",
     actionType: "pay",
-    priceDisplay: getDisplayPrice("advanced_legal"),
-    stripePaymentLink: STRIPE_LINKS.advanced_legal,
+    priceLabel: getPriceLabel("advanced_legal"),
+    stripePaymentLink: STRIPE_LINKS.advanced_legal || null,
     highlights: [
       "Multi-document packages",
       "Attorney coordination available",
@@ -160,8 +160,8 @@ export const serviceCatalog = [
       "Document handling, verification, and compliance support for federal partners.",
     category: "Federal",
     actionType: "pay",
-    priceDisplay: getDisplayPrice("federal_support"),
-    stripePaymentLink: STRIPE_LINKS.federal_support,
+    priceLabel: getPriceLabel("federal_support"),
+    stripePaymentLink: STRIPE_LINKS.federal_support || null,
     highlights: [
       "NAICS-aligned services",
       "Secure document handling",

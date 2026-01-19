@@ -84,6 +84,16 @@
   margin-top: 1.5rem;
 }
 
+.hsFormWrap {
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.hsFormWrap iframe {
+  width: 100%;
+  min-height: 700px;
+}
+
 .btn--block {
   width: 100%;
   text-align: center;
