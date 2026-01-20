@@ -1,12 +1,10 @@
-import { paymentLinks } from "./paymentLinks.js";
-
 export const bookingServices = [
   {
     id: "notary",
     name: "Mobile Notary",
     description: "On-site notarizations with flexible scheduling.",
     tidyCalPath: "danideclaresns/notary",
-    paymentUrl: paymentLinks.notary,
+    payServiceKey: "mobile_notary",
     payLabel: "Pay Deposit",
   },
   {
@@ -14,7 +12,7 @@ export const bookingServices = [
     name: "Apostille Facilitation",
     description: "Document authentication support and coordination.",
     tidyCalPath: "danideclaresns/apostille",
-    paymentUrl: paymentLinks.apostille,
+    payServiceKey: "apostille",
     payLabel: "Pay Deposit",
   },
   {
@@ -22,7 +20,7 @@ export const bookingServices = [
     name: "Loan Signing",
     description: "Certified signing agent support for loan packages.",
     tidyCalPath: "danideclaresns/loansigning",
-    paymentUrl: paymentLinks.loansigning,
+    payServiceKey: "loan_signing",
     payLabel: "Pay Deposit",
   },
   {
@@ -30,7 +28,6 @@ export const bookingServices = [
     name: "Officiant Services",
     description: "Wedding and vow ceremony officiation with travel coordination.",
     tidyCalPath: "danideclaresns/officiant",
-    paymentUrl: paymentLinks.officiant,
     payLabel: "Pay Deposit",
   },
 ];

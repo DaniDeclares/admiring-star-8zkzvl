@@ -1,7 +1,11 @@
-import { PRICING_CANON } from "../config/pricingCanon.js";
+import { SERVICES } from "./servicesCatalog.js";
 
 const SERVICE_KEY_MAP = {
-  loansigning: "loansigning",
+  notary: "mobile_notary",
+  loansigning: "loan_signing",
+  loan_signing: "loan_signing",
+  trust: "trust_signing",
+  trust_signing: "trust_signing",
   officiant: "officiant",
 };
 
@@ -18,12 +22,12 @@ export function getPriceLabel(serviceId) {
     return "Starting at / Quoted";
   }
 
-  const canonKey = SERVICE_KEY_MAP[serviceId] || serviceId;
-  const canonEntry = PRICING_CANON[canonKey];
+  const catalogKey = SERVICE_KEY_MAP[serviceId] || serviceId;
+  const catalogEntry = SERVICES[catalogKey];
 
-  if (!canonEntry) {
+  if (!catalogEntry) {
     return "Starting at / Quoted";
   }
 
-  return formatPrice(canonEntry.price);
+  return formatPrice(catalogEntry.price);
 }
