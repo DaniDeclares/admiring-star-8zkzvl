@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
-import { TIDYCAL_LINKS } from "../config/tidycalLinks.js";
 import {
   bookingServices,
   getBookingServiceById,
@@ -11,16 +10,9 @@ import { notaryFeeDisclaimer } from "../data/services.js";
 import { loadTidycalScript } from "../lib/loadTidycal.js";
 import "./BookingPage.css";
 
-const SERVICE_TIDYCAL_KEY_MAP = {
-  loan_signing: "loansigning",
-  trust_signing: "trust",
-  officiant_deposit: "officiant",
-};
-
 const SERVICE_ID_ALIASES = {
-  loansigning: "loan_signing",
-  trust: "trust_signing",
-  officiant: "officiant_deposit",
+  loan_signing: "loansigning",
+  officiant_deposit: "officiant",
 };
 
 export default function BookingPage() {
@@ -37,8 +29,7 @@ export default function BookingPage() {
     [selectedServiceId]
   );
   const hasSelection = Boolean(selectedService);
-  const tidycalKey = SERVICE_TIDYCAL_KEY_MAP[selectedServiceId] || selectedServiceId;
-  const tidycalPath = TIDYCAL_LINKS[tidycalKey] || TIDYCAL_LINKS.notary;
+  const tidycalPath = selectedService?.tidyCalPath || "danideclaresns/notary";
   const tidycalLink = `https://tidycal.com/${tidycalPath}`;
   const priceLabel = selectedServiceId ? getPriceLabel(selectedServiceId) : null;
 
@@ -84,7 +75,8 @@ export default function BookingPage() {
           <div>
             <h2>Booking Requirements</h2>
             <ul>
-              <li>All services book against the same calendar to prevent double-booking.</li>
+              <li>All services book against the same calendar and availability rules.</li>
+              <li>This keeps availability synchronized to prevent double-booking.</li>
               <li>Please complete payment immediately after booking to confirm.</li>
               <li>If you do not see times, call/text and we will assist.</li>
             </ul>
@@ -100,14 +92,31 @@ export default function BookingPage() {
           </div>
         </section>
 
+        <section className="booking-policy">
+          <h2>Deposit &amp; Cancellation Policy</h2>
+          <ul>
+            <li>
+              Appointment is pending until payment is completed. Unpaid bookings are
+              released.
+            </li>
+            <li>
+              Deposits are non-refundable and applied to your total at the appointment.
+            </li>
+            <li>
+              Travel/after-hours adjustments are disclosed before service begins.
+            </li>
+            <li>If you need to reschedule, contact us ASAP.</li>
+          </ul>
+        </section>
+
         <section className="booking-options booking-cards">
           {bookingServices.map((service) => (
             <article key={service.id} className="booking-card">
               <h2>{service.name}</h2>
-              <p>{service.shortDesc}</p>
+              <p>{service.description}</p>
               <p className="booking-card__notice">
                 Appointment is pending until payment is completed. Unpaid bookings
-                may be released.
+                are released.
               </p>
               <div className="booking-card__actions">
                 <Link
@@ -117,7 +126,7 @@ export default function BookingPage() {
                   Book Now
                 </Link>
                 <Link className="btn btn--secondary" to={`/pay?service=${service.id}`}>
-                  Pay to Confirm
+                  {service.payLabel || "Pay to Confirm"}
                 </Link>
               </div>
             </article>
@@ -133,10 +142,10 @@ export default function BookingPage() {
                 </p>
                 <h2>{selectedService.name} Booking</h2>
                 <p className="booking-details__policy">
-                  Appointment is pending until payment is completed. Unpaid bookings
-                  may be released. Deposits are applied to your total. Travel/after-hours
-                  adjustments are disclosed before service. If you need to reschedule,
-                  contact us ASAP.
+                  Appointment is pending until payment is completed. Unpaid bookings are
+                  released. Deposits are non-refundable and applied to your total.
+                  Travel/after-hours adjustments are disclosed before service. If you
+                  need to reschedule, contact us ASAP.
                 </p>
                 {priceLabel && (
                   <p className="booking-details__price">{priceLabel}</p>

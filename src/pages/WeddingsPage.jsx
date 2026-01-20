@@ -83,7 +83,7 @@ export default function WeddingsPage() {
       </section>
 
       <ServiceCta
-        serviceId="officiant_deposit"
+        serviceId="officiant"
         bookingLabel="Book Officiant Consultation"
       />
     </main>

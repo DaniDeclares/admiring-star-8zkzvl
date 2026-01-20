@@ -32,7 +32,7 @@ export default function Homepage() {
               <Link to="/tax-services" className="btn btn--secondary">
                 Tax &amp; IRS Document Help
               </Link>
-              <Link to="/federal-services" className="btn btn--outline">
+              <Link to="/federal" className="btn btn--outline">
                 Federal &amp; Agency Services
               </Link>
             </div>
@@ -84,7 +84,7 @@ export default function Homepage() {
             <div>
               <h3>Government &amp; Agencies</h3>
               <p>Contract-ready document, notary, and administrative support.</p>
-              <Link to="/federal-services">Federal Services</Link>
+              <Link to="/federal">Federal Services</Link>
             </div>
           </div>
         </section>

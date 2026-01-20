@@ -13,7 +13,7 @@ export default function ServicesPage() {
         <title>Services • Dani Declares</title>
         <meta
           name="description"
-          content="Mobile notary, apostille facilitation, tax-season services, and loan signing support with clear booking and payment steps."
+          content="Mobile notary, apostille facilitation, loan signing, and officiant services with clear booking and payment steps."
         />
       </Helmet>
 

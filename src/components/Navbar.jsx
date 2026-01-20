@@ -54,10 +54,10 @@ export default function Navbar() {
           Tax Season
         </Link>
         <Link
-          to="/federal-services"
+          to="/federal"
           onClick={handleLinkClick}
           className={`nav-link ${
-            location.pathname === "/federal-services" ? "active" : ""
+            location.pathname === "/federal" ? "active" : ""
           }`}
         >
           Federal

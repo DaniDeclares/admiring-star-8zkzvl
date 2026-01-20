@@ -1,25 +1,17 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
-import { PRICING_CANON } from "../config/pricingCanon.js";
-import { STRIPE_LINKS } from "../config/stripeLinks.js";
 import { getPriceLabel } from "../data/pricingCanon.js";
-import { getServiceById } from "../data/services.js";
+import {
+  bookingServices,
+  getBookingServiceById,
+} from "../data/bookingServices.js";
 import { siteConfig } from "../data/siteConfig.js";
 import "./PayPage.css";
 
-const SERVICE_KEY_MAP = {
-  loan_signing: "loansigning",
-  trust_signing: "trust",
-  officiant_deposit: "officiant",
-  advanced_legal: "advanced",
-  federal_support: "advanced",
-};
-
 const SERVICE_ID_ALIASES = {
-  loansigning: "loan_signing",
-  trust: "trust_signing",
-  officiant: "officiant_deposit",
+  loan_signing: "loansigning",
+  officiant_deposit: "officiant",
 };
 
 export default function PayPage() {
@@ -27,90 +19,22 @@ export default function PayPage() {
   const params = new URLSearchParams(location.search);
   const rawServiceId = params.get("service") || "notary";
   const resolvedServiceId = SERVICE_ID_ALIASES[rawServiceId] || rawServiceId;
-  const selectedServiceId = getServiceById(resolvedServiceId)
+  const selectedServiceId = getBookingServiceById(resolvedServiceId)
     ? resolvedServiceId
     : "notary";
-  const canonServiceKey = SERVICE_KEY_MAP[selectedServiceId] || selectedServiceId;
   const selectedService = useMemo(
-    () => getServiceById(selectedServiceId),
+    () => getBookingServiceById(selectedServiceId),
     [selectedServiceId]
   );
-  const invoiceRef = useRef(null);
-  const pricingEntry = PRICING_CANON[canonServiceKey] || PRICING_CANON.notary;
-  const stripeLink = STRIPE_LINKS[canonServiceKey] || "";
-  const showInvoiceFallback = Boolean(
-    selectedService && !stripeLink && pricingEntry?.paymentType === "quote"
-  );
   const showMissingPaymentLink = Boolean(
-    selectedService && !stripeLink && pricingEntry?.paymentType !== "quote"
+    selectedService && !selectedService.paymentUrl
   );
   const priceLabel =
-    selectedService?.priceLabel || (selectedServiceId ? getPriceLabel(selectedServiceId) : null);
+    selectedServiceId ? getPriceLabel(selectedServiceId) : null;
   const hasValidService = Boolean(selectedService);
-  const paymentStepLabel =
-    pricingEntry?.paymentType === "deposit"
-      ? "Step 2 — Pay deposit to confirm"
-      : pricingEntry?.paymentType === "full"
-        ? "Step 2 — Pay in full to confirm"
-        : null;
-
-  const handleInvoiceScroll = () => {
-    invoiceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  useEffect(() => {
-    if (!showInvoiceFallback) {
-      return;
-    }
-
-    const targetId = "hs-invoice-form";
-    const ensureForm = () => {
-      if (!window.hbspt || !document.getElementById(targetId)) {
-        return;
-      }
-
-      if (document.querySelector(`#${targetId} .hs-form`)) {
-        return;
-      }
-
-      window.hbspt.forms.create({
-        portalId: "242764935",
-        formId: "cd04ab8c-3203-43e8-b634-7e2a1daefd36",
-        region: "na2",
-        target: `#${targetId}`,
-        onFormReady: () => {
-          const container = document.getElementById(targetId);
-          if (!container) return;
-          const serviceField = container.querySelector(
-            'input[name="serviceKey"]'
-          );
-          if (serviceField && selectedServiceId) {
-            serviceField.value = selectedServiceId;
-          }
-          const pageField = container.querySelector('input[name="pageUrl"]');
-          if (pageField) {
-            pageField.value = window.location.href;
-          }
-        },
-      });
-    };
-
-    const scriptId = "hs-form-embed-script";
-    const existingScript = document.getElementById(scriptId);
-
-    if (existingScript) {
-      ensureForm();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = "//js-na2.hsforms.net/forms/embed/v2.js";
-    script.async = true;
-    script.charset = "utf-8";
-    script.onload = ensureForm;
-    document.body.appendChild(script);
-  }, [selectedServiceId, showInvoiceFallback]);
+  const otherServices = bookingServices.filter(
+    (service) => service.id !== selectedServiceId
+  );
 
   return (
     <>
@@ -128,7 +52,7 @@ export default function PayPage() {
           <h1>Pay to Confirm</h1>
           <p>
             Your appointment is pending until payment is completed. Unpaid bookings
-            may be released.
+            are released.
           </p>
           <p>
             Select your service to complete payment. If you still need to book a
@@ -159,17 +83,20 @@ export default function PayPage() {
             {hasValidService && (
               <>
                 <h2>{selectedService.name}</h2>
-                <p>{selectedService.shortDesc}</p>
+                <p>{selectedService.description}</p>
                 {priceLabel && <p className="pay-card__price">{priceLabel}</p>}
-                {stripeLink && paymentStepLabel && (
-                  <p className="pay-card__stripe-note">{paymentStepLabel}</p>
-                )}
-                {stripeLink && (
+                <p className="pay-card__stripe-note">
+                  Step 2 — Pay deposit to confirm. Deposits are non-refundable and
+                  applied to your total.
+                </p>
+                {selectedService.paymentUrl && (
                   <a
                     className="btn btn--primary btn--block"
-                    href={stripeLink}
+                    href={selectedService.paymentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    Pay Now
+                    {selectedService.payLabel || "Pay Deposit"}
                   </a>
                 )}
                 {showMissingPaymentLink && (
@@ -188,39 +115,7 @@ export default function PayPage() {
                       >
                         Email {siteConfig.emails.admin}
                       </a>
-                      <Link className="btn btn--tertiary" to="/services">
-                        Back to Services
-                      </Link>
-                    </div>
-                  </div>
-                )}
-                {showInvoiceFallback && (
-                  <div className="pay-card__fallback">
-                    <p>
-                      Online payment for this service is currently unavailable.
-                      Request an invoice or contact us to proceed.
-                    </p>
-                    <div className="pay-card__fallback-actions">
-                      <button
-                        type="button"
-                        className="btn btn--primary"
-                        onClick={handleInvoiceScroll}
-                      >
-                        Request an Invoice
-                      </button>
-                      <a
-                        className="btn btn--secondary"
-                        href={`tel:${siteConfig.phoneNumbers.primary.tel}`}
-                      >
-                        Call/Text {siteConfig.phoneNumbers.primary.display}
-                      </a>
-                      <a
-                        className="btn btn--secondary"
-                        href={`mailto:${siteConfig.emails.admin}`}
-                      >
-                        Email {siteConfig.emails.admin}
-                      </a>
-                      <Link className="btn btn--tertiary" to="/services">
+                      <Link className="btn btn--secondary" to="/services">
                         Back to Services
                       </Link>
                     </div>
@@ -231,18 +126,23 @@ export default function PayPage() {
           </article>
         </section>
 
-        {showInvoiceFallback && (
-          <section id="invoice" className="pay-invoice" ref={invoiceRef}>
-            <h3>Request an Invoice</h3>
-            <p>
-              Tell us what you need and we’ll send the correct invoice or payment
-              link.
-            </p>
-            <div className="hsFormWrap embed-wrap">
-              <div id="hs-invoice-form" />
-            </div>
-          </section>
-        )}
+        <section className="pay-alternates">
+          <h2>Other Services</h2>
+          <div className="pay-alternates__grid">
+            {otherServices.map((service) => (
+              <article key={service.id} className="pay-alt-card">
+                <h3>{service.name}</h3>
+                <p>{service.description}</p>
+                <Link
+                  className="btn btn--secondary btn--block"
+                  to={`/pay?service=${service.id}`}
+                >
+                  View &amp; Pay
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
       </main>
     </>
   );
