@@ -1,39 +1,57 @@
 import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
-import { getPriceLabel } from "../data/pricingCanon.js";
-import {
-  bookingServices,
-  getBookingServiceById,
-} from "../data/bookingServices.js";
-import { siteConfig } from "../data/siteConfig.js";
+import StripeBuyButton from "../components/StripeBuyButton.jsx";
+import { SERVICES, STRIPE_PUBLISHABLE_KEY } from "../data/servicesCatalog.js";
 import "./PayPage.css";
 
 const SERVICE_ID_ALIASES = {
-  loan_signing: "loansigning",
-  officiant_deposit: "officiant",
+  notary: "mobile_notary",
+  loansigning: "loan_signing",
+  loan_signing: "loan_signing",
+  trust: "trust_signing",
+  trust_signing: "trust_signing",
 };
+
+const BOOKING_SERVICE_MAP = {
+  mobile_notary: "notary",
+  poa: "notary",
+  i9: "notary",
+  apostille: "apostille",
+  loan_signing: "loansigning",
+  trust_signing: "loansigning",
+  printing_scanning: "notary",
+  travel_fee: "notary",
+  additional_notarization: "notary",
+  process_serving: "notary",
+  court_courier: "notary",
+  digital_court_reporting: "notary",
+  legal_doc_prep: "notary",
+  field_property_inspections: "notary",
+  mobile_closing_services: "loansigning",
+  general_document_signing: "notary",
+  trust_signing_agent: "loansigning",
+};
+
+const formatPrice = (price) =>
+  typeof price === "number" ? `$${price}` : price;
 
 export default function PayPage() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const rawServiceId = params.get("service") || "notary";
-  const resolvedServiceId = SERVICE_ID_ALIASES[rawServiceId] || rawServiceId;
-  const selectedServiceId = getBookingServiceById(resolvedServiceId)
-    ? resolvedServiceId
-    : "notary";
-  const selectedService = useMemo(
-    () => getBookingServiceById(selectedServiceId),
-    [selectedServiceId]
+  const rawServiceKey = params.get("service") || "mobile_notary";
+  const resolvedServiceKey = SERVICE_ID_ALIASES[rawServiceKey] || rawServiceKey;
+  const selectedServiceKey = SERVICES[resolvedServiceKey]
+    ? resolvedServiceKey
+    : "mobile_notary";
+  const selectedService = SERVICES[selectedServiceKey];
+  const priceLabel = useMemo(
+    () => (selectedService ? formatPrice(selectedService.price) : null),
+    [selectedService]
   );
-  const showMissingPaymentLink = Boolean(
-    selectedService && !selectedService.paymentUrl
-  );
-  const priceLabel =
-    selectedServiceId ? getPriceLabel(selectedServiceId) : null;
-  const hasValidService = Boolean(selectedService);
-  const otherServices = bookingServices.filter(
-    (service) => service.id !== selectedServiceId
+  const bookingServiceKey = BOOKING_SERVICE_MAP[selectedServiceKey] || "notary";
+  const otherServices = Object.entries(SERVICES).filter(
+    ([serviceKey]) => serviceKey !== selectedServiceKey
   );
 
   return (
@@ -51,91 +69,69 @@ export default function PayPage() {
           <p className="pay-eyebrow">Step 2</p>
           <h1>Pay to Confirm</h1>
           <p>
-            Your appointment is pending until payment is completed. Unpaid bookings
-            are released.
+            Complete payment securely without leaving the site. Your appointment is
+            pending until payment is completed.
           </p>
           <p>
-            Select your service to complete payment. If you still need to book a
-            time, start on the{" "}
-            <Link
-              to={selectedService ? `/book?service=${selectedService.id}` : "/book"}
-            >
-              booking page
-            </Link>
-            .
+            Need to schedule a time? Start on the{" "}
+            <Link to={`/book?service=${bookingServiceKey}`}>booking page</Link>.
           </p>
         </header>
 
         <section className="pay-details pay-cards">
           <article className="pay-card">
-            {!hasValidService && (
-              <>
-                <h2>Select a service to pay for</h2>
-                <p>
-                  Choose a service to see the payment options and confirmation
-                  steps.
-                </p>
-                <Link className="btn btn--primary btn--block" to="/services">
-                  Browse Services
-                </Link>
-              </>
-            )}
-            {hasValidService && (
-              <>
-                <h2>{selectedService.name}</h2>
-                <p>{selectedService.description}</p>
-                {priceLabel && <p className="pay-card__price">{priceLabel}</p>}
-                <p className="pay-card__stripe-note">
-                  Step 2 — Pay deposit to confirm. Deposits are non-refundable and
-                  applied to your total.
-                </p>
-                {selectedService.paymentUrl && (
-                  <a
-                    className="btn btn--primary btn--block"
-                    href={selectedService.paymentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedService.payLabel || "Pay Deposit"}
-                  </a>
-                )}
-                {showMissingPaymentLink && (
-                  <div className="pay-card__fallback">
-                    <p>Payment link not configured. Please contact us.</p>
-                    <div className="pay-card__fallback-actions">
-                      <a
-                        className="btn btn--secondary"
-                        href={`tel:${siteConfig.phoneNumbers.primary.tel}`}
-                      >
-                        Call/Text {siteConfig.phoneNumbers.primary.display}
-                      </a>
-                      <a
-                        className="btn btn--secondary"
-                        href={`mailto:${siteConfig.emails.admin}`}
-                      >
-                        Email {siteConfig.emails.admin}
-                      </a>
-                      <Link className="btn btn--secondary" to="/services">
-                        Back to Services
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
+            <h2>{selectedService.label}</h2>
+            {priceLabel && <p className="pay-card__price">Total: {priceLabel}</p>}
+            <p className="pay-card__stripe-note">
+              Step 2 — Pay now to confirm. Deposits are non-refundable and applied
+              to your total.
+            </p>
+            <div>
+              {selectedService.buyButtonId ? (
+                <StripeBuyButton
+                  buyButtonId={selectedService.buyButtonId}
+                  publishableKey={STRIPE_PUBLISHABLE_KEY}
+                />
+              ) : selectedService.payLinkUrl ? (
+                <a
+                  className="btn btn--primary btn--block"
+                  href={selectedService.payLinkUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Pay Now
+                </a>
+              ) : (
+                <p>Payment option coming soon. Please contact us.</p>
+              )}
+            </div>
+            <div>
+              <h3>Book for later</h3>
+              <a
+                className="btn btn--secondary btn--block"
+                href={
+                  selectedService.tidycalUrl ||
+                  "https://tidycal.com/danideclaresns/notary"
+                }
+                target="_blank"
+                rel="noreferrer"
+              >
+                Schedule Appointment
+              </a>
+            </div>
           </article>
         </section>
 
         <section className="pay-alternates">
           <h2>Other Services</h2>
           <div className="pay-alternates__grid">
-            {otherServices.map((service) => (
-              <article key={service.id} className="pay-alt-card">
-                <h3>{service.name}</h3>
-                <p>{service.description}</p>
+            {otherServices.map(([serviceKey, service]) => (
+              <article key={serviceKey} className="pay-alt-card">
+                <h3>{service.label}</h3>
+                <p>Total: {formatPrice(service.price)}</p>
                 <Link
                   className="btn btn--secondary btn--block"
-                  to={`/pay?service=${service.id}`}
+                  to={`/pay?service=${serviceKey}`}
                 >
                   View &amp; Pay
                 </Link>

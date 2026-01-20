@@ -125,7 +125,10 @@ export default function BookingPage() {
                 >
                   Book Now
                 </Link>
-                <Link className="btn btn--secondary" to={`/pay?service=${service.id}`}>
+                <Link
+                  className="btn btn--secondary"
+                  to={`/pay?service=${service.payServiceKey || service.id}`}
+                >
                   {service.payLabel || "Pay to Confirm"}
                 </Link>
               </div>
@@ -178,7 +181,7 @@ export default function BookingPage() {
                 </p>
                 <Link
                   className="btn btn--primary"
-                  to={`/pay?service=${selectedServiceId}`}
+                  to={`/pay?service=${selectedService.payServiceKey || selectedServiceId}`}
                 >
                   Pay to Confirm
                 </Link>

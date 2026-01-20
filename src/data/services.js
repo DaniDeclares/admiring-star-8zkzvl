@@ -1,5 +1,4 @@
 import { getPriceLabel } from "./pricingCanon.js";
-import { paymentLinks } from "./paymentLinks.js";
 
 export const travelFeeDefaults = {
   baseRadiusMiles: 10,
@@ -20,7 +19,6 @@ export const serviceCatalog = [
       "On-site notarizations for personal and business documents with flexible scheduling.",
     category: "Notary",
     priceLabel: getPriceLabel("notary"),
-    stripePaymentLink: paymentLinks.notary || null,
     highlights: [
       "State-compliant notarial acts",
       "Evening & weekend availability",
@@ -34,7 +32,6 @@ export const serviceCatalog = [
       "Document authentication support with clear guidance for domestic and international use.",
     category: "Apostille",
     priceLabel: getPriceLabel("apostille"),
-    stripePaymentLink: paymentLinks.apostille || null,
     highlights: [
       "Step-by-step intake",
       "Drop-off coordination",
@@ -48,7 +45,6 @@ export const serviceCatalog = [
       "Certified signing agent support for purchase, refinance, and loan packages.",
     category: "Loan Signing",
     priceLabel: getPriceLabel("loansigning"),
-    stripePaymentLink: paymentLinks.loansigning || null,
     highlights: [
       "NNA-certified signing agent",
       "Detailed document walkthroughs",
@@ -62,7 +58,6 @@ export const serviceCatalog = [
       "Ceremony officiation for elopements, courthouse-style vows, and custom celebrations.",
     category: "Officiant",
     priceLabel: getPriceLabel("officiant"),
-    stripePaymentLink: paymentLinks.officiant || null,
     highlights: [
       "Personalized ceremony flow",
       "Support with filing guidance",
