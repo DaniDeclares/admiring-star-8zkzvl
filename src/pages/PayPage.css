@@ -71,36 +71,43 @@
   gap: 0.75rem;
 }
 
-.pay-invoice {
-  max-width: 720px;
-  margin: 2.5rem auto 0;
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 2rem;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-}
-
-.pay-invoice__form {
-  margin-top: 1.5rem;
-}
-
-.hsFormWrap {
-  margin-top: 1.5rem;
-  width: 100%;
-}
-
-.hsFormWrap form {
-  width: 100%;
-  min-height: 700px;
-}
-
 .btn--block {
   width: 100%;
   text-align: center;
 }
 
+.pay-alternates {
+  max-width: 980px;
+  margin: 2.5rem auto 0;
+}
+
+.pay-alternates h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.pay-alternates__grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.pay-alt-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 @media (max-width: 600px) {
   .pay-page {
     padding: 2rem 1.25rem 3rem;
+  }
+
+  .pay-card {
+    padding: 1.5rem;
   }
 }

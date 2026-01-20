@@ -52,7 +52,7 @@ export default function RealEstatePage() {
       </section>
 
       <ServiceCta
-        serviceId="loan_signing"
+        serviceId="loansigning"
         bookingLabel="Book Loan Signing"
       />
     </main>

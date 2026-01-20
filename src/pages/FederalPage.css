@@ -15,6 +15,14 @@
   margin-bottom: 0.75rem;
 }
 
+.federal-hero__actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
 .federal-section {
   background: #ffffff;
   border-radius: 18px;
@@ -37,6 +45,10 @@
 
 .federal-contact__actions {
   margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
 }
 
 @media (max-width: 600px) {

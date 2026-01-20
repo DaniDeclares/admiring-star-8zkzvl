@@ -63,6 +63,22 @@
   margin-bottom: 0;
 }
 
+.booking-policy {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  margin-bottom: 2.5rem;
+}
+
+.booking-policy ul {
+  margin-top: 1rem;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.6rem;
+  color: #4b3a3f;
+}
+
 .booking-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
