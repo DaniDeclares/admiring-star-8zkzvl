@@ -106,6 +106,7 @@ export const getServiceById = (serviceId) =>
     shortDesc:
       "On-site notarizations for personal and business documents with flexible scheduling.",
     category: "Notary",
+    tidycalSlug: "notary",
     priceLabel: getPriceLabel("notary"),
     highlights: [
       "State-compliant notarial acts",
@@ -119,6 +120,7 @@ export const getServiceById = (serviceId) =>
     shortDesc:
       "Document authentication support with clear guidance for domestic and international use.",
     category: "Apostille",
+    tidycalSlug: "apostille",
     priceLabel: getPriceLabel("apostille"),
     highlights: [
       "Step-by-step intake",
@@ -132,6 +134,7 @@ export const getServiceById = (serviceId) =>
     shortDesc:
       "Certified signing agent support for purchase, refinance, and loan packages.",
     category: "Loan Signing",
+    tidycalSlug: "loansigning",
     priceLabel: getPriceLabel("loansigning"),
     highlights: [
       "NNA-certified signing agent",
@@ -145,6 +148,7 @@ export const getServiceById = (serviceId) =>
     shortDesc:
       "Ceremony officiation for elopements, courthouse-style vows, and custom celebrations.",
     category: "Officiant",
+    tidycalSlug: "officiant",
     priceLabel: getPriceLabel("officiant"),
     highlights: [
       "Personalized ceremony flow",
