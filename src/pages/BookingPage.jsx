@@ -6,7 +6,7 @@ import {
   getBookingServiceById,
 } from "../data/bookingServices.js";
 import { getPriceLabel } from "../data/pricingCanon.js";
-import { notaryFeeDisclaimer } from "../data/services.js";
+import NotaryFeesNotice from "../components/NotaryFeesNotice.jsx";
 import { loadTidycalScript } from "../lib/loadTidycal.js";
 import "./BookingPage.css";
 
@@ -82,13 +82,7 @@ export default function BookingPage() {
             </ul>
           </div>
           <div className="booking-requirements__note">
-            <p>{notaryFeeDisclaimer}</p>
-            <p>
-              Preferred client rates, volume pricing, multi-appointment bundles, and
-              retainers are available for law firms, tax professionals, and recurring
-              clients. After-hours and urgent requests may include an expedited
-              service fee.
-            </p>
+            <NotaryFeesNotice />
           </div>
         </section>
 

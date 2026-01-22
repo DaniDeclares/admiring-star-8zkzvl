@@ -8,9 +8,6 @@ export const travelFeeDefaults = {
     "Travel fees are calculated round trip using Google mileage. The base travel fee covers the first 10 miles round trip.",
 };
 
-export const notaryFeeDisclaimer =
-  "Notary fees are set by state law ($10 per notarial act in GA, $5 per notarial act in SC). Mobile travel and convenience fees apply and are disclosed before service.";
-
 export const serviceCatalog = [
   {
     id: "notary",

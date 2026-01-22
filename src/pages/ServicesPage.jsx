@@ -1,9 +1,10 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { serviceCatalog, notaryFeeDisclaimer } from "../data/services.js";
+import { serviceCatalog } from "../data/services.js";
 import { buildServiceActionPath } from "../data/serviceRoutes.js";
 import { siteConfig } from "../data/siteConfig.js";
+import NotaryFeesNotice from "../components/NotaryFeesNotice.jsx";
 import "./ServicesPage.css";
 
 export default function ServicesPage() {
@@ -84,13 +85,7 @@ export default function ServicesPage() {
 
         <section className="services-disclaimer">
           <h3>Notary pricing disclosure</h3>
-          <p>{notaryFeeDisclaimer}</p>
-          <p className="services-discount-note">
-            Preferred client rates, volume pricing, multi-appointment bundles, and
-            retainers are available for law firms, tax professionals, and recurring
-            clients. After-hours and urgent requests may include an expedited service
-            fee.
-          </p>
+          <NotaryFeesNotice />
         </section>
 
         <section className="services-contact-bar">
