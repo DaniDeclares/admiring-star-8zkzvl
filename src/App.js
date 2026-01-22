@@ -28,6 +28,9 @@ import TaxServicesPage from "./pages/TaxServicesPage.jsx";
 import PaymentCancel from "./pages/PaymentCancel.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
+import TermsPage from "./pages/TermsPage.jsx";
+import PrivacyPage from "./pages/PrivacyPage.jsx";
+import OnboardingPage from "./pages/OnboardingPage.jsx";
 
 // Auth & Dashboard
 import LoginPage from "./pages/LoginPage.jsx";
@@ -130,6 +133,10 @@ export default function App() {
         <Route path="/festival" element={<FestivalPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
@@ -167,10 +174,6 @@ export default function App() {
           <Route
             path="/festival-dashboard"
             element={<FestivalDashboard />}
-          />
-          <Route
-            path="/partner-onboarding"
-            element={<PartnerOnboarding />}
           />
           {/* legacy or alternate success/cancel */}
           <Route path="/success" element={<SuccessPage />} />
