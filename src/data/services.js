@@ -106,12 +106,17 @@ export const getServiceById = (serviceId) =>
     shortDesc:
       "On-site notarizations for personal and business documents with flexible scheduling.",
     category: "Notary",
+codex/make-service-pricing-compliance-safe
+    priceLabel:
+      "Mobile service fee from $25 + statutory act fee (GA $2/act, SC up to $5/act)",
+=======
     tidycalSlug: "notary",
     priceLabel: getPriceLabel("notary"),
     highlights: [
       "State-compliant notarial acts",
       "Evening & weekend availability",
       "Travel fee disclosed before service",
+      "Statutory act fees set by state law (GA $2/act, SC up to $5/act); mobile/service fees separate",
     ],
   },
   {

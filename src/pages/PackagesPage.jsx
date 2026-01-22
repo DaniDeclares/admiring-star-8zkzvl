@@ -10,14 +10,14 @@ import {
   getServiceSections,
   serviceBundles,
   servicePages,
-} from "../data/services.js";
+ from "../data/services.js";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
 
 export default function PackagesPage() {
   return (
     <main className="packages-page">
-      <Helmet>
+      <Helme
         <title>Services & Pricing • Dani Declares</title>
         <meta
           name="description"
@@ -26,6 +26,13 @@ export default function PackagesPage() {
       </Helmet>
 
       <header className="packages-hero">
+codex/make-service-pricing-compliance-safe
+        <h1>All Services & Pricing</h1>
+        <p>Browse every service and package offered by Dani Declares LLC.</p>
+        <p className="packages-fee-note">
+          Statutory notarial act fees are set by state law (GA $2/act, SC up to
+          $5/act). Mobile/service fees are separate.
+=======
         <p className="eyebrow">Service Catalog</p>
         <h1>Services & Pricing</h1>
         <p>
