@@ -6,14 +6,14 @@
 | BASE_TRAVEL_FEE | Yes | api/travel-quote.js:53 | Server | Keep | Used to compute travel fee base in the travel quote API. |
 | GOOGLE_MAPS_API_KEY | Yes | api/travel-quote.js:49 | Server | Keep | Required for Google Maps Distance Matrix requests. |
 | MILEAGE_RATE | Yes | api/travel-quote.js:52 | Server | Keep | Used to compute travel fee mileage rate in the travel quote API. |
-| NEXT_PUBLIC_GA_ID | Yes | src/App.js:47 | Client | Keep | Used to initialize GA tracking on the client. |
-| NODE_ENV | Yes | src/App.js:49 | Client | Keep | Build/runtime environment flag; provided by build tooling. |
+| NODE_ENV | Yes | src/App.js:47 | Client | Keep | Build/runtime environment flag; provided by build tooling. |
 | ORIGIN_ADDRESS | Yes | api/travel-quote.js:50 | Server | Keep | Required to set the origin for travel quotes. |
 | PRINTIFY_API_TOKEN | Yes | src/setupProxy.js:13<br>src/scripts/printify.mjs:6 | Server | Keep | Used for Printify API requests (proxy and script). |
 | PRINTIFY_STORE_ID | Yes | src/scripts/printify.mjs:5 | Server | Keep | Used for Printify product creation script. |
 | PUBLIC_URL | Yes | src/pages/Homepage.jsx:7<br>src/pages/WeddingsPage.jsx:64 | Client | Keep | CRA public asset base URL. |
 | REACT_APP_FB_PIXEL_ID | No | README.md:74 | Client | Delete | Mentioned in README example only; not referenced in code. |
 | REACT_APP_GA_MEASUREMENT_ID | Yes | src/App.js:48 | Client | Keep | Used to initialize GA tracking on the client. |
+| REACT_APP_PAYPAL_CLIENT_ID | Yes | src/components/PayPalButton.jsx:11 | Client | Keep | Used to load the PayPal SDK script on the client. |
 | REACT_APP_SNIPCART_API_KEY | No | README.md:69 | Client | Delete | Mentioned in README example only; not referenced in code. |
 | REACT_APP_STRIPE_APOSTILLE | Yes | src/config/stripeLinks.js:5 | Client | Keep | Stripe payment link for apostille service. |
 | REACT_APP_STRIPE_CONNECT_CLIENT_ID | Yes | src/pages/OnboardingPage copy.jsx:7<br>src/pages/OnboardingPage.jsx:7<br>src/pages/PartnerOnboarding.jsx:7 | Client | Keep | Used for Stripe Connect onboarding links. |
