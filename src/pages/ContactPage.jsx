@@ -12,25 +12,11 @@ export default function ContactPage() {
         <title>Contact & Quotes • Dani Declares</title>
         <meta
           name="description"
-
-          content="Questions, bookings, or custom service quotes? Reach out to Dani Declares for notary, apostille, officiant, and event inquiries."
-=======
           content="Questions, bookings, or custom quotes? Reach out to Dani Declares for mobile notary, apostille, loan signing, and officiant services."
-
         />
       </Helmet>
 
       <main className="contact-page">
-codex/redesign-danideclares.com-for-service-booking
-        <h1>Let’s Connect & Get You Started</h1>
-        <p>
-          Have questions about our services—Notary & Legal Support, Apostille,
-          Officiant Services,
-          {SHOW_FESTIVAL ? " Festival & Vendor Opportunities, or Merch? " : " or Merch? "}
-          Fill out the form below, and we’ll follow up with personalized next
-          steps or a custom quote.
-        </p>
-=======
         <header className="contact-hero">
           <p className="contact-eyebrow">Contact</p>
           <h1>Let’s plan your appointment.</h1>
@@ -76,22 +62,24 @@ codex/redesign-danideclares.com-for-service-booking
         <section className="quick-links">
           <h3>Quick Links</h3>
           <ul>
-codex/redesign-danideclares.com-for-service-booking
-            <li><Link to="/services">Service Catalog</Link></li>
-            <li><Link to="/book">Book an Appointment</Link></li>
-            <li><Link to="/pay">Complete Payment</Link></li>
-            {SHOW_FESTIVAL && (
-              <li><Link to="/festival">Festival & Vendor Info</Link></li>
-            )}
-            <li><Link to="/shop">Merch & Digital Products</Link></li>
-=======
-            <li><Link to="/services">All Services</Link></li>
-            <li><Link to="/book?service=notary">Book Notary</Link></li>
-            <li><Link to="/book?service=apostille">Book Apostille</Link></li>
-            <li><Link to="/book?service=loansigning">Book Loan Signing</Link></li>
-            <li><Link to="/book?service=officiant">Book Officiant</Link></li>
-            <li><Link to="/pay">Pay to Confirm</Link></li>
-
+            <li>
+              <Link to="/services">All Services</Link>
+            </li>
+            <li>
+              <Link to="/book?service=notary">Book Notary</Link>
+            </li>
+            <li>
+              <Link to="/book?service=apostille">Book Apostille</Link>
+            </li>
+            <li>
+              <Link to="/book?service=loansigning">Book Loan Signing</Link>
+            </li>
+            <li>
+              <Link to="/book?service=officiant">Book Officiant</Link>
+            </li>
+            <li>
+              <Link to="/pay">Pay to Confirm</Link>
+            </li>
           </ul>
         </section>
       </main>
