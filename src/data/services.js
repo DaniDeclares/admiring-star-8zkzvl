@@ -1,8 +1,6 @@
- codex/redesign-danideclares.com-for-service-booking
-import { paymentLinks } from "./paymentLinks.js";
-=======
+import { getStripeLink } from "../config/stripeLinks.js";
 import { getPriceLabel } from "./pricingCanon.js";
-
+import { SERVICES } from "./servicesCatalog.js";
 
 export const travelFeeDefaults = {
   baseRadiusMiles: 10,
@@ -12,20 +10,19 @@ export const travelFeeDefaults = {
     "Travel fees are calculated round trip using Google mileage. The base travel fee covers the first 10 miles round trip.",
 };
 
-// Centralized service catalog derived from products.csv + prices.csv exports.
-export const services = [
+const bookingServiceData = [
   {
     id: "notary",
-codex/redesign-danideclares.com-for-service-booking
     title: "General Notary",
     shortDescription: "Mobile notarization for everyday documents and affidavits.",
     category: "notary",
     actionType: "book",
     tidycalSlug: "notary",
     priceLabel: "$35 per signature",
+    paymentServiceId: "notary-payment",
   },
   {
-    id: "loan-signing",
+    id: "loansigning",
     title: "Loan Signing",
     shortDescription:
       "Certified signing agent support for refinance, purchase, and seller packages.",
@@ -33,6 +30,7 @@ codex/redesign-danideclares.com-for-service-booking
     actionType: "book",
     tidycalSlug: "loansigning",
     priceLabel: "Packages from $175",
+    paymentServiceId: "loan-signing-payment",
   },
   {
     id: "apostille",
@@ -43,6 +41,7 @@ codex/redesign-danideclares.com-for-service-booking
     actionType: "book",
     tidycalSlug: "apostille",
     priceLabel: "Starting at $175",
+    paymentServiceId: "apostille-payment",
   },
   {
     id: "officiant",
@@ -52,7 +51,11 @@ codex/redesign-danideclares.com-for-service-booking
     actionType: "book",
     tidycalSlug: "officiant",
     priceLabel: "Packages from $200",
+    paymentServiceId: "officiant-payment",
   },
+];
+
+const paymentServiceData = [
   {
     id: "notary-payment",
     title: "Notary Appointment Payment",
@@ -60,7 +63,8 @@ codex/redesign-danideclares.com-for-service-booking
       "Complete payment to confirm your scheduled general notary appointment.",
     category: "payment",
     actionType: "pay",
-    stripePaymentLink: paymentLinks.notary.mobileNotaryVisit,
+    catalogKey: "mobile_notary",
+    bookingServiceId: "notary",
   },
   {
     id: "loan-signing-payment",
@@ -69,7 +73,8 @@ codex/redesign-danideclares.com-for-service-booking
       "Confirm your loan signing appointment with secure payment.",
     category: "payment",
     actionType: "pay",
-    stripePaymentLink: paymentLinks.notary.loanSigningAgent,
+    catalogKey: "loan_signing",
+    bookingServiceId: "loansigning",
   },
   {
     id: "apostille-payment",
@@ -78,38 +83,48 @@ codex/redesign-danideclares.com-for-service-booking
       "Finalize payment for your apostille facilitation appointment.",
     category: "payment",
     actionType: "pay",
-    stripePaymentLink: paymentLinks.notary.apostilleFacilitation,
+    catalogKey: "apostille",
+    bookingServiceId: "apostille",
   },
   {
     id: "officiant-payment",
     title: "Officiant Service Payment",
-    shortDescription:
-      "Reserve and confirm your officiant package with payment.",
+    shortDescription: "Reserve and confirm your officiant package with payment.",
     category: "payment",
     actionType: "pay",
-    stripePaymentLink: paymentLinks.weddings.simpleVows,
+    catalogKey: "officiant",
+    bookingServiceId: "officiant",
   },
 ];
 
-export const bookingServices = services.filter(
-  (service) => service.actionType === "book"
-);
+const buildPaymentService = (service) => {
+  const catalogEntry = SERVICES[service.catalogKey] || {};
 
-export const paymentServices = services.filter(
-  (service) => service.actionType === "pay"
-);
+  return {
+    ...service,
+    price: catalogEntry.price ?? null,
+    buyButtonId: catalogEntry.buyButtonId ?? null,
+    stripePaymentLink:
+      catalogEntry.payLinkUrl || getStripeLink(service.catalogKey),
+    tidycalUrl: catalogEntry.tidycalUrl || null,
+  };
+};
+
+export const bookingServices = bookingServiceData;
+export const paymentServices = paymentServiceData.map(buildPaymentService);
+
+export const services = [...bookingServices, ...paymentServices];
 
 export const getServiceById = (serviceId) =>
   services.find((service) => service.id === serviceId);
-=======
+
+export const serviceCatalog = [
+  {
+    id: "notary",
     name: "Mobile Notary",
     shortDesc:
       "On-site notarizations for personal and business documents with flexible scheduling.",
     category: "Notary",
-codex/make-service-pricing-compliance-safe
-    priceLabel:
-      "Mobile service fee from $25 + statutory act fee (GA $2/act, SC up to $5/act)",
-=======
     tidycalSlug: "notary",
     priceLabel: getPriceLabel("notary"),
     highlights: [
@@ -163,5 +178,13 @@ codex/make-service-pricing-compliance-safe
   },
 ];
 
-export const getServiceById = (serviceId) =>
-  serviceCatalog.find((service) => service.id === serviceId);
+export const servicePages = {
+  financial: [],
+  legal: [],
+  realEstate: [],
+  weddings: [],
+};
+
+export const serviceBundles = [];
+
+export const getServiceSections = (sections) => sections || [];
