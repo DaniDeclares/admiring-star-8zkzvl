@@ -43,9 +43,7 @@ import CancelPage from "./pages/CancelPage.jsx";
 
 export default function App() {
   const location = useLocation();
-  const gaMeasurementId =
-    process.env.NEXT_PUBLIC_GA_ID ||
-    process.env.REACT_APP_GA_MEASUREMENT_ID;
+  const gaMeasurementId = process.env.REACT_APP_GA_MEASUREMENT_ID;
   const isProduction = process.env.NODE_ENV === "production";
 
   useEffect(() => {
