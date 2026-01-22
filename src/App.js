@@ -111,6 +111,10 @@ export default function App() {
   }, [gaMeasurementId, isProduction, location]);
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
     window._hsq = window._hsq || [];
     window._hsq.push(["setPath", `${location.pathname}${location.search}`]);
     window._hsq.push(["trackPageView"]);
