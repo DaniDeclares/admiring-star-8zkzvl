@@ -8,5 +8,8 @@ export function loadHubSpotTracking() {
   s.async = true;
   s.defer = true;
   s.src = "https://js-na2.hs-scripts.com/242764935.js";
-  document.body.appendChild(s);
+  const target = document.body || document.head;
+  if (target) {
+    target.appendChild(s);
+  }
 }
