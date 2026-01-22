@@ -15,8 +15,8 @@ export const SERVICES = {
     buyButtonId: "buy_btn_1SrfleChHm1uJK9xdESFK49d",
     tidycalUrl: "https://tidycal.com/danideclaresns/notary",
   },
-  additional_notarization: {
-    label: "Additional Notarization",
+  additional_signature_set: {
+    label: "Additional Signature Set / Service Add-On",
     price: 10,
     buyButtonId: "buy_btn_1SrfoSChHm1uJK9xGWWY0swD",
     tidycalUrl: "https://tidycal.com/danideclaresns/notary",
