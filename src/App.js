@@ -5,28 +5,41 @@ import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 // Global Components
 import FestivalBanner from "./components/FestivalBanner.jsx";
 import Navbar from "./components/Navbar.jsx";
-import SocialLinks from "./components/SocialLinks.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import Footer from "./components/Footer.jsx";
 import { SHOW_FESTIVAL } from "./data/siteConfig.js";
+import { loadHubSpotTracking } from "./lib/loadHubSpot.js";
 
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
+codex/redesign-danideclares.com-for-service-booking
 import BookPage from "./pages/BookPage.jsx";
 import PayPage from "./pages/PayPage.jsx";
 import EventsPage from "./pages/EventsPage.jsx";
+=======
+import BookingPage from "./pages/BookingPage.jsx";
+import PayPage from "./pages/PayPage.jsx";
+
 import FestivalPage from "./pages/FestivalPage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
+import ServicesPage from "./pages/ServicesPage.jsx";
+import FederalPage from "./pages/FederalPage.jsx";
+import TaxServicesPage from "./pages/TaxServicesPage.jsx";
 
 // Newly created Public Pages
+codex/redesign-danideclares.com-for-service-booking
 import PackagesPage from "./pages/PackagesPage.jsx";
+=======
 import PaymentCancel from "./pages/PaymentCancel.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
+import TermsPage from "./pages/TermsPage.jsx";
+import PrivacyPage from "./pages/PrivacyPage.jsx";
+import OnboardingPage from "./pages/OnboardingPage.jsx";
 
 // Auth & Dashboard
 import LoginPage from "./pages/LoginPage.jsx";
@@ -42,9 +55,7 @@ import CancelPage from "./pages/CancelPage.jsx";
 
 export default function App() {
   const location = useLocation();
-  const gaMeasurementId =
-    process.env.NEXT_PUBLIC_GA_ID ||
-    process.env.REACT_APP_GA_MEASUREMENT_ID;
+  const gaMeasurementId = process.env.REACT_APP_GA_MEASUREMENT_ID;
   const isProduction = process.env.NODE_ENV === "production";
 
   useEffect(() => {
@@ -54,6 +65,10 @@ export default function App() {
       "https://chimpstatic.com/mcjs-connected/js/users/a28036bff232caaa9e6879b80/db34d9bf94e068347531b6748.js";
     script.async = true;
     document.body.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    loadHubSpotTracking();
   }, []);
 
   useEffect(() => {
@@ -95,6 +110,11 @@ export default function App() {
     });
   }, [gaMeasurementId, isProduction, location]);
 
+  useEffect(() => {
+    window._hsq = window._hsq || [];
+    window._hsq.push(["setPath", `${location.pathname}${location.search}`]);
+    window._hsq.push(["trackPageView"]);
+  }, [location]);
   return (
     <>
       {SHOW_FESTIVAL && <FestivalBanner />}
@@ -103,7 +123,16 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<Homepage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/federal" element={<FederalPage />} />
+        <Route
+          path="/federal-services"
+          element={<Navigate to="/federal" replace />}
+        />
+        <Route path="/tax" element={<Navigate to="/tax-services" replace />} />
+        <Route path="/tax-services" element={<TaxServicesPage />} />
         <Route path="/shop" element={<ShopPage />} />
+codex/redesign-danideclares.com-for-service-booking
         <Route path="/services" element={<PackagesPage />} />
         <Route path="/book" element={<BookPage />} />
         <Route path="/pay" element={<PayPage />} />
@@ -115,14 +144,46 @@ export default function App() {
         <Route path="/legal-services" element={<Navigate to="/services" replace />} />
         <Route path="/packages" element={<Navigate to="/services" replace />} />
         <Route path="/bookings" element={<Navigate to="/book" replace />} />
+=======
+        <Route path="/book" element={<BookingPage />} />
+        <Route path="/bookings" element={<Navigate to="/book" replace />} />
+        <Route path="/pay" element={<PayPage />} />
+
         <Route path="/travel-quote" element={<TravelQuotePage />} />
         <Route path="/festival" element={<FestivalPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
+codex/redesign-danideclares.com-for-service-booking
         {/* Newly added service pages */}
+=======
+        {/* Legacy service routes */}
+        <Route path="/notary" element={<Navigate to="/services" replace />} />
+        <Route
+          path="/apostille"
+          element={<Navigate to="/book?service=apostille" replace />}
+        />
+        <Route
+          path="/officiant"
+          element={<Navigate to="/book?service=officiant" replace />}
+        />
+        <Route path="/packages" element={<Navigate to="/services" replace />} />
+        <Route path="/real-estate" element={<Navigate to="/services" replace />} />
+        <Route path="/legal-services" element={<Navigate to="/services" replace />} />
+        <Route
+          path="/professional-services"
+          element={<Navigate to="/services" replace />}
+        />
+        <Route path="/weddings" element={<Navigate to="/services" replace />} />
+        <Route path="/financial" element={<Navigate to="/services" replace />} />
+        <Route path="/events" element={<Navigate to="/services" replace />} />
+
         <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
 
@@ -138,17 +199,12 @@ export default function App() {
             path="/festival-dashboard"
             element={<FestivalDashboard />}
           />
-          <Route
-            path="/partner-onboarding"
-            element={<PartnerOnboarding />}
-          />
           {/* legacy or alternate success/cancel */}
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
         </Route>
       </Routes>
 
-      <SocialLinks />
       <CookieConsent />
       <Footer />
     </>

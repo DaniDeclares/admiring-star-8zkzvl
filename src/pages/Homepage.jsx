@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import Countdown from "react-countdown";
-import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 const eventBackground =
   process.env.PUBLIC_URL + "/images/festival/pexels-fang-liu-1996637-3617724.jpg";
@@ -73,7 +72,7 @@ export default function Homepage() {
 
       <main className="homepage home-main">
         {/* HERO */}
-        <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
+        <section className="hero">
           <div className="hero-overlay">
             <h1>Declare Your Worth</h1>
             <p className="hero-subtitle">

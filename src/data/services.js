@@ -1,4 +1,8 @@
+ codex/redesign-danideclares.com-for-service-booking
 import { paymentLinks } from "./paymentLinks.js";
+=======
+import { getPriceLabel } from "./pricingCanon.js";
+
 
 export const travelFeeDefaults = {
   baseRadiusMiles: 10,
@@ -12,6 +16,7 @@ export const travelFeeDefaults = {
 export const services = [
   {
     id: "notary",
+codex/redesign-danideclares.com-for-service-booking
     title: "General Notary",
     shortDescription: "Mobile notarization for everyday documents and affidavits.",
     category: "notary",
@@ -96,3 +101,58 @@ export const paymentServices = services.filter(
 
 export const getServiceById = (serviceId) =>
   services.find((service) => service.id === serviceId);
+=======
+    name: "Mobile Notary",
+    shortDesc:
+      "On-site notarizations for personal and business documents with flexible scheduling.",
+    category: "Notary",
+    priceLabel: getPriceLabel("notary"),
+    highlights: [
+      "State-compliant notarial acts",
+      "Evening & weekend availability",
+      "Travel fee disclosed before service",
+    ],
+  },
+  {
+    id: "apostille",
+    name: "Apostille Facilitation",
+    shortDesc:
+      "Document authentication support with clear guidance for domestic and international use.",
+    category: "Apostille",
+    priceLabel: getPriceLabel("apostille"),
+    highlights: [
+      "Step-by-step intake",
+      "Drop-off coordination",
+      "Status updates provided",
+    ],
+  },
+  {
+    id: "loansigning",
+    name: "Loan Signing",
+    shortDesc:
+      "Certified signing agent support for purchase, refinance, and loan packages.",
+    category: "Loan Signing",
+    priceLabel: getPriceLabel("loansigning"),
+    highlights: [
+      "NNA-certified signing agent",
+      "Detailed document walkthroughs",
+      "Scanbacks available on request",
+    ],
+  },
+  {
+    id: "officiant",
+    name: "Officiant Services",
+    shortDesc:
+      "Ceremony officiation for elopements, courthouse-style vows, and custom celebrations.",
+    category: "Officiant",
+    priceLabel: getPriceLabel("officiant"),
+    highlights: [
+      "Personalized ceremony flow",
+      "Support with filing guidance",
+      "Travel coordination included",
+    ],
+  },
+];
+
+export const getServiceById = (serviceId) =>
+  serviceCatalog.find((service) => service.id === serviceId);

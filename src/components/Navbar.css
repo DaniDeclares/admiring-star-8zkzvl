@@ -7,11 +7,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+codex/redesign-danideclares.com-for-service-booking
   font-family: var(--font-primary);
   position: sticky;
   top: 0;
   z-index: 1000;
   backdrop-filter: blur(12px);
+=======
+  font-family: 'Raleway', sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+main
 }
 
 .navbar-logo {
@@ -43,7 +51,10 @@
   left: 0;
   right: 0;
   padding: 1rem;
+codex/redesign-danideclares.com-for-service-booking
   border-bottom: 1px solid rgba(139, 30, 46, 0.12);
+=======
+
 }
 
 .nav-link {

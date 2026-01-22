@@ -96,7 +96,10 @@ export default function TravelQuotePage() {
       </section>
 
       <ServiceCta
+ codex/redesign-danideclares.com-for-service-booking
         bookingServiceId="notary"
+=======
+        serviceId="notary"
         bookingLabel="Book a Mobile Appointment"
       />
     </main>

@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-01-20T13:57:04.528Z",
+  "total": 4,
+  "brokenCount": 4,
+  "broken": [
+    {
+      "id": "notary",
+      "url": "https://buy.stripe.com/5kQ4gOf0H9H08dq6oq",
+      "status": null,
+      "finalUrl": "https://buy.stripe.com/5kQ4gOf0H9H08dq6oq",
+      "ok": false,
+      "error": "fetch failed"
+    },
+    {
+      "id": "apostille",
+      "url": "https://buy.stripe.com/3cs14mbGh6uOaU85k9",
+      "status": null,
+      "finalUrl": "https://buy.stripe.com/3cs14mbGh6uOaU85k9",
+      "ok": false,
+      "error": "fetch failed"
+    },
+    {
+      "id": "loansigning",
+      "url": "https://buy.stripe.com/6oU6oGdGh9H0ebO28g",
+      "status": null,
+      "finalUrl": "https://buy.stripe.com/6oU6oGdGh9H0ebO28g",
+      "ok": false,
+      "error": "fetch failed"
+    },
+    {
+      "id": "officiant",
+      "url": "https://buy.stripe.com/aFa7sKdGhcTc71Rfpv6kg14",
+      "status": null,
+      "finalUrl": "https://buy.stripe.com/aFa7sKdGhcTc71Rfpv6kg14",
+      "ok": false,
+      "error": "fetch failed"
+    }
+  ]
+}

@@ -1,81 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+ codex/redesign-danideclares.com-for-service-booking
 import Countdown from "react-countdown";
 import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 import { bookingServices } from "../data/services.js";
 const eventBackground =
   process.env.PUBLIC_URL + "/images/festival/pexels-fang-liu-1996637-3617724.jpg";
+=======
+
 import "./Homepage.css";
 
-const testimonials = [
-  {
-    quote: "Fast, professional, and on time—exactly what we needed for our signing.",
-    author: "Alex R.",
-  },
-  {
-    quote: "The travel fee estimate was clear and the appointment was smooth.",
-    author: "Monica L.",
-  },
-  {
-    quote: "Our open house was covered flawlessly. Great support for busy agents.",
-    author: "Jasmine M.",
-  },
-  {
-    quote: "Efficient courier service saved us a trip to the courthouse.",
-    author: "Erika W.",
-  },
-  {
-    quote: "Simple, elegant ceremony and quick filing. Highly recommend.",
-    author: "Taylor C.",
-  },
-  {
-    quote: "We booked same-day notarization and everything was handled with care.",
-    author: "Brianna S.",
-  },
-];
-
-function CountdownTimer() {
-  const festivalDate = new Date("2025-07-28T09:00:00-04:00");
-  const renderer = ({ days, hours, minutes, seconds }) => (
-    <div className="countdown-values">
-      <span>{days}d</span> <span>{hours}h</span> <span>{minutes}m</span>{" "}
-      <span>{seconds}s</span>
-    </div>
-  );
-  return (
-    <div className="festival-countdown">
-      <h3>Festival starts in:</h3>
-      <Countdown date={festivalDate} renderer={renderer} />
-    </div>
-  );
-}
-
 export default function Homepage() {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const iv = setInterval(
-      () => setIdx((i) => (i + 1) % testimonials.length),
-      4000
-    );
-    return () => clearInterval(iv);
-  }, []);
-
   return (
     <>
       <Helmet>
-        <title>Dani Declares • Mobile Notary, Real Estate & Officiant Services</title>
+        <title>Dani Declares • Tax Season Notary & Federal Ready Services</title>
         <meta
           name="description"
-          content="Mobile notary, real estate support, courier services, and officiant ceremonies across Metro Atlanta. Transparent pricing and easy booking."
+          content="Same-day mobile notary support for tax, legal, and government documents across Georgia and South Carolina."
         />
       </Helmet>
 
       <main className="homepage home-main">
-        {/* HERO */}
-        <section className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
+        <section className="hero">
           <div className="hero-overlay">
+codex/redesign-danideclares.com-for-service-booking
             <p className="hero-eyebrow">Mobile Notary & Officiant Services</p>
             <h1>Book Notary Appointments in Minutes.</h1>
             <p className="hero-subtitle">
@@ -88,6 +39,25 @@ export default function Homepage() {
               </Link>
               <Link to="/services" className="btn btn--secondary">
                 View Services
+=======
+            <h1>
+              Reliable Notary &amp; Document Services for Tax, Legal, and Government
+              Needs
+            </h1>
+            <p className="hero-subtitle">
+              Same-day mobile service for individuals, tax professionals, law firms, and
+              agencies across Georgia and South Carolina.
+            </p>
+            <div className="hero-cta">
+              <Link to="/book?service=notary" className="btn btn--primary">
+                Book a Notary Now
+              </Link>
+              <Link to="/tax-services" className="btn btn--secondary">
+                Tax &amp; IRS Document Help
+              </Link>
+              <Link to="/federal" className="btn btn--outline">
+                Federal &amp; Agency Services
+
               </Link>
             </div>
             <p className="hero-footnote">
@@ -96,6 +66,7 @@ export default function Homepage() {
           </div>
         </section>
 
+codex/redesign-danideclares.com-for-service-booking
         {/* ABOUT US */}
         <section className="about-us-section">
           <h2>Premium mobile services, built for ease.</h2>
@@ -104,40 +75,40 @@ export default function Homepage() {
             with transparent pricing and quick scheduling. Book your appointment,
             then confirm payment to lock in your time.
           </p>
+=======
+        <section className="tax-season">
+          <h2>Tax Season Services</h2>
+          <ul>
+            <li>IRS letters, notices, and sworn statements</li>
+            <li>Power of Attorney (POA) for tax representatives</li>
+            <li>I-9 and identity verification</li>
+            <li>Affidavits and declarations</li>
+            <li>Apostille facilitation for foreign income or dependents</li>
+            <li>Same-day mobile and after-hours availability</li>
+          </ul>
+          <Link to="/book" className="btn btn--primary">
+            Schedule Tax-Related Notary Service
+          </Link>
         </section>
 
-        {/* WHY THIS FESTIVAL MATTERS */}
-        {SHOW_FESTIVAL && (
-          <section className="festival-purpose-section">
-            <h2>Why the Declare Your Worth Festival Matters</h2>
-            <p>
-              Growing up, financial literacy wasn’t something that was taught in my
-              household—or in many others like mine.
-              I know firsthand what it feels like to navigate adulthood without the
-              tools, resources, or financial confidence needed to thrive.
-            </p>
-            <p>
-              From kid entrepreneur zones and budgeting bootcamps to interactive
-              workshops and live entertainment—this event is a movement to empower
-              every generation.
-            </p>
-            <Link to="/festival" className="btn btn--primary">
-              Explore the Festival →
-            </Link>
-          </section>
-        )}
+        <section className="trust">
+          <ul className="trust-list">
+            <li>Commissioned Notary Public (GA &amp; SC)</li>
+            <li>Experienced with legal, real estate, and government documents</li>
+            <li>Mobile, on-site, and on-call availability</li>
+            <li>Insured and compliant business entity</li>
+        </section>
 
-        {/* FESTIVAL PROMO */}
-        {SHOW_FESTIVAL && (
-          <section
-            className="festival-banner"
-            style={{ backgroundImage: `url(${eventBackground})` }}
-          >
-            <div className="festival-overlay">
-              <h2>Declare Your Worth Festival</h2>
+        <section className="who-we-serve">
+          <h2>Who We Serve</h2>
+          <div className="grid-3">
+            <div>
+              <h3>Individuals &amp; Families</h3>
               <p>
-                <strong>July 28–29, 2025 • Atlanta, GA</strong>
+                Fast, professional notary support for personal, tax, and legal
+                documents.
               </p>
+ codex/redesign-danideclares.com-for-service-booking
               <CountdownTimer />
               <Link to="/festival" className="btn btn--primary">
                 Get Early Bird Tickets
@@ -187,10 +158,25 @@ export default function Homepage() {
             <Link to="/services" className="btn btn--secondary">
               See all services & pricing
             </Link>
+=======
+              <Link to="/book">Book Service</Link>
+            </div>
+            <div>
+              <h3>Tax &amp; Legal Professionals</h3>
+              <p>
+                Reliable execution for clients, filings, and time-sensitive documents.
+              </p>
+              <Link to="/services">Professional Services</Link>
+            </div>
+            <div>
+              <h3>Government &amp; Agencies</h3>
+              <p>Contract-ready document, notary, and administrative support.</p>
+              <Link to="/federal">Federal Services</Link>
+            </div>
+
           </div>
         </section>
 
-        {/* CONTACT CTA */}
         <section className="contact-cta">
           <h2>Need help selecting a service?</h2>
           <p>Tell us what you need and we’ll follow up quickly.</p>

@@ -2,7 +2,17 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import "./PackagesPage.css";
+odex/redesign-danideclares.com-for-service-booking
 import { bookingServices, paymentServices } from "../data/services.js";
+=======
+import { SHOW_FESTIVAL } from "../data/siteConfig.js";
+import {
+  getServiceSections,
+  serviceBundles,
+  servicePages,
+} from "../data/services.js";
+import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
+import ServiceCta from "../components/ServiceCta.jsx";
 
 export default function PackagesPage() {
   return (
@@ -60,6 +70,7 @@ export default function PackagesPage() {
                 <h3>{service.title}</h3>
                 <p>{service.shortDescription}</p>
               </div>
+codex/redesign-danideclares.com-for-service-booking
               <Link
                 to={`/pay?service=${service.id}`}
                 className="btn btn--secondary"
@@ -70,6 +81,16 @@ export default function PackagesPage() {
           ))}
         </div>
       </section>
+=======
+            ))}
+          </div>
+        </section>
+      )}
+
+      <ServiceCta
+        serviceId="notary"
+        bookingLabel="Book an Appointment"
+      />
     </main>
   );
 }

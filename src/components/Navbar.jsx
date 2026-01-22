@@ -1,23 +1,28 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+codex/redesign-danideclares.com-for-service-booking
 import { FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext.jsx";
+=======
+
 
 import logoSeal from "../assets/logo/logo-gold-seal.png";
 import "./Navbar.css";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+codex/redesign-danideclares.com-for-service-booking
   const { cart } = useCart();
+=======
+
   const location = useLocation();
-  const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-  const navRef = useRef();
 
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setMenuOpen(false);
   };
 
+codex/redesign-danideclares.com-for-service-booking
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -29,8 +34,10 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+=======
+
   return (
-    <nav className="navbar" ref={navRef}>
+    <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/" onClick={handleLinkClick}>
           <img src={logoSeal} alt="Dani Declares Logo" className="navbar-logo" />
@@ -46,6 +53,7 @@ export default function Navbar() {
       </button>
 
       <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
+codex/redesign-danideclares.com-for-service-booking
         {/* Primary Links */}
         <Link
           to="/services"
@@ -77,30 +85,79 @@ export default function Navbar() {
         </Link>
         <Link
           to="/shop"
+=======
+        <Link
+          to="/"
+
           onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/shop" ? "active" : ""}`}>
-          Shop
+          className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
+        >
+          Home
         </Link>
         <Link
-          to="/blog"
+          to="/services"
           onClick={handleLinkClick}
-          className={`nav-link ${location.pathname.startsWith("/blog") ? "active" : ""}`}>
-          Blog
+          className={`nav-link ${location.pathname === "/services" ? "active" : ""}`}
+        >
+          Services
         </Link>
-
-        {/* Cart */}
-        <Link to="/cart" className="cart-link" onClick={handleLinkClick}>
-          <FiShoppingCart size={20} />
-          {totalQty > 0 && <span className="cart-badge">{totalQty}</span>}
+        <Link
+          to="/tax-services"
+          onClick={handleLinkClick}
+          className={`nav-link ${
+            location.pathname === "/tax-services" ? "active" : ""
+          }`}
+        >
+          Tax Season
+        </Link>
+        <Link
+          to="/federal"
+          onClick={handleLinkClick}
+          className={`nav-link ${
+            location.pathname === "/federal" ? "active" : ""
+          }`}
+        >
+          Federal
+        </Link>
+        <Link
+          to="/apostille"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/apostille" ? "active" : ""}`}
+        >
+          Apostille
+        </Link>
+        <Link
+          to="/book"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/book" ? "active" : ""}`}
+        >
+          Book
+        </Link>
+        <Link
+          to="/contact"
+          onClick={handleLinkClick}
+          className={`nav-link ${location.pathname === "/contact" ? "active" : ""}`}
+        >
+          Contact
         </Link>
       </div>
 
+codex/redesign-danideclares.com-for-service-booking
       <a
         href="/book?service=notary"
+=======
+      <Link
+        to="/book?service=notary"
+
         className="btn btn--primary book-btn"
+        onClick={handleLinkClick}
       >
         Book Notary
+ codex/redesign-danideclares.com-for-service-booking
       </a>
+=======
+      </Link>
+
     </nav>
   );
 }

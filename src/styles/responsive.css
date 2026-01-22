@@ -1,0 +1,143 @@
+:root {
+  --maxw: 1120px;
+  --pad: 16px;
+  --radius: 14px;
+}
+
+/* Base container */
+.container {
+  width: min(var(--maxw), 100%);
+  margin: 0 auto;
+  padding: 0 var(--pad);
+}
+
+/* Prevent overflow + horizontal scroll */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Images always scale */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Buttons: never cram */
+.btn-row,
+.cta-buttons,
+.hero-cta,
+.booking-card__actions,
+.pay-card__fallback-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Cards: consistent spacing */
+.card, .service-card, .panel, .box {
+  border-radius: var(--radius);
+}
+
+/* Grid helpers */
+.grid-2, .grid-3, .grid-4 {
+  display: grid;
+  gap: 16px;
+}
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* Responsive embeds */
+.embed-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.embed-wrap iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Tablet and down */
+@media (max-width: 768px) {
+  :root { --pad: 14px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+
+  .cta-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .btn, .btn-primary, .btn-secondary, .btn-outline, button,
+  .btn--primary, .btn--secondary, .btn--outline, .btn--accent {
+    width: 100% !important;
+  }
+
+  .tidycal-embed {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Hero */
+  .hero, .hero-section {
+    padding: 28px 0 !important;
+  }
+
+  .hero h1 {
+    font-size: 28px !important;
+    line-height: 1.15 !important;
+  }
+
+  .hero p {
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Make big sections breathe */
+  section {
+    padding: 22px 0 !important;
+  }
+
+  /* Booking/Pay cards stack */
+  .booking-cards,
+  .pay-cards,
+  .services-grid,
+  .booking-options,
+  .pay-details {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* Footer links wrap */
+  footer .footer-links,
+  footer .social-links,
+  footer .footer-site-links,
+  footer .footer-social {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  :root { --pad: 12px; }
+
+  .hero h1 { font-size: 24px !important; }
+  .btn, button, .btn-primary, .btn-secondary, .btn-outline,
+  .btn--primary, .btn--secondary, .btn--outline, .btn--accent {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Reduce card padding */
+  .card, .service-card, .panel, .box {
+    padding: 14px !important;
+  }
+}

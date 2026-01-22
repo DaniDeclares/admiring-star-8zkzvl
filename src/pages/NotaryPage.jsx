@@ -1,18 +1,12 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { siteConfig } from "../data/siteConfig.js";
-import {
-  getServiceSections,
-  servicePages,
-} from "../data/services.js";
+import NotaryFeesNotice from "../components/NotaryFeesNotice.jsx";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
-import { tidyCalEvents } from "../data/tidycal.js";
 import "./NotaryPage.css";
 
 export default function NotaryPage() {
-  const sections = getServiceSections(servicePages.notary);
-
   return (
     <main className="notary-page">
       <Helmet>
@@ -37,50 +31,17 @@ export default function NotaryPage() {
         </p>
       </header>
 
-      {sections.map((section) => (
-        <section key={section.id} className="service-section">
-          <div className="section-heading">
-            <h2>{section.title}</h2>
-            <p>{section.description}</p>
-          </div>
-          <div className="services-grid">
-            {section.items.map((item) => (
-              <div key={item.name} className="service-card">
-                <h3>{item.name}</h3>
-                <p className="meta">{item.price}</p>
-                {item.details && <p className="desc">{item.details}</p>}
-              </div>
-            ))}
-          </div>
-          {section.addOns && (
-            <div className="add-ons">
-              <h3>Add-ons</h3>
-              <ul>
-                {section.addOns.map((addon) => (
-                  <li key={addon.name}>
-                    {addon.name}: <strong>{addon.price}</strong>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
-      ))}
-
       <TravelFeesBlock />
 
       <section className="extra-info">
         <p>
           <strong>Discounts:</strong> Ask about volume plans and corporate rates.
-          <br />
-          <em className="italic">
-            Additional notarizations may include per-signature act fees where applicable.
-          </em>
         </p>
+        <NotaryFeesNotice className="italic" />
       </section>
 
       <ServiceCta
-        bookingSlug={tidyCalEvents.generalNotary.slug}
+        serviceId="notary"
         bookingLabel="Book Notary Appointment"
       />
 
