@@ -15,11 +15,13 @@ export const serviceCatalog = [
     shortDesc:
       "On-site notarizations for personal and business documents with flexible scheduling.",
     category: "Notary",
-    priceLabel: getPriceLabel("notary"),
+    priceLabel:
+      "Mobile service fee from $25 + statutory act fee (GA $2/act, SC up to $5/act)",
     highlights: [
       "State-compliant notarial acts",
       "Evening & weekend availability",
       "Travel fee disclosed before service",
+      "Statutory act fees set by state law (GA $2/act, SC up to $5/act); mobile/service fees separate",
     ],
   },
   {

@@ -30,6 +30,10 @@ export default function PackagesPage() {
       <header className="packages-hero">
         <h1>All Services & Pricing</h1>
         <p>Browse every service and package offered by Dani Declares LLC.</p>
+        <p className="packages-fee-note">
+          Statutory notarial act fees are set by state law (GA $2/act, SC up to
+          $5/act). Mobile/service fees are separate.
+        </p>
       </header>
 
       {categories.map((category) => (
