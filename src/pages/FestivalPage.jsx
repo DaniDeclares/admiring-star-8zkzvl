@@ -62,9 +62,18 @@ export default function FestivalPage() {
           <p className="festival-subtitle">
             November 29–30, 2025 • Brook Run Park, Doraville GA
           </p>
-          <Link to="#schedule" className="btn btn--primary festival-cta-hero">
+          <button
+            type="button"
+            className="btn btn--primary festival-cta-hero"
+            onClick={() =>
+              document.getElementById("schedule")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              })
+            }
+          >
             See Full Schedule
-          </Link>
+          </button>
         </div>
       </header>
 

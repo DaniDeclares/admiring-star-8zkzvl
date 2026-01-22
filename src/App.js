@@ -13,8 +13,14 @@ import { loadHubSpotTracking } from "./lib/loadHubSpot.js";
 // Public Pages
 import Homepage from "./pages/HomePage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
+codex/redesign-danideclares.com-for-service-booking
+import BookPage from "./pages/BookPage.jsx";
+import PayPage from "./pages/PayPage.jsx";
+import EventsPage from "./pages/EventsPage.jsx";
+=======
 import BookingPage from "./pages/BookingPage.jsx";
 import PayPage from "./pages/PayPage.jsx";
+
 import FestivalPage from "./pages/FestivalPage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
@@ -25,9 +31,15 @@ import FederalPage from "./pages/FederalPage.jsx";
 import TaxServicesPage from "./pages/TaxServicesPage.jsx";
 
 // Newly created Public Pages
+codex/redesign-danideclares.com-for-service-booking
+import PackagesPage from "./pages/PackagesPage.jsx";
+=======
 import PaymentCancel from "./pages/PaymentCancel.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
+import TermsPage from "./pages/TermsPage.jsx";
+import PrivacyPage from "./pages/PrivacyPage.jsx";
+import OnboardingPage from "./pages/OnboardingPage.jsx";
 
 // Auth & Dashboard
 import LoginPage from "./pages/LoginPage.jsx";
@@ -43,9 +55,7 @@ import CancelPage from "./pages/CancelPage.jsx";
 
 export default function App() {
   const location = useLocation();
-  const gaMeasurementId =
-    process.env.NEXT_PUBLIC_GA_ID ||
-    process.env.REACT_APP_GA_MEASUREMENT_ID;
+  const gaMeasurementId = process.env.REACT_APP_GA_MEASUREMENT_ID;
   const isProduction = process.env.NODE_ENV === "production";
 
   useEffect(() => {
@@ -105,7 +115,6 @@ export default function App() {
     window._hsq.push(["setPath", `${location.pathname}${location.search}`]);
     window._hsq.push(["trackPageView"]);
   }, [location]);
-
   return (
     <>
       {SHOW_FESTIVAL && <FestivalBanner />}
@@ -123,16 +132,37 @@ export default function App() {
         <Route path="/tax" element={<Navigate to="/tax-services" replace />} />
         <Route path="/tax-services" element={<TaxServicesPage />} />
         <Route path="/shop" element={<ShopPage />} />
+codex/redesign-danideclares.com-for-service-booking
+        <Route path="/services" element={<PackagesPage />} />
+        <Route path="/book" element={<BookPage />} />
+        <Route path="/pay" element={<PayPage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/notary" element={<Navigate to="/services" replace />} />
+        <Route path="/weddings" element={<Navigate to="/services" replace />} />
+        <Route path="/financial" element={<Navigate to="/services" replace />} />
+        <Route path="/real-estate" element={<Navigate to="/services" replace />} />
+        <Route path="/legal-services" element={<Navigate to="/services" replace />} />
+        <Route path="/packages" element={<Navigate to="/services" replace />} />
+        <Route path="/bookings" element={<Navigate to="/book" replace />} />
+=======
         <Route path="/book" element={<BookingPage />} />
         <Route path="/bookings" element={<Navigate to="/book" replace />} />
         <Route path="/pay" element={<PayPage />} />
+
         <Route path="/travel-quote" element={<TravelQuotePage />} />
         <Route path="/festival" element={<FestivalPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
+codex/redesign-danideclares.com-for-service-booking
+        {/* Newly added service pages */}
+=======
         {/* Legacy service routes */}
         <Route path="/notary" element={<Navigate to="/services" replace />} />
         <Route
@@ -153,6 +183,7 @@ export default function App() {
         <Route path="/weddings" element={<Navigate to="/services" replace />} />
         <Route path="/financial" element={<Navigate to="/services" replace />} />
         <Route path="/events" element={<Navigate to="/services" replace />} />
+
         <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
 
@@ -167,10 +198,6 @@ export default function App() {
           <Route
             path="/festival-dashboard"
             element={<FestivalDashboard />}
-          />
-          <Route
-            path="/partner-onboarding"
-            element={<PartnerOnboarding />}
           />
           {/* legacy or alternate success/cancel */}
           <Route path="/success" element={<SuccessPage />} />

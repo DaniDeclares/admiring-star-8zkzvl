@@ -16,17 +16,25 @@ const SOCIAL_LABELS = {
 };
 
 export default function Footer() {
+codex/redesign-danideclares.com-for-service-booking
+=======
   const socialEntries = Object.entries(SOCIAL_LINKS).filter(
     ([, url]) => url
   );
+
 
   return (
     <footer className="footer">
       {/* Top contact info */}
       <div className="footer-top">
         <p>
+codex/redesign-danideclares.com-for-service-booking
+          <strong>Book:</strong>{" "}
+          <Link to="/book?service=notary">Book a notary appointment</Link>
+=======
           <strong>Consultation:</strong>{" "}
           <Link to="/book">danideclares.com/book</Link>
+
         </p>
         <p>
           <strong>Email:</strong>{" "}
@@ -51,10 +59,13 @@ export default function Footer() {
       {/* Quick site links */}
       <nav className="footer-site-links" aria-label="Site links">
         <Link to="/services">Services</Link>
+codex/redesign-danideclares.com-for-service-booking
+=======
         <Link to="/federal">Federal</Link>
         <Link to="/book?service=notary">Book</Link>
         <Link to="/pay">Pay</Link>
         <Link to="/contact">Contact</Link>
+
         <Link to="/terms">Terms of Service</Link>
         <Link to="/privacy">Privacy Policy</Link>
       </nav>

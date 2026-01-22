@@ -1,3 +1,15 @@
+codex/redesign-danideclares.com-for-service-booking
+/* src/pages/Homepage.css — Dani Declares modern homepage */
+
+.home-main {
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+.hero {
+  background-size: cover;
+  background-position: center;
+=======
 .home-main {
   font-family: "Raleway", sans-serif;
   color: var(--text-dark);
@@ -11,6 +23,31 @@
 }
 
 .hero-overlay {
+codex/redesign-danideclares.com-for-service-booking
+  background: rgba(41, 9, 14, 0.78);
+  padding: 2.5rem;
+  border-radius: 24px;
+  color: #fff;
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+.hero-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+}
+
+.hero h1 {
+  font-family: var(--font-secondary);
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  margin-bottom: 0.9rem;
+=======
   max-width: 780px;
   margin: 0 auto;
   background: rgba(17, 17, 17, 0.7);
@@ -29,6 +66,10 @@
 
 .hero-subtitle {
   font-size: 1.05rem;
+codex/redesign-danideclares.com-for-service-booking
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 1.5rem;
+=======
   color: #f3e7d1;
   margin-bottom: 1.75rem;
 }
@@ -40,6 +81,42 @@
   flex-wrap: wrap;
 }
 
+codex/redesign-danideclares.com-for-service-booking
+.hero-footnote {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.about-us-section {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 2.5rem;
+  background: #fff;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: var(--card-shadow);
+}
+
+.about-us-section h2 {
+  font-family: var(--font-secondary);
+  color: var(--burgundy);
+  margin-bottom: 0.75rem;
+}
+
+.about-us-section p {
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+}
+
+.testimonial-carousel {
+  padding: 3.5rem 1.5rem;
+  background: #fff;
+  text-align: center;
+}
+
+.testimonial-carousel h2 {
+=======
 .tax-season {
   max-width: 1000px;
   margin: -2.5rem auto 2.5rem;
@@ -56,6 +133,106 @@
   margin-bottom: 1rem;
 }
 
+codex/redesign-danideclares.com-for-service-booking
+.carousel {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.testimonial-slide {
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.testimonial-slide span {
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--burgundy);
+  font-weight: 600;
+}
+
+.festival-banner {
+  background-size: cover;
+  background-position: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #fff;
+}
+
+.festival-overlay {
+  background: rgba(41, 9, 14, 0.8);
+  padding: 1.75rem;
+  border-radius: 20px;
+  display: inline-block;
+  max-width: 420px;
+}
+
+.festival-overlay h2 {
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+
+.festival-countdown {
+  margin: 1rem 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.early-bird-note {
+  color: var(--gold);
+  margin-top: 0.5rem;
+}
+
+.packages {
+  padding: 3.5rem 1.5rem;
+}
+
+.section-heading {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 2rem;
+}
+
+.section-heading h2 {
+  font-family: var(--font-secondary);
+  color: var(--burgundy);
+  margin-bottom: 0.6rem;
+}
+
+.section-heading p {
+  color: var(--ink-muted);
+}
+
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.package-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  border: 1px solid rgba(139, 30, 46, 0.08);
+}
+
+.package-card h3 {
+  margin-bottom: 0.4rem;
+}
+
+.package-card p {
+  color: var(--ink-muted);
+}
+
+.services-footer {
+  margin-top: 2rem;
+  text-align: center;
+=======
 .tax-season ul {
   padding-left: 1.2rem;
   margin-bottom: 1.5rem;
@@ -127,6 +304,26 @@
 .contact-cta {
   background: var(--burgundy);
   color: #fff;
+codex/redesign-danideclares.com-for-service-booking
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.contact-cta h2 {
+  font-family: var(--font-secondary);
+  margin-bottom: 0.6rem;
+}
+
+.contact-cta p {
+  margin-bottom: 1.2rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 700px) {
+  .hero-overlay {
+    padding: 2rem 1.5rem;
+  }
+=======
   text-align: center;
   padding: 3rem 1.5rem;
 }

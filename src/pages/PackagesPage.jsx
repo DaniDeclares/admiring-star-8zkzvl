@@ -1,81 +1,94 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import "./PackagesPage.css";
+odex/redesign-danideclares.com-for-service-booking
+import { bookingServices, paymentServices } from "../data/services.js";
+=======
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 import {
   getServiceSections,
   serviceBundles,
   servicePages,
-} from "../data/services.js";
+ from "../data/services.js";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
 
 export default function PackagesPage() {
-  const categories = getServiceSections(servicePages.packages);
-
   return (
     <main className="packages-page">
-      <Helmet>
-        <title>All Services & Pricing • Dani Declares</title>
+      <Helme
+        <title>Services & Pricing • Dani Declares</title>
         <meta
           name="description"
-          content={
-            SHOW_FESTIVAL
-              ? "Explore Dani Declares full service catalog: notary, real estate, legal, wedding, financial, festival, merch & bundles."
-              : "Explore Dani Declares full service catalog: notary, real estate, legal, wedding, financial, merch & bundles."
-          }
+          content="Explore Dani Declares notary, apostille, loan signing, and officiant services with clear booking and payment steps."
         />
       </Helmet>
 
       <header className="packages-hero">
+codex/make-service-pricing-compliance-safe
         <h1>All Services & Pricing</h1>
         <p>Browse every service and package offered by Dani Declares LLC.</p>
         <p className="packages-fee-note">
           Statutory notarial act fees are set by state law (GA $2/act, SC up to
           $5/act). Mobile/service fees are separate.
+=======
+        <p className="eyebrow">Service Catalog</p>
+        <h1>Services & Pricing</h1>
+        <p>
+          Book first, then pay to confirm your appointment. Select the service that
+          matches your needs and follow the guided flow.
         </p>
       </header>
 
-      {categories.map((category) => (
-        <section key={category.id} className="category-section">
-          <h2>{category.title}</h2>
-          <p className="category-desc">{category.description}</p>
-          <div className="items-grid">
-            {category.items.map((item) => (
-              <div key={item.name} className="item-card">
-                <h3>{item.name}</h3>
-                <p className="price">{item.price}</p>
-                {item.details && <p className="notes">{item.details}</p>}
+      <section className="service-section">
+        <h2>Book a service</h2>
+        <div className="service-grid">
+          {bookingServices.map((service) => (
+            <div key={service.id} className="service-card">
+              <div>
+                <h3>{service.title}</h3>
+                <p>{service.shortDescription}</p>
+                {service.priceLabel && (
+                  <span className="price">{service.priceLabel}</span>
+                )}
               </div>
-            ))}
-          </div>
-          {category.addOns && (
-            <div className="category-addons">
-              <h3>Add-ons</h3>
-              <ul>
-                {category.addOns.map((addon) => (
-                  <li key={addon.name}>
-                    {addon.name}: <strong>{addon.price}</strong>
-                  </li>
-                ))}
-              </ul>
+              <Link
+                to={`/book?service=${service.id}`}
+                className="btn btn--primary"
+              >
+                Book
+              </Link>
             </div>
-          )}
-        </section>
-      ))}
+          ))}
+        </div>
+      </section>
 
-      <TravelFeesBlock />
-
-      {serviceBundles.length > 0 && (
-        <section className="bundles-section">
-          <h2>Bundled Packages</h2>
-          <div className="bundles-grid">
-            {serviceBundles.map((bundle) => (
-              <div key={bundle.name} className="bundle-card">
-                <h3>{bundle.name}</h3>
-                <p className="bundle-price">{bundle.price}</p>
-                <p className="bundle-notes">Includes: {bundle.includes}</p>
+      <section className="service-section">
+        <h2>Complete payment</h2>
+        <p className="section-note">
+          Payment links are only used after you have booked your appointment. This
+          keeps your time slot safe and avoids double-booking.
+        </p>
+        <div className="service-grid">
+          {paymentServices.map((service) => (
+            <div key={service.id} className="service-card">
+              <div>
+                <h3>{service.title}</h3>
+                <p>{service.shortDescription}</p>
               </div>
+codex/redesign-danideclares.com-for-service-booking
+              <Link
+                to={`/pay?service=${service.id}`}
+                className="btn btn--secondary"
+              >
+                Pay
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+=======
             ))}
           </div>
         </section>

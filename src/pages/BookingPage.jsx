@@ -6,6 +6,7 @@ import {
   getBookingServiceById,
 } from "../data/bookingServices.js";
 import { getPriceLabel } from "../data/pricingCanon.js";
+import { buildTidyCalPath, buildTidyCalUrl } from "../data/tidycal.js";
 import NotaryFeesNotice from "../components/NotaryFeesNotice.jsx";
 import { loadTidycalScript } from "../lib/loadTidycal.js";
 import "./BookingPage.css";
@@ -19,19 +20,26 @@ export default function BookingPage() {
   const location = useLocation();
   const sectionRef = useRef(null);
   const params = new URLSearchParams(location.search);
-  const rawServiceId = params.get("service") || "notary";
+  const rawServiceId = params.get("service");
   const resolvedServiceId = SERVICE_ID_ALIASES[rawServiceId] || rawServiceId;
-  const selectedServiceId = getBookingServiceById(resolvedServiceId)
-    ? resolvedServiceId
-    : "notary";
+  const fallbackServiceId = "notary";
+  const selectedServiceId = resolvedServiceId || fallbackServiceId;
   const selectedService = useMemo(
     () => getBookingServiceById(selectedServiceId),
     [selectedServiceId]
   );
   const hasSelection = Boolean(selectedService);
-  const tidycalPath = selectedService?.tidyCalPath || "danideclaresns/notary";
-  const tidycalLink = `https://tidycal.com/${tidycalPath}`;
-  const priceLabel = selectedServiceId ? getPriceLabel(selectedServiceId) : null;
+  const isInvalidSelection = Boolean(rawServiceId) && !selectedService;
+  const tidycalSlug =
+    selectedService?.tidycalSlug?.trim() ||
+    selectedService?.tidyCalPath?.split("/").filter(Boolean).pop()?.trim() ||
+    "";
+  const hasValidSlug = Boolean(tidycalSlug);
+  const tidycalPath = hasValidSlug ? buildTidyCalPath(tidycalSlug) : null;
+  const tidycalLink = hasValidSlug ? buildTidyCalUrl(tidycalSlug) : null;
+  const priceLabel = hasSelection ? getPriceLabel(selectedServiceId) : null;
+  const showDetails = hasSelection || isInvalidSelection;
+  const showEmbed = hasSelection && hasValidSlug;
 
   useEffect(() => {
     loadTidycalScript();
@@ -130,56 +138,76 @@ export default function BookingPage() {
           ))}
         </section>
 
-        {hasSelection && (
+        {showDetails && (
           <section className="booking-details" ref={sectionRef}>
             <div className="booking-embed-section is-active">
               <div className="booking-details__header">
                 <p className="booking-section__eyebrow">
-                  Book {selectedService.name}
+                  {hasSelection ? `Book ${selectedService.name}` : "Booking Help"}
                 </p>
-                <h2>{selectedService.name} Booking</h2>
-                <p className="booking-details__policy">
-                  Appointment is pending until payment is completed. Unpaid bookings are
-                  released. Deposits are non-refundable and applied to your total.
-                  Travel/after-hours adjustments are disclosed before service. If you
-                  need to reschedule, contact us ASAP.
-                </p>
+                <h2>
+                  {hasSelection
+                    ? `${selectedService.name} Booking`
+                    : "Booking Temporarily Unavailable"}
+                </h2>
+                {hasSelection && (
+                  <p className="booking-details__policy">
+                    Appointment is pending until payment is completed. Unpaid bookings
+                    are released. Deposits are non-refundable and applied to your total.
+                    Travel/after-hours adjustments are disclosed before service. If you
+                    need to reschedule, contact us ASAP.
+                  </p>
+                )}
                 {priceLabel && (
                   <p className="booking-details__price">{priceLabel}</p>
                 )}
               </div>
               <div className="booking-embed">
-                <div className="embed-wrap">
-                  <div className="tidycal-embed" data-path={tidycalPath} />
-                </div>
-                <div className="booking-embed__fallback">
+                {showEmbed ? (
+                  <>
+                    <div className="embed-wrap">
+                      <div className="tidycal-embed" data-path={tidycalPath} />
+                    </div>
+                    <div className="booking-embed__fallback">
+                      <p>
+                        If the calendar does not load or shows as disabled, use the
+                        direct link below to schedule your appointment.
+                      </p>
+                      <a
+                        className="btn btn--secondary"
+                        href={tidycalLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open TidyCal Scheduling
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <div className="booking-embed--missing">
+                    <p>
+                      Booking temporarily unavailable — call/text (864) 326-5263
+                    </p>
+                  </div>
+                )}
+              </div>
+              {hasSelection && (
+                <div className="booking-confirmation">
+                  <h3>Already booked? Continue to payment</h3>
                   <p>
-                    If the calendar does not load or shows as disabled, use the
-                    direct link below to schedule your appointment.
+                    Complete payment right after booking to secure your appointment.
+                    Unpaid bookings are released.
                   </p>
-                  <a
-                    className="btn btn--secondary"
-                    href={tidycalLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    className="btn btn--primary"
+                    to={`/pay?service=${
+                      selectedService.payServiceKey || selectedServiceId
+                    }`}
                   >
-                    Open TidyCal Scheduling
-                  </a>
+                    Pay to Confirm
+                  </Link>
                 </div>
-              </div>
-              <div className="booking-confirmation">
-                <h3>Already booked? Continue to payment</h3>
-                <p>
-                  Complete payment right after booking to secure your appointment. Unpaid
-                  bookings are released.
-                </p>
-                <Link
-                  className="btn btn--primary"
-                  to={`/pay?service=${selectedService.payServiceKey || selectedServiceId}`}
-                >
-                  Pay to Confirm
-                </Link>
-              </div>
+              )}
             </div>
           </section>
         )}
