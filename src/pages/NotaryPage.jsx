@@ -1,9 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { siteConfig } from "../data/siteConfig.js";
-import {
-  notaryFeeDisclaimer,
-} from "../data/services.js";
+import NotaryFeesNotice from "../components/NotaryFeesNotice.jsx";
 import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
 import "./NotaryPage.css";
@@ -38,9 +36,8 @@ export default function NotaryPage() {
       <section className="extra-info">
         <p>
           <strong>Discounts:</strong> Ask about volume plans and corporate rates.
-          <br />
-          <em className="italic">{notaryFeeDisclaimer}</em>
         </p>
+        <NotaryFeesNotice className="italic" />
       </section>
 
       <ServiceCta
