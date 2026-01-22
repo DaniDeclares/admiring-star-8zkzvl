@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
 import StripeBuyButton from "../components/StripeBuyButton.jsx";
 import { SERVICES, STRIPE_PUBLISHABLE_KEY } from "../data/servicesCatalog.js";
+import { siteConfig } from "../data/siteConfig.js";
 import "./PayPage.css";
 
 const SERVICE_ID_ALIASES = {
@@ -22,7 +23,7 @@ const BOOKING_SERVICE_MAP = {
   trust_signing: "loansigning",
   printing_scanning: "notary",
   travel_fee: "notary",
-  additional_notarization: "notary",
+  additional_signature_set: "notary",
   process_serving: "notary",
   court_courier: "notary",
   digital_court_reporting: "notary",
@@ -49,10 +50,14 @@ export default function PayPage() {
     () => (selectedService ? formatPrice(selectedService.price) : null),
     [selectedService]
   );
+  const primaryPhone = siteConfig.phoneNumbers.primary;
   const bookingServiceKey = BOOKING_SERVICE_MAP[selectedServiceKey] || "notary";
   const otherServices = Object.entries(SERVICES).filter(
     ([serviceKey]) => serviceKey !== selectedServiceKey
   );
+  const payLinkUrl = selectedService?.payLinkUrl;
+  const isValidPayLinkUrl =
+    typeof payLinkUrl === "string" && payLinkUrl.startsWith("https://");
 
   return (
     <>
@@ -92,17 +97,25 @@ export default function PayPage() {
                   buyButtonId={selectedService.buyButtonId}
                   publishableKey={STRIPE_PUBLISHABLE_KEY}
                 />
-              ) : selectedService.payLinkUrl ? (
+              ) : isValidPayLinkUrl ? (
                 <a
                   className="btn btn--primary btn--block"
-                  href={selectedService.payLinkUrl}
+                  href={payLinkUrl}
                   target="_blank"
                   rel="noreferrer"
                 >
                   Pay Now
                 </a>
               ) : (
-                <p>Payment option coming soon. Please contact us.</p>
+                <>
+                  <button className="btn btn--primary btn--block" disabled>
+                    Pay Now
+                  </button>
+                  <p>
+                    Booking temporarily unavailable — call/text{" "}
+                    {primaryPhone.display}
+                  </p>
+                </>
               )}
             </div>
             <div>
