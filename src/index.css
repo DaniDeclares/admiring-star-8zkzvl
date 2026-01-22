@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap');
+codex/redesign-danideclares.com-for-service-booking
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
+=======
 
 :root {
   --burgundy: #8B1E2E;
@@ -13,7 +16,29 @@
   box-sizing: border-box;
 }
 
+:root {
+  --burgundy: #8B1E2E;
+  --ivory: #F8F5F1;
+  --gold: #D4AF37;
+  --ink: #1f1b1c;
+  --ink-muted: #5b5254;
+  --font-primary: 'Raleway', 'Helvetica Neue', Arial, sans-serif;
+  --font-secondary: 'Merriweather', 'Georgia', serif;
+  --card-shadow: 0 12px 30px rgba(17, 17, 17, 0.08);
+}
+
 body {
+codex/redesign-danideclares.com-for-service-booking
+  font-family: var(--font-primary);
+  background: var(--ivory);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-secondary);
+  color: var(--ink);
+=======
   font-family: 'Raleway', Arial, Helvetica, sans-serif;
   font-weight: 400;
   background: #fff;
@@ -28,6 +53,7 @@ h4 {
   font-family: 'Raleway', Arial, Helvetica, sans-serif;
   font-weight: 700;
   color: var(--text-dark);
+
 }
 
 a {
@@ -41,6 +67,17 @@ a:hover {
 }
 
 .btn {
+codex/redesign-danideclares.com-for-service-booking
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+  border: 1px solid transparent;
+=======
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -64,13 +101,21 @@ a:hover {
 }
 
 .btn--primary:hover {
+codex/redesign-danideclares.com-for-service-booking
+  background-color: #6f1824;
+=======
   background-color: #741425;
+
   color: #fff;
 }
 
 .btn--secondary {
   background-color: var(--gold);
+codex/redesign-danideclares.com-for-service-booking
+  color: #2b1c1f;
+=======
   color: #2f2528;
+
 }
 
 .btn--secondary:hover {
@@ -90,6 +135,11 @@ a:hover {
 }
 
 .btn--accent {
+codex/redesign-danideclares.com-for-service-booking
+  background-color: #fff;
+  color: var(--burgundy);
+  border: 1px solid var(--burgundy);
+=======
   background-color: var(--ivory);
   color: var(--burgundy);
   border-color: var(--burgundy);
@@ -137,6 +187,9 @@ footer {
   padding: 1rem 0.5rem;
   font-size: 0.9rem;
   background: var(--ivory);
+codex/redesign-danideclares.com-for-service-booking
+  color: var(--ink-muted);
+=======
   color: #5c4b4e;
 }
 

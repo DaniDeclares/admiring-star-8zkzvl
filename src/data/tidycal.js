@@ -3,19 +3,19 @@ export const tidyCalBaseUrl = "https://tidycal.com/danideclaresns";
 export const tidyCalEvents = {
   generalNotary: {
     label: "General Notary Appointment",
-    slug: "15-minute-meeting",
+    slug: "notary",
   },
   loanSigning: {
     label: "Loan Signing",
-    slug: "loan-signing",
+    slug: "loansigning",
   },
   apostille: {
     label: "Apostille Intake/Dropoff",
-    slug: "apostille-intake-dropoff",
+    slug: "apostille",
   },
   officiantConsultation: {
     label: "Officiant Consultation",
-    slug: "officiant-consultation",
+    slug: "officiant",
   },
   sipSignSocial: {
     label: "Sip & Sign Social",
