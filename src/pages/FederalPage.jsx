@@ -1,6 +1,5 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
 import "./FederalPage.css";
 
 export default function FederalPage() {
@@ -16,23 +15,12 @@ export default function FederalPage() {
 
       <main className="federal-page">
         <section className="federal-hero">
-          <h1>Federal Contracting</h1>
-          <p>
-            Dani Declares provides mobile notary, loan signing, and apostille
-            facilitation support for government teams and prime contractors.
-          </p>
-          <div className="federal-hero__actions">
-            <Link className="btn btn--primary" to="/contact">
-              Request a Quote
-            </Link>
-            <a
-              className="btn btn--secondary"
-              href="/assets/capability-statement.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Download Capability Statement
-            </a>
+          <div className="federal-hero__content">
+            <h1>Federal Contracting</h1>
+            <p>
+              Mobile notary, loan signing, and document execution support for
+              government teams and prime contractors across Georgia and South Carolina.
+            </p>
           </div>
         </section>
 
@@ -75,25 +63,12 @@ export default function FederalPage() {
           </ul>
         </section>
 
-        <section className="federal-section federal-contact">
-          <h2>Ready to Engage?</h2>
+        <section className="federal-section federal-note">
+          <h2>Engagement</h2>
           <p>
-            Request a quote or download the capability statement for internal
-            distribution and procurement onboarding.
+            Capability statement and compliance documentation are available upon
+            request for procurement and onboarding.
           </p>
-          <div className="federal-contact__actions">
-            <Link className="btn btn--primary" to="/contact">
-              Request a Quote
-            </Link>
-            <a
-              className="btn btn--secondary"
-              href="/assets/capability-statement.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Download Capability Statement
-            </a>
-          </div>
         </section>
       </main>
     </>

@@ -1,15 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
- codex/redesign-danideclares.com-for-service-booking
-import Countdown from "react-countdown";
-import heroImage from "../assets/hero/hero-couple-beach-wide.jpg";
-import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 import { bookingServices } from "../data/services.js";
-const eventBackground =
-  process.env.PUBLIC_URL + "/images/festival/pexels-fang-liu-1996637-3617724.jpg";
-=======
-
 import "./Homepage.css";
 
 export default function Homepage() {
@@ -26,27 +18,15 @@ export default function Homepage() {
       <main className="homepage home-main">
         <section className="hero">
           <div className="hero-overlay">
-codex/redesign-danideclares.com-for-service-booking
-            <p className="hero-eyebrow">Mobile Notary & Officiant Services</p>
-            <h1>Book Notary Appointments in Minutes.</h1>
-            <p className="hero-subtitle">
-              Premium, mobile-first service across Metro Atlanta. Book first, pay
-              to confirm, and we bring the experience to you.
-            </p>
-            <div className="hero-cta">
-              <Link to="/book?service=notary" className="btn btn--primary">
-                Book Notary
-              </Link>
-              <Link to="/services" className="btn btn--secondary">
-                View Services
-=======
+            <p className="hero-eyebrow">Mobile Notary &amp; Document Support</p>
+            <div className="hero-accent" aria-hidden="true" />
             <h1>
               Reliable Notary &amp; Document Services for Tax, Legal, and Government
               Needs
             </h1>
             <p className="hero-subtitle">
-              Same-day mobile service for individuals, tax professionals, law firms, and
-              agencies across Georgia and South Carolina.
+              Same-day mobile service for individuals, tax professionals, law firms,
+              and agencies across Georgia and South Carolina.
             </p>
             <div className="hero-cta">
               <Link to="/book?service=notary" className="btn btn--primary">
@@ -57,79 +37,96 @@ codex/redesign-danideclares.com-for-service-booking
               </Link>
               <Link to="/federal" className="btn btn--outline">
                 Federal &amp; Agency Services
-
               </Link>
             </div>
-            <p className="hero-footnote">
-              Your appointment is pending until payment is completed.
+            <p className="hero-subline">Book first. Pay to confirm.</p>
+          </div>
+        </section>
+
+        <section className="capabilities">
+          <div className="section-heading">
+            <h2>We support essential offices and mobile filings.</h2>
+            <p>
+              Capability-forward coverage for courts, agencies, and institutional
+              documentation across the Southeast.
             </p>
           </div>
-        </section>
-
-codex/redesign-danideclares.com-for-service-booking
-        {/* ABOUT US */}
-        <section className="about-us-section">
-          <h2>Premium mobile services, built for ease.</h2>
-          <p>
-            Dani Declares delivers trusted notary, apostille, and officiant support
-            with transparent pricing and quick scheduling. Book your appointment,
-            then confirm payment to lock in your time.
-          </p>
-=======
-        <section className="tax-season">
-          <h2>Tax Season Services</h2>
-          <ul>
-            <li>IRS letters, notices, and sworn statements</li>
-            <li>Power of Attorney (POA) for tax representatives</li>
-            <li>I-9 and identity verification</li>
-            <li>Affidavits and declarations</li>
-            <li>Apostille facilitation for foreign income or dependents</li>
-            <li>Same-day mobile and after-hours availability</li>
-          </ul>
-          <Link to="/book" className="btn btn--primary">
-            Schedule Tax-Related Notary Service
-          </Link>
-        </section>
-
-        <section className="trust">
-          <ul className="trust-list">
-            <li>Commissioned Notary Public (GA &amp; SC)</li>
-            <li>Experienced with legal, real estate, and government documents</li>
-            <li>Mobile, on-site, and on-call availability</li>
-            <li>Insured and compliant business entity</li>
-        </section>
-
-        <section className="who-we-serve">
-          <h2>Who We Serve</h2>
-          <div className="grid-3">
-            <div>
-              <h3>Individuals &amp; Families</h3>
-              <p>
-                Fast, professional notary support for personal, tax, and legal
-                documents.
-              </p>
- codex/redesign-danideclares.com-for-service-booking
-              <CountdownTimer />
-              <Link to="/festival" className="btn btn--primary">
-                Get Early Bird Tickets
-              </Link>
-              <p className="early-bird-note">Early Bird pricing ends soon!</p>
-            </div>
-          </section>
-        )}
-
-        {/* TESTIMONIAL CAROUSEL */}
-        <section className="testimonial-carousel">
-          <h2>Client Feedback</h2>
-          <div className="carousel">
-            <div className="testimonial-slide">
-              <p>“{testimonials[idx].quote}”</p>
-              <span>— {testimonials[idx].author}</span>
-            </div>
+          <div className="capability-grid">
+            <article
+              className="capability-tile"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(41, 9, 14, 0.7), rgba(41, 9, 14, 0.7)), url("/images/stock/court building exterior.jpg")',
+              }}
+            >
+              <div className="capability-tile__content">
+                <h3>Courts &amp; Clerk Filings</h3>
+                <p>Affidavits, sworn statements, and on-site support.</p>
+              </div>
+            </article>
+            <article
+              className="capability-tile"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(41, 9, 14, 0.7), rgba(41, 9, 14, 0.7)), url("/images/stock/Hospital administrative desks.jpg")',
+              }}
+            >
+              <div className="capability-tile__content">
+                <h3>Hospitals &amp; Care Centers</h3>
+                <p>Patient forms, POA, and urgent administrative signings.</p>
+              </div>
+            </article>
+            <article
+              className="capability-tile"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(41, 9, 14, 0.7), rgba(41, 9, 14, 0.7)), url("/images/stock/School admin offices.jpg")',
+              }}
+            >
+              <div className="capability-tile__content">
+                <h3>Schools &amp; Universities</h3>
+                <p>Enrollment, guardianship, and education records.</p>
+              </div>
+            </article>
+            <article
+              className="capability-tile"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(41, 9, 14, 0.7), rgba(41, 9, 14, 0.7)), url("/images/stock/government office paperwork.jpg")',
+              }}
+            >
+              <div className="capability-tile__content">
+                <h3>Government Offices</h3>
+                <p>Agency-ready execution and filing coordination.</p>
+              </div>
+            </article>
+            <article
+              className="capability-tile"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(41, 9, 14, 0.7), rgba(41, 9, 14, 0.7)), url("/images/stock/Clipboards.jpg")',
+              }}
+            >
+              <div className="capability-tile__content">
+                <h3>Employer &amp; I-9 Support</h3>
+                <p>Identity verification and administrative documentation.</p>
+              </div>
+            </article>
+            <article
+              className="capability-tile"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(41, 9, 14, 0.7), rgba(41, 9, 14, 0.7)), url("/images/stock/personal data confidential folder image.jpg")',
+              }}
+            >
+              <div className="capability-tile__content">
+                <h3>Confidential Handling</h3>
+                <p>Secure chain-of-custody and privacy-first processes.</p>
+              </div>
+            </article>
           </div>
         </section>
 
-        {/* SERVICE HIGHLIGHTS */}
         <section className="packages other-services">
           <div className="section-heading">
             <h2>Services designed for busy schedules</h2>
@@ -156,24 +153,8 @@ codex/redesign-danideclares.com-for-service-booking
           </div>
           <div className="services-footer">
             <Link to="/services" className="btn btn--secondary">
-              See all services & pricing
+              See all services &amp; pricing
             </Link>
-=======
-              <Link to="/book">Book Service</Link>
-            </div>
-            <div>
-              <h3>Tax &amp; Legal Professionals</h3>
-              <p>
-                Reliable execution for clients, filings, and time-sensitive documents.
-              </p>
-              <Link to="/services">Professional Services</Link>
-            </div>
-            <div>
-              <h3>Government &amp; Agencies</h3>
-              <p>Contract-ready document, notary, and administrative support.</p>
-              <Link to="/federal">Federal Services</Link>
-            </div>
-
           </div>
         </section>
 

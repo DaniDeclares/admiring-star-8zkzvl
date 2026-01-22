@@ -5,8 +5,19 @@
 }
 
 .federal-hero {
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto 2.5rem;
+  border-radius: 24px;
+  background-image: linear-gradient(rgba(41, 9, 14, 0.75), rgba(41, 9, 14, 0.75)),
+    url("/images/stock/Courthouse steps.jpg");
+  background-size: cover;
+  background-position: center;
+  color: #f8f5f1;
+  box-shadow: 0 20px 45px rgba(16, 24, 40, 0.2);
+}
+
+.federal-hero__content {
+  padding: 3rem 2.5rem;
   text-align: center;
 }
 
@@ -15,12 +26,9 @@
   margin-bottom: 0.75rem;
 }
 
-.federal-hero__actions {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
+.federal-hero p {
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
 }
 
 .federal-section {
@@ -39,20 +47,16 @@
   gap: 0.5rem;
 }
 
-.federal-contact {
+.federal-note {
   text-align: center;
-}
-
-.federal-contact__actions {
-  margin-top: 1.25rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
 }
 
 @media (max-width: 600px) {
   .federal-page {
     padding: 2rem 1.25rem 3rem;
+  }
+
+  .federal-hero__content {
+    padding: 2.5rem 1.75rem;
   }
 }
