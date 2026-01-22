@@ -39,7 +39,6 @@ import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
 import TermsPage from "./pages/TermsPage.jsx";
 import PrivacyPage from "./pages/PrivacyPage.jsx";
-import OnboardingPage from "./pages/OnboardingPage.jsx";
 
 // Auth & Dashboard
 import LoginPage from "./pages/LoginPage.jsx";
@@ -159,7 +158,10 @@ codex/redesign-danideclares.com-for-service-booking
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route
+          path="/onboarding"
+          element={<Navigate to="/partner-onboarding" replace />}
+        />
         <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
