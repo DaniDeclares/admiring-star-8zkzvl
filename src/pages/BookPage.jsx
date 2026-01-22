@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import TidyCalEmbed from "../components/TidyCalEmbed.jsx";
 import { bookingServices } from "../data/services.js";
+import { siteConfig } from "../data/siteConfig.js";
 import { buildTidyCalPath } from "../data/tidycal.js";
 import "./BookPage.css";
 
@@ -82,6 +83,24 @@ export default function BookPage() {
                 )}
               </div>
               <TidyCalEmbed path={buildTidyCalPath(service.tidycalSlug)} />
+              <div className="booking-card__actions">
+                {service.paymentServiceId ? (
+                  <a
+                    className="btn btn--secondary"
+                    href={`/pay?service=${service.paymentServiceId}`}
+                  >
+                    Pay to Confirm
+                  </a>
+                ) : (
+                  <a
+                    className="btn btn--secondary"
+                    style={{ opacity: 0.6 }}
+                    href={`tel:${siteConfig.phoneNumbers.primary.tel}`}
+                  >
+                    Payment link unavailable — call/text to pay
+                  </a>
+                )}
+              </div>
             </article>
           ))}
         </section>
