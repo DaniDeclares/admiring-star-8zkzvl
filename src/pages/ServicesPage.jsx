@@ -90,15 +90,14 @@ export default function ServicesPage() {
             <p>Book → Pay deposit → Receive appointment confirmation.</p>
           </div>
         </section>
-
-codex/update-services-page-with-new-layout
+        
         <section className="services-index">
           {serviceGroups.map((group) => (
             <div key={group.id} className="services-group">
               <div className="services-group__header">
                 <h2>{group.title}</h2>
                 <p>{group.description}</p>
-=======
+
         <section className="services-contact-bar">
           <div>
             <h3>Facility Visits</h3>
