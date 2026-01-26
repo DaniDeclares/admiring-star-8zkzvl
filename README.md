@@ -10,7 +10,7 @@
 **Business Type:**  
 Mobile legal, administrative, and compliance support services provider.
 
-Dani Declares LLC delivers mobile-first, compliance-driven services for individuals, businesses, institutions, and government entities. Notary services are a foundational competency, but the company is not positioned as “notary-only.”
+Dani Declares LLC delivers mobile-first, compliance-driven services for individuals, businesses, institutions, and government entities. Notary services are foundational, but the company is not positioned as “notary-only.”
 
 ---
 
@@ -35,10 +35,10 @@ Dani Declares LLC delivers mobile-first, compliance-driven services for individu
 
 ## 3. Core Services (Public Website)
 
-Services are intentionally grouped and prioritized to support consistency-first income and compliance needs.
+Services are intentionally grouped and prioritized to support mobile legal/admin/compliance support while keeping a capability-forward posture for institutional and government audiences.
 
 ### Primary Service Categories
-1. **Tax & Legal Paperwork Support**
+1. **Legal & Compliance Documentation Support**
    - Affidavits, sworn statements, POAs
    - IRS and tax-related documentation
    - Time-sensitive filings
@@ -89,7 +89,7 @@ Services are intentionally grouped and prioritized to support consistency-first 
 - No Stripe Buy Button embed snippets
 - All payments are routed through:
   - `/pay` (centralized payment page)
-- Stripe is triggered via:
+- Stripe Payment Links are launched via:
   - `window.location.assign`
 - Fallback contact is always visible:
   - Call/Text: (864) 326-5362
@@ -110,6 +110,7 @@ A dedicated **Federal / Government** page exists and must:
 - Use conservative, capability-based language
 - Contain **NO Stripe buttons**
 - Contain **NO booking CTAs**
+- Avoid sales language entirely
 - Be suitable for procurement officers and prime contractors
 
 Includes:
