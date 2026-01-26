@@ -2,80 +2,163 @@
 
 ## 1. Business Overview
 
-* **Name:** Dani Declares
-* **Owner:** Danielle Williams
-* **Location:** Atlanta, GA
-* **Website:** [https://danideclares.com](https://danideclares.com)
+**Name:** Dani Declares LLC  
+**Owner:** Danielle Williams  
+**Primary Service Area:** Georgia & South Carolina  
+**Website:** https://danideclares.com  
 
-> *“We simplify life’s milestones—weddings, legal services, financial planning—in one warm, empowering experience.”*
+**Business Type:**  
+Mobile legal, administrative, and compliance support services provider.
 
----
-
-## 2. Brand Kit
-
-* **Primary Color (Burgundy):** #8B1E2E
-* **Secondary Color (Ivory):** #F8F5F1
-* **Accent Color (Gold):** #D4AF37
-* **Fonts:**
-
-  * Headings: Roboto, Georgia, Merriweather
-  * Body: Arial, Helvetica, Montserrat
-* **Logo Files:**
-
-  * `/assets/logo-primary.png`
-  * `/assets/logo-gold-seal.png`
+Dani Declares LLC delivers mobile-first, compliance-driven services for individuals, businesses, institutions, and government entities. Notary services are a foundational competency, but the company is not positioned as “notary-only.”
 
 ---
 
-## 3. Services & Packages
+## 2. Brand & Positioning
 
-| Service               | URL Slug    | Starting Price | Notes                                             |
-| --------------------- | ----------- | -------------: | ------------------------------------------------- |
-| Mobile Notary         | `/notary`   |           \$35 | General notary, loan signings, apostille          |
-| Real Estate Support   | `/real-estate` |       \$50 | Open house host, inspections, coordination        |
-| Officiant Services    | `/weddings` |          \$200 | Elopement, courthouse-style, custom ceremonies    |
-| Courier Services      | `/legal-services` |      \$65 | Same-day local, rush, multi-stop                  |
-| Events                | `/events`   |   See calendar | Pop-ups, clinics, and seasonal activations        |
+**Core Positioning Principles**
+- Compliance-first
+- Revenue-generating, high-demand services prioritized
+- Conservative, capability-forward presentation (especially for government and institutional clients)
+- Mobile/field services are a core differentiator
 
----
+**Brand Colors**
+- Burgundy (Primary): `#8B1E2E`
+- Ivory (Secondary): `#F8F5F1`
+- Gold (Accent): `#D4AF37`
 
-## 4. Upcoming Events & Milestones
-
-| Date        | Event                                           | Folder / Design Path          |
-| ----------- | ----------------------------------------------- | ----------------------------- |
-| Jun 2 2025  | Sign & Sip: Notary + Networking Pop-Up          | `src/pages/EventsPage.jsx`    |
-| Jul 13 2025 | Love & Legalities: Wedding Mixer                | `src/pages/WeddingsPage.jsx`  |
-| Sept 2025   | Declare Your Worth Festival (Brook Run)         | `src/pages/FestivalPage.jsx`  |
-| Jan 1 2026  | Start filming ‘WedFest: Battle for the Big Day’ | —                             |
+**Typography**
+- Headings: Roboto, Georgia, Merriweather  
+- Body: Arial, Helvetica, Montserrat  
 
 ---
 
-## 5. Website Structure & Tech
+## 3. Core Services (Public Website)
 
-### 5.1 Build, E-Commerce & Analytics
+Services are intentionally grouped and prioritized to support consistency-first income and compliance needs.
 
-* **Build & Deploy:** Vercel (`vercel.json` defines builds + routes)
-* **E-commerce:** Snipcart (use `<button class="snipcart-add-item" data-item-id="…" …>` snippets in product pages)
-* **Analytics/Ads:** Google Analytics, Facebook Pixel (load only in production)
+### Primary Service Categories
+1. **Tax & Legal Paperwork Support**
+   - Affidavits, sworn statements, POAs
+   - IRS and tax-related documentation
+   - Time-sensitive filings
+
+2. **General Notary & Document Execution**
+   - Mobile notarizations
+   - Personal, legal, and business documents
+   - GA & SC compliant statutory fees
+
+3. **School & Family Documentation**
+   - Enrollment affidavits
+   - Travel consent
+   - Guardianship-related documents
+
+4. **Employer / I-9 & Administrative Services**
+   - I-9 employment verification
+   - Administrative document assistance
+   - HR support (non-legal)
+
+5. **Apostille & Authentication**
+   - Intake coordination
+   - Status tracking
+   - Domestic & international document preparation support
+
+6. **Facility Visits (Mobile Field Services)**
+   - Hospitals & nursing homes
+   - Assisted living & rehab facilities
+   - Correctional facilities
+   - Courthouses & government offices
+
+> **Officiant services are offered but intentionally de-emphasized.**  
+> They are never a hero service or primary CTA.
 
 ---
 
-## 6. Environment Variables
+## 4. Booking & Payments (NON-NEGOTIABLE)
 
-> *These are managed securely in your Vercel dashboard or a local `.env` file. Never commit secrets to version control.*
+### Scheduling
+- **TidyCal is the ONLY booking system**
+- Authoritative booking paths:
+  - `danideclaresns/notary`
+  - `danideclaresns/apostille`
+  - `danideclaresns/officiant`
+  - `danideclaresns/loansigning`
 
-```
-# .env (example — DO NOT COMMIT REAL KEYS)
-REACT_APP_SNIPCART_API_KEY=your-public-api-key
-PRINTIFY_STORE_ID=your-store-id
-NEXT_PUBLIC_GA_ID=your-ga-id
-REACT_APP_GA_MEASUREMENT_ID=your-ga-id
-REACT_APP_FB_PIXEL_ID=your-pixel-id
-GOOGLE_MAPS_API_KEY=your-server-api-key
-ORIGIN_ADDRESS=your-business-address
+### Payments
+- **Stripe Payment Links ONLY**
+- No Stripe Buy Button embed snippets
+- All payments are routed through:
+  - `/pay` (centralized payment page)
+- Stripe is triggered via:
+  - `window.location.assign`
+- Fallback contact is always visible:
+  - Call/Text: (864) 326-5362
+  - Email: admin@danideclares.com
+
+### Booking Flow (Required)
+1. Client books via TidyCal  
+2. Appointment is **pending**
+3. Client completes payment via `/pay`
+4. Payment confirms appointment
+
+---
+
+## 5. Federal / Government Services Page
+
+A dedicated **Federal / Government** page exists and must:
+
+- Use conservative, capability-based language
+- Contain **NO Stripe buttons**
+- Contain **NO booking CTAs**
+- Be suitable for procurement officers and prime contractors
+
+Includes:
+- Core capabilities
+- NAICS / PSC alignment
+- UEI / CAGE (when provided)
+- Compliance posture
+- Coverage areas
+
+---
+
+## 6. Technology Stack
+
+**Frontend**
+- React (Create React App)
+- React Router
+- CSS modules / scoped CSS
+
+**Hosting & Deployment**
+- Vercel (production & preview environments)
+- GitHub-integrated CI/CD
+
+**Payments**
+- Stripe Payment Links (no embedded checkout widgets)
+
+**Scheduling**
+- TidyCal (external, authoritative)
+
+**CRM / Forms**
+- HubSpot (forms + tracking)
+
+**Analytics**
+- Google Analytics 4
+- (Loaded in production only)
+
+---
+
+## 7. Environment Variables
+
+> Managed via Vercel dashboard or local `.env`.  
+> **Never commit secrets to the repository.**
+
+```env
+# Analytics
+REACT_APP_GA_MEASUREMENT_ID=
+
+# Maps / Travel Calculations
+GOOGLE_MAPS_API_KEY=
+ORIGIN_ADDRESS=
 BASE_RADIUS_MILES=10
 MILEAGE_RATE=1.0
 BASE_TRAVEL_FEE=25
-```
-
-*If you've accidentally committed secrets, revoke and rotate them immediately.*
