@@ -7,19 +7,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-codex/redesign-danideclares.com-for-service-booking
   font-family: var(--font-primary);
   position: sticky;
   top: 0;
   z-index: 1000;
-  backdrop-filter: blur(12px);
-=======
-  font-family: 'Raleway', sans-serif;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-main
 }
 
 .navbar-logo {
@@ -51,10 +43,6 @@ main
   left: 0;
   right: 0;
   padding: 1rem;
-codex/redesign-danideclares.com-for-service-booking
-  border-bottom: 1px solid rgba(139, 30, 46, 0.12);
-=======
-
 }
 
 .nav-link {
@@ -63,6 +51,7 @@ codex/redesign-danideclares.com-for-service-booking
   font-weight: 600;
   position: relative;
 }
+
 .nav-link::after {
   content: '';
   position: absolute;
@@ -73,13 +62,16 @@ codex/redesign-danideclares.com-for-service-booking
   background: var(--gold);
   transition: width 0.3s ease;
 }
+
 .nav-link:hover {
   color: var(--burgundy);
 }
+
 .nav-link:hover::after,
 .nav-link.active::after {
   width: 100%;
 }
+
 .nav-link.active {
   color: var(--burgundy);
 }
@@ -88,6 +80,7 @@ codex/redesign-danideclares.com-for-service-booking
   position: relative;
   color: var(--burgundy);
 }
+
 .cart-badge {
   position: absolute;
   top: -0.5rem;

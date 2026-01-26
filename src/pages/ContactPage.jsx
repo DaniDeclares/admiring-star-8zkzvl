@@ -6,6 +6,10 @@ import "./ContactPage.css";
 import { siteConfig } from "../data/siteConfig.js";
 
 export default function ContactPage() {
+  const heroStyle = {
+    backgroundImage: `linear-gradient(180deg, rgba(45, 12, 16, 0.75), rgba(45, 12, 16, 0.5)), url(${process.env.PUBLIC_URL}/images/stock/document execution office.jpg)`,
+  };
+
   return (
     <>
       <Helmet>
@@ -17,7 +21,7 @@ export default function ContactPage() {
       </Helmet>
 
       <main className="contact-page">
-        <header className="contact-hero">
+        <header className="contact-hero" style={heroStyle}>
           <p className="contact-eyebrow">Contact</p>
           <h1>Let’s plan your appointment.</h1>
           <p>
