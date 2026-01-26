@@ -86,8 +86,8 @@ export default function PayPage() {
           <p className="pay-eyebrow">Step 2</p>
           <h1>Pay to Confirm</h1>
           <p>
-            Complete payment securely without leaving the site. Your appointment is
-            pending until payment is completed.
+            Payment required to confirm. Complete payment securely without leaving
+            the site—your appointment is pending until payment is completed.
           </p>
           <p>
             Need to schedule a time? Start on the{" "}
@@ -149,8 +149,8 @@ export default function PayPage() {
                 <p className="pay-card__price">Total: {priceLabel}</p>
               )}
               <p className="pay-card__stripe-note">
-                Step 2 — Pay now to confirm. Deposits are non-refundable and applied
-                to your total.
+                Step 2 — Payment required to confirm. Pay now; deposits are
+                non-refundable and applied to your total.
               </p>
               <div>
                 <button

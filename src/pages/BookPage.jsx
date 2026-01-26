@@ -33,8 +33,8 @@ export default function BookPage() {
           <p className="eyebrow">Service Booking</p>
           <h1>Book Your Appointment</h1>
           <p>
-            Your appointment is pending until payment is completed. Unpaid bookings
-            may be released.
+            Payment required to confirm. Your appointment is pending until payment
+            is completed, and unpaid bookings may be released.
           </p>
         </header>
 
