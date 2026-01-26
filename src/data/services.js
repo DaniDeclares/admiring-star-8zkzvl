@@ -123,16 +123,13 @@ export const serviceCatalog = [
     id: "notary",
     name: "Mobile Notary",
     shortDesc:
-      "On-site notarizations for personal and business documents with flexible scheduling.",
+      "On-site notarizations for personal, legal, and business documents with flexible scheduling.",
     category: "Notary",
     tidycalSlug: "notary",
     priceLabel: getPriceLabel("notary"),
-    highlights: [
-      "State-compliant notarial acts",
-      "Evening & weekend availability",
-      "Travel fee disclosed before service",
-      "Statutory act fees set by state law (GA $2/act, SC up to $5/act); mobile/service fees separate",
-    ],
+    bookingServiceId: "notary",
+    paymentServiceId: "notary-payment",
+    group: "general-notary",
   },
   {
     id: "apostille",
@@ -142,11 +139,9 @@ export const serviceCatalog = [
     category: "Apostille",
     tidycalSlug: "apostille",
     priceLabel: getPriceLabel("apostille"),
-    highlights: [
-      "Step-by-step intake",
-      "Drop-off coordination",
-      "Status updates provided",
-    ],
+    bookingServiceId: "apostille",
+    paymentServiceId: "apostille-payment",
+    group: "apostille-auth",
   },
   {
     id: "loansigning",
@@ -156,11 +151,53 @@ export const serviceCatalog = [
     category: "Loan Signing",
     tidycalSlug: "loansigning",
     priceLabel: getPriceLabel("loansigning"),
-    highlights: [
-      "NNA-certified signing agent",
-      "Detailed document walkthroughs",
-      "Scanbacks available on request",
-    ],
+    bookingServiceId: "loansigning",
+    paymentServiceId: "loan-signing-payment",
+    group: "tax-legal",
+  },
+  {
+    id: "courier-field",
+    name: "Courier & Field Support",
+    shortDesc:
+      "Court runs, document drops, and field support handled with clear pickup and delivery updates.",
+    category: "Courier/Field",
+    tidycalSlug: "notary",
+    bookingServiceId: "notary",
+    paymentServiceId: "notary-payment",
+    group: "tax-legal",
+  },
+  {
+    id: "facility-visits",
+    name: "Facility Visits",
+    shortDesc:
+      "Mobile notary visits for hospitals, nursing homes, detention centers, and care facilities.",
+    category: "Facility Visits",
+    tidycalSlug: "notary",
+    bookingServiceId: "notary",
+    paymentServiceId: "notary-payment",
+    group: "general-notary",
+  },
+  {
+    id: "school-family",
+    name: "School & Family Documentation",
+    shortDesc:
+      "Notarization for school enrollment, travel consent, guardianship, and family affidavits.",
+    category: "School/Family",
+    tidycalSlug: "notary",
+    bookingServiceId: "notary",
+    paymentServiceId: "notary-payment",
+    group: "school-family",
+  },
+  {
+    id: "i9-admin",
+    name: "I-9 & Administrative Support",
+    shortDesc:
+      "Employer I-9 verification and administrative document assistance for HR teams.",
+    category: "I-9/Admin",
+    tidycalSlug: "notary",
+    bookingServiceId: "notary",
+    paymentServiceId: "notary-payment",
+    group: "employer-admin",
   },
   {
     id: "officiant",
@@ -170,11 +207,9 @@ export const serviceCatalog = [
     category: "Officiant",
     tidycalSlug: "officiant",
     priceLabel: getPriceLabel("officiant"),
-    highlights: [
-      "Personalized ceremony flow",
-      "Support with filing guidance",
-      "Travel coordination included",
-    ],
+    bookingServiceId: "officiant",
+    paymentServiceId: "officiant-payment",
+    group: "school-family",
   },
 ];
 
