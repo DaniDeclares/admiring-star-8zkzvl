@@ -52,6 +52,9 @@ function CountdownTimer() {
 
 export default function Homepage() {
   const [idx, setIdx] = useState(0);
+  const heroStyle = {
+    backgroundImage: `url(${process.env.PUBLIC_URL}/images/stock/court building exterior3.jpg)`,
+  };
   useEffect(() => {
     const iv = setInterval(
       () => setIdx((i) => (i + 1) % testimonials.length),
@@ -72,7 +75,7 @@ export default function Homepage() {
 
       <main className="homepage home-main">
         {/* HERO */}
-        <section className="hero">
+        <section className="hero" style={heroStyle}>
           <div className="hero-overlay">
             <h1>Declare Your Worth</h1>
             <p className="hero-subtitle">

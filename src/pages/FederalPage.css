@@ -8,9 +8,6 @@
   max-width: 900px;
   margin: 0 auto 2.5rem;
   text-align: center;
-  background:
-    linear-gradient(180deg, rgba(27, 10, 14, 0.82), rgba(27, 10, 14, 0.6)),
-    url("/images/stock/Courthouse steps.jpg");
   background-size: cover;
   background-position: center;
   border-radius: 24px;

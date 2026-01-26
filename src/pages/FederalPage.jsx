@@ -4,6 +4,10 @@ import { Link } from "react-router-dom";
 import "./FederalPage.css";
 
 export default function FederalPage() {
+  const heroStyle = {
+    backgroundImage: `linear-gradient(180deg, rgba(27, 10, 14, 0.82), rgba(27, 10, 14, 0.6)), url(${process.env.PUBLIC_URL}/images/stock/Courthouse steps.jpg)`,
+  };
+
   return (
     <>
       <Helmet>
@@ -15,7 +19,7 @@ export default function FederalPage() {
       </Helmet>
 
       <main className="federal-page">
-        <section className="federal-hero">
+        <section className="federal-hero" style={heroStyle}>
           <h1>Federal Contracting</h1>
           <p>
             Dani Declares provides mobile notary, loan signing, and apostille

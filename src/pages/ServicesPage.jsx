@@ -8,6 +8,9 @@ import NotaryFeesNotice from "../components/NotaryFeesNotice.jsx";
 import "./ServicesPage.css";
 
 export default function ServicesPage() {
+  const heroStyle = {
+    backgroundImage: `linear-gradient(180deg, rgba(45, 12, 16, 0.82), rgba(45, 12, 16, 0.6)), url(${process.env.PUBLIC_URL}/images/stock/legal paperwork desk2.jpg)`,
+  };
   const serviceGroups = [
     {
       id: "tax-legal",
@@ -55,7 +58,7 @@ export default function ServicesPage() {
       </Helmet>
 
       <main className="services-page">
-        <header className="services-hero">
+        <header className="services-hero" style={heroStyle}>
           <p className="services-eyebrow">Premium Mobile Services</p>
           <h1>Trusted notary and document support, delivered with care.</h1>
           <p>
@@ -90,42 +93,12 @@ export default function ServicesPage() {
             <p>Book → Pay deposit → Receive appointment confirmation.</p>
           </div>
         </section>
-        
         <section className="services-index">
           {serviceGroups.map((group) => (
             <div key={group.id} className="services-group">
               <div className="services-group__header">
                 <h2>{group.title}</h2>
                 <p>{group.description}</p>
-
-        <section className="services-contact-bar">
-          <div>
-            <h3>Facility Visits</h3>
-            <p>
-              Mobile notary support for hospitals, nursing homes, rehab centers,
-              correctional facilities, and courthouses with limited availability.
-              We coordinate on-site details and confirm travel before your appointment
-              is finalized.
-            </p>
-          </div>
-          <div className="services-contact-bar__actions">
-            <Link to="/facility-visits" className="btn btn--secondary">
-              Learn About Facility Visits
-            </Link>
-          </div>
-        </section>
-
-        <section className="services-grid">
-          {serviceCatalog.map((service) => (
-            <article key={service.id} className="service-card">
-              <div className="service-card__header">
-                <span className="service-card__tag">{service.category}</span>
-                <h2>{service.name}</h2>
-                <p>{service.shortDesc}</p>
-                {service.priceLabel && (
-                  <p className="service-card__price">{service.priceLabel}</p>
-                )}
-
               </div>
               <div className="services-group__grid">
                 {group.services.map((service) => (
@@ -157,6 +130,23 @@ export default function ServicesPage() {
               </div>
             </div>
           ))}
+        </section>
+
+        <section className="services-contact-bar">
+          <div>
+            <h3>Facility Visits</h3>
+            <p>
+              Mobile notary support for hospitals, nursing homes, rehab centers,
+              correctional facilities, and courthouses with limited availability.
+              We coordinate on-site details and confirm travel before your appointment
+              is finalized.
+            </p>
+          </div>
+          <div className="services-contact-bar__actions">
+            <Link to="/facility-visits" className="btn btn--secondary">
+              Learn About Facility Visits
+            </Link>
+          </div>
         </section>
 
         <section className="services-disclaimer">
