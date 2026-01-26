@@ -11,6 +11,33 @@ const formatPrice = (price) =>
 const INVALID_PAYMENT_MESSAGE =
   "Service temporarily unavailable — call/text (864) 326-5362 or email admin@danideclares.com.";
 
+const normalizeServiceKey = (value) =>
+  typeof value === "string" ? value.trim().toLowerCase() : "";
+
+const addServiceAlias = (map, alias, canonicalId) => {
+  const normalizedAlias = normalizeServiceKey(alias);
+  if (!normalizedAlias) {
+    return;
+  }
+
+  map.set(normalizedAlias, canonicalId);
+  if (normalizedAlias.includes("_")) {
+    map.set(normalizedAlias.replace(/_/g, "-"), canonicalId);
+  }
+  if (normalizedAlias.includes("-")) {
+    map.set(normalizedAlias.replace(/-/g, "_"), canonicalId);
+  }
+};
+
+const resolveServiceId = (requestedId, aliasMap) => {
+  const normalizedId = normalizeServiceKey(requestedId);
+  if (!normalizedId) {
+    return "";
+  }
+
+  return aliasMap.get(normalizedId) || "";
+};
+
 export default function PayPage() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -33,8 +60,22 @@ export default function PayPage() {
     });
     return lookup;
   }, [paymentOptions]);
+  const serviceAliasMap = useMemo(() => {
+    const aliasMap = new Map();
+    paymentOptions.forEach((service) => {
+      const canonicalId = service.id;
+      addServiceAlias(aliasMap, canonicalId, canonicalId);
+      addServiceAlias(aliasMap, service.serviceId, canonicalId);
+      addServiceAlias(aliasMap, service.bookingServiceId, canonicalId);
+      addServiceAlias(aliasMap, service.catalogKey, canonicalId);
+    });
+    return aliasMap;
+  }, [paymentOptions]);
+  const normalizedServiceId = requestedServiceId
+    ? resolveServiceId(requestedServiceId, serviceAliasMap)
+    : "";
   const requestedService = requestedServiceId
-    ? serviceLookup.get(requestedServiceId)
+    ? serviceLookup.get(normalizedServiceId)
     : null;
   const [selectedServiceId, setSelectedServiceId] = useState("");
 
