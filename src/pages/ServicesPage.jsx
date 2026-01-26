@@ -8,20 +8,56 @@ import NotaryFeesNotice from "../components/NotaryFeesNotice.jsx";
 import "./ServicesPage.css";
 
 export default function ServicesPage() {
+  const serviceGroups = [
+    {
+      id: "tax-legal",
+      title: "Tax & legal paperwork support",
+      description:
+        "Support for time-sensitive filings, signatures, and legal documentation.",
+    },
+    {
+      id: "general-notary",
+      title: "General notary & document execution",
+      description:
+        "Mobile, on-site notarization for individuals, families, and businesses.",
+    },
+    {
+      id: "school-family",
+      title: "School & family documentation",
+      description:
+        "Documentation support for families, schools, and personal milestones.",
+    },
+    {
+      id: "employer-admin",
+      title: "Employer/I-9 & administrative services",
+      description:
+        "Administrative support for HR teams and employer verification needs.",
+    },
+    {
+      id: "apostille-auth",
+      title: "Apostille & authentication",
+      description:
+        "Guided document authentication support for domestic and international use.",
+    },
+  ].map((group) => ({
+    ...group,
+    services: serviceCatalog.filter((service) => service.group === group.id),
+  }));
+
   return (
     <>
       <Helmet>
         <title>Services • Dani Declares</title>
         <meta
           name="description"
-          content="Mobile notary, apostille facilitation, loan signing, and officiant services with clear booking and payment steps."
+          content="Mobile notary, apostille facilitation, and loan signing support with clear booking and payment steps."
         />
       </Helmet>
 
       <main className="services-page">
         <header className="services-hero">
           <p className="services-eyebrow">Premium Mobile Services</p>
-          <h1>Trusted notary and ceremony support, delivered with care.</h1>
+          <h1>Trusted notary and document support, delivered with care.</h1>
           <p>
             Book your appointment in minutes, then confirm with a secure deposit.
             We serve Georgia and South Carolina with flexible, mobile-first scheduling.
@@ -55,6 +91,14 @@ export default function ServicesPage() {
           </div>
         </section>
 
+codex/update-services-page-with-new-layout
+        <section className="services-index">
+          {serviceGroups.map((group) => (
+            <div key={group.id} className="services-group">
+              <div className="services-group__header">
+                <h2>{group.title}</h2>
+                <p>{group.description}</p>
+=======
         <section className="services-contact-bar">
           <div>
             <h3>Facility Visits</h3>
@@ -82,21 +126,37 @@ export default function ServicesPage() {
                 {service.priceLabel && (
                   <p className="service-card__price">{service.priceLabel}</p>
                 )}
+
               </div>
-              <ul className="service-card__highlights">
-                {service.highlights.map((item) => (
-                  <li key={item}>{item}</li>
+              <div className="services-group__grid">
+                {group.services.map((service) => (
+                  <article key={service.id} className="service-card">
+                    <div className="service-card__header">
+                      <span className="service-card__tag">{service.category}</span>
+                      <h3>{service.name}</h3>
+                      <p>{service.shortDesc}</p>
+                      {service.priceLabel && (
+                        <p className="service-card__price">{service.priceLabel}</p>
+                      )}
+                    </div>
+                    <div className="service-card__actions">
+                      <Link
+                        className="btn btn--primary"
+                        to={buildServiceActionPath(service.bookingServiceId)}
+                      >
+                        Book Appointment
+                      </Link>
+                      <Link
+                        className="btn btn--secondary"
+                        to={`/pay?service=${service.paymentServiceId}`}
+                      >
+                        Pay
+                      </Link>
+                    </div>
+                  </article>
                 ))}
-              </ul>
-              <div className="service-card__actions">
-                <Link
-                  className="btn btn--primary"
-                  to={buildServiceActionPath(service.id)}
-                >
-                  Book Now
-                </Link>
               </div>
-            </article>
+            </div>
           ))}
         </section>
 
