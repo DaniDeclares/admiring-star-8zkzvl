@@ -95,6 +95,16 @@ const paymentServiceData = [
     catalogKey: "officiant",
     bookingServiceId: "officiant",
   },
+  {
+    id: "process-serving-payment",
+    title: "Process Serving Payment",
+    shortDescription:
+      "Submit payment for process serving and case-related document delivery.",
+    category: "payment",
+    actionType: "pay",
+    catalogKey: "process_serving",
+    bookingServiceId: "notary",
+  },
 ];
 
 const buildPaymentService = (service) => {
