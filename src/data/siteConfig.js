@@ -4,8 +4,8 @@ export const siteConfig = {
   serviceAreaText: "Serving Atlanta, Doraville, Dunwoody, and beyond.",
   phoneNumbers: {
     primary: {
-      display: "(864) 326-5263",
-      tel: "+18643265263",
+      display: "(864) 326-5362",
+      tel: "+18643265362",
     },
     secondary: {
       display: "(470) 523-4892",
