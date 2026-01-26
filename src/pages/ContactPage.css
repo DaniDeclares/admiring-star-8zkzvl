@@ -8,13 +8,21 @@
   max-width: 720px;
   margin: 0 auto 2rem;
   text-align: center;
+  background:
+    linear-gradient(180deg, rgba(45, 12, 16, 0.75), rgba(45, 12, 16, 0.5)),
+    url("/images/stock/document execution office.jpg");
+  background-size: cover;
+  background-position: center;
+  padding: 2.5rem 2rem;
+  border-radius: 22px;
+  color: #fff;
 }
 
 .contact-eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 0.75rem;
-  color: #8b1e2e;
+  color: #f6e6c0;
   font-weight: 700;
   margin-bottom: 0.75rem;
 }
@@ -22,12 +30,12 @@
 .contact-hero h1 {
   font-family: "Raleway", serif;
   font-size: clamp(2rem, 3vw, 2.8rem);
-  color: #2b1b1f;
+  color: #fff;
   margin-bottom: 0.75rem;
 }
 
 .contact-hero p {
-  color: #4b3a3f;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .contact-form {
