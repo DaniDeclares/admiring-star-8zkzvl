@@ -27,6 +27,7 @@ import ContactPage from "./pages/ContactPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
+import FacilityVisitsPage from "./pages/FacilityVisitsPage.jsx";
 import FederalPage from "./pages/FederalPage.jsx";
 import TaxServicesPage from "./pages/TaxServicesPage.jsx";
 
@@ -127,6 +128,7 @@ export default function App() {
         {/* Public */}
         <Route path="/" element={<Homepage />} />
         <Route path="/services" element={<ServicesPage />} />
+        <Route path="/facility-visits" element={<FacilityVisitsPage />} />
         <Route path="/federal" element={<FederalPage />} />
         <Route
           path="/federal-services"

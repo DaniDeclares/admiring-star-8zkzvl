@@ -55,6 +55,23 @@ export default function ServicesPage() {
           </div>
         </section>
 
+        <section className="services-contact-bar">
+          <div>
+            <h3>Facility Visits</h3>
+            <p>
+              Mobile notary support for hospitals, nursing homes, rehab centers,
+              correctional facilities, and courthouses with limited availability.
+              We coordinate on-site details and confirm travel before your appointment
+              is finalized.
+            </p>
+          </div>
+          <div className="services-contact-bar__actions">
+            <Link to="/facility-visits" className="btn btn--secondary">
+              Learn About Facility Visits
+            </Link>
+          </div>
+        </section>
+
         <section className="services-grid">
           {serviceCatalog.map((service) => (
             <article key={service.id} className="service-card">
