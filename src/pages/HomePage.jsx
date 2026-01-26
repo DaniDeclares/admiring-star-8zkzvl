@@ -7,6 +7,34 @@ import "./Homepage.css";
 
 const eventBackground =
   process.env.PUBLIC_URL + "/images/festival/pexels-fang-liu-1996637-3617724.jpg";
+const stockBase = process.env.PUBLIC_URL + "/images/stock";
+
+const capabilityTiles = [
+  {
+    title: "Courts",
+    image: `${stockBase}/court building exterior.jpg`,
+  },
+  {
+    title: "Hospitals",
+    image: `${stockBase}/Hospital administrative desks.jpg`,
+  },
+  {
+    title: "Schools",
+    image: `${stockBase}/School admin offices.jpg`,
+  },
+  {
+    title: "Government Offices",
+    image: `${stockBase}/government office paperwork.jpg`,
+  },
+  {
+    title: "Administration",
+    image: `${stockBase}/Office hallways.jpg`,
+  },
+  {
+    title: "Confidentiality",
+    image: `${stockBase}/personal data confidential folder image.jpg`,
+  },
+];
 
 const testimonials = [
   {
@@ -113,6 +141,24 @@ export default function Homepage() {
             To provide transparent pricing, fast scheduling, and trusted mobile
             services across notary, real estate, and officiant support.
           </p>
+        </section>
+
+        <section className="capabilities-section">
+          <div className="section-heading">
+            <h2>Trusted On-Site Capability</h2>
+            <p>
+              From courthouse signings to confidential records handling, we support
+              public-sector environments with care and professionalism.
+            </p>
+          </div>
+          <div className="capabilities-grid">
+            {capabilityTiles.map((tile) => (
+              <div key={tile.title} className="capability-card">
+                <img src={tile.image} alt={`${tile.title} setting`} />
+                <div className="capability-label">{tile.title}</div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* WHY THIS FESTIVAL MATTERS */}

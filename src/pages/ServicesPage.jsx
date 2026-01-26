@@ -91,12 +91,42 @@ export default function ServicesPage() {
           </div>
         </section>
 
+codex/update-services-page-with-new-layout
         <section className="services-index">
           {serviceGroups.map((group) => (
             <div key={group.id} className="services-group">
               <div className="services-group__header">
                 <h2>{group.title}</h2>
                 <p>{group.description}</p>
+=======
+        <section className="services-contact-bar">
+          <div>
+            <h3>Facility Visits</h3>
+            <p>
+              Mobile notary support for hospitals, nursing homes, rehab centers,
+              correctional facilities, and courthouses with limited availability.
+              We coordinate on-site details and confirm travel before your appointment
+              is finalized.
+            </p>
+          </div>
+          <div className="services-contact-bar__actions">
+            <Link to="/facility-visits" className="btn btn--secondary">
+              Learn About Facility Visits
+            </Link>
+          </div>
+        </section>
+
+        <section className="services-grid">
+          {serviceCatalog.map((service) => (
+            <article key={service.id} className="service-card">
+              <div className="service-card__header">
+                <span className="service-card__tag">{service.category}</span>
+                <h2>{service.name}</h2>
+                <p>{service.shortDesc}</p>
+                {service.priceLabel && (
+                  <p className="service-card__price">{service.priceLabel}</p>
+                )}
+
               </div>
               <div className="services-group__grid">
                 {group.services.map((service) => (

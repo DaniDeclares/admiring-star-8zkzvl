@@ -1,48 +1,75 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
-import StripeBuyButton from "../components/StripeBuyButton.jsx";
 import { getStripeLink, isValidStripeUrl } from "../config/stripeLinks.js";
 import { bookingServices, paymentServices } from "../data/services.js";
-import { STRIPE_PUBLISHABLE_KEY } from "../data/servicesCatalog.js";
 import "./PayPage.css";
 
 const formatPrice = (price) =>
   typeof price === "number" ? `$${price}` : price;
 
 const INVALID_PAYMENT_MESSAGE =
-  "Booking temporarily unavailable — call/text (864) 326-5263";
+  "Service temporarily unavailable — call/text (864) 326-5362 or email admin@danideclares.com.";
 
 export default function PayPage() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const requestedServiceId = params.get("service");
-  const serviceLookup = useMemo(
-    () => new Map(paymentServices.map((service) => [service.id, service])),
+  const paymentOptions = useMemo(
+    () =>
+      paymentServices.map((service) => ({
+        ...service,
+        serviceId: service.bookingServiceId || service.id,
+      })),
     [paymentServices]
   );
-  const selectedService = requestedServiceId
+  const serviceLookup = useMemo(() => {
+    const lookup = new Map();
+    paymentOptions.forEach((service) => {
+      lookup.set(service.serviceId, service);
+      if (service.id && service.id !== service.serviceId) {
+        lookup.set(service.id, service);
+      }
+    });
+    return lookup;
+  }, [paymentOptions]);
+  const requestedService = requestedServiceId
     ? serviceLookup.get(requestedServiceId)
     : null;
-  const fallbackService = paymentServices[0] || null;
-  const activeService = selectedService || fallbackService;
-  const isValidSelection = Boolean(selectedService);
+  const [selectedServiceId, setSelectedServiceId] = useState("");
+
+  useEffect(() => {
+    if (!requestedServiceId) {
+      setSelectedServiceId("");
+      return;
+    }
+
+    if (requestedService) {
+      setSelectedServiceId(requestedService.serviceId);
+    } else {
+      setSelectedServiceId("");
+    }
+  }, [requestedServiceId, requestedService]);
+
+  const activeService =
+    requestedService ||
+    (selectedServiceId ? serviceLookup.get(selectedServiceId) : null);
+  const isSelectionRequired = !requestedService;
 
   const priceLabel = useMemo(
     () => (activeService ? formatPrice(activeService.price) : null),
     [activeService]
   );
   const bookingServiceId =
-    activeService?.bookingServiceId ||
-    bookingServices[0]?.id ||
-    "notary";
+    activeService?.bookingServiceId || bookingServices[0]?.id || "notary";
   const payLinkUrl = activeService
     ? activeService.stripePaymentLink || getStripeLink(activeService.catalogKey)
     : "";
   const isValidPayLinkUrl = isValidStripeUrl(payLinkUrl);
-  const otherServices = paymentServices.filter(
-    (service) => service.id !== activeService?.id
-  );
+  const hasInvalidRequestedService =
+    Boolean(requestedServiceId) && !requestedService;
+  const showFallbackContact =
+    hasInvalidRequestedService || (activeService && !isValidPayLinkUrl);
 
   return (
     <>
@@ -68,13 +95,49 @@ export default function PayPage() {
           </p>
         </header>
 
-        {!isValidSelection && requestedServiceId && (
+        {hasInvalidRequestedService && (
           <section className="pay-warning">
             <h2>Select a service to pay</h2>
             <p>
               The payment link you requested is unavailable. Please choose a service
-              below to continue.
+              below or contact us for help.
             </p>
+          </section>
+        )}
+
+        {showFallbackContact && !activeService && (
+          <section className="pay-details">
+            <div className="pay-card__fallback" role="status">
+              <strong>Service not available.</strong>
+              <p>{INVALID_PAYMENT_MESSAGE}</p>
+              <div className="pay-card__fallback-actions">
+                <a href="tel:18643265362">Call/Text (864) 326-5362</a>
+                <a href="mailto:admin@danideclares.com">
+                  Email admin@danideclares.com
+                </a>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {isSelectionRequired && (
+          <section className="pay-selection">
+            <h2>Select a service</h2>
+            <div className="pay-selection__control">
+              <label htmlFor="pay-service-select">Service</label>
+              <select
+                id="pay-service-select"
+                value={selectedServiceId}
+                onChange={(event) => setSelectedServiceId(event.target.value)}
+              >
+                <option value="">Choose a service</option>
+                {paymentOptions.map((service) => (
+                  <option key={service.serviceId} value={service.serviceId}>
+                    {service.title}
+                  </option>
+                ))}
+              </select>
+            </div>
           </section>
         )}
 
@@ -90,27 +153,25 @@ export default function PayPage() {
                 to your total.
               </p>
               <div>
-                {activeService.buyButtonId ? (
-                  <StripeBuyButton
-                    buyButtonId={activeService.buyButtonId}
-                    publishableKey={STRIPE_PUBLISHABLE_KEY}
-                  />
-                ) : isValidPayLinkUrl ? (
-                  <a
-                    className="btn btn--primary btn--block"
-                    href={payLinkUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Pay Now
-                  </a>
-                ) : (
-                  <>
-                    <button className="btn btn--primary btn--block" disabled>
-                      Pay Now
-                    </button>
+                <button
+                  className="btn btn--primary btn--block"
+                  type="button"
+                  disabled={!activeService || !isValidPayLinkUrl}
+                  onClick={() => window.location.assign(payLinkUrl)}
+                >
+                  Pay Now
+                </button>
+                {showFallbackContact && (
+                  <div className="pay-card__fallback" role="status">
+                    <strong>Service not available.</strong>
                     <p>{INVALID_PAYMENT_MESSAGE}</p>
-                  </>
+                    <div className="pay-card__fallback-actions">
+                      <a href="tel:18643265362">Call/Text (864) 326-5362</a>
+                      <a href="mailto:admin@danideclares.com">
+                        Email admin@danideclares.com
+                      </a>
+                    </div>
+                  </div>
                 )}
               </div>
               <div>
@@ -131,25 +192,6 @@ export default function PayPage() {
           </section>
         )}
 
-        <section className="pay-alternates">
-          <h2>Other Services</h2>
-          <div className="pay-alternates__grid">
-            {otherServices.map((service) => (
-              <article key={service.id} className="pay-alt-card">
-                <h3>{service.title}</h3>
-                {service.price !== null && service.price !== undefined && (
-                  <p>Total: {formatPrice(service.price)}</p>
-                )}
-                <Link
-                  className="btn btn--secondary btn--block"
-                  to={`/pay?service=${service.id}`}
-                >
-                  View &amp; Pay
-                </Link>
-              </article>
-            ))}
-          </div>
-        </section>
       </main>
     </>
   );

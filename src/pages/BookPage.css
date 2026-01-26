@@ -99,6 +99,51 @@
   min-height: 640px;
 }
 
+.booking-card__primary {
+  margin-bottom: 1.5rem;
+}
+
+.booking-card__primary .btn,
+.booking-card__payment .btn,
+.booking-card__fallback .btn {
+  width: 100%;
+}
+
+.booking-card__embed {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.booking-card__fallback {
+  background: rgba(139, 30, 46, 0.04);
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid rgba(139, 30, 46, 0.08);
+}
+
+.booking-card__fallback p {
+  color: var(--ink-muted);
+  margin-bottom: 0.75rem;
+}
+
+.booking-card__payment {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(139, 30, 46, 0.12);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.booking-card__payment h4 {
+  font-size: 1.1rem;
+  color: var(--burgundy);
+}
+
+.booking-card__payment p {
+  color: var(--ink-muted);
+  margin: 0;
+}
+
 .price-pill {
   background: rgba(212, 175, 55, 0.18);
   color: var(--burgundy);
