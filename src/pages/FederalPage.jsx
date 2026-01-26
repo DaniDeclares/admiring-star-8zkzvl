@@ -23,7 +23,7 @@ export default function FederalPage() {
           </p>
           <div className="federal-hero__actions">
             <Link className="btn btn--primary" to="/contact">
-              Request a Quote
+              Contracting Inquiries
             </Link>
             <a
               className="btn btn--secondary"
@@ -73,27 +73,6 @@ export default function FederalPage() {
             <li>Insured and bonded where applicable</li>
             <li>Mobile-first scheduling and field-ready support</li>
           </ul>
-        </section>
-
-        <section className="federal-section federal-contact">
-          <h2>Ready to Engage?</h2>
-          <p>
-            Request a quote or download the capability statement for internal
-            distribution and procurement onboarding.
-          </p>
-          <div className="federal-contact__actions">
-            <Link className="btn btn--primary" to="/contact">
-              Request a Quote
-            </Link>
-            <a
-              className="btn btn--secondary"
-              href="/assets/capability-statement.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Download Capability Statement
-            </a>
-          </div>
         </section>
       </main>
     </>

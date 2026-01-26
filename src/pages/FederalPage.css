@@ -8,11 +8,20 @@
   max-width: 900px;
   margin: 0 auto 2.5rem;
   text-align: center;
+  background:
+    linear-gradient(180deg, rgba(27, 10, 14, 0.82), rgba(27, 10, 14, 0.6)),
+    url("/images/stock/Courthouse steps.jpg");
+  background-size: cover;
+  background-position: center;
+  border-radius: 24px;
+  padding: 2.75rem 2rem;
+  color: #fff;
 }
 
 .federal-hero h1 {
   font-size: clamp(2.2rem, 3.5vw, 3rem);
   margin-bottom: 0.75rem;
+  color: #fff;
 }
 
 .federal-hero__actions {
@@ -39,20 +48,12 @@
   gap: 0.5rem;
 }
 
-.federal-contact {
-  text-align: center;
-}
-
-.federal-contact__actions {
-  margin-top: 1.25rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-}
-
 @media (max-width: 600px) {
   .federal-page {
     padding: 2rem 1.25rem 3rem;
+  }
+
+  .federal-hero {
+    padding: 2.25rem 1.5rem;
   }
 }

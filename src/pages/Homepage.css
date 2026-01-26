@@ -6,8 +6,10 @@
 }
 
 .hero {
+  background-image: url("/images/stock/court building exterior3.jpg");
   background-size: cover;
   background-position: center;
+  padding: 4rem 1.5rem;
 }
 
 .hero-overlay {
@@ -157,6 +159,51 @@
   color: var(--ink-muted);
 }
 
+.capabilities-section {
+  padding: 1rem 1.5rem 3rem;
+}
+
+.capabilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.capability-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 180px;
+  box-shadow: var(--card-shadow);
+}
+
+.capability-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.capability-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(23, 6, 9, 0.1), rgba(23, 6, 9, 0.7));
+}
+
+.capability-label {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 1;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
 .packages-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -208,5 +255,9 @@
 @media (max-width: 700px) {
   .hero-overlay {
     padding: 2rem 1.5rem;
+  }
+
+  .hero {
+    padding: 3.5rem 1.25rem;
   }
 }
