@@ -1,43 +1,14 @@
 .cancel-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 3rem 1rem;
+  padding: var(--section-padding) var(--section-gap);
   text-align: center;
-  background: #fff;
-  color: #333;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-primary);
 }
 
 .cancel-page h1 {
-  color: #8B1E2E;
+  color: var(--burgundy);
   margin-bottom: 1rem;
-}
-
-.cancel-page .btn {
-  border-radius: 8px;
-  padding: 0.7rem 1.5rem;
-  text-decoration: none;
-  display: inline-block;
-  margin-top: 1rem;
-  font-weight: bold;
-}
-
-.cancel-page .btn--primary {
-  background: #8B1E2E;
-  color: #fff;
-}
-
-.cancel-page .btn--primary:hover {
-  background: #D4AF37;
-  color: #8B1E2E;
-}
-
-.cancel-page .btn--secondary {
-  background: #D4AF37;
-  color: #222;
-}
-
-.cancel-page .btn--secondary:hover {
-  background: #bfa13a;
-  color: #fff;
 }

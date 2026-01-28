@@ -1,23 +1,23 @@
 .onboarding-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 3rem 1rem;
+  padding: var(--section-padding) var(--section-gap);
   text-align: center;
-  background: #fff5f7;
-  color: #333;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-primary);
 }
 
 .onboarding-page h1 {
-  color: #8B1E2E;
+  color: var(--burgundy);
   margin-bottom: 1rem;
 }
 
 .onboarding-page p a {
-  color: #D4AF37;
+  color: var(--gold);
   text-decoration: underline;
 }
 
 .onboarding-page p a:hover {
-  color: #8B1E2E;
+  color: var(--burgundy);
 }

@@ -1,17 +1,17 @@
 /* src/pages/VendorPortal.css — Styles for Vendor & Speaker Portal */
 
 .vendor-portal {
-  background: #F8F5F1;
-  padding: 2rem 1rem;
-  font-family: 'Montserrat', Arial, sans-serif;
-  color: #333;
+  background: var(--ivory);
+  padding: var(--section-padding) var(--section-gap);
+  font-family: var(--font-primary);
+  color: var(--ink);
   max-width: 1000px;
   margin: 0 auto;
 }
 
 .vendor-portal h1 {
-  font-size: 2rem;
-  color: #8B1E2E;
+  font-size: var(--heading-1);
+  color: var(--burgundy);
   text-align: center;
   margin-bottom: 1rem;
 }
@@ -36,23 +36,23 @@
 
 .vendor-portal ul li::before {
   content: "✔";
-  color: #D4AF37;
+  color: var(--gold);
   position: absolute;
   left: 0;
   top: 0;
 }
 
 .portal-section {
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
+  background: var(--surface);
+  border-radius: var(--card-radius);
+  border: var(--card-border);
+  padding: var(--card-padding);
+  margin: var(--section-gap) 0;
 }
 
 .portal-section h2 {
-  font-size: 1.25rem;
-  color: #8B1E2E;
+  font-size: var(--heading-3);
+  color: var(--burgundy);
   margin-bottom: 0.75rem;
 }
 
@@ -70,15 +70,15 @@
 
 .portal-section ul li::before {
   content: "➤";
-  color: #8B1E2E;
+  color: var(--burgundy);
   position: absolute;
   left: 0;
   top: 0;
 }
 
 .contact-support {
-  background: #fffbe7;
-  border-left: 4px solid #D4AF37;
+  background: var(--surface-muted);
+  border-left: 4px solid var(--gold);
 }
 
 .contact-support h2 {
@@ -91,15 +91,15 @@
 }
 
 .contact-support a {
-  color: #8B1E2E;
+  color: var(--burgundy);
   text-decoration: underline;
 }
 
 @media (max-width: 700px) {
   .vendor-portal {
-    padding: 1rem;
+    padding: var(--section-padding-tight) var(--section-gap);
   }
   .portal-section {
-    padding: 1rem;
+    padding: var(--card-padding);
   }
 }

@@ -1,12 +1,12 @@
 .service-cta {
-  margin: 3rem auto 0;
-  padding: 2.5rem;
-  border-radius: 24px;
-  background: #fff;
+  margin: var(--section-gap) auto 0;
+  padding: var(--section-padding-tight) var(--section-gap);
+  border-radius: var(--card-radius);
+  background: var(--surface);
   text-align: center;
   max-width: 960px;
   box-shadow: var(--card-shadow);
-  border: 1px solid rgba(139, 30, 46, 0.08);
+  border: var(--card-border);
 }
 
 .service-cta h2 {
@@ -16,9 +16,9 @@
 .service-cta__actions {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--section-gap);
   align-items: center;
-  margin-top: 1.5rem;
+  margin-top: var(--section-gap);
 }
 
 .service-cta__note {
@@ -40,6 +40,6 @@
   .service-cta__actions {
     flex-direction: row;
     justify-content: center;
-    gap: 3rem;
+    gap: calc(var(--section-gap) * 1.5);
   }
 }

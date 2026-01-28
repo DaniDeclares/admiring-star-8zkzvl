@@ -1,18 +1,14 @@
-:root {
-  --color-accent: #d4af37; /* your gold */
-}
-
 .weddings-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  padding: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
+  gap: var(--grid-gap);
+  padding: var(--section-padding-tight) var(--section-gap);
 }
 
 .gallery-item {
   overflow: hidden;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
   transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
 }
 
@@ -26,7 +22,7 @@
 .gallery-item:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-  border: 2px solid var(--color-accent);
+  border: 2px solid var(--gold);
 }
 
 .gallery-item:hover img {
