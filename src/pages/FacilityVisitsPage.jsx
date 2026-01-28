@@ -44,7 +44,8 @@ export default function FacilityVisitsPage() {
               facility and confirm the travel window.
             </li>
             <li>
-              <strong>Pay:</strong> Complete payment once travel is confirmed.
+              <strong>Pay:</strong> Complete payment once travel is confirmed to
+              hold your appointment.
             </li>
             <li>
               <strong>Meet on-site:</strong> We arrive at the approved time and
@@ -79,11 +80,11 @@ export default function FacilityVisitsPage() {
         </div>
         <div className="facility-visits-actions">
           <Link to="/book?service=notary" className="btn btn--primary">
-            Book Appointment
+            Book an Appointment
           </Link>
-          <Link to="/pay" className="btn btn--secondary">
-            Pay
-          </Link>
+          <p className="facility-visits-note">
+            Appointments are not confirmed until payment is completed.
+          </p>
         </div>
       </section>
     </main>

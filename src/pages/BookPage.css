@@ -103,6 +103,12 @@
   margin-bottom: 1.5rem;
 }
 
+.booking-card__note {
+  color: var(--ink-muted);
+  margin: 0.75rem 0 0;
+  text-align: center;
+}
+
 .booking-card__primary .btn,
 .booking-card__payment .btn,
 .booking-card__fallback .btn {

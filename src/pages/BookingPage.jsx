@@ -61,7 +61,7 @@ export default function BookingPage() {
         <title>Book a Service • Dani Declares</title>
         <meta
           name="description"
-          content="Book a mobile notary, apostille, or loan signing appointment with immediate payment to confirm."
+          content="Book a mobile notary, apostille, or loan signing appointment, then complete payment to confirm."
         />
       </Helmet>
 
@@ -70,7 +70,7 @@ export default function BookingPage() {
           <p className="booking-eyebrow">Step 1</p>
           <h1>Book Your Appointment</h1>
           <p>
-            Choose the service you need, select a time, and complete payment to
+            Choose the service you need, select a time, then complete payment to
             confirm your appointment.
           </p>
           <p className="booking-hero__notice">
@@ -125,14 +125,11 @@ export default function BookingPage() {
                   className="btn btn--primary"
                   to={`/book?service=${service.id}`}
                 >
-                  Book Now
+                  Book an Appointment
                 </Link>
-                <Link
-                  className="btn btn--secondary"
-                  to={`/pay?service=${service.payServiceKey || service.id}`}
-                >
-                  {service.payLabel || "Pay to Confirm"}
-                </Link>
+                <p className="booking-card__note">
+                  Appointments are not confirmed until payment is completed.
+                </p>
               </div>
             </article>
           ))}
@@ -186,17 +183,17 @@ export default function BookingPage() {
                 ) : (
                   <div className="booking-embed--missing">
                     <p>
-                      Booking temporarily unavailable — call/text (864) 326-5263
+                      Booking temporarily unavailable — call/text (864) 326-5362
                     </p>
                   </div>
                 )}
               </div>
               {hasSelection && (
                 <div className="booking-confirmation">
-                  <h3>Already booked? Continue to payment</h3>
+                  <h3>Step 2 — Complete payment after booking</h3>
                   <p>
-                    Complete payment right after booking to secure your appointment.
-                    Unpaid bookings are released.
+                    Your appointment is reserved. Payment is required to confirm and
+                    hold your time.
                   </p>
                   <Link
                     className="btn btn--primary"
@@ -204,7 +201,7 @@ export default function BookingPage() {
                       selectedService.payServiceKey || selectedServiceId
                     }`}
                   >
-                    Pay to Confirm
+                    Continue to Payment
                   </Link>
                 </div>
               )}

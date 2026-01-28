@@ -71,12 +71,15 @@ export default function ServicesPage() {
           </p>
           <div className="services-hero__actions">
             <Link to="/book?service=notary" className="btn btn--primary">
-              Book Notary
+              Book an Appointment
             </Link>
             <Link to="/contact" className="btn btn--secondary">
               Request a Custom Quote
             </Link>
           </div>
+          <p className="services-hero__note">
+            Appointments are not confirmed until payment is completed.
+          </p>
         </header>
 
         <section className="services-trust">
@@ -90,7 +93,7 @@ export default function ServicesPage() {
           </div>
           <div>
             <h3>Clear Confirmation</h3>
-            <p>Book → Pay deposit → Receive appointment confirmation.</p>
+            <p>Book → Pay after booking → Receive appointment confirmation.</p>
           </div>
         </section>
         <section className="services-index">
@@ -116,14 +119,11 @@ export default function ServicesPage() {
                         className="btn btn--primary"
                         to={buildServiceActionPath(service.bookingServiceId)}
                       >
-                        Book Appointment
+                        Book an Appointment
                       </Link>
-                      <Link
-                        className="btn btn--secondary"
-                        to={`/pay?service=${service.paymentServiceId}`}
-                      >
-                        Pay
-                      </Link>
+                      <p className="service-card__note">
+                        Appointments are not confirmed until payment is completed.
+                      </p>
                     </div>
                   </article>
                 ))}

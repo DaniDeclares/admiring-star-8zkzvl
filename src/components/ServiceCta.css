@@ -21,6 +21,13 @@
   margin-top: 1.5rem;
 }
 
+.service-cta__note {
+  color: var(--ink-muted);
+  margin: 0;
+  max-width: 280px;
+  text-align: center;
+}
+
 .service-cta__contact {
   text-align: left;
 }
