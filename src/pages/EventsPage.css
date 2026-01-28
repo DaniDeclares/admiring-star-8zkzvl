@@ -3,19 +3,20 @@
 .events-page {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 2.2rem 1rem 3.4rem 1rem;
-  background: #F8F5F1;    /* Ivory */
+  padding: var(--section-padding) var(--section-gap);
+  background: var(--ivory);
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: var(--section-gap);
 }
 
 .events-page h1 {
   text-align: center;
-  color: #8B1E2E;
-  margin-bottom: 2rem;
-  font-size: 2.4rem;
-  font-family: 'Georgia', serif;
+  color: var(--burgundy);
+  margin-bottom: 0;
+  font-size: var(--heading-1);
+  font-family: var(--font-secondary);
   letter-spacing: 0.5px;
   font-weight: bold;
   text-shadow: 0 2px 14px #f9e7e7;
@@ -23,129 +24,93 @@
 
 .events-page .intro {
   text-align: center;
-  margin-bottom: 2rem;
-  font-size: 1.11rem;
-  color: #474343;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  margin-bottom: 0;
+  font-size: 1.05rem;
+  color: var(--ink-muted);
+  font-family: var(--font-primary);
   line-height: 1.5;
   max-width: 800px;
 }
 
 /* Event Cards Grid */
 .events-page .event-card {
-  background: #fff;
-  border-radius: 1.2rem;
-  padding: 2.1rem 1.4rem;
   width: 100%;
   max-width: 345px;
-  box-shadow: 0 2px 13px rgba(139,30,46,0.11);
-  border: 1.5px solid #F8F5F1;
   text-align: center;
   transition: box-shadow 0.19s, transform 0.18s;
-  margin: 1rem;
-  flex: 1 1 260px;
+  margin: 0;
+  flex: 1 1 var(--grid-min);
 }
 
 .events-page {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
+  gap: var(--grid-gap);
   justify-content: center;
 }
 
 .event-card:hover {
   box-shadow: 0 7px 22px rgba(139,30,46,0.17);
   transform: translateY(-2px) scale(1.018);
-  border-color: #D4AF37;
+  border-color: var(--gold);
 }
 
 .event-card h2 {
-  color: #8B1E2E;
+  color: var(--burgundy);
   margin-bottom: 0.5rem;
-  font-size: 1.33rem;
-  font-family: 'Raleway', Georgia, serif;
+  font-size: var(--heading-3);
+  font-family: var(--font-secondary);
   font-weight: 700;
   letter-spacing: 0.2px;
 }
 
 .event-meta,
 .event-desc {
-  color: #555;
+  color: var(--ink-muted);
   font-size: 1rem;
   margin-bottom: 0.9rem;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary);
   line-height: 1.5;
 }
 
-.btn {
-  background: #8B1E2E;
-  color: #fff;
-  border: none;
-  border-radius: 0.7rem;
-  padding: 0.7rem 1.5rem;
-  font-size: 1.03rem;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  margin: 0.5rem 0.24rem;
-  font-family: inherit;
-  font-weight: 600;
-  transition: background 0.19s, color 0.17s, box-shadow 0.16s;
-  box-shadow: 0 2px 7px rgba(212,175,55,0.08);
-}
-
-.btn--primary { background: #8B1E2E; color: #fff; }
-.btn--primary:hover { background: #D4AF37; color: #8B1E2E; }
-.btn--secondary { background: #D4AF37; color: #222; }
-.btn--secondary:hover,
-.btn--secondary:focus { background: #b8952c; color: #fff; }
-.btn--tertiary { background: #e0e0e0; color: #8B1E2E; }
-.btn--tertiary:hover,
-.btn--tertiary:focus { background: #f9f3f5; color: #8B1E2E; }
-
 /* Contact (Lead Capture) Card */
 .contact-info {
-  background: #fff;
-  border-radius: 1.2rem;
-  box-shadow: 0 2px 13px rgba(139,30,46,0.11);
-  padding: 2rem 1.4rem;
-  margin: 2rem;
+  margin: 0;
   text-align: center;
-  border: 1.5px solid #F8F5F1;
   max-width: 345px;
 }
 
 .contact-info h3 {
-  color: #8B1E2E;
-  font-family: 'Raleway', Georgia, serif;
+  color: var(--burgundy);
+  font-family: var(--font-secondary);
   margin-bottom: 0.6rem;
-  font-size: 1.26rem;
+  font-size: var(--heading-3);
 }
 
 .contact-info p {
-  color: #555;
+  color: var(--ink-muted);
   font-size: 1rem;
   line-height: 1.5;
   margin-bottom: 1rem;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary);
 }
 
 @media (max-width: 900px) {
   .events-page {
-    padding: 1rem 0.5rem 2rem 0.5rem;
+    padding: var(--section-padding-tight) var(--section-gap);
   }
   .event-card,
   .contact-info {
     max-width: 98vw;
-    padding: 1.2rem 0.7rem;
+    padding: var(--card-padding);
   }
   .events-page h1 {
-    font-size: 1.8rem;
+    font-size: var(--heading-2);
   }
 }
 
 @media (max-width: 600px) {
   .events-page {
-    padding: 1rem 0.12rem 2rem 0.12rem;
+    padding: var(--section-padding-tight) var(--section-gap);
   }
 }

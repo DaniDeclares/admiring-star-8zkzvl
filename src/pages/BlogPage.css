@@ -1,139 +1,120 @@
 .blog-page { 
   max-width: 980px;
   margin: 0 auto;
-  padding: 3rem 1.2rem 4rem 1.2rem;
-  background: #F8F5F1; /* ivory */
+  padding: var(--section-padding) var(--section-gap);
+  background: var(--ivory);
   min-height: 90vh;
 }
 
 .blog-title {
-  font-family: Georgia, serif;
-  color: #8B1E2E; /* burgundy */
+  font-family: var(--font-secondary);
+  color: var(--burgundy);
   text-align: center;
   margin-bottom: 0.3em;
-  font-size: 2.3rem;
+  font-size: var(--heading-1);
   letter-spacing: 1.2px;
   font-weight: 700;
   text-shadow: 0 1px 0 #fff, 0 2px 10px rgba(139,30,46,0.08);
 }
 
 .blog-tagline {
-  font-family: Montserrat, Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary);
   text-align: center;
-  font-size: 1.07rem;
-  margin-bottom: 2rem;
-  color: #56484b; /* deeper gray for contrast */
+  font-size: 1.05rem;
+  margin-bottom: var(--section-gap);
+  color: var(--ink-muted);
 }
 
 .blog-mailchimp {
   display: flex;
   justify-content: center;
-  margin-bottom: 2.2rem;
+  margin-bottom: var(--section-gap);
 }
 .blog-mailchimp form {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+.blog-mailchimp .email {
+  padding: 0.65rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(139, 30, 46, 0.35);
+  min-width: min(320px, 100%);
+}
 
 .blog-grid {
-  display: grid;
-  gap: 2.1rem;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--grid-gap);
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
 }
 
 .blog-card {
-  background: #fff5f7;
-  border-radius: 16px;
-  box-shadow: 0 2px 14px rgba(139,30,46,0.08);
-  padding: 2rem 1.7rem 2.5rem 1.7rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   min-height: 320px;
-  border: 1px solid #f3e5e9;
   transition: box-shadow 0.18s, border 0.18s;
 }
 .blog-card:hover {
   box-shadow: 0 6px 22px rgba(139,30,46,0.14);
-  border: 1px solid #D4AF37; /* gold border on hover */
+  border-color: var(--gold);
 }
 
 .blog-card-title {
-  color: #8B1E2E;
-  font-family: Georgia, serif;
-  font-size: 1.35rem;
+  color: var(--burgundy);
+  font-family: var(--font-secondary);
+  font-size: var(--heading-3);
   margin-bottom: 0.25em;
   font-weight: bold;
 }
 .blog-card-title .gold {
-  color: #D4AF37;
+  color: var(--gold);
 }
 
 .blog-meta {
   font-size: 0.93rem;
-  color: #B47A84; /* muted burgundy */
+  color: #B47A84;
   margin-bottom: 0.75em;
-  font-family: Montserrat, Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary);
   letter-spacing: 0.4px;
 }
 
 .blog-summary {
-  font-family: Montserrat, Arial, Helvetica, sans-serif;
-  color: #5e494c; /* softer but still readable */
+  font-family: var(--font-primary);
+  color: var(--ink-muted);
   margin-bottom: 1.2em;
   font-size: 1rem;
 }
 
-.btn--secondary {
-  background: #D4AF37;   /* gold */
-  color: #8B1E2E;        /* burgundy text for gold buttons */
-  border-radius: 6px;
-  padding: 0.57rem 1.25rem;
-  text-decoration: none;
-  font-weight: bold;
-  border: none;
-  margin-top: auto;
-  transition: background 0.2s, color 0.2s;
-  font-family: Montserrat, Arial, Helvetica, sans-serif;
-  box-shadow: 0 2px 6px rgba(139,30,46,0.10);
-}
-.btn--secondary:hover,
-.btn--secondary:focus {
-  background: #bfa13a;
-  color: #fff;
-}
-
 @media (max-width: 700px) {
   .blog-page {
-    padding: 2.2rem 0.2rem 3rem 0.2rem;
+    padding: var(--section-padding-tight) var(--section-gap);
   }
   .blog-card {
-    padding: 1.2rem 0.7rem 1.7rem 0.7rem;
+    padding: var(--card-padding);
   }
 }
 
 /* BLOG POST PAGE */
 .blog-post-page {
-  background: #fff5f7;
-  border-radius: 16px;
-  box-shadow: 0 2px 14px rgba(139,30,46,0.08);
-  padding: 2rem 1.5rem 2.2rem 1.5rem;
-  margin: 2rem auto 3rem auto;
+  background: var(--surface);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: var(--card-padding);
+  margin: var(--section-gap) auto;
   max-width: 750px;
-  border: 1px solid #f3e5e9;
+  border: var(--card-border);
 }
 
 .blog-post-page .blog-title {
-  font-family: Georgia, serif;
-  font-size: 2.1rem;
-  color: #8B1E2E;
+  font-family: var(--font-secondary);
+  font-size: var(--heading-2);
+  color: var(--burgundy);
   margin-bottom: 0.6rem;
   letter-spacing: 1px;
 }
 
 .blog-post-page .blog-meta {
-  font-family: Montserrat, Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary);
   font-size: 0.98rem;
   color: #B47A84;
   margin-bottom: 1.5rem;
@@ -141,14 +122,14 @@
 }
 
 .blog-content {
-  font-family: Montserrat, Arial, Helvetica, sans-serif;
-  color: #363636;
+  font-family: var(--font-primary);
+  color: var(--ink);
   line-height: 1.7;
-  font-size: 1.07rem;
+  font-size: 1rem;
 }
 
 @media (max-width: 700px) {
   .blog-post-page {
-    padding: 1.2rem 0.4rem 1.2rem 0.4rem;
+    padding: var(--card-padding);
   }
 }

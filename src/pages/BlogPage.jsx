@@ -8,8 +8,8 @@ import "./BlogPage.css";
 const MAILCHIMP_FORM = `
 <div id="mc_embed_signup">
   <form action="https://YOUR-USERNAME.usXX.list-manage.com/subscribe/post?u=XXXX&amp;id=XXXX" method="post" target="_blank" novalidate>
-    <input type="email" name="EMAIL" class="email" id="mce-EMAIL" placeholder="Your email" required style="padding:8px 14px; border-radius:6px; border:1px solid #8B1E2E; margin-right:10px;"/>
-    <input type="submit" value="Subscribe" name="subscribe" class="btn btn--primary" style="background:#8B1E2E;color:#fff; border:none; border-radius:6px; padding:9px 18px;"/>
+    <input type="email" name="EMAIL" class="email" id="mce-EMAIL" placeholder="Your email" required />
+    <input type="submit" value="Subscribe" name="subscribe" class="btn btn--primary" />
   </form>
 </div>
 `;

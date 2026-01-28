@@ -79,7 +79,7 @@ export default function ProductGallery() {
             href={group.paylink}
             target="_blank"
             rel="noopener noreferrer"
-            className="buy-now-button"
+            className="btn btn--primary buy-now-button"
           >
             Buy Now
           </a>
