@@ -48,6 +48,9 @@
 }
 
 .service-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.6rem 1rem;
   border-radius: 999px;
   border: 1px solid rgba(139, 30, 46, 0.2);
@@ -55,6 +58,8 @@
   color: var(--burgundy);
   font-weight: 600;
   transition: all 0.2s ease;
+  min-height: 44px;
+  text-align: center;
 }
 
 .service-chip:hover,
@@ -93,6 +98,9 @@
 
 .booking-card .tidycal-embed {
   min-height: 640px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .booking-card__primary {
@@ -156,7 +164,20 @@
 }
 
 @media (max-width: 720px) {
+  .service-chip-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .service-chip {
+    width: 100%;
+  }
+
   .booking-card__header {
     flex-direction: column;
+  }
+
+  .booking-card .tidycal-embed {
+    min-height: 560px;
   }
 }
