@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Countdown from "react-countdown";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 import "./Homepage.css";
+import heroBackground from "../assets/hero/hero-couple-beach-wide.jpg";
 
 const eventBackground =
   process.env.PUBLIC_URL + "/images/festival/pexels-fang-liu-1996637-3617724.jpg";
@@ -88,6 +89,9 @@ export default function Homepage() {
     );
     return () => clearInterval(iv);
   }, []);
+  const heroStyle = {
+    backgroundImage: `url(${heroBackground})`,
+  };
 
   return (
     <>
@@ -101,7 +105,7 @@ export default function Homepage() {
 
       <main className="homepage home-main">
         {/* HERO */}
-        <section className="hero">
+        <section className="hero" style={heroStyle}>
           <div className="hero-overlay">
             <h1>Declare Your Worth</h1>
             <p className="hero-subtitle">
