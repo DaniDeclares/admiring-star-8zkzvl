@@ -81,9 +81,6 @@ export default function ContactPage() {
             <li>
               <Link to="/book?service=officiant">Book Officiant</Link>
             </li>
-            <li>
-              <Link to="/pay">Pay to Confirm</Link>
-            </li>
           </ul>
         </section>
       </main>

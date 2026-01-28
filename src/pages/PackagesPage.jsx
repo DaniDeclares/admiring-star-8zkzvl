@@ -1,7 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { bookingServices, paymentServices } from "../data/services.js";
+import { bookingServices } from "../data/services.js";
 import ServiceCta from "../components/ServiceCta.jsx";
 import "./PackagesPage.css";
 
@@ -20,8 +20,8 @@ export default function PackagesPage() {
         <p className="eyebrow">Service Catalog</p>
         <h1>Services & Pricing</h1>
         <p>
-          Book first, then pay to confirm your appointment. Select the service that
-          matches your needs and follow the guided flow.
+          Book first, then complete payment to confirm your appointment. Select the
+          service that matches your needs and follow the guided flow.
         </p>
       </header>
 
@@ -41,32 +41,11 @@ export default function PackagesPage() {
                 to={`/book?service=${service.id}`}
                 className="btn btn--primary"
               >
-                Book
+                Book an Appointment
               </Link>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="service-section">
-        <h2>Complete payment</h2>
-        <p className="section-note">
-          Payment links are only used after you have booked your appointment. This
-          keeps your time slot safe and avoids double-booking.
-        </p>
-        <div className="service-grid">
-          {paymentServices.map((service) => (
-            <div key={service.id} className="service-card">
-              <div>
-                <h3>{service.title}</h3>
-                <p>{service.shortDescription}</p>
-              </div>
-              <Link
-                to={`/pay?service=${service.id}`}
-                className="btn btn--secondary"
-              >
-                Pay
-              </Link>
+              <p className="service-card__note">
+                Appointments are not confirmed until payment is completed.
+              </p>
             </div>
           ))}
         </div>

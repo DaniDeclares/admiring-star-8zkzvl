@@ -6,7 +6,7 @@ import "./ServiceCta.css";
 
 export default function ServiceCta({
   serviceId = "notary",
-  bookingLabel = "Book Appointment",
+  bookingLabel = "Book an Appointment",
   link,
 }) {
   const service = getServiceById(serviceId);
@@ -15,13 +15,16 @@ export default function ServiceCta({
     <section className="service-cta">
       <h2>Ready to book?</h2>
       <p>
-        We make scheduling easy—book your appointment first, then pay to confirm
-        your time.
+        We make scheduling easy—book your appointment first, then complete payment
+        to confirm your time.
       </p>
       <div className="service-cta__actions">
         <Link className="btn btn--primary" to={bookingUrl}>
           {bookingLabel}
         </Link>
+        <p className="service-cta__note">
+          Appointments are not confirmed until payment is completed.
+        </p>
         <div className="service-cta__contact">
           <p>
             <strong>Call/Text:</strong>{" "}

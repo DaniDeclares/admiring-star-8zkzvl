@@ -53,7 +53,6 @@ export default function Footer() {
         <Link to="/services">Services</Link>
         <Link to="/federal">Federal</Link>
         <Link to="/book?service=notary">Book</Link>
-        <Link to="/pay">Pay</Link>
         <Link to="/contact">Contact</Link>
 
         <Link to="/terms">Terms of Service</Link>

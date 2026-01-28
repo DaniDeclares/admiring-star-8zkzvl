@@ -107,6 +107,11 @@
   gap: 0.75rem;
 }
 
+.booking-card__note {
+  color: #6b7280;
+  margin: 0;
+}
+
 .booking-details {
   display: flex;
   flex-direction: column;

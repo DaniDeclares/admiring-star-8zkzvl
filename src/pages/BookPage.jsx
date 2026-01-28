@@ -33,8 +33,8 @@ export default function BookPage() {
           <p className="eyebrow">Service Booking</p>
           <h1>Book Your Appointment</h1>
           <p>
-            Payment required to confirm. Your appointment is pending until payment
-            is completed, and unpaid bookings may be released.
+            Your appointment is pending until payment is completed, and unpaid
+            bookings may be released.
           </p>
         </header>
 
@@ -82,8 +82,11 @@ export default function BookPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Book Appointment
+                  Book an Appointment
                 </a>
+                <p className="booking-card__note">
+                  Appointments are not confirmed until payment is completed.
+                </p>
               </div>
               <div className="booking-card__embed">
                 <TidyCalEmbed path={tidycalPath} />
@@ -103,18 +106,13 @@ export default function BookPage() {
                 </div>
               </div>
               <div className="booking-card__payment">
-                <h4>Payment required to confirm</h4>
+                <h4>Step 2 — Complete payment after booking</h4>
                 <p>
-                  Complete payment right after booking to secure your appointment.
+                  Your appointment is reserved. Payment is required to confirm and
+                  hold your time. After booking, continue to the{" "}
+                  <a href={`/pay?service=${service.id}`}>payment page</a>.
                 </p>
-                {service.paymentServiceId ? (
-                  <a
-                    className="btn btn--secondary btn--block"
-                    href={`/pay?service=${service.id}`}
-                  >
-                    Pay to Confirm
-                  </a>
-                ) : (
+                {!service.paymentServiceId && (
                   <a
                     className="btn btn--secondary btn--block"
                     style={{ opacity: 0.6 }}
