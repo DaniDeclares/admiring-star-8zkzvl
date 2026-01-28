@@ -9,6 +9,16 @@
   background-size: cover;
   background-position: center;
   padding: 4rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(25, 7, 10, 0.62), rgba(25, 7, 10, 0.35));
+  z-index: 0;
 }
 
 .hero-overlay {
@@ -20,6 +30,8 @@
   margin: 0 auto;
   text-align: center;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
 }
 
 .hero-eyebrow {
