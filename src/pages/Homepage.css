@@ -8,6 +8,8 @@
 .hero {
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  background-color: #2a1419;
 
   padding: var(--section-padding) var(--section-gap);
   padding: 4rem 1.5rem;
@@ -19,12 +21,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, rgba(25, 7, 10, 0.62), rgba(25, 7, 10, 0.35));
+  background: linear-gradient(120deg, rgba(25, 7, 10, 0.78), rgba(25, 7, 10, 0.45));
   z-index: 0;
 }
 
 .hero-overlay {
-  background: rgba(41, 9, 14, 0.78);
+  background: linear-gradient(135deg, rgba(45, 11, 18, 0.92), rgba(22, 6, 10, 0.82));
   padding: var(--card-padding);
   border-radius: var(--card-radius);
   color: #fff;
@@ -49,6 +51,7 @@
   font-family: var(--font-secondary);
   font-size: var(--heading-1);
   margin-bottom: 0.9rem;
+  color: var(--ivory);
 }
 
 .hero-subtitle {
@@ -62,6 +65,17 @@
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.hero .btn--primary {
+  background-color: var(--gold);
+  color: #2b1c1f;
+  border-color: transparent;
+}
+
+.hero .btn--primary:hover {
+  background-color: #b68917;
+  color: #fff;
 }
 
 .hero-footnote {
@@ -78,6 +92,32 @@
   border-radius: var(--card-radius);
   text-align: center;
   box-shadow: var(--card-shadow);
+}
+
+.mission-statement-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--card-padding);
+  background: var(--surface-muted);
+  border-radius: var(--card-radius);
+  text-align: center;
+  box-shadow: var(--card-shadow);
+}
+
+.home-main
+  > section:not(.hero):not(.festival-banner):not(.contact-cta)
+  h2,
+.home-main
+  > section:not(.hero):not(.festival-banner):not(.contact-cta)
+  h3 {
+  color: var(--burgundy);
+}
+
+.home-main
+  > section:not(.hero):not(.festival-banner):not(.contact-cta)
+  p {
+  color: var(--ink-muted);
+  font-size: 1.05rem;
 }
 
 .about-us-section h2 {
@@ -232,6 +272,7 @@
 
 .contact-cta h2 {
   font-family: var(--font-secondary);
+  color: #fff;
   margin-bottom: 0.6rem;
 }
 
