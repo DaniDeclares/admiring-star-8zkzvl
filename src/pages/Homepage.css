@@ -8,8 +8,7 @@
 .hero {
   background-size: cover;
   background-position: center;
- 
- codex/normalize-styles-and-spacing-across-pages
+
   padding: var(--section-padding) var(--section-gap);
   padding: 4rem 1.5rem;
   position: relative;
