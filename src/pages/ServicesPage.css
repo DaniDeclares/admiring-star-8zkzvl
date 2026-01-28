@@ -1,6 +1,6 @@
 .services-page {
   padding: var(--section-padding) var(--section-gap);
-  background: var(--ivory);
+  background: var(--cream);
 }
 
 .services-hero {
@@ -11,15 +11,16 @@
   background-position: center;
   border-radius: var(--card-radius);
   padding: var(--section-padding-tight) var(--section-gap);
-  box-shadow: 0 18px 40px rgba(16, 24, 40, 0.12);
+  box-shadow: var(--shadow-strong);
   color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .services-eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 0.75rem;
-  color: #f6e6c0;
+  color: var(--gold-muted);
   font-weight: 700;
   margin-bottom: 0.75rem;
 }
@@ -37,7 +38,7 @@
 
 .services-hero__notice {
   font-weight: 600;
-  color: #f6e6c0;
+  color: var(--gold-muted);
 }
 
 .services-hero__actions {
@@ -49,7 +50,7 @@
 
 .services-hero__note {
   margin-top: 0.75rem;
-  color: #f5e9da;
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 600;
 }
 
@@ -71,7 +72,7 @@
 
 .services-trust h3 {
   margin-bottom: 0.5rem;
-  color: #8b1e2e;
+  color: var(--burgundy);
 }
 
 .services-index {
@@ -83,7 +84,7 @@
 }
 
 .services-group {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--surface);
   border-radius: var(--card-radius);
   padding: var(--card-padding);
   box-shadow: var(--card-shadow);
@@ -117,7 +118,7 @@
 
 .service-card__tag {
   background: rgba(139, 30, 46, 0.12);
-  color: #8b1e2e;
+  color: var(--burgundy);
   font-weight: 700;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
@@ -130,7 +131,7 @@
 
 .service-card__price {
   font-weight: 700;
-  color: #5a2e36;
+  color: var(--charcoal);
   margin-top: 0.5rem;
 }
 
@@ -151,7 +152,7 @@
   content: "•";
   position: absolute;
   left: 0;
-  color: #d4af37;
+  color: var(--gold);
   font-weight: 700;
 }
 
@@ -170,11 +171,11 @@
 .services-disclaimer {
   max-width: 980px;
   margin: 0 auto var(--section-gap);
-  background: #fff6ec;
-  border: 1px solid rgba(139, 30, 46, 0.2);
+  background: var(--surface-muted);
+  border: 1px solid rgba(139, 30, 46, 0.18);
   border-radius: var(--card-radius);
   padding: var(--card-padding);
-  color: #5a2e36;
+  color: var(--charcoal);
 }
 
 .services-discount-note {
@@ -183,7 +184,7 @@
 }
 
 .services-contact-bar {
-  background: #8b1e2e;
+  background: var(--burgundy);
   color: #fff;
   border-radius: var(--card-radius);
   padding: var(--card-padding);
@@ -201,7 +202,8 @@
 }
 
 .services-contact-bar .btn--secondary {
-  background-color: #d4af37;
+  background-color: var(--gold);
+  color: var(--charcoal);
 }
 
 @media (min-width: 768px) {

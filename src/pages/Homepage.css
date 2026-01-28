@@ -10,7 +10,6 @@
   background-position: center;
 
   padding: var(--section-padding) var(--section-gap);
-  padding: 4rem 1.5rem;
   position: relative;
   overflow: hidden;
 }
@@ -24,14 +23,15 @@
 }
 
 .hero-overlay {
-  background: rgba(41, 9, 14, 0.78);
+  background: rgba(43, 28, 31, 0.78);
   padding: var(--card-padding);
   border-radius: var(--card-radius);
+  border: var(--card-border);
   color: #fff;
   max-width: 640px;
   margin: 0 auto;
   text-align: center;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-strong);
   position: relative;
   z-index: 1;
 }
@@ -71,13 +71,14 @@
 }
 
 .about-us-section {
-  max-width: 900px;
+  max-width: var(--max-width-narrow);
   margin: 0 auto;
   padding: var(--card-padding);
   background: var(--surface);
   border-radius: var(--card-radius);
   text-align: center;
   box-shadow: var(--card-shadow);
+  border: var(--card-border);
 }
 
 .about-us-section h2 {
@@ -133,6 +134,7 @@
   background: rgba(41, 9, 14, 0.8);
   padding: var(--card-padding);
   border-radius: var(--card-radius);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   display: inline-block;
   max-width: 420px;
 }
@@ -154,6 +156,29 @@
 
 .packages {
   padding: var(--section-padding) var(--section-gap);
+}
+
+.mission-statement-section,
+.festival-purpose-section {
+  max-width: var(--max-width-narrow);
+  margin: 0 auto;
+  padding: var(--card-padding);
+  background: var(--surface);
+  border-radius: var(--card-radius);
+  text-align: center;
+  box-shadow: var(--card-shadow);
+  border: var(--card-border);
+}
+
+.mission-statement-section h2,
+.festival-purpose-section h2 {
+  color: var(--burgundy);
+  margin-bottom: 0.75rem;
+}
+
+.mission-statement-section p,
+.festival-purpose-section p {
+  color: var(--ink-muted);
 }
 
 .capabilities-section {
@@ -199,7 +224,7 @@
 }
 
 .packages-grid {
-  max-width: 1100px;
+  max-width: var(--max-width);
   margin: 0 auto;
 }
 
@@ -228,6 +253,10 @@
   color: #fff;
   padding: var(--section-padding) var(--section-gap);
   text-align: center;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  margin: 0 auto;
+  max-width: var(--max-width);
 }
 
 .contact-cta h2 {

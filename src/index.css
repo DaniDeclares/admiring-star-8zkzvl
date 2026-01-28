@@ -3,8 +3,12 @@
 
 :root {
   --burgundy: #8B1E2E;
+  --burgundy-dark: #6f1824;
   --ivory: #F8F5F1;
+  --cream: #FDF9F3;
   --gold: #D4AF37;
+  --gold-muted: #F6E6C0;
+  --charcoal: #2B1C1F;
   --ink: #1f1b1c;
   --ink-muted: #5b5254;
   --font-primary: 'Raleway', 'Helvetica Neue', Arial, sans-serif;
@@ -12,6 +16,7 @@
   --surface: #ffffff;
   --surface-muted: #fffbe7;
   --card-shadow: 0 12px 30px rgba(17, 17, 17, 0.08);
+  --shadow-strong: 0 24px 60px rgba(17, 17, 17, 0.16);
   --card-radius: 18px;
   --card-border: 1px solid rgba(31, 27, 28, 0.08);
   --card-padding: clamp(1.25rem, 2vw, 1.75rem);
@@ -20,13 +25,17 @@
   --section-gap: clamp(1.25rem, 3vw, 2rem);
   --grid-gap: clamp(1rem, 2.5vw, 1.75rem);
   --grid-min: 240px;
+  --max-width: 1200px;
+  --max-width-narrow: 960px;
   --btn-padding-y: 0.75rem;
   --btn-padding-x: 1.75rem;
   --btn-radius: 999px;
   --btn-font-size: 1rem;
+  --btn-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
   --heading-1: clamp(2.2rem, 4vw, 3.2rem);
   --heading-2: clamp(1.7rem, 3vw, 2.3rem);
   --heading-3: clamp(1.25rem, 2.5vw, 1.6rem);
+  --body-size: 1rem;
 }
 
 * {
@@ -37,7 +46,8 @@
 
 body {
   font-family: var(--font-primary);
-  background: var(--ivory);
+  font-size: var(--body-size);
+  background: var(--cream);
   color: var(--ink);
   line-height: 1.6;
 }
@@ -49,14 +59,17 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
   font-size: var(--heading-1);
+  line-height: 1.15;
 }
 
 h2 {
   font-size: var(--heading-2);
+  line-height: 1.2;
 }
 
 h3 {
   font-size: var(--heading-3);
+  line-height: 1.25;
 }
 
 a {
@@ -79,7 +92,7 @@ a:hover {
   cursor: pointer;
   text-decoration: none;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--btn-shadow);
   border: 1px solid transparent;
 }
 
@@ -89,12 +102,12 @@ a:hover {
 }
 
 .btn--primary:hover {
-  background-color: #6f1824;
+  background-color: var(--burgundy-dark);
 }
 
 .btn--secondary {
   background-color: var(--gold);
-  color: #2b1c1f;
+  color: var(--charcoal);
 }
 
 .btn--secondary:hover {
@@ -131,7 +144,7 @@ a:hover {
 
 /* General container spacing */
 .container {
-  max-width: 1200px;
+  max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 var(--section-gap);
 }
@@ -207,7 +220,7 @@ form input, form textarea, form select {
   font-size: 1rem;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: var(--card-border);
 }
 
 form button {
@@ -216,7 +229,7 @@ form button {
 
 p,
 li {
-  font-family: 'Raleway', Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary);
   font-weight: 400;
 }
 
@@ -225,7 +238,7 @@ footer {
   text-align: center;
   padding: 1rem 0.5rem;
   font-size: 0.9rem;
-  background: var(--ivory);
+  background: var(--cream);
   color: var(--ink-muted);
 }
 
