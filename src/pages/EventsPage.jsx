@@ -1,3 +1,7 @@
+Completed in 33 sec, without tools.
+Understood — full file every time, no partial edits. Here's the complete EventsPage.jsx:
+Tap src → pages → EventsPage.jsx
+Tap pencil → select all → delete → paste:
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
@@ -152,12 +156,12 @@ export default function EventsPage() {
           <div className="ep-container">
             <h2>Our Work</h2>
             <div className="ep-photo-grid">
-              <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Wedding ceremony setup" loading="lazy" />
+              <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Wedding ceremony execution" loading="lazy" />
               <img src="/weddings/LakefrontWedding_CeremonySetup.jpg" alt="Lakefront wedding ceremony" loading="lazy" />
               <img src="/weddings/MansionWedding_Kiss_Umbrella.jpg" alt="Wedding couple" loading="lazy" />
               <img src="/weddings/barn-ceiling-drapery.jpg" alt="Event venue decor" loading="lazy" />
-              <img src="/weddings/BridalBouquet_White_Greenery.jpg" alt="Bridal bouquet" loading="lazy" />
-              <img src="/weddings/ReceptionTable_Candles_Florals.jpg" alt="Reception table setup" loading="lazy" />
+              <img src="/weddings/MountainBride_CircleArch_Bouquet.jpg" alt="Bridal bouquet" loading="lazy" />
+              <img src="/weddings/rustic-barn-wedding-reception-with-greenery-on-wooden-table.jpg" alt="Reception table setup" loading="lazy" />
             </div>
           </div>
         </section>
