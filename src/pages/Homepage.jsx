@@ -1,3 +1,6 @@
+Edit HomePage.jsx — Full Replacement
+Tap src → pages → HomePage.jsx
+Tap pencil → select all → delete → paste:
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
@@ -86,7 +89,7 @@ export default function Homepage() {
             <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Wedding ceremony execution" loading="lazy" />
             <img src="/weddings/LakefrontWedding_CeremonySetup.jpg" alt="Event setup and execution" loading="lazy" />
             <img src="/weddings/MansionWedding_Kiss_Umbrella.jpg" alt="Wedding planning" loading="lazy" />
-            <img src="/weddings/ReceptionTable_Candles_Florals.jpg" alt="Reception decor setup" loading="lazy" />
+            <img src="/weddings/boho-outdoor-lounge.jpg" alt="Event decor setup" loading="lazy" />
           </div>
         </div>
       </section>
