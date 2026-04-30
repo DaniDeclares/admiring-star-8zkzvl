@@ -1,5 +1,3 @@
-// src/App.js
-
 import React, { useEffect } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
@@ -24,6 +22,8 @@ import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
 import SignatureServicesPage from "./pages/SignatureServicesPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
+import FieldServicesPage from "./pages/FieldServicesPage.jsx";
+import EventsPage from "./pages/EventsPage.jsx";
 import FacilityVisitsPage from "./pages/FacilityVisitsPage.jsx";
 import FederalPage from "./pages/FederalPage.jsx";
 import TaxServicesPage from "./pages/TaxServicesPage.jsx";
@@ -104,6 +104,8 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<Homepage />} />
+        <Route path="/field-services" element={<FieldServicesPage />} />
+        <Route path="/events" element={<EventsPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/signature-services" element={<SignatureServicesPage />} />
         <Route path="/about" element={<AboutPage />} />
@@ -127,17 +129,16 @@ export default function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
-        {/* Legacy service routes */}
+        {/* Legacy redirects */}
         <Route path="/notary" element={<Navigate to="/services" replace />} />
         <Route path="/apostille" element={<Navigate to="/book?service=apostille" replace />} />
-        <Route path="/officiant" element={<Navigate to="/book?service=officiant" replace />} />
-        <Route path="/packages" element={<Navigate to="/services" replace />} />
-        <Route path="/real-estate" element={<Navigate to="/services" replace />} />
+        <Route path="/officiant" element={<Navigate to="/events" replace />} />
+        <Route path="/packages" element={<Navigate to="/signature-services" replace />} />
+        <Route path="/real-estate" element={<Navigate to="/field-services" replace />} />
         <Route path="/legal-services" element={<Navigate to="/services" replace />} />
         <Route path="/professional-services" element={<Navigate to="/services" replace />} />
-        <Route path="/weddings" element={<Navigate to="/services" replace />} />
+        <Route path="/weddings" element={<Navigate to="/events" replace />} />
         <Route path="/financial" element={<Navigate to="/services" replace />} />
-        <Route path="/events" element={<Navigate to="/services" replace />} />
         <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
 
