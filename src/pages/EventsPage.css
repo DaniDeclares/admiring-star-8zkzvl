@@ -1,116 +1,288 @@
-/* src/pages/EventsPage.css — Dani Declares Brand */
+:root {
+  --burgundy: #8b1e2e;
+  --ivory: #f8f5f1;
+  --gold: #d4af37;
+  --dark: #1a1a1a;
+  --radius: 8px;
+}
 
-.events-page {
-  max-width: 1100px;
+.ep-page { background: #fff; }
+
+.ep-container {
+  max-width: 1000px;
   margin: 0 auto;
-  padding: var(--section-padding) var(--section-gap);
-  background: var(--ivory);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--section-gap);
+  padding: 0 1.5rem;
 }
 
-.events-page h1 {
+.ep-section { padding: 4rem 0; }
+
+.ep-alt { background: var(--ivory); }
+
+.ep-header {
+  background: var(--burgundy);
+  color: #fff;
+  padding: 5rem 1.5rem 4rem;
   text-align: center;
-  color: var(--burgundy);
-  margin-bottom: 0;
-  font-size: var(--heading-1);
-  font-family: var(--font-secondary);
-  letter-spacing: 0.5px;
-  font-weight: bold;
-  text-shadow: 0 2px 14px #f9e7e7;
 }
 
-.events-page .intro {
-  text-align: center;
-  margin-bottom: 0;
-  font-size: 1.05rem;
-  color: var(--ink-muted);
-  font-family: var(--font-primary);
-  line-height: 1.5;
-  max-width: 800px;
+.ep-header h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  margin-bottom: 0.75rem;
 }
 
-/* Event Cards Grid */
-.events-page .event-card {
-  width: 100%;
-  max-width: 345px;
-  text-align: center;
-  transition: box-shadow 0.19s, transform 0.18s;
-  margin: 0;
-  flex: 1 1 var(--grid-min);
+.ep-header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 580px;
+  margin: 0 auto 2rem;
 }
 
-.events-page {
+.ep-header-ctas {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--grid-gap);
+  gap: 0.75rem;
   justify-content: center;
 }
 
-.event-card:hover {
-  box-shadow: 0 7px 22px rgba(139,30,46,0.17);
-  transform: translateY(-2px) scale(1.018);
-  border-color: var(--gold);
-}
-
-.event-card h2 {
-  color: var(--burgundy);
-  margin-bottom: 0.5rem;
-  font-size: var(--heading-3);
-  font-family: var(--font-secondary);
+.ep-btn-primary {
+  background: var(--gold);
+  color: var(--dark);
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
   font-weight: 700;
-  letter-spacing: 0.2px;
-}
-
-.event-meta,
-.event-desc {
-  color: var(--ink-muted);
+  text-decoration: none;
   font-size: 1rem;
-  margin-bottom: 0.9rem;
-  font-family: var(--font-primary);
-  line-height: 1.5;
+  transition: opacity 0.2s;
 }
 
-/* Contact (Lead Capture) Card */
-.contact-info {
-  margin: 0;
-  text-align: center;
-  max-width: 345px;
+.ep-btn-primary:hover { opacity: 0.88; }
+
+.ep-btn-secondary {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1rem;
 }
 
-.contact-info h3 {
+.ep-section h2 {
+  font-family: Georgia, serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
   color: var(--burgundy);
-  font-family: var(--font-secondary);
-  margin-bottom: 0.6rem;
-  font-size: var(--heading-3);
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
-.contact-info p {
-  color: var(--ink-muted);
+.ep-two-col {
+  list-style: none;
+  padding: 0;
+  max-width: 700px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.5rem 2rem;
+}
+
+.ep-two-col li::before {
+  content: "✓ ";
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.ep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.ep-card {
+  background: #fff;
+  border: 1px solid #e6e0d8;
+  border-top: 4px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.ep-card h3 {
+  font-family: Georgia, serif;
+  color: var(--burgundy);
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+
+.ep-card p {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+.ep-process { background: var(--dark); color: #fff; }
+
+.ep-process h2 { color: var(--gold) !important; }
+
+.ep-steps {
+  list-style: none;
+  padding: 0;
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ep-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
   font-size: 1rem;
   line-height: 1.5;
-  margin-bottom: 1rem;
-  font-family: var(--font-primary);
 }
 
-@media (max-width: 900px) {
-  .events-page {
-    padding: var(--section-padding-tight) var(--section-gap);
-  }
-  .event-card,
-  .contact-info {
-    max-width: 98vw;
-    padding: var(--card-padding);
-  }
-  .events-page h1 {
-    font-size: var(--heading-2);
-  }
+.ep-num {
+  background: var(--gold);
+  color: var(--dark);
+  font-weight: 700;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ep-pricing-sub {
+  text-align: center;
+  color: #555;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  font-size: 1rem;
+}
+
+.ep-pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1.5rem;
+}
+
+.ep-pkg-card {
+  background: #fff;
+  border: 1px solid #e6e0d8;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.ep-pkg-card.featured {
+  border: 2px solid var(--gold);
+}
+
+.ep-pkg-card h3 {
+  font-family: Georgia, serif;
+  color: var(--burgundy);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ep-pkg-card p {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.ep-price {
+  font-weight: 700;
+  color: var(--burgundy);
+}
+
+.ep-bundle {
+  background: var(--dark);
+  color: #fff;
+  text-align: center;
+}
+
+.ep-bundle h2 { color: var(--gold) !important; }
+
+.ep-bundle-sub {
+  font-size: 1rem;
+  opacity: 0.85;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+}
+
+.ep-bundle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.ep-bundle-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.ep-bundle-card h3 {
+  font-family: Georgia, serif;
+  color: var(--gold);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ep-bundle-card p {
+  font-size: 0.88rem;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+.ep-bundle .ep-btn-primary { display: inline-block; }
+
+.ep-gallery { background: #fff; }
+
+.ep-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.ep-photo-grid img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.ep-cta {
+  background: var(--burgundy);
+  color: #fff;
+  text-align: center;
+}
+
+.ep-cta h2 { color: #fff !important; }
+
+.ep-cta p {
+  opacity: 0.9;
+  margin-bottom: 2rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ep-cta .ep-btn-secondary {
+  color: #fff;
+  border-color: #fff;
 }
 
 @media (max-width: 600px) {
-  .events-page {
-    padding: var(--section-padding-tight) var(--section-gap);
-  }
+  .ep-grid { grid-template-columns: 1fr; }
+  .ep-pkg-grid { grid-template-columns: 1fr; }
+  .ep-photo-grid { grid-template-columns: 1fr; }
+  .ep-header-ctas { flex-direction: column; align-items: center; }
 }
