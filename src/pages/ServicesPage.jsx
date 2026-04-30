@@ -1,180 +1,129 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { serviceCatalog } from "../data/services.js";
-import { buildServiceActionPath } from "../data/serviceRoutes.js";
-import { siteConfig } from "../data/siteConfig.js";
-import NotaryFeesNotice from "../components/NotaryFeesNotice.jsx";
 import "./ServicesPage.css";
 
-export default function ServicesPage() {
-  const heroStyle = {
-    backgroundImage: `linear-gradient(180deg, rgba(45, 12, 16, 0.82), rgba(45, 12, 16, 0.6)), url(${process.env.PUBLIC_URL}/images/stock/legal paperwork desk2.jpg)`,
-  };
-  const serviceGroups = [
-    {
-      id: "tax-legal",
-      title: "Tax & legal paperwork support",
-      description:
-        "Support for time-sensitive filings, signatures, and legal documentation.",
-    },
-    {
-      id: "general-notary",
-      title: "General notary & document execution",
-      description:
-        "Mobile, on-site notarization for individuals, families, and businesses.",
-    },
-    {
-      id: "school-family",
-      title: "School & family documentation",
-      description:
-        "Documentation support for families, schools, and personal milestones.",
-    },
-    {
-      id: "employer-admin",
-      title: "Employer/I-9 & administrative services",
-      description:
-        "Administrative support for HR teams and employer verification needs.",
-    },
-    {
-      id: "apostille-auth",
-      title: "Apostille & authentication",
-      description:
-        "Guided document authentication support for domestic and international use.",
-    },
-  ].map((group) => ({
-    ...group,
-    services: serviceCatalog.filter((service) => service.group === group.id),
-  }));
+const divisions = [
+  {
+    id: "document",
+    title: "Document & Compliance",
+    tagline: "We handle paperwork from start to submission",
+    forWho: "Individuals, businesses, law firms, tax offices, HR departments",
+    items: [
+      "Notary Services (SC active / GA pending)",
+      "Apostille Processing",
+      "Document Preparation (non-attorney)",
+      "I-9 Employment Verification",
+      "Printing / Scanning / Organization",
+      "Document Packaging & Submission (Signature Service)",
+      "Power of Attorney (POA) Notarization",
+      "Sworn Statements & Affidavits",
+    ],
+    bookSlug: "notary",
+  },
+  {
+    id: "logistics",
+    title: "Logistics & Courier",
+    tagline: "We move documents and handle execution tasks",
+    forWho: "Law firms, title companies, carriers, businesses, medical facilities",
+    items: [
+      "Court Filing & Retrieval",
+      "Document Pickup & Delivery",
+      "Hospital / Jail / Facility Runs",
+      "Process Serving (standard & rush)",
+      "Business Courier & Admin Support",
+      "Carrier Back-Office (invoicing, paperwork, compliance)",
+    ],
+    bookSlug: null,
+  },
+  {
+    id: "field",
+    title: "Field Services (Property Reset)",
+    tagline: "We reset and prepare properties for use",
+    forWho: "Property managers, landlords, real estate agents, investors",
+    items: [
+      "Move-In / Move-Out Cleaning — from $300",
+      "Deep Cleaning — from $400",
+      "Rental Turnovers",
+      "Full Property Reset (Signature Service) — $500–$1,500",
+      "Inspections & Photo Documentation",
+    ],
+    bookSlug: null,
+  },
+  {
+    id: "events",
+    title: "Event Planning & Execution",
+    tagline: "We plan, coordinate, and execute events",
+    forWho: "Individuals, organizations, businesses, couples",
+    items: [
+      "Planning & Coordination",
+      "Setup & Breakdown",
+      "Vendor Coordination",
+      "Decor & Custom Production",
+      "Balloon Installs & Backdrops",
+      "Sticker / Label Packages",
+    ],
+    bookSlug: null,
+  },
+  {
+    id: "business",
+    title: "Business & Admin Support",
+    tagline: "We organize and manage administrative systems",
+    forWho: "Small businesses, startups, professionals, agencies",
+    items: [
+      "Document Organization",
+      "Compliance Tracking",
+      "Client Intake Systems",
+      "Back-Office Support",
+    ],
+    bookSlug: null,
+  },
+];
 
+export default function ServicesPage() {
   return (
     <>
       <Helmet>
-        <title>Services • Dani Declares</title>
+        <title>Services — Dani Declares LLC</title>
         <meta
           name="description"
-          content="Mobile notary, apostille facilitation, and loan signing support with clear booking and payment steps."
+          content="Document compliance, logistics, property resets, event execution, and business support. Mobile services across Metro Atlanta and South Carolina."
         />
       </Helmet>
-
-      <main className="services-page">
-        <header className="services-hero" style={heroStyle}>
-          <p className="services-eyebrow">Premium Mobile Services</p>
-          <h1>Trusted notary and document support, delivered with care.</h1>
-          <p>
-            Book your appointment in minutes, then confirm with a secure deposit.
-            We serve Georgia and South Carolina with flexible, mobile-first scheduling.
-          </p>
-          <p className="services-hero__notice">
-            Appointments are pending until payment is completed. Unpaid bookings may be
-            released.
-          </p>
-          <div className="services-hero__actions">
-            <Link to="/book?service=notary" className="btn btn--primary">
-              Book an Appointment
-            </Link>
-            <Link to="/contact" className="btn btn--secondary">
-              Request a Custom Quote
-            </Link>
+      <div className="sp-page">
+        <header className="sp-header">
+          <div className="sp-container">
+            <h1>Our Services</h1>
+            <p>Mobile execution support across five divisions. We come to you and handle the entire process.</p>
           </div>
-          <p className="services-hero__note">
-            Appointments are not confirmed until payment is completed.
-          </p>
         </header>
-
-        <section className="services-trust">
-          <div>
-            <h3>Verified & Insured</h3>
-            <p>NNA-certified, bonded, and insured for every appointment.</p>
-          </div>
-          <div>
-            <h3>Mobile Convenience</h3>
-            <p>We travel to homes, offices, hospitals, and venues.</p>
-          </div>
-          <div>
-            <h3>Clear Confirmation</h3>
-            <p>Book → Pay after booking → Receive appointment confirmation.</p>
-          </div>
-        </section>
-        <section className="services-index">
-          {serviceGroups.map((group) => (
-            <div key={group.id} className="services-group">
-              <div className="services-group__header">
-                <h2>{group.title}</h2>
-                <p>{group.description}</p>
-              </div>
-              <div className="services-group__grid">
-                {group.services.map((service) => (
-                  <article key={service.id} className="service-card">
-                    <div className="service-card__header">
-                      <span className="service-card__tag">{service.category}</span>
-                      <h3>{service.name}</h3>
-                      <p>{service.shortDesc}</p>
-                      {service.priceLabel && (
-                        <p className="service-card__price">{service.priceLabel}</p>
-                      )}
-                    </div>
-                    <div className="service-card__actions">
-                      <Link
-                        className="btn btn--primary"
-                        to={buildServiceActionPath(service.bookingServiceId)}
-                      >
-                        Book an Appointment
-                      </Link>
-                      <p className="service-card__note">
-                        Appointments are not confirmed until payment is completed.
-                      </p>
-                    </div>
-                  </article>
-                ))}
+        {divisions.map((div) => (
+          <section key={div.id} className="sp-division">
+            <div className="sp-container">
+              <h2>{div.title}</h2>
+              <p className="sp-tagline">{div.tagline}</p>
+              <p className="sp-for-who"><strong>Who it's for:</strong> {div.forWho}</p>
+              <ul className="sp-items">
+                {div.items.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+              <div className="sp-division-ctas">
+                {div.bookSlug
+                  ? <a href={`https://tidycal.com/danideclaresns/${div.bookSlug}`} target="_blank" rel="noopener noreferrer" className="sp-btn-primary">Book Now</a>
+                  : <Link to="/contact" className="sp-btn-primary">Request a Quote</Link>
+                }
+                <Link to="/pay" className="sp-btn-secondary">Pay for Service</Link>
               </div>
             </div>
-          ))}
-        </section>
-
-        <section className="services-contact-bar">
-          <div>
-            <h3>Facility Visits</h3>
-            <p>
-              Mobile notary support for hospitals, nursing homes, rehab centers,
-              correctional facilities, and courthouses with limited availability.
-              We coordinate on-site details and confirm travel before your appointment
-              is finalized.
-            </p>
-          </div>
-          <div className="services-contact-bar__actions">
-            <Link to="/facility-visits" className="btn btn--secondary">
-              Learn About Facility Visits
-            </Link>
+          </section>
+        ))}
+        <section className="sp-sig-cta">
+          <div className="sp-container">
+            <h2>Need a Complete Solution?</h2>
+            <p>Our Signature Services handle entire processes from start to finish — not just individual tasks.</p>
+            <Link to="/signature-services" className="sp-btn-primary">View Signature Services</Link>
           </div>
         </section>
-
-        <section className="services-disclaimer">
-          <h3>Notary pricing disclosure</h3>
-          <NotaryFeesNotice />
-        </section>
-
-        <section className="services-contact-bar">
-          <div>
-            <h3>Need a fast answer?</h3>
-            <p>Call or text and we will confirm your service window quickly.</p>
-          </div>
-          <div className="services-contact-bar__actions">
-            <a
-              className="btn btn--primary"
-              href={`tel:${siteConfig.phoneNumbers.primary.tel}`}
-            >
-              Call {siteConfig.phoneNumbers.primary.display}
-            </a>
-            <a
-              className="btn btn--secondary"
-              href={`mailto:${siteConfig.emails.admin}`}
-            >
-              Email {siteConfig.emails.admin}
-            </a>
-          </div>
-        </section>
-      </main>
+      </div>
     </>
   );
 }
