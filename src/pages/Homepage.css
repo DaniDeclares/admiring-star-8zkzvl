@@ -1,292 +1,269 @@
-/* src/pages/Homepage.css — Dani Declares modern homepage */
+:root {
+  --burgundy: #8b1e2e;
+  --ivory: #f8f5f1;
+  --gold: #d4af37;
+  --dark: #1a1a1a;
+  --text: #333;
+  --radius: 8px;
+}
 
-.home-main {
+.dd-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.dd-section {
+  padding: 4rem 0;
+}
+
+.dd-alt-bg {
   background: var(--ivory);
-  color: var(--ink);
 }
 
-.hero {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: #2a1419;
-
-  padding: var(--section-padding) var(--section-gap);
-  padding: 4rem 1.5rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(120deg, rgba(25, 7, 10, 0.78), rgba(25, 7, 10, 0.45));
-  z-index: 0;
-}
-
-.hero-overlay {
-  background: linear-gradient(135deg, rgba(45, 11, 18, 0.92), rgba(22, 6, 10, 0.82));
-  padding: var(--card-padding);
-  border-radius: var(--card-radius);
+.dd-hero {
+  background: var(--burgundy);
   color: #fff;
-  max-width: 640px;
+  padding: 6rem 1.5rem 5rem;
+  text-align: center;
+}
+
+.dd-hero-content {
+  max-width: 780px;
   margin: 0 auto;
-  text-align: center;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
-  position: relative;
-  z-index: 1;
 }
 
-.hero-eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.25em;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--gold);
-  margin-bottom: 0.8rem;
-}
-
-.hero h1 {
-  font-family: var(--font-secondary);
-  font-size: var(--heading-1);
-  margin-bottom: 0.9rem;
-  color: var(--ivory);
-}
-
-.hero-subtitle {
-  font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 1.5rem;
-}
-
-.hero-cta {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.hero .btn--primary {
-  background-color: var(--gold);
-  color: #2b1c1f;
-  border-color: transparent;
-}
-
-.hero .btn--primary:hover {
-  background-color: #b68917;
-  color: #fff;
-}
-
-.hero-footnote {
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.about-us-section {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: var(--card-padding);
-  background: var(--surface);
-  border-radius: var(--card-radius);
-  text-align: center;
-  box-shadow: var(--card-shadow);
-}
-
-.mission-statement-section {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: var(--card-padding);
-  background: var(--surface-muted);
-  border-radius: var(--card-radius);
-  text-align: center;
-  box-shadow: var(--card-shadow);
-}
-
-.home-main
-  > section:not(.hero):not(.festival-banner):not(.contact-cta)
-  h2,
-.home-main
-  > section:not(.hero):not(.festival-banner):not(.contact-cta)
-  h3 {
-  color: var(--burgundy);
-}
-
-.home-main
-  > section:not(.hero):not(.festival-banner):not(.contact-cta)
-  p {
-  color: var(--ink-muted);
-  font-size: 1.05rem;
-}
-
-.about-us-section h2 {
-  font-family: var(--font-secondary);
-  color: var(--burgundy);
-  margin-bottom: 0.75rem;
-}
-
-.about-us-section p {
-  color: var(--ink-muted);
-  font-size: 1.05rem;
-}
-
-.testimonial-carousel {
-  padding: var(--section-padding) var(--section-gap);
-  background: var(--surface);
-  text-align: center;
-}
-
-.testimonial-carousel h2 {
-  font-family: var(--font-secondary);
-  color: var(--burgundy);
+.dd-hero h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
   margin-bottom: 1rem;
+  line-height: 1.2;
 }
 
-.carousel {
-  max-width: 640px;
-  margin: 0 auto;
+.dd-hero-sub {
+  font-size: 1.15rem;
+  opacity: 0.92;
+  margin-bottom: 2rem;
+  line-height: 1.6;
 }
 
-.testimonial-slide {
-  font-style: italic;
-  font-size: 1.05rem;
-  color: var(--ink);
+.dd-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
 }
 
-.testimonial-slide span {
-  display: block;
-  margin-top: 0.6rem;
+.dd-btn-primary {
+  background: var(--gold);
+  color: var(--dark);
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: opacity 0.2s;
+}
+
+.dd-btn-primary:hover {
+  opacity: 0.88;
+}
+
+.dd-btn-secondary {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.dd-btn-secondary:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.dd-btn-outline {
+  background: transparent;
+  color: var(--gold);
+  border: 2px solid var(--gold);
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.dd-btn-link {
   color: var(--burgundy);
   font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
 }
 
-.festival-banner {
-  background-size: cover;
-  background-position: center;
-  padding: var(--section-padding) var(--section-gap);
+.dd-btn-link:hover {
+  text-decoration: underline;
+}
+
+.dd-what h2,
+.dd-divisions h2,
+.dd-how h2,
+.dd-who h2,
+.dd-why h2,
+.dd-areas h2,
+.dd-bottom-cta h2 {
+  font-family: Georgia, serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--burgundy);
+  margin-bottom: 1.5rem;
   text-align: center;
-  color: #fff;
 }
 
-.festival-overlay {
-  background: rgba(41, 9, 14, 0.8);
-  padding: var(--card-padding);
-  border-radius: var(--card-radius);
-  display: inline-block;
-  max-width: 420px;
+.dd-handle-list {
+  list-style: none;
+  padding: 0;
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: center;
 }
 
-.festival-overlay h2 {
+.dd-handle-list li::before {
+  content: "✓ ";
   color: var(--gold);
+  font-weight: 700;
+}
+
+.dd-divisions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dd-division-card {
+  background: #fff;
+  border: 1px solid #e6e0d8;
+  border-top: 4px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.dd-division-card h3 {
+  font-family: Georgia, serif;
+  color: var(--burgundy);
+  font-size: 1.05rem;
   margin-bottom: 0.5rem;
 }
 
-.festival-countdown {
-  margin: 1rem 0;
-  color: rgba(255, 255, 255, 0.85);
+.dd-division-card p {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
-.early-bird-note {
-  color: var(--gold);
-  margin-top: 0.5rem;
-}
-
-.packages {
-  padding: var(--section-padding) var(--section-gap);
-}
-
-.capabilities-section {
-  padding: var(--section-padding-tight) var(--section-gap);
-}
-
-.capabilities-grid {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.capability-card {
-  position: relative;
-  border-radius: var(--card-radius);
-  overflow: hidden;
-  min-height: 180px;
-  box-shadow: var(--card-shadow);
-}
-
-.capability-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.capability-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(23, 6, 9, 0.1), rgba(23, 6, 9, 0.7));
-}
-
-.capability-label {
-  position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  z-index: 1;
-  color: #fff;
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.02em;
-}
-
-.packages-grid {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.package-card {
+.dd-divisions-footer {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 1.25rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
 }
 
-.package-card h3 {
-  margin-bottom: 0.4rem;
+.dd-divisions-footer .dd-btn-secondary {
+  color: var(--burgundy);
+  border-color: var(--burgundy);
 }
 
-.package-card p {
-  color: var(--ink-muted);
-}
-
-.services-footer {
-  margin-top: 2rem;
-  text-align: center;
-}
-
-.contact-cta {
+.dd-how {
   background: var(--burgundy);
   color: #fff;
-  padding: var(--section-padding) var(--section-gap);
+}
+
+.dd-how h2 {
+  color: var(--gold) !important;
+}
+
+.dd-steps {
+  list-style: none;
+  padding: 0;
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dd-steps li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.05rem;
+}
+
+.dd-step-num {
+  background: var(--gold);
+  color: var(--dark);
+  font-weight: 700;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dd-two-col-list,
+.dd-why-list {
+  list-style: none;
+  padding: 0;
+  max-width: 700px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.5rem 2rem;
+}
+
+.dd-two-col-list li::before {
+  content: "• ";
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.dd-why-list li::before {
+  content: "✓ ";
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.dd-areas p {
+  text-align: center;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.dd-bottom-cta {
+  background: var(--dark);
+  color: #fff;
   text-align: center;
 }
 
-.contact-cta h2 {
-  font-family: var(--font-secondary);
+.dd-bottom-cta h2 {
+  color: var(--gold) !important;
+}
+
+.dd-bottom-cta .dd-btn-secondary {
   color: #fff;
-  margin-bottom: 0.6rem;
+  border-color: #fff;
 }
 
-.contact-cta p {
-  margin-bottom: 1.2rem;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-@media (max-width: 700px) {
-  .hero-overlay {
-    padding: var(--card-padding);
-  }
-
-  .hero {
-    padding: var(--section-padding) var(--section-gap);
-  }
+@media (max-width: 600px) {
+  .dd-hero { padding: 4rem 1rem 3.5rem; }
+  .dd-divisions-grid { grid-template-columns: 1fr; }
+  .dd-hero-ctas { flex-direction: column; align-items: center; }
 }
