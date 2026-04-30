@@ -5,93 +5,51 @@ import "./Navbar.css";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-
   const location = useLocation();
-
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setMenuOpen(false);
   };
+  const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="navbar">
-      <div className="navbar-brand">
-        <Link to="/" onClick={handleLinkClick}>
-          <img src={logoSeal} alt="Dani Declares Logo" className="navbar-logo" />
+    <nav className="dd-navbar" aria-label="Main navigation">
+      <div className="dd-navbar-inner">
+        <Link to="/" className="dd-navbar-logo" onClick={handleLinkClick}>
+          <img src={logoSeal} alt="Dani Declares LLC" />
+          <span>Dani Declares</span>
         </Link>
+        <ul className="dd-nav-links" role="list">
+          <li><Link to="/" className={isActive("/") ? "active" : ""} onClick={handleLinkClick}>Home</Link></li>
+          <li><Link to="/services" className={isActive("/services") ? "active" : ""} onClick={handleLinkClick}>Services</Link></li>
+          <li><Link to="/signature-services" className={isActive("/signature-services") ? "active" : ""} onClick={handleLinkClick}>Signature Services</Link></li>
+          <li><Link to="/book" className={isActive("/book") ? "active" : ""} onClick={handleLinkClick}>Book</Link></li>
+          <li><Link to="/pay" className={isActive("/pay") ? "active" : ""} onClick={handleLinkClick}>Pay</Link></li>
+          <li><Link to="/federal" className={isActive("/federal") ? "active" : ""} onClick={handleLinkClick}>Government</Link></li>
+          <li><Link to="/about" className={isActive("/about") ? "active" : ""} onClick={handleLinkClick}>About</Link></li>
+          <li><Link to="/contact" className={isActive("/contact") ? "active" : ""} onClick={handleLinkClick}>Contact</Link></li>
+        </ul>
+        <button
+          className="dd-nav-hamburger"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((o) => !o)}
+        >
+          <span /><span /><span />
+        </button>
       </div>
-
-      <button
-        className="hamburger"
-        aria-label="Toggle menu"
-        onClick={() => setMenuOpen((open) => !open)}
-      >
-        ☰
-      </button>
-
-      <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
-        <Link
-          to="/"
-          onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
-        >
-          Home
-        </Link>
-        <Link
-          to="/services"
-          onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/services" ? "active" : ""}`}
-        >
-          Services
-        </Link>
-        <Link
-          to="/tax-services"
-          onClick={handleLinkClick}
-          className={`nav-link ${
-            location.pathname === "/tax-services" ? "active" : ""
-          }`}
-        >
-          Tax Season
-        </Link>
-        <Link
-          to="/federal"
-          onClick={handleLinkClick}
-          className={`nav-link ${
-            location.pathname === "/federal" ? "active" : ""
-          }`}
-        >
-          Federal
-        </Link>
-        <Link
-          to="/apostille"
-          onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/apostille" ? "active" : ""}`}
-        >
-          Apostille
-        </Link>
-        <Link
-          to="/book"
-          onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/book" ? "active" : ""}`}
-        >
-          Book
-        </Link>
-        <Link
-          to="/contact"
-          onClick={handleLinkClick}
-          className={`nav-link ${location.pathname === "/contact" ? "active" : ""}`}
-        >
-          Contact
-        </Link>
-      </div>
-
-      <Link
-        to="/book?service=notary"
-        className="btn btn--primary book-btn"
-        onClick={handleLinkClick}
-      >
-        Book Notary
-      </Link>
+      {menuOpen && (
+        <ul className="dd-nav-mobile" role="list">
+          <li><Link to="/" onClick={handleLinkClick}>Home</Link></li>
+          <li><Link to="/services" onClick={handleLinkClick}>Services</Link></li>
+          <li><Link to="/signature-services" onClick={handleLinkClick}>Signature Services</Link></li>
+          <li><Link to="/book" onClick={handleLinkClick}>Book</Link></li>
+          <li><Link to="/pay" onClick={handleLinkClick}>Pay</Link></li>
+          <li><Link to="/federal" onClick={handleLinkClick}>Government</Link></li>
+          <li><Link to="/about" onClick={handleLinkClick}>About</Link></li>
+          <li><Link to="/contact" onClick={handleLinkClick}>Contact</Link></li>
+        </ul>
+      )}
     </nav>
   );
 }
