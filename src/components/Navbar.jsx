@@ -21,10 +21,10 @@ export default function Navbar() {
         </Link>
         <ul className="dd-nav-links" role="list">
           <li><Link to="/" className={isActive("/") ? "active" : ""} onClick={handleLinkClick}>Home</Link></li>
+          <li><Link to="/field-services" className={isActive("/field-services") ? "active" : ""} onClick={handleLinkClick}>Field Services</Link></li>
+          <li><Link to="/events" className={isActive("/events") ? "active" : ""} onClick={handleLinkClick}>Events</Link></li>
           <li><Link to="/services" className={isActive("/services") ? "active" : ""} onClick={handleLinkClick}>Services</Link></li>
           <li><Link to="/signature-services" className={isActive("/signature-services") ? "active" : ""} onClick={handleLinkClick}>Signature Services</Link></li>
-          <li><Link to="/book" className={isActive("/book") ? "active" : ""} onClick={handleLinkClick}>Book</Link></li>
-          <li><Link to="/pay" className={isActive("/pay") ? "active" : ""} onClick={handleLinkClick}>Pay</Link></li>
           <li><Link to="/federal" className={isActive("/federal") ? "active" : ""} onClick={handleLinkClick}>Government</Link></li>
           <li><Link to="/about" className={isActive("/about") ? "active" : ""} onClick={handleLinkClick}>About</Link></li>
           <li><Link to="/contact" className={isActive("/contact") ? "active" : ""} onClick={handleLinkClick}>Contact</Link></li>
@@ -41,10 +41,10 @@ export default function Navbar() {
       {menuOpen && (
         <ul className="dd-nav-mobile" role="list">
           <li><Link to="/" onClick={handleLinkClick}>Home</Link></li>
+          <li><Link to="/field-services" onClick={handleLinkClick}>Field Services</Link></li>
+          <li><Link to="/events" onClick={handleLinkClick}>Events</Link></li>
           <li><Link to="/services" onClick={handleLinkClick}>Services</Link></li>
           <li><Link to="/signature-services" onClick={handleLinkClick}>Signature Services</Link></li>
-          <li><Link to="/book" onClick={handleLinkClick}>Book</Link></li>
-          <li><Link to="/pay" onClick={handleLinkClick}>Pay</Link></li>
           <li><Link to="/federal" onClick={handleLinkClick}>Government</Link></li>
           <li><Link to="/about" onClick={handleLinkClick}>About</Link></li>
           <li><Link to="/contact" onClick={handleLinkClick}>Contact</Link></li>
