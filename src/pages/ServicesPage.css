@@ -6,148 +6,182 @@
   --radius: 8px;
 }
 
-.sp-page {
-  background: #fff;
-}
-
-.sp-container {
-  max-width: 960px;
+.sig-container {
+  max-width: 900px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
 
-.sp-header {
-  background: var(--burgundy);
+.sig-header {
+  background: var(--dark);
   color: #fff;
-  padding: 4rem 1.5rem 3rem;
+  padding: 5rem 1.5rem 4rem;
   text-align: center;
 }
 
-.sp-header h1 {
+.sig-header h1 {
   font-family: Georgia, serif;
   font-size: clamp(1.8rem, 4vw, 2.8rem);
-  margin-bottom: 0.75rem;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
 }
 
-.sp-header p {
-  font-size: 1.1rem;
-  opacity: 0.9;
-  max-width: 600px;
+.sig-sub {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.sig-desc {
+  font-size: 1rem;
+  opacity: 0.85;
+  max-width: 580px;
   margin: 0 auto;
+  line-height: 1.6;
 }
 
-.sp-division {
-  padding: 3.5rem 0;
-  border-bottom: 1px solid #eee;
+.sig-services {
+  padding: 4rem 0;
+  background: #fff;
 }
 
-.sp-division:nth-child(even) {
-  background: var(--ivory);
+.sig-card {
+  border: 1px solid #e8e0d6;
+  border-left: 5px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
 }
 
-.sp-division h2 {
+.sig-card h2 {
   font-family: Georgia, serif;
   color: var(--burgundy);
-  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  margin-bottom: 0.6rem;
+}
+
+.sig-card-desc {
+  color: #444;
+  font-size: 0.97rem;
+  line-height: 1.6;
+  margin-bottom: 0.6rem;
+}
+
+.sig-card-ideal {
+  font-size: 0.9rem;
+  color: #666;
   margin-bottom: 0.4rem;
 }
 
-.sp-tagline {
-  color: #666;
+.sig-card-note {
+  font-size: 0.88rem;
+  color: #888;
   font-style: italic;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
 }
 
-.sp-for-who {
-  font-size: 0.95rem;
-  margin-bottom: 1rem;
-  color: #444;
+.sig-card-price {
+  margin-top: 0.5rem;
+  font-weight: 700;
+  color: var(--burgundy);
 }
 
-.sp-items {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 1.5rem;
+.sig-bundles {
+  padding: 4rem 0;
+  background: var(--ivory);
+}
+
+.sig-bundles h2 {
+  font-family: Georgia, serif;
+  color: var(--burgundy);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.sig-bundle-sub {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.sig-bundle-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 0.4rem 1.5rem;
+  gap: 1.5rem;
 }
 
-.sp-items li {
-  font-size: 0.95rem;
-  color: #333;
-  padding-left: 1.2rem;
-  position: relative;
+.sig-bundle-card {
+  background: #fff;
+  border: 1px solid #e6e0d8;
+  border-top: 4px solid var(--burgundy);
+  border-radius: var(--radius);
+  padding: 1.5rem;
 }
 
-.sp-items li::before {
-  content: "•";
-  color: var(--gold);
-  font-weight: 700;
-  position: absolute;
-  left: 0;
+.sig-bundle-card h3 {
+  font-family: Georgia, serif;
+  color: var(--burgundy);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
 }
 
-.sp-division-ctas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+.sig-bundle-card p {
+  font-size: 0.88rem;
+  color: #555;
+  line-height: 1.5;
 }
 
-.sp-btn-primary {
+.sig-cta {
   background: var(--burgundy);
   color: #fff;
-  padding: 0.65rem 1.5rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 0.95rem;
-  transition: opacity 0.2s;
-}
-
-.sp-btn-primary:hover {
-  opacity: 0.85;
-}
-
-.sp-btn-secondary {
-  background: transparent;
-  color: var(--burgundy);
-  border: 2px solid var(--burgundy);
-  padding: 0.65rem 1.5rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.sp-sig-cta {
-  background: var(--dark);
-  color: #fff;
-  padding: 4rem 1.5rem;
+  padding: 4.5rem 1.5rem;
   text-align: center;
 }
 
-.sp-sig-cta h2 {
+.sig-cta h2 {
   font-family: Georgia, serif;
-  color: var(--gold);
   font-size: clamp(1.4rem, 3vw, 2rem);
   margin-bottom: 0.75rem;
 }
 
-.sp-sig-cta p {
-  font-size: 1.05rem;
+.sig-cta p {
+  font-size: 1rem;
   opacity: 0.9;
-  margin-bottom: 1.5rem;
-  max-width: 500px;
+  margin-bottom: 2rem;
+  max-width: 480px;
   margin-left: auto;
   margin-right: auto;
 }
 
-.sp-sig-cta .sp-btn-primary {
+.sig-cta-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.sig-btn-primary {
   background: var(--gold);
   color: var(--dark);
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sig-btn-secondary {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
 }
 
 @media (max-width: 600px) {
-  .sp-items { grid-template-columns: 1fr; }
+  .sig-bundle-grid { grid-template-columns: 1fr; }
+  .sig-cta-btns { flex-direction: column; align-items: center; }
 }
