@@ -267,3 +267,48 @@
   .dd-divisions-grid { grid-template-columns: 1fr; }
   .dd-hero-ctas { flex-direction: column; align-items: center; }
 }
+.dd-work { padding: 4rem 0; background: #fff; }
+
+.dd-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.dd-photo-grid img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.dd-bundles { padding: 4rem 0; }
+
+.dd-bundle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dd-bundle-card {
+  background: var(--ivory);
+  border: 1px solid #e6e0d8;
+  border-top: 4px solid var(--burgundy);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.dd-bundle-card h3 {
+  font-family: Georgia, serif;
+  color: var(--burgundy);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.dd-bundle-card p {
+  font-size: 0.88rem;
+  color: #555;
+  line-height: 1.5;
+}
