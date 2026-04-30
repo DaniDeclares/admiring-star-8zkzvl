@@ -1,4 +1,5 @@
 // src/App.js
+
 import React, { useEffect } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
@@ -15,17 +16,17 @@ import Homepage from "./pages/HomePage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
 import BookingPage from "./pages/BookingPage.jsx";
 import PayPage from "./pages/PayPage.jsx";
-
 import FestivalPage from "./pages/FestivalPage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
+import SignatureServicesPage from "./pages/SignatureServicesPage.jsx";
+import AboutPage from "./pages/AboutPage.jsx";
 import FacilityVisitsPage from "./pages/FacilityVisitsPage.jsx";
 import FederalPage from "./pages/FederalPage.jsx";
 import TaxServicesPage from "./pages/TaxServicesPage.jsx";
-
 import PaymentCancel from "./pages/PaymentCancel.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
@@ -40,7 +41,6 @@ import NotaryDashboard from "./pages/NotaryDashboard.jsx";
 import VendorPortal from "./pages/VendorPortal.jsx";
 import FestivalDashboard from "./pages/FestivalDashboard.jsx";
 import PartnerOnboarding from "./pages/PartnerOnboarding.jsx";
-// You can remove SuccessPage/CancelPage if you fully switch to PaymentSuccess/PaymentCancel
 import SuccessPage from "./pages/SuccessPage.jsx";
 import CancelPage from "./pages/CancelPage.jsx";
 
@@ -63,20 +63,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!isProduction || !gaMeasurementId) {
-      return;
-    }
-
-    if (!window.dataLayer) {
-      window.dataLayer = [];
-    }
-
+    if (!isProduction || !gaMeasurementId) return;
+    if (!window.dataLayer) window.dataLayer = [];
     if (!window.gtag) {
       window.gtag = function gtag() {
         window.dataLayer.push(arguments);
       };
     }
-
     if (!document.getElementById("ga-script")) {
       const gaScript = document.createElement("script");
       gaScript.id = "ga-script";
@@ -84,16 +77,12 @@ export default function App() {
       gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`;
       document.head.appendChild(gaScript);
     }
-
     window.gtag("js", new Date());
     window.gtag("config", gaMeasurementId, { send_page_view: false });
   }, [gaMeasurementId, isProduction]);
 
   useEffect(() => {
-    if (!isProduction || !gaMeasurementId || !window.gtag) {
-      return;
-    }
-
+    if (!isProduction || !gaMeasurementId || !window.gtag) return;
     window.gtag("event", "page_view", {
       page_path: `${location.pathname}${location.search}`,
       page_location: window.location.href,
@@ -102,92 +91,69 @@ export default function App() {
   }, [gaMeasurementId, isProduction, location]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
+    if (typeof window === "undefined") return;
     window._hsq = window._hsq || [];
     window._hsq.push(["setPath", `${location.pathname}${location.search}`]);
     window._hsq.push(["trackPageView"]);
   }, [location]);
+
   return (
     <>
       {SHOW_FESTIVAL && <FestivalBanner />}
       <Navbar />
-
       <Routes>
         {/* Public */}
         <Route path="/" element={<Homepage />} />
         <Route path="/services" element={<ServicesPage />} />
+        <Route path="/signature-services" element={<SignatureServicesPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/facility-visits" element={<FacilityVisitsPage />} />
         <Route path="/federal" element={<FederalPage />} />
-        <Route
-          path="/federal-services"
-          element={<Navigate to="/federal" replace />}
-        />
+        <Route path="/federal-services" element={<Navigate to="/federal" replace />} />
         <Route path="/tax" element={<Navigate to="/tax-services" replace />} />
         <Route path="/tax-services" element={<TaxServicesPage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/book" element={<BookingPage />} />
         <Route path="/bookings" element={<Navigate to="/book" replace />} />
         <Route path="/pay" element={<PayPage />} />
-
         <Route path="/travel-quote" element={<TravelQuotePage />} />
         <Route path="/festival" element={<FestivalPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
-        <Route
-          path="/onboarding"
-          element={<Navigate to="/partner-onboarding" replace />}
-        />
+        <Route path="/onboarding" element={<Navigate to="/partner-onboarding" replace />} />
         <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
         {/* Legacy service routes */}
         <Route path="/notary" element={<Navigate to="/services" replace />} />
-        <Route
-          path="/apostille"
-          element={<Navigate to="/book?service=apostille" replace />}
-        />
-        <Route
-          path="/officiant"
-          element={<Navigate to="/book?service=officiant" replace />}
-        />
+        <Route path="/apostille" element={<Navigate to="/book?service=apostille" replace />} />
+        <Route path="/officiant" element={<Navigate to="/book?service=officiant" replace />} />
         <Route path="/packages" element={<Navigate to="/services" replace />} />
         <Route path="/real-estate" element={<Navigate to="/services" replace />} />
         <Route path="/legal-services" element={<Navigate to="/services" replace />} />
-        <Route
-          path="/professional-services"
-          element={<Navigate to="/services" replace />}
-        />
+        <Route path="/professional-services" element={<Navigate to="/services" replace />} />
         <Route path="/weddings" element={<Navigate to="/services" replace />} />
         <Route path="/financial" element={<Navigate to="/services" replace />} />
         <Route path="/events" element={<Navigate to="/services" replace />} />
-
         <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
 
         {/* Authentication */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Protected Phase-2 Routes */}
+        {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/notary-dashboard" element={<NotaryDashboard />} />
           <Route path="/vendor-portal" element={<VendorPortal />} />
-          <Route
-            path="/festival-dashboard"
-            element={<FestivalDashboard />}
-          />
-          {/* legacy or alternate success/cancel */}
+          <Route path="/festival-dashboard" element={<FestivalDashboard />} />
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
         </Route>
       </Routes>
-
       <CookieConsent />
       <Footer />
     </>
