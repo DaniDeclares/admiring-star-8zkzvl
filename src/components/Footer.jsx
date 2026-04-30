@@ -1,4 +1,3 @@
-// src/components/Footer.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import { SOCIAL_LINKS } from "../config/socialLinks.js";
@@ -16,71 +15,69 @@ const SOCIAL_LABELS = {
 };
 
 export default function Footer() {
-  const socialEntries = Object.entries(SOCIAL_LINKS).filter(
-    ([, url]) => url
-  );
+  const socialEntries = Object.entries(SOCIAL_LINKS).filter(([, url]) => url);
 
   return (
     <footer className="footer">
-      {/* Top contact info */}
-      <div className="footer-top">
-        <p>
-          <strong>Consultation:</strong>{" "}
-          <Link to="/book">danideclares.com/book</Link>
-        </p>
-        <p>
-          <strong>Email:</strong>{" "}
-          <a href={`mailto:${siteConfig.emails.admin}`}>{siteConfig.emails.admin}</a>
-        </p>
-        <p>
-          <strong>Call:</strong>{" "}
-          <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
-            {siteConfig.phoneNumbers.primary.display}
-          </a>{" "}
-          {siteConfig.phoneNumbers.secondary && (
-            <>
-              {" "}
-              <span className="footer-secondary-phone">
-                ({siteConfig.phoneNumbers.secondary.display})
-              </span>
-            </>
-          )}
-        </p>
+
+      <div className="footer-brand">
+        <p className="footer-tagline">Dani Declares LLC</p>
+        <p className="footer-sub">Mobile Operations & Execution Support</p>
+        <p className="footer-area">Serving Metro Atlanta, Georgia & South Carolina</p>
       </div>
 
-      {/* Quick site links */}
-      <nav className="footer-site-links" aria-label="Site links">
-        <Link to="/services">Services</Link>
-        <Link to="/federal">Federal</Link>
-        <Link to="/book?service=notary">Book</Link>
-        <Link to="/contact">Contact</Link>
+      <div className="footer-columns">
 
-        <Link to="/terms">Terms of Service</Link>
-        <Link to="/privacy">Privacy Policy</Link>
-      </nav>
+        <div className="footer-col">
+          <h4>Services</h4>
+          <Link to="/field-services">Field Services</Link>
+          <Link to="/events">Event Planning</Link>
+          <Link to="/services">All Services</Link>
+          <Link to="/signature-services">Signature Services</Link>
+          <Link to="/federal">Government Contracting</Link>
+        </div>
 
-      {/* Social media */}
-      <nav className="footer-social" aria-label="Social media">
-        {socialEntries.map(([key, url]) => (
-          <a key={key} href={url} target="_blank" rel="noopener noreferrer">
-            {SOCIAL_LABELS[key] || key}
-          </a>
-        ))}
-      </nav>
+        <div className="footer-col">
+          <h4>Company</h4>
+          <Link to="/about">About</Link>
+          <Link to="/book">Book a Service</Link>
+          <Link to="/pay">Make a Payment</Link>
+          <Link to="/contact">Contact</Link>
+          <Link to="/blog">Blog</Link>
+        </div>
 
-      <section className="pricing-note">
-        <p>
-          Preferred client rates, volume pricing, multi-appointment bundles, and
-          retainers are available for law firms, tax professionals, and recurring
-          clients.
-        </p>
-        <p>After-hours and urgent requests may include an expedited service fee.</p>
-      </section>
+        <div className="footer-col">
+          <h4>Contact</h4>
+          <p>GA: <a href="tel:4706829348">(470) 682-9348</a></p>
+          <p>SC: <a href="tel:8643265362">(864) 326-5362</a></p>
+          <p><a href="mailto:admin@danideclares.com">admin@danideclares.com</a></p>
+          <p><a href="mailto:events@danideclares.com">events@danideclares.com</a></p>
+        </div>
 
-      {/* Bottom copyright */}
-      <p className="footer-bottom">
-        © {new Date().getFullYear()} Dani Declares. All rights reserved.
-      </p>
+        <div className="footer-col">
+          <h4>Follow Us</h4>
+          {socialEntries.map(([key, url]) => (
+            <a key={key} href={url} target="_blank" rel="noopener noreferrer">
+              {SOCIAL_LABELS[key] || key}
+            </a>
+          ))}
+        </div>
+
+      </div>
+
+      <div className="footer-note">
+        <p>Preferred rates, volume pricing, and retainers available for law firms, property managers, and recurring clients. After-hours and rush requests may include an expedited service fee.</p>
+        <p>Dani Declares LLC is not a law firm and does not provide legal advice. Notary services performed only where legally commissioned.</p>
+      </div>
+
+      <div className="footer-bottom">
+        <p>© {new Date().getFullYear()} Dani Declares LLC. All rights reserved.</p>
+        <div className="footer-legal-links">
+          <Link to="/terms">Terms of Service</Link>
+          <Link to="/privacy">Privacy Policy</Link>
+        </div>
+      </div>
+
     </footer>
   );
 }
