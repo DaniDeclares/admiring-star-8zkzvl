@@ -8,13 +8,13 @@ export const siteConfig = {
       tel: "+18643265362",
     },
     secondary: {
-      display: "(470) 523-4892",
-      tel: "+14705234892",
+      display: "(470) 682-9348",
+      tel: "+14706829348",
     },
   },
   emails: {
     admin: "admin@danideclares.com",
     events: "events@danideclares.com",
-    notary: "danideclaresns@gmail.com",
+    notary: "danideclaresllc@gmail.com",
   },
 };
