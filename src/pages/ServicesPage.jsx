@@ -5,78 +5,88 @@ import "./ServicesPage.css";
 
 const divisions = [
   {
+    id: "field",
+    title: "Field Services & Property Reset",
+    tagline: "We prepare properties for the next tenant, buyer, or use.",
+    forWho: "Property managers, landlords, real estate agents, Airbnb hosts, contractors, investors",
+    items: [
+      "Move-In / Move-Out Cleaning — from $300",
+      "Deep Cleaning — from $400",
+      "Rental & Airbnb Turnovers",
+      "Post-Construction Cleaning",
+      "Full Property Reset (Signature Service) — $500–$1,500",
+      "Trash Removal Coordination",
+      "Inspections & Photo Documentation",
+      "Add-Ons: carpet, steam, odor removal, appliances",
+    ],
+    link: "/field-services",
+    linkLabel: "View Field Services",
+  },
+  {
+    id: "events",
+    title: "Event Planning & Execution",
+    tagline: "We plan, coordinate, and execute your entire event.",
+    forWho: "Couples, families, businesses, organizations, community groups",
+    items: [
+      "Full Wedding Planning",
+      "Wedding Officiating",
+      "Party & Event Planning",
+      "Day-Of Coordination",
+      "Balloon Arches & Custom Decor",
+      "Setup & Breakdown",
+      "Vendor Coordination",
+      "Custom Labels, Stickers, Signage & Favors",
+    ],
+    link: "/events",
+    linkLabel: "View Events Services",
+  },
+  {
     id: "document",
     title: "Document & Compliance",
-    tagline: "We handle paperwork from start to submission",
-    forWho: "Individuals, businesses, law firms, tax offices, HR departments",
+    tagline: "We handle your paperwork from start to submission.",
+    forWho: "Individuals, businesses, law firms, tax offices, HR departments, employers",
     items: [
-      "Notary Services (SC active / GA pending)",
+      "Mobile Notary Services (SC active / GA pending)",
+      "POAs, Trusts & Affidavits",
+      "I-9 Employment Verification",
       "Apostille Processing",
       "Document Preparation (non-attorney)",
-      "I-9 Employment Verification",
       "Printing / Scanning / Organization",
       "Document Packaging & Submission (Signature Service)",
-      "Power of Attorney (POA) Notarization",
-      "Sworn Statements & Affidavits",
     ],
-    bookSlug: "notary",
+    link: "/book",
+    linkLabel: "Book Document Services",
   },
   {
     id: "logistics",
     title: "Logistics & Courier",
-    tagline: "We move documents and handle execution tasks",
+    tagline: "We go where you can't and handle it.",
     forWho: "Law firms, title companies, carriers, businesses, medical facilities",
     items: [
       "Court Filing & Retrieval",
       "Document Pickup & Delivery",
       "Hospital / Jail / Facility Runs",
-      "Process Serving (standard & rush)",
-      "Business Courier & Admin Support",
-      "Carrier Back-Office (invoicing, paperwork, compliance)",
+      "Process Serving",
+      "Business Courier & Administrative Support",
+      "Carrier Back-Office Support (invoicing, broker packets, compliance)",
     ],
-    bookSlug: null,
-  },
-  {
-    id: "field",
-    title: "Field Services (Property Reset)",
-    tagline: "We reset and prepare properties for use",
-    forWho: "Property managers, landlords, real estate agents, investors",
-    items: [
-      "Move-In / Move-Out Cleaning — from $300",
-      "Deep Cleaning — from $400",
-      "Rental Turnovers",
-      "Full Property Reset (Signature Service) — $500–$1,500",
-      "Inspections & Photo Documentation",
-    ],
-    bookSlug: null,
-  },
-  {
-    id: "events",
-    title: "Event Planning & Execution",
-    tagline: "We plan, coordinate, and execute events",
-    forWho: "Individuals, organizations, businesses, couples",
-    items: [
-      "Planning & Coordination",
-      "Setup & Breakdown",
-      "Vendor Coordination",
-      "Decor & Custom Production",
-      "Balloon Installs & Backdrops",
-      "Sticker / Label Packages",
-    ],
-    bookSlug: null,
+    link: "/contact",
+    linkLabel: "Request Logistics Support",
   },
   {
     id: "business",
-    title: "Business & Admin Support",
-    tagline: "We organize and manage administrative systems",
-    forWho: "Small businesses, startups, professionals, agencies",
+    title: "Business & Administrative Support",
+    tagline: "We organize systems so you can focus on running your business.",
+    forWho: "Small businesses, startups, solo operators, agencies",
     items: [
-      "Document Organization",
-      "Compliance Tracking",
+      "Document Organization & Compliance Tracking",
       "Client Intake Systems",
       "Back-Office Support",
+      "Business Writing & Bios",
+      "Branded Document Kits & Business Starter Packs",
     ],
-    bookSlug: null,
+    link: "/contact",
+    linkLabel: "Request Business Support",
   },
 ];
 
@@ -85,18 +95,16 @@ export default function ServicesPage() {
     <>
       <Helmet>
         <title>Services — Dani Declares LLC</title>
-        <meta
-          name="description"
-          content="Document compliance, logistics, property resets, event execution, and business support. Mobile services across Metro Atlanta and South Carolina."
-        />
+        <meta name="description" content="Mobile execution support across five divisions. Field services, events, documents, logistics, and business support. We come to you and handle it." />
       </Helmet>
       <div className="sp-page">
         <header className="sp-header">
           <div className="sp-container">
-            <h1>Our Services</h1>
-            <p>Mobile execution support across five divisions. We come to you and handle the entire process.</p>
+            <h1>What We Handle</h1>
+            <p>Five service divisions. One company. We come to you and handle the entire process.</p>
           </div>
         </header>
+
         {divisions.map((div) => (
           <section key={div.id} className="sp-division">
             <div className="sp-container">
@@ -107,20 +115,21 @@ export default function ServicesPage() {
                 {div.items.map((item) => <li key={item}>{item}</li>)}
               </ul>
               <div className="sp-division-ctas">
-                {div.bookSlug
-                  ? <a href={`https://tidycal.com/danideclaresns/${div.bookSlug}`} target="_blank" rel="noopener noreferrer" className="sp-btn-primary">Book Now</a>
-                  : <Link to="/contact" className="sp-btn-primary">Request a Quote</Link>
-                }
-                <Link to="/pay" className="sp-btn-secondary">Pay for Service</Link>
+                <Link to={div.link} className="sp-btn-primary">{div.linkLabel}</Link>
+                <a href="tel:4706829348" className="sp-btn-secondary">Call / Text (470) 682-9348</a>
               </div>
             </div>
           </section>
         ))}
+
         <section className="sp-sig-cta">
           <div className="sp-container">
             <h2>Need a Complete Solution?</h2>
-            <p>Our Signature Services handle entire processes from start to finish — not just individual tasks.</p>
-            <Link to="/signature-services" className="sp-btn-primary">View Signature Services</Link>
+            <p>Our Signature Services bundle multiple divisions into one complete package handled from start to finish.</p>
+            <div className="sp-sig-btns">
+              <Link to="/signature-services" className="sp-btn-gold">View Signature Services</Link>
+              <Link to="/contact" className="sp-btn-outline">Request a Custom Quote</Link>
+            </div>
           </div>
         </section>
       </div>
