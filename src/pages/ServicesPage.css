@@ -183,5 +183,36 @@
 
 @media (max-width: 600px) {
   .sig-bundle-grid { grid-template-columns: 1fr; }
-  .sig-cta-btns { flex-direction: column; align-items: center; }
+  .sig-cta-btns { flex-direction: column; align-items: .sp-btn-gold {
+  background: var(--gold);
+  color: var(--dark);
+  padding: 0.65rem 1.5rem;
+  border-radius: var(--radius);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: opacity 0.2s;
+}
+
+.sp-btn-gold:hover {
+  opacity: 0.88;
+}
+
+.sp-btn-outline {
+  background: transparent;
+  color: var(--burgundy);
+  border: 2px solid var(--burgundy);
+  padding: 0.65rem 1.5rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.sp-sig-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
 }
