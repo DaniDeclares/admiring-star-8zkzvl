@@ -44,6 +44,9 @@ import PartnerOnboarding from "./pages/PartnerOnboarding.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
 import CancelPage from "./pages/CancelPage.jsx";
 
+// ✅ NEW IMPORT (Partner Network Page)
+import PartnerNetwork from "./pages/partner-network/PartnerNetwork.jsx";
+
 export default function App() {
   const location = useLocation();
   const gaMeasurementId = process.env.REACT_APP_GA_MEASUREMENT_ID;
@@ -101,6 +104,7 @@ export default function App() {
     <>
       {SHOW_FESTIVAL && <FestivalBanner />}
       <Navbar />
+
       <Routes>
         {/* Public */}
         <Route path="/" element={<Homepage />} />
@@ -126,6 +130,10 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/onboarding" element={<Navigate to="/partner-onboarding" replace />} />
         <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
+
+        {/* ✅ NEW ROUTE */}
+        <Route path="/partners" element={<PartnerNetwork />} />
+
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
 
@@ -155,6 +163,7 @@ export default function App() {
           <Route path="/cancel" element={<CancelPage />} />
         </Route>
       </Routes>
+
       <CookieConsent />
       <Footer />
     </>
