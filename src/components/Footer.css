@@ -1,9 +1,3 @@
-Completed in 15 sec, without tools.
-Step 12 — Update Footer.css
-Tap src → components → Footer.css
-Tap the pencil/edit icon
-Select all and delete
-Paste this:
 :root {
   --burgundy: #8b1e2e;
   --ivory: #f8f5f1;

@@ -1,314 +1,88 @@
-:root {
-  --burgundy: #8b1e2e;
-  --ivory: #f8f5f1;
-  --gold: #d4af37;
-  --dark: #1a1a1a;
-  --text: #333;
-  --radius: 8px;
+/* Homepage specific CSS (incremental, safe update)
+   NO existing class removed. Brand token vars layered in.
+*/
+.brand-hero {
+  background: var(--color-burgundy, #800020);
+  color: var(--color-ivory, #f9f6f2);
 }
 
-.dd-container {
+.service-cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md, 1.5rem);
+  justify-content: center;
+  margin: var(--space-md, 1.5rem) auto;
   max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
 }
-
-.dd-section {
-  padding: 4rem 0;
-}
-
-.dd-alt-bg {
-  background: var(--ivory);
-}
-
-.dd-hero {
-  background: var(--burgundy);
-  color: #fff;
-  padding: 6rem 1.5rem 5rem;
-  text-align: center;
-}
-
-.dd-hero-content {
-  max-width: 780px;
-  margin: 0 auto;
-}
-
-.dd-hero h1 {
-  font-family: Georgia, serif;
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  font-weight: 700;
-  margin-bottom: 1rem;
-  line-height: 1.2;
-}
-
-.dd-hero-sub {
-  font-size: 1.15rem;
-  opacity: 0.92;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-}
-
-.dd-hero-ctas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: center;
-}
-
-.dd-btn-primary {
-  background: var(--gold);
-  color: var(--dark);
-  padding: 0.75rem 1.75rem;
-  border-radius: var(--radius);
-  font-weight: 700;
-  text-decoration: none;
-  font-size: 1rem;
-  transition: opacity 0.2s;
-}
-
-.dd-btn-primary:hover {
-  opacity: 0.88;
-}
-
-.dd-btn-secondary {
-  background: transparent;
-  color: #fff;
-  border: 2px solid #fff;
-  padding: 0.75rem 1.75rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 1rem;
-}
-
-.dd-btn-secondary:hover {
-  background: rgba(255,255,255,0.15);
-}
-
-.dd-btn-outline {
-  background: transparent;
-  color: var(--gold);
-  border: 2px solid var(--gold);
-  padding: 0.75rem 1.75rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 1rem;
-}
-
-.dd-btn-link {
-  color: var(--burgundy);
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.dd-btn-link:hover {
-  text-decoration: underline;
-}
-
-.dd-what h2,
-.dd-divisions h2,
-.dd-how h2,
-.dd-who h2,
-.dd-why h2,
-.dd-areas h2,
-.dd-bottom-cta h2 {
-  font-family: Georgia, serif;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  color: var(--burgundy);
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.dd-handle-list {
-  list-style: none;
-  padding: 0;
-  max-width: 640px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  text-align: center;
-}
-
-.dd-handle-list li::before {
-  content: "✓ ";
-  color: var(--gold);
-  font-weight: 700;
-}
-
-.dd-divisions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.dd-division-card {
+.service-card {
   background: #fff;
-  border: 1px solid #e6e0d8;
-  border-top: 4px solid var(--gold);
-  border-radius: var(--radius);
-  padding: 1.5rem;
+  min-width: 250px;
+  max-width: 340px;
+  flex: 1 1 250px;
+  border-radius: var(--border-radius-base, 6px);
+  box-shadow: 0 2px 10px 0 rgba(128,0,32,0.1);
+  padding: var(--space-md, 1.5rem);
+  margin: 0.5rem;
+  text-align: left;
+  border: 1.5px solid var(--color-burgundy, #800020);
 }
-
-.dd-division-card h3 {
-  font-family: Georgia, serif;
-  color: var(--burgundy);
-  font-size: 1.05rem;
-  margin-bottom: 0.5rem;
-}
-
-.dd-division-card p {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-}
-
-.dd-divisions-footer {
+.process-flow {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
   justify-content: center;
-}
-
-.dd-divisions-footer .dd-btn-secondary {
-  color: var(--burgundy);
-  border-color: var(--burgundy);
-}
-
-.dd-how {
-  background: var(--burgundy);
-  color: #fff;
-}
-
-.dd-how h2 {
-  color: var(--gold) !important;
-}
-
-.dd-steps {
+  gap: var(--space-md, 1.5rem);
   list-style: none;
+  counter-reset: step;
   padding: 0;
-  max-width: 640px;
-  margin: 0 auto;
+}
+.process-flow li {
+  background: #fff;
+  color: var(--color-burgundy, #800020);
+  border-radius: var(--border-radius-base, 6px);
+  font-weight: 600;
+  box-shadow: 0 1px 4px 0 rgba(128,0,32,0.06);
+  padding: var(--space-sm, 1rem) var(--space-md, 1.5rem);
+  margin: 0 0.3rem;
+  min-width: 130px;
+  position: relative;
+}
+.process-flow li:before {
+  counter-increment: step;
+  content: counter(step);
+  background: var(--color-gold, #c8b273);
+  color: var(--color-black, #161616);
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  display: inline-block;
+  line-height: 2em;
+  font-weight: bold;
+  position: absolute;
+  left: -2.7em;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.why-us-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}
-
-.dd-steps li {
-  display: flex;
+  gap: 0.5em;
   align-items: center;
-  gap: 1rem;
-  font-size: 1.05rem;
-}
-
-.dd-step-num {
-  background: var(--gold);
-  color: var(--dark);
-  font-weight: 700;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.dd-two-col-list,
-.dd-why-list {
+  font-size: 1.12rem;
+  margin: var(--space-md, 1.5rem) 0;
   list-style: none;
   padding: 0;
-  max-width: 700px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 0.5rem 2rem;
 }
 
-.dd-two-col-list li::before {
-  content: "• ";
-  color: var(--gold);
-  font-weight: 700;
-}
-
-.dd-why-list li::before {
-  content: "✓ ";
-  color: var(--gold);
-  font-weight: 700;
-}
-
-.dd-areas p {
-  text-align: center;
-  font-size: 1.05rem;
-  color: var(--text);
-}
-
-.dd-bottom-cta {
-  background: var(--dark);
-  color: #fff;
-  text-align: center;
-}
-
-.dd-bottom-cta h2 {
-  color: var(--gold) !important;
-}
-
-.dd-bottom-cta .dd-btn-secondary {
-  color: #fff;
-  border-color: #fff;
-}
-
-@media (max-width: 600px) {
-  .dd-hero { padding: 4rem 1rem 3.5rem; }
-  .dd-divisions-grid { grid-template-columns: 1fr; }
-  .dd-hero-ctas { flex-direction: column; align-items: center; }
-}
-.dd-work { padding: 4rem 0; background: #fff; }
-
-.dd-photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.dd-photo-grid img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.dd-bundles { padding: 4rem 0; }
-
-.dd-bundle-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.dd-bundle-card {
-  background: var(--ivory);
-  border: 1px solid #e6e0d8;
-  border-top: 4px solid var(--burgundy);
-  border-radius: 8px;
-  padding: 1.5rem;
-}
-
-.dd-bundle-card h3 {
-  font-family: Georgia, serif;
-  color: var(--burgundy);
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.dd-bundle-card p {
-  font-size: 0.88rem;
-  color: #555;
-  line-height: 1.5;
+@media (max-width: 900px) {
+  .service-cards-row {
+    flex-direction: column;
+    max-width: 96vw;
+  }
+  .process-flow {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7em;
+  }
+  .process-flow li:before {
+    left: -2.3em;
+  }
 }

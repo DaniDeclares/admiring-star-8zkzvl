@@ -1,7 +1,3 @@
-Completed in 33 sec, without tools.
-Understood — full file every time, no partial edits. Here's the complete EventsPage.jsx:
-Tap src → pages → EventsPage.jsx
-Tap pencil → select all → delete → paste:
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
@@ -12,10 +8,12 @@ export default function EventsPage() {
     <>
       <Helmet>
         <title>Event Planning & Execution — Dani Declares LLC</title>
-        <meta name="description" content="Full-service event planning, wedding planning, officiating, balloon arches, custom decor, and day-of execution across Metro Atlanta and South Carolina." />
+        <meta
+          name="description"
+          content="Full-service event planning, wedding planning, officiating, balloon arches, custom decor, and day-of execution across Metro Atlanta and South Carolina."
+        />
       </Helmet>
       <div className="ep-page">
-
         <header className="ep-header">
           <div className="ep-container">
             <h1>Event Planning & Execution</h1>
@@ -178,7 +176,6 @@ export default function EventsPage() {
             </div>
           </div>
         </section>
-
       </div>
     </>
   );

@@ -1,0 +1,48 @@
+/* Design Tokens: Brand Colors & Basics (Dani Declares)
+   DO NOT DELETE: Used for standardized, scalable design system.
+*/
+:root {
+  --color-burgundy: #800020;
+  --color-ivory: #f9f6f2;
+  --color-gold: #c8b273;
+  --color-black: #161616;
+  --color-gray: #eeeeee;
+
+  --font-family-base: 'Inter', 'Arial', sans-serif;
+  --font-size-base: 1rem;
+  --font-size-h1: 2.1rem;
+  --font-size-h2: 1.5rem;
+  --font-size-h3: 1.25rem;
+
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.25rem;
+  --space-xl: 3rem;
+  --border-radius-base: 6px;
+  --button-padding: 0.7em 1.5em;
+  --button-radius: 4px;
+}
+
+/* Example utility class using tokens - apply tokens incrementally, do not refactor legacy CSS yet. */
+.brand-hero {
+  background: var(--color-burgundy);
+  color: var(--color-ivory);
+  font-family: var(--font-family-base);
+}
+
+.button-primary {
+  background: var(--color-gold);
+  color: var(--color-black);
+  border-radius: var(--button-radius);
+  padding: var(--button-padding);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.button-primary:hover {
+  background: var(--color-burgundy);
+  color: var(--color-ivory);
+}
