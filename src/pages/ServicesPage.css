@@ -1,3 +1,4 @@
+/* Valid and fixed CSS for ServicesPage.css */
 :root {
   --burgundy: #8b1e2e;
   --ivory: #f8f5f1;
@@ -73,64 +74,10 @@
   margin-bottom: 0.4rem;
 }
 
-.sig-card-note {
-  font-size: 0.88rem;
-  color: #888;
-  font-style: italic;
-  margin-bottom: 0.4rem;
-}
-
 .sig-card-price {
   margin-top: 0.5rem;
   font-weight: 700;
   color: var(--burgundy);
-}
-
-.sig-bundles {
-  padding: 4rem 0;
-  background: var(--ivory);
-}
-
-.sig-bundles h2 {
-  font-family: Georgia, serif;
-  color: var(--burgundy);
-  font-size: clamp(1.4rem, 3vw, 2rem);
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.sig-bundle-sub {
-  text-align: center;
-  color: #666;
-  margin-bottom: 2rem;
-  font-size: 1rem;
-}
-
-.sig-bundle-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-}
-
-.sig-bundle-card {
-  background: #fff;
-  border: 1px solid #e6e0d8;
-  border-top: 4px solid var(--burgundy);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-}
-
-.sig-bundle-card h3 {
-  font-family: Georgia, serif;
-  color: var(--burgundy);
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.sig-bundle-card p {
-  font-size: 0.88rem;
-  color: #555;
-  line-height: 1.5;
 }
 
 .sig-cta {
@@ -140,79 +87,14 @@
   text-align: center;
 }
 
-.sig-cta h2 {
-  font-family: Georgia, serif;
-  font-size: clamp(1.4rem, 3vw, 2rem);
-  margin-bottom: 0.75rem;
-}
-
 .sig-cta p {
   font-size: 1rem;
-  opacity: 0.9;
   margin-bottom: 2rem;
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.sig-cta-btns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.sig-btn-primary {
-  background: var(--gold);
-  color: var(--dark);
-  padding: 0.75rem 1.75rem;
-  border-radius: var(--radius);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.sig-btn-secondary {
-  background: transparent;
-  color: #fff;
-  border: 2px solid #fff;
-  padding: 0.75rem 1.75rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  text-decoration: none;
 }
 
 @media (max-width: 600px) {
-  .sig-bundle-grid { grid-template-columns: 1fr; }
-  .sig-cta-btns { flex-direction: column; align-items: .sp-btn-gold {
-  background: var(--gold);
-  color: var(--dark);
-  padding: 0.65rem 1.5rem;
-  border-radius: var(--radius);
-  font-weight: 700;
-  text-decoration: none;
-  font-size: 0.95rem;
-  transition: opacity 0.2s;
-}
-
-.sp-btn-gold:hover {
-  opacity: 0.88;
-}
-
-.sp-btn-outline {
-  background: transparent;
-  color: var(--burgundy);
-  border: 2px solid var(--burgundy);
-  padding: 0.65rem 1.5rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.sp-sig-btns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 1.5rem;
+  .sig-card {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
 }
