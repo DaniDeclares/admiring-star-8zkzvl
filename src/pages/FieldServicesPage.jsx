@@ -3,27 +3,98 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import "./FieldServicesPage.css";
 
+const readinessLabels = [
+  "Move-Ready",
+  "Guest-Ready",
+  "Inspection-Ready",
+  "Market-Ready",
+];
+
+const fieldOpsHandles = [
+  "Property reset planning and scope of work creation",
+  "Move-in, move-out, rental, and short-term rental turnover support",
+  "Deep cleaning, post-construction cleaning, and detail reset coordination",
+  "Inspection support, before/after documentation, and completion reporting",
+  "Trash-out coordination, vendor coordination, and access support",
+  "Recurring property support for managers, landlords, investors, and hosts",
+];
+
+const fieldOpsProcess = [
+  "Property Assessment",
+  "Scope Creation",
+  "Estimate Generation",
+  "Service Execution",
+  "Photo Documentation",
+  "Completion Report",
+];
+
 export default function FieldServicesPage() {
   return (
     <>
       <Helmet>
-        <title>Field Services & Property Reset — Dani Declares LLC</title>
-        <meta name="description" content="Professional property reset, move-in/move-out cleaning, deep cleaning, and turnover services across Metro Atlanta and surrounding areas." />
+        <title>FieldOps Property Operations & Reset Services — Dani Declares LLC</title>
+        <meta name="description" content="Dani Declares FieldOps provides property operations and reset services for move-ready, guest-ready, inspection-ready, and market-ready properties across Metro Atlanta." />
       </Helmet>
       <div className="fs-page">
 
         <header className="fs-header">
           <div className="fs-container">
-            <h1>Field Services & Property Reset</h1>
-            <p>We prepare properties for the next tenant, buyer, or use — from start to finish.</p>
+            <p className="fs-eyebrow">Dani Declares FieldOps</p>
+            <h1>Property Operations & Reset Services</h1>
+            <p>We prepare properties for the next tenant, guest, buyer, inspection, or use with a clear scope, coordinated execution, photo documentation, and completion reporting.</p>
+            <div className="fs-readiness-row" aria-label="Property readiness outcomes">
+              {readinessLabels.map((label) => (
+                <span key={label} className="fs-readiness-pill">{label}</span>
+              ))}
+            </div>
             <div className="fs-header-ctas">
               <a href="tel:4706829348" className="fs-btn-primary">Call / Text (470) 682-9348</a>
-              <Link to="/contact" className="fs-btn-secondary">Request a Quote</Link>
+              <Link to="/contact" className="fs-btn-secondary">Request a FieldOps Quote</Link>
             </div>
           </div>
         </header>
 
-        <section className="fs-section fs-who">
+        <section className="fs-section fs-intro">
+          <div className="fs-container">
+            <h2>FieldOps Is More Than Cleaning</h2>
+            <p className="fs-lead-copy">
+              Dani Declares FieldOps is the Property Operations & Reset division of Dani Declares LLC. It is built for property managers, landlords, investors, real estate professionals, Airbnb hosts, contractors, and businesses that need properties handled from assessment to completion.
+            </p>
+            <p className="fs-lead-copy">
+              The focus is not just cleaning a space. The focus is making the property move-ready, guest-ready, inspection-ready, or market-ready with organized field execution and documentation.
+            </p>
+          </div>
+        </section>
+
+        <section className="fs-section fs-alt fs-operations">
+          <div className="fs-container">
+            <h2>What FieldOps Handles</h2>
+            <div className="fs-grid">
+              {fieldOpsHandles.map((item) => (
+                <div className="fs-card" key={item}>
+                  <h3>{item}</h3>
+                  <p>Handled with a property operations mindset so the work is scoped, coordinated, documented, and ready for the next step.</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="fs-section fs-process-section">
+          <div className="fs-container">
+            <h2>FieldOps Process</h2>
+            <div className="fs-process-grid">
+              {fieldOpsProcess.map((step, index) => (
+                <div className="fs-process-card" key={step}>
+                  <span className="fs-process-number">{index + 1}</span>
+                  <h3>{step}</h3>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="fs-section fs-who fs-alt">
           <div className="fs-container">
             <h2>Who We Serve</h2>
             <ul className="fs-two-col">
@@ -37,7 +108,7 @@ export default function FieldServicesPage() {
           </div>
         </section>
 
-        <section className="fs-section fs-alt">
+        <section className="fs-section">
           <div className="fs-container">
             <h2>Core Services</h2>
             <div className="fs-grid">
@@ -69,7 +140,7 @@ export default function FieldServicesPage() {
           </div>
         </section>
 
-        <section className="fs-section fs-addons">
+        <section className="fs-section fs-addons fs-alt">
           <div className="fs-container">
             <h2>Add-On Services</h2>
             <ul className="fs-two-col">
@@ -89,9 +160,9 @@ export default function FieldServicesPage() {
           </div>
         </section>
 
-        <section className="fs-section fs-alt fs-packages">
+        <section className="fs-section fs-packages">
           <div className="fs-container">
-            <h2>Service Packages</h2>
+            <h2>Signature Services</h2>
             <div className="fs-pkg-grid">
               <div className="fs-pkg-card">
                 <h3>Standard Turnover</h3>
@@ -117,6 +188,15 @@ export default function FieldServicesPage() {
           </div>
         </section>
 
+        <section className="fs-section fs-documentation fs-alt">
+          <div className="fs-container">
+            <h2>Built for Managers Who Need Proof</h2>
+            <p className="fs-lead-copy">
+              FieldOps supports property files with before/after documentation, condition notes, completion reporting, and scope-based execution. This helps managers, owners, and vendors know what was requested, what was handled, and what may need follow-up.
+            </p>
+          </div>
+        </section>
+
         <section className="fs-section fs-bundle">
           <div className="fs-container">
             <h2>Bundle & Save</h2>
@@ -124,15 +204,15 @@ export default function FieldServicesPage() {
             <div className="fs-bundle-grid">
               <div className="fs-bundle-card">
                 <h3>Move-Out Bundle</h3>
-                <p>Cleaning + property reset + photo documentation + notary for lease termination + courier for deposit/keys</p>
+                <p>Cleaning + property reset + photo documentation + document support + courier coordination for keys or paperwork</p>
               </div>
               <div className="fs-bundle-card">
                 <h3>Real Estate Bundle</h3>
-                <p>Property reset + notary for closing docs + document packaging + courier delivery + photo documentation</p>
+                <p>Property reset + document packaging + courier delivery + photo documentation + field support</p>
               </div>
               <div className="fs-bundle-card">
                 <h3>Landlord Bundle</h3>
-                <p>Turnover cleaning + inspection report + photo documentation + lease notarization</p>
+                <p>Turnover cleaning + inspection report + photo documentation + recurring property support</p>
               </div>
             </div>
             <Link to="/contact" className="fs-btn-primary">Request a Bundle Quote</Link>
@@ -152,7 +232,7 @@ export default function FieldServicesPage() {
             <div className="fs-header-ctas">
               <a href="tel:4706829348" className="fs-btn-primary">Call / Text GA: (470) 682-9348</a>
               <a href="tel:8643265362" className="fs-btn-primary">Call / Text SC: (864) 326-5362</a>
-              <Link to="/contact" className="fs-btn-secondary">Request a Quote</Link>
+              <Link to="/contact" className="fs-btn-secondary">Request a FieldOps Quote</Link>
             </div>
           </div>
         </section>
