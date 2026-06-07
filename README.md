@@ -36,6 +36,12 @@ Primary goals:
 9. Scalable internal operations systems
 10. Unified Dani Declares Ops Portal
 
+Current cash-flow rule:
+
+- Prioritize immediate cash flow over ideal job selection until business reserves are stronger.
+- Prioritize services that can create $300–$500+ tickets quickly.
+- Property manager and recurring B2B relationships are higher priority than one-off low-margin work.
+
 ---
 
 ## 2. Brand Rules
@@ -419,7 +425,155 @@ Primary intake route:
 
 ---
 
-## 7. Current Website Routes
+## 7. Lead Generation and Outreach Systems
+
+### 7.1 10-Platform Lead System
+
+Dani Declares uses a multi-platform lead generation system to create immediate and recurring opportunities.
+
+Primary platforms:
+
+1. Thumbtack
+2. Bark
+3. Google Business Profile
+4. Facebook local groups
+5. Nextdoor
+6. Craigslist
+7. Fiverr
+8. TaskRabbit
+9. LinkedIn Services
+10. Wedding/event platforms
+
+Rule:
+
+- Fast response matters.
+- Always evaluate lead cost, competition, number of pros contacted, number of pros responded, ticket potential, urgency, and repeat-client potential.
+- Paid lead platforms should be judged by expected return, not just interest.
+
+### 7.2 Property Manager Acquisition System
+
+Highest-priority B2B targets:
+
+- Regional managers
+- Property managers
+- Vendor coordinators
+- Facilities managers
+- Procurement contacts
+- Ownership groups managing multiple buildings
+- Apartment communities
+- STR/Airbnb operators
+- Landlords with multiple doors
+
+Primary outreach methods:
+
+- Calls
+- Emails
+- LinkedIn
+- HubSpot/CRM tracking
+- Google Sheets or Airtable tracking
+- Follow-up systems
+- Property manager packets
+- QR/NFC lead capture
+
+Rule:
+
+Prioritize organized outreach and follow-up before random walk-ins.
+
+### 7.3 Marketing Packet System
+
+Packets should convert, not just look pretty.
+
+Packet assets may include:
+
+- One-page service flyer
+- Simple pricing or starting-rate sheet
+- CTA card
+- QR sticker
+- NFC card
+- Property manager packet
+- Vendor readiness packet
+- Capability statement
+- Door hangers
+- Yard signs
+- Car magnets
+- Client kit inserts
+
+Design rule:
+
+Use burgundy, ivory, and gold. Keep layouts clean, professional, trusted, and easy to scan.
+
+---
+
+## 8. Production Assets and Equipment Capabilities
+
+Dani Declares has in-house and vendor-supported production capabilities that support service delivery, packets, event products, and add-on revenue.
+
+Known assets/capabilities:
+
+- Brother color laser all-in-one printer
+- Heat press
+- Label and sticker printing workflow
+- Cardstock and packet production
+- QR code sticker production
+- NFC card strategy
+- DTF vendor relationship
+- Epson-based DTF vendor workflow support
+- Canva design workflow
+- CADlink design-to-production workflow
+- Packaging labels and inserts
+- Business starter kit materials
+- Event product sample production
+
+Rule:
+
+Production tools should support revenue, conversion, client deliverables, and higher-ticket bundles. Do not let production become a side mission that delays lead generation or sales.
+
+---
+
+## 9. Event Product Collection System
+
+Dani Declares Event Product Collections follow a structured product-development system.
+
+Default framework:
+
+1. Lock strategy before image generation.
+2. Use the 72-item master product catalog.
+3. Define phrase assignments.
+4. Define design matrix.
+5. Create master artwork assets.
+6. Build phased product roadmap.
+7. Prioritize product tiers.
+8. Create products one at a time.
+9. Use e-commerce style mockups only.
+10. Package strategy comes after product library creation.
+
+Rule:
+
+Do not create random event products without locking the product collection strategy first.
+
+---
+
+## 10. Youth and Family Work Opportunities
+
+Dani Declares may include age-appropriate youth/family work opportunities as the business grows.
+
+Examples:
+
+- Sticker sorting
+- Packet assembly
+- Label placement
+- Simple inventory organization
+- Safe packaging support
+- Age-appropriate creative input
+- Basic non-client-facing admin support
+
+Rule:
+
+Youth/family work must remain age-appropriate, safe, supervised, and legally compliant.
+
+---
+
+## 11. Current Website Routes
 
 Public routes:
 
@@ -467,7 +621,7 @@ Some routes and CTAs still reflect older notary/book/contact flows. Future updat
 
 ---
 
-## 8. Technology Stack
+## 12. Technology Stack and Tool Operating Map
 
 Frontend:
 
@@ -515,19 +669,25 @@ Scheduling:
   - `danideclaresns/officiant`
   - `danideclaresns/loansigning`
 
-CRM and operations tools:
+Tool operating map:
 
-- Supabase: website/backend source of truth
-- HubSpot: sales CRM and follow-up
-- Airtable: operations planning, vendor/product/REACH databases when useful
-- Asana: task execution and project management
-- Google Drive/Docs/Sheets: documents, packets, SOPs, trackers
-- Gmail/Contacts/Calendar: communications and scheduling
-- Formula Genius: formulas, scripts, and spreadsheet logic
+- Supabase = website/backend source of truth
+- HubSpot = sales CRM and follow-up system
+- Airtable = flexible operations databases, vendor/product/REACH trackers
+- Asana = task execution and project management
+- Google Drive/Docs/Sheets = documents, packets, SOPs, trackers
+- Gmail/Contacts/Calendar = communications and scheduling
+- Formula Genius = formulas, spreadsheet logic, scripts, and automation support
+- Stripe = payments, invoices, products, prices, payment links
+- GitHub/Vercel = website, codebase, deployment, and future portal build
+
+Data rule:
+
+Do not spread the same data everywhere without purpose. Each tool must have a defined role.
 
 ---
 
-## 9. Request Service Intake
+## 13. Request Service Intake
 
 The `/request-service` page is the current lead capture foundation.
 
@@ -548,7 +708,7 @@ Known follow-up improvement:
 
 ---
 
-## 10. Ops Portal Direction
+## 14. Ops Portal Direction
 
 Do not create separate disconnected systems.
 
@@ -582,7 +742,7 @@ The future Ops Portal should manage:
 
 ---
 
-## 11. Project Execution Rules
+## 15. Project Execution Rules
 
 ### Master Rule
 
@@ -635,7 +795,7 @@ Audit
 
 ---
 
-## 12. Current Roadmap
+## 16. Current Roadmap
 
 Phase 1: Website Foundation
 
@@ -664,7 +824,7 @@ Phase 6: Unified Dani Declares Ops System
 
 ---
 
-## 13. Known Site Audit Findings
+## 17. Known Site Audit Findings
 
 Current gaps to address after this README update:
 
@@ -681,7 +841,7 @@ Current gaps to address after this README update:
 
 ---
 
-## 14. What Not To Change Without Approval
+## 18. What Not To Change Without Approval
 
 Do not change:
 
@@ -698,7 +858,7 @@ Do not change:
 
 ---
 
-## 15. Immediate Next Development Sequence
+## 19. Immediate Next Development Sequence
 
 1. Complete live `/request-service` form test.
 2. Verify `leads` and `service_requests` records in Supabase.
