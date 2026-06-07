@@ -44,7 +44,52 @@ Current cash-flow rule:
 
 ---
 
-## 2. Brand Rules
+## 2. Revenue Engine Framework
+
+Dani Declares should be built around multiple money engines, not one service category.
+
+Primary money engines:
+
+1. Immediate Cash Field Services
+2. Logistics Operations
+3. Compliance / Document Services
+4. Courier & Mobile Services
+5. Government Contracts / Subcontracting
+6. Media / Content
+7. Network / Referrals
+
+Revenue path:
+
+```txt
+Entry Service
+→ Expand Need
+→ Bundle Services
+→ Increase Ticket
+→ Capture Review
+→ Convert to Repeat / Referral
+```
+
+Examples:
+
+- FieldOps job → property reset → photo documentation → key/courier support → recurring property manager relationship
+- EventOps job → planning/setup → custom labels/stickers → shirts/merch → breakdown support
+- DocOps job → printing/scanning → document prep → courier → packaging/submission support
+- BusinessOps job → setup packet → digital folders → labels/stickers → admin system
+- VendorOps/REACH job → Dani captures lead → routes fulfillment → documents quality → builds partner capacity
+
+Revenue priority order:
+
+1. Fast paid work
+2. Higher ticket bundles
+3. Repeat B2B relationships
+4. Vendor/subcontractor-enabled fulfillment
+5. Government/subcontracting pipeline
+6. Product/Media add-on revenue
+7. Long-term automation and portal systems
+
+---
+
+## 3. Brand Rules
 
 ### Visual Identity
 
@@ -86,7 +131,7 @@ Avoid:
 
 ---
 
-## 3. Compliance Rules
+## 4. Compliance Rules
 
 Compliance overrides speed, creativity, and marketing.
 
@@ -116,11 +161,11 @@ Insurance/vendor readiness rule:
 
 ---
 
-## 4. Internal Divisions
+## 5. Internal Divisions
 
 Dani Declares LLC operates as a parent company with internal operating divisions. Divisions may share the same intake, CRM, backend, vendor network, and fulfillment workflows.
 
-### 4.1 DocOps / Document & Compliance
+### 5.1 DocOps / Document & Compliance
 
 Purpose:
 
@@ -138,7 +183,7 @@ Includes:
 - Records organization
 - Notarial services where legally authorized and commissioned
 
-### 4.2 FieldOps / Property Operations & Reset Services
+### 5.2 FieldOps / Property Operations & Reset Services
 
 Purpose:
 
@@ -161,7 +206,7 @@ Positioning:
 
 FieldOps is not basic maid service. It is property operations and reset support.
 
-### 4.3 CourierOps / Logistics & Courier
+### 5.3 CourierOps / Logistics & Courier
 
 Purpose:
 
@@ -183,7 +228,7 @@ Positioning:
 
 Dispatch is not the main identity. Carrier back-office and logistics operations support are stronger.
 
-### 4.4 EventOps / Event Planning & Execution
+### 5.4 EventOps / Event Planning & Execution
 
 Purpose:
 
@@ -206,7 +251,7 @@ Positioning:
 
 Dani Declares handles execution, not just planning ideas.
 
-### 4.5 ProductOps / Stickers, Labels, Heat Press, Merch & Event Products
+### 5.5 ProductOps / Stickers, Labels, Heat Press, Merch & Event Products
 
 Purpose:
 
@@ -233,7 +278,7 @@ Rule:
 
 ProductOps supports higher-ticket bundles, events, branding, marketing packets, and client deliverables. It should not distract from revenue-generating service execution.
 
-### 4.6 DesignOps / Canva, CADlink, Print Prep, DTF & Production Workflow
+### 5.6 DesignOps / Canva, CADlink, Print Prep, DTF & Production Workflow
 
 Purpose:
 
@@ -257,7 +302,7 @@ Positioning:
 
 DesignOps is internal production support unless intentionally packaged as a public service.
 
-### 4.7 MediaOps / Content & Lead Generation
+### 5.7 MediaOps / Content & Lead Generation
 
 Purpose:
 
@@ -283,7 +328,7 @@ Content channels:
 2. Dani Declares business page
 3. Dani’s Logistics / trucking operations content
 
-### 4.8 GovOps / Government Contracting Support
+### 5.8 GovOps / Government Contracting Support
 
 Purpose:
 
@@ -307,7 +352,7 @@ Known GovCon details:
 - Secondary NAICS: `541120`, `541199`, `561611`, `531390`
 - PSC: `R699`, `R499`, `R707`, `R418`
 
-### 4.9 VendorOps / Vendor Readiness & Subcontractor Network
+### 5.9 VendorOps / Vendor Readiness & Subcontractor Network
 
 Purpose:
 
@@ -325,7 +370,7 @@ Includes:
 - Work assignment support
 - Relationship tracking
 
-### 4.10 BusinessOps / Administrative Support & Business Systems
+### 5.10 BusinessOps / Administrative Support & Business Systems
 
 Purpose:
 
@@ -348,7 +393,7 @@ Includes:
 
 ---
 
-## 5. Strategic External Business Relationships
+## 6. Strategic External Business Relationships
 
 ### REACH Strategy
 
@@ -388,7 +433,7 @@ Dani Declares is building its own lead capture and operations engine while also 
 
 ---
 
-## 6. Website Purpose
+## 7. Website Purpose
 
 The website is not just a brochure. It is the front end of the Dani Declares operating system.
 
@@ -425,9 +470,9 @@ Primary intake route:
 
 ---
 
-## 7. Lead Generation and Outreach Systems
+## 8. Lead Generation and Outreach Systems
 
-### 7.1 10-Platform Lead System
+### 8.1 10-Platform Lead System
 
 Dani Declares uses a multi-platform lead generation system to create immediate and recurring opportunities.
 
@@ -450,7 +495,7 @@ Rule:
 - Always evaluate lead cost, competition, number of pros contacted, number of pros responded, ticket potential, urgency, and repeat-client potential.
 - Paid lead platforms should be judged by expected return, not just interest.
 
-### 7.2 Property Manager Acquisition System
+### 8.2 Property Manager Acquisition System
 
 Highest-priority B2B targets:
 
@@ -479,7 +524,7 @@ Rule:
 
 Prioritize organized outreach and follow-up before random walk-ins.
 
-### 7.3 Marketing Packet System
+### 8.3 Marketing Packet System
 
 Packets should convert, not just look pretty.
 
@@ -504,7 +549,7 @@ Use burgundy, ivory, and gold. Keep layouts clean, professional, trusted, and ea
 
 ---
 
-## 8. Production Assets and Equipment Capabilities
+## 9. Production Assets and Equipment Capabilities
 
 Dani Declares has in-house and vendor-supported production capabilities that support service delivery, packets, event products, and add-on revenue.
 
@@ -530,7 +575,7 @@ Production tools should support revenue, conversion, client deliverables, and hi
 
 ---
 
-## 9. Event Product Collection System
+## 10. Event Product Collection System
 
 Dani Declares Event Product Collections follow a structured product-development system.
 
@@ -553,7 +598,7 @@ Do not create random event products without locking the product collection strat
 
 ---
 
-## 10. Youth and Family Work Opportunities
+## 11. Youth and Family Work Opportunities
 
 Dani Declares may include age-appropriate youth/family work opportunities as the business grows.
 
@@ -573,7 +618,7 @@ Youth/family work must remain age-appropriate, safe, supervised, and legally com
 
 ---
 
-## 11. Current Website Routes
+## 12. Current Website Routes
 
 Public routes:
 
@@ -621,7 +666,7 @@ Some routes and CTAs still reflect older notary/book/contact flows. Future updat
 
 ---
 
-## 12. Technology Stack and Tool Operating Map
+## 13. Technology Stack and Tool Operating Map
 
 Frontend:
 
@@ -687,7 +732,7 @@ Do not spread the same data everywhere without purpose. Each tool must have a de
 
 ---
 
-## 13. Request Service Intake
+## 14. Request Service Intake
 
 The `/request-service` page is the current lead capture foundation.
 
@@ -708,7 +753,7 @@ Known follow-up improvement:
 
 ---
 
-## 14. Ops Portal Direction
+## 15. Ops Portal Direction
 
 Do not create separate disconnected systems.
 
@@ -742,7 +787,7 @@ The future Ops Portal should manage:
 
 ---
 
-## 15. Project Execution Rules
+## 16. Project Execution Rules
 
 ### Master Rule
 
@@ -795,7 +840,7 @@ Audit
 
 ---
 
-## 16. Current Roadmap
+## 17. Current Roadmap
 
 Phase 1: Website Foundation
 
@@ -824,7 +869,7 @@ Phase 6: Unified Dani Declares Ops System
 
 ---
 
-## 17. Known Site Audit Findings
+## 18. Known Site Audit Findings
 
 Current gaps to address after this README update:
 
@@ -841,7 +886,7 @@ Current gaps to address after this README update:
 
 ---
 
-## 18. What Not To Change Without Approval
+## 19. What Not To Change Without Approval
 
 Do not change:
 
@@ -858,7 +903,7 @@ Do not change:
 
 ---
 
-## 19. Immediate Next Development Sequence
+## 20. Immediate Next Development Sequence
 
 1. Complete live `/request-service` form test.
 2. Verify `leads` and `service_requests` records in Supabase.
