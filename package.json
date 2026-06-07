@@ -7,6 +7,7 @@
   "dependencies": {
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.4.0",
+    "@supabase/supabase-js": "^2.45.4",
     "@vercel/speed-insights": "^1.2.0",
     "dotenv": "^16.5.0",
     "gh-pages": "^6.3.0",
