@@ -4,14 +4,16 @@ import { supabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
 import "./RequestServicePage.css";
 
 const fallbackDivisions = [
-  { id: null, name: "Document & Compliance" },
-  { id: null, name: "Field Services / Property Resets" },
-  { id: null, name: "Property Support & Inspections" },
-  { id: null, name: "Events" },
-  { id: null, name: "Logistics & Courier" },
-  { id: null, name: "Government Contracting Support" },
-  { id: null, name: "Vendor Readiness" },
-  { id: null, name: "Business/Admin Systems" },
+  { id: null, name: "DocOps / Document & Compliance" },
+  { id: null, name: "FieldOps / Property Operations & Resets" },
+  { id: null, name: "CourierOps / Logistics & Courier" },
+  { id: null, name: "EventOps / Event Planning & Execution" },
+  { id: null, name: "ProductOps / Stickers, Labels, Heat Press & Merch" },
+  { id: null, name: "DesignOps / Canva, CADlink, DTF & Print Prep" },
+  { id: null, name: "MediaOps / Content & Lead Generation" },
+  { id: null, name: "GovOps / Government Contracting Support" },
+  { id: null, name: "VendorOps / Vendor Readiness & Subcontractors" },
+  { id: null, name: "BusinessOps / Admin Systems & Business Support" },
 ];
 
 const fallbackMarketingSources = [
@@ -175,15 +177,15 @@ export default function RequestServicePage() {
             <aside className="request-info-card">
               <h2>What This Covers</h2>
               <ul>
-                <li>Document & compliance support</li>
-                <li>Field services and property resets</li>
-                <li>Property manager support</li>
-                <li>Events and setup coordination</li>
-                <li>Courier and logistics support</li>
-                <li>Vendor readiness and admin support</li>
+                <li>Document, compliance, and administrative support</li>
+                <li>Field services, property resets, and photo documentation</li>
+                <li>Courier, logistics, and mobile operations support</li>
+                <li>Events, setup coordination, and custom production support</li>
+                <li>Product, print, sticker, label, and merch-related requests</li>
+                <li>Vendor readiness, business systems, and government support</li>
               </ul>
               <p className="request-note">
-                South Carolina notary services are available. Georgia notary services are pending commission activation, but Georgia administrative, document, courier, field, and event services may be requested.
+                Dani Declares LLC provides mobile document, compliance, administrative, courier, field, property, event, and operations support services throughout Georgia and South Carolina. Notarial services are available where legally authorized and commissioned.
               </p>
             </aside>
 
