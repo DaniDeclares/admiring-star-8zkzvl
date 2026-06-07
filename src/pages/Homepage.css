@@ -6,6 +6,81 @@
   color: var(--color-ivory, #f9f6f2);
 }
 
+.dd-hero--visual {
+  background: linear-gradient(135deg, #2d0c10 0%, var(--color-burgundy, #800020) 58%, #4b111c 100%);
+  color: var(--color-ivory, #f9f6f2);
+  padding: clamp(4rem, 7vw, 7rem) 1.5rem;
+  overflow: hidden;
+}
+
+.dd-hero-inner {
+  align-items: center;
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  margin: 0 auto;
+  max-width: 1180px;
+}
+
+.dd-hero-eyebrow {
+  color: var(--color-gold, #c8b273);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.9rem;
+  text-transform: uppercase;
+}
+
+.dd-visual-collage {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-rows: repeat(2, minmax(150px, 1fr));
+  min-height: 430px;
+}
+
+.dd-visual-card {
+  background: rgba(248, 245, 241, 0.08);
+  border: 1px solid rgba(248, 245, 241, 0.22);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+  min-height: 180px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dd-visual-card--large {
+  grid-row: span 2;
+}
+
+.dd-visual-card img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.dd-visual-card::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(27, 10, 14, 0.72));
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.dd-visual-card span {
+  background: rgba(248, 245, 241, 0.92);
+  border: 1px solid rgba(212, 175, 55, 0.7);
+  border-radius: 999px;
+  bottom: 1rem;
+  color: var(--color-burgundy, #800020);
+  font-size: 0.82rem;
+  font-weight: 800;
+  left: 1rem;
+  padding: 0.45rem 0.75rem;
+  position: absolute;
+  z-index: 1;
+}
+
 .service-cards-row {
   display: flex;
   flex-wrap: wrap;
@@ -73,6 +148,22 @@
 }
 
 @media (max-width: 900px) {
+  .dd-hero-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-visual-collage {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    min-height: auto;
+  }
+
+  .dd-visual-card,
+  .dd-visual-card--large {
+    grid-row: auto;
+    min-height: 220px;
+  }
+
   .service-cards-row {
     flex-direction: column;
     max-width: 96vw;

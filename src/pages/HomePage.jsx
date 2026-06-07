@@ -14,18 +14,36 @@ export default function Homepage() {
         />
       </Helmet>
 
-      <section className="dd-hero">
-        <div className="dd-hero-content">
-          <h1>We Handle It From Start to Finish</h1>
-          <p className="dd-hero-sub">
-            Mobile support for documents, compliance, logistics, property, and events.
-            <br />
-            We come to you and get it done.
-          </p>
-          <div className="dd-hero-ctas">
-            <Link to="/book" className="dd-btn-primary">Book Now</Link>
-            <a href="tel:8643265362" className="dd-btn-secondary">Call / Text Now</a>
-            <Link to="/contact" className="dd-btn-outline">Request a Quote</Link>
+      <section className="dd-hero dd-hero--visual">
+        <div className="dd-hero-inner">
+          <div className="dd-hero-content">
+            <p className="dd-hero-eyebrow">Mobile Operations &amp; Execution Support</p>
+            <h1>We Handle It From Start to Finish</h1>
+            <p className="dd-hero-sub">
+              Mobile support for documents, compliance, logistics, property, events, and business operations.
+              <br />
+              We come to you, organize the details, and help get it done.
+            </p>
+            <div className="dd-hero-ctas">
+              <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
+              <a href="tel:8643265362" className="dd-btn-secondary">Call / Text Now</a>
+              <Link to="/services" className="dd-btn-outline">View Services</Link>
+            </div>
+          </div>
+
+          <div className="dd-visual-collage" aria-label="Dani Declares service visuals">
+            <div className="dd-visual-card dd-visual-card--large">
+              <img src="/images/stock/document execution office.jpg" alt="Organized document and administrative support" loading="eager" />
+              <span>Document &amp; Admin Support</span>
+            </div>
+            <div className="dd-visual-card">
+              <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Event planning and execution support" loading="eager" />
+              <span>EventOps</span>
+            </div>
+            <div className="dd-visual-card">
+              <img src="/images/stock/Courthouse steps.jpg" alt="Government and compliance support" loading="eager" />
+              <span>GovOps</span>
+            </div>
           </div>
         </div>
       </section>
@@ -84,9 +102,9 @@ export default function Homepage() {
         <div className="dd-container">
           <h2>How It Works</h2>
           <ol className="dd-steps">
-            <li><span className="dd-step-num">1</span>Contact or Book</li>
+            <li><span className="dd-step-num">1</span>Request Service</li>
             <li><span className="dd-step-num">2</span>We Review &amp; Confirm Details</li>
-            <li><span className="dd-step-num">3</span>We Execute the Service</li>
+            <li><span className="dd-step-num">3</span>We Execute or Coordinate the Service</li>
             <li><span className="dd-step-num">4</span>You Get Completion &amp; Documentation</li>
           </ol>
         </div>
@@ -123,7 +141,7 @@ export default function Homepage() {
       <section className="dd-section dd-areas dd-alt-bg">
         <div className="dd-container">
           <h2>Service Areas</h2>
-          <p>Metro Atlanta &amp; surrounding areas &nbsp;•&nbsp; South Carolina (notary active) &nbsp;•&nbsp; Travel available based on service</p>
+          <p>Metro Atlanta &amp; surrounding areas &nbsp;•&nbsp; South Carolina &nbsp;•&nbsp; Travel available based on service</p>
         </div>
       </section>
 
@@ -131,9 +149,9 @@ export default function Homepage() {
         <div className="dd-container">
           <h2>Ready to Get It Handled?</h2>
           <div className="dd-hero-ctas">
-            <Link to="/book" className="dd-btn-primary">Book Now</Link>
+            <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
             <a href="tel:8643265362" className="dd-btn-secondary">Call / Text (864) 326-5362</a>
-            <Link to="/contact" className="dd-btn-outline">Request a Quote</Link>
+            <Link to="/services" className="dd-btn-outline">View Services</Link>
           </div>
         </div>
       </section>
