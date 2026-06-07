@@ -11,19 +11,21 @@ export default function FederalPage() {
   return (
     <>
       <Helmet>
-        <title>Federal Contracting • Dani Declares</title>
+        <title>Government Contracting • Dani Declares LLC</title>
         <meta
           name="description"
-          content="Federal-ready mobile notary, loan signing, and apostille facilitation services across Georgia and South Carolina."
+          content="Government contracting capabilities for mobile administrative, document, compliance, field support, courier coordination, and property support services."
         />
       </Helmet>
 
       <main className="federal-page">
         <section className="federal-hero" style={heroStyle}>
-          <h1>Federal Contracting</h1>
+          <h1>Government Contracting</h1>
           <p>
-            Dani Declares provides mobile notary, loan signing, and apostille
-            facilitation support for government teams and prime contractors.
+            Dani Declares LLC provides mobile operations and execution support
+            for agencies, prime contractors, subcontractors, and organizations
+            needing administrative, document, compliance, courier, and field
+            support services.
           </p>
           <div className="federal-hero__actions">
             <Link className="btn btn--primary" to="/contact">
@@ -43,39 +45,44 @@ export default function FederalPage() {
         <section className="federal-section">
           <h2>Core Capabilities</h2>
           <ul>
-            <li>Mobile and on-site notary services</li>
-            <li>Loan signing support for real estate transactions</li>
-            <li>Apostille facilitation and document intake coordination</li>
-            <li>Document courier and field support coordination</li>
+            <li>Administrative support and document processing</li>
+            <li>Records organization and compliance support</li>
+            <li>Document packaging and submission support</li>
+            <li>Courier, logistics coordination, and field support</li>
+            <li>Field inspection and photo documentation support</li>
+            <li>Property support and mobile operations assistance</li>
           </ul>
         </section>
 
         <section className="federal-section">
           <h2>Coverage</h2>
-          <p>Georgia and South Carolina with travel available upon request.</p>
           <p>
-            Mobile, on-site, and after-hours coverage is coordinated in advance to
-            meet agency timelines.
+            Georgia and South Carolina service coordination with travel
+            availability based on scope, location, and scheduling requirements.
+          </p>
+          <p>
+            Mobile, on-site, and deadline-sensitive coverage is coordinated in
+            advance to support project and agency timelines.
           </p>
         </section>
 
         <section className="federal-section">
           <h2>Identifiers</h2>
           <ul>
-            <li>UEI: [Add UEI]</li>
-            <li>CAGE: [Add CAGE]</li>
-            <li>SAM Status: [Add SAM Status]</li>
-            <li>NAICS: 541120 (Primary), 541199, 561410, 541611</li>
+            <li>UEI: TD4TSG48LHN9</li>
+            <li>Primary NAICS: 561410 — Document Preparation Services</li>
+            <li>Additional NAICS: 541120, 541199, 561611, 531390</li>
+            <li>PSC Codes: R699, R499, R707, R418</li>
           </ul>
         </section>
 
         <section className="federal-section">
           <h2>Differentiators</h2>
           <ul>
-            <li>Fast response for urgent mission-critical requests</li>
-            <li>Compliance-minded workflows and documentation</li>
-            <li>Insured and bonded where applicable</li>
-            <li>Mobile-first scheduling and field-ready support</li>
+            <li>Mobile-first support for document, field, and courier needs</li>
+            <li>Compliance-minded workflows and organized documentation</li>
+            <li>Flexible support for prime contractors and subcontracting teams</li>
+            <li>Administrative and operational support across multiple service areas</li>
           </ul>
         </section>
       </main>
