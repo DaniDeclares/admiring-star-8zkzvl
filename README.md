@@ -1,152 +1,710 @@
-# 📂 Dani Declares Project
+# Dani Declares LLC — Master Operating Guide
 
-## 1. Business Overview
+## 1. Current Business Identity
 
-**Name:** Dani Declares LLC  
-**Owner:** Danielle Williams (@danideclares)  
-**Primary Service Area:** Georgia + South Carolina  
-**Website:** https://danideclares.com  
+**Dani Declares LLC** is a **Mobile Operations & Execution Support Company** serving Georgia, South Carolina, and remote clients where appropriate.
 
-**Business Type:**  
-Mobile operations & execution support company providing legal, administrative, compliance, logistics, property, event, and media services. Notary work is foundational but the brand is **not** “notary-only.”
+The company is not a notary-only business, cleaning-only business, event-only business, or product-only business. Dani Declares LLC is the parent operating company that captures requests, coordinates services, routes fulfillment, manages documentation, and builds systems across multiple divisions.
 
----
+Core positioning:
 
-## 2. Brand & Positioning
+> We come to you and handle what needs to be done.
 
-| Principle            | Meaning                                                                |
-|----------------------|------------------------------------------------------------------------|
-| **Compliance-first** | Every service is delivered to meet or exceed legal requirements.       |
-| **Revenue & demand** | High-demand, cash-generating services get front-page priority.         |
-| **Capability-forward** | Conservative tone for government & institutional audiences.          |
-| **Mobile execution** | We come to the client: hospitals, jails, courts, job sites, homes.     |
+Primary operating flow:
 
-### Brand Colors
-- Burgundy (primary) `#8B1E2E`
-- Ivory (secondary) `#F8F5F1`
-- Gold (accent) `#D4AF37`
+```txt
+Lead Capture
+→ Intake
+→ Quote
+→ Coordinate
+→ Execute or Route Fulfillment
+→ Document
+→ Follow Up
+→ Review / Repeat Client
+```
 
-### Typography
-- **Headings:** Roboto • Georgia • Merriweather  
-- **Body:** Arial • Helvetica • Montserrat  
+Primary goals:
 
----
-
-## 3. Divisional Structure & Public Services
-
-### 3.1 Document & Compliance (Primary Cash Engine)
-
-| Service Set            | Examples                                                             |
-|------------------------|----------------------------------------------------------------------|
-| **Document Handling**  | Printing, scanning, secure packaging, courier hand-off               |
-| **Legal Docs (non-attorney)** | POA, affidavits, sworn statements, contracts                 |
-| **Tax & IRS Support**  | 2848, SS-4, W-9, W-7, 4506-T                                         |
-| **Notary Services**    | Mobile GA & SC notarizations, witness signings                       |
-| **I-9 Verification**   | Authorized representative, E-Verify liaison                          |
-| **Apostille Facilitation** | Intake, courier to SOS, status tracking                         |
-| **Document Packaging & Submission** | Signature tiered service, full chain of custody        |
-
-### 3.2 Logistics & Courier (B2B / Recurring)
-
-| Service Set            | Examples                                                             |
-|------------------------|----------------------------------------------------------------------|
-| **Court & Agency Runs**| Filing, retrieval, same-day rush                                     |
-| **Carrier Back-Office**| Broker packets, invoicing, compliance tracking                       |
-| **Process Serving**    | Standard and rush, first attempt within 48 h                         |
-| **Custom Courier**     | Medical records, equipment, time-sensitive docs                      |
-
-### 3.3 Field Services (Property Reset)
-
-| Service                           | Base Price* |
-|-----------------------------------|-------------|
-| Move-in / Move-out Cleaning       | from \$300  |
-| Deep Cleaning                     | from \$400  |
-| Full Property Reset (signature)   | \$500–\$1 500 |
-| Add-ons                           | Carpet extraction, steam sanitize, haul-out |
-
-### 3.4 Event Planning & Execution (High Ticket)
-
-| Service                    | Notes                                  |
-|----------------------------|----------------------------------------|
-| Turn-key Event Planning    | Theme, vendor coordination, timeline   |
-| Setup & Breakdown          | Crew dispatched on-site                |
-| Custom Decor & Production  | Balloon installs, backdrops, props     |
-| Sticker / Label Packages   | Brand-matched custom items             |
-
-### 3.5 Product System (Add-on)
-
-- Custom stickers & labels  
-- Business starter kits  
-- Branded apparel (bundled only)
-
-### 3.6 Media System
-
-- Content creation showcasing real work & systems  
-- Lead-generation funnels (Facebook, Google, Thumbtack, etc.)  
-- Weekly FB Creator tasks for monetization
-
-### 3.7 Government Contracting
-
-| Code  | Description                                     |
-|-------|-------------------------------------------------|
-| NAICS | 561410, 541120, 541199, 561611, 531390           |
-| PSC   | R699, R499, R707, R418                           |
-
-**UEI:** TD4TSG48LHN9  
-*Focus:* subcontracting for admin, compliance, logistics, property support
-
-> \* All published prices exclude travel and rush fees. Detailed rate cards live in `src/data/services.json`.
+1. Immediate cash flow
+2. Lead capture and conversion
+3. Property manager acquisition
+4. Vendor readiness
+5. Repeat clients and recurring service relationships
+6. Government and subcontracting readiness
+7. Media and content-driven lead generation
+8. Product and production add-on revenue
+9. Scalable internal operations systems
+10. Unified Dani Declares Ops Portal
 
 ---
 
-## 4. Booking & Payments (Non-Negotiable)
+## 2. Brand Rules
 
-| Flow            | System              | Rule                                                                                      |
-|-----------------|---------------------|-------------------------------------------------------------------------------------------|
-| **Scheduling**  | TidyCal             | Only four authoritative slugs: `notary`, `apostille`, `officiant`, `loansigning`          |
-| **Payments**    | Stripe Payment Links| Launched via `window.location.assign` from `/pay`                                         |
-| **Confirmation**| Internal            | Appointment moves from *pending* to *confirmed* only after payment                        |
+### Visual Identity
 
-**Fallback Contact**  
-Call / Text (864) 326-5362 | admin@danideclares.com
+- Burgundy: `#8B1E2E`
+- Ivory: `#F8F5F1`
+- Gold: `#D4AF37`
+
+Design direction:
+
+- Clean
+- Professional
+- Trusted
+- Easy to scan
+- Conversion-focused
+- No overdesigned luxury clutter
+
+### Voice and Positioning
+
+Use:
+
+- Mobile Operations & Execution Support
+- We come to you and handle what needs to be done
+- Document, compliance, logistics, property, event, production, and business support
+- Request Service
+- Mobile support
+- Property operations
+- Execution support
+- Vendor readiness
+- Administrative support
+
+Avoid:
+
+- Notary-only positioning
+- Cleaning-only positioning
+- Overpromising legal services
+- Treating officiant services as the main brand anchor
+- Flashy sales language on government pages
+- Creating separate disconnected apps or systems
 
 ---
 
-## 5. Federal / Government Page
+## 3. Compliance Rules
 
-- Conservative, capability-based copy  
-- Lists NAICS, PSC, UEI, coverage area  
-- **No** Stripe buttons, **no** booking CTAs  
-- Purpose-built for procurement reviewers
+Compliance overrides speed, creativity, and marketing.
+
+Notary rule:
+
+- Notarial services may only be described as available where legally authorized and commissioned.
+- Do not claim active Georgia notary services unless commission status is verified.
+- Notary is a tool within Document & Compliance, not the whole business identity.
+
+Legal support rule:
+
+- Dani Declares LLC may provide administrative and document preparation support.
+- Do not imply legal advice, legal representation, or attorney services.
+- Use “non-attorney document preparation support” where needed.
+
+Government rule:
+
+- Government pages must remain conservative, capability-based, and compliance-focused.
+- Do not use Stripe/payment CTAs on government pages.
+- Do not use exaggerated claims.
+
+Insurance/vendor readiness rule:
+
+- Current priority is general liability and COI readiness.
+- Hired/non-owned auto may be considered when needed.
+- Workers compensation should be pursued only when required by contract, staffing structure, or platform requirements.
 
 ---
 
-## 6. Technology Stack
+## 4. Internal Divisions
 
-| Layer       | Tooling                                   |
-|-------------|-------------------------------------------|
-| **Frontend**| React (CRA), React Router, CSS Modules    |
-| **Data**    | `services.json` catalog read at build-time|
-| **Hosting** | Vercel (preview & prod)                   |
-| **CI/CD**   | GitHub → Vercel auto-deploy               |
-| **Payments**| Stripe Payment Links                      |
-| **Scheduling** | TidyCal                               |
-| **CRM / Forms** | HubSpot                              |
-| **Analytics** | Google Analytics 4 (prod only)          |
+Dani Declares LLC operates as a parent company with internal operating divisions. Divisions may share the same intake, CRM, backend, vendor network, and fulfillment workflows.
+
+### 4.1 DocOps / Document & Compliance
+
+Purpose:
+
+Document handling, document preparation, compliance support, I-9, apostille facilitation, printing, scanning, packaging, submission support, and notarial services where legally authorized.
+
+Includes:
+
+- Document preparation support
+- Legal/admin paperwork support, non-attorney
+- I-9 employment verification support
+- Apostille facilitation
+- Printing, scanning, organizing, and packaging
+- Document Packaging & Submission Support
+- Compliance organization
+- Records organization
+- Notarial services where legally authorized and commissioned
+
+### 4.2 FieldOps / Property Operations & Reset Services
+
+Purpose:
+
+Property reset, cleaning, turnover, inspection readiness, move-ready and guest-ready property support.
+
+Includes:
+
+- Move-in / move-out cleaning
+- Deep cleaning
+- Property resets
+- Airbnb / short-term rental turnovers
+- Post-construction cleanup
+- Inspection and photo documentation
+- Trash-out coordination
+- Carpet and steam cleaning add-ons
+- Recurring property support
+- Property manager support
+
+Positioning:
+
+FieldOps is not basic maid service. It is property operations and reset support.
+
+### 4.3 CourierOps / Logistics & Courier
+
+Purpose:
+
+Mobile logistics, courier, document runs, court/agency support, and carrier back-office support.
+
+Includes:
+
+- Court filing support
+- Agency runs
+- Courier delivery
+- Medical, legal, and business document transport
+- Facility visits
+- Carrier paperwork support
+- Broker packets
+- Invoicing support
+- Compliance tracking for small carriers
+
+Positioning:
+
+Dispatch is not the main identity. Carrier back-office and logistics operations support are stronger.
+
+### 4.4 EventOps / Event Planning & Execution
+
+Purpose:
+
+Event planning, setup, breakdown, coordination, decor production, and custom event product support.
+
+Includes:
+
+- Birthday parties
+- Weddings and coordination
+- Setup and breakdown
+- Vendor coordination
+- Timeline management
+- Balloon/decor support
+- Custom party products
+- Event product collections
+- Stickers, labels, chip bags, treat labels, signage
+- Day-of execution support
+
+Positioning:
+
+Dani Declares handles execution, not just planning ideas.
+
+### 4.5 ProductOps / Stickers, Labels, Heat Press, Merch & Event Products
+
+Purpose:
+
+Physical product production as an add-on revenue stream and support system for service packages.
+
+Includes:
+
+- Stickers
+- Labels
+- QR stickers
+- Packaging stickers
+- Business packet stickers
+- Event labels
+- Heat press apparel
+- Merch
+- Branded shirts
+- Business starter kits
+- Client kits
+- Custom event product collections
+- Product samples for marketing
+- Bundled service add-ons
+
+Rule:
+
+ProductOps supports higher-ticket bundles, events, branding, marketing packets, and client deliverables. It should not distract from revenue-generating service execution.
+
+### 4.6 DesignOps / Canva, CADlink, Print Prep, DTF & Production Workflow
+
+Purpose:
+
+Design-to-production workflow for printed and physical products.
+
+Includes:
+
+- Canva design
+- CADlink workflow
+- Print prep
+- Label layout
+- Sticker layout
+- Heat press design prep
+- DTF vendor coordination
+- File organization
+- Mockups
+- Product templates
+- Production-ready artwork
+
+Positioning:
+
+DesignOps is internal production support unless intentionally packaged as a public service.
+
+### 4.7 MediaOps / Content & Lead Generation
+
+Purpose:
+
+Content strategy, storytelling, social media, business-building documentation, and lead generation.
+
+Includes:
+
+- Personal creator content
+- Dani Declares business content
+- Logistics content
+- Field service content
+- Event content
+- Product/merch content
+- Behind-the-scenes work
+- Facebook monetization tasks
+- Affiliate posts
+- Lead generation posts
+- Market research from social media groups
+
+Content channels:
+
+1. Personal creator page
+2. Dani Declares business page
+3. Dani’s Logistics / trucking operations content
+
+### 4.8 GovOps / Government Contracting Support
+
+Purpose:
+
+Federal, state, local, and subcontracting readiness.
+
+Includes:
+
+- Capability statements
+- Administrative support
+- Document support
+- Courier/logistics support
+- Compliance support
+- Vendor readiness
+- Subcontractor positioning
+- APEX / DSBS / SAM alignment
+
+Known GovCon details:
+
+- UEI: `TD4TSG48LHN9`
+- Primary NAICS: `561410`
+- Secondary NAICS: `541120`, `541199`, `561611`, `531390`
+- PSC: `R699`, `R499`, `R707`, `R418`
+
+### 4.9 VendorOps / Vendor Readiness & Subcontractor Network
+
+Purpose:
+
+Build and manage a roster of people and businesses who can fulfill work Dani Declares brings in.
+
+Includes:
+
+- Vendor list
+- Subcontractor intake
+- Insurance/compliance tracking
+- Partner readiness
+- Job routing
+- Quality control
+- Follow-up documentation
+- Work assignment support
+- Relationship tracking
+
+### 4.10 BusinessOps / Administrative Support & Business Systems
+
+Purpose:
+
+Business administration, internal systems, documents, CRM, client follow-up, and business support services.
+
+Includes:
+
+- Admin setup
+- Spreadsheet systems
+- Client tracking
+- Follow-up workflows
+- Quote tracking
+- File organization
+- Business starter packets
+- Digital folders
+- USB/client package systems
+- SOPs
+- Excel/Sheets workflows
+- Business organization and scaling support
 
 ---
 
-## 7. Environment Variables
+## 5. Strategic External Business Relationships
 
-Manage in Vercel or local `.env` — **never commit secrets**.
+### REACH Strategy
 
-```env
-# Analytics
-REACT_APP_GA_MEASUREMENT_ID=
+REACH is an external business relationship connected to Dani Declares in two ways:
 
-# Maps & Travel
-GOOGLE_MAPS_API_KEY=
-ORIGIN_ADDRESS="650 Abberley Way, Stone Mountain GA 30083"
-BASE_RADIUS_MILES=10
-MILEAGE_RATE=1.0      # dollars per mile charged
-BASE_TRAVEL_FEE=25    # minimum travel fee
+1. Subcontract / fulfillment partner
+2. Business development client / scaling project
+
+REACH is not a Dani Declares division and should not be merged into Dani Declares.
+
+Dani Declares may:
+
+- Generate and route suitable job opportunities to REACH
+- Help organize REACH’s service structure
+- Build pricing, intake, and quoting systems
+- Support marketing and outreach
+- Create business documents, flyers, and client-facing materials
+- Help build vendor readiness
+- Help create operations systems
+- Help with lead tracking and follow-up
+- Support website/app/system planning when needed
+- Help REACH become more scalable and professional
+
+REACH may:
+
+- Fulfill suitable field, service, cleaning, property, or related jobs when agreed
+- Maintain its own business identity
+- Maintain its own pricing, labor, insurance, and compliance responsibilities unless separately agreed
+
+Rule:
+
+Do not present REACH as part of Dani Declares unless there is a formal written agreement.
+
+Strategic purpose:
+
+Dani Declares is building its own lead capture and operations engine while also helping REACH grow into a stronger fulfillment and business partner.
+
+---
+
+## 6. Website Purpose
+
+The website is not just a brochure. It is the front end of the Dani Declares operating system.
+
+The website should:
+
+1. Explain what Dani Declares does
+2. Build trust quickly
+3. Convert visitors into leads
+4. Route visitors into the Request Service form
+5. Support all divisions
+6. Collect service requests in Supabase
+7. Feed the future Ops Portal
+8. Support public services and government credibility separately
+
+Primary public flow:
+
+```txt
+Homepage
+→ Service pages
+→ Request Service
+→ Supabase
+→ Follow-up
+→ Quote
+→ Job
+→ Payment
+→ Review
+```
+
+Primary intake route:
+
+```txt
+/request-service
+```
+
+---
+
+## 7. Current Website Routes
+
+Public routes:
+
+```txt
+/
+/field-services
+/events
+/services
+/signature-services
+/request-service
+/about
+/facility-visits
+/federal
+/tax-services
+/shop
+/book
+/pay
+/travel-quote
+/festival
+/membership
+/contact
+/terms
+/privacy
+/partner-onboarding
+/partners
+/blog
+/blog/:slug
+```
+
+Protected/internal routes:
+
+```txt
+/login
+/dashboard
+/notary-dashboard
+/vendor-portal
+/festival-dashboard
+/success
+/cancel
+```
+
+Current issue:
+
+Some routes and CTAs still reflect older notary/book/contact flows. Future updates should prioritize `/request-service` for new requests and keep `/contact` as support/contact, not the main quote flow.
+
+---
+
+## 8. Technology Stack
+
+Frontend:
+
+- React / Create React App
+- React Router
+- CSS files and CSS modules
+
+Hosting and deployment:
+
+- Vercel
+- GitHub auto-deploy
+
+Repository:
+
+```txt
+DaniDeclares/admiring-star-8zkzvl
+```
+
+Database/backend foundation:
+
+- Supabase
+- Project ref: `ajxezpczaemunlcmqlgl`
+
+Current Supabase tables:
+
+- `divisions`
+- `services`
+- `marketing_sources`
+- `leads`
+- `service_requests`
+- `followups`
+
+Payments:
+
+- Stripe Payment Links
+- Payment logic should stay centralized on `/pay`
+- Do not replace payment systems without approval
+
+Scheduling:
+
+- TidyCal links only
+- Current authoritative booking paths:
+  - `danideclaresns/notary`
+  - `danideclaresns/apostille`
+  - `danideclaresns/officiant`
+  - `danideclaresns/loansigning`
+
+CRM and operations tools:
+
+- Supabase: website/backend source of truth
+- HubSpot: sales CRM and follow-up
+- Airtable: operations planning, vendor/product/REACH databases when useful
+- Asana: task execution and project management
+- Google Drive/Docs/Sheets: documents, packets, SOPs, trackers
+- Gmail/Contacts/Calendar: communications and scheduling
+- Formula Genius: formulas, scripts, and spreadsheet logic
+
+---
+
+## 9. Request Service Intake
+
+The `/request-service` page is the current lead capture foundation.
+
+It should:
+
+- Load active divisions from Supabase
+- Load active marketing sources from Supabase
+- Create a lead record in `leads`
+- Create a service request record in `service_requests`
+- Support all divisions over time
+- Feed the future Ops Portal
+
+Known follow-up improvement:
+
+- Update fallback divisions to include ProductOps, DesignOps, and MediaOps.
+- Replace any outdated notary-specific public notes with compliance-safe operations language.
+- Complete live form test after deployment.
+
+---
+
+## 10. Ops Portal Direction
+
+Do not create separate disconnected systems.
+
+The goal is one unified Ops Portal that can support:
+
+- DocOps
+- FieldOps
+- CourierOps
+- EventOps
+- ProductOps
+- DesignOps
+- MediaOps
+- GovOps
+- VendorOps
+- BusinessOps
+
+The future Ops Portal should manage:
+
+- leads
+- service requests
+- quotes
+- jobs
+- vendors
+- followups
+- divisions
+- services
+- client records
+- status tracking
+- fulfillment routing
+- REACH-related business support tasks
+
+---
+
+## 11. Project Execution Rules
+
+### Master Rule
+
+Audit first. Do not modify before verifying the current state.
+
+Workflow:
+
+```txt
+Audit
+→ Verify
+→ Modify
+→ Verify Again
+→ PR
+→ Checks
+→ Merge
+→ Deploy
+→ Live Test
+```
+
+### Operating Rules
+
+1. Stay on the original objective.
+2. No side missions unless required for the current objective.
+3. Use the minimum necessary change.
+4. One branch per issue or task.
+5. Audit branch status before editing.
+6. Audit database schema before coding against it.
+7. Confirm changed files before merging.
+8. Verify deployment and live behavior before closing issues.
+9. Report only what matters: current status, done, blocker, next action.
+10. Identify one next highest-priority action.
+
+### Priority Order
+
+1. Revenue
+2. Conversion
+3. Lead Capture
+4. Operations System
+5. Automation
+6. Nice-to-have Features
+
+### Website Build Order
+
+1. Foundation
+2. Intake
+3. CRM
+4. Operations
+5. Automation
+6. Client Portal
+
+---
+
+## 12. Current Roadmap
+
+Phase 1: Website Foundation
+
+- Status: Complete
+
+Phase 2: Supabase Foundation
+
+- Status: Complete
+
+Phase 3: Request Service Intake
+
+- Status: Built, merged, and deployed
+- Remaining: live form submission test and record verification
+
+Phase 4: Operations Dashboard
+
+- Next major build phase after README and site scope reset
+
+Phase 5: Division-Specific Workflows
+
+- Build after shared dashboard foundation
+
+Phase 6: Unified Dani Declares Ops System
+
+- Long-term target
+
+---
+
+## 13. Known Site Audit Findings
+
+Current gaps to address after this README update:
+
+1. Homepage should prioritize `/request-service` as the main intake CTA.
+2. Contact page is outdated and still notary-first.
+3. Services page says “five service divisions” and needs expansion or repositioning.
+4. ProductOps, DesignOps, MediaOps, and VendorOps need clearer placement.
+5. Partner Network page has placeholder HubSpot endpoint code and is not production-ready.
+6. Phone numbers are inconsistent across pages.
+7. Notary language must be compliance-safe across the site.
+8. Signature Services page includes some writing/editing services that may need repositioning.
+9. CTAs should be standardized around Request Service, Call/Text, and division-specific booking only where appropriate.
+10. REACH strategy needs to be documented internally but not publicly positioned as part of Dani Declares without agreement.
+
+---
+
+## 14. What Not To Change Without Approval
+
+Do not change:
+
+- Stripe payment architecture
+- TidyCal booking links
+- Public pricing structure
+- Legal/compliance claims
+- Government page positioning
+- Notary commission language
+- REACH public relationship language
+- Core brand colors
+- Primary business positioning
+- Existing protected routes or dashboard access assumptions
+
+---
+
+## 15. Immediate Next Development Sequence
+
+1. Complete live `/request-service` form test.
+2. Verify `leads` and `service_requests` records in Supabase.
+3. Patch outdated Request Service notary note.
+4. Patch homepage CTAs toward `/request-service`.
+5. Patch Contact page to stop being the main quote flow.
+6. Patch Services page division language.
+7. Fix Partner Network form direction or route it into Supabase.
+8. Begin Phase 4: Operations Dashboard.
