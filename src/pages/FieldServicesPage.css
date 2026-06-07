@@ -34,8 +34,35 @@
 .fs-header p {
   font-size: 1.1rem;
   opacity: 0.9;
-  max-width: 580px;
+  max-width: 700px;
   margin: 0 auto 2rem;
+}
+
+.fs-eyebrow {
+  color: var(--gold);
+  font-size: 0.85rem !important;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.75rem !important;
+  text-transform: uppercase;
+}
+
+.fs-readiness-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: center;
+  margin: 0 auto 2rem;
+  max-width: 720px;
+}
+
+.fs-readiness-pill {
+  border: 1px solid rgba(212, 175, 55, 0.75);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.45rem 0.85rem;
 }
 
 .fs-header-ctas {
@@ -74,6 +101,15 @@
   font-size: clamp(1.4rem, 3vw, 2rem);
   color: var(--burgundy);
   margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.fs-lead-copy {
+  color: #444;
+  font-size: 1.03rem;
+  line-height: 1.75;
+  margin: 0 auto 1rem;
+  max-width: 760px;
   text-align: center;
 }
 
@@ -118,6 +154,45 @@
   font-size: 0.9rem;
   color: #555;
   line-height: 1.5;
+}
+
+.fs-process-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.fs-process-card {
+  background: var(--ivory);
+  border: 1px solid #e6e0d8;
+  border-radius: var(--radius);
+  padding: 1.35rem;
+  text-align: center;
+}
+
+.fs-process-number {
+  align-items: center;
+  background: var(--burgundy);
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-weight: 800;
+  height: 2.25rem;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  width: 2.25rem;
+}
+
+.fs-process-card h3 {
+  color: var(--burgundy);
+  font-family: Georgia, serif;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.fs-documentation {
+  border-top: 1px solid #e6e0d8;
+  border-bottom: 1px solid #e6e0d8;
 }
 
 .fs-pkg-grid {
@@ -224,5 +299,7 @@
 @media (max-width: 600px) {
   .fs-grid { grid-template-columns: 1fr; }
   .fs-pkg-grid { grid-template-columns: 1fr; }
+  .fs-process-grid { grid-template-columns: 1fr; }
   .fs-header-ctas { flex-direction: column; align-items: center; }
+  .fs-readiness-row { gap: 0.5rem; }
 }
