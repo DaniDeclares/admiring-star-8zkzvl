@@ -21,6 +21,7 @@ import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
 import SignatureServicesPage from "./pages/SignatureServicesPage.jsx";
+import RequestServicePage from "./pages/RequestServicePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import FieldServicesPage from "./pages/FieldServicesPage.jsx";
 import EventsPage from "./pages/EventsPage.jsx";
@@ -112,6 +113,7 @@ export default function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/signature-services" element={<SignatureServicesPage />} />
+        <Route path="/request-service" element={<RequestServicePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/facility-visits" element={<FacilityVisitsPage />} />
         <Route path="/federal" element={<FederalPage />} />
