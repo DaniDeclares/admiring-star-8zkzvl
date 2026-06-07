@@ -1,30 +1,30 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
 import "./RequestServicePage.css";
 
-const divisions = [
-  "Document & Compliance",
-  "Field Services / Property Resets",
-  "Property Support & Inspections",
-  "Events",
-  "Logistics & Courier",
-  "Government Contracting Support",
-  "Vendor Readiness",
-  "Business/Admin Systems",
+const fallbackDivisions = [
+  { id: null, name: "Document & Compliance" },
+  { id: null, name: "Field Services / Property Resets" },
+  { id: null, name: "Property Support & Inspections" },
+  { id: null, name: "Events" },
+  { id: null, name: "Logistics & Courier" },
+  { id: null, name: "Government Contracting Support" },
+  { id: null, name: "Vendor Readiness" },
+  { id: null, name: "Business/Admin Systems" },
 ];
 
-const marketingSources = [
-  "Website",
-  "QR Code",
-  "NFC Card",
-  "Property Manager Packet",
-  "Flyer / Door Hanger",
-  "Facebook",
-  "LinkedIn",
-  "Google Business",
-  "Referral",
-  "Other",
+const fallbackMarketingSources = [
+  { id: null, name: "Website" },
+  { id: null, name: "QR Code" },
+  { id: null, name: "NFC Card" },
+  { id: null, name: "Property Manager Packet" },
+  { id: null, name: "Flyer / Door Hanger" },
+  { id: null, name: "Facebook" },
+  { id: null, name: "LinkedIn" },
+  { id: null, name: "Google Business" },
+  { id: null, name: "Referral" },
+  { id: null, name: "Other" },
 ];
 
 const initialForm = {
@@ -32,23 +32,63 @@ const initialForm = {
   companyName: "",
   phone: "",
   email: "",
-  division: "",
+  divisionId: "",
   serviceNeeded: "",
-  preferredDate: "",
-  marketingSource: "Website",
+  timeline: "",
+  marketingSourceId: "",
+  marketingSourceText: "Website",
+  locationAddress: "",
+  budgetRange: "",
   description: "",
 };
 
 export default function RequestServicePage() {
   const [form, setForm] = useState(initialForm);
+  const [divisions, setDivisions] = useState(fallbackDivisions);
+  const [marketingSources, setMarketingSources] = useState(fallbackMarketingSources);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
 
   const leadName = useMemo(() => form.fullName.trim(), [form.fullName]);
 
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+
+    const loadOptions = async () => {
+      const [{ data: divisionData }, { data: sourceData }] = await Promise.all([
+        supabase
+          .from("divisions")
+          .select("id, name")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true }),
+        supabase
+          .from("marketing_sources")
+          .select("id, name")
+          .eq("is_active", true)
+          .order("name", { ascending: true }),
+      ]);
+
+      if (divisionData?.length) setDivisions(divisionData);
+      if (sourceData?.length) setMarketingSources(sourceData);
+    };
+
+    loadOptions();
+  }, []);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleMarketingSourceChange = (event) => {
+    const sourceId = event.target.value;
+    const selectedSource = marketingSources.find((source) => String(source.id) === sourceId);
+
+    setForm((current) => ({
+      ...current,
+      marketingSourceId: sourceId,
+      marketingSourceText: selectedSource?.name || current.marketingSourceText,
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -63,19 +103,15 @@ export default function RequestServicePage() {
     }
 
     try {
-      const [firstName, ...lastNameParts] = leadName.split(" ");
-      const lastName = lastNameParts.join(" ");
-
       const leadPayload = {
-        first_name: firstName || leadName,
-        last_name: lastName || null,
-        company_name: form.companyName || null,
-        phone: form.phone,
+        full_name: leadName,
+        organization_name: form.companyName || null,
+        phone: form.phone || null,
         email: form.email || null,
-        lead_source: form.marketingSource,
-        service_division: form.division,
-        status: "New",
-        notes: form.description,
+        source_id: form.marketingSourceId || null,
+        source_text: form.marketingSourceText || "Website",
+        status: "new",
+        notes: form.description || null,
       };
 
       const { data: lead, error: leadError } = await supabase
@@ -88,12 +124,14 @@ export default function RequestServicePage() {
 
       const requestPayload = {
         lead_id: lead?.id || null,
-        division: form.division,
-        service_name: form.serviceNeeded,
-        status: "New",
-        preferred_date: form.preferredDate || null,
-        description: form.description,
-        source: form.marketingSource,
+        division_id: form.divisionId ? Number(form.divisionId) : null,
+        service_needed: form.serviceNeeded || null,
+        location_address: form.locationAddress || null,
+        timeline: form.timeline || null,
+        budget_range: form.budgetRange || null,
+        request_details: form.description || null,
+        status: "new",
+        priority: "normal",
       };
 
       const { error: requestError } = await supabase
@@ -169,10 +207,10 @@ export default function RequestServicePage() {
                 </label>
                 <label>
                   Division Needed *
-                  <select name="division" value={form.division} onChange={handleChange} required>
+                  <select name="divisionId" value={form.divisionId} onChange={handleChange} required>
                     <option value="">Select a division</option>
                     {divisions.map((division) => (
-                      <option key={division} value={division}>{division}</option>
+                      <option key={division.name} value={division.id || ""}>{division.name}</option>
                     ))}
                   </select>
                 </label>
@@ -181,16 +219,25 @@ export default function RequestServicePage() {
                   <input name="serviceNeeded" value={form.serviceNeeded} onChange={handleChange} required placeholder="Example: move-out reset, courier, event setup" />
                 </label>
                 <label>
-                  Preferred Date
-                  <input type="date" name="preferredDate" value={form.preferredDate} onChange={handleChange} />
+                  Timeline
+                  <input name="timeline" value={form.timeline} onChange={handleChange} placeholder="Example: ASAP, this week, June 15" />
                 </label>
                 <label>
                   How did you find us?
-                  <select name="marketingSource" value={form.marketingSource} onChange={handleChange}>
+                  <select name="marketingSourceId" value={form.marketingSourceId} onChange={handleMarketingSourceChange}>
+                    <option value="">Website</option>
                     {marketingSources.map((source) => (
-                      <option key={source} value={source}>{source}</option>
+                      <option key={source.name} value={source.id || ""}>{source.name}</option>
                     ))}
                   </select>
+                </label>
+                <label>
+                  Service Location
+                  <input name="locationAddress" value={form.locationAddress} onChange={handleChange} placeholder="City, neighborhood, or address if available" />
+                </label>
+                <label>
+                  Budget Range
+                  <input name="budgetRange" value={form.budgetRange} onChange={handleChange} placeholder="Optional" />
                 </label>
               </div>
 
