@@ -20,7 +20,7 @@ export default function Homepage() {
             <p className="dd-hero-eyebrow">Mobile Operations &amp; Execution Support</p>
             <h1>We Handle It From Start to Finish</h1>
             <p className="dd-hero-sub">
-              Mobile support for documents, compliance, logistics, property, events, and business operations.
+              Dani Declares LLC helps clients handle documents, logistics, properties, events, and business support from start to finish.
               <br />
               We come to you, organize the details, and help get it done.
             </p>
@@ -44,6 +44,61 @@ export default function Homepage() {
               <img src="/images/stock/Courthouse steps.jpg" alt="Government and compliance support" loading="eager" />
               <span>GovOps</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="dd-trust-strip" aria-label="Dani Declares trust signals">
+        <div className="dd-container dd-trust-grid">
+          <span>Mobile Support</span>
+          <span>Metro Atlanta</span>
+          <span>South Carolina Available</span>
+          <span>Documentation Included</span>
+          <span>Fast Response</span>
+          <span>Vendor Readiness In Progress</span>
+        </div>
+      </section>
+
+      <section className="dd-section dd-property-business">
+        <div className="dd-container dd-property-panel">
+          <div>
+            <p className="dd-section-eyebrow">Property Managers &amp; Businesses</p>
+            <h2>One Mobile Support Vendor for the Work That Has to Get Done</h2>
+            <p>
+              Need reliable support for turnovers, move-ready prep, document handling, inspections, courier runs, event execution, or administrative tasks?
+            </p>
+            <p>
+              Dani Declares LLC helps property managers and businesses handle the small-but-critical work without chasing multiple vendors.
+            </p>
+          </div>
+          <div className="dd-property-actions">
+            <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
+            <Link to="/services" className="dd-btn-secondary">View Services</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="dd-section dd-ops-spotlight">
+        <div className="dd-container">
+          <p className="dd-section-eyebrow">High-Demand Support</p>
+          <h2>Built for Property, Logistics, and Business Execution</h2>
+          <div className="dd-spotlight-grid">
+            <article className="dd-spotlight-card">
+              <div className="dd-spotlight-icon">F</div>
+              <div>
+                <h3>FieldOps / Property Reset</h3>
+                <p>Move-out cleaning, move-in prep, deep cleaning, turnovers, inspection/photo documentation, and property reset coordination.</p>
+                <Link to="/request-service" className="dd-btn-link">Request Field Support →</Link>
+              </div>
+            </article>
+            <article className="dd-spotlight-card">
+              <div className="dd-spotlight-icon">L</div>
+              <div>
+                <h3>LogisticsOps / Courier Support</h3>
+                <p>Court runs, document delivery, facility visits, business errands, and carrier back-office support.</p>
+                <Link to="/request-service" className="dd-btn-link">Request Logistics Support →</Link>
+              </div>
+            </article>
           </div>
         </div>
       </section>
