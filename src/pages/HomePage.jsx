@@ -38,11 +38,11 @@ export default function Homepage() {
             </div>
             <div className="dd-visual-card">
               <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Event planning and execution support" loading="eager" />
-              <span>EventOps</span>
+              <span>Event Planning</span>
             </div>
             <div className="dd-visual-card">
               <img src="/images/stock/Courthouse steps.jpg" alt="Government and compliance support" loading="eager" />
-              <span>GovOps</span>
+              <span>Government Support</span>
             </div>
           </div>
         </div>
@@ -81,22 +81,22 @@ export default function Homepage() {
       <section className="dd-section dd-ops-spotlight">
         <div className="dd-container">
           <p className="dd-section-eyebrow">High-Demand Support</p>
-          <h2>Built for Property, Logistics, and Business Execution</h2>
+          <h2>Support for Property, Courier, and Business Tasks</h2>
           <div className="dd-spotlight-grid">
             <article className="dd-spotlight-card">
-              <div className="dd-spotlight-icon">F</div>
+              <div className="dd-spotlight-icon">P</div>
               <div>
-                <h3>FieldOps / Property Reset</h3>
+                <h3>Property Reset &amp; Field Support</h3>
                 <p>Move-out cleaning, move-in prep, deep cleaning, turnovers, inspection/photo documentation, and property reset coordination.</p>
-                <Link to="/request-service" className="dd-btn-link">Request Field Support →</Link>
+                <Link to="/request-service" className="dd-btn-link">Request Property Support →</Link>
               </div>
             </article>
             <article className="dd-spotlight-card">
-              <div className="dd-spotlight-icon">L</div>
+              <div className="dd-spotlight-icon">C</div>
               <div>
-                <h3>LogisticsOps / Courier Support</h3>
+                <h3>Courier &amp; Delivery Support</h3>
                 <p>Court runs, document delivery, facility visits, business errands, and carrier back-office support.</p>
-                <Link to="/request-service" className="dd-btn-link">Request Logistics Support →</Link>
+                <Link to="/request-service" className="dd-btn-link">Request Courier Support →</Link>
               </div>
             </article>
           </div>
