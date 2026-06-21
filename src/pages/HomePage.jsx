@@ -3,155 +3,184 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import "./Homepage.css";
 
-export default function Homepage() {
+export default function HomePage() {
   return (
     <>
       <Helmet>
-        <title>Dani Declares LLC — Mobile Operations & Execution Support</title>
+        <title>Dani Declares LLC — Mobile Operations & Service Intake</title>
         <meta
           name="description"
-          content="Mobile operations and execution support for documents, compliance, logistics, property, and events. We come to you and handle it from start to finish."
+          content="Mobile operations support for documents, property, courier runs, events, and vendor readiness. Request service and get it handled."
         />
       </Helmet>
 
-      <section className="dd-hero dd-hero--visual">
-        <div className="dd-hero-inner">
-          <div className="dd-hero-content">
-            <p className="dd-hero-eyebrow">Mobile Operations &amp; Execution Support</p>
-            <h1>We Handle It From Start to Finish</h1>
-            <p className="dd-hero-sub">
-              Mobile support for documents, compliance, logistics, property, events, and business operations.
-              <br />
-              We come to you, organize the details, and help get it done.
-            </p>
-            <div className="dd-hero-ctas">
-              <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
-              <a href="tel:8643265362" className="dd-btn-secondary">Call / Text Now</a>
-              <Link to="/services" className="dd-btn-outline">View Services</Link>
-            </div>
+      {/* HERO SECTION */}
+      <section className="hp-hero">
+        <div className="hp-hero-content">
+          <div className="hp-eyebrow">Dani Declares LLC</div>
+          <h1 className="hp-headline">Mobile operations support for the work that has to get handled.</h1>
+          <p className="hp-hero-sub">
+            Documents, courier runs, property resets, events, vendor readiness, admin cleanup, and custom production through one organized intake.
+          </p>
+          <div className="hp-hero-ctas">
+            <Link to="/request-service" className="hp-btn-primary">Request Service</Link>
+            <a href="tel:8643265362" className="hp-btn-secondary">Call or Text (864) 326-5362</a>
+            <Link to="/services" className="hp-btn-outline">View Services</Link>
           </div>
+        </div>
+      </section>
 
-          <div className="dd-visual-collage" aria-label="Dani Declares service visuals">
-            <div className="dd-visual-card dd-visual-card--large">
-              <img src="/images/stock/document execution office.jpg" alt="Organized document and administrative support" loading="eager" />
-              <span>Document &amp; Admin Support</span>
+      {/* FAST INTAKE STRIP */}
+      <section className="hp-intake-strip">
+        <div className="hp-intake-content">
+          <h2>Need something handled?</h2>
+          <p>Tell us what you need. We'll confirm availability and route you to the right team.</p>
+          <Link to="/request-service" className="hp-btn-intake">Start Your Request →</Link>
+        </div>
+      </section>
+
+      {/* SERVICE LANES GRID */}
+      <section className="hp-service-lanes">
+        <div className="hp-container">
+          <h2 className="hp-section-title">Our Service Lanes</h2>
+          <div className="hp-lanes-grid">
+            <div className="hp-lane-card">
+              <h3>DocOps</h3>
+              <p>Document handling, notary, compliance paperwork, and admin support. Secure, on-site service.</p>
+              <Link to="/request-service?lane=docops" className="hp-lane-link">Request DocOps →</Link>
             </div>
-            <div className="dd-visual-card">
-              <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Event planning and execution support" loading="eager" />
-              <span>EventOps</span>
+            <div className="hp-lane-card">
+              <h3>FieldOps</h3>
+              <p>Property resets, move-out turnovers, Airbnb prep, and inspection-ready support.</p>
+              <Link to="/request-service?lane=fieldops" className="hp-lane-link">Request FieldOps →</Link>
             </div>
-            <div className="dd-visual-card">
-              <img src="/images/stock/Courthouse steps.jpg" alt="Government and compliance support" loading="eager" />
-              <span>GovOps</span>
+            <div className="hp-lane-card">
+              <h3>CourierOps</h3>
+              <p>Local pickups, deliveries, court runs, and time-sensitive logistics coordination.</p>
+              <Link to="/request-service?lane=courieops" className="hp-lane-link">Request CourierOps →</Link>
+            </div>
+            <div className="hp-lane-card">
+              <h3>EventOps</h3>
+              <p>Event planning, coordination, setup, breakdown, and day-of execution.</p>
+              <Link to="/request-service?lane=eventops" className="hp-lane-link">Request EventOps →</Link>
+            </div>
+            <div className="hp-lane-card">
+              <h3>GovOps</h3>
+              <p>Vendor readiness, procurement support, and compliance coordination.</p>
+              <Link to="/request-service?lane=govops" className="hp-lane-link">Request GovOps →</Link>
+            </div>
+            <div className="hp-lane-card">
+              <h3>ProductOps</h3>
+              <p>Custom merch, DTF production, signage, and branded items produced in-house.</p>
+              <Link to="/request-service?lane=productops" className="hp-lane-link">Request ProductOps →</Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="dd-section dd-what">
-        <div className="dd-container">
-          <h2>What We Handle</h2>
-          <ul className="dd-handle-list">
-            <li>Paperwork and document processing</li>
-            <li>Court, medical, and business logistics</li>
-            <li>Property cleaning, resets, and turnovers</li>
-            <li>Event planning, setup, and execution</li>
-            <li>Administrative and compliance support</li>
-          </ul>
-        </div>
-      </section>
-
-      <section className="dd-section dd-divisions">
-        <div className="dd-container">
-          <h2>Core Service Divisions</h2>
-          <div className="dd-divisions-grid">
-            <div className="dd-division-card">
-              <h3>Document &amp; Compliance</h3>
-              <p>Notary, apostille, document prep, I-9 verification, printing, and full packaging.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
+      {/* CONVERSION / PROOF SECTION */}
+      <section className="hp-proof">
+        <div className="hp-container">
+          <h2 className="hp-section-title">Why Teams Choose Dani Declares</h2>
+          <div className="hp-proof-grid">
+            <div className="hp-proof-card">
+              <h3>Organized Execution</h3>
+              <p>Structured systems. Clear timelines. Documented completion. No surprises.</p>
             </div>
-            <div className="dd-division-card">
-              <h3>Logistics &amp; Courier</h3>
-              <p>Court runs, document delivery, facility visits, and carrier back-office support.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
+            <div className="hp-proof-card">
+              <h3>One Point of Contact</h3>
+              <p>Request, confirm, and track through the same interface. Simple and reliable.</p>
             </div>
-            <div className="dd-division-card">
-              <h3>Field Services (Property Reset)</h3>
-              <p>Move-in/out cleaning, deep cleaning, rental turnovers, and full property resets.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
+            <div className="hp-proof-card">
+              <h3>Multi-Lane Coverage</h3>
+              <p>Multiple service types under one team. Handle docs, field work, and events in one partnership.</p>
             </div>
-            <div className="dd-division-card">
-              <h3>Event Planning &amp; Execution</h3>
-              <p>Full planning, vendor coordination, setup, breakdown, and custom decor production.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
+            <div className="hp-proof-card">
+              <h3>Fast Response</h3>
+              <p>Quick availability confirmation. Same-day or next-day service in most cases.</p>
             </div>
-            <div className="dd-division-card">
-              <h3>Business &amp; Admin Support</h3>
-              <p>Document organization, compliance tracking, client intake, and back-office systems.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
-            </div>
-          </div>
-          <div className="dd-divisions-footer">
-            <Link to="/signature-services" className="dd-btn-primary">View Signature Services</Link>
-            <Link to="/services" className="dd-btn-secondary">All Services</Link>
           </div>
         </div>
       </section>
 
-      <section className="dd-section dd-how">
-        <div className="dd-container">
-          <h2>How It Works</h2>
-          <ol className="dd-steps">
-            <li><span className="dd-step-num">1</span>Request Service</li>
-            <li><span className="dd-step-num">2</span>We Review &amp; Confirm Details</li>
-            <li><span className="dd-step-num">3</span>We Execute or Coordinate the Service</li>
-            <li><span className="dd-step-num">4</span>You Get Completion &amp; Documentation</li>
+      {/* HOW IT WORKS */}
+      <section className="hp-how-it-works">
+        <div className="hp-container">
+          <h2 className="hp-section-title">How It Works</h2>
+          <ol className="hp-steps">
+            <li>
+              <span className="hp-step-number">1</span>
+              <div className="hp-step-content">
+                <strong>Request Service</strong>
+                <p>Tell us what you need, when, and where. Pick your service lane or describe a custom need.</p>
+              </div>
+            </li>
+            <li>
+              <span className="hp-step-number">2</span>
+              <div className="hp-step-content">
+                <strong>We Confirm & Quote</strong>
+                <p>We review your request, confirm availability, and send you a clear quote.</p>
+              </div>
+            </li>
+            <li>
+              <span className="hp-step-number">3</span>
+              <div className="hp-step-content">
+                <strong>We Execute</strong>
+                <p>On the scheduled date, we show up prepared and handle everything as planned.</p>
+              </div>
+            </li>
+            <li>
+              <span className="hp-step-number">4</span>
+              <div className="hp-step-content">
+                <strong>You Get Proof & Pay</strong>
+                <p>Photos, documentation, or direct confirmation. Simple payment options.</p>
+              </div>
+            </li>
           </ol>
         </div>
       </section>
 
-      <section className="dd-section dd-who dd-alt-bg">
-        <div className="dd-container">
-          <h2>Who We Help</h2>
-          <ul className="dd-two-col-list">
-            <li>Individuals &amp; families</li>
-            <li>Business owners &amp; professionals</li>
-            <li>Property managers &amp; landlords</li>
-            <li>Law firms, title companies, tax offices</li>
-            <li>Carriers &amp; logistics companies</li>
-            <li>Event clients</li>
-            <li>Agencies &amp; contractors</li>
-          </ul>
+      {/* WHO THIS HELPS */}
+      <section className="hp-who-helps">
+        <div className="hp-container">
+          <h2 className="hp-section-title">Who This Helps</h2>
+          <div className="hp-who-grid">
+            <div className="hp-who-item">
+              <strong>Property Managers & Landlords</strong>
+              <p>Turnovers, inspections, vendor coordination, and move-out resets.</p>
+            </div>
+            <div className="hp-who-item">
+              <strong>Event Professionals</strong>
+              <p>Planning, coordination, setup, and day-of execution support.</p>
+            </div>
+            <div className="hp-who-item">
+              <strong>Business Owners</strong>
+              <p>Document handling, compliance support, and admin cleanup.</p>
+            </div>
+            <div className="hp-who-item">
+              <strong>Government & Vendors</strong>
+              <p>Procurement readiness and compliance documentation.</p>
+            </div>
+            <div className="hp-who-item">
+              <strong>Logistics Companies</strong>
+              <p>Courier runs, local deliveries, and field execution.</p>
+            </div>
+            <div className="hp-who-item">
+              <strong>Individuals & Families</strong>
+              <p>Estate paperwork, moving support, and personal event coordination.</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="dd-section dd-why">
-        <div className="dd-container">
-          <h2>Why Choose Dani Declares</h2>
-          <ul className="dd-why-list">
-            <li><strong>Mobile</strong> — we come to you</li>
-            <li><strong>Multi-service</strong> — multiple tasks handled in one visit</li>
-            <li><strong>Structured execution</strong> — organized, reliable, documented</li>
-            <li><strong>Fast response</strong> — quick turnaround on bookings and quotes</li>
-            <li><strong>Built to execute</strong> — for people who need things DONE</li>
-          </ul>
-        </div>
-      </section>
-
-      <section className="dd-section dd-areas dd-alt-bg">
-        <div className="dd-container">
-          <h2>Service Areas</h2>
-          <p>Metro Atlanta &amp; surrounding areas &nbsp;•&nbsp; South Carolina &nbsp;•&nbsp; Travel available based on service</p>
-        </div>
-      </section>
-
-      <section className="dd-section dd-bottom-cta">
-        <div className="dd-container">
-          <h2>Ready to Get It Handled?</h2>
-          <div className="dd-hero-ctas">
-            <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
-            <a href="tel:8643265362" className="dd-btn-secondary">Call / Text (864) 326-5362</a>
-            <Link to="/services" className="dd-btn-outline">View Services</Link>
+      {/* BOTTOM CTA */}
+      <section className="hp-bottom-cta">
+        <div className="hp-container">
+          <h2>Ready to Get Started?</h2>
+          <p>Request service now. We'll handle the rest.</p>
+          <div className="hp-bottom-cta-buttons">
+            <Link to="/request-service" className="hp-btn-primary">Request Service</Link>
+            <a href="tel:8643265362" className="hp-btn-secondary">Call or Text (864) 326-5362</a>
           </div>
         </div>
       </section>
