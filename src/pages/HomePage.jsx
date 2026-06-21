@@ -14,6 +14,7 @@ export default function Homepage() {
         />
       </Helmet>
 
+      {/* Hero */}
       <section className="dd-hero dd-hero--visual">
         <div className="dd-hero-inner">
           <div className="dd-hero-content">
@@ -48,111 +49,177 @@ export default function Homepage() {
         </div>
       </section>
 
-      <section className="dd-section dd-what">
-        <div className="dd-container">
-          <h2>What We Handle</h2>
-          <ul className="dd-handle-list">
-            <li>Paperwork and document processing</li>
-            <li>Court, medical, and business logistics</li>
-            <li>Property cleaning, resets, and turnovers</li>
-            <li>Event planning, setup, and execution</li>
-            <li>Administrative and compliance support</li>
-          </ul>
+      {/* Fast Intake Strip */}
+      <section className="dd-intake-strip">
+        <div className="dd-container dd-intake-inner">
+          <p className="dd-intake-text">Need something handled today? Submit a service request and we'll follow up fast.</p>
+          <Link to="/request-service" className="dd-btn-intake">Request Service Now →</Link>
         </div>
       </section>
 
-      <section className="dd-section dd-divisions">
+      {/* Service Lanes */}
+      <section className="dd-section dd-lanes">
         <div className="dd-container">
-          <h2>Core Service Divisions</h2>
-          <div className="dd-divisions-grid">
-            <div className="dd-division-card">
+          <h2>Choose Your Service Lane</h2>
+          <p className="dd-section-sub">Select the operation type that matches your need. We route and execute from there.</p>
+          <div className="dd-lanes-grid">
+            <div className="dd-lane-card">
+              <span className="dd-lane-tag">DocOps</span>
               <h3>Document &amp; Compliance</h3>
               <p>Notary, apostille, document prep, I-9 verification, printing, and full packaging.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request DocOps →</Link>
             </div>
-            <div className="dd-division-card">
+            <div className="dd-lane-card">
+              <span className="dd-lane-tag">FieldOps</span>
+              <h3>Field Services &amp; Property</h3>
+              <p>Move-in/out cleaning, deep cleaning, rental turnovers, and full property resets.</p>
+              <Link to="/request-service" className="dd-btn-link">Request FieldOps →</Link>
+            </div>
+            <div className="dd-lane-card">
+              <span className="dd-lane-tag">CourierOps</span>
               <h3>Logistics &amp; Courier</h3>
               <p>Court runs, document delivery, facility visits, and carrier back-office support.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request CourierOps →</Link>
             </div>
-            <div className="dd-division-card">
-              <h3>Field Services (Property Reset)</h3>
-              <p>Move-in/out cleaning, deep cleaning, rental turnovers, and full property resets.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
-            </div>
-            <div className="dd-division-card">
+            <div className="dd-lane-card">
+              <span className="dd-lane-tag">EventOps</span>
               <h3>Event Planning &amp; Execution</h3>
               <p>Full planning, vendor coordination, setup, breakdown, and custom decor production.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request EventOps →</Link>
             </div>
-            <div className="dd-division-card">
+            <div className="dd-lane-card">
+              <span className="dd-lane-tag">GovOps</span>
+              <h3>Government &amp; Compliance</h3>
+              <p>Court filings, government office runs, compliance documentation, and agency support.</p>
+              <Link to="/request-service" className="dd-btn-link">Request GovOps →</Link>
+            </div>
+            <div className="dd-lane-card">
+              <span className="dd-lane-tag">ProductOps</span>
               <h3>Business &amp; Admin Support</h3>
               <p>Document organization, compliance tracking, client intake, and back-office systems.</p>
-              <Link to="/services" className="dd-btn-link">Learn More →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request ProductOps →</Link>
             </div>
           </div>
           <div className="dd-divisions-footer">
-            <Link to="/signature-services" className="dd-btn-primary">View Signature Services</Link>
-            <Link to="/services" className="dd-btn-secondary">All Services</Link>
+            <Link to="/services" className="dd-btn-secondary">View All Services</Link>
           </div>
         </div>
       </section>
 
+      {/* Why Choose Dani Declares */}
+      <section className="dd-section dd-why dd-alt-bg">
+        <div className="dd-container">
+          <h2>Why Choose Dani Declares</h2>
+          <div className="dd-why-grid">
+            <div className="dd-why-card">
+              <strong>Mobile</strong>
+              <p>We come to you — no need to arrange drop-offs or pickups.</p>
+            </div>
+            <div className="dd-why-card">
+              <strong>Multi-service</strong>
+              <p>Multiple tasks handled in one visit, saving you time and coordination effort.</p>
+            </div>
+            <div className="dd-why-card">
+              <strong>Structured execution</strong>
+              <p>Organized, reliable, and fully documented from intake to completion.</p>
+            </div>
+            <div className="dd-why-card">
+              <strong>Fast response</strong>
+              <p>Quick turnaround on bookings and quotes — we don't sit on requests.</p>
+            </div>
+            <div className="dd-why-card">
+              <strong>Built to execute</strong>
+              <p>Designed for people who need things DONE, not just discussed.</p>
+            </div>
+            <div className="dd-why-card">
+              <strong>Transparent intake</strong>
+              <p>Clear service routing so you always know what's being handled and by whom.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
       <section className="dd-section dd-how">
         <div className="dd-container">
           <h2>How It Works</h2>
           <ol className="dd-steps">
-            <li><span className="dd-step-num">1</span>Request Service</li>
-            <li><span className="dd-step-num">2</span>We Review &amp; Confirm Details</li>
-            <li><span className="dd-step-num">3</span>We Execute or Coordinate the Service</li>
-            <li><span className="dd-step-num">4</span>You Get Completion &amp; Documentation</li>
+            <li>
+              <span className="dd-step-num">1</span>
+              <div>
+                <strong>Submit a Request</strong>
+                <p>Fill out the service intake form. Select your lane and describe your need.</p>
+              </div>
+            </li>
+            <li>
+              <span className="dd-step-num">2</span>
+              <div>
+                <strong>We Review &amp; Confirm</strong>
+                <p>We follow up to confirm details, timeline, location, and scope.</p>
+              </div>
+            </li>
+            <li>
+              <span className="dd-step-num">3</span>
+              <div>
+                <strong>We Execute</strong>
+                <p>We coordinate and carry out the service — mobile, on-site, or remotely.</p>
+              </div>
+            </li>
+            <li>
+              <span className="dd-step-num">4</span>
+              <div>
+                <strong>Completion &amp; Documentation</strong>
+                <p>You receive confirmation, documentation, and any relevant follow-up.</p>
+              </div>
+            </li>
           </ol>
         </div>
       </section>
 
+      {/* Who This Helps */}
       <section className="dd-section dd-who dd-alt-bg">
         <div className="dd-container">
-          <h2>Who We Help</h2>
-          <ul className="dd-two-col-list">
-            <li>Individuals &amp; families</li>
-            <li>Business owners &amp; professionals</li>
-            <li>Property managers &amp; landlords</li>
-            <li>Law firms, title companies, tax offices</li>
-            <li>Carriers &amp; logistics companies</li>
-            <li>Event clients</li>
-            <li>Agencies &amp; contractors</li>
-          </ul>
+          <h2>Who This Helps</h2>
+          <div className="dd-who-grid">
+            <div className="dd-who-card">
+              <strong>Individuals &amp; Families</strong>
+              <p>Personal document needs, property transitions, and event coordination.</p>
+            </div>
+            <div className="dd-who-card">
+              <strong>Business Owners &amp; Professionals</strong>
+              <p>Back-office support, compliance documentation, and admin execution.</p>
+            </div>
+            <div className="dd-who-card">
+              <strong>Property Managers &amp; Landlords</strong>
+              <p>Rental turnovers, move-in/out cleans, and property reset coordination.</p>
+            </div>
+            <div className="dd-who-card">
+              <strong>Law Firms &amp; Title Companies</strong>
+              <p>Court runs, document delivery, notary coordination, and filing support.</p>
+            </div>
+            <div className="dd-who-card">
+              <strong>Carriers &amp; Logistics Companies</strong>
+              <p>Back-office support, facility visits, and compliance documentation.</p>
+            </div>
+            <div className="dd-who-card">
+              <strong>Event Clients &amp; Organizations</strong>
+              <p>Full event execution from planning through breakdown and wrap-up.</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="dd-section dd-why">
-        <div className="dd-container">
-          <h2>Why Choose Dani Declares</h2>
-          <ul className="dd-why-list">
-            <li><strong>Mobile</strong> — we come to you</li>
-            <li><strong>Multi-service</strong> — multiple tasks handled in one visit</li>
-            <li><strong>Structured execution</strong> — organized, reliable, documented</li>
-            <li><strong>Fast response</strong> — quick turnaround on bookings and quotes</li>
-            <li><strong>Built to execute</strong> — for people who need things DONE</li>
-          </ul>
-        </div>
-      </section>
-
-      <section className="dd-section dd-areas dd-alt-bg">
-        <div className="dd-container">
-          <h2>Service Areas</h2>
-          <p>Metro Atlanta &amp; surrounding areas &nbsp;•&nbsp; South Carolina &nbsp;•&nbsp; Travel available based on service</p>
-        </div>
-      </section>
-
+      {/* Bottom CTA */}
       <section className="dd-section dd-bottom-cta">
         <div className="dd-container">
           <h2>Ready to Get It Handled?</h2>
+          <p className="dd-bottom-cta-sub">Submit a request and we'll route you to the right service lane.</p>
           <div className="dd-hero-ctas">
             <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
             <a href="tel:8643265362" className="dd-btn-secondary">Call / Text (864) 326-5362</a>
-            <Link to="/services" className="dd-btn-outline">View Services</Link>
+            <Link to="/services" className="dd-btn-outline">View All Services</Link>
           </div>
+          <p className="dd-areas-note">Metro Atlanta &amp; surrounding areas &nbsp;•&nbsp; South Carolina &nbsp;•&nbsp; Travel available based on service</p>
         </div>
       </section>
     </>
