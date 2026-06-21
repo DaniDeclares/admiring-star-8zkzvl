@@ -27,7 +27,7 @@ export default function Homepage() {
             </p>
             <div className="dd-hero-ctas">
               <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
-              <a href="tel:8643265362" className="dd-btn-secondary">Call / Text Now</a>
+              <a href="tel:4704857173" className="dd-btn-secondary">Call / Text Now</a>
               <Link to="/services" className="dd-btn-outline">View Services</Link>
             </div>
           </div>
@@ -216,7 +216,7 @@ export default function Homepage() {
           <p className="dd-bottom-cta-sub">Submit a request and we'll route you to the right service lane.</p>
           <div className="dd-hero-ctas">
             <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
-            <a href="tel:8643265362" className="dd-btn-secondary">Call / Text (864) 326-5362</a>
+            <a href="tel:4704857173" className="dd-btn-secondary">Call / Text (470) 485-7173</a>
             <Link to="/services" className="dd-btn-outline">View All Services</Link>
           </div>
           <p className="dd-areas-note">Metro Atlanta &amp; surrounding areas &nbsp;•&nbsp; South Carolina &nbsp;•&nbsp; Travel available based on service</p>
