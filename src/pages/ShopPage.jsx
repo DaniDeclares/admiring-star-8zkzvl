@@ -113,6 +113,8 @@ const PRODUCTS = [
 ];
 
 export default function ShopPage() {
+  const publicPhone = siteConfig.phoneNumbers.public;
+
   return (
     <main className="shop-page">
       <Helmet>
@@ -146,14 +148,20 @@ export default function ShopPage() {
             <h2>{product.name}</h2>
             <p>{product.desc}</p>
             <div className="price">${product.price.toFixed(2)}</div>
-            <a
-              className="btn btn--primary"
-              href={product.link ?? product.image}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View Product
-            </a>
+            {product.link ? (
+              <a
+                className="btn btn--primary"
+                href={product.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View Product
+              </a>
+            ) : (
+              <span className="btn btn--primary" aria-disabled="true">
+                Purchase Link Coming Soon
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -166,8 +174,8 @@ export default function ShopPage() {
             {siteConfig.emails.admin}
           </a>{" "}
           or text us at{" "}
-          <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
-            {siteConfig.phoneNumbers.primary.display}
+          <a href={`tel:${publicPhone.tel}`}>
+            {publicPhone.display}
           </a>
           .
         </p>
