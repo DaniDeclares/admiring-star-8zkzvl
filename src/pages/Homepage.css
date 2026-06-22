@@ -252,6 +252,7 @@
 
 /* Fix: match established button styling with display: inline-flex and min-height: 48px */
 .dd-btn-intake {
+  display: inline-flex;
   align-items: center;
   background: var(--color-gold, #c8b273);
   border-radius: 999px;
