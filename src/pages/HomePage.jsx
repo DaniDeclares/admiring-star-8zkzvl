@@ -95,8 +95,8 @@ export default function Homepage() {
             </div>
             <div className="dd-lane-card">
               <span className="dd-lane-tag">ProductOps</span>
-              <h3>Business &amp; Admin Support</h3>
-              <p>Document organization, compliance tracking, client intake, and back-office systems.</p>
+              <h3>Product, Print &amp; Merch Support</h3>
+              <p>Stickers, labels, heat press apparel, business merch, event products, and branded add-ons.</p>
               <Link to="/request-service" className="dd-btn-link">Request ProductOps →</Link>
             </div>
           </div>
