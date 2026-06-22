@@ -1,18 +1,26 @@
+const publicPhone = {
+  display: "(470) 485-7173",
+  tel: "+14704857173",
+};
+
+const scPhone = {
+  display: "(864) 326-5362",
+  tel: "+18643265362",
+};
+
 export const SHOW_FESTIVAL = false;
 
 export const siteConfig = {
   serviceAreaText: "Serving Atlanta, Doraville, Dunwoody, and beyond.",
   phoneNumbers: {
-    // Public call/text line — use in all public-facing CTAs
-    public: {
-      display: "(470) 485-7173",
-      tel: "+14704857173",
-    },
-    // SC-specific line — only show when clearly labeled for South Carolina use
-    sc: {
-      display: "(864) 326-5362",
-      tel: "+18643265362",
-    },
+    // Public call/text line - use in all public-facing CTAs
+    public: publicPhone,
+    // SC-specific line - only show when clearly labeled for South Carolina use
+    sc: scPhone,
+    // Temporary compatibility aliases for older pages/components.
+    // New code should use phoneNumbers.public or phoneNumbers.sc directly.
+    primary: publicPhone,
+    secondary: scPhone,
   },
   emails: {
     admin: "admin@danideclares.com",
