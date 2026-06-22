@@ -7,6 +7,7 @@ import {
 } from "../data/bookingServices.js";
 import { getPriceLabel } from "../data/pricingCanon.js";
 import { buildTidyCalPath, buildTidyCalUrl } from "../data/tidycal.js";
+import { siteConfig } from "../data/siteConfig.js";
 import NotaryFeesNotice from "../components/NotaryFeesNotice.jsx";
 import { loadTidycalScript } from "../lib/loadTidycal.js";
 import "./BookingPage.css";
@@ -183,7 +184,7 @@ export default function BookingPage() {
                 ) : (
                   <div className="booking-embed--missing">
                     <p>
-                      Booking temporarily unavailable — call/text (864) 326-5362
+                      Booking temporarily unavailable — call/text {siteConfig.phoneNumbers.public.display}
                     </p>
                   </div>
                 )}

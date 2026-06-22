@@ -3,13 +3,14 @@ import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
 import { getStripeLink, isValidStripeUrl } from "../config/stripeLinks.js";
 import { bookingServices, paymentServices } from "../data/services.js";
+import { siteConfig } from "../data/siteConfig.js";
 import "./PayPage.css";
 
 const formatPrice = (price) =>
   typeof price === "number" ? `$${price}` : price;
 
 const INVALID_PAYMENT_MESSAGE =
-  "Service temporarily unavailable — call/text (864) 326-5362 or email admin@danideclares.com.";
+  `Service temporarily unavailable — call/text ${siteConfig.phoneNumbers.public.display} or email ${siteConfig.emails.admin}.`;
 
 const normalizeServiceKey = (value) =>
   typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -152,9 +153,9 @@ export default function PayPage() {
               <strong>Service not available.</strong>
               <p>{INVALID_PAYMENT_MESSAGE}</p>
               <div className="pay-card__fallback-actions">
-                <a href="tel:18643265362">Call/Text (864) 326-5362</a>
-                <a href="mailto:admin@danideclares.com">
-                  Email admin@danideclares.com
+                <a href={`tel:${siteConfig.phoneNumbers.public.tel}`}>Call/Text {siteConfig.phoneNumbers.public.display}</a>
+                <a href={`mailto:${siteConfig.emails.admin}`}>
+                  Email {siteConfig.emails.admin}
                 </a>
               </div>
             </div>
@@ -207,9 +208,9 @@ export default function PayPage() {
                     <strong>Service not available.</strong>
                     <p>{INVALID_PAYMENT_MESSAGE}</p>
                     <div className="pay-card__fallback-actions">
-                      <a href="tel:18643265362">Call/Text (864) 326-5362</a>
-                      <a href="mailto:admin@danideclares.com">
-                        Email admin@danideclares.com
+                      <a href={`tel:${siteConfig.phoneNumbers.public.tel}`}>Call/Text {siteConfig.phoneNumbers.public.display}</a>
+                      <a href={`mailto:${siteConfig.emails.admin}`}>
+                        Email {siteConfig.emails.admin}
                       </a>
                     </div>
                   </div>

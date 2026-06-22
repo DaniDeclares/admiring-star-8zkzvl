@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { siteConfig } from "../data/siteConfig.js";
 import "./FederalServicesPage.css";
 
 export default function FederalServicesPage() {
@@ -65,9 +66,9 @@ export default function FederalServicesPage() {
         <section className="federal-section federal-contact">
           <h2>Contact</h2>
           <p>
-            Phone: (864) 326-5362
+            Phone: {siteConfig.phoneNumbers.public.display}
             <br />
-            Email: admin@danideclares.com
+            Email: {siteConfig.emails.admin}
           </p>
           <div className="federal-contact__actions">
             <Link className="btn btn--secondary" to="/contact">

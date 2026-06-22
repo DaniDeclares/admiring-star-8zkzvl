@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { siteConfig } from "../data/siteConfig.js";
 import "./EventsPage.css";
 
 export default function EventsPage() {
@@ -19,7 +20,7 @@ export default function EventsPage() {
             <h1>Event Planning & Execution</h1>
             <p>We don't just decorate. We plan, coordinate, and execute your entire event from start to finish.</p>
             <div className="ep-header-ctas">
-              <a href="tel:4706829348" className="ep-btn-primary">Call / Text (470) 682-9348</a>
+              <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="ep-btn-primary">Call / Text {siteConfig.phoneNumbers.public.display}</a>
               <Link to="/contact" className="ep-btn-secondary">Request a Consultation</Link>
             </div>
           </div>
@@ -169,8 +170,8 @@ export default function EventsPage() {
             <h2>Ready to Plan Your Event?</h2>
             <p>Every event starts with a consultation. Tell us what you need and we will build the right plan.</p>
             <div className="ep-header-ctas">
-              <a href="tel:4706829348" className="ep-btn-primary">Call / Text GA: (470) 682-9348</a>
-              <a href="tel:8643265362" className="ep-btn-primary">Call / Text SC: (864) 326-5362</a>
+              <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="ep-btn-primary">Call / Text GA: {siteConfig.phoneNumbers.public.display}</a>
+              <a href={`tel:${siteConfig.phoneNumbers.sc.tel}`} className="ep-btn-primary">Call / Text SC: {siteConfig.phoneNumbers.sc.display}</a>
               <Link to="/contact" className="ep-btn-secondary">Request a Consultation</Link>
               <a href="mailto:events@danideclares.com" className="ep-btn-secondary">Email Events Team</a>
             </div>

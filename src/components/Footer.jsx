@@ -48,10 +48,10 @@ export default function Footer() {
 
         <div className="footer-col">
           <h4>Contact</h4>
-          <p>GA: <a href="tel:4706829348">(470) 682-9348</a></p>
-          <p>SC: <a href="tel:8643265362">(864) 326-5362</a></p>
-          <p><a href="mailto:admin@danideclares.com">admin@danideclares.com</a></p>
-          <p><a href="mailto:events@danideclares.com">events@danideclares.com</a></p>
+          <p><a href={`tel:${siteConfig.phoneNumbers.public.tel}`}>{siteConfig.phoneNumbers.public.display}</a></p>
+          <p>SC: <a href={`tel:${siteConfig.phoneNumbers.sc.tel}`}>{siteConfig.phoneNumbers.sc.display}</a></p>
+          <p><a href={`mailto:${siteConfig.emails.admin}`}>{siteConfig.emails.admin}</a></p>
+          <p><a href={`mailto:${siteConfig.emails.vendor}`}>{siteConfig.emails.vendor}</a></p>
         </div>
 
         <div className="footer-col">

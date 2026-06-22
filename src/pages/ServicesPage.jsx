@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { siteConfig } from "../data/siteConfig.js";
 import "./ServicesPage.css";
 
 const divisions = [
@@ -116,7 +117,7 @@ export default function ServicesPage() {
               </ul>
               <div className="sp-division-ctas">
                 <Link to={div.link} className="sp-btn-primary">{div.linkLabel}</Link>
-                <a href="tel:4706829348" className="sp-btn-secondary">Call / Text (470) 682-9348</a>
+                <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="sp-btn-secondary">Call / Text {siteConfig.phoneNumbers.public.display}</a>
               </div>
             </div>
           </section>

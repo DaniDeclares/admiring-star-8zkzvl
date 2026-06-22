@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { siteConfig } from "../data/siteConfig.js";
 import "./FieldServicesPage.css";
 
 const readinessLabels = [
@@ -48,7 +49,7 @@ export default function FieldServicesPage() {
               ))}
             </div>
             <div className="fs-header-ctas">
-              <a href="tel:4706829348" className="fs-btn-primary">Call / Text (470) 682-9348</a>
+              <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="fs-btn-primary">Call / Text {siteConfig.phoneNumbers.public.display}</a>
               <Link to="/contact" className="fs-btn-secondary">Request a FieldOps Quote</Link>
             </div>
           </div>
@@ -230,8 +231,8 @@ export default function FieldServicesPage() {
           <div className="fs-container">
             <h2>Ready to Get Your Property Handled?</h2>
             <div className="fs-header-ctas">
-              <a href="tel:4706829348" className="fs-btn-primary">Call / Text GA: (470) 682-9348</a>
-              <a href="tel:8643265362" className="fs-btn-primary">Call / Text SC: (864) 326-5362</a>
+              <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="fs-btn-primary">Call / Text GA: {siteConfig.phoneNumbers.public.display}</a>
+              <a href={`tel:${siteConfig.phoneNumbers.sc.tel}`} className="fs-btn-primary">Call / Text SC: {siteConfig.phoneNumbers.sc.display}</a>
               <Link to="/contact" className="fs-btn-secondary">Request a FieldOps Quote</Link>
             </div>
           </div>
