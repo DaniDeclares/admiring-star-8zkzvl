@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { siteConfig } from "../data/siteConfig.js";
 import { supabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
 import "./RequestServicePage.css";
 
@@ -52,6 +53,7 @@ export default function RequestServicePage() {
   const [message, setMessage] = useState("");
 
   const leadName = useMemo(() => form.fullName.trim(), [form.fullName]);
+  const publicPhone = siteConfig.phoneNumbers.public;
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -101,7 +103,7 @@ export default function RequestServicePage() {
     if (!isSupabaseConfigured || !supabase) {
       setStatus("error");
       setMessage(
-        "The request system is not fully connected yet. For urgent requests, call or text (470) 485-7173."
+        `The request system is not fully connected yet. For urgent requests, call or text ${publicPhone.display}.`
       );
       return;
     }
@@ -152,12 +154,12 @@ export default function RequestServicePage() {
       setForm(initialForm);
       setStatus("success");
       setMessage(
-        "Your request was received. Dani Declares will follow up as soon as possible. For urgent requests, call or text (470) 485-7173."
+        `Your request was received. Dani Declares will follow up as soon as possible. For urgent requests, call or text ${publicPhone.display}.`
       );
     } catch (error) {
       setStatus("error");
       setMessage(
-        "Something went wrong while saving your request. For urgent requests, call or text (470) 485-7173."
+        `Something went wrong while saving your request. For urgent requests, call or text ${publicPhone.display}.`
       );
     }
   };
