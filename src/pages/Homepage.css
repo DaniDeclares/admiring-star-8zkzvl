@@ -229,6 +229,192 @@
   width: 2rem;
 }
 
+/* Fast Intake Strip */
+.dd-intake-strip {
+  background: var(--color-burgundy, #800020);
+  color: var(--color-ivory, #f9f6f2);
+  padding: 1.25rem 1.5rem;
+}
+
+.dd-intake-inner {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.dd-intake-text {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Fix: match established button styling with display: inline-flex and min-height: 48px */
+.dd-btn-intake {
+  align-items: center;
+  background: var(--color-gold, #c8b273);
+  border-radius: 999px;
+  color: #1b0a0e;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.65rem 1.35rem;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  white-space: nowrap;
+}
+
+.dd-btn-intake:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  transform: translateY(-1px);
+}
+
+/* Service Lanes */
+.dd-section-sub {
+  color: #555;
+  font-size: 1rem;
+  margin: 0.4rem 0 0;
+}
+
+.dd-lanes-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-top: 1.5rem;
+}
+
+.dd-lane-card {
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.18);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(128, 0, 32, 0.07);
+  padding: 1.4rem 1.25rem;
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.dd-lane-card:hover {
+  box-shadow: 0 12px 32px rgba(128, 0, 32, 0.13);
+  transform: translateY(-2px);
+}
+
+.dd-lane-tag {
+  background: var(--color-burgundy, #800020);
+  border-radius: 999px;
+  color: var(--color-ivory, #f9f6f2);
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  text-transform: uppercase;
+}
+
+.dd-lane-card h3 {
+  margin: 0 0 0.5rem;
+}
+
+.dd-lane-card p {
+  color: #444;
+  font-size: 0.92rem;
+  margin: 0 0 0.75rem;
+}
+
+/* Why Choose grid */
+.dd-why-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 1.5rem;
+}
+
+.dd-why-card {
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.14);
+  border-radius: 8px;
+  padding: 1.2rem;
+}
+
+.dd-why-card strong {
+  color: var(--color-burgundy, #800020);
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.dd-why-card p {
+  color: #444;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Who This Helps grid */
+.dd-who-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 1.5rem;
+}
+
+.dd-who-card {
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.14);
+  border-radius: 8px;
+  padding: 1.2rem;
+}
+
+.dd-who-card strong {
+  color: var(--color-burgundy, #800020);
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.dd-who-card p {
+  color: #444;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Bottom CTA */
+.dd-bottom-cta {
+  background: linear-gradient(135deg, #2d0c10 0%, var(--color-burgundy, #800020) 58%, #4b111c 100%);
+  color: var(--color-ivory, #f9f6f2);
+  padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+  text-align: center;
+}
+
+.dd-bottom-cta h2 {
+  color: var(--color-ivory, #f9f6f2);
+  margin-bottom: 0.5rem;
+}
+
+.dd-bottom-cta-sub {
+  color: rgba(249, 246, 242, 0.88);
+  font-size: 1.05rem;
+  margin: 0 auto 0.5rem;
+  max-width: 520px;
+}
+
+.dd-bottom-cta .dd-btn-outline {
+  border-color: rgba(249, 246, 242, 0.78);
+}
+
+.dd-areas-note {
+  color: rgba(249, 246, 242, 0.65);
+  font-size: 0.85rem;
+  margin: 1.75rem auto 0;
+}
+
+/* Alt background */
+.dd-alt-bg {
+  background: #faf7f4;
+}
+
 .service-cards-row {
   display: flex;
   flex-wrap: wrap;
@@ -350,5 +536,42 @@
   }
   .process-flow li:before {
     left: -2.3em;
+  }
+}
+
+@media (max-width: 768px) {
+  .dd-lanes-grid,
+  .dd-why-grid,
+  .dd-who-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-intake-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .dd-btn-intake {
+    text-align: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .dd-hero--visual {
+    padding: 2.5rem 1rem 2rem;
+  }
+
+  /* Fix: keep consistent 8px border-radius on mobile (was incorrectly 6px) */
+  .dd-lane-card,
+  .dd-why-card,
+  .dd-who-card {
+    border-radius: 8px;
+  }
+
+  .dd-bottom-cta .dd-btn-primary,
+  .dd-bottom-cta .dd-btn-secondary,
+  .dd-bottom-cta .dd-btn-outline {
+    width: 100%;
   }
 }
