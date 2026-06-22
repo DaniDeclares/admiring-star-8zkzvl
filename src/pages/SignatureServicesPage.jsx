@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { siteConfig } from "../data/siteConfig.js";
 import "./SignatureServicesPage.css";
 
 const signatureServices = [
@@ -121,8 +122,8 @@ export default function SignatureServicesPage() {
             <p>Every Signature Service starts with a consultation. Tell us what you need and we will scope the right solution.</p>
             <div className="sig-cta-btns">
               <Link to="/contact" className="sig-btn-primary">Request a Custom Quote</Link>
-              <a href="tel:4706829348" className="sig-btn-secondary">Call / Text GA: (470) 682-9348</a>
-              <a href="tel:8643265362" className="sig-btn-secondary">Call / Text SC: (864) 326-5362</a>
+              <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="sig-btn-secondary">Call / Text GA: {siteConfig.phoneNumbers.public.display}</a>
+              <a href={`tel:${siteConfig.phoneNumbers.sc.tel}`} className="sig-btn-secondary">Call / Text SC: {siteConfig.phoneNumbers.sc.display}</a>
             </div>
           </div>
         </section>

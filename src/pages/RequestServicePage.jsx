@@ -100,7 +100,9 @@ export default function RequestServicePage() {
 
     if (!isSupabaseConfigured || !supabase) {
       setStatus("error");
-      setMessage("The request system is not fully connected yet. Please call or text Dani Declares directly.");
+      setMessage(
+        "The request system is not fully connected yet. For urgent requests, call or text (470) 485-7173."
+      );
       return;
     }
 
@@ -142,12 +144,21 @@ export default function RequestServicePage() {
 
       if (requestError) throw requestError;
 
+      // TODO: Automated lead notification not yet implemented.
+      // Next step: add a Supabase Edge Function or webhook to notify Dani Declares
+      // when a new service request is created (e.g., email to admin@danideclares.com
+      // or entry into an operations lead queue). See docs/lead-notifications.md.
+
       setForm(initialForm);
       setStatus("success");
-      setMessage("Your request was received. Dani Declares will follow up as soon as possible.");
+      setMessage(
+        "Your request was received. Dani Declares will follow up as soon as possible. For urgent requests, call or text (470) 485-7173."
+      );
     } catch (error) {
       setStatus("error");
-      setMessage("Something went wrong while saving your request. Please call or text Dani Declares directly.");
+      setMessage(
+        "Something went wrong while saving your request. For urgent requests, call or text (470) 485-7173."
+      );
     }
   };
 

@@ -48,17 +48,18 @@ export default function ContactPage() {
               {siteConfig.emails.admin}
             </a>{" "}
             |{" "}
-            <a href={`mailto:${siteConfig.emails.events}`}>
-              {siteConfig.emails.events}
+            <a href={`mailto:${siteConfig.emails.vendor}`}>
+              {siteConfig.emails.vendor}
             </a>
             <br />
             📞{" "}
-            <a href={`tel:${siteConfig.phoneNumbers.primary.tel}`}>
-              {siteConfig.phoneNumbers.primary.display}
+            <a href={`tel:${siteConfig.phoneNumbers.public.tel}`}>
+              {siteConfig.phoneNumbers.public.display}
             </a>{" "}
             |{" "}
-            <a href={`tel:${siteConfig.phoneNumbers.secondary.tel}`}>
-              {siteConfig.phoneNumbers.secondary.display}
+            SC:{" "}
+            <a href={`tel:${siteConfig.phoneNumbers.sc.tel}`}>
+              {siteConfig.phoneNumbers.sc.display}
             </a>
           </p>
         </section>
