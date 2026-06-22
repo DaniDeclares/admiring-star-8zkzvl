@@ -48,7 +48,7 @@ export default function Footer() {
 
         <div className="footer-col">
           <h4>Contact</h4>
-          <p><a href={`tel:${siteConfig.phoneNumbers.public.tel}`}>{siteConfig.phoneNumbers.public.display}</a></p>
+          <p>GA: <a href={`tel:${siteConfig.phoneNumbers.public.tel}`}>{siteConfig.phoneNumbers.public.display}</a></p>
           <p>SC: <a href={`tel:${siteConfig.phoneNumbers.sc.tel}`}>{siteConfig.phoneNumbers.sc.display}</a></p>
           <p><a href={`mailto:${siteConfig.emails.admin}`}>{siteConfig.emails.admin}</a></p>
           <p><a href={`mailto:${siteConfig.emails.vendor}`}>{siteConfig.emails.vendor}</a></p>
