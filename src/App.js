@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Global Components
 import FestivalBanner from "./components/FestivalBanner.jsx";
@@ -168,6 +169,7 @@ export default function App() {
 
       <CookieConsent />
       <Footer />
+      <SpeedInsights />
     </>
   );
 }
