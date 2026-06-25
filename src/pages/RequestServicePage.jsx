@@ -11,15 +11,28 @@ import {
 } from "../lib/ddosIntake.js";
 import "./RequestServicePage.css";
 
+const divisionDisplayNames = {
+  docops: "Document & Compliance Services",
+  fieldops: "Field Services",
+  courierops: "Logistics & Courier",
+  eventops: "Event Planning & Execution",
+  productops: "Product Production",
+  propertyops: "Property Support Services",
+  govops: "Government Contracting",
+  vendorops: "Vendor Readiness",
+  businessops: "Business Support Services",
+};
+
 const fallbackDivisions = [
-  { id: null, name: "DocOps / Document & Compliance", slug: "docops" },
-  { id: null, name: "FieldOps / Property Operations & Resets", slug: "fieldops" },
-  { id: null, name: "CourierOps / Logistics & Courier", slug: "courierops" },
-  { id: null, name: "EventOps / Event Planning & Execution", slug: "eventops" },
-  { id: null, name: "ProductOps / Stickers, Labels, Heat Press & Merch", slug: "productops" },
-  { id: null, name: "GovOps / Government Contracting Support", slug: "govops" },
-  { id: null, name: "VendorOps / Vendor Readiness & Subcontractors", slug: "vendorops" },
-  { id: null, name: "BusinessOps / Admin Systems & Business Support", slug: "businessops" },
+  { id: null, name: divisionDisplayNames.docops, slug: "docops" },
+  { id: null, name: divisionDisplayNames.fieldops, slug: "fieldops" },
+  { id: null, name: divisionDisplayNames.courierops, slug: "courierops" },
+  { id: null, name: divisionDisplayNames.eventops, slug: "eventops" },
+  { id: null, name: divisionDisplayNames.productops, slug: "productops" },
+  { id: null, name: divisionDisplayNames.propertyops, slug: "propertyops" },
+  { id: null, name: divisionDisplayNames.govops, slug: "govops" },
+  { id: null, name: divisionDisplayNames.vendorops, slug: "vendorops" },
+  { id: null, name: divisionDisplayNames.businessops, slug: "businessops" },
 ];
 
 const fallbackMarketingSources = [
@@ -66,6 +79,10 @@ function formatMoney(value) {
   return money.format(toMoneyNumber(value));
 }
 
+function displayDivisionName(division) {
+  return divisionDisplayNames[division.slug] || division.name;
+}
+
 export default function RequestServicePage() {
   const [form, setForm] = useState(initialForm);
   const [divisions, setDivisions] = useState(fallbackDivisions);
@@ -81,11 +98,7 @@ export default function RequestServicePage() {
   const leadName = useMemo(() => form.fullName.trim(), [form.fullName]);
   const publicPhone = siteConfig.phoneNumbers.public;
 
-  const activeDivisionSlug = useMemo(() => {
-    if (form.divisionSlug) return form.divisionSlug;
-    const selected = divisions.find((division) => String(division.id) === form.divisionId);
-    return selected?.slug || "";
-  }, [divisions, form.divisionId, form.divisionSlug]);
+  const activeDivisionSlug = useMemo(() => form.divisionSlug || "", [form.divisionSlug]);
 
   const visiblePackages = useMemo(
     () => packages.filter((item) => item.division_slug === activeDivisionSlug),
@@ -155,9 +168,13 @@ export default function RequestServicePage() {
   }
 
   function handleDivisionChange(event) {
-    const divisionId = event.target.value;
-    const selected = divisions.find((division) => String(division.id) === divisionId);
-    setForm((current) => ({ ...current, divisionId, divisionSlug: selected?.slug || "" }));
+    const divisionSlug = event.target.value;
+    const selected = divisions.find((division) => division.slug === divisionSlug);
+    setForm((current) => ({
+      ...current,
+      divisionSlug,
+      divisionId: selected?.id ? String(selected.id) : "",
+    }));
     setSelectedPackageId("");
     setSelectedAddonIds([]);
   }
@@ -215,7 +232,7 @@ export default function RequestServicePage() {
       setReference(estimate.public_reference);
       setMessage(`Your request was received. Reference ${estimate.public_reference}. Dani Declares will review it and follow up as soon as possible.`);
     } catch (error) {
-      console.error("DDOS intake submission failed", error);
+      console.error("Intake submission failed", error);
       setStatus("error");
       setMessage(`Something went wrong while saving your request. For urgent requests, call or text ${publicPhone.display}.`);
     }
@@ -233,14 +250,14 @@ export default function RequestServicePage() {
           <div className="request-container">
             <p className="request-eyebrow">Dani Declares Intake</p>
             <h1>Request Service</h1>
-            <p>Tell us what needs to be handled. This form routes your request into DDOS for follow-up, quoting, and scheduling.</p>
+            <p>Your request will be routed through the Dani Declares Operations Team for review, estimating, scheduling, and follow-up.</p>
           </div>
         </section>
 
         <section className="request-section">
           <div className="request-container request-layout">
             <aside className="request-info-card">
-              <h2>Estimate Preview</h2>
+              <h2>Request Summary</h2>
               <p className="request-note">Select a division, package, and optional add-ons to preview the request before submitting.</p>
               <div className="request-estimate-card">
                 <p><span>Package</span><strong>{formatMoney(baseSubtotal)}</strong></p>
@@ -253,24 +270,24 @@ export default function RequestServicePage() {
 
             <form className="request-form" onSubmit={handleSubmit}>
               <div className="request-grid">
-                <label>Full Name *<input name="fullName" value={form.fullName} onChange={handleChange} required /></label>
-                <label>Company Name<input name="companyName" value={form.companyName} onChange={handleChange} /></label>
-                <label>Phone *<input name="phone" value={form.phone} onChange={handleChange} required /></label>
-                <label>Email<input type="email" name="email" value={form.email} onChange={handleChange} /></label>
+                <label>Full Name *<input name="fullName" autoComplete="name" value={form.fullName} onChange={handleChange} required /></label>
+                <label>Company Name<input name="companyName" autoComplete="organization" value={form.companyName} onChange={handleChange} /></label>
+                <label>Phone *<input name="phone" autoComplete="tel" value={form.phone} onChange={handleChange} required /></label>
+                <label>Email<input type="email" name="email" autoComplete="email" value={form.email} onChange={handleChange} /></label>
                 <label>Client Type<select name="clientType" value={form.clientType} onChange={handleChange}><option value="">Select one</option><option value="homeowner">Homeowner</option><option value="property_manager">Property Manager</option><option value="business">Business</option><option value="contractor">Contractor</option><option value="other">Other</option></select></label>
-                <label>Division Needed *<select name="divisionId" value={form.divisionId} onChange={handleDivisionChange} required><option value="">Select a division</option>{divisions.map((division) => <option key={division.slug || division.name} value={division.id || ""}>{division.name}</option>)}</select></label>
+                <label>Division Needed *<select name="divisionSlug" value={form.divisionSlug} onChange={handleDivisionChange} required><option value="">Select a division</option>{divisions.map((division) => <option key={division.slug || division.name} value={division.slug || ""}>{displayDivisionName(division)}</option>)}</select></label>
                 <label>Service Needed *<input name="serviceNeeded" value={form.serviceNeeded} onChange={handleChange} required placeholder="Example: move-out reset, courier, event setup" /></label>
                 <label>Timeline<input name="timeline" value={form.timeline} onChange={handleChange} placeholder="Example: ASAP, this week, June 15" /></label>
                 <label>How did you find us?<select name="marketingSourceId" value={form.marketingSourceId} onChange={handleMarketingSourceChange}><option value="">Website</option>{marketingSources.map((source) => <option key={source.slug || source.name} value={source.id || ""}>{source.name}</option>)}</select></label>
-                <label>Service Location<input name="locationAddress" value={form.locationAddress} onChange={handleChange} placeholder="Street, city, or neighborhood" /></label>
-                <label>City<input name="city" value={form.city} onChange={handleChange} /></label>
-                <label>State<input name="state" value={form.state} onChange={handleChange} /></label>
-                <label>ZIP Code<input name="zipCode" value={form.zipCode} onChange={handleChange} /></label>
+                <label>Service Location<input name="locationAddress" autoComplete="street-address" value={form.locationAddress} onChange={handleChange} placeholder="Street, city, or neighborhood" /></label>
+                <label>City<input name="city" autoComplete="address-level2" value={form.city} onChange={handleChange} /></label>
+                <label>State<input name="state" autoComplete="address-level1" value={form.state} onChange={handleChange} /></label>
+                <label>ZIP Code<input name="zipCode" autoComplete="postal-code" value={form.zipCode} onChange={handleChange} /></label>
                 <label>Budget Range<input name="budgetRange" value={form.budgetRange} onChange={handleChange} placeholder="Optional" /></label>
               </div>
 
               <fieldset className="request-fieldset">
-                <legend>Service Package *</legend>
+                <legend>Select Your Package *</legend>
                 {!activeDivisionSlug && <p className="request-muted">Select a division to load packages.</p>}
                 {activeDivisionSlug && !visiblePackages.length && <p className="request-muted">No public packages are available for this division yet.</p>}
                 {visiblePackages.map((item) => <label className="request-option" key={item.id}><input type="radio" name="selectedPackage" checked={selectedPackageId === item.id} onChange={() => setSelectedPackageId(item.id)} required /><span><strong>{item.public_name || item.package_name}</strong><br /><small>{item.outcome_label || "Service package"} • {formatMoney(packagePrice(item))}</small></span></label>)}
