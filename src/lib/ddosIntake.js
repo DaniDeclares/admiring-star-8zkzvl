@@ -34,6 +34,18 @@ export function buildUploadSummary(rawLinks = "") {
   };
 }
 
+function safeUuid(value) {
+  if (!value) return null;
+  const text = String(value);
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(text) ? text : null;
+}
+
+function safeBigInt(value) {
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
 export async function submitDdosIntake({
   supabase,
   form,
@@ -48,7 +60,7 @@ export async function submitDdosIntake({
     organization_name: form.companyName || null,
     phone: form.phone || null,
     email: form.email || null,
-    source_id: form.marketingSourceId || null,
+    source_id: safeUuid(form.marketingSourceId),
     source_text: form.marketingSourceText || "Website",
     status: "new",
     notes: form.description || null,
@@ -66,7 +78,7 @@ export async function submitDdosIntake({
     .from("service_requests")
     .insert({
       lead_id: lead?.id || null,
-      division_id: form.divisionId ? Number(form.divisionId) : null,
+      division_id: safeBigInt(form.divisionId),
       service_category: divisionSlug,
       service_needed: form.serviceNeeded || selectedPackage.package_name,
       location_address: form.locationAddress || null,
