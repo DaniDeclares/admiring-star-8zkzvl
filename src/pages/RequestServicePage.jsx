@@ -2,32 +2,48 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { siteConfig } from "../data/siteConfig.js";
 import { supabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
+import {
+  addonPrice,
+  calculateDeposit,
+  packagePrice,
+  submitDdosIntake,
+  toMoneyNumber,
+} from "../lib/ddosIntake.js";
 import "./RequestServicePage.css";
 
+const divisionDisplayNames = {
+  docops: "Document & Compliance Services",
+  fieldops: "Field Services",
+  courierops: "Logistics & Courier",
+  eventops: "Event Planning & Execution",
+  productops: "Product Production",
+  propertyops: "Property Support Services",
+  govops: "Government Contracting",
+  vendorops: "Vendor Readiness",
+  businessops: "Business Support Services",
+};
+
 const fallbackDivisions = [
-  { id: null, name: "DocOps / Document & Compliance" },
-  { id: null, name: "FieldOps / Property Operations & Resets" },
-  { id: null, name: "CourierOps / Logistics & Courier" },
-  { id: null, name: "EventOps / Event Planning & Execution" },
-  { id: null, name: "ProductOps / Stickers, Labels, Heat Press & Merch" },
-  { id: null, name: "DesignOps / Canva, CADlink, DTF & Print Prep" },
-  { id: null, name: "MediaOps / Content & Lead Generation" },
-  { id: null, name: "GovOps / Government Contracting Support" },
-  { id: null, name: "VendorOps / Vendor Readiness & Subcontractors" },
-  { id: null, name: "BusinessOps / Admin Systems & Business Support" },
+  { id: null, name: divisionDisplayNames.docops, slug: "docops" },
+  { id: null, name: divisionDisplayNames.fieldops, slug: "fieldops" },
+  { id: null, name: divisionDisplayNames.courierops, slug: "courierops" },
+  { id: null, name: divisionDisplayNames.eventops, slug: "eventops" },
+  { id: null, name: divisionDisplayNames.productops, slug: "productops" },
+  { id: null, name: divisionDisplayNames.propertyops, slug: "propertyops" },
+  { id: null, name: divisionDisplayNames.govops, slug: "govops" },
+  { id: null, name: divisionDisplayNames.vendorops, slug: "vendorops" },
+  { id: null, name: divisionDisplayNames.businessops, slug: "businessops" },
 ];
 
 const fallbackMarketingSources = [
-  { id: null, name: "Website" },
-  { id: null, name: "QR Code" },
-  { id: null, name: "NFC Card" },
-  { id: null, name: "Property Manager Packet" },
-  { id: null, name: "Flyer / Door Hanger" },
-  { id: null, name: "Facebook" },
-  { id: null, name: "LinkedIn" },
-  { id: null, name: "Google Business" },
-  { id: null, name: "Referral" },
-  { id: null, name: "Other" },
+  { id: null, name: "Website", slug: "website" },
+  { id: null, name: "Property Manager Packet", slug: "property_manager_packet" },
+  { id: null, name: "Field Services Flyer", slug: "field_services_flyer" },
+  { id: null, name: "Facebook Group", slug: "facebook_group" },
+  { id: null, name: "Google Business Profile", slug: "google_business_profile" },
+  { id: null, name: "LinkedIn", slug: "linkedin" },
+  { id: null, name: "Referral", slug: "referral" },
+  { id: null, name: "Other", slug: "other" },
 ];
 
 const initialForm = {
@@ -35,143 +51,235 @@ const initialForm = {
   companyName: "",
   phone: "",
   email: "",
+  clientType: "",
   divisionId: "",
+  divisionSlug: "",
   serviceNeeded: "",
   timeline: "",
+  rushRequested: false,
   marketingSourceId: "",
+  marketingSourceSlug: "website",
   marketingSourceText: "Website",
   locationAddress: "",
+  city: "",
+  state: "GA",
+  zipCode: "",
   budgetRange: "",
+  uploadLinks: "",
   description: "",
 };
+
+const money = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+function formatMoney(value) {
+  return money.format(toMoneyNumber(value));
+}
+
+function displayDivisionName(division) {
+  return divisionDisplayNames[division.slug] || division.name;
+}
+
+function isPreviewOrDev() {
+  const mode = typeof import.meta !== "undefined" && import.meta.env ? import.meta.env.MODE : "production";
+  const isDev = mode === "development";
+  const isPreview = Boolean(
+    typeof import.meta !== "undefined" &&
+      import.meta.env &&
+      (import.meta.env.VITE_VERCEL_ENV === "preview" || import.meta.env.VITE_APP_ENV === "preview")
+  );
+  return isDev || isPreview;
+}
+
+function formatDiagnosticMessage(diagnostic) {
+  if (!diagnostic) return "";
+  const lines = [
+    `stage: ${diagnostic.stage || "unknown"}`,
+    `code: ${diagnostic.code || "unknown"}`,
+    `message: ${diagnostic.message || "unknown"}`,
+    `details: ${diagnostic.details || "n/a"}`,
+    `hint: ${diagnostic.hint || "n/a"}`,
+  ];
+  return lines.join("\n");
+}
 
 export default function RequestServicePage() {
   const [form, setForm] = useState(initialForm);
   const [divisions, setDivisions] = useState(fallbackDivisions);
   const [marketingSources, setMarketingSources] = useState(fallbackMarketingSources);
+  const [packages, setPackages] = useState([]);
+  const [addons, setAddons] = useState([]);
+  const [selectedPackageId, setSelectedPackageId] = useState("");
+  const [selectedAddonIds, setSelectedAddonIds] = useState([]);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [reference, setReference] = useState("");
+  const [diagnosticMessage, setDiagnosticMessage] = useState("");
 
   const leadName = useMemo(() => form.fullName.trim(), [form.fullName]);
   const publicPhone = siteConfig.phoneNumbers.public;
 
+  const activeDivisionSlug = useMemo(() => form.divisionSlug || "", [form.divisionSlug]);
+
+  const visiblePackages = useMemo(
+    () => packages.filter((item) => item.division_slug === activeDivisionSlug),
+    [packages, activeDivisionSlug]
+  );
+
+  const visibleAddons = useMemo(
+    () => addons.filter((item) => item.division_slug === activeDivisionSlug || item.division_slug === "global"),
+    [addons, activeDivisionSlug]
+  );
+
+  const selectedPackage = useMemo(
+    () => visiblePackages.find((item) => item.id === selectedPackageId) || null,
+    [visiblePackages, selectedPackageId]
+  );
+
+  const selectedAddons = useMemo(
+    () => visibleAddons.filter((item) => selectedAddonIds.includes(item.id)),
+    [visibleAddons, selectedAddonIds]
+  );
+
+  const baseSubtotal = packagePrice(selectedPackage);
+  const addonSubtotal = selectedAddons.reduce((total, item) => total + addonPrice(item), 0);
+  const rushFee = form.rushRequested ? Math.max((baseSubtotal + addonSubtotal) * 0.25, 75) : 0;
+  const estimatedTotal = baseSubtotal + addonSubtotal + rushFee;
+  const depositDue = calculateDeposit(estimatedTotal);
+
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
 
-    const loadOptions = async () => {
-      const [{ data: divisionData }, { data: sourceData }] = await Promise.all([
+    async function loadOptions() {
+      const [divisionResult, sourceResult, packageResult, addonResult] = await Promise.all([
+        supabase.from("divisions").select("id, name, slug").eq("is_active", true).order("sort_order", { ascending: true }),
+        supabase.from("marketing_sources").select("id, name, slug").eq("is_active", true).order("name", { ascending: true }),
         supabase
-          .from("divisions")
-          .select("id, name")
+          .from("dd_service_packages")
+          .select("id, division_slug, package_slug, package_name, public_name, outcome_label, locked_price, starting_price, typical_min, typical_max, pricing_model, sort_order")
           .eq("is_active", true)
+          .eq("is_public", true)
           .order("sort_order", { ascending: true }),
         supabase
-          .from("marketing_sources")
-          .select("id, name")
+          .from("dd_service_addons")
+          .select("id, division_slug, addon_slug, addon_name, pricing_type, base_price, min_price, max_price, unit_label, quote_notes, sort_order")
           .eq("is_active", true)
-          .order("name", { ascending: true }),
+          .order("sort_order", { ascending: true }),
       ]);
 
-      if (divisionData?.length) setDivisions(divisionData);
-      if (sourceData?.length) setMarketingSources(sourceData);
-    };
+      if (divisionResult.data?.length) setDivisions(divisionResult.data);
+      if (sourceResult.data?.length) setMarketingSources(sourceResult.data);
+      if (packageResult.data?.length) setPackages(packageResult.data);
+      if (addonResult.data?.length) setAddons(addonResult.data);
+    }
 
     loadOptions();
   }, []);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
-  };
+  useEffect(() => {
+    if (selectedPackageId && !visiblePackages.some((item) => item.id === selectedPackageId)) {
+      setSelectedPackageId("");
+    }
+    setSelectedAddonIds((current) => current.filter((id) => visibleAddons.some((item) => item.id === id)));
+  }, [visiblePackages, visibleAddons, selectedPackageId]);
 
-  const handleMarketingSourceChange = (event) => {
+  function handleChange(event) {
+    const { name, type, checked, value } = event.target;
+    setForm((current) => ({ ...current, [name]: type === "checkbox" ? checked : value }));
+  }
+
+  function handleDivisionChange(event) {
+    const divisionSlug = event.target.value;
+    const selected = divisions.find((division) => division.slug === divisionSlug);
+    setForm((current) => ({
+      ...current,
+      divisionSlug,
+      divisionId: selected?.id ? String(selected.id) : "",
+    }));
+    setSelectedPackageId("");
+    setSelectedAddonIds([]);
+  }
+
+  function handleMarketingSourceChange(event) {
     const sourceId = event.target.value;
-    const selectedSource = marketingSources.find((source) => String(source.id) === sourceId);
-
+    const selected = marketingSources.find((source) => String(source.id) === sourceId);
     setForm((current) => ({
       ...current,
       marketingSourceId: sourceId,
-      marketingSourceText: selectedSource?.name || current.marketingSourceText,
+      marketingSourceSlug: selected?.slug || "website",
+      marketingSourceText: selected?.name || "Website",
     }));
-  };
+  }
 
-  const handleSubmit = async (event) => {
+  function toggleAddon(addonId) {
+    setSelectedAddonIds((current) =>
+      current.includes(addonId) ? current.filter((id) => id !== addonId) : [...current, addonId]
+    );
+  }
+
+  async function handleSubmit(event) {
     event.preventDefault();
     setStatus("submitting");
     setMessage("");
+    setReference("");
+    setDiagnosticMessage("");
 
     if (!isSupabaseConfigured || !supabase) {
       setStatus("error");
-      setMessage(
-        `The request system is not fully connected yet. For urgent requests, call or text ${publicPhone.display}.`
-      );
+      setMessage(`The request system is not fully connected yet. For urgent requests, call or text ${publicPhone.display}.`);
+      return;
+    }
+
+    if (!activeDivisionSlug || !selectedPackage) {
+      setStatus("error");
+      setMessage("Please select a division and service package before submitting.");
       return;
     }
 
     try {
-      const leadPayload = {
-        full_name: leadName,
-        organization_name: form.companyName || null,
-        phone: form.phone || null,
-        email: form.email || null,
-        source_id: form.marketingSourceId || null,
-        source_text: form.marketingSourceText || "Website",
-        status: "new",
-        notes: form.description || null,
-      };
-
-      const { data: lead, error: leadError } = await supabase
-        .from("leads")
-        .insert(leadPayload)
-        .select("id")
-        .single();
-
-      if (leadError) throw leadError;
-
-      const requestPayload = {
-        lead_id: lead?.id || null,
-        division_id: form.divisionId ? Number(form.divisionId) : null,
-        service_needed: form.serviceNeeded || null,
-        location_address: form.locationAddress || null,
-        timeline: form.timeline || null,
-        budget_range: form.budgetRange || null,
-        request_details: form.description || null,
-        status: "new",
-        priority: "normal",
-      };
-
-      const { error: requestError } = await supabase
-        .from("service_requests")
-        .insert(requestPayload);
-
-      if (requestError) throw requestError;
-
-      // TODO: Automated lead notification not yet implemented.
-      // Next step: add a Supabase Edge Function or webhook to notify Dani Declares
-      // when a new service request is created (e.g., email to admin@danideclares.com
-      // or entry into an operations lead queue). See docs/lead-notifications.md.
+      const estimate = await submitDdosIntake({
+        supabase,
+        form,
+        leadName,
+        divisionSlug: activeDivisionSlug,
+        selectedPackage,
+        selectedAddons,
+        totals: { baseSubtotal, addonSubtotal, rushFee, estimatedTotal, depositDue },
+      });
 
       setForm(initialForm);
+      setSelectedPackageId("");
+      setSelectedAddonIds([]);
       setStatus("success");
-      setMessage(
-        `Your request was received. Dani Declares will follow up as soon as possible. For urgent requests, call or text ${publicPhone.display}.`
-      );
+      setReference(estimate.public_reference);
+      setMessage(`Your request was received. Reference ${estimate.public_reference}. Dani Declares will review it and follow up as soon as possible.`);
     } catch (error) {
+      console.error("Intake submission failed", error);
+      const diagnostic = error?.diagnostic || {
+        stage: "unknown",
+        code: error?.code || null,
+        message: error?.message || "Unknown intake failure",
+        details: error?.details || null,
+        hint: error?.hint || null,
+      };
+
       setStatus("error");
-      setMessage(
-        `Something went wrong while saving your request. For urgent requests, call or text ${publicPhone.display}.`
-      );
+      setMessage(`Something went wrong while saving your request. For urgent requests, call or text ${publicPhone.display}.`);
+
+      if (isPreviewOrDev()) {
+        setDiagnosticMessage(formatDiagnosticMessage(diagnostic));
+      }
     }
-  };
+  }
 
   return (
     <>
       <Helmet>
         <title>Request Service • Dani Declares LLC</title>
-        <meta
-          name="description"
-          content="Request mobile operations, document, field, courier, event, property, vendor readiness, or government contracting support from Dani Declares LLC."
-        />
+        <meta name="description" content="Request mobile operations, document, field, courier, event, property, vendor readiness, or government contracting support from Dani Declares LLC." />
       </Helmet>
 
       <main className="request-page">
@@ -179,93 +287,62 @@ export default function RequestServicePage() {
           <div className="request-container">
             <p className="request-eyebrow">Dani Declares Intake</p>
             <h1>Request Service</h1>
-            <p>
-              Tell us what needs to be handled. This form routes your request into the Dani Declares operations system for follow-up, quoting, and scheduling.
-            </p>
+            <p>Your request will be routed through the Dani Declares Operations Team for review, estimating, scheduling, and follow-up.</p>
           </div>
         </section>
 
         <section className="request-section">
           <div className="request-container request-layout">
             <aside className="request-info-card">
-              <h2>What This Covers</h2>
-              <ul>
-                <li>Document, compliance, and administrative support</li>
-                <li>Field services, property resets, and photo documentation</li>
-                <li>Courier, logistics, and mobile operations support</li>
-                <li>Events, setup coordination, and custom production support</li>
-                <li>Product, print, sticker, label, and merch-related requests</li>
-                <li>Vendor readiness, business systems, and government support</li>
-              </ul>
-              <p className="request-note">
-                Dani Declares LLC provides mobile document, compliance, administrative, courier, field, property, event, and operations support services throughout Georgia and South Carolina. Notarial services are available where legally authorized and commissioned.
-              </p>
+              <h2>Request Summary</h2>
+              <p className="request-note">Select a division, package, and optional add-ons to preview the request before submitting.</p>
+              <div className="request-estimate-card">
+                <p><span>Package</span><strong>{formatMoney(baseSubtotal)}</strong></p>
+                <p><span>Add-ons</span><strong>{formatMoney(addonSubtotal)}</strong></p>
+                <p><span>Rush</span><strong>{formatMoney(rushFee)}</strong></p>
+                <p><span>Estimated Total</span><strong>{formatMoney(estimatedTotal)}</strong></p>
+                <p><span>Deposit Preview</span><strong>{formatMoney(depositDue)}</strong></p>
+              </div>
             </aside>
 
             <form className="request-form" onSubmit={handleSubmit}>
               <div className="request-grid">
-                <label>
-                  Full Name *
-                  <input name="fullName" value={form.fullName} onChange={handleChange} required />
-                </label>
-                <label>
-                  Company Name
-                  <input name="companyName" value={form.companyName} onChange={handleChange} />
-                </label>
-                <label>
-                  Phone *
-                  <input name="phone" value={form.phone} onChange={handleChange} required />
-                </label>
-                <label>
-                  Email
-                  <input type="email" name="email" value={form.email} onChange={handleChange} />
-                </label>
-                <label>
-                  Division Needed *
-                  <select name="divisionId" value={form.divisionId} onChange={handleChange} required>
-                    <option value="">Select a division</option>
-                    {divisions.map((division) => (
-                      <option key={division.name} value={division.id || ""}>{division.name}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Service Needed *
-                  <input name="serviceNeeded" value={form.serviceNeeded} onChange={handleChange} required placeholder="Example: move-out reset, courier, event setup" />
-                </label>
-                <label>
-                  Timeline
-                  <input name="timeline" value={form.timeline} onChange={handleChange} placeholder="Example: ASAP, this week, June 15" />
-                </label>
-                <label>
-                  How did you find us?
-                  <select name="marketingSourceId" value={form.marketingSourceId} onChange={handleMarketingSourceChange}>
-                    <option value="">Website</option>
-                    {marketingSources.map((source) => (
-                      <option key={source.name} value={source.id || ""}>{source.name}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Service Location
-                  <input name="locationAddress" value={form.locationAddress} onChange={handleChange} placeholder="City, neighborhood, or address if available" />
-                </label>
-                <label>
-                  Budget Range
-                  <input name="budgetRange" value={form.budgetRange} onChange={handleChange} placeholder="Optional" />
-                </label>
+                <label>Full Name *<input name="fullName" autoComplete="name" value={form.fullName} onChange={handleChange} required /></label>
+                <label>Company Name<input name="companyName" autoComplete="organization" value={form.companyName} onChange={handleChange} /></label>
+                <label>Phone *<input name="phone" autoComplete="tel" value={form.phone} onChange={handleChange} required /></label>
+                <label>Email<input type="email" name="email" autoComplete="email" value={form.email} onChange={handleChange} /></label>
+                <label>Client Type<select name="clientType" value={form.clientType} onChange={handleChange}><option value="">Select one</option><option value="homeowner">Homeowner</option><option value="business">Business</option><option value="government">Government</option><option value="nonprofit">Nonprofit</option><option value="other">Other</option></select></label>
+                <label>Division Needed *<select name="divisionSlug" value={form.divisionSlug} onChange={handleDivisionChange} required><option value="">Select a division</option>{divisions.map((division) => (<option key={division.slug} value={division.slug}>{displayDivisionName(division)}</option>))}</select></label>
+                <label>Service Needed *<input name="serviceNeeded" value={form.serviceNeeded} onChange={handleChange} required placeholder="Example: move-out reset, courier, event setup" /></label>
+                <label>Timeline<input name="timeline" value={form.timeline} onChange={handleChange} placeholder="Example: ASAP, this week, June 15" /></label>
+                <label>How did you find us?<select name="marketingSourceId" value={form.marketingSourceId} onChange={handleMarketingSourceChange}><option value="">Website</option>{marketingSources.map((source) => (<option key={source.slug} value={String(source.id)}>{source.name}</option>))}</select></label>
+                <label>Service Location<input name="locationAddress" autoComplete="street-address" value={form.locationAddress} onChange={handleChange} placeholder="Street, city, or neighborhood" /></label>
+                <label>City<input name="city" autoComplete="address-level2" value={form.city} onChange={handleChange} /></label>
+                <label>State<input name="state" autoComplete="address-level1" value={form.state} onChange={handleChange} /></label>
+                <label>ZIP Code<input name="zipCode" autoComplete="postal-code" value={form.zipCode} onChange={handleChange} /></label>
+                <label>Budget Range<input name="budgetRange" value={form.budgetRange} onChange={handleChange} placeholder="Optional" /></label>
               </div>
 
-              <label>
-                Request Details *
-                <textarea name="description" value={form.description} onChange={handleChange} required rows="6" placeholder="Describe the property, document, event, delivery, deadline, or support needed." />
-              </label>
+              <fieldset className="request-fieldset">
+                <legend>Select Your Package *</legend>
+                {!activeDivisionSlug && <p className="request-muted">Select a division to load packages.</p>}
+                {activeDivisionSlug && !visiblePackages.length && <p className="request-muted">No public packages are available for this division yet.</p>}
+                {visiblePackages.map((item) => <label className="request-option" key={item.id}><input type="radio" name="selectedPackage" checked={selectedPackageId === item.id} onChange={() => setSelectedPackageId(item.id)} /><div><strong>{item.public_name || item.package_name}</strong><p>{item.outcome_label || "Scope confirmed during intake review."}</p></div><span>{formatMoney(packagePrice(item))}</span></label>)}
+              </fieldset>
 
-              <button className="request-submit" type="submit" disabled={status === "submitting"}>
-                {status === "submitting" ? "Submitting..." : "Submit Request"}
-              </button>
+              <fieldset className="request-fieldset">
+                <legend>Add-ons</legend>
+                {visibleAddons.map((item) => <label className="request-option" key={item.id}><input type="checkbox" checked={selectedAddonIds.includes(item.id)} onChange={() => toggleAddon(item.id)} /><div><strong>{item.addon_name}</strong><p>{item.quote_notes || "Optional enhancement"}</p></div><span>{item.pricing_type === "quote" ? "Quote" : formatMoney(addonPrice(item))}</span></label>)}
+              </fieldset>
 
+              <label>Photo, File, or Folder Links<textarea name="uploadLinks" value={form.uploadLinks} onChange={handleChange} rows="3" placeholder="Paste links here. One per line." /></label>
+              <label>Request Details *<textarea name="description" value={form.description} onChange={handleChange} required rows="6" placeholder="Describe the property, document, event, delivery, or support needed." /></label>
+              <label className="request-checkbox"><input type="checkbox" name="rushRequested" checked={form.rushRequested} onChange={handleChange} /><span>Rush or same-day/next-day support requested</span></label>
+
+              <button className="request-submit" type="submit" disabled={status === "submitting"}>{status === "submitting" ? "Submitting..." : "Submit Request"}</button>
+              {reference && <p className="request-reference">Reference: <strong>{reference}</strong></p>}
               {message && <p className={`request-message request-message--${status}`}>{message}</p>}
+              {diagnosticMessage && <pre className="request-diagnostic">{diagnosticMessage}</pre>}
             </form>
           </div>
         </section>
