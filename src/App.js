@@ -27,6 +27,7 @@ import FieldServicesPage from "./pages/FieldServicesPage.jsx";
 import EventsPage from "./pages/EventsPage.jsx";
 import FacilityVisitsPage from "./pages/FacilityVisitsPage.jsx";
 import FederalPage from "./pages/FederalPage.jsx";
+import GovConPage from "./pages/GovConPage.jsx";
 import TaxServicesPage from "./pages/TaxServicesPage.jsx";
 import PaymentCancel from "./pages/PaymentCancel.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
@@ -116,6 +117,9 @@ export default function App() {
         <Route path="/request-service" element={<RequestServicePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/facility-visits" element={<FacilityVisitsPage />} />
+        <Route path="/govcon" element={<GovConPage />} />
+        <Route path="/vendor-readiness" element={<Navigate to="/govcon" replace />} />
+        <Route path="/government-contracting" element={<Navigate to="/govcon" replace />} />
         <Route path="/federal" element={<FederalPage />} />
         <Route path="/federal-services" element={<Navigate to="/federal" replace />} />
         <Route path="/tax" element={<Navigate to="/tax-services" replace />} />

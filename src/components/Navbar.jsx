@@ -25,7 +25,7 @@ export default function Navbar() {
           <li><Link to="/events" className={isActive("/events") ? "active" : ""} onClick={handleLinkClick}>Events</Link></li>
           <li><Link to="/services" className={isActive("/services") ? "active" : ""} onClick={handleLinkClick}>Services</Link></li>
           <li><Link to="/signature-services" className={isActive("/signature-services") ? "active" : ""} onClick={handleLinkClick}>Signature Services</Link></li>
-          <li><Link to="/federal" className={isActive("/federal") ? "active" : ""} onClick={handleLinkClick}>Government</Link></li>
+          <li><Link to="/govcon" className={isActive("/govcon") ? "active" : ""} onClick={handleLinkClick}>GovCon</Link></li>
           <li><Link to="/request-service" className={isActive("/request-service") ? "active" : ""} onClick={handleLinkClick}>Request Service</Link></li>
           <li><Link to="/about" className={isActive("/about") ? "active" : ""} onClick={handleLinkClick}>About</Link></li>
           <li><Link to="/contact" className={isActive("/contact") ? "active" : ""} onClick={handleLinkClick}>Contact</Link></li>
@@ -46,7 +46,7 @@ export default function Navbar() {
           <li><Link to="/events" onClick={handleLinkClick}>Events</Link></li>
           <li><Link to="/services" onClick={handleLinkClick}>Services</Link></li>
           <li><Link to="/signature-services" onClick={handleLinkClick}>Signature Services</Link></li>
-          <li><Link to="/federal" onClick={handleLinkClick}>Government</Link></li>
+          <li><Link to="/govcon" onClick={handleLinkClick}>GovCon</Link></li>
           <li><Link to="/request-service" onClick={handleLinkClick}>Request Service</Link></li>
           <li><Link to="/about" onClick={handleLinkClick}>About</Link></li>
           <li><Link to="/contact" onClick={handleLinkClick}>Contact</Link></li>
