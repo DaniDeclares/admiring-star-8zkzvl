@@ -12,9 +12,7 @@
 }
 
 .govcon-hero {
-  background:
-    linear-gradient(135deg, rgba(42, 13, 20, 0.94), rgba(91, 22, 36, 0.9)),
-    url("/images/stock/Courthouse steps.jpg");
+  background: linear-gradient(135deg, rgba(42, 13, 20, 0.94), rgba(91, 22, 36, 0.9));
   background-position: center;
   background-size: cover;
   color: #fff;

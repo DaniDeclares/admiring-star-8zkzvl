@@ -7,6 +7,10 @@ import "./GovConPage.css";
 const capabilityStatementPath = "/assets/capability-statement.pdf";
 
 export default function GovConPage() {
+  const heroStyle = {
+    backgroundImage: `linear-gradient(135deg, rgba(42, 13, 20, 0.94), rgba(91, 22, 36, 0.9)), url("${process.env.PUBLIC_URL}/images/stock/Courthouse steps.jpg")`,
+  };
+
   return (
     <>
       <Helmet>
@@ -25,7 +29,7 @@ export default function GovConPage() {
       </Helmet>
 
       <main className="govcon-page">
-        <section className="govcon-hero" aria-labelledby="govcon-title">
+        <section className="govcon-hero" style={heroStyle} aria-labelledby="govcon-title">
           <div className="govcon-hero__content">
             <p className="govcon-eyebrow">Government contracting and vendor readiness</p>
             <h1 id="govcon-title">Operational Execution & Subcontracting Support for Prime Contractors</h1>
