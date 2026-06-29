@@ -1,0 +1,5 @@
+name: Deployment Intake Auditor
+description: Audits GitHub, Vercel, and Supabase intake pipelines for GO/NO-GO merge decisions.
+branding:
+  color: burgundy
+  accent_color: gold
