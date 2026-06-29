@@ -1,0 +1,265 @@
+.govcon-page {
+  --govcon-burgundy: #5b1624;
+  --govcon-burgundy-dark: #2a0d14;
+  --govcon-gold: #c9a227;
+  --govcon-gold-soft: #f2df9b;
+  --govcon-ivory: #fbf7ef;
+  --govcon-ink: #241b1d;
+  --govcon-muted: #665b5e;
+  --govcon-line: rgba(91, 22, 36, 0.18);
+  background: var(--govcon-ivory);
+  color: var(--govcon-ink);
+}
+
+.govcon-hero {
+  background:
+    linear-gradient(135deg, rgba(42, 13, 20, 0.94), rgba(91, 22, 36, 0.9)),
+    url("/images/stock/Courthouse steps.jpg");
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+  min-height: 68vh;
+  display: flex;
+  align-items: center;
+  padding: clamp(4rem, 8vw, 7rem) 1.5rem;
+}
+
+.govcon-hero__content {
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+
+.govcon-eyebrow,
+.govcon-section-label {
+  color: var(--govcon-gold-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin: 0 0 0.8rem;
+  text-transform: uppercase;
+}
+
+.govcon-section-label {
+  color: var(--govcon-burgundy);
+}
+
+.govcon-hero h1 {
+  color: #fff;
+  font-size: clamp(2.35rem, 6vw, 4.8rem);
+  line-height: 1.02;
+  max-width: 920px;
+  margin: 0;
+}
+
+.govcon-hero__lead {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(1.05rem, 2vw, 1.28rem);
+  max-width: 760px;
+  margin: 1.25rem 0 0;
+}
+
+.govcon-hero__actions,
+.govcon-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 2rem;
+}
+
+.govcon-btn {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0.8rem 1.25rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.govcon-btn:hover,
+.govcon-btn:focus-visible {
+  transform: translateY(-1px);
+}
+
+.govcon-btn--primary,
+.govcon-btn--light {
+  background: var(--govcon-gold);
+  color: var(--govcon-burgundy-dark);
+}
+
+.govcon-btn--secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.52);
+  color: #fff;
+}
+
+.govcon-section {
+  padding: clamp(3rem, 6vw, 5rem) 1.5rem 0;
+}
+
+.govcon-section__header {
+  width: min(920px, 100%);
+  margin: 0 auto 1.6rem;
+}
+
+.govcon-section__header h2,
+.govcon-data-panel h2,
+.govcon-readiness-panel h2,
+.govcon-cta h2 {
+  color: var(--govcon-burgundy-dark);
+  font-size: clamp(1.75rem, 3vw, 2.55rem);
+  line-height: 1.1;
+  margin: 0 0 0.75rem;
+}
+
+.govcon-section__header p,
+.govcon-readiness-panel p,
+.govcon-cta p {
+  color: var(--govcon-muted);
+  font-size: 1.04rem;
+  margin: 0;
+}
+
+.govcon-capability-grid {
+  width: min(1160px, calc(100% - 3rem));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.govcon-capability-card {
+  background: #fff;
+  border: 1px solid var(--govcon-line);
+  border-top: 4px solid var(--govcon-gold);
+  border-radius: 8px;
+  min-height: 210px;
+  padding: 1.25rem;
+}
+
+.govcon-capability-card h3 {
+  color: var(--govcon-burgundy);
+  font-size: 1.15rem;
+  margin: 0 0 0.75rem;
+}
+
+.govcon-capability-card p {
+  color: var(--govcon-muted);
+  margin: 0;
+}
+
+.govcon-details {
+  width: min(1160px, calc(100% - 3rem));
+  margin: clamp(3rem, 6vw, 5rem) auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 1rem;
+}
+
+.govcon-data-panel,
+.govcon-readiness-panel {
+  background: #fff;
+  border: 1px solid var(--govcon-line);
+  border-radius: 8px;
+  padding: clamp(1.4rem, 3vw, 2rem);
+}
+
+.govcon-data-list {
+  display: grid;
+  gap: 0;
+  margin: 1.25rem 0 0;
+}
+
+.govcon-data-list div {
+  border-bottom: 1px solid var(--govcon-line);
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.8rem 0;
+}
+
+.govcon-data-list div:last-child {
+  border-bottom: 0;
+}
+
+.govcon-data-list dt {
+  color: var(--govcon-burgundy);
+  font-weight: 800;
+}
+
+.govcon-data-list dd {
+  color: var(--govcon-muted);
+  margin: 0;
+}
+
+.govcon-readiness-panel ul {
+  color: var(--govcon-muted);
+  display: grid;
+  gap: 0.55rem;
+  margin: 1rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.govcon-cta {
+  background: var(--govcon-burgundy-dark);
+  color: #fff;
+  margin-top: clamp(3rem, 6vw, 5rem);
+  padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+}
+
+.govcon-cta__content {
+  width: min(900px, 100%);
+  margin: 0 auto;
+}
+
+.govcon-cta .govcon-section-label,
+.govcon-cta h2 {
+  color: #fff;
+}
+
+.govcon-cta p {
+  color: rgba(255, 255, 255, 0.84);
+  max-width: 760px;
+}
+
+.govcon-text-link {
+  color: var(--govcon-gold-soft);
+  font-weight: 800;
+}
+
+@media (max-width: 960px) {
+  .govcon-capability-grid,
+  .govcon-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .govcon-hero {
+    min-height: auto;
+  }
+
+  .govcon-hero__actions,
+  .govcon-cta__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .govcon-btn,
+  .govcon-text-link {
+    width: 100%;
+  }
+
+  .govcon-capability-grid,
+  .govcon-details {
+    width: min(100% - 2rem, 1160px);
+    grid-template-columns: 1fr;
+  }
+
+  .govcon-capability-card {
+    min-height: auto;
+  }
+}
