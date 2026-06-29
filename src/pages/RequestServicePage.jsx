@@ -83,6 +83,29 @@ function displayDivisionName(division) {
   return divisionDisplayNames[division.slug] || division.name;
 }
 
+function isPreviewOrDev() {
+  const mode = typeof import.meta !== "undefined" && import.meta.env ? import.meta.env.MODE : "production";
+  const isDev = mode === "development";
+  const isPreview = Boolean(
+    typeof import.meta !== "undefined" &&
+      import.meta.env &&
+      (import.meta.env.VITE_VERCEL_ENV === "preview" || import.meta.env.VITE_APP_ENV === "preview")
+  );
+  return isDev || isPreview;
+}
+
+function formatDiagnosticMessage(diagnostic) {
+  if (!diagnostic) return "";
+  const lines = [
+    `stage: ${diagnostic.stage || "unknown"}`,
+    `code: ${diagnostic.code || "unknown"}`,
+    `message: ${diagnostic.message || "unknown"}`,
+    `details: ${diagnostic.details || "n/a"}`,
+    `hint: ${diagnostic.hint || "n/a"}`,
+  ];
+  return lines.join("\n");
+}
+
 export default function RequestServicePage() {
   const [form, setForm] = useState(initialForm);
   const [divisions, setDivisions] = useState(fallbackDivisions);
@@ -94,6 +117,7 @@ export default function RequestServicePage() {
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
   const [reference, setReference] = useState("");
+  const [diagnosticMessage, setDiagnosticMessage] = useState("");
 
   const leadName = useMemo(() => form.fullName.trim(), [form.fullName]);
   const publicPhone = siteConfig.phoneNumbers.public;
@@ -201,6 +225,7 @@ export default function RequestServicePage() {
     setStatus("submitting");
     setMessage("");
     setReference("");
+    setDiagnosticMessage("");
 
     if (!isSupabaseConfigured || !supabase) {
       setStatus("error");
@@ -233,8 +258,20 @@ export default function RequestServicePage() {
       setMessage(`Your request was received. Reference ${estimate.public_reference}. Dani Declares will review it and follow up as soon as possible.`);
     } catch (error) {
       console.error("Intake submission failed", error);
+      const diagnostic = error?.diagnostic || {
+        stage: "unknown",
+        code: error?.code || null,
+        message: error?.message || "Unknown intake failure",
+        details: error?.details || null,
+        hint: error?.hint || null,
+      };
+
       setStatus("error");
       setMessage(`Something went wrong while saving your request. For urgent requests, call or text ${publicPhone.display}.`);
+
+      if (isPreviewOrDev()) {
+        setDiagnosticMessage(formatDiagnosticMessage(diagnostic));
+      }
     }
   }
 
@@ -274,11 +311,11 @@ export default function RequestServicePage() {
                 <label>Company Name<input name="companyName" autoComplete="organization" value={form.companyName} onChange={handleChange} /></label>
                 <label>Phone *<input name="phone" autoComplete="tel" value={form.phone} onChange={handleChange} required /></label>
                 <label>Email<input type="email" name="email" autoComplete="email" value={form.email} onChange={handleChange} /></label>
-                <label>Client Type<select name="clientType" value={form.clientType} onChange={handleChange}><option value="">Select one</option><option value="homeowner">Homeowner</option><option value="property_manager">Property Manager</option><option value="business">Business</option><option value="contractor">Contractor</option><option value="other">Other</option></select></label>
-                <label>Division Needed *<select name="divisionSlug" value={form.divisionSlug} onChange={handleDivisionChange} required><option value="">Select a division</option>{divisions.map((division) => <option key={division.slug || division.name} value={division.slug || ""}>{displayDivisionName(division)}</option>)}</select></label>
+                <label>Client Type<select name="clientType" value={form.clientType} onChange={handleChange}><option value="">Select one</option><option value="homeowner">Homeowner</option><option value="business">Business</option><option value="government">Government</option><option value="nonprofit">Nonprofit</option><option value="other">Other</option></select></label>
+                <label>Division Needed *<select name="divisionSlug" value={form.divisionSlug} onChange={handleDivisionChange} required><option value="">Select a division</option>{divisions.map((division) => (<option key={division.slug} value={division.slug}>{displayDivisionName(division)}</option>))}</select></label>
                 <label>Service Needed *<input name="serviceNeeded" value={form.serviceNeeded} onChange={handleChange} required placeholder="Example: move-out reset, courier, event setup" /></label>
                 <label>Timeline<input name="timeline" value={form.timeline} onChange={handleChange} placeholder="Example: ASAP, this week, June 15" /></label>
-                <label>How did you find us?<select name="marketingSourceId" value={form.marketingSourceId} onChange={handleMarketingSourceChange}><option value="">Website</option>{marketingSources.map((source) => <option key={source.slug || source.name} value={source.id || ""}>{source.name}</option>)}</select></label>
+                <label>How did you find us?<select name="marketingSourceId" value={form.marketingSourceId} onChange={handleMarketingSourceChange}><option value="">Website</option>{marketingSources.map((source) => (<option key={source.slug} value={String(source.id)}>{source.name}</option>))}</select></label>
                 <label>Service Location<input name="locationAddress" autoComplete="street-address" value={form.locationAddress} onChange={handleChange} placeholder="Street, city, or neighborhood" /></label>
                 <label>City<input name="city" autoComplete="address-level2" value={form.city} onChange={handleChange} /></label>
                 <label>State<input name="state" autoComplete="address-level1" value={form.state} onChange={handleChange} /></label>
@@ -290,21 +327,22 @@ export default function RequestServicePage() {
                 <legend>Select Your Package *</legend>
                 {!activeDivisionSlug && <p className="request-muted">Select a division to load packages.</p>}
                 {activeDivisionSlug && !visiblePackages.length && <p className="request-muted">No public packages are available for this division yet.</p>}
-                {visiblePackages.map((item) => <label className="request-option" key={item.id}><input type="radio" name="selectedPackage" checked={selectedPackageId === item.id} onChange={() => setSelectedPackageId(item.id)} required /><span><strong>{item.public_name || item.package_name}</strong><br /><small>{item.outcome_label || "Service package"} • {formatMoney(packagePrice(item))}</small></span></label>)}
+                {visiblePackages.map((item) => <label className="request-option" key={item.id}><input type="radio" name="selectedPackage" checked={selectedPackageId === item.id} onChange={() => setSelectedPackageId(item.id)} /><div><strong>{item.public_name || item.package_name}</strong><p>{item.outcome_label || "Scope confirmed during intake review."}</p></div><span>{formatMoney(packagePrice(item))}</span></label>)}
               </fieldset>
 
               <fieldset className="request-fieldset">
                 <legend>Add-ons</legend>
-                {visibleAddons.map((item) => <label className="request-option" key={item.id}><input type="checkbox" checked={selectedAddonIds.includes(item.id)} onChange={() => toggleAddon(item.id)} /><span><strong>{item.addon_name}</strong><br /><small>{addonPrice(item) ? formatMoney(addonPrice(item)) : "Quote/review"}</small></span></label>)}
+                {visibleAddons.map((item) => <label className="request-option" key={item.id}><input type="checkbox" checked={selectedAddonIds.includes(item.id)} onChange={() => toggleAddon(item.id)} /><div><strong>{item.addon_name}</strong><p>{item.quote_notes || "Optional enhancement"}</p></div><span>{item.pricing_type === "quote" ? "Quote" : formatMoney(addonPrice(item))}</span></label>)}
               </fieldset>
 
               <label>Photo, File, or Folder Links<textarea name="uploadLinks" value={form.uploadLinks} onChange={handleChange} rows="3" placeholder="Paste links here. One per line." /></label>
-              <label>Request Details *<textarea name="description" value={form.description} onChange={handleChange} required rows="6" placeholder="Describe the property, document, event, delivery, deadline, or support needed." /></label>
+              <label>Request Details *<textarea name="description" value={form.description} onChange={handleChange} required rows="6" placeholder="Describe the property, document, event, delivery, or support needed." /></label>
               <label className="request-checkbox"><input type="checkbox" name="rushRequested" checked={form.rushRequested} onChange={handleChange} /><span>Rush or same-day/next-day support requested</span></label>
 
               <button className="request-submit" type="submit" disabled={status === "submitting"}>{status === "submitting" ? "Submitting..." : "Submit Request"}</button>
               {reference && <p className="request-reference">Reference: <strong>{reference}</strong></p>}
               {message && <p className={`request-message request-message--${status}`}>{message}</p>}
+              {diagnosticMessage && <pre className="request-diagnostic">{diagnosticMessage}</pre>}
             </form>
           </div>
         </section>
