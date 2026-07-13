@@ -6,7 +6,6 @@ import FestivalBanner from "../components/FestivalBanner.jsx";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 
 // festival highlights
-import highlight1 from "../images/festival-images/istockphoto-147288826-612x612.webp";
 import highlight2 from "../images/festival-images/istockphoto-1048325338-612x612.webp";
 import highlight3 from "../images/festival-images/istockphoto-1266364936-612x612.jpg";
 import highlight4 from "../images/festival-images/istockphoto-1495159969-612x612.webp";
