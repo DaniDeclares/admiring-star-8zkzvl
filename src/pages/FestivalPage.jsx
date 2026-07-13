@@ -70,7 +70,7 @@ export default function FestivalPage() {
 
       <header
         className="festival-hero"
-        style={{ backgroundImage: `url(${resolveImageFallback(APP_IMAGES.festival.heroBackground)})` }}
+        style={{ backgroundImage: `url(${resolveImageFallback("festival", "heroBackground")})` }}
       >
         <div className="festival-hero-overlay">
           <h1>Declare Your Worth Festival</h1>

@@ -61,7 +61,7 @@ export default function PartnerNetwork() {
     const selectedPartnership = partnershipLabels[formData.partnershipType] || formData.partnershipType;
 
     return [
-      `Service Type: ${selectedService}`,
+      selectedService ? `Service Type: ${selectedService}` : null,
       formData.serviceArea.trim() ? `Service Area: ${formData.serviceArea.trim()}` : null,
       formData.website.trim() ? `Website or Social: ${formData.website.trim()}` : null,
       selectedPartnership ? `Partnership Interest: ${selectedPartnership}` : null,

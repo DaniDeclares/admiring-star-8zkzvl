@@ -55,6 +55,7 @@ export default function BlogPage() {
           status: "new",
           notes: "Blog subscriber requested updates from the blog page.",
         },
+        requestPayload: null,
       });
 
       setSubscribeForm(initialSubscribeForm);
