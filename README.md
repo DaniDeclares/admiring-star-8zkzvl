@@ -72,7 +72,7 @@ Entry Service
 Examples:
 
 - Field Execution Training job → property reset → photo documentation → key/courier support → recurring property manager relationship
-- EventOps job → planning/setup → custom labels/stickers → shirts/merch → breakdown support
+- Event Planning & On-Site Setup job → planning/setup → custom labels/stickers → shirts/merch → breakdown support
 - Document Lifecycle Management job → printing/scanning → document prep → courier → packaging/submission support
 - BusinessOps job → setup packet → digital folders → labels/stickers → admin system
 - VendorOps/REACH job → Dani captures lead → routes fulfillment → documents quality → builds partner capacity
@@ -228,7 +228,7 @@ Positioning:
 
 Dispatch is not the main identity. Carrier back-office and logistics operations support are stronger.
 
-### 5.4 EventOps / Event Planning & Execution
+### 5.4 Event Planning & On-Site Setup / Event Planning & Execution
 
 Purpose:
 
@@ -251,7 +251,7 @@ Positioning:
 
 Dani Declares handles execution, not just planning ideas.
 
-### 5.5 ProductOps / Stickers, Labels, Heat Press, Merch & Event Products
+### 5.5 Custom Print & Merchandise Prep / Stickers, Labels, Heat Press, Merch & Event Products
 
 Purpose:
 
@@ -276,7 +276,7 @@ Includes:
 
 Rule:
 
-ProductOps supports higher-ticket bundles, events, branding, marketing packets, and client deliverables. It should not distract from revenue-generating service execution.
+Custom Print & Merchandise Prep supports higher-ticket bundles, events, branding, marketing packets, and client deliverables. It should not distract from revenue-generating service execution.
 
 ### 5.6 DesignOps / Canva, CADlink, Print Prep, DTF & Production Workflow
 
@@ -328,7 +328,7 @@ Content channels:
 2. Dani Declares business page
 3. Dani’s Logistics / trucking operations content
 
-### 5.8 GovOps / Government Contracting Support
+### 5.8 Government & Compliance Support / Government Contracting Support
 
 Purpose:
 
@@ -747,7 +747,7 @@ It should:
 
 Known follow-up improvement:
 
-- Update fallback divisions to include ProductOps, DesignOps, and MediaOps.
+- Update fallback divisions to include Custom Print & Merchandise Prep, DesignOps, and MediaOps.
 - Replace any outdated notary-specific public notes with compliance-safe operations language.
 - Complete live form test after deployment.
 
@@ -762,11 +762,11 @@ The goal is one unified Ops Portal that can support:
 - Document Lifecycle Management
 - Field Execution Training
 - Courier Logistics Support
-- EventOps
-- ProductOps
+- Event Planning & On-Site Setup
+- Custom Print & Merchandise Prep
 - DesignOps
 - MediaOps
-- GovOps
+- Government & Compliance Support
 - VendorOps
 - BusinessOps
 
@@ -876,7 +876,7 @@ Current gaps to address after this README update:
 1. Homepage should prioritize `/request-service` as the main intake CTA.
 2. Contact page is outdated and still notary-first.
 3. Services page says “five service divisions” and needs expansion or repositioning.
-4. ProductOps, DesignOps, MediaOps, and VendorOps need clearer placement.
+4. Custom Print & Merchandise Prep, DesignOps, MediaOps, and VendorOps need clearer placement.
 5. Partner Network page has placeholder HubSpot endpoint code and is not production-ready.
 6. Phone numbers are inconsistent across pages.
 7. Notary language must be compliance-safe across the site.

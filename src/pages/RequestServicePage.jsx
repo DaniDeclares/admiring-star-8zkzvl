@@ -5,14 +5,14 @@ import { supabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
 import "./RequestServicePage.css";
 
 const fallbackDivisions = [
-  { id: null, name: "DocOps / Document & Compliance" },
-  { id: null, name: "FieldOps / Property Operations & Resets" },
-  { id: null, name: "CourierOps / Logistics & Courier" },
-  { id: null, name: "EventOps / Event Planning & Execution" },
-  { id: null, name: "ProductOps / Stickers, Labels, Heat Press & Merch" },
+  { id: null, name: "Administrative & Document Management / Document & Compliance" },
+  { id: null, name: "On-Site Field Logistics / Property Operations & Resets" },
+  { id: null, name: "Mobile Courier Services / Logistics & Courier" },
+  { id: null, name: "Event Planning & On-Site Setup / Event Planning & Execution" },
+  { id: null, name: "Custom Print & Merchandise Prep / Stickers, Labels, Heat Press & Merch" },
   { id: null, name: "DesignOps / Canva, CADlink, DTF & Print Prep" },
   { id: null, name: "MediaOps / Content & Lead Generation" },
-  { id: null, name: "GovOps / Government Contracting Support" },
+  { id: null, name: "Government & Compliance Support / Government Contracting Support" },
   { id: null, name: "VendorOps / Vendor Readiness & Subcontractors" },
   { id: null, name: "BusinessOps / Admin Systems & Business Support" },
 ];

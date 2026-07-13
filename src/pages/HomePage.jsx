@@ -39,11 +39,11 @@ export default function Homepage() {
             </div>
             <div className="dd-visual-card">
               <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Event planning and execution support" loading="eager" />
-              <span>EventOps</span>
+              <span>Event Planning & On-Site Setup</span>
             </div>
             <div className="dd-visual-card">
               <img src="/images/stock/Courthouse steps.jpg" alt="Government and compliance support" loading="eager" />
-              <span>GovOps</span>
+              <span>Government & Compliance Support</span>
             </div>
           </div>
         </div>
@@ -64,40 +64,40 @@ export default function Homepage() {
           <p className="dd-section-sub">Select the operation type that matches your need. We route and execute from there.</p>
           <div className="dd-lanes-grid">
             <div className="dd-lane-card">
-              <span className="dd-lane-tag">DocOps</span>
+              <span className="dd-lane-tag">Administrative & Document Management</span>
               <h3>Document &amp; Compliance</h3>
               <p>Notary, apostille, document prep, I-9 verification, printing, and full packaging.</p>
-              <Link to="/request-service" className="dd-btn-link">Request DocOps →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request Administrative & Document Management →</Link>
             </div>
             <div className="dd-lane-card">
-              <span className="dd-lane-tag">FieldOps</span>
+              <span className="dd-lane-tag">On-Site Field Logistics</span>
               <h3>Field Services &amp; Property</h3>
               <p>Move-in/out cleaning, deep cleaning, rental turnovers, and full property resets.</p>
-              <Link to="/request-service" className="dd-btn-link">Request FieldOps →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request On-Site Field Logistics →</Link>
             </div>
             <div className="dd-lane-card">
-              <span className="dd-lane-tag">CourierOps</span>
+              <span className="dd-lane-tag">Mobile Courier Services</span>
               <h3>Logistics &amp; Courier</h3>
               <p>Court runs, document delivery, facility visits, and carrier back-office support.</p>
-              <Link to="/request-service" className="dd-btn-link">Request CourierOps →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request Mobile Courier Services →</Link>
             </div>
             <div className="dd-lane-card">
-              <span className="dd-lane-tag">EventOps</span>
+              <span className="dd-lane-tag">Event Planning & On-Site Setup</span>
               <h3>Event Planning &amp; Execution</h3>
               <p>Full planning, vendor coordination, setup, breakdown, and custom decor production.</p>
-              <Link to="/request-service" className="dd-btn-link">Request EventOps →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request Event Planning & On-Site Setup →</Link>
             </div>
             <div className="dd-lane-card">
-              <span className="dd-lane-tag">GovOps</span>
+              <span className="dd-lane-tag">Government & Compliance Support</span>
               <h3>Government &amp; Compliance</h3>
               <p>Court filings, government office runs, compliance documentation, and agency support.</p>
-              <Link to="/request-service" className="dd-btn-link">Request GovOps →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request Government & Compliance Support →</Link>
             </div>
             <div className="dd-lane-card">
-              <span className="dd-lane-tag">ProductOps</span>
+              <span className="dd-lane-tag">Custom Print & Merchandise Prep</span>
               <h3>Product, Print &amp; Merch Support</h3>
               <p>Stickers, labels, heat press apparel, business merch, event products, and branded add-ons.</p>
-              <Link to="/request-service" className="dd-btn-link">Request ProductOps →</Link>
+              <Link to="/request-service" className="dd-btn-link">Request Custom Print & Merchandise Prep →</Link>
             </div>
           </div>
           <div className="dd-divisions-footer">

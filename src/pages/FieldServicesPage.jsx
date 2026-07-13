@@ -11,7 +11,7 @@ const readinessLabels = [
   "Market-Ready",
 ];
 
-const fieldOpsHandles = [
+const fieldLogisticsHandles = [
   "Property reset planning and scope of work creation",
   "Move-in, move-out, rental, and short-term rental turnover support",
   "Deep cleaning, post-construction cleaning, and detail reset coordination",
@@ -20,7 +20,7 @@ const fieldOpsHandles = [
   "Recurring property support for managers, landlords, investors, and hosts",
 ];
 
-const fieldOpsProcess = [
+const fieldLogisticsProcess = [
   "Property Assessment",
   "Scope Creation",
   "Estimate Generation",
@@ -33,14 +33,14 @@ export default function FieldServicesPage() {
   return (
     <>
       <Helmet>
-        <title>FieldOps Property Operations & Reset Services — Dani Declares LLC</title>
-        <meta name="description" content="Dani Declares FieldOps provides property operations and reset services for move-ready, guest-ready, inspection-ready, and market-ready properties across Metro Atlanta." />
+        <title>On-Site Field Logistics Property Operations & Reset Services — Dani Declares LLC</title>
+        <meta name="description" content="Dani Declares On-Site Field Logistics provides property operations and reset services for move-ready, guest-ready, inspection-ready, and market-ready properties across Metro Atlanta." />
       </Helmet>
       <div className="fs-page">
 
         <header className="fs-header">
           <div className="fs-container">
-            <p className="fs-eyebrow">Dani Declares FieldOps</p>
+            <p className="fs-eyebrow">Dani Declares On-Site Field Logistics</p>
             <h1>Property Operations & Reset Services</h1>
             <p>We prepare properties for the next tenant, guest, buyer, inspection, or use with a clear scope, coordinated execution, photo documentation, and completion reporting.</p>
             <div className="fs-readiness-row" aria-label="Property readiness outcomes">
@@ -50,16 +50,16 @@ export default function FieldServicesPage() {
             </div>
             <div className="fs-header-ctas">
               <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="fs-btn-primary">Call / Text {siteConfig.phoneNumbers.public.display}</a>
-              <Link to="/contact" className="fs-btn-secondary">Request a FieldOps Quote</Link>
+              <Link to="/contact" className="fs-btn-secondary">Request a On-Site Field Logistics Quote</Link>
             </div>
           </div>
         </header>
 
         <section className="fs-section fs-intro">
           <div className="fs-container">
-            <h2>FieldOps Is More Than Cleaning</h2>
+            <h2>On-Site Field Logistics Is More Than Cleaning</h2>
             <p className="fs-lead-copy">
-              Dani Declares FieldOps is the Property Operations & Reset division of Dani Declares LLC. It is built for property managers, landlords, investors, real estate professionals, Airbnb hosts, contractors, and businesses that need properties handled from assessment to completion.
+              Dani Declares On-Site Field Logistics is the Property Operations & Reset division of Dani Declares LLC. It is built for property managers, landlords, investors, real estate professionals, Airbnb hosts, contractors, and businesses that need properties handled from assessment to completion.
             </p>
             <p className="fs-lead-copy">
               The focus is not just cleaning a space. The focus is making the property move-ready, guest-ready, inspection-ready, or market-ready with organized field execution and documentation.
@@ -69,9 +69,9 @@ export default function FieldServicesPage() {
 
         <section className="fs-section fs-alt fs-operations">
           <div className="fs-container">
-            <h2>What FieldOps Handles</h2>
+            <h2>What On-Site Field Logistics Handles</h2>
             <div className="fs-grid">
-              {fieldOpsHandles.map((item) => (
+              {fieldLogisticsHandles.map((item) => (
                 <div className="fs-card" key={item}>
                   <h3>{item}</h3>
                   <p>Handled with a property operations mindset so the work is scoped, coordinated, documented, and ready for the next step.</p>
@@ -83,9 +83,9 @@ export default function FieldServicesPage() {
 
         <section className="fs-section fs-process-section">
           <div className="fs-container">
-            <h2>FieldOps Process</h2>
+            <h2>On-Site Field Logistics Process</h2>
             <div className="fs-process-grid">
-              {fieldOpsProcess.map((step, index) => (
+              {fieldLogisticsProcess.map((step, index) => (
                 <div className="fs-process-card" key={step}>
                   <span className="fs-process-number">{index + 1}</span>
                   <h3>{step}</h3>
@@ -193,7 +193,7 @@ export default function FieldServicesPage() {
           <div className="fs-container">
             <h2>Built for Managers Who Need Proof</h2>
             <p className="fs-lead-copy">
-              FieldOps supports property files with before/after documentation, condition notes, completion reporting, and scope-based execution. This helps managers, owners, and vendors know what was requested, what was handled, and what may need follow-up.
+              On-Site Field Logistics supports property files with before/after documentation, condition notes, completion reporting, and scope-based execution. This helps managers, owners, and vendors know what was requested, what was handled, and what may need follow-up.
             </p>
           </div>
         </section>
@@ -233,7 +233,7 @@ export default function FieldServicesPage() {
             <div className="fs-header-ctas">
               <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="fs-btn-primary">Call / Text GA: {siteConfig.phoneNumbers.public.display}</a>
               <a href={`tel:${siteConfig.phoneNumbers.sc.tel}`} className="fs-btn-primary">Call / Text SC: {siteConfig.phoneNumbers.sc.display}</a>
-              <Link to="/contact" className="fs-btn-secondary">Request a FieldOps Quote</Link>
+              <Link to="/contact" className="fs-btn-secondary">Request a On-Site Field Logistics Quote</Link>
             </div>
           </div>
         </section>
