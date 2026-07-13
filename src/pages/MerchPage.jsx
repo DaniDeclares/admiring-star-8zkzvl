@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
@@ -146,10 +146,11 @@ const faqs = [
 ];
 
 export default function MerchPage() {
+  const servicesRef = useRef(null);
   const [openFaq, setOpenFaq] = useState(null);
 
   const scrollToServices = () => {
-    document.getElementById("merch-services")?.scrollIntoView({ behavior: "smooth" });
+    servicesRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -206,7 +207,7 @@ export default function MerchPage() {
           </div>
         </section>
 
-        <section id="merch-services" className="merch-section merch-section--alt">
+        <section id="merch-services" ref={servicesRef} className="merch-section merch-section--alt">
           <div className="merch-container">
             <div className="merch-section-heading">
               <h2>What We Print &amp; Press</h2>

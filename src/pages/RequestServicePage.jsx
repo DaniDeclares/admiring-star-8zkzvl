@@ -52,6 +52,10 @@ const getDivisionIdForSubmission = (divisionValue) => (
   /^\d+$/.test(divisionValue) ? Number(divisionValue) : null
 );
 
+const getDivisionQueryToken = (divisionName) => (
+  divisionName.split("/")[0].trim().toLowerCase()
+);
+
 export default function RequestServicePage() {
   const location = useLocation();
   const [form, setForm] = useState(initialForm);
@@ -92,9 +96,13 @@ export default function RequestServicePage() {
 
     if (!requestedDivision) return;
 
-    const matchingDivision = divisions.find((division) =>
-      division.name.toLowerCase().startsWith(requestedDivision)
-    );
+    const matchingDivision = divisions.find((division) => {
+      const normalizedName = division.name.toLowerCase();
+      return (
+        normalizedName === requestedDivision ||
+        getDivisionQueryToken(division.name) === requestedDivision
+      );
+    });
 
     if (!matchingDivision) return;
 
