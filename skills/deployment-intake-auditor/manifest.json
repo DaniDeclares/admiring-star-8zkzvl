@@ -1,0 +1,27 @@
+{
+  "name": "deployment-intake-auditor",
+  "version": "1.0.0",
+  "description": "Automated pipeline auditor that verifies GitHub PRs, checks Vercel environmental drift, tracks test payloads, and runs relational integrity checks across Supabase intake layers to issue a binary GO/NO-GO merge decision.",
+  "entrypoint": "src/index.js",
+  "triggers": [
+    "manual_run_deployment_audit",
+    "verify_pr_pipeline",
+    "vercel_preview_build_complete"
+  ],
+  "configuration": {
+    "target_supabase_project_ref": "ajxezpczaemunlcmqlgl",
+    "target_supabase_region": "us-east-2",
+    "default_test_lead_name": "DDOS Test Lead",
+    "enable_junction_integrity_by_default": true,
+    "enforce_strict_phase1_execution_order": true
+  },
+  "permissions": {
+    "github": ["read:pull_requests", "read:contents", "read:statuses"],
+    "vercel": ["read:deployments", "read:projects", "read:logs"],
+    "supabase": ["read:tables", "execute:queries", "read:policies"]
+  },
+  "metadata": {
+    "architecture_layer": "B2B/B2G Intake Pipeline Safeguard",
+    "owner": "Dani Declares LLC Operations"
+  }
+}
