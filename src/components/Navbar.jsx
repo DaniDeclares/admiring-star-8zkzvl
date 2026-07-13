@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logoSeal from "../images/logo/logo-gold-seal.png";
 import "./Navbar.css";
 
 export default function Navbar() {
