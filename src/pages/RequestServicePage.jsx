@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
 import { supabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
 import "./RequestServicePage.css";
@@ -45,7 +46,18 @@ const initialForm = {
   description: "",
 };
 
+const getDivisionOptionValue = (division) => String(division.id ?? division.name);
+
+const getDivisionIdForSubmission = (divisionValue) => (
+  /^\d+$/.test(divisionValue) ? Number(divisionValue) : null
+);
+
+const getDivisionQueryToken = (divisionName) => (
+  divisionName.split("/")[0].trim().toLowerCase()
+);
+
 export default function RequestServicePage() {
+  const location = useLocation();
   const [form, setForm] = useState(initialForm);
   const [divisions, setDivisions] = useState(fallbackDivisions);
   const [marketingSources, setMarketingSources] = useState(fallbackMarketingSources);
@@ -54,6 +66,10 @@ export default function RequestServicePage() {
 
   const leadName = useMemo(() => form.fullName.trim(), [form.fullName]);
   const publicPhone = siteConfig.phoneNumbers.public;
+  const requestedDivision = useMemo(
+    () => new URLSearchParams(location.search).get("division")?.trim().toLowerCase() || "",
+    [location.search]
+  );
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -78,6 +94,26 @@ export default function RequestServicePage() {
 
     loadOptions();
   }, []);
+
+  useEffect(() => {
+    if (!requestedDivision) return;
+
+    const matchingDivision = divisions.find((division) => {
+      const normalizedName = division.name.toLowerCase();
+      return (
+        normalizedName === requestedDivision ||
+        getDivisionQueryToken(division.name) === requestedDivision
+      );
+    });
+
+    if (!matchingDivision) return;
+
+    const nextDivisionId = getDivisionOptionValue(matchingDivision);
+
+    if (form.divisionId === nextDivisionId) return;
+
+    setForm((current) => ({ ...current, divisionId: nextDivisionId }));
+  }, [divisions, form.divisionId, requestedDivision]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -136,7 +172,7 @@ export default function RequestServicePage() {
 
       const requestPayload = {
         lead_id: lead?.id || null,
-        division_id: form.divisionId ? Number(form.divisionId) : null,
+        division_id: getDivisionIdForSubmission(form.divisionId),
         service_needed: form.serviceNeeded || null,
         location_address: form.locationAddress || null,
         timeline: form.timeline || null,
@@ -233,7 +269,7 @@ export default function RequestServicePage() {
                   <select name="divisionId" value={form.divisionId} onChange={handleChange} required>
                     <option value="">Select a division</option>
                     {divisions.map((division) => (
-                      <option key={division.name} value={division.id || ""}>{division.name}</option>
+                      <option key={division.name} value={getDivisionOptionValue(division)}>{division.name}</option>
                     ))}
                   </select>
                 </label>
