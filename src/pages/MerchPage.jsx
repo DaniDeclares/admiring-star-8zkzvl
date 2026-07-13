@@ -146,7 +146,7 @@ const faqs = [
 ];
 
 export default function MerchPage() {
-  const [openFaq, setOpenFaq] = useState(0);
+  const [openFaq, setOpenFaq] = useState(null);
 
   const scrollToServices = () => {
     document.getElementById("merch-services")?.scrollIntoView({ behavior: "smooth" });

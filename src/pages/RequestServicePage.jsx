@@ -46,6 +46,12 @@ const initialForm = {
   description: "",
 };
 
+const getDivisionOptionValue = (division) => String(division.id ?? division.name);
+
+const getDivisionIdForSubmission = (divisionValue) => (
+  /^\d+$/.test(divisionValue) ? Number(divisionValue) : null
+);
+
 export default function RequestServicePage() {
   const location = useLocation();
   const [form, setForm] = useState(initialForm);
@@ -93,7 +99,7 @@ export default function RequestServicePage() {
     if (!matchingDivision) return;
 
     setForm((current) => {
-      const nextDivisionId = String(matchingDivision.id ?? matchingDivision.name);
+      const nextDivisionId = getDivisionOptionValue(matchingDivision);
 
       if (current.divisionId === nextDivisionId) {
         return current;
@@ -154,7 +160,7 @@ export default function RequestServicePage() {
 
       const requestPayload = {
         lead_id: lead?.id || null,
-        division_id: /^\d+$/.test(form.divisionId) ? Number(form.divisionId) : null,
+        division_id: getDivisionIdForSubmission(form.divisionId),
         service_needed: form.serviceNeeded || null,
         location_address: form.locationAddress || null,
         timeline: form.timeline || null,
@@ -249,7 +255,7 @@ export default function RequestServicePage() {
                   <select name="divisionId" value={form.divisionId} onChange={handleChange} required>
                     <option value="">Select a division</option>
                     {divisions.map((division) => (
-                      <option key={division.name} value={String(division.id ?? division.name)}>{division.name}</option>
+                      <option key={division.name} value={getDivisionOptionValue(division)}>{division.name}</option>
                     ))}
                   </select>
                 </label>
