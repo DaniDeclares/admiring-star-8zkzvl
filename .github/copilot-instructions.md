@@ -14,7 +14,7 @@ This repository contains the software infrastructure for Dani Declares LLC. All 
 
 You are strictly forbidden from writing code that updates the front-end user interface to show a successful state, reference code, or transaction confirmation before verifying that the network transaction has successfully cleared the backend database gateway without error objects.
 
-- **Required Action:** Always validate `if (error) throw error;` at every step of an asynchronous Supabase promise chain before clearing user inputs or transitioning views.
+- **Required Action:** Always validate `if (error) throw error;` at every step of an asynchronous Supabase promise chain, or trigger an equivalent immediate fail-fast error path before clearing user inputs or transitioning views.
 - **Failure Mode Prevention:** If database success cannot be definitively proven, the transaction must be treated as completely failed, a sanitized error displayed, and the form state preserved.
 
 ### 2. Multi-Workstream Safety (Anti-Contamination Rule)
@@ -42,7 +42,7 @@ When catching exceptions across data nodes, never print the raw `error` string o
 ```js
 catch (err) {
   console.error("DDOS Intake Stage Failure [context_tag]", {
-    error: err,
+    error: "Sanitize raw error objects before logging in production environments.",
     message: err?.message,
     details: err?.details,
     code: err?.code || "UNKNOWN_ERR",
