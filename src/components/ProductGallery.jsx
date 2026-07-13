@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Lightbox from "react-image-lightbox";
 import "react-image-lightbox/style.css";
+import { useNavigate } from "react-router-dom";
 import { APP_IMAGES, resolveImageFallback } from "../assets/images.js";
 import "./ProductGallery.css";
 
@@ -13,7 +14,6 @@ const productGroups = [
       APP_IMAGES.products.gallery.cheaperKeepDadMug.secondary,
       APP_IMAGES.products.gallery.cheaperKeepDadMug.tertiary,
     ],
-    paylink: "https://g3umzm-cq.myshopify.com/products/cheaper-to-keep-dad-mug",
   },
   {
     id: "dad-documents-sleeve",
@@ -23,16 +23,27 @@ const productGroups = [
       APP_IMAGES.products.gallery.dadDocumentsLaptopSleeve.secondary,
       APP_IMAGES.products.gallery.dadDocumentsLaptopSleeve.tertiary,
     ],
-    paylink: "https://g3umzm-cq.myshopify.com/products/dad-documents-laptop-sleeve",
   },
 ];
 
 export default function ProductGallery() {
+  const navigate = useNavigate();
   const [lightbox, setLightbox] = useState({
     isOpen: false,
     groupIdx: 0,
     imgIdx: 0,
   });
+
+  const routeProductInquiry = (productName) => {
+    const targetPackage = encodeURIComponent(productName);
+
+    navigate(`/request-service?source=shop&package=${targetPackage}`, {
+      state: {
+        serviceNeeded: "Merchandise Printing",
+        notes: `Inquiry regarding custom printing for: ${productName}`,
+      },
+    });
+  };
 
   const openLightbox = (groupIdx, imgIdx) => {
     setLightbox({ isOpen: true, groupIdx, imgIdx });
@@ -78,14 +89,13 @@ export default function ProductGallery() {
               />
             ))}
           </div>
-          <a
-            href={group.paylink}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
             className="btn btn--primary buy-now-button"
+            onClick={() => routeProductInquiry(group.title)}
           >
-            Buy Now
-          </a>
+            Request Custom Quote
+          </button>
         </div>
       ))}
 

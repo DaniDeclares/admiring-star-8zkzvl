@@ -9,9 +9,9 @@ jest.mock("../lib/supabaseClient.js", () => ({
   isSupabaseConfigured: false,
 }));
 
-const renderPage = () =>
+const renderPage = (initialEntry = "/request-service") =>
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[initialEntry]}>
       <HelmetProvider>
         <RequestServicePage />
       </HelmetProvider>
@@ -36,6 +36,22 @@ describe("RequestServicePage", () => {
     });
 
     expect(submitButton).toBeEnabled();
+  });
+
+  it("prefills shop inquiries from routed state and query params", () => {
+    renderPage({
+      pathname: "/request-service",
+      search: "?source=shop&package=Cheaper%20to%20Keep%20Dad%20Mug",
+      state: {
+        serviceNeeded: "Merchandise Printing",
+        notes: "Inquiry regarding custom printing for: Cheaper to Keep Dad Mug",
+      },
+    });
+
+    expect(screen.getByRole("textbox", { name: /service needed/i })).toHaveValue("Merchandise Printing");
+    expect(screen.getByRole("textbox", { name: /request details/i })).toHaveValue(
+      "Inquiry regarding custom printing for: Cheaper to Keep Dad Mug"
+    );
   });
 
   it("displays unavailable message when Supabase is not configured", () => {

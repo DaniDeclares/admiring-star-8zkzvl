@@ -82,6 +82,23 @@ const IMAGE_MATRIX = {
         tertiary: "/images/products/Dad Documents Laptop Sleeve3.jpg",
       },
     },
+    shop: {
+      cheaperToKeepDadMug: "/images/products/cheaper-to-keep-dad-mug/13417731404300332877_2048.jpg",
+      signedSealedDadliveredGlassMug: "/images/products/signed-sealed-dadlivered-glass-mug/13417731404300332877_2048_800.jpg",
+      licenseToDadMug: "/images/products/license-to-dad-mug/13673897199289775117_2048_800.jpg",
+      licenseToDadBeachTowel: "/images/products/license-to-dad-beach-towel/10363092619905953242_2048.jpg",
+      cheaperToKeepDadBeachTowel: "/images/products/cheaper-to-keep-dad-beach-towel/9879137063207955309_2048_800x.jpg",
+      grillSergeantBeachTowel: "/images/products/grill-sergeant-beach-towel/9879137063207955309_2048_800x.jpg",
+      officialDadDocumentsToteBag: "/images/products/official-dad-documents-tote-bag/11901353032387740085_2048_800x800.jpg",
+      dadDocumentsLaptopSleeve: "/images/products/dad-documents-laptop-sleeve/11010138353168134045_2048_800x800.jpg",
+      declareYourWorthTee: "/images/products/declare-your-worth-tee/11901353032387740085_2048_800x800.jpg",
+      heartfeltDadUnisexTee: "/images/products/heartfelt-dad-unisex-tee/9375045573264734471_2048.jpg",
+      dadDocumentsLaptopSleeveAlt: "/images/products/dad-documents-laptop-sleeve/404397518277071714_2048_800x800.jpg",
+      unisexGarmentDyedTshirt: "/images/products/unisex-garment-dyed-tshirt/CPxzKdjZLCfK73jMmEVThn.jpg",
+      dadsBeachTowelLicenseToDad: "/images/products/dads-beach-towel-license-to-dad/UYEy6AHSqBbqNquao85NoK.jpg",
+      declareYourWorthEbook: "/images/products/declare-your-worth-ebook.png",
+      businessPlannerDigital: "/images/products/business-planner-digital.png",
+    },
   },
   branding: {
     hero: {

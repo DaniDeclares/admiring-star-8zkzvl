@@ -66,10 +66,42 @@ export default function RequestServicePage() {
 
   const leadName = useMemo(() => form.fullName.trim(), [form.fullName]);
   const publicPhone = siteConfig.phoneNumbers.public;
-  const requestedDivision = useMemo(
-    () => new URLSearchParams(location.search).get("division")?.trim().toLowerCase() || "",
+  const requestSearchParams = useMemo(
+    () => new URLSearchParams(location.search),
     [location.search]
   );
+  const requestedDivision = useMemo(
+    () => requestSearchParams.get("division")?.trim().toLowerCase() || "",
+    [requestSearchParams]
+  );
+  const requestedSource = useMemo(
+    () => requestSearchParams.get("source")?.trim().toLowerCase() || "",
+    [requestSearchParams]
+  );
+  const requestedPackage = useMemo(
+    () => requestSearchParams.get("package")?.trim() || "",
+    [requestSearchParams]
+  );
+  const requestedServiceNeeded = useMemo(() => {
+    const stateServiceNeeded = location.state?.serviceNeeded;
+
+    if (typeof stateServiceNeeded === "string" && stateServiceNeeded.trim()) {
+      return stateServiceNeeded.trim();
+    }
+
+    return requestedSource === "shop" ? "Merchandise Printing" : "";
+  }, [location.state, requestedSource]);
+  const requestedDescription = useMemo(() => {
+    const stateNotes = location.state?.notes;
+
+    if (typeof stateNotes === "string" && stateNotes.trim()) {
+      return stateNotes.trim();
+    }
+
+    return requestedPackage
+      ? `Inquiry regarding custom printing for: ${requestedPackage}`
+      : "";
+  }, [location.state, requestedPackage]);
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -114,6 +146,28 @@ export default function RequestServicePage() {
 
     setForm((current) => ({ ...current, divisionId: nextDivisionId }));
   }, [divisions, form.divisionId, requestedDivision]);
+
+
+  useEffect(() => {
+    if (!requestedServiceNeeded && !requestedDescription) return;
+
+    setForm((current) => {
+      const nextForm = { ...current };
+      let hasChanges = false;
+
+      if (requestedServiceNeeded && current.serviceNeeded !== requestedServiceNeeded) {
+        nextForm.serviceNeeded = requestedServiceNeeded;
+        hasChanges = true;
+      }
+
+      if (requestedDescription && current.description !== requestedDescription) {
+        nextForm.description = requestedDescription;
+        hasChanges = true;
+      }
+
+      return hasChanges ? nextForm : current;
+    });
+  }, [requestedDescription, requestedServiceNeeded]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
