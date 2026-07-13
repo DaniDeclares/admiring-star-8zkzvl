@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logoSeal from "../assets/logo/logo-gold-seal.png";
+import { resolveImageFallback } from "../assets/images.js";
 import "./Navbar.css";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const logoSeal = resolveImageFallback("logos", "primary");
+
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setMenuOpen(false);

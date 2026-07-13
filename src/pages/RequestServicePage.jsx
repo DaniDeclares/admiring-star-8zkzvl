@@ -99,11 +99,13 @@ export default function RequestServicePage() {
     event.preventDefault();
     setStatus("submitting");
     setMessage("");
+    const genericErrorMessage = `Something went wrong while saving your request. For urgent requests, call or text ${publicPhone.display}.`;
+    const supabaseErrorMessage = `We couldn't save your request right now. Please try again. For urgent requests, call or text ${publicPhone.display}.`;
 
     if (!isSupabaseConfigured || !supabase) {
       setStatus("error");
       setMessage(
-        `The request system is not fully connected yet. For urgent requests, call or text ${publicPhone.display}.`
+        `Request submission is temporarily unavailable. For urgent requests, call or text ${publicPhone.display}.`
       );
       return;
     }
@@ -126,7 +128,11 @@ export default function RequestServicePage() {
         .select("id")
         .single();
 
-      if (leadError) throw leadError;
+      if (leadError) {
+        setStatus("error");
+        setMessage(supabaseErrorMessage);
+        return;
+      }
 
       const requestPayload = {
         lead_id: lead?.id || null,
@@ -144,7 +150,11 @@ export default function RequestServicePage() {
         .from("service_requests")
         .insert(requestPayload);
 
-      if (requestError) throw requestError;
+      if (requestError) {
+        setStatus("error");
+        setMessage(supabaseErrorMessage);
+        return;
+      }
 
       // TODO: Automated lead notification not yet implemented.
       // Next step: add a Supabase Edge Function or webhook to notify Dani Declares
@@ -158,9 +168,7 @@ export default function RequestServicePage() {
       );
     } catch (error) {
       setStatus("error");
-      setMessage(
-        `Something went wrong while saving your request. For urgent requests, call or text ${publicPhone.display}.`
-      );
+      setMessage(genericErrorMessage);
     }
   };
 
@@ -261,7 +269,7 @@ export default function RequestServicePage() {
                 <textarea name="description" value={form.description} onChange={handleChange} required rows="6" placeholder="Describe the property, document, event, delivery, deadline, or support needed." />
               </label>
 
-              <button className="request-submit" type="submit" disabled={status === "submitting"}>
+              <button className="request-submit" type="submit" disabled={!form.fullName || !form.email || !form.serviceNeeded}>
                 {status === "submitting" ? "Submitting..." : "Submit Request"}
               </button>
 
