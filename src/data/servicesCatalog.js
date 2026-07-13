@@ -1,5 +1,14 @@
 export const STRIPE_PUBLISHABLE_KEY =
-  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
+  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
+
+export const assertStripePublishableKey = () => {
+  if (!STRIPE_PUBLISHABLE_KEY) {
+    throw new Error(
+      "Stripe publishable key is not configured. Set REACT_APP_STRIPE_PUBLISHABLE_KEY."
+    );
+  }
+  return STRIPE_PUBLISHABLE_KEY;
+};
 
 export const SERVICES = {
   printing_scanning: {

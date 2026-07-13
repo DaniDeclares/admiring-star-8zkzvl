@@ -42,13 +42,17 @@ const loadPrices = async () => {
 };
 
 const loadPaymentLinks = async () => {
-  const content = await fs.readFile(paymentLinksPath, "utf-8");
-  return parseCsv(content)
-    .filter((row) => row.id && row.url)
-    .reduce((acc, row) => {
-      acc[row.id] = row.url;
-      return acc;
-    }, {});
+  try {
+    const content = await fs.readFile(paymentLinksPath, "utf-8");
+    return parseCsv(content)
+      .filter((row) => row.id && row.url)
+      .reduce((acc, row) => {
+        acc[row.id] = row.url;
+        return acc;
+      }, {});
+  } catch (error) {
+    throw new Error(`Unable to read payment links from ${paymentLinksPath}: ${error.message}`);
+  }
 };
 
 const checkLink = async (id, url) => {
