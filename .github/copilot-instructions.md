@@ -42,7 +42,7 @@ When catching exceptions across data nodes, never print the raw `error` string o
 ```js
 catch (err) {
   console.error("DDOS Intake Stage Failure [context_tag]", {
-    error: "Sanitize raw error objects before logging in production environments.",
+    errorType: err?.name || "UNKNOWN_ERROR",
     message: err?.message,
     details: err?.details,
     code: err?.code || "UNKNOWN_ERR",
