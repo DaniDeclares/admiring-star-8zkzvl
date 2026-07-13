@@ -237,6 +237,10 @@ const looksLikeAssetPath = (value) => (
   && /\.[a-z0-9]+($|[?#])/i.test(value)
 );
 
+/**
+ * Resolve an image from APP_IMAGES using a dotted path or path segments.
+ * When only a direct asset path is supplied, that path is returned unchanged.
+ */
 export function resolveImageFallback(category, key, fallbackDefault = DEFAULT_FALLBACK_IMAGE) {
   try {
     if (key == null && looksLikeAssetPath(category)) {

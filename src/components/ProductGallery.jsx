@@ -65,8 +65,6 @@ export default function ProductGallery() {
     }));
   };
 
-  const activeImages = productGroups[lightbox.groupIdx].images;
-
   return (
     <div className="product-gallery">
       {productGroups.map((group, groupIdx) => (
@@ -95,16 +93,24 @@ export default function ProductGallery() {
         </div>
       ))}
 
-      {lightbox.isOpen && (
-        <Lightbox
-          mainSrc={resolveImageFallback(activeImages[lightbox.imgIdx])}
-          nextSrc={resolveImageFallback(activeImages[(lightbox.imgIdx + 1) % activeImages.length])}
-          prevSrc={resolveImageFallback(activeImages[(lightbox.imgIdx + activeImages.length - 1) % activeImages.length])}
-          onCloseRequest={closeLightbox}
-          onMovePrevRequest={movePrev}
-          onMoveNextRequest={moveNext}
-        />
-      )}
+      {lightbox.isOpen && (() => {
+        const activeImages = productGroups[lightbox.groupIdx]?.images;
+
+        if (!activeImages?.length) {
+          return null;
+        }
+
+        return (
+          <Lightbox
+            mainSrc={resolveImageFallback(activeImages[lightbox.imgIdx])}
+            nextSrc={resolveImageFallback(activeImages[(lightbox.imgIdx + 1) % activeImages.length])}
+            prevSrc={resolveImageFallback(activeImages[(lightbox.imgIdx + activeImages.length - 1) % activeImages.length])}
+            onCloseRequest={closeLightbox}
+            onMovePrevRequest={movePrev}
+            onMoveNextRequest={moveNext}
+          />
+        );
+      })()}
     </div>
   );
 }
