@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import { paymentLinks } from "../src/data/paymentLinks.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,6 +8,7 @@ const __dirname = path.dirname(__filename);
 const reportPath = path.join(__dirname, "paymentLinkReport.json");
 const needsRecreatedPath = path.join(__dirname, "..", "NEEDS_RECREATED.md");
 const pricesPath = path.join(__dirname, "..", "prices.csv");
+const paymentLinksPath = path.join(__dirname, "..", "payment_links.csv");
 
 const errorIndicators = [
   "something-went-wrong",
@@ -39,6 +39,16 @@ const loadPrices = async () => {
   } catch (error) {
     return [];
   }
+};
+
+const loadPaymentLinks = async () => {
+  const content = await fs.readFile(paymentLinksPath, "utf-8");
+  return parseCsv(content)
+    .filter((row) => row.id && row.url)
+    .reduce((acc, row) => {
+      acc[row.id] = row.url;
+      return acc;
+    }, {});
 };
 
 const checkLink = async (id, url) => {
@@ -76,6 +86,7 @@ const checkLink = async (id, url) => {
 };
 
 const run = async () => {
+  const paymentLinks = await loadPaymentLinks();
   const entries = Object.entries(paymentLinks).map(([id, url]) => ({ id, url }));
   const results = [];
   for (const entry of entries) {

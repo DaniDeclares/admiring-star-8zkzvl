@@ -913,3 +913,40 @@ Do not change:
 6. Patch Services page division language.
 7. Fix Partner Network form direction or route it into Supabase.
 8. Begin Phase 4: Operations Dashboard.
+
+---
+
+## 21. Engineering Runbook (Local + Deploy)
+
+### Prerequisites
+
+- Node.js 18+
+- npm (repository is npm-first and uses `package-lock.json`)
+
+### Local setup
+
+1. Copy `.env.example` to `.env.local`.
+2. Fill required environment variables before using API-backed features.
+3. Install dependencies:
+   - `npm ci`
+4. Start the app:
+   - `npm start`
+
+### Build and test
+
+- Run tests:
+  - `npm test`
+- Build production bundle:
+  - `npm run build`
+
+### Vercel deployment notes
+
+- Build command: `npm run build`
+- Output directory: `build`
+- SPA rewrites are configured in `vercel.json`.
+- API function path `/api/travel-quote` must remain available and not be swallowed by SPA rewrites.
+
+### Optional maintenance scripts
+
+- Validate payment links and regenerate reports:
+  - `node scripts/validatePaymentLinks.mjs`

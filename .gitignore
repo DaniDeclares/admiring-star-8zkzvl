@@ -5,6 +5,10 @@ __MACOSX/
 # local env files
 .env
 .env.local
+.env.development.local
+.env.test.local
 build/
 /src/generated/prisma
 .env.production
+yarn-error.log*
+npm-debug.log*
