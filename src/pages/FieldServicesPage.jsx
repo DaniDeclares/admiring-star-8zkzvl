@@ -1,244 +1,82 @@
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
-import { siteConfig } from "../data/siteConfig.js";
-import "./FieldServicesPage.css";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
-const readinessLabels = [
-  "Move-Ready",
-  "Guest-Ready",
-  "Inspection-Ready",
-  "Market-Ready",
-];
+const FieldServicesPage = () => {
+  const handlesItems = [
+    { title: "Property Reset Planning", text: "Comprehensive scope of work creation configured with a property management mindset." },
+    { title: "Turnover & Rental Support", text: "Fast move-in, move-out, long-term rental, and short-term Airbnb guest transitions." },
+    { title: "Deep & Specialist Cleaning", text: "Detailed structural cleanouts, post-construction cleanup, and thorough detail adjustments." },
+    { title: "Inspection Readiness & Tracking", text: "Rigorous before-and-after photo documentation, condition notes, and formal completion reports." },
+    { title: "Trash-Out & Vendor Support", text: "Coordinating debris removal, gate access coordination, and physical vendor supervision." },
+    { title: "Recurring Property Support", text: "Scheduled repeat routing built specifically for property managers, landlords, and investors." }
+  ];
 
-const fieldLogisticsHandles = [
-  "Property reset planning and scope of work creation",
-  "Move-in, move-out, rental, and short-term rental turnover support",
-  "Deep cleaning, post-construction cleaning, and detail reset coordination",
-  "Inspection support, before/after documentation, and completion reporting",
-  "Trash-out coordination, vendor coordination, and access support",
-  "Recurring property support for managers, landlords, investors, and hosts",
-];
+  const coreServices = [
+    { title: "Move-In / Move-Out Cleaning", desc: "Full cleaning for properties transitioning between tenants, buyers, or owners. We leave it ready for the next occupant." },
+    { title: "Deep Cleaning", desc: "Top to bottom detail cleaning including appliances, cabinets, baseboards, bathrooms, and buildup removal." },
+    { title: "Rental Turnovers", desc: "Fast, reliable turnover service for landlords and property managers. We get your unit back on the market quickly." },
+    { title: "Airbnb & Short-Term Rental Resets", desc: "Between-guest resets, restocking coordination, and full turnovers for short-term rental properties." },
+    { title: "Post-Construction Cleaning", desc: "Debris removal, dust cleanup, surface cleaning, and final detail work after construction or renovation." },
+    { title: "Inspections & Photo Documentation", desc: "Property condition reports and photo documentation for move-out records, listings, or landlord files." }
+  ];
 
-const fieldLogisticsProcess = [
-  "Property Assessment",
-  "Scope Creation",
-  "Estimate Generation",
-  "Service Execution",
-  "Photo Documentation",
-  "Completion Report",
-];
-
-export default function FieldServicesPage() {
   return (
-    <>
-      <Helmet>
-        <title>On-Site Field Logistics Property Operations & Reset Services — Dani Declares LLC</title>
-        <meta name="description" content="Dani Declares On-Site Field Logistics provides property operations and reset services for move-ready, guest-ready, inspection-ready, and market-ready properties across Metro Atlanta." />
-      </Helmet>
-      <div className="fs-page">
-
-        <header className="fs-header">
-          <div className="fs-container">
-            <p className="fs-eyebrow">Dani Declares On-Site Field Logistics</p>
-            <h1>Property Operations & Reset Services</h1>
-            <p>We prepare properties for the next tenant, guest, buyer, inspection, or use with a clear scope, coordinated execution, photo documentation, and completion reporting.</p>
-            <div className="fs-readiness-row" aria-label="Property readiness outcomes">
-              {readinessLabels.map((label) => (
-                <span key={label} className="fs-readiness-pill">{label}</span>
-              ))}
-            </div>
-            <div className="fs-header-ctas">
-              <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="fs-btn-primary">Call / Text {siteConfig.phoneNumbers.public.display}</a>
-              <Link to="/contact" className="fs-btn-secondary">Request a On-Site Field Logistics Quote</Link>
-            </div>
-          </div>
-        </header>
-
-        <section className="fs-section fs-intro">
-          <div className="fs-container">
-            <h2>On-Site Field Logistics Is More Than Cleaning</h2>
-            <p className="fs-lead-copy">
-              Dani Declares On-Site Field Logistics is the Property Operations & Reset division of Dani Declares LLC. It is built for property managers, landlords, investors, real estate professionals, Airbnb hosts, contractors, and businesses that need properties handled from assessment to completion.
-            </p>
-            <p className="fs-lead-copy">
-              The focus is not just cleaning a space. The focus is making the property move-ready, guest-ready, inspection-ready, or market-ready with organized field execution and documentation.
-            </p>
-          </div>
-        </section>
-
-        <section className="fs-section fs-alt fs-operations">
-          <div className="fs-container">
-            <h2>What On-Site Field Logistics Handles</h2>
-            <div className="fs-grid">
-              {fieldLogisticsHandles.map((item) => (
-                <div className="fs-card" key={item}>
-                  <h3>{item}</h3>
-                  <p>Handled with a property operations mindset so the work is scoped, coordinated, documented, and ready for the next step.</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="fs-section fs-process-section">
-          <div className="fs-container">
-            <h2>On-Site Field Logistics Process</h2>
-            <div className="fs-process-grid">
-              {fieldLogisticsProcess.map((step, index) => (
-                <div className="fs-process-card" key={step}>
-                  <span className="fs-process-number">{index + 1}</span>
-                  <h3>{step}</h3>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="fs-section fs-who fs-alt">
-          <div className="fs-container">
-            <h2>Who We Serve</h2>
-            <ul className="fs-two-col">
-              <li>Property managers & landlords</li>
-              <li>Real estate agents & investors</li>
-              <li>Airbnb & short-term rental hosts</li>
-              <li>Contractors & builders</li>
-              <li>Families moving in or out</li>
-              <li>Businesses & offices</li>
-            </ul>
-          </div>
-        </section>
-
-        <section className="fs-section">
-          <div className="fs-container">
-            <h2>Core Services</h2>
-            <div className="fs-grid">
-              <div className="fs-card">
-                <h3>Move-In / Move-Out Cleaning</h3>
-                <p>Full cleaning for properties transitioning between tenants, buyers, or owners. We leave it ready for the next occupant.</p>
-              </div>
-              <div className="fs-card">
-                <h3>Deep Cleaning</h3>
-                <p>Top to bottom detail cleaning including appliances, cabinets, baseboards, bathrooms, and buildup removal.</p>
-              </div>
-              <div className="fs-card">
-                <h3>Rental Turnovers</h3>
-                <p>Fast, reliable turnover service for landlords and property managers. We get your unit back on the market quickly.</p>
-              </div>
-              <div className="fs-card">
-                <h3>Airbnb & Short-Term Rental Resets</h3>
-                <p>Between-guest resets, restocking coordination, and full turnovers for short-term rental properties.</p>
-              </div>
-              <div className="fs-card">
-                <h3>Post-Construction Cleaning</h3>
-                <p>Debris removal, dust cleanup, surface cleaning, and final detail work after construction or renovation.</p>
-              </div>
-              <div className="fs-card">
-                <h3>Inspections & Photo Documentation</h3>
-                <p>Property condition reports and photo documentation for move-out records, listings, or landlord files.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="fs-section fs-addons fs-alt">
-          <div className="fs-container">
-            <h2>Add-On Services</h2>
-            <ul className="fs-two-col">
-              <li>Carpet cleaning</li>
-              <li>Steam cleaning & sanitizing</li>
-              <li>Odor removal</li>
-              <li>Appliance deep cleaning</li>
-              <li>Cabinet interior cleaning</li>
-              <li>Baseboard & wall detail</li>
-              <li>Interior window cleaning</li>
-              <li>Trash removal coordination</li>
-              <li>Laundry service</li>
-              <li>Lockbox & access support</li>
-              <li>Rush & same-day service</li>
-              <li>After-hours availability</li>
-            </ul>
-          </div>
-        </section>
-
-        <section className="fs-section fs-packages">
-          <div className="fs-container">
-            <h2>Signature Services</h2>
-            <div className="fs-pkg-grid">
-              <div className="fs-pkg-card">
-                <h3>Standard Turnover</h3>
-                <p>Light to moderate move-in/move-out cleaning for well-maintained properties.</p>
-                <p className="fs-price">Starting at $300</p>
-              </div>
-              <div className="fs-pkg-card">
-                <h3>Deep Property Reset</h3>
-                <p>Detailed cleaning including appliances, cabinets, baseboards, bathrooms, and buildup removal.</p>
-                <p className="fs-price">Starting at $400</p>
-              </div>
-              <div className="fs-pkg-card featured">
-                <h3>Full Reset Package</h3>
-                <p>Complete reset including deep cleaning, carpet service, deodorizing, appliance cleaning, wall and baseboard detail, trash removal coordination, and photo documentation.</p>
-                <p className="fs-price">$500 – $1,500</p>
-              </div>
-              <div className="fs-pkg-card">
-                <h3>Recurring Property Support</h3>
-                <p>For landlords, property managers, Airbnb hosts, and realtors needing consistent repeat service.</p>
-                <p className="fs-price">Custom Quote</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="fs-section fs-documentation fs-alt">
-          <div className="fs-container">
-            <h2>Built for Managers Who Need Proof</h2>
-            <p className="fs-lead-copy">
-              On-Site Field Logistics supports property files with before/after documentation, condition notes, completion reporting, and scope-based execution. This helps managers, owners, and vendors know what was requested, what was handled, and what may need follow-up.
-            </p>
-          </div>
-        </section>
-
-        <section className="fs-section fs-bundle">
-          <div className="fs-container">
-            <h2>Bundle & Save</h2>
-            <p className="fs-bundle-sub">Combine field services with other Dani Declares services for a complete solution.</p>
-            <div className="fs-bundle-grid">
-              <div className="fs-bundle-card">
-                <h3>Move-Out Bundle</h3>
-                <p>Cleaning + property reset + photo documentation + document support + courier coordination for keys or paperwork</p>
-              </div>
-              <div className="fs-bundle-card">
-                <h3>Real Estate Bundle</h3>
-                <p>Property reset + document packaging + courier delivery + photo documentation + field support</p>
-              </div>
-              <div className="fs-bundle-card">
-                <h3>Landlord Bundle</h3>
-                <p>Turnover cleaning + inspection report + photo documentation + recurring property support</p>
-              </div>
-            </div>
-            <Link to="/contact" className="fs-btn-primary">Request a Bundle Quote</Link>
-          </div>
-        </section>
-
-        <section className="fs-section fs-alt fs-areas">
-          <div className="fs-container">
-            <h2>Service Areas</h2>
-            <p>Metro Atlanta, Stone Mountain, Decatur, Tucker, Doraville, Dunwoody, and surrounding areas. Travel available based on job scope.</p>
-          </div>
-        </section>
-
-        <section className="fs-section fs-cta">
-          <div className="fs-container">
-            <h2>Ready to Get Your Property Handled?</h2>
-            <div className="fs-header-ctas">
-              <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="fs-btn-primary">Call / Text GA: {siteConfig.phoneNumbers.public.display}</a>
-              <a href={`tel:${siteConfig.phoneNumbers.sc.tel}`} className="fs-btn-primary">Call / Text SC: {siteConfig.phoneNumbers.sc.display}</a>
-              <Link to="/contact" className="fs-btn-secondary">Request a On-Site Field Logistics Quote</Link>
-            </div>
-          </div>
-        </section>
-
+    <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'sans-serif', color: '#333', paddingBottom: '60px' }}>
+      <Helmet><title>Property Operations &amp; Reset Services | Dani Declares LLC</title></Helmet>
+      
+      {/* Header Banner */}
+      <div style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '60px 20px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '38px', margin: '0 0 12px 0' }}>Dani Declares On-Site Field Logistics</h1>
+        <p style={{ fontSize: '18px', maxWidth: '800px', margin: '0 auto 24px auto', lineHeight: '1.5', opacity: '0.9' }}>Property Operations &amp; Reset Services. We prepare properties for the next tenant, guest, buyer, or inspection with clean scopes and photo completion reports.</p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', fontWeight: 'bold' }}>
+          <span style={{ backgroundColor: '#rgba(255,255,255,0.15)', padding: '6px 12px', borderRadius: '4px' }}>Move-Ready</span>
+          <span style={{ backgroundColor: '#rgba(255,255,255,0.15)', padding: '6px 12px', borderRadius: '4px' }}>Guest-Ready</span>
+          <span style={{ backgroundColor: '#rgba(255,255,255,0.15)', padding: '6px 12px', borderRadius: '4px' }}>Inspection-Ready</span>
+          <span style={{ backgroundColor: '#rgba(255,255,255,0.15)', padding: '6px 12px', borderRadius: '4px' }}>Market-Ready</span>
+        </div>
       </div>
-    </>
+
+      {/* Intro section */}
+      <div style={{ padding: '50px 20px', maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+        <h2>On-Site Field Logistics Is More Than Cleaning</h2>
+        <p style={{ color: '#555', fontSize: '16px', lineHeight: '1.6', marginTop: '16px' }}>
+          Built for property managers, landlords, investors, real estate professionals, and Airbnb hosts who need properties handled from assessment to completion with organized field execution and documentation.
+        </p>
+      </div>
+
+      {/* Handles Section */}
+      <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <h3 style={{ color: '#8B1E2E', fontSize: '24px', textAlign: 'center', marginBottom: '32px' }}>What On-Site Field Logistics Handles</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          {handlesItems.map((item) => (
+            <div key={item.title} style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              <h4 style={{ color: '#8B1E2E', margin: '0 0 8px 0', fontSize: '18px' }}>{item.title}</h4>
+              <p style={{ color: '#666', fontSize: '14px', lineHeight: '1.5', margin: '0' }}>{item.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Core Services Section */}
+      <div style={{ padding: '50px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <h3 style={{ color: '#222', fontSize: '26px', textAlign: 'center', marginBottom: '32px', borderBottom: '2px solid #ddd', paddingBottom: '12px' }}>Core Services</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+          {coreServices.map((service) => (
+            <div key={service.title} style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '6px', borderLeft: '4px solid #D4AF37' }}>
+              <h4 style={{ margin: '0 0 10px 0', fontSize: '18px', color: '#333' }}>{service.title}</h4>
+              <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.5', margin: '0' }}>{service.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA Button Block */}
+      <div style={{ textAlign: 'center', marginTop: '40px' }}>
+        <Link to="/request-service" style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '14px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', display: 'inline-block' }}>Request an On-Site Field Logistics Quote</Link>
+      </div>
+    </div>
   );
-}
+};
+
+export default FieldServicesPage;
