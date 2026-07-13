@@ -1,0 +1,27 @@
+.product-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
+  gap: var(--grid-gap);
+  padding: var(--section-padding-tight) var(--section-gap);
+}
+
+.product-card {
+  text-align: center;
+}
+
+.product-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: var(--section-gap);
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  border-radius: var(--card-radius);
+}
+
+.buy-now-button {
+  margin-top: auto;
+}

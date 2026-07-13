@@ -1,0 +1,118 @@
+:root {
+  --burgundy: #8b1e2e;
+  --ivory: #f8f5f1;
+  --gold: #d4af37;
+  --dark: #1a1a1a;
+}
+
+.dd-navbar {
+  background: var(--dark);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.dd-navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dd-navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--gold);
+  font-family: Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dd-navbar-logo img {
+  height: 40px;
+  width: auto;
+}
+
+.dd-nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dd-nav-links a {
+  color: #e0dbd4;
+  text-decoration: none;
+  padding: 0.45rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.dd-nav-links a:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.dd-nav-links a.active {
+  color: var(--gold);
+  border-bottom: 2px solid var(--gold);
+}
+
+.dd-nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.dd-nav-hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+}
+
+.dd-nav-mobile {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0 1rem;
+  background: var(--dark);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.dd-nav-mobile li a {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  color: #e0dbd4;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.dd-nav-mobile li a:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--gold);
+}
+
+@media (max-width: 820px) {
+  .dd-nav-links { display: none; }
+  .dd-nav-hamburger { display: flex; }
+}

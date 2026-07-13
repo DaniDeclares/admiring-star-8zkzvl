@@ -1,0 +1,28 @@
+
+
+    Directory: C:\Users\Dani Declares\admiring-star-8zkzvl
+
+
+Mode                 LastWriteTime         Length Name                                          
+----                 -------------         ------ ----                                          
+d-----         5/29/2025   5:43 PM                .codesandbox                                  
+d-----         5/29/2025   5:43 PM                .github                                       
+d-----         5/29/2025   1:11 PM                .vercel                                       
+d-----          6/4/2025   8:33 PM                build                                         
+d-----         5/29/2025  11:18 PM                node_modules                                  
+d-----         5/30/2025  12:14 PM                public                                        
+d-----         5/29/2025  11:10 PM                src                                           
+-a----         5/17/2025   8:09 AM            416 .devcontainer                                 
+-a----         5/18/2025   2:26 PM            117 .env                                          
+-a----         5/18/2025   2:26 PM            117 .env.example                                  
+-a----         5/20/2025   1:40 PM           1396 .env.local                                    
+-a----         5/29/2025   2:03 PM            401 .env.production                               
+-a----         5/29/2025  10:10 PM             81 .gitignore                                    
+-a----         5/29/2025   6:04 PM         690030 package-lock.json                             
+-a----         5/29/2025   4:58 PM           1285 package.json                                  
+-a----          6/4/2025  10:41 PM              0 product-files.txt                             
+-a----         5/29/2025   2:16 PM           3009 README.md                                     
+-a----         5/20/2025   6:19 PM            514 vercel.json                                   
+-a----         5/17/2025   8:09 AM           2870 yarn-error.log                                
+
+

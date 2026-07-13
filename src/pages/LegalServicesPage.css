@@ -1,0 +1,85 @@
+/* src/pages/LegalServicesPage.css */
+
+.legal-page {
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-primary);
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--section-padding) var(--section-gap);
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+.hero h1 {
+  font-size: var(--heading-1);
+  color: var(--burgundy);
+  font-family: var(--font-secondary);
+}
+.hero p {
+  font-size: 1.05rem;
+  color: var(--ink-muted);
+  margin-top: 0.6rem;
+}
+
+.service-section {
+  margin-bottom: var(--section-gap);
+}
+
+.service-section h2 {
+  color: var(--burgundy);
+  margin-bottom: 0.35rem;
+  font-family: var(--font-secondary);
+}
+
+.section-desc {
+  color: var(--ink-muted);
+  margin-bottom: var(--section-gap);
+}
+
+.services-grid {
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
+  gap: var(--grid-gap);
+}
+.service-card {
+  text-align: left;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  border-color: rgba(139, 30, 46, 0.18);
+}
+.service-card:hover {
+  box-shadow: 0 6px 20px rgba(212,175,55,0.15);
+  border-color: var(--burgundy);
+}
+.service-card h3 {
+  color: var(--burgundy);
+  margin-bottom: 0.4rem;
+  font-family: var(--font-secondary);
+}
+.service-card .meta {
+  font-weight: bold;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+}
+.service-card .desc {
+  color: var(--ink-muted);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.contact-cta {
+  text-align: center;
+  margin-top: var(--section-gap);
+}
+.contact-cta p {
+  font-size: 1rem;
+}
+.contact-cta a {
+  color: var(--burgundy);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.contact-cta a:hover {
+  color: #6f1824;
+}

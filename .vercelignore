@@ -1,0 +1,11 @@
+node_modules/
+node_modules_backup/
+.git/
+.cache/
+*.zip
+build/
+yarn-error.log
+*.psd
+*.ai
+*.bak
+*.DS_Store

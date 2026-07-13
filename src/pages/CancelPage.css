@@ -1,0 +1,14 @@
+.cancel-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--section-padding) var(--section-gap);
+  text-align: center;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-primary);
+}
+
+.cancel-page h1 {
+  color: var(--burgundy);
+  margin-bottom: 1rem;
+}

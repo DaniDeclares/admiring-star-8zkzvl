@@ -1,0 +1,51 @@
+.federal-page {
+  padding: var(--section-padding) var(--section-gap);
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+.federal-hero {
+  max-width: 900px;
+  margin: 0 auto var(--section-gap);
+  text-align: center;
+}
+
+.federal-hero h1 {
+  font-size: var(--heading-1);
+  margin-bottom: 0.75rem;
+}
+
+.federal-section {
+  background: var(--surface);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  box-shadow: var(--card-shadow);
+  margin: 0 auto var(--section-gap);
+  border: var(--card-border);
+  max-width: 980px;
+}
+
+.federal-section ul {
+  margin-top: 1rem;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.federal-contact {
+  text-align: center;
+}
+
+.federal-contact__actions {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .federal-page {
+    padding: var(--section-padding-tight) var(--section-gap);
+  }
+}

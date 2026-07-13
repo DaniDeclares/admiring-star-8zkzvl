@@ -1,0 +1,23 @@
+.onboarding-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--section-padding) var(--section-gap);
+  text-align: center;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-primary);
+}
+
+.onboarding-page h1 {
+  color: var(--burgundy);
+  margin-bottom: 1rem;
+}
+
+.onboarding-page p a {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.onboarding-page p a:hover {
+  color: var(--burgundy);
+}

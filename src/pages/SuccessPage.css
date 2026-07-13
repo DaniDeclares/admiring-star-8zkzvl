@@ -1,0 +1,14 @@
+.success-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--section-padding) var(--section-gap);
+  text-align: center;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-primary);
+}
+
+.success-page h1 {
+  color: var(--burgundy);
+  margin-bottom: 1rem;
+}

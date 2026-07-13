@@ -1,0 +1,569 @@
+/* Homepage specific CSS (incremental, safe update)
+   NO existing class removed. Brand token vars layered in.
+*/
+.brand-hero {
+  background: var(--color-burgundy, #800020);
+  color: var(--color-ivory, #f9f6f2);
+}
+
+.dd-hero--visual {
+  background: linear-gradient(135deg, #2d0c10 0%, var(--color-burgundy, #800020) 58%, #4b111c 100%);
+  color: var(--color-ivory, #f9f6f2);
+  padding: clamp(4rem, 7vw, 7rem) 1.5rem;
+  overflow: hidden;
+}
+
+.dd-hero-inner {
+  align-items: center;
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  margin: 0 auto;
+  max-width: 1180px;
+}
+
+.dd-hero-content h1,
+.dd-hero--visual h1 {
+  color: var(--color-ivory, #f9f6f2);
+  line-height: 1.02;
+  margin-bottom: 1rem;
+  max-width: 780px;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.22);
+}
+
+.dd-hero-sub {
+  color: rgba(249, 246, 242, 0.94);
+  max-width: 740px;
+}
+
+.dd-hero-eyebrow {
+  color: var(--color-gold, #c8b273);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.9rem;
+  text-transform: uppercase;
+}
+
+.dd-hero-ctas,
+.dd-divisions-footer {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+}
+
+.dd-btn-primary,
+.dd-btn-secondary,
+.dd-btn-outline {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  line-height: 1.1;
+  min-height: 48px;
+  padding: 0.88rem 1.2rem;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.dd-btn-primary {
+  background: var(--color-gold, #c8b273);
+  border: 2px solid var(--color-gold, #c8b273);
+  color: #1b0a0e;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.dd-btn-secondary {
+  background: var(--color-ivory, #f9f6f2);
+  border: 2px solid var(--color-ivory, #f9f6f2);
+  color: var(--color-burgundy, #800020);
+}
+
+.dd-btn-outline {
+  background: transparent;
+  border: 2px solid rgba(249, 246, 242, 0.78);
+  color: var(--color-ivory, #f9f6f2);
+}
+
+.dd-btn-primary:hover,
+.dd-btn-secondary:hover,
+.dd-btn-outline:hover {
+  transform: translateY(-1px);
+}
+
+.dd-visual-collage {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-rows: repeat(2, minmax(150px, 1fr));
+  min-height: 430px;
+}
+
+.dd-visual-card {
+  background: rgba(248, 245, 241, 0.08);
+  border: 1px solid rgba(248, 245, 241, 0.22);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+  min-height: 180px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dd-visual-card--large {
+  grid-row: span 2;
+}
+
+.dd-visual-card img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.dd-visual-card::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(27, 10, 14, 0.72));
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.dd-visual-card span {
+  background: rgba(248, 245, 241, 0.92);
+  border: 1px solid rgba(212, 175, 55, 0.7);
+  border-radius: 999px;
+  bottom: 1rem;
+  color: var(--color-burgundy, #800020);
+  font-size: 0.82rem;
+  font-weight: 800;
+  left: 1rem;
+  padding: 0.45rem 0.75rem;
+  position: absolute;
+  z-index: 1;
+}
+
+.dd-section {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.dd-container {
+  margin: 0 auto;
+  max-width: 1120px;
+}
+
+.dd-handle-list,
+.dd-two-col-list,
+.dd-why-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.dd-handle-list li,
+.dd-two-col-list li,
+.dd-why-list li {
+  margin-bottom: 0.55rem;
+}
+
+.dd-divisions-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  margin-top: 1.5rem;
+}
+
+.dd-division-card {
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.18);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(128, 0, 32, 0.08);
+  padding: 1.25rem;
+}
+
+.dd-division-card h3 {
+  margin-top: 0;
+}
+
+.dd-btn-link {
+  color: var(--color-burgundy, #800020);
+  display: inline-flex;
+  font-weight: 800;
+  margin-top: 0.55rem;
+  text-decoration: none;
+}
+
+.dd-steps {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.dd-steps li {
+  align-items: center;
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.16);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(128, 0, 32, 0.08);
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.dd-step-num {
+  align-items: center;
+  background: var(--color-gold, #c8b273);
+  border-radius: 50%;
+  color: #1b0a0e;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-weight: 900;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+/* Fast Intake Strip */
+.dd-intake-strip {
+  background: var(--color-burgundy, #800020);
+  color: var(--color-ivory, #f9f6f2);
+  padding: 1.25rem 1.5rem;
+}
+
+.dd-intake-inner {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.dd-intake-text {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dd-btn-intake {
+  background: var(--color-gold, #c8b273);
+  border-radius: 999px;
+  color: #1b0a0e;
+  font-weight: 800;
+  padding: 0.65rem 1.35rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.dd-btn-intake:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+/* Service Lanes */
+.dd-section-sub {
+  color: #555;
+  font-size: 1rem;
+  margin: 0.4rem 0 0;
+}
+
+.dd-lanes-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-top: 1.5rem;
+}
+
+.dd-lane-card {
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.18);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(128, 0, 32, 0.07);
+  padding: 1.4rem 1.25rem;
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.dd-lane-card:hover {
+  box-shadow: 0 12px 32px rgba(128, 0, 32, 0.13);
+  transform: translateY(-2px);
+}
+
+.dd-lane-tag {
+  background: var(--color-burgundy, #800020);
+  border-radius: 999px;
+  color: var(--color-ivory, #f9f6f2);
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  text-transform: uppercase;
+}
+
+.dd-lane-card h3 {
+  margin: 0 0 0.5rem;
+}
+
+.dd-lane-card p {
+  color: #444;
+  font-size: 0.92rem;
+  margin: 0 0 0.75rem;
+}
+
+/* Why Choose grid */
+.dd-why-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 1.5rem;
+}
+
+.dd-why-card {
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.14);
+  border-radius: 8px;
+  padding: 1.2rem;
+}
+
+.dd-why-card strong {
+  color: var(--color-burgundy, #800020);
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.dd-why-card p {
+  color: #444;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Who This Helps grid */
+.dd-who-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 1.5rem;
+}
+
+.dd-who-card {
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.14);
+  border-radius: 8px;
+  padding: 1.2rem;
+}
+
+.dd-who-card strong {
+  color: var(--color-burgundy, #800020);
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.dd-who-card p {
+  color: #444;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Bottom CTA */
+.dd-bottom-cta {
+  background: linear-gradient(135deg, #2d0c10 0%, var(--color-burgundy, #800020) 58%, #4b111c 100%);
+  color: var(--color-ivory, #f9f6f2);
+  padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+  text-align: center;
+}
+
+.dd-bottom-cta h2 {
+  color: var(--color-ivory, #f9f6f2);
+  margin-bottom: 0.5rem;
+}
+
+.dd-bottom-cta-sub {
+  color: rgba(249, 246, 242, 0.88);
+  font-size: 1.05rem;
+  margin: 0 auto 0.5rem;
+  max-width: 520px;
+}
+
+.dd-bottom-cta .dd-btn-outline {
+  border-color: rgba(249, 246, 242, 0.78);
+}
+
+.dd-areas-note {
+  color: rgba(249, 246, 242, 0.65);
+  font-size: 0.85rem;
+  margin: 1.75rem auto 0;
+}
+
+/* Alt background */
+.dd-alt-bg {
+  background: #faf7f4;
+}
+
+.service-cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md, 1.5rem);
+  justify-content: center;
+  margin: var(--space-md, 1.5rem) auto;
+  max-width: 1100px;
+}
+.service-card {
+  background: #fff;
+  min-width: 250px;
+  max-width: 340px;
+  flex: 1 1 250px;
+  border-radius: var(--border-radius-base, 6px);
+  box-shadow: 0 2px 10px 0 rgba(128,0,32,0.1);
+  padding: var(--space-md, 1.5rem);
+  margin: 0.5rem;
+  text-align: left;
+  border: 1.5px solid var(--color-burgundy, #800020);
+}
+.process-flow {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md, 1.5rem);
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+}
+.process-flow li {
+  background: #fff;
+  color: var(--color-burgundy, #800020);
+  border-radius: var(--border-radius-base, 6px);
+  font-weight: 600;
+  box-shadow: 0 1px 4px 0 rgba(128,0,32,0.06);
+  padding: var(--space-sm, 1rem) var(--space-md, 1.5rem);
+  margin: 0 0.3rem;
+  min-width: 130px;
+  position: relative;
+}
+.process-flow li:before {
+  counter-increment: step;
+  content: counter(step);
+  background: var(--color-gold, #c8b273);
+  color: var(--color-black, #161616);
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  display: inline-block;
+  line-height: 2em;
+  font-weight: bold;
+  position: absolute;
+  left: -2.7em;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.why-us-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  align-items: center;
+  font-size: 1.12rem;
+  margin: var(--space-md, 1.5rem) 0;
+  list-style: none;
+  padding: 0;
+}
+
+@media (max-width: 900px) {
+  .dd-hero--visual {
+    padding: 3.5rem 1rem 2.5rem;
+  }
+
+  .dd-hero-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-hero-content h1,
+  .dd-hero--visual h1 {
+    font-size: clamp(2.4rem, 13vw, 4rem);
+  }
+
+  .dd-hero-ctas,
+  .dd-divisions-footer {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .dd-btn-primary,
+  .dd-btn-secondary,
+  .dd-btn-outline {
+    width: 100%;
+  }
+
+  .dd-visual-collage {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    min-height: auto;
+  }
+
+  .dd-visual-card,
+  .dd-visual-card--large {
+    grid-row: auto;
+    min-height: 220px;
+  }
+
+  .dd-divisions-grid,
+  .dd-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .service-cards-row {
+    flex-direction: column;
+    max-width: 96vw;
+  }
+  .process-flow {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7em;
+  }
+  .process-flow li:before {
+    left: -2.3em;
+  }
+
+  .dd-lanes-grid,
+  .dd-why-grid,
+  .dd-who-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-intake-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .dd-btn-intake {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .dd-hero--visual {
+    padding: 2.5rem 1rem 2rem;
+  }
+
+  .dd-lane-card,
+  .dd-why-card,
+  .dd-who-card {
+    border-radius: 6px;
+  }
+
+  .dd-bottom-cta .dd-btn-primary,
+  .dd-bottom-cta .dd-btn-secondary,
+  .dd-bottom-cta .dd-btn-outline {
+    width: 100%;
+  }
+}

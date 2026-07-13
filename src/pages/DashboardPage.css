@@ -1,0 +1,29 @@
+.dashboard-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--section-padding) var(--section-gap);
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-primary);
+}
+
+.dashboard-page h1 {
+  color: var(--burgundy);
+  margin-bottom: 1rem;
+  font-family: var(--font-secondary);
+}
+
+.dashboard-page ul {
+  list-style: disc inside;
+  margin: 1rem 0 1.5rem 0;
+  padding-left: 1rem;
+}
+
+.dashboard-page a {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.dashboard-page a:hover {
+  color: var(--burgundy);
+}

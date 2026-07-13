@@ -1,0 +1,43 @@
+.tax-services-page {
+  background: var(--ivory);
+  padding: var(--section-padding) var(--section-gap);
+  color: var(--ink);
+}
+
+.tax-services-hero {
+  max-width: 900px;
+  margin: 0 auto var(--section-gap);
+  text-align: center;
+}
+
+.tax-services-hero h1 {
+  font-size: var(--heading-1);
+  margin-bottom: 1rem;
+}
+
+.tax-services-card {
+  max-width: 820px;
+  margin: 0 auto;
+  background: var(--surface);
+  padding: var(--card-padding);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  display: grid;
+  gap: var(--section-gap);
+}
+
+.tax-services-card ul {
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.tax-services-callout {
+  color: var(--burgundy);
+}
+
+@media (max-width: 600px) {
+  .tax-services-page {
+    padding: var(--section-padding-tight) var(--section-gap);
+  }
+}

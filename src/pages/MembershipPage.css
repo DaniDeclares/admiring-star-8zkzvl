@@ -1,0 +1,226 @@
+/* src/pages/MembershipPage.css — Updated Dani Declares Membership */
+
+.membership-page {
+  background: var(--ivory);
+  padding: var(--section-padding) var(--section-gap);
+  font-family: var(--font-primary);
+  color: var(--ink);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.membership-page h1 {
+  font-size: var(--heading-1);
+  color: var(--burgundy);
+  text-align: center;
+  font-family: var(--font-secondary);
+  margin-bottom: 0.8rem;
+}
+.membership-page .subtitle {
+  text-align: center;
+  font-size: 1.05rem;
+  color: var(--ink-muted);
+  margin-bottom: var(--section-gap);
+}
+.membership-page .urgent {
+  color: var(--gold);
+  font-weight: bold;
+}
+
+.billing-toggle {
+  display: flex;
+  justify-content: center;
+  gap: var(--section-gap);
+  margin-bottom: var(--section-gap);
+}
+.billing-toggle button {
+  background: #fff;
+  border: 2px solid var(--burgundy);
+  color: var(--burgundy);
+  padding: 0.55rem 1.3rem;
+  font-weight: bold;
+  border-radius: var(--card-radius);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.billing-toggle button.active,
+.billing-toggle button:hover {
+  background: var(--burgundy);
+  color: #fff;
+}
+.billing-toggle .save {
+  margin-left: 0.4rem;
+  color: var(--gold);
+  font-weight: bold;
+}
+
+.tiers-grid {
+  gap: var(--grid-gap);
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
+  margin: var(--section-gap) 0;
+}
+.tier-card {
+  border: var(--card-border);
+  text-align: center;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.tier-card:hover {
+  border-color: var(--gold);
+  box-shadow: 0 6px 22px rgba(212, 175, 55, 0.13);
+}
+.tier-card h3 {
+  color: var(--burgundy);
+  font-size: var(--heading-3);
+  margin-bottom: 0.4rem;
+  font-family: var(--font-secondary);
+}
+.tier-desc {
+  font-size: 0.98rem;
+  color: var(--ink-muted);
+  margin-bottom: 0.6rem;
+}
+.tier-price {
+  font-size: 1.1rem;
+  color: var(--gold);
+  font-weight: bold;
+  margin-bottom: 0.8rem;
+}
+.tier-price span {
+  font-size: 0.9rem;
+  color: var(--burgundy);
+  font-weight: normal;
+}
+.perk-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.1rem;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+.perk-list li::before {
+  content: "✔";
+  color: var(--gold);
+  margin-right: 0.4rem;
+}
+
+.onboarding-info {
+  margin-top: 0.65rem;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+}
+
+.membership-options {
+  margin-top: var(--section-gap);
+  padding-top: var(--section-gap);
+  border-top: 1px solid #ddd;
+  text-align: center;
+}
+.membership-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--grid-gap);
+  justify-content: center;
+  margin-top: var(--section-gap);
+}
+.membership-card {
+  border: 1.5px solid var(--gold);
+  max-width: 320px;
+  flex: 1;
+}
+.membership-card h3 {
+  color: var(--burgundy);
+  font-size: var(--heading-3);
+  margin-bottom: 0.5rem;
+}
+
+.testimonial-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--grid-gap);
+  justify-content: center;
+  background: var(--surface-muted);
+  border-top: 1px solid #ddd5c1;
+  padding: var(--section-padding-tight) var(--section-gap);
+  margin-top: var(--section-gap);
+}
+.testimonial-item {
+  max-width: 380px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+.testimonial-logo {
+  max-height: 48px;
+  margin-bottom: 0.7rem;
+}
+.testimonial-author {
+  margin-top: 0.4rem;
+  font-weight: bold;
+  color: var(--burgundy);
+}
+
+.comparison-table-section {
+  padding: var(--section-padding) var(--section-gap);
+  text-align: center;
+  margin-top: var(--section-gap);
+}
+.comparison-table-wrap {
+  overflow-x: auto;
+  margin-top: var(--section-gap);
+}
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 1rem;
+  background: var(--surface);
+  font-size: 0.92rem;
+}
+.comparison-table th,
+.comparison-table td {
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+.comparison-table th {
+  background-color: #f6f0e5;
+  color: var(--burgundy);
+  font-weight: bold;
+  position: relative;
+}
+.comparison-table th.featured-header {
+  background-color: var(--burgundy);
+  color: #fff;
+}
+.comparison-table th.featured-header::before {
+  content: "Best Value";
+  position: absolute;
+  top: -0.75rem;
+  left: 1rem;
+  background: var(--gold);
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+.comparison-table tbody tr:hover {
+  background-color: rgba(212, 175, 55, 0.1);
+}
+.comparison-table tfoot td {
+  padding: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .billing-toggle {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .tier-card {
+    padding: 1rem;
+  }
+  .comparison-table th,
+  .comparison-table td {
+    padding: 0.5rem;
+  }
+}

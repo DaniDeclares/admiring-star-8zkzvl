@@ -1,0 +1,10 @@
+node_modules
+.vercel
+
+__MACOSX/
+# local env files
+.env
+.env.local
+build/
+/src/generated/prisma
+.env.production

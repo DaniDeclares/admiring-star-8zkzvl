@@ -1,0 +1,46 @@
+/* src/pages/PaymentCancel.css — Dani Declares Payment Canceled Page */
+
+.payment-cancel-page {
+  background-color: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-primary);
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--section-padding-tight) var(--section-gap);
+  text-align: center;
+}
+
+.payment-cancel-page h1 {
+  font-size: var(--heading-1);
+  color: var(--burgundy);
+  margin-bottom: 1rem;
+  font-family: var(--font-secondary);
+  letter-spacing: 1px;
+}
+
+.payment-cancel-page p {
+  font-size: 1.05rem;
+  margin: 0.5rem 0;
+  max-width: 480px;
+  color: var(--ink-muted);
+}
+
+.payment-cancel-page .btn {
+  margin-top: var(--section-gap);
+}
+
+@media (max-width: 600px) {
+  .payment-cancel-page h1 {
+    font-size: var(--heading-2);
+  }
+  .payment-cancel-page p {
+    font-size: 1rem;
+  }
+  .payment-cancel-page .btn {
+    width: 100%;
+    margin: 0.75rem 0;
+  }
+}

@@ -1,0 +1,91 @@
+:root {
+  --burgundy: #8b1e2e;
+  --gold: #d4af37;
+  --dark: #1a1a1a;
+  --radius: 8px;
+}
+
+.about-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.about-header {
+  background: var(--burgundy);
+  color: #fff;
+  padding: 4rem 1.5rem 3rem;
+  text-align: center;
+}
+
+.about-header h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+
+.about-section {
+  padding: 4rem 0;
+  background: #fff;
+}
+
+.about-lead {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--burgundy);
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.about-section p {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #333;
+  margin-bottom: 1.25rem;
+}
+
+.about-section h2 {
+  font-family: Georgia, serif;
+  color: var(--burgundy);
+  font-size: 1.4rem;
+  margin: 2rem 0 1rem;
+}
+
+.about-values {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.about-values li::before {
+  content: "✓ ";
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.about-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.about-btn-primary {
+  background: var(--burgundy);
+  color: #fff;
+  padding: 0.7rem 1.6rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.about-btn-secondary {
+  background: transparent;
+  color: var(--burgundy);
+  border: 2px solid var(--burgundy);
+  padding: 0.7rem 1.6rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+}

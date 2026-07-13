@@ -1,0 +1,105 @@
+/* src/pages/VendorPortal.css — Styles for Vendor & Speaker Portal */
+
+.vendor-portal {
+  background: var(--ivory);
+  padding: var(--section-padding) var(--section-gap);
+  font-family: var(--font-primary);
+  color: var(--ink);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.vendor-portal h1 {
+  font-size: var(--heading-1);
+  color: var(--burgundy);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.vendor-portal p {
+  font-size: 1rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.vendor-portal ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.vendor-portal ul li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin: 0.6rem 0;
+  font-size: 1rem;
+}
+
+.vendor-portal ul li::before {
+  content: "✔";
+  color: var(--gold);
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.portal-section {
+  background: var(--surface);
+  border-radius: var(--card-radius);
+  border: var(--card-border);
+  padding: var(--card-padding);
+  margin: var(--section-gap) 0;
+}
+
+.portal-section h2 {
+  font-size: var(--heading-3);
+  color: var(--burgundy);
+  margin-bottom: 0.75rem;
+}
+
+.portal-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.portal-section ul li {
+  position: relative;
+  padding-left: 1.8rem;
+  margin: 0.5rem 0;
+}
+
+.portal-section ul li::before {
+  content: "➤";
+  color: var(--burgundy);
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.contact-support {
+  background: var(--surface-muted);
+  border-left: 4px solid var(--gold);
+}
+
+.contact-support h2 {
+  margin-top: 0;
+}
+
+.contact-support p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.contact-support a {
+  color: var(--burgundy);
+  text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+  .vendor-portal {
+    padding: var(--section-padding-tight) var(--section-gap);
+  }
+  .portal-section {
+    padding: var(--card-padding);
+  }
+}
