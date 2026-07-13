@@ -227,6 +227,10 @@ const toPathSegments = (value) => {
   return [];
 };
 
+/**
+ * Treat direct asset URLs and public-folder file paths as already-resolved image sources.
+ * Examples: "/images/example.jpg" and "https://cdn.example.com/example.png".
+ */
 const looksLikeAssetPath = (value) => (
   typeof value === "string"
   && (value.startsWith("/") || /^https?:\/\//i.test(value))

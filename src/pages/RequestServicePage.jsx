@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
 import { supabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
+import { buildShopInquiryNotes, SHOP_INQUIRY_SERVICE_NEEDED } from "../lib/shopInquiry.js";
 import "./RequestServicePage.css";
 
 const fallbackDivisions = [
@@ -89,7 +90,7 @@ export default function RequestServicePage() {
       return stateServiceNeeded.trim();
     }
 
-    return requestedSource === "shop" ? "Merchandise Printing" : "";
+    return requestedSource === "shop" ? SHOP_INQUIRY_SERVICE_NEEDED : "";
   }, [location.state, requestedSource]);
   const requestedDescription = useMemo(() => {
     const stateNotes = location.state?.notes;
@@ -98,9 +99,7 @@ export default function RequestServicePage() {
       return stateNotes.trim();
     }
 
-    return requestedPackage
-      ? `Inquiry regarding custom printing for: ${requestedPackage}`
-      : "";
+    return requestedPackage ? buildShopInquiryNotes(requestedPackage) : "";
   }, [location.state, requestedPackage]);
 
   useEffect(() => {

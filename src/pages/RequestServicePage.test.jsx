@@ -54,6 +54,30 @@ describe("RequestServicePage", () => {
     );
   });
 
+  it("submits with shop-prefilled inquiry context", () => {
+    const { container } = renderPage({
+      pathname: "/request-service",
+      search: "?source=shop&package=Cheaper%20to%20Keep%20Dad%20Mug",
+      state: {
+        serviceNeeded: "Merchandise Printing",
+        notes: "Inquiry regarding custom printing for: Cheaper to Keep Dad Mug",
+      },
+    });
+
+    fireEvent.change(screen.getByRole("textbox", { name: /full name/i }), {
+      target: { value: "Danielle" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: /email/i }), {
+      target: { value: "danielle@example.com" },
+    });
+
+    fireEvent.submit(container.querySelector("form"));
+
+    expect(
+      screen.getByText(/request submission is temporarily unavailable/i)
+    ).toBeInTheDocument();
+  });
+
   it("displays unavailable message when Supabase is not configured", () => {
     const { container } = renderPage();
 

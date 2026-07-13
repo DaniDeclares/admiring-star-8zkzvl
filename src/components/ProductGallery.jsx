@@ -3,6 +3,7 @@ import Lightbox from "react-image-lightbox";
 import "react-image-lightbox/style.css";
 import { useNavigate } from "react-router-dom";
 import { APP_IMAGES, resolveImageFallback } from "../assets/images.js";
+import { buildShopInquiryPath, buildShopInquiryState } from "../lib/shopInquiry.js";
 import "./ProductGallery.css";
 
 const productGroups = [
@@ -35,13 +36,8 @@ export default function ProductGallery() {
   });
 
   const routeProductInquiry = (productName) => {
-    const targetPackage = encodeURIComponent(productName);
-
-    navigate(`/request-service?source=shop&package=${targetPackage}`, {
-      state: {
-        serviceNeeded: "Merchandise Printing",
-        notes: `Inquiry regarding custom printing for: ${productName}`,
-      },
+    navigate(buildShopInquiryPath(productName), {
+      state: buildShopInquiryState(productName),
     });
   };
 

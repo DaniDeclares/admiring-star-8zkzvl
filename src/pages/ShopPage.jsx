@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { resolveImageFallback } from "../assets/images.js";
 import { siteConfig } from "../data/siteConfig.js";
+import { buildShopInquiryPath, buildShopInquiryState } from "../lib/shopInquiry.js";
 import "./ShopPage.css";
 
 const SHOP_IMAGE_CATEGORY = "products.shop";
@@ -121,13 +122,8 @@ export default function ShopPage() {
   const publicPhone = siteConfig.phoneNumbers.public;
 
   const routeProductInquiry = (productName) => {
-    const targetPackage = encodeURIComponent(productName);
-
-    navigate(`/request-service?source=shop&package=${targetPackage}`, {
-      state: {
-        serviceNeeded: "Merchandise Printing",
-        notes: `Inquiry regarding custom printing for: ${productName}`,
-      },
+    navigate(buildShopInquiryPath(productName), {
+      state: buildShopInquiryState(productName),
     });
   };
 
