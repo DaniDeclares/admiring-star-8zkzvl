@@ -5,7 +5,7 @@ This repository contains the software infrastructure for Dani Declares LLC. All 
 ## 🏛️ Core System Architecture
 
 - **Frontend Runtime:** React Single-Page Application (SPA) compiled and deployed via Vercel.
-- **Backend Data Layer:** Supabase PostgreSQL database cluster (`ajxezpczaemunlcmqlgl`) located in `us-east-2`.
+- **Backend Data Layer:** Supabase PostgreSQL database cluster (see environment configuration for the active project reference) located in `us-east-2`.
 - **Primary Data Pipe Sequence:** Inbound leads move through a 5-tier relational sequence: `leads` -> `service_requests` -> `dd_estimates` -> `dd_estimate_packages` -> `dd_estimate_addons`.
 
 ## 🚨 Strict Engineering Guardrails (Non-Negotiable)
