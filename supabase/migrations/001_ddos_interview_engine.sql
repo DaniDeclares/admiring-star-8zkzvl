@@ -74,6 +74,15 @@ create table if not exists public.dd_question_rules (
   )
 );
 
+comment on column public.dd_client_types.updated_at is
+  'Managed by application/admin updates; migration 001 intentionally does not add update triggers.';
+comment on column public.dd_service_outcomes.updated_at is
+  'Managed by application/admin updates; migration 001 intentionally does not add update triggers.';
+comment on column public.dd_intake_questions.updated_at is
+  'Managed by application/admin updates; migration 001 intentionally does not add update triggers.';
+comment on column public.dd_question_rules.updated_at is
+  'Managed by application/admin updates; migration 001 intentionally does not add update triggers.';
+
 create index if not exists idx_dd_client_types_active_sort
   on public.dd_client_types (is_active, sort_order);
 
@@ -248,11 +257,11 @@ insert into public.dd_question_rules (
 )
 select
   q.id,
-  null,
-  null,
-  null,
-  null,
-  null,
+  null::bigint,
+  null::bigint,
+  null::bigint,
+  null::text,
+  null::jsonb,
   q.sort_order,
   true
 from public.dd_intake_questions q
