@@ -4,6 +4,7 @@ import App from "./App.js";
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { CartProvider } from "./context/CartContext.jsx";
+import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
 import "./index.css";
 import "./styles/responsive.css";
 
@@ -13,7 +14,9 @@ root.render(
     <CartProvider>
       <HelmetProvider>
         <BrowserRouter>
-          <App />
+          <AppErrorBoundary>
+            <App />
+          </AppErrorBoundary>
         </BrowserRouter>
       </HelmetProvider>
     </CartProvider>
