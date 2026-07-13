@@ -1,61 +1,17 @@
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import "./LegalPages.css";
-
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
 export default function PrivacyPage() {
   return (
-    <main className="legal-page">
-      <Helmet>
-        <title>Privacy Policy • Dani Declares</title>
-        <meta
-          name="description"
-          content="Learn how Dani Declares uses, stores, and protects your data."
-        />
-      </Helmet>
-
-      <section className="legal-hero">
-        <h1>Privacy Policy</h1>
-        <p>
-          We respect your privacy and only collect the information needed to
-          deliver notary, booking, and payment services.
-        </p>
-      </section>
-
-      <section className="legal-section">
-        <h2>Information We Collect</h2>
-        <ul>
-          <li>Contact details submitted through booking or inquiry forms.</li>
-          <li>Appointment information needed to complete mobile services.</li>
-          <li>
-            Payment data is handled securely by third-party providers (e.g. Stripe).
-          </li>
-        </ul>
-      </section>
-
-      <section className="legal-section">
-        <h2>How We Use Your Information</h2>
-        <ul>
-          <li>To schedule, confirm, and deliver your services.</li>
-          <li>To send appointment updates and receipts.</li>
-          <li>To improve service quality and site performance.</li>
-        </ul>
-      </section>
-
-      <section className="legal-section">
-        <h2>Data Sharing</h2>
-        <p>
-          We do not sell your personal data. We share information only with
-          trusted service providers necessary to complete your booking and payment.
-        </p>
-      </section>
-
-      <section className="legal-section">
-        <h2>Questions</h2>
-        <p>
-          Email us at{" "}
-          <a href="mailto:admin@danideclares.com">admin@danideclares.com</a>.
-        </p>
-      </section>
-    </main>
+    <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'sans-serif', color: '#333', padding: '60px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <Helmet><title>Privacy Policy | Dani Declares LLC</title></Helmet>
+      <h1 style={{ color: '#8B1E2E' }}>Privacy Policy</h1>
+      <p><strong>Effective Date: July 2026</strong></p>
+      <p>Dani Declares LLC operates as a mobile single-source operations firm across Georgia and South Carolina. We are committed to protecting the data, property photos, and document history uploaded to our client portals.</p>
+      <h2>1. Information We Collect</h2>
+      <p>We collect customer details via our request forms, mobile phone lines, and file upload systems, including names, company parameters, property addresses, and completion photography portfolios.</p>
+      <h2>2. Data Security &amp; Retention</h2>
+      <p>All client credentials, past invoices, and document signature tracking logs are securely encrypted and stored within our private database frameworks. We do not sell or lease your commercial property data to third-party networks.</p>
+      <p><em>Disclaimer: Dani Declares LLC is not a law firm and does not provide legal advice. Notary and signature verifications are performed strictly within legally commissioned boundaries.</em></p>
+    </div>
   );
 }

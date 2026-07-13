@@ -1,74 +1,16 @@
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import "./LegalPages.css";
-
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
 export default function TermsPage() {
   return (
-    <main className="legal-page">
-      <Helmet>
-        <title>Terms of Service • Dani Declares</title>
-        <meta
-          name="description"
-          content="Review the terms of service for Dani Declares mobile notary, booking, and payment services."
-        />
-      </Helmet>
-
-      <section className="legal-hero">
-        <h1>Terms of Service</h1>
-        <p>
-          By booking or purchasing services from Dani Declares, you agree to the
-          terms below. These terms help us deliver reliable, on-time mobile services.
-        </p>
-      </section>
-
-      <section className="legal-section">
-        <h2>Bookings &amp; Appointments</h2>
-        <ul>
-          <li>Appointments are confirmed after payment is received.</li>
-          <li>Same-day availability depends on schedule capacity.</li>
-          <li>
-            Please have valid identification and documents ready before the
-            appointment.
-          </li>
-        </ul>
-      </section>
-
-      <section className="legal-section">
-        <h2>Payments &amp; Fees</h2>
-        <ul>
-          <li>Deposits are applied to your total service fee.</li>
-          <li>
-            Travel, after-hours, and expedited service fees are quoted before
-            work begins.
-          </li>
-          <li>Unpaid bookings may be released to other clients.</li>
-        </ul>
-      </section>
-
-      <section className="legal-section">
-        <h2>Rescheduling &amp; Cancellations</h2>
-        <ul>
-          <li>Please notify us as soon as possible if you need to reschedule.</li>
-          <li>Deposits are non-refundable once an appointment is confirmed.</li>
-        </ul>
-      </section>
-
-      <section className="legal-section">
-        <h2>Service Area</h2>
-        <p>
-          We serve Metro Atlanta and surrounding areas. Additional travel fees may
-          apply outside our standard service radius.
-        </p>
-      </section>
-
-      <section className="legal-section">
-        <h2>Questions</h2>
-        <p>
-          Contact us at{" "}
-          <a href="mailto:admin@danideclares.com">admin@danideclares.com</a> for
-          assistance.
-        </p>
-      </section>
-    </main>
+    <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'sans-serif', color: '#333', padding: '60px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <Helmet><title>Terms of Service | Dani Declares LLC</title></Helmet>
+      <h1 style={{ color: '#8B1E2E' }}>Terms of Service</h1>
+      <p><strong>Effective Date: July 2026</strong></p>
+      <p>By using the website, client intake portals, or dispatch networks of Dani Declares LLC, you agree to the following operational parameters:</p>
+      <h2>1. Service Dispatches &amp; Cancellations</h2>
+      <p>Assignments, property turnovers, courier routing requests, and print orders are scheduled upon confirmation. Urgent, after-hours, or rush requests may be subject to expedited processing surcharges as outlined by our dispatch text matrices.</p>
+      <h2>2. Corporate Limitations</h2>
+      <p>Dani Declares LLC acts as an independent execution provider. We assume no legal liability for underlying lease agreements, court filings contents, or document compliance specifications. Dani Declares LLC is explicitly not a law firm and does not provide legal counsel.</p>
+    </div>
   );
 }
