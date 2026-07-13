@@ -5,10 +5,10 @@ import { Helmet } from 'react-helmet-async';
 const HomePage = () => {
   const lanes = [
     { title: 'On-Site Field Logistics', text: 'Rapid move-in/move-out deep cleaning, multi-family unit turnover resets, post-construction debris cleanup, and detailed before/after photo documentation tracking reports.', path: '/request-service', img: '/images/stock/property-cleaning-turnover.jpg' },
-    { title: 'Custom Print & Merchandise', text: 'Premium custom heat-press t-shirts, promotional corporate apparel, retail product packaging labels, custom stickers, and branded enterprise merchandise kits.', path: '/request-service', img: '/images/products/renamed_merch_image.jpg' },
+    { title: 'Custom Print & Merchandise', text: 'Premium custom heat-press t-shirts, promotional corporate apparel, retail product packaging labels, custom stickers, and branded enterprise merchandise kits.', path: '/request-service', img: '/images/stock/Clipboards.jpg' },
     { title: 'Apostille & Legal Compliance', text: 'Secure international apostille processing, mobile non-attorney document preparation, multi-page document packages, printing, scanning, and secure administrative filing.', path: '/request-service', img: '/images/stock/legal paperwork desk.jpg' },
-    { title: 'Trusts, POAs & Loan Signings', text: 'Mobilized on-site signature coordination for living trusts, real estate loan signings, durable powers of attorney, and complex legal estate packages.', path: '/request-service', img: '/images/stock/mobile-notary-signing.jpg' },
-    { title: 'Mobile Courier Services', text: 'Secure regional court filing deliveries, time-sensitive case record retrieval, urgent jail/hospital signature runs, and municipal office routing support.', path: '/request-service', img: '/images/stock/court building exterior.jpg' },
+    { title: 'Trusts, POAs & Loan Signings', text: 'Mobilized on-site signature coordination for living trusts, real estate loan signings, durable powers of attorney, and complex legal estate packages.', path: '/request-service', img: '/images/stock/mobile notary public.jpg' },
+    { title: 'Mobile Courier Services', text: 'Secure regional court filing deliveries, time-sensitive case record retrieval, urgent jail/hospital signature runs, and municipal office routing support.', path: '/request-service', img: '/images/stock/court%20building%20exterior.jpg' },
     { title: 'Government Contracting Portal', text: 'Verified federal subcontractor operations equipped for agency assignments. Active identifiers: UEI (TD4TSG48LHN9) and CAGE Code (17VV2).', path: '/govcon', img: '/images/stock/file cabinet.jpg' }
   ];
 
@@ -24,7 +24,7 @@ const HomePage = () => {
         
         {/* The 3 Absolute Booking Funnels - Positioned Instantly For Fast Conversions */}
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '1000px', margin: '0 auto' }}>
-          <Link to='/request-service' style={{ backgroundColor: '#D4AF37', color: '#222', padding: '16px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', flexGrow: '1', minWidth: '260px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', border: '2px solid #D4AF37' }}>?? Book Turnovers &amp; Field Logistics</Link>
+          <Link to='/request-service' style={{ backgroundColor: '#D4AF37', color: '#222', padding: '16px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', flexGrow: '1', minWidth: '260px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', border: '2px solid #D4AF37' }}>Refr ?? Book Turnovers &amp; Field Logistics</Link>
           <Link to='/request-service' style={{ backgroundColor: '#fff', color: '#8B1E2E', padding: '16px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', flexGrow: '1', minWidth: '260px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', border: '2px solid #fff' }}>?? Order T-Shirts &amp; Print Material</Link>
           <Link to='/request-service' style={{ backgroundColor: '#222', color: '#fff', padding: '16px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', flexGrow: '1', minWidth: '260px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', border: '2px solid rgba(255,255,255,0.2)' }}>?? Book Notary, Trusts &amp; Apostille</Link>
         </div>
@@ -47,7 +47,7 @@ const HomePage = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '30px' }}>
           {lanes.map((lane) => (
             <Link to={lane.path} key={lane.title} style={{ textDecoration: 'none', color: 'inherit', backgroundColor: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', borderLeft: '4px solid #8B1E2E', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1.0)'}>
-              <div style={{ height: '210px', backgroundColor: '#eee' }}><img src={lane.img} alt={lane.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e)=>{e.target.src='/images/festival/festival-promo-gradient.jpg';}} /></div>
+              <div style={{ height: '210px', backgroundColor: '#eee' }}><img src={lane.img} alt={lane.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e)=>{e.target.src='/images/stock/file cabinet.jpg';}} /></div>
               <div style={{ padding: '24px', flexGrow: '1', display: 'flex', flexDirection: 'column' }}>
                 <h3 style={{ fontSize: '20px', color: '#222', margin: '0 0 10px 0', fontWeight: 'bold' }}>{lane.title}</h3>
                 <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.5', marginBottom: '20px', flexGrow: '1' }}>{lane.text}</p>
