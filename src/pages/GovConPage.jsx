@@ -106,12 +106,12 @@ export default function GovConPage() {
       });
 
       if (!lead?.id) {
-        throw new Error("Missing lead reference");
+        throw new Error("Lead submission succeeded but no reference ID was returned");
       }
 
       const nextReferenceCode = `GOVCON-${String(lead.id)
         .replace(/[^a-zA-Z0-9]/g, "")
-        .slice(0, 8)
+        .slice(0, 12)
         .toUpperCase()}`;
 
       setForm(initialForm);

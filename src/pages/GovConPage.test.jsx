@@ -64,7 +64,7 @@ describe("GovConPage", () => {
       expect(screen.getByText(/Your teaming inquiry was received/i)).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/Confirmation Reference: GOVCON-ABC12345/i)).toBeInTheDocument();
+    expect(screen.getByText(/Confirmation Reference: GOVCON-ABC123456789/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Prime Company Name/i)).toHaveValue("");
     expect(screen.getByLabelText(/Corporate Email/i)).toHaveValue("");
     expect(screen.getByLabelText(/Solicitation Number/i)).toHaveValue("");
