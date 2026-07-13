@@ -13,7 +13,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'sans-serif', color: '#333' }}>
+    <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'sans-serif', color: '#333', paddingTop: '70px', minHeight: '100vh' }}>
       <Helmet><title>Mobile Operations &amp; Corporate Execution Support | Dani Declares LLC</title></Helmet>
       
       {/* The High-Velocity Conversion Hero */}
@@ -24,7 +24,7 @@ const HomePage = () => {
         
         {/* The 3 Absolute Booking Funnels - Positioned Instantly For Fast Conversions */}
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '1000px', margin: '0 auto' }}>
-          <Link to='/request-service' style={{ backgroundColor: '#D4AF37', color: '#222', padding: '16px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', flexGrow: '1', minWidth: '260px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', border: '2px solid #D4AF37' }}>Refr ?? Book Turnovers &amp; Field Logistics</Link>
+          <Link to='/request-service' style={{ backgroundColor: '#D4AF37', color: '#222', padding: '16px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', flexGrow: '1', minWidth: '260px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', border: '2px solid #D4AF37' }}>?? Book Turnovers &amp; Field Logistics</Link>
           <Link to='/request-service' style={{ backgroundColor: '#fff', color: '#8B1E2E', padding: '16px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', flexGrow: '1', minWidth: '260px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', border: '2px solid #fff' }}>?? Order T-Shirts &amp; Print Material</Link>
           <Link to='/request-service' style={{ backgroundColor: '#222', color: '#fff', padding: '16px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', flexGrow: '1', minWidth: '260px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', border: '2px solid rgba(255,255,255,0.2)' }}>?? Book Notary, Trusts &amp; Apostille</Link>
         </div>
