@@ -100,6 +100,7 @@ export default function RequestServicePage() {
     setStatus("submitting");
     setMessage("");
     const genericErrorMessage = `Something went wrong while saving your request. For urgent requests, call or text ${publicPhone.display}.`;
+    const supabaseErrorMessage = `We couldn't save your request right now. Please try again. For urgent requests, call or text ${publicPhone.display}.`;
 
     if (!isSupabaseConfigured || !supabase) {
       setStatus("error");
@@ -129,7 +130,7 @@ export default function RequestServicePage() {
 
       if (leadError) {
         setStatus("error");
-        setMessage(leadError.message || genericErrorMessage);
+        setMessage(supabaseErrorMessage);
         return;
       }
 
@@ -151,7 +152,7 @@ export default function RequestServicePage() {
 
       if (requestError) {
         setStatus("error");
-        setMessage(requestError.message || genericErrorMessage);
+        setMessage(supabaseErrorMessage);
         return;
       }
 

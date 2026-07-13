@@ -35,7 +35,7 @@ describe("RequestServicePage", () => {
     expect(submitButton).toBeEnabled();
   });
 
-  it("shows a visible unavailable message instead of the old hardcoded text", () => {
+  it("displays unavailable message when Supabase is not configured", () => {
     const { container } = renderPage();
 
     fireEvent.change(screen.getByRole("textbox", { name: /full name/i }), {
