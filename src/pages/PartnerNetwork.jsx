@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { siteConfig } from "../data/siteConfig.js";
-import { isValidEmail, logIntakeFailure, submitLeadIntake } from "../lib/secureIntake.js";
+import { isValidEmail, submitLeadIntake } from "../lib/secureIntake.js";
 import styles from "./PartnerNetwork.module.css";
 
 const initialFormData = {
@@ -86,6 +86,7 @@ export default function PartnerNetwork() {
 
     try {
       await submitLeadIntake({
+        contextTag: "partner_network_submit",
         leadPayload: {
           full_name: formData.name,
           organization_name: formData.businessName,
@@ -113,7 +114,6 @@ export default function PartnerNetwork() {
         `Your application was received. Dani Declares will follow up soon. For urgent questions, call or text ${publicPhone.display}.`
       );
     } catch (error) {
-      logIntakeFailure("partner_network_submit", error);
       setStatus("error");
       setMessage(
         `We couldn't submit your application right now. Please try again or call or text ${publicPhone.display}.`

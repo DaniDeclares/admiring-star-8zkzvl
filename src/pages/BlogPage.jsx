@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
-import { isValidEmail, logIntakeFailure, submitLeadIntake } from "../lib/secureIntake.js";
+import { isValidEmail, submitLeadIntake } from "../lib/secureIntake.js";
 import posts from "../posts/posts";
 import "./BlogPage.css";
 
@@ -46,6 +46,7 @@ export default function BlogPage() {
 
     try {
       await submitLeadIntake({
+        contextTag: "blog_subscribe_submit",
         leadPayload: {
           full_name: subscribeForm.fullName,
           organization_name: null,
@@ -62,7 +63,6 @@ export default function BlogPage() {
       setStatus("success");
       setMessage("Thanks for subscribing. We’ll share new stories and updates soon.");
     } catch (error) {
-      logIntakeFailure("blog_subscribe_submit", error);
       setStatus("error");
       setMessage(
         `We couldn't save your subscription right now. Please try again or call or text ${publicPhone.display}.`

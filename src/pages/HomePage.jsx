@@ -55,13 +55,13 @@ export default function Homepage() {
           </div>
 
           <div className="dd-visual-collage" aria-label="Dani Declares service visuals">
-            {heroVisuals.map((visual, index) => (
+            {heroVisuals.map((visual) => (
               <div key={visual.label} className={visual.className}>
                 <img
                   src={visual.src}
                   alt={visual.alt}
                   loading="eager"
-                  fetchPriority={visual.priority && index === 0 ? "high" : undefined}
+                  fetchPriority={visual.priority ? "high" : undefined}
                 />
                 <span>{visual.label}</span>
               </div>

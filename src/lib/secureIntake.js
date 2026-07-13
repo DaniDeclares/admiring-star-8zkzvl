@@ -20,10 +20,11 @@ export const logIntakeFailure = (contextTag, error) => {
   });
 };
 
-export async function submitLeadIntake({ leadPayload, requestPayload }) {
+export async function submitLeadIntake({ contextTag = "lead_intake_submit", leadPayload, requestPayload }) {
   if (!isSupabaseConfigured || !supabase) {
     const unavailableError = new Error("Supabase client unavailable");
     unavailableError.code = "SUPABASE_UNAVAILABLE";
+    logIntakeFailure(contextTag, unavailableError);
     throw unavailableError;
   }
 
@@ -44,6 +45,7 @@ export async function submitLeadIntake({ leadPayload, requestPayload }) {
     .single();
 
   if (leadError) {
+    logIntakeFailure(contextTag, leadError);
     throw leadError;
   }
 
@@ -68,6 +70,7 @@ export async function submitLeadIntake({ leadPayload, requestPayload }) {
       .insert(normalizedRequestPayload);
 
     if (requestError) {
+      logIntakeFailure(contextTag, requestError);
       throw requestError;
     }
   }
