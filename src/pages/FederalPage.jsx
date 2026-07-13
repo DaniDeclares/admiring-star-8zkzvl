@@ -33,7 +33,7 @@ export default function FederalPage() {
             </Link>
             <a
               className="btn btn--secondary"
-              href="/assets/capability-statement.pdf"
+              href="/images/capability-statement.pdf"
               target="_blank"
               rel="noopener noreferrer"
             >

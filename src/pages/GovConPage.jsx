@@ -52,7 +52,7 @@ const GovConPage = () => {
         <h2 style={{ margin: '0 0 12px 0', color: '#333' }}>Teaming & Subcontracting Opportunities</h2>
         <p style={{ margin: '0 0 16px 0', fontSize: '16px', lineHeight: '1.5' }}>Dani Declares LLC is open to Joint Ventures (JV), Prime-Sub alliances, and corporate teaming arrangements to fulfill federal diversity quotas and service mandates.</p>
         <div style={{ marginBottom: '20px' }}>
-          <a href='/assets/capability-statement.pdf' download='Dani_Declares_LLC_Capability_Statement.pdf' style={{ color: '#fff', backgroundColor: '#2b8a3e', padding: '12px 24px', textDecoration: 'none', borderRadius: '4px', display: 'inline-block', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>?? Download Capability Statement (PDF)</a>
+          <a href='/images/capability-statement.pdf' download='Dani_Declares_LLC_Capability_Statement.pdf' style={{ color: '#fff', backgroundColor: '#2b8a3e', padding: '12px 24px', textDecoration: 'none', borderRadius: '4px', display: 'inline-block', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>?? Download Capability Statement (PDF)</a>
         </div>
         <p style={{ margin: '0', fontSize: '16px' }}><strong>Procurement Contact Email:</strong> <a href='mailto:vendors@danideclares.com' style={{ color: '#0056b3', textDecoration: 'none', fontWeight: 'bold' }}>vendors@danideclares.com</a></p>
       </div>
