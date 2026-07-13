@@ -11,6 +11,7 @@ const GovConPage = () => {
     { code: 'NAICS 561720', name: 'Janitorial Services (Residential, Commercial, Airbnb, & Office Cleaning)' },
     { code: 'NAICS 561790', name: 'Other Services to Buildings and Dwellings (Property Resets & Deep Cleans)' },
     { code: 'NAICS 561210', name: 'Facilities Support Services (Turnaround Management)' },
+    { code: 'NAICS 323113', name: 'Commercial Screen Printing (Custom Apparel, Signage, & Merchandise Prep)' },
     { code: 'NAICS 492110', name: 'Couriers and Express Delivery Services (Mobile Routing)' }
   ];
 
@@ -43,12 +44,16 @@ const GovConPage = () => {
         <ul style={{ lineHeight: '1.6', fontSize: '16px', paddingLeft: '20px' }}>
           <li style={{ marginBottom: '10px' }}><strong>Full-Lifecycle Operations:</strong> Exceptional ability to manage a client's back-office documentation and compliance while deploying crews to execute physical site cleanouts and property resets simultaneously.</li>
           <li style={{ marginBottom: '10px' }}><strong>Multi-Sector cleaning Expertise:</strong> Proven capability running high-speed, detailed cleanings for residential apartments, corporate offices, and fast-turnaround short-term rentals (Airbnbs).</li>
+          <li style={{ marginBottom: '10px' }}><strong>On-Demand Graphic & Print Readiness:</strong> In-house capability to rapidly process custom signage, labels, and apparel (Canva, heat-press, and print prep) for urgent event logistics and vendor deployments.</li>
           <li style={{ marginBottom: '10px' }}><strong>Two-State Mobile Footprint:</strong> Fully mobilized, asset-backed crews capable of rapid routing, scheduling, and physical deployment across the Georgia and South Carolina service footprint.</li>
         </ul>
       </div>
       <div style={{ padding: '24px', backgroundColor: '#e9ecef', borderRadius: '4px' }}>
         <h2 style={{ margin: '0 0 12px 0', color: '#333' }}>Teaming & Subcontracting Opportunities</h2>
         <p style={{ margin: '0 0 16px 0', fontSize: '16px', lineHeight: '1.5' }}>Dani Declares LLC is open to Joint Ventures (JV), Prime-Sub alliances, and corporate teaming arrangements to fulfill federal diversity quotas and service mandates.</p>
+        <div style={{ marginBottom: '20px' }}>
+          <a href='/assets/capability-statement.pdf' download='Dani_Declares_LLC_Capability_Statement.pdf' style={{ color: '#fff', backgroundColor: '#2b8a3e', padding: '12px 24px', textDecoration: 'none', borderRadius: '4px', display: 'inline-block', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>?? Download Capability Statement (PDF)</a>
+        </div>
         <p style={{ margin: '0', fontSize: '16px' }}><strong>Procurement Contact Email:</strong> <a href='mailto:vendors@danideclares.com' style={{ color: '#0056b3', textDecoration: 'none', fontWeight: 'bold' }}>vendors@danideclares.com</a></p>
       </div>
     </div>
