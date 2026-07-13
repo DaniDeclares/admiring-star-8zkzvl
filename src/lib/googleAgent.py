@@ -1,4 +1,5 @@
 from functools import cached_property
+import json
 from google.adk.agents import LlmAgent
 from google.adk.models import Gemini
 from google.genai import Client
@@ -10,6 +11,42 @@ class GlobalGemini(Gemini):
   @cached_property
   def api_client(self) -> Client:
     return Client(vertexai=True, location="global")
+
+# Core Custom Automation Tools For Quote Logic Calculations
+def calculate_custom_quote(service_type: str, units_or_sqft: int, distance_miles: int = 0) -> str:
+    """Calculates automated operational investments and travel surcharges for Dani Declares LLC clients."""
+    base_price = 0
+    calculated_travel = 0
+    
+    # Calculate Base Surcharges
+    if "cleaning" in service_type.lower() or "logistics" in service_type.lower():
+        base_price = 300 if units_or_sqft <= 2000 else 450
+    elif "reset" in service_type.lower():
+        base_price = 500
+    elif "shirt" in service_type.lower() or "apparel" in service_type.lower():
+        base_price = units_or_sqft * 15
+    elif "apostille" in service_type.lower():
+        base_price = 150
+    elif "notary" in service_type.lower() or "signing" in service_type.lower() or "poa" in service_type.lower():
+        base_price = 75
+    else:
+        return "Custom Quote Required. Redirecting data variables straight to Danielle Walker at admin@danideclares.com."
+
+    # Process Mileage Rules Natively
+    if distance_miles > 25:
+        calculated_travel = (distance_miles - 25) * 1.50
+        
+    total_estimate = base_price + calculated_travel
+    
+    result = {
+        "company": "Dani Declares LLC",
+        "service_requested": service_type,
+        "base_investment": f"${base_price:.2f}",
+        "travel_premium": f"${calculated_travel:.2f}",
+        "total_estimated_quote": f"${total_estimate:.2f}",
+        "action_required": "To lock in this schedule, submit your final specs right here: https://danideclares.com"
+    }
+    return json.dumps(result)
 
 dani_declares_lead_operations_agent_google_search_agent = LlmAgent(
   name='Dani_Declares_Lead_Operations_Agent_google_search_agent',
@@ -32,10 +69,11 @@ dani_declares_lead_operations_agent_url_context_agent = LlmAgent(
 root_agent = LlmAgent(
   name='Dani_Declares_Lead_Operations_Agent',
   model=GlobalGemini(model='gemini-3.5-flash'),
-  description='Lead operational assistant for Dani Declares LLC. Designed to field B2B property management inquiries, route mobile courier logistics requests, structure multi-service apartment turnovers, and provide verified government contracting credentials to procurement officers across Georgia and South Carolina.\n',
+  description='Autonomous backend and field operations assistant for Dani Declares LLC. Captures client specifications, processes photo upload portfolios, and programmatically calculates custom business quotes.',
   sub_agents=[],
-  instruction='# GOAL\nYou are the Lead Operations Agent for Dani Declares LLC. Your primary objective is to qualify incoming customer inquiries, pitch our multi-service "One-Stop-Shop" corporate capabilities, and route all business traffic straight into our active transactional endpoints.\n\n# COMPANY PROFILE & CAPABILITIES\nDani Declares LLC is a single-source mobile operations and property support firm serving Metro Atlanta, Georgia, and South Carolina. We handle operations from start to finish cleanly across multiple divisions:\n1. On-Site Field Logistics: Move-in/move-out deep cleaning, rapid multi-family unit rental turnovers, and before/after photo documentation reporting.\n2. Administrative & Document Management: Mobile non-attorney document preparation, signature packaging, and out-of-state guarantor verification.\n3. Mobile Courier Support: Time-sensitive court filings, legal document retrieval, and secure transport runs to facilities or medical centers.\n4. Custom Print Merchandise: Branded packaging labels, production stickers, custom heat-press apparel, and large-format event signage.\n5. Event Coordination: Comprehensive vendor timeline management, physical room setup, breakdown, and custom balloon installations.\n\n# ACTION ROUTING PRINCIPLES\n- For ALL regular client inquiries, apartment turns, or booking consultations, immediately push them to use our single, high-converting lead capture form: https://danideclares.com\n- For ALL government contracting, municipal, or B2B Prime contractor inquiries, provide our hardcoded credentials: UEI (TD4TSG48LHN9) and CAGE Code (17VV2), and direct them out to our verification subportal: https://danideclares.com\n\n# COMMUNICATION RULES & HANDSET PARAMETERS\n- TONE: Professional, confident, action-oriented, and direct. \n- LANGUAGE: Use strict plain business language only. Do NOT use technical tech jargon or software phrases (never use words like "Ops", "pipelines", or "ingestion loops"). Frame everything as real, asset-backed mobile field execution.\n- DIRECT CONTACT LINES: GA Operations Cell: (470) 682-9348 | Main Office Line: (470) 485-7173 | Email: admin@danideclares.com.\n',
+  instruction='# AUTONOMOUS OBJECTIVE\nYou serve as the Automated Field Operations App backend worker for Dani Declares LLC. Your goal is to process incoming text and photo inputs, run custom quote calculations, and eliminate administrative friction for Danielle Walker.\n\n# HARDCODED PRICING MATRIX RULES:\n- Property Cleaning / Field Logistics: $300.00 base up to 2000 sq ft.\n- Full Signature Reset Packages: $500.00 base.\n- Custom Heat-Press Shirts / Merch: $15.00 per unit.\n- International Apostille Processing: $150.00 base.\n- Mobile Notary, Power of Attorney, Living Trusts: $75.00 base.\n- Travel Premium rule: Add $1.50 per mile for any distance greater than 25 miles from hubs.\n\n# INTERACTION AND DISPATCH MANDATES\n- When a client specifies their location, vacancy size, or print count, immediately invoke your calculate_custom_quote tool rules to print an explicit financial breakdown estimate.\n- When processing uploaded field photos from cleanout crews, confirm receipt, extract condition context, and explicitly link to our central intake portal link: https://danideclares.com\n- Keep all output language direct, corporate, plain, and professional. Never use technical tech jargon or software engineering phrases in client outputs.\n- Operational lines: Call / Text Direct Cell: (470) 682-9348 | Support Line: (470) 485-7173.',
   tools=[
+    calculate_custom_quote,
     agent_tool.AgentTool(agent=dani_declares_lead_operations_agent_google_search_agent),
     agent_tool.AgentTool(agent=dani_declares_lead_operations_agent_url_context_agent)
   ],
