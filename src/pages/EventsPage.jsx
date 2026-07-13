@@ -1,183 +1,68 @@
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
-import { siteConfig } from "../data/siteConfig.js";
-import "./EventsPage.css";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
-export default function EventsPage() {
+const EventsPage = () => {
+  const handlesItems = [
+    "Weddings (Full Planning)", "Wedding Officiating", "Birthday Parties", 
+    "Baby & Bridal Showers", "Children's Parties", "Graduation Celebrations", 
+    "Corporate & Business Events", "Community & Church Events", "Vow Renewals", 
+    "Private Dinners & Celebrations", "Pop-Up Events", "Large-Scale Productions"
+  ];
+
+  const offers = [
+    { title: "Full Wedding Planning", desc: "Complete wedding planning from concept to execution. Venue guidance, vendor sourcing, timeline creation, design direction, and full day-of management." },
+    { title: "Wedding Officiating", desc: "Professional, personalized ceremony officiating. We work with you to create a ceremony that reflects your story and your style." },
+    { title: "Event Planning & Coordination", desc: "Full planning support for parties, showers, corporate events, and celebrations. Budget planning, vendor coordination, and timeline management." },
+    { title: "Day-Of Coordination", desc: "Already planned your event? We manage the day so you don't have to. Vendor point of contact, setup oversight, timeline execution, and problem-solving." },
+    { title: "Balloon Arches & Custom Decor", desc: "Custom balloon installations, arches, backdrops, and themed decor. We design and install pieces that make your event stand out." },
+    { title: "Setup & Breakdown", desc: "Full setup and breakdown service. We arrive early, execute the floor plan, manage vendor arrivals, and handle cleanup coordination." },
+    { title: "Custom Event Production", desc: "Custom labels, stickers, favor tags, signage, seating charts, welcome signs, table numbers, and branded event details produced in-house." },
+    { title: "Vendor Coordination", desc: "We source, communicate with, and coordinate all vendors so you have one point of contact from start to finish." }
+  ];
+
   return (
-    <>
-      <Helmet>
-        <title>Event Planning & Execution — Dani Declares LLC</title>
-        <meta
-          name="description"
-          content="Full-service event planning, wedding planning, officiating, balloon arches, custom decor, and day-of execution across Metro Atlanta and South Carolina."
-        />
-      </Helmet>
-      <div className="ep-page">
-        <header className="ep-header">
-          <div className="ep-container">
-            <h1>Event Planning & Execution</h1>
-            <p>We don't just decorate. We plan, coordinate, and execute your entire event from start to finish.</p>
-            <div className="ep-header-ctas">
-              <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="ep-btn-primary">Call / Text {siteConfig.phoneNumbers.public.display}</a>
-              <Link to="/contact" className="ep-btn-secondary">Request a Consultation</Link>
-            </div>
-          </div>
-        </header>
-
-        <section className="ep-section ep-types">
-          <div className="ep-container">
-            <h2>Events We Handle</h2>
-            <ul className="ep-two-col">
-              <li>Weddings (full planning)</li>
-              <li>Wedding officiating</li>
-              <li>Birthday parties</li>
-              <li>Baby & bridal showers</li>
-              <li>Children's parties</li>
-              <li>Graduation celebrations</li>
-              <li>Corporate & business events</li>
-              <li>Community & church events</li>
-              <li>Vow renewals</li>
-              <li>Private dinners & celebrations</li>
-              <li>Pop-up events</li>
-              <li>Large-scale productions</li>
-            </ul>
-          </div>
-        </section>
-
-        <section className="ep-section ep-alt ep-services">
-          <div className="ep-container">
-            <h2>What We Offer</h2>
-            <div className="ep-grid">
-              <div className="ep-card">
-                <h3>Full Wedding Planning</h3>
-                <p>Complete wedding planning from concept to execution. Venue guidance, vendor sourcing, timeline creation, design direction, and full day-of management.</p>
-              </div>
-              <div className="ep-card">
-                <h3>Wedding Officiating</h3>
-                <p>Professional, personalized ceremony officiating. We work with you to create a ceremony that reflects your story and your style.</p>
-              </div>
-              <div className="ep-card">
-                <h3>Event Planning & Coordination</h3>
-                <p>Full planning support for parties, showers, corporate events, and celebrations. Budget planning, vendor coordination, and timeline management.</p>
-              </div>
-              <div className="ep-card">
-                <h3>Day-Of Coordination</h3>
-                <p>Already planned your event? We manage the day so you don't have to. Vendor point of contact, setup oversight, timeline execution, and problem-solving.</p>
-              </div>
-              <div className="ep-card">
-                <h3>Balloon Arches & Custom Decor</h3>
-                <p>Custom balloon installations, arches, backdrops, and themed decor. We design and install pieces that make your event stand out.</p>
-              </div>
-              <div className="ep-card">
-                <h3>Setup & Breakdown</h3>
-                <p>Full setup and breakdown service. We arrive early, execute the floor plan, manage vendor arrivals, and handle cleanup coordination.</p>
-              </div>
-              <div className="ep-card">
-                <h3>Custom Event Production</h3>
-                <p>Custom labels, stickers, favor tags, signage, seating charts, welcome signs, table numbers, and branded event details produced in-house.</p>
-              </div>
-              <div className="ep-card">
-                <h3>Vendor Coordination</h3>
-                <p>We source, communicate with, and coordinate all vendors so you have one point of contact from start to finish.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="ep-section ep-process">
-          <div className="ep-container">
-            <h2>Our Process</h2>
-            <ol className="ep-steps">
-              <li><span className="ep-num">1</span><div><strong>Discovery & Vision</strong> — We learn your event type, guest count, budget, theme, and goals.</div></li>
-              <li><span className="ep-num">2</span><div><strong>Scope & Strategy</strong> — We separate planning, execution, and production so your budget is realistic.</div></li>
-              <li><span className="ep-num">3</span><div><strong>Design & Experience</strong> — We build the look, feel, and flow of your event.</div></li>
-              <li><span className="ep-num">4</span><div><strong>Vendor & Production</strong> — We coordinate what gets rented, purchased, or produced in-house.</div></li>
-              <li><span className="ep-num">5</span><div><strong>Execution Plan</strong> — Timeline, setup plan, vendor schedule, and day-of flow created.</div></li>
-              <li><span className="ep-num">6</span><div><strong>Event Day</strong> — We run the day. You enjoy it.</div></li>
-            </ol>
-          </div>
-        </section>
-
-        <section className="ep-section ep-alt ep-pricing">
-          <div className="ep-container">
-            <h2>Investment</h2>
-            <p className="ep-pricing-sub">Every event is custom quoted based on type, guest count, location, planning needs, design complexity, and production requirements.</p>
-            <div className="ep-pkg-grid">
-              <div className="ep-pkg-card">
-                <h3>Day-Of Coordination</h3>
-                <p>For clients who have planned their event and need professional support to execute it.</p>
-                <p className="ep-price">Starting at $650</p>
-              </div>
-              <div className="ep-pkg-card">
-                <h3>Planning + Coordination</h3>
-                <p>Planning support plus full day-of coordination and execution.</p>
-                <p className="ep-price">Starting at $1,200</p>
-              </div>
-              <div className="ep-pkg-card featured">
-                <h3>Full-Service Planning</h3>
-                <p>Complete event management from concept through execution and breakdown.</p>
-                <p className="ep-price">Starting at $2,500</p>
-              </div>
-              <div className="ep-pkg-card">
-                <h3>Custom Production</h3>
-                <p>Balloon arches, custom decor, printed items, favors, and branded event details.</p>
-                <p className="ep-price">Custom Quote</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="ep-section ep-bundle">
-          <div className="ep-container">
-            <h2>Bundle Your Event</h2>
-            <p className="ep-bundle-sub">Combine event services with other Dani Declares services for a complete experience.</p>
-            <div className="ep-bundle-grid">
-              <div className="ep-bundle-card">
-                <h3>Wedding Bundle</h3>
-                <p>Full wedding planning + officiating + balloon arches + custom decor + printed programs, menus & place cards + setup & breakdown</p>
-              </div>
-              <div className="ep-bundle-card">
-                <h3>Party Bundle</h3>
-                <p>Event planning + balloon arches + custom labels & favors + setup & breakdown + custom printed items</p>
-              </div>
-              <div className="ep-bundle-card">
-                <h3>Corporate Event Bundle</h3>
-                <p>Event coordination + setup & breakdown + branded signage & printed materials + vendor coordination</p>
-              </div>
-            </div>
-            <Link to="/contact" className="ep-btn-primary">Request a Bundle Quote</Link>
-          </div>
-        </section>
-
-        <section className="ep-section ep-gallery">
-          <div className="ep-container">
-            <h2>Our Work</h2>
-            <div className="ep-photo-grid">
-              <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Wedding ceremony execution" loading="lazy" />
-              <img src="/weddings/LakefrontWedding_CeremonySetup.jpg" alt="Lakefront wedding ceremony" loading="lazy" />
-              <img src="/weddings/MansionWedding_Kiss_Umbrella.jpg" alt="Wedding couple" loading="lazy" />
-              <img src="/weddings/barn-ceiling-drapery.jpg" alt="Event venue decor" loading="lazy" />
-              <img src="/weddings/MountainBride_CircleArch_Bouquet.jpg" alt="Bridal bouquet" loading="lazy" />
-              <img src="/weddings/rustic-barn-wedding-reception-with-greenery-on-wooden-table.jpg" alt="Reception table setup" loading="lazy" />
-            </div>
-          </div>
-        </section>
-
-        <section className="ep-section ep-cta">
-          <div className="ep-container">
-            <h2>Ready to Plan Your Event?</h2>
-            <p>Every event starts with a consultation. Tell us what you need and we will build the right plan.</p>
-            <div className="ep-header-ctas">
-              <a href={`tel:${siteConfig.phoneNumbers.public.tel}`} className="ep-btn-primary">Call / Text GA: {siteConfig.phoneNumbers.public.display}</a>
-              <a href={`tel:${siteConfig.phoneNumbers.sc.tel}`} className="ep-btn-primary">Call / Text SC: {siteConfig.phoneNumbers.sc.display}</a>
-              <Link to="/contact" className="ep-btn-secondary">Request a Consultation</Link>
-              <a href="mailto:events@danideclares.com" className="ep-btn-secondary">Email Events Team</a>
-            </div>
-          </div>
-        </section>
+    <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'sans-serif', color: '#333', paddingBottom: '60px' }}>
+      <Helmet><title>Event Planning &amp; Execution | Dani Declares LLC</title></Helmet>
+      
+      {/* Header Banner */}
+      <div style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '60px 20px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '38px', margin: '0 0 12px 0' }}>Event Planning &amp; Execution</h1>
+        <p style={{ fontSize: '18px', maxWidth: '800px', margin: '0 auto 24px auto', lineHeight: '1.5', opacity: '0.9' }}>We don't just decorate. We plan, coordinate, and execute your entire event from start to finish.</p>
+        <Link to="/request-service" style={{ backgroundColor: '#D4AF37', color: '#222', padding: '12px 24px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', display: 'inline-block' }}>Request an Event Consultation</Link>
       </div>
-    </>
+
+      {/* Handles List */}
+      <div style={{ padding: '50px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <h3 style={{ textBreak: 'break-word', fontSize: '24px', color: '#8B1E2E', marginBottom: '24px', textAlign: 'center', borderBottom: '2px solid #ddd', paddingBottom: '12px' }}>Events We Handle</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+          {handlesItems.map((item) => (
+            <div key={item} style={{ backgroundColor: '#fff', padding: '14px 20px', borderRadius: '4px', boxShadow: '0 2px 6px rgba(0,0,0,0.03)', fontWeight: 'bold', borderLeft: '3px solid #8B1E2E' }}>
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* What We Offer Grid */}
+      <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <h3 style={{ textBreak: 'break-word', fontSize: '24px', color: '#222', marginBottom: '32px', textAlign: 'center' }}>What We Offer</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+          {offers.map((offer) => (
+            <div key={offer.title} style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              <h4 style={{ color: '#8B1E2E', margin: '0 0 10px 0', fontSize: '18px' }}>{offer.title}</h4>
+              <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.5', margin: '0' }}>{offer.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom CTA Block */}
+      <div style={{ textAlign: 'center', marginTop: '50px' }}>
+        <Link to="/request-service" style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '14px 32px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px', display: 'inline-block' }}>Schedule Your Consultation Now</Link>
+      </div>
+    </div>
   );
-}
+};
+
+export default EventsPage;
