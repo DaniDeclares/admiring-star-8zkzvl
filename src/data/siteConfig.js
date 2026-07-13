@@ -4,8 +4,8 @@ const publicPhone = {
 };
 
 const scPhone = {
-  display: "(864) 326-5362",
-  tel: "+18643265362",
+  display: "(470) 682-9348",
+  tel: "+14706829348",
 };
 
 export const SHOW_FESTIVAL = false;
