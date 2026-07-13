@@ -168,7 +168,7 @@ export default function RequestServicePage() {
       );
     } catch (error) {
       setStatus("error");
-      setMessage(error?.message || genericErrorMessage);
+      setMessage(genericErrorMessage);
     }
   };
 
