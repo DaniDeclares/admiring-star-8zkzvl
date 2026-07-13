@@ -1,20 +1,75 @@
-import React from "react";
+import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { siteConfig } from "../data/siteConfig.js";
+import { isValidEmail, submitLeadIntake } from "../lib/secureIntake.js";
 import posts from "../posts/posts";
 import "./BlogPage.css";
 
-// Mailchimp form (✅ Replace with your actual Mailchimp list URL!)
-const MAILCHIMP_FORM = `
-<div id="mc_embed_signup">
-  <form action="https://YOUR-USERNAME.usXX.list-manage.com/subscribe/post?u=XXXX&amp;id=XXXX" method="post" target="_blank" novalidate>
-    <input type="email" name="EMAIL" class="email" id="mce-EMAIL" placeholder="Your email" required />
-    <input type="submit" value="Subscribe" name="subscribe" class="btn btn--primary" />
-  </form>
-</div>
-`;
+const initialSubscribeForm = {
+  fullName: "",
+  email: "",
+};
 
 export default function BlogPage() {
+  const [subscribeForm, setSubscribeForm] = useState(initialSubscribeForm);
+  const [status, setStatus] = useState("idle");
+  const [message, setMessage] = useState("");
+  const publicPhone = siteConfig.phoneNumbers.public;
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setSubscribeForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    if (!subscribeForm.fullName.trim()) return "Enter your name to subscribe.";
+    if (!isValidEmail(subscribeForm.email)) return "Enter a valid email address to subscribe.";
+    return "";
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const validationMessage = validateForm();
+
+    if (validationMessage) {
+      setStatus("error");
+      setMessage(validationMessage);
+      return;
+    }
+
+    setStatus("submitting");
+    setMessage("");
+
+    try {
+      await submitLeadIntake({
+        contextTag: "blog_subscribe_submit",
+        leadPayload: {
+          full_name: subscribeForm.fullName,
+          organization_name: null,
+          phone: null,
+          email: subscribeForm.email,
+          source_text: "Blog Subscribe Page",
+          status: "new",
+          notes: "Blog subscriber requested updates from the blog page.",
+        },
+        requestPayload: null,
+      });
+
+      setSubscribeForm(initialSubscribeForm);
+      setStatus("success");
+      setMessage("Thanks for subscribing. We’ll share new stories and updates soon.");
+    } catch (error) {
+      setStatus("error");
+      setMessage(
+        `We couldn't save your subscription right now. Please try again or call or text ${publicPhone.display}.`
+      );
+    }
+  };
+
   return (
     <main className="blog-page">
       <Helmet>
@@ -30,11 +85,43 @@ export default function BlogPage() {
         Stories, strategies, and spotlights for every life chapter.
       </p>
 
-      {/* Mailchimp Subscribe Form */}
-      <div
-        className="blog-mailchimp"
-        dangerouslySetInnerHTML={{ __html: MAILCHIMP_FORM }}
-      />
+      <div className="blog-mailchimp">
+        <form onSubmit={handleSubmit} noValidate>
+          <input
+            type="text"
+            name="fullName"
+            className="email"
+            value={subscribeForm.fullName}
+            onChange={handleChange}
+            placeholder="Your name"
+            autoComplete="name"
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            className="email"
+            value={subscribeForm.email}
+            onChange={handleChange}
+            placeholder="Your email"
+            autoComplete="email"
+            required
+          />
+          <input
+            type="submit"
+            value={status === "submitting" ? "Submitting..." : "Subscribe"}
+            name="subscribe"
+            className="btn btn--primary"
+            disabled={status === "submitting"}
+          />
+        </form>
+      </div>
+
+      {message && (
+        <p className={`blog-subscribe-message blog-subscribe-message--${status}`} role="status" aria-live="polite">
+          {message}
+        </p>
+      )}
 
       <div className="blog-grid">
         {posts.map((p) => {

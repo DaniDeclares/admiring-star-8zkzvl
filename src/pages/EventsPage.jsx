@@ -1,8 +1,36 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { APP_IMAGES, resolveImageFallback } from "../assets/images.js";
 import { siteConfig } from "../data/siteConfig.js";
 import "./EventsPage.css";
+
+const eventGalleryImages = [
+  {
+    src: resolveImageFallback(APP_IMAGES.events.gallery.floralCoupleGoldChairs),
+    alt: "Wedding ceremony execution",
+  },
+  {
+    src: resolveImageFallback(APP_IMAGES.events.gallery.lakefrontCeremonySetup),
+    alt: "Lakefront wedding ceremony",
+  },
+  {
+    src: resolveImageFallback(APP_IMAGES.events.gallery.mansionKissUmbrella),
+    alt: "Wedding couple",
+  },
+  {
+    src: resolveImageFallback(APP_IMAGES.events.gallery.barnCeilingDrapery),
+    alt: "Event venue decor",
+  },
+  {
+    src: resolveImageFallback(APP_IMAGES.events.gallery.mountainBrideBouquet),
+    alt: "Bridal bouquet",
+  },
+  {
+    src: resolveImageFallback(APP_IMAGES.events.gallery.rusticReceptionTable),
+    alt: "Reception table setup",
+  },
+];
 
 export default function EventsPage() {
   return (
@@ -155,12 +183,9 @@ export default function EventsPage() {
           <div className="ep-container">
             <h2>Our Work</h2>
             <div className="ep-photo-grid">
-              <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Wedding ceremony execution" loading="lazy" />
-              <img src="/weddings/LakefrontWedding_CeremonySetup.jpg" alt="Lakefront wedding ceremony" loading="lazy" />
-              <img src="/weddings/MansionWedding_Kiss_Umbrella.jpg" alt="Wedding couple" loading="lazy" />
-              <img src="/weddings/barn-ceiling-drapery.jpg" alt="Event venue decor" loading="lazy" />
-              <img src="/weddings/MountainBride_CircleArch_Bouquet.jpg" alt="Bridal bouquet" loading="lazy" />
-              <img src="/weddings/rustic-barn-wedding-reception-with-greenery-on-wooden-table.jpg" alt="Reception table setup" loading="lazy" />
+              {eventGalleryImages.map((image) => (
+                <img key={image.alt} src={image.src} alt={image.alt} loading="lazy" />
+              ))}
             </div>
           </div>
         </section>

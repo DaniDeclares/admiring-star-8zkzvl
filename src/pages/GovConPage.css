@@ -1,263 +1,279 @@
 .govcon-page {
-  --govcon-burgundy: #5b1624;
-  --govcon-burgundy-dark: #2a0d14;
-  --govcon-gold: #c9a227;
-  --govcon-gold-soft: #f2df9b;
-  --govcon-ivory: #fbf7ef;
-  --govcon-ink: #241b1d;
-  --govcon-muted: #665b5e;
-  --govcon-line: rgba(91, 22, 36, 0.18);
+  --govcon-burgundy: #4a0412;
+  --govcon-ivory: #fdfbf7;
+  --govcon-gold: #d4af37;
+  --govcon-gold-soft: rgba(212, 175, 55, 0.18);
+  --govcon-text: #24171c;
+  --govcon-muted: #5b4f53;
+  --govcon-line: rgba(74, 4, 18, 0.18);
   background: var(--govcon-ivory);
-  color: var(--govcon-ink);
+  color: var(--govcon-text);
+}
+
+.govcon-shell {
+  width: min(1120px, calc(100% - 3rem));
+  margin: 0 auto;
 }
 
 .govcon-hero {
-  background: linear-gradient(135deg, rgba(42, 13, 20, 0.94), rgba(91, 22, 36, 0.9));
-  background-position: center;
-  background-size: cover;
+  background: var(--govcon-burgundy);
   color: #fff;
-  min-height: 68vh;
-  display: flex;
-  align-items: center;
-  padding: clamp(4rem, 8vw, 7rem) 1.5rem;
-}
-
-.govcon-hero__content {
-  width: min(980px, 100%);
-  margin: 0 auto;
+  padding: clamp(4rem, 8vw, 6.5rem) 0;
 }
 
 .govcon-eyebrow,
 .govcon-section-label {
-  color: var(--govcon-gold-soft);
-  font-size: 0.78rem;
+  margin: 0 0 0.9rem;
+  color: var(--govcon-gold);
+  font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0;
-  margin: 0 0 0.8rem;
   text-transform: uppercase;
 }
 
-.govcon-section-label {
-  color: var(--govcon-burgundy);
+.govcon-hero h1,
+.govcon-panel h2,
+.govcon-inquiry-copy h2 {
+  margin: 0;
+  line-height: 1.1;
 }
 
 .govcon-hero h1 {
-  color: #fff;
-  font-size: clamp(2.35rem, 6vw, 4.8rem);
-  line-height: 1.02;
-  max-width: 920px;
-  margin: 0;
+  max-width: 900px;
+  font-size: clamp(2.2rem, 6vw, 4.6rem);
 }
 
 .govcon-hero__lead {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(1.05rem, 2vw, 1.28rem);
   max-width: 760px;
   margin: 1.25rem 0 0;
-}
-
-.govcon-hero__actions,
-.govcon-cta__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.9rem;
-  margin-top: 2rem;
-}
-
-.govcon-btn {
-  border: 1px solid transparent;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px;
-  padding: 0.8rem 1.25rem;
-  font-weight: 800;
-  text-decoration: none;
-  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
-}
-
-.govcon-btn:hover,
-.govcon-btn:focus-visible {
-  transform: translateY(-1px);
-}
-
-.govcon-btn--primary,
-.govcon-btn--light {
-  background: var(--govcon-gold);
-  color: var(--govcon-burgundy-dark);
-}
-
-.govcon-btn--secondary {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.52);
-  color: #fff;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(1rem, 2.1vw, 1.2rem);
 }
 
 .govcon-section {
-  padding: clamp(3rem, 6vw, 5rem) 1.5rem 0;
+  padding: clamp(3rem, 6vw, 5rem) 0;
 }
 
-.govcon-section__header {
-  width: min(920px, 100%);
-  margin: 0 auto 1.6rem;
+.govcon-section--ivory {
+  background: var(--govcon-ivory);
 }
 
-.govcon-section__header h2,
-.govcon-data-panel h2,
-.govcon-readiness-panel h2,
-.govcon-cta h2 {
-  color: var(--govcon-burgundy-dark);
-  font-size: clamp(1.75rem, 3vw, 2.55rem);
-  line-height: 1.1;
-  margin: 0 0 0.75rem;
+.govcon-section--burgundy {
+  background: var(--govcon-burgundy);
+  color: #fff;
 }
 
-.govcon-section__header p,
-.govcon-readiness-panel p,
-.govcon-cta p {
-  color: var(--govcon-muted);
-  font-size: 1.04rem;
-  margin: 0;
-}
-
-.govcon-capability-grid {
-  width: min(1160px, calc(100% - 3rem));
-  margin: 0 auto;
+.govcon-layout,
+.govcon-inquiry-layout {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
-.govcon-capability-card {
-  background: #fff;
-  border: 1px solid var(--govcon-line);
-  border-top: 4px solid var(--govcon-gold);
-  border-radius: 8px;
-  min-height: 210px;
-  padding: 1.25rem;
+.govcon-layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.govcon-capability-card h3 {
-  color: var(--govcon-burgundy);
-  font-size: 1.15rem;
-  margin: 0 0 0.75rem;
-}
-
-.govcon-capability-card p {
-  color: var(--govcon-muted);
-  margin: 0;
-}
-
-.govcon-details {
-  width: min(1160px, calc(100% - 3rem));
-  margin: clamp(3rem, 6vw, 5rem) auto 0;
-  display: grid;
+.govcon-inquiry-layout {
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  gap: 1rem;
+  align-items: start;
 }
 
-.govcon-data-panel,
-.govcon-readiness-panel {
+.govcon-panel,
+.govcon-form {
   background: #fff;
   border: 1px solid var(--govcon-line);
-  border-radius: 8px;
-  padding: clamp(1.4rem, 3vw, 2rem);
+  border-radius: 10px;
+  box-shadow: 0 18px 40px rgba(74, 4, 18, 0.08);
 }
 
-.govcon-data-list {
-  display: grid;
-  gap: 0;
-  margin: 1.25rem 0 0;
+.govcon-panel {
+  padding: clamp(1.5rem, 3vw, 2rem);
 }
 
-.govcon-data-list div {
+.govcon-panel h2,
+.govcon-inquiry-copy h2 {
+  color: var(--govcon-burgundy);
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+}
+
+.govcon-table-wrap {
+  overflow-x: auto;
+  margin-top: 1.25rem;
+}
+
+.govcon-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.govcon-table th,
+.govcon-table td {
+  padding: 0.95rem 1rem;
   border-bottom: 1px solid var(--govcon-line);
-  display: grid;
-  gap: 0.35rem;
-  padding: 0.8rem 0;
+  text-align: left;
+  vertical-align: top;
 }
 
-.govcon-data-list div:last-child {
+.govcon-table tr:last-child th,
+.govcon-table tr:last-child td {
   border-bottom: 0;
 }
 
-.govcon-data-list dt {
+.govcon-table th {
+  width: 42%;
   color: var(--govcon-burgundy);
   font-weight: 800;
 }
 
-.govcon-data-list dd {
+.govcon-table td {
   color: var(--govcon-muted);
-  margin: 0;
 }
 
-.govcon-readiness-panel ul {
-  color: var(--govcon-muted);
+.govcon-capabilities {
   display: grid;
-  gap: 0.55rem;
-  margin: 1rem 0 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1.25rem;
+  margin: 1.25rem 0 0;
   padding-left: 1.2rem;
+  color: var(--govcon-text);
 }
 
-.govcon-cta {
-  background: var(--govcon-burgundy-dark);
-  color: #fff;
-  margin-top: clamp(3rem, 6vw, 5rem);
-  padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+.govcon-capabilities li {
+  line-height: 1.55;
 }
 
-.govcon-cta__content {
-  width: min(900px, 100%);
-  margin: 0 auto;
+.govcon-inquiry-copy {
+  padding-top: 0.5rem;
 }
 
-.govcon-cta .govcon-section-label,
-.govcon-cta h2 {
+.govcon-section-label--light {
   color: #fff;
 }
 
-.govcon-cta p {
-  color: rgba(255, 255, 255, 0.84);
-  max-width: 760px;
+.govcon-inquiry-copy h2 {
+  color: #fff;
 }
 
-.govcon-text-link {
-  color: var(--govcon-gold-soft);
+.govcon-inquiry-copy p {
+  margin: 1rem 0 0;
+  max-width: 620px;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.govcon-inquiry-copy__contact a {
+  color: var(--govcon-gold);
   font-weight: 800;
 }
 
-@media (max-width: 960px) {
-  .govcon-capability-grid,
-  .govcon-details {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.govcon-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding: clamp(1.5rem, 3vw, 2rem);
+}
+
+.govcon-field {
+  display: grid;
+  gap: 0.5rem;
+  color: var(--govcon-burgundy);
+  font-weight: 700;
+}
+
+.govcon-field--full,
+.govcon-submit,
+.govcon-form-status {
+  grid-column: 1 / -1;
+}
+
+.govcon-field input,
+.govcon-field textarea {
+  width: 100%;
+  border: 1px solid rgba(74, 4, 18, 0.26);
+  border-radius: 8px;
+  background: var(--govcon-ivory);
+  color: var(--govcon-text);
+  font: inherit;
+  padding: 0.85rem 0.95rem;
+}
+
+.govcon-field input:focus,
+.govcon-field textarea:focus {
+  outline: 2px solid rgba(212, 175, 55, 0.35);
+  border-color: var(--govcon-gold);
+}
+
+.govcon-field textarea {
+  resize: vertical;
+}
+
+.govcon-submit {
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--govcon-gold);
+  color: var(--govcon-burgundy);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter 160ms ease;
+}
+
+.govcon-submit:hover,
+.govcon-submit:focus-visible {
+  filter: brightness(0.96);
+}
+
+.govcon-submit:disabled {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.govcon-form-status {
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.govcon-form-status p {
+  margin: 0;
+}
+
+.govcon-form-status p + p {
+  margin-top: 0.5rem;
+}
+
+.govcon-form-status--success {
+  background: rgba(24, 120, 72, 0.1);
+  border: 1px solid rgba(24, 120, 72, 0.25);
+  color: #1f5a3f;
+}
+
+.govcon-form-status--error {
+  background: var(--govcon-gold-soft);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  color: var(--govcon-burgundy);
+}
+
+.govcon-form-status__reference {
+  font-weight: 800;
+}
+
+@media (max-width: 840px) {
+  .govcon-layout,
+  .govcon-inquiry-layout,
+  .govcon-form,
+  .govcon-capabilities {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 680px) {
-  .govcon-hero {
-    min-height: auto;
+@media (max-width: 640px) {
+  .govcon-shell {
+    width: min(100% - 1.5rem, 1120px);
   }
 
-  .govcon-hero__actions,
-  .govcon-cta__actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .govcon-btn,
-  .govcon-text-link {
-    width: 100%;
-  }
-
-  .govcon-capability-grid,
-  .govcon-details {
-    width: min(100% - 2rem, 1160px);
-    grid-template-columns: 1fr;
-  }
-
-  .govcon-capability-card {
-    min-height: auto;
+  .govcon-table th,
+  .govcon-table td {
+    padding: 0.85rem 0.8rem;
   }
 }

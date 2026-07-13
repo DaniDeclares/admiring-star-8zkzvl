@@ -1,23 +1,29 @@
 import React from "react";
+import { APP_IMAGES, resolveImageFallback } from "../assets/images.js";
 import "../components/WeddingsGallery.css";
 
 const IMAGES = [
-  { src: require("../assets/weddings/barn-hanging-glass-orbs.jpg"), alt: "Hanging glass orb tablescape" },
-  { src: require("../assets/weddings/ivory-sofa-lounge.jpg"),       alt: "Ivory sofa lounge vignette"    },
-  { src: require("../assets/weddings/wooden-coffee-table.jpg"),     alt: "Wooden coffee table decor"     },
-  { src: require("../assets/weddings/rustic-outdoor-lounge-1.jpg"), alt: "Rustic outdoor lounge #1"      },
-  { src: require("../assets/weddings/rustic-outdoor-lounge-2.jpg"), alt: "Rustic outdoor lounge #2"      },
-  { src: require("../assets/weddings/boho-outdoor-lounge.jpg"),     alt: "Boho outdoor lounge vignette"  },
-  { src: require("../assets/weddings/love-marquee-barn.jpg"),       alt: "Barn with LOVE marquee sign"   },
-  { src: require("../assets/weddings/barn-ceiling-drapery.jpg"),    alt: "Barn ceiling drapery & lights" },
+  { src: APP_IMAGES.weddings.gallery.barnHangingGlassOrbs, alt: "Hanging glass orb tablescape" },
+  { src: APP_IMAGES.weddings.gallery.ivorySofaLounge, alt: "Ivory sofa lounge vignette" },
+  { src: APP_IMAGES.weddings.gallery.woodenCoffeeTable, alt: "Wooden coffee table decor" },
+  { src: APP_IMAGES.weddings.gallery.rusticOutdoorLoungeOne, alt: "Rustic outdoor lounge #1" },
+  { src: APP_IMAGES.weddings.gallery.rusticOutdoorLoungeTwo, alt: "Rustic outdoor lounge #2" },
+  { src: APP_IMAGES.weddings.gallery.bohoOutdoorLounge, alt: "Boho outdoor lounge vignette" },
+  { src: APP_IMAGES.weddings.gallery.loveMarqueeBarn, alt: "Barn with LOVE marquee sign" },
+  { src: APP_IMAGES.weddings.gallery.barnCeilingDrapery, alt: "Barn ceiling drapery & lights" },
 ];
 
 export default function WeddingsGallery() {
   return (
     <div className="weddings-gallery">
-      {IMAGES.map((img, idx) => (
-        <div key={idx} className="gallery-item">
-          <img src={img.src} alt={img.alt} />
+      {IMAGES.map((image) => (
+        <div key={image.alt} className="gallery-item">
+          <img
+            src={resolveImageFallback(image.src)}
+            alt={image.alt}
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       ))}
     </div>

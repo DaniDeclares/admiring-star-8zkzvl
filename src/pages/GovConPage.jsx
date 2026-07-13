@@ -1,163 +1,261 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
+import { isSupabaseConfigured } from "../lib/supabaseClient.js";
+import { isValidEmail, submitLeadIntake } from "../lib/secureIntake.js";
 import "./GovConPage.css";
 
-const capabilityStatementPath = "/assets/capability-statement.pdf";
+const initialForm = {
+  primeCompanyName: "",
+  corporateEmail: "",
+  solicitationNumber: "",
+  scopingNotes: "",
+};
+
+const corporateIdentificationRows = [
+  ["Legal Entity Name", "Dani Declares LLC"],
+  ["State of Incorporation", "Georgia"],
+  ["Target Service Footprint", "Georgia, South Carolina"],
+  ["SAM.gov Registration Status", "[Pending Verification]"],
+  ["CAGE Code", "[Pending Verification or Assignment]"],
+  ["UEI Number", "[Pending Verification]"],
+];
+
+const capabilities = [
+  "Office administrative support",
+  "Document preparation and lifecycle support",
+  "Project coordination and vendor readiness support",
+  "Local operational coordination",
+];
+
+const buildInquirySummary = (form) =>
+  [
+    `Prime Company Name: ${form.primeCompanyName}`,
+    `Corporate Email: ${form.corporateEmail}`,
+    `Solicitation Number: ${form.solicitationNumber}`,
+    `Scoping Notes: ${form.scopingNotes}`,
+  ].join("\n");
 
 export default function GovConPage() {
-  const heroStyle = {
-    backgroundImage: `linear-gradient(135deg, rgba(42, 13, 20, 0.94), rgba(91, 22, 36, 0.9)), url("${process.env.PUBLIC_URL}/images/stock/Courthouse steps.jpg")`,
+  const [form, setForm] = useState(initialForm);
+  const [status, setStatus] = useState("idle");
+  const [message, setMessage] = useState("");
+  const [referenceCode, setReferenceCode] = useState("");
+
+  const vendorEmail = siteConfig.emails.vendor;
+  const successMessage = useMemo(
+    () =>
+      `Your teaming inquiry was received. Dani Declares will follow up using the corporate email provided. For alternate outreach, email ${vendorEmail}.`,
+    [vendorEmail]
+  );
+  const submissionUnavailableMessage = useMemo(
+    () =>
+      `Teaming inquiry submission is temporarily unavailable. Please email ${vendorEmail}.`,
+    [vendorEmail]
+  );
+  const saveErrorMessage = useMemo(
+    () =>
+      `We couldn't save your teaming inquiry right now. Please try again or email ${vendorEmail}.`,
+    [vendorEmail]
+  );
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setStatus("submitting");
+    setMessage("");
+    setReferenceCode("");
+
+    if (!isValidEmail(form.corporateEmail)) {
+      setStatus("error");
+      setMessage("Enter a valid corporate email address.");
+      return;
+    }
+
+    if (!isSupabaseConfigured) {
+      setStatus("error");
+      setMessage(submissionUnavailableMessage);
+      return;
+    }
+
+    try {
+      const inquirySummary = buildInquirySummary(form);
+      const lead = await submitLeadIntake({
+        contextTag: "govcon_teaming_inquiry",
+        leadPayload: {
+          full_name: "GovCon Teaming Inquiry",
+          organization_name: form.primeCompanyName,
+          email: form.corporateEmail,
+          source_text: "GovCon Teaming Inquiry",
+          status: "new",
+          notes: inquirySummary,
+        },
+        requestPayload: {
+          service_needed: "GovCon Teaming Inquiry",
+          request_details: inquirySummary,
+          status: "new",
+          priority: "normal",
+        },
+      });
+
+      if (!lead?.id) {
+        throw new Error("Lead submission succeeded but no reference ID was returned");
+      }
+
+      const nextReferenceCode = `GOVCON-${String(lead.id)
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .slice(0, 12)
+        .toUpperCase()}`;
+
+      setForm(initialForm);
+      setStatus("success");
+      setMessage(successMessage);
+      setReferenceCode(nextReferenceCode);
+    } catch {
+      setStatus("error");
+      setMessage(saveErrorMessage);
+    }
   };
 
   return (
     <>
       <Helmet>
-        <title>Operational Subcontracting & Vendor Readiness Support | Dani Declares</title>
+        <title>GovCon Teaming Inquiries | Dani Declares LLC</title>
         <meta
           name="description"
-          content="Dani Declares LLC provides administrative support, document lifecycle support, project coordination, vendor readiness, and local operational support for prime contractors in Georgia and South Carolina."
+          content="GovCon teaming inquiries for administrative support, document lifecycle support, project coordination, and local operational coordination."
         />
         <link rel="canonical" href="https://danideclares.com/govcon" />
-        <meta property="og:title" content="Operational Subcontracting & Vendor Readiness Support | Dani Declares" />
-        <meta
-          property="og:description"
-          content="Subcontracting and vendor-readiness support for prime contractors needing administrative, document lifecycle, project coordination, and local operational support."
-        />
-        <meta property="og:url" content="https://danideclares.com/govcon" />
       </Helmet>
 
       <main className="govcon-page">
-        <section className="govcon-hero" style={heroStyle} aria-labelledby="govcon-title">
-          <div className="govcon-hero__content">
-            <p className="govcon-eyebrow">Government contracting and vendor readiness</p>
-            <h1 id="govcon-title">Operational Execution & Subcontracting Support for Prime Contractors</h1>
+        <section className="govcon-hero" aria-labelledby="govcon-title">
+          <div className="govcon-shell">
+            <p className="govcon-eyebrow">Dani Declares LLC GovCon Sub-Portal</p>
+            <h1 id="govcon-title">Vendor Readiness Support for Prime Contractor Teaming</h1>
             <p className="govcon-hero__lead">
-              Dani Declares LLC supports prime contractors with administrative support,
-              document lifecycle support, project coordination, vendor readiness, and
+              This isolated sub-portal supports business-to-business teaming inquiries for
+              administrative support, document lifecycle support, project coordination, and
               local operational coordination across Georgia and South Carolina.
             </p>
-            <div className="govcon-hero__actions">
-              <Link className="govcon-btn govcon-btn--primary" to="/request-service?division=govcon&source=govcon">
-                Submit Vendor Inquiry
-              </Link>
-              <a
-                className="govcon-btn govcon-btn--secondary"
-                href={capabilityStatementPath}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Capability Statement
-              </a>
+          </div>
+        </section>
+
+        <section className="govcon-section govcon-section--ivory" aria-labelledby="govcon-corporate-title">
+          <div className="govcon-shell govcon-layout">
+            <div className="govcon-panel">
+              <p className="govcon-section-label">Corporate profile</p>
+              <h2 id="govcon-corporate-title">Corporate Identification</h2>
+              <div className="govcon-table-wrap">
+                <table className="govcon-table" aria-label="Corporate Identification">
+                  <tbody>
+                    {corporateIdentificationRows.map(([label, value]) => (
+                      <tr key={label}>
+                        <th scope="row">{label}</th>
+                        <td>{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="govcon-panel">
+              <p className="govcon-section-label">Approved capabilities</p>
+              <h2>Capabilities Matrix</h2>
+              <ul className="govcon-capabilities" aria-label="Approved service categories">
+                {capabilities.map((capability) => (
+                  <li key={capability}>{capability}</li>
+                ))}
+              </ul>
             </div>
           </div>
         </section>
 
-        <section className="govcon-section govcon-intro" aria-labelledby="govcon-support-title">
-          <div className="govcon-section__header">
-            <p className="govcon-section-label">Prime contractor support</p>
-            <h2 id="govcon-support-title">Reliable Support for Complex Contract Workflows</h2>
-            <p>
-              We focus on targeted back-office and local coordination tasks that help
-              prime teams keep project details organized, documented, and moving.
-            </p>
-          </div>
-        </section>
-
-        <section className="govcon-section" aria-labelledby="govcon-capabilities-title">
-          <div className="govcon-section__header">
-            <p className="govcon-section-label">Core capabilities</p>
-            <h2 id="govcon-capabilities-title">Teaming Scope</h2>
-          </div>
-
-          <div className="govcon-capability-grid">
-            <article className="govcon-capability-card">
-              <h3>Administrative Support</h3>
-              <p>Document preparation, structured data entry, spreadsheet updates, task tracking, and file audit support.</p>
-            </article>
-            <article className="govcon-capability-card">
-              <h3>Document Lifecycle Support</h3>
-              <p>File organization, folder tracking, indexing support, metadata logging, and preparation for existing prime systems.</p>
-            </article>
-            <article className="govcon-capability-card">
-              <h3>Project Coordination</h3>
-              <p>Schedule monitoring, timeline logs, cross-team task updates, intake routing, and vendor-readiness follow-up.</p>
-            </article>
-            <article className="govcon-capability-card">
-              <h3>Local Operational Coordination</h3>
-              <p>Regional task coordination, local routing support, site documentation, and physical workspace coordination as scope allows.</p>
-            </article>
-          </div>
-        </section>
-
-        <section className="govcon-details" aria-labelledby="govcon-corporate-title">
-          <div className="govcon-data-panel">
-            <p className="govcon-section-label">Corporate snapshot</p>
-            <h2 id="govcon-corporate-title">Corporate Identification</h2>
-            <dl className="govcon-data-list">
-              <div>
-                <dt>Legal Entity Name</dt>
-                <dd>Dani Declares LLC</dd>
-              </div>
-              <div>
-                <dt>State of Incorporation</dt>
-                <dd>Georgia</dd>
-              </div>
-              <div>
-                <dt>Target Service Footprint</dt>
-                <dd>Georgia and South Carolina</dd>
-              </div>
-              <div>
-                <dt>UEI</dt>
-                <dd>TD4TSG48LHN9</dd>
-              </div>
-              <div>
-                <dt>SAM.gov Registration Status</dt>
-                <dd>Pending verification</dd>
-              </div>
-              <div>
-                <dt>CAGE Code</dt>
-                <dd>Pending verification or assignment</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className="govcon-readiness-panel">
-            <p className="govcon-section-label">Subcontractor readiness</p>
-            <h2>Structured for Teaming Support</h2>
-            <p>
-              Dani Declares LLC is structured for small business teaming and
-              subcontractor readiness. The company supports targeted operational
-              tasks while prime contractors retain ownership of specialized systems,
-              secure records infrastructure, and contract-specific compliance controls.
-            </p>
-            <ul>
-              <li>Office administrative support</li>
-              <li>Document preparation and lifecycle support</li>
-              <li>Project coordination and vendor-readiness support</li>
-              <li>Local operational coordination</li>
-            </ul>
-          </div>
-        </section>
-
-        <section id="vendor-inquiry" className="govcon-cta" aria-labelledby="govcon-cta-title">
-          <div className="govcon-cta__content">
-            <p className="govcon-section-label">Next step</p>
-            <h2 id="govcon-cta-title">Discuss Teaming Opportunities</h2>
-            <p>
-              Preparing a proposal or managing an active award that needs reliable
-              administrative support, document lifecycle support, or local coordination?
-              Connect with Dani Declares to discuss a structured subcontracting fit.
-            </p>
-            <div className="govcon-cta__actions">
-              <Link className="govcon-btn govcon-btn--light" to="/request-service?division=govcon&source=govcon">
-                Submit Vendor Inquiry
-              </Link>
-              <a className="govcon-text-link" href={`mailto:${siteConfig.emails.vendor}`}>
-                {siteConfig.emails.vendor}
-              </a>
+        <section className="govcon-section govcon-section--burgundy" aria-labelledby="govcon-inquiry-title">
+          <div className="govcon-shell govcon-inquiry-layout">
+            <div className="govcon-inquiry-copy">
+              <p className="govcon-section-label govcon-section-label--light">Teaming inquiries</p>
+              <h2 id="govcon-inquiry-title">Structured B2B Intake for Vendor Readiness Support</h2>
+              <p>
+                Use this form for prime-contractor and partner outreach related to solicitation
+                support, teaming alignment, and scoped operational coordination.
+              </p>
+              <p className="govcon-inquiry-copy__contact">
+                Alternate contact: <a href={`mailto:${vendorEmail}`}>{vendorEmail}</a>
+              </p>
             </div>
+
+            <form className="govcon-form" onSubmit={handleSubmit} noValidate>
+              <label className="govcon-field">
+                <span>Prime Company Name</span>
+                <input
+                  name="primeCompanyName"
+                  type="text"
+                  value={form.primeCompanyName}
+                  onChange={handleChange}
+                  autoComplete="organization"
+                  required
+                />
+              </label>
+
+              <label className="govcon-field">
+                <span>Corporate Email</span>
+                <input
+                  name="corporateEmail"
+                  type="email"
+                  value={form.corporateEmail}
+                  onChange={handleChange}
+                  autoComplete="email"
+                  required
+                />
+              </label>
+
+              <label className="govcon-field">
+                <span>Solicitation Number</span>
+                <input
+                  name="solicitationNumber"
+                  type="text"
+                  value={form.solicitationNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+
+              <label className="govcon-field govcon-field--full">
+                <span>Scoping Notes</span>
+                <textarea
+                  name="scopingNotes"
+                  value={form.scopingNotes}
+                  onChange={handleChange}
+                  rows="5"
+                  required
+                />
+              </label>
+
+              <button className="govcon-submit" type="submit" disabled={status === "submitting"}>
+                {status === "submitting" ? "Submitting Inquiry..." : "Submit Teaming Inquiry"}
+              </button>
+
+              {message ? (
+                <div
+                  className={`govcon-form-status govcon-form-status--${status === "success" ? "success" : "error"}`}
+                  role="status"
+                >
+                  <p>{message}</p>
+                  {status === "success" && referenceCode ? (
+                    <p className="govcon-form-status__reference">Confirmation Reference: {referenceCode}</p>
+                  ) : null}
+                </div>
+              ) : null}
+            </form>
           </div>
         </section>
       </main>

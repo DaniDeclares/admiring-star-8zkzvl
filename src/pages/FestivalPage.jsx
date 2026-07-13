@@ -1,8 +1,7 @@
-// src/pages/FestivalPage.jsx
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { resolveImageFallback } from "../assets/images.js";
+import { APP_IMAGES, resolveImageFallback } from "../assets/images.js";
 import FestivalBanner from "../components/FestivalBanner.jsx";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
 import "./FestivalPage.css";
@@ -10,22 +9,22 @@ import "./FestivalPage.css";
 export default function FestivalPage() {
   const highlights = [
     {
-      src: resolveImageFallback("festival.highlights", "facePainting"),
+      src: resolveImageFallback(APP_IMAGES.festival.highlights.facePainting),
       alt: "Face painting for children",
       caption: "Face Painting",
     },
     {
-      src: resolveImageFallback("festival.highlights", "vendorMarket"),
+      src: resolveImageFallback(APP_IMAGES.festival.highlights.vendorMarket),
       alt: "Families browsing vendor booths",
       caption: "Vendor Market",
     },
     {
-      src: resolveImageFallback("festival.highlights", "liveMusic"),
+      src: resolveImageFallback(APP_IMAGES.festival.highlights.liveMusic),
       alt: "Live band on stage",
       caption: "Live Music",
     },
     {
-      src: resolveImageFallback("festival.highlights", "kidZone"),
+      src: resolveImageFallback(APP_IMAGES.festival.highlights.kidZone),
       alt: "Kids playing in the Kid Zone",
       caption: "Kid Zone (Free!)",
     },
@@ -67,13 +66,11 @@ export default function FestivalPage() {
         />
       </Helmet>
 
-      {/* Sticky countdown banner */}
       <FestivalBanner />
 
-      {/* Hero: now using public path, no import */}
       <header
         className="festival-hero"
-        style={{ backgroundImage: "url('/images/festival/hero.jpg')" }}
+        style={{ backgroundImage: `url(${resolveImageFallback(APP_IMAGES.festival.heroBackground)})` }}
       >
         <div className="festival-hero-overlay">
           <h1>Declare Your Worth Festival</h1>
@@ -95,7 +92,6 @@ export default function FestivalPage() {
         </div>
       </header>
 
-      {/* Why this matters */}
       <section className="festival-why">
         <h2>Why This Festival Matters</h2>
         <p>
@@ -111,7 +107,6 @@ export default function FestivalPage() {
         </p>
       </section>
 
-      {/* Highlights gallery */}
       <section className="festival-highlights">
         <h2>Festival Highlights</h2>
         <p>
@@ -120,20 +115,20 @@ export default function FestivalPage() {
         </p>
         <div className="highlights-grid">
           {highlights.map((item) => (
-             <figure key={item.alt} className="highlight-item">
-               <img src={item.src} alt={item.alt} />
-               <figcaption>{item.caption}</figcaption>
-             </figure>
+            <figure key={item.alt} className="highlight-item">
+              <img
+                src={item.src}
+                alt={item.alt}
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>{item.caption}</figcaption>
+            </figure>
           ))}
         </div>
       </section>
 
-      {/* Full schedule */}
-      <section id="schedule" className="festival-schedule">
-        {/* …your schedule table… */}
-      </section>
-
-      {/* Tickets & booths, partners, FAQs, final CTA… */}
+      <section id="schedule" className="festival-schedule" />
     </main>
   );
 }
