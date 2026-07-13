@@ -4,7 +4,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
 import GovConPage from "./GovConPage.jsx";
 
-const submitLeadIntake = jest.fn();
+const mockSubmitLeadIntake = jest.fn();
 
 jest.mock("../lib/supabaseClient.js", () => ({
   isSupabaseConfigured: true,
@@ -12,7 +12,7 @@ jest.mock("../lib/supabaseClient.js", () => ({
 
 jest.mock("../lib/secureIntake.js", () => ({
   isValidEmail: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()),
-  submitLeadIntake: (...args) => submitLeadIntake(...args),
+  submitLeadIntake: (...args) => mockSubmitLeadIntake(...args),
 }));
 
 const renderPage = () =>
@@ -41,7 +41,7 @@ const fillRequiredFields = () => {
 
 describe("GovConPage", () => {
   beforeEach(() => {
-    submitLeadIntake.mockReset();
+    mockSubmitLeadIntake.mockReset();
   });
 
   it("renders the corporate identification table and capabilities matrix", () => {
@@ -54,7 +54,7 @@ describe("GovConPage", () => {
   });
 
   it("clears the form and shows a confirmation reference after a successful submission", async () => {
-    submitLeadIntake.mockResolvedValue({ id: "abc12345-6789" });
+    mockSubmitLeadIntake.mockResolvedValue({ id: "abc12345-6789" });
     renderPage();
     fillRequiredFields();
 
@@ -72,7 +72,7 @@ describe("GovConPage", () => {
   });
 
   it("preserves form values and omits a confirmation reference when saving fails", async () => {
-    submitLeadIntake.mockRejectedValue(new Error("save failed"));
+    mockSubmitLeadIntake.mockRejectedValue(new Error("save failed"));
     renderPage();
     fillRequiredFields();
 
