@@ -98,6 +98,7 @@ export default function Homepage() {
               <h3>Product, Print &amp; Merch Support</h3>
               <p>Stickers, labels, heat press apparel, business merch, event products, and branded add-ons.</p>
               <Link to="/request-service" className="dd-btn-link">Request ProductOps →</Link>
+              <Link to="/merch" className="dd-btn-link">View Merch &amp; Print Services →</Link>
             </div>
           </div>
           <div className="dd-divisions-footer">

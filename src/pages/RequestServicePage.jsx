@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
 import { siteConfig } from "../data/siteConfig.js";
 import { supabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
 import "./RequestServicePage.css";
@@ -46,6 +47,7 @@ const initialForm = {
 };
 
 export default function RequestServicePage() {
+  const location = useLocation();
   const [form, setForm] = useState(initialForm);
   const [divisions, setDivisions] = useState(fallbackDivisions);
   const [marketingSources, setMarketingSources] = useState(fallbackMarketingSources);
@@ -78,6 +80,28 @@ export default function RequestServicePage() {
 
     loadOptions();
   }, []);
+
+  useEffect(() => {
+    const requestedDivision = new URLSearchParams(location.search).get("division")?.trim().toLowerCase();
+
+    if (!requestedDivision) return;
+
+    const matchingDivision = divisions.find((division) =>
+      division.name.toLowerCase().startsWith(requestedDivision)
+    );
+
+    if (!matchingDivision) return;
+
+    setForm((current) => {
+      const nextDivisionId = String(matchingDivision.id ?? matchingDivision.name);
+
+      if (current.divisionId === nextDivisionId) {
+        return current;
+      }
+
+      return { ...current, divisionId: nextDivisionId };
+    });
+  }, [divisions, location.search]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -130,7 +154,7 @@ export default function RequestServicePage() {
 
       const requestPayload = {
         lead_id: lead?.id || null,
-        division_id: form.divisionId ? Number(form.divisionId) : null,
+        division_id: /^\d+$/.test(form.divisionId) ? Number(form.divisionId) : null,
         service_needed: form.serviceNeeded || null,
         location_address: form.locationAddress || null,
         timeline: form.timeline || null,
@@ -225,7 +249,7 @@ export default function RequestServicePage() {
                   <select name="divisionId" value={form.divisionId} onChange={handleChange} required>
                     <option value="">Select a division</option>
                     {divisions.map((division) => (
-                      <option key={division.name} value={division.id || ""}>{division.name}</option>
+                      <option key={division.name} value={String(division.id ?? division.name)}>{division.name}</option>
                     ))}
                   </select>
                 </label>

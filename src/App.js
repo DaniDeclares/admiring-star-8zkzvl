@@ -28,6 +28,7 @@ import EventsPage from "./pages/EventsPage.jsx";
 import FacilityVisitsPage from "./pages/FacilityVisitsPage.jsx";
 import FederalPage from "./pages/FederalPage.jsx";
 import GovConPage from "./pages/GovConPage.jsx";
+import MerchPage from "./pages/MerchPage.jsx";
 import TaxServicesPage from "./pages/TaxServicesPage.jsx";
 import PaymentCancel from "./pages/PaymentCancel.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
@@ -114,6 +115,7 @@ export default function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/signature-services" element={<SignatureServicesPage />} />
+        <Route path="/merch" element={<MerchPage />} />
         <Route path="/request-service" element={<RequestServicePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/facility-visits" element={<FacilityVisitsPage />} />
