@@ -37,7 +37,7 @@ const GovConLayout = () => {
           </ul>
 
           <div style={{ textAlign: 'center', marginTop: '35px' }}>
-            <a href="/request-service" style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '14px 28px', textDecoration: 'none', borderRadius: '4px', fontWeight: 'bold', display: 'inline-block' }}>Access Secure Prime Teaming Portal &rarr;</a>
+            <a href="/Capability_Statement_Dani_Declares.txt" download style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '14px 28px', textDecoration: 'none', borderRadius: '4px', fontWeight: 'bold', display: 'inline-block' }}>Access Secure Prime Teaming Portal &rarr;</a>
           </div>
         </div>
       </div>
