@@ -1,5 +1,6 @@
 import React from "react";
-import { siteConfig } from "../data/siteConfig.js";
+
+const SUPPORT_EMAIL = "operations@danideclares.com";
 
 export default class AppErrorBoundary extends React.Component {
   constructor(props) {
@@ -16,8 +17,6 @@ export default class AppErrorBoundary extends React.Component {
   }
 
   render() {
-    const supportEmail = siteConfig.emails.admin;
-
     if (this.state.hasError) {
       return (
         <main style={{ padding: "2rem 1rem", maxWidth: "42rem", margin: "0 auto" }}>
@@ -27,7 +26,7 @@ export default class AppErrorBoundary extends React.Component {
           </p>
           <p>
             If the issue continues, contact us at{" "}
-            <a href={`mailto:${supportEmail}`}>{supportEmail}</a> so we can help.
+            <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> so we can help.
           </p>
         </main>
       );
