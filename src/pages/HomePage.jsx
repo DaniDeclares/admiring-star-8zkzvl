@@ -1,227 +1,44 @@
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
-import "./Homepage.css";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
-export default function Homepage() {
+const HomePage = () => {
+  const lanes = [
+    { title: 'Administrative & Document Management', text: 'Professional notary, apostille, non-attorney document preparation, I-9 verification, printing, and scanning support.', path: '/request-service', img: '/images/stock/legal paperwork desk.jpg' },
+    { title: 'On-Site Field Logistics', text: 'Move-in and move-out cleaning, deep cleaning, residential transitions, rental turnovers, and full property resets.', path: '/field-services', img: '/images/stock/mobile notary public.jpg' },
+    { title: 'Mobile Courier Services', text: 'Secure court filings, urgent document delivery routing, municipal agency visits, and carrier back-office transport management.', path: '/request-service', img: '/images/stock/court building exterior.jpg' },
+    { title: 'Event Planning & On-Site Setup', text: 'Comprehensive vendor coordination, operations scheduling, physical asset placement, event breakdown, and execution support.', path: '/events', img: '/images/festival/festival-promo-gradient.jpg' },
+    { title: 'Government & Compliance Support', text: 'Court filings, regulatory office runs, document compliance tracking, and structured teaming portals for federal contracts.', path: '/govcon', img: '/images/stock/file cabinet.jpg' },
+    { title: 'Custom Print & Merchandise Prep', text: 'Production labels, packaging stickers, heat-press custom apparel, client welcome kits, and branded enterprise merchandise.', path: '/request-service', img: '/images/products/renamed_merch_image.jpg' }
+  ];
   return (
-    <>
-      <Helmet>
-        <title>Dani Declares LLC — Mobile Operations & Execution Support</title>
-        <meta
-          name="description"
-          content="Mobile operations and execution support for documents, compliance, logistics, property, and events. We come to you and handle it from start to finish."
-        />
-      </Helmet>
-
-      {/* Hero */}
-      <section className="dd-hero dd-hero--visual">
-        <div className="dd-hero-inner">
-          <div className="dd-hero-content">
-            <p className="dd-hero-eyebrow">Mobile Operations &amp; Execution Support</p>
-            <h1>We Handle It From Start to Finish</h1>
-            <p className="dd-hero-sub">
-              Mobile support for documents, compliance, logistics, property, events, and business operations.
-              <br />
-              We come to you, organize the details, and help get it done.
-            </p>
-            <div className="dd-hero-ctas">
-              <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
-              <a href="tel:4704857173" className="dd-btn-secondary">Call / Text Now</a>
-              <Link to="/services" className="dd-btn-outline">View Services</Link>
-            </div>
-          </div>
-
-          <div className="dd-visual-collage" aria-label="Dani Declares service visuals">
-            <div className="dd-visual-card dd-visual-card--large">
-              <img src="/images/stock/document execution office.jpg" alt="Organized document and administrative support" loading="eager" />
-              <span>Document &amp; Admin Support</span>
-            </div>
-            <div className="dd-visual-card">
-              <img src="/weddings/FloralWedding_Couple_GoldChairs.jpg" alt="Event planning and execution support" loading="eager" />
-              <span>Event Planning & On-Site Setup</span>
-            </div>
-            <div className="dd-visual-card">
-              <img src="/images/stock/Courthouse steps.jpg" alt="Government and compliance support" loading="eager" />
-              <span>Government & Compliance Support</span>
-            </div>
-          </div>
+    <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'sans-serif', color: '#333' }}>
+      <Helmet><title>Mobile Operations & Execution Support | Dani Declares LLC</title></Helmet>
+      <div style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '80px 20px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '42px', fontWeight: 'bold', margin: '0 0 16px 0' }}>Mobile Operations &amp; Execution Support</h1>
+        <p style={{ fontSize: '19px', margin: '0 auto 32px auto', maxWidth: '800px', lineHeight: '1.6', opacity: '0.95' }}>We handle it from start to finish. Back-office administrative compliance, regional field couriers, and complete on-site property turn cleaning logistics across Georgia and South Carolina.</p>
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link to='/request-service' style={{ backgroundColor: '#D4AF37', color: '#222', padding: '14px 28px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px' }}>Request Service Now</Link>
+          <a href='tel:4704857173' style={{ border: '2px solid #fff', color: '#fff', padding: '12px 26px', borderRadius: '4px', fontWeight: 'bold', textDecoration: 'none', fontSize: '16px' }}>Call / Text Now</a>
         </div>
-      </section>
-
-      {/* Fast Intake Strip */}
-      <section className="dd-intake-strip">
-        <div className="dd-container dd-intake-inner">
-          <p className="dd-intake-text">Need something handled today? Submit a service request and we'll follow up fast.</p>
-          <Link to="/request-service" className="dd-btn-intake">Request Service Now →</Link>
-        </div>
-      </section>
-
-      {/* Service Lanes */}
-      <section className="dd-section dd-lanes">
-        <div className="dd-container">
-          <h2>Choose Your Service Lane</h2>
-          <p className="dd-section-sub">Select the operation type that matches your need. We route and execute from there.</p>
-          <div className="dd-lanes-grid">
-            <div className="dd-lane-card">
-              <span className="dd-lane-tag">Administrative & Document Management</span>
-              <h3>Document &amp; Compliance</h3>
-              <p>Notary, apostille, document prep, I-9 verification, printing, and full packaging.</p>
-              <Link to="/request-service" className="dd-btn-link">Request Administrative & Document Management →</Link>
-            </div>
-            <div className="dd-lane-card">
-              <span className="dd-lane-tag">On-Site Field Logistics</span>
-              <h3>Field Services &amp; Property</h3>
-              <p>Move-in/out cleaning, deep cleaning, rental turnovers, and full property resets.</p>
-              <Link to="/request-service" className="dd-btn-link">Request On-Site Field Logistics →</Link>
-            </div>
-            <div className="dd-lane-card">
-              <span className="dd-lane-tag">Mobile Courier Services</span>
-              <h3>Logistics &amp; Courier</h3>
-              <p>Court runs, document delivery, facility visits, and carrier back-office support.</p>
-              <Link to="/request-service" className="dd-btn-link">Request Mobile Courier Services →</Link>
-            </div>
-            <div className="dd-lane-card">
-              <span className="dd-lane-tag">Event Planning & On-Site Setup</span>
-              <h3>Event Planning &amp; Execution</h3>
-              <p>Full planning, vendor coordination, setup, breakdown, and custom decor production.</p>
-              <Link to="/request-service" className="dd-btn-link">Request Event Planning & On-Site Setup →</Link>
-            </div>
-            <div className="dd-lane-card">
-              <span className="dd-lane-tag">Government & Compliance Support</span>
-              <h3>Government &amp; Compliance</h3>
-              <p>Court filings, government office runs, compliance documentation, and agency support.</p>
-              <Link to="/request-service" className="dd-btn-link">Request Government & Compliance Support →</Link>
-            </div>
-            <div className="dd-lane-card">
-              <span className="dd-lane-tag">Custom Print & Merchandise Prep</span>
-              <h3>Product, Print &amp; Merch Support</h3>
-              <p>Stickers, labels, heat press apparel, business merch, event products, and branded add-ons.</p>
-              <Link to="/request-service" className="dd-btn-link">Request Custom Print & Merchandise Prep →</Link>
-            </div>
-          </div>
-          <div className="dd-divisions-footer">
-            <Link to="/services" className="dd-btn-secondary">View All Services</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Dani Declares */}
-      <section className="dd-section dd-why dd-alt-bg">
-        <div className="dd-container">
-          <h2>Why Choose Dani Declares</h2>
-          <div className="dd-why-grid">
-            <div className="dd-why-card">
-              <strong>Mobile</strong>
-              <p>We come to you — no need to arrange drop-offs or pickups.</p>
-            </div>
-            <div className="dd-why-card">
-              <strong>Multi-service</strong>
-              <p>Multiple tasks handled in one visit, saving you time and coordination effort.</p>
-            </div>
-            <div className="dd-why-card">
-              <strong>Structured execution</strong>
-              <p>Organized, reliable, and fully documented from intake to completion.</p>
-            </div>
-            <div className="dd-why-card">
-              <strong>Fast response</strong>
-              <p>Quick turnaround on bookings and quotes — we don't sit on requests.</p>
-            </div>
-            <div className="dd-why-card">
-              <strong>Built to execute</strong>
-              <p>Designed for people who need things DONE, not just discussed.</p>
-            </div>
-            <div className="dd-why-card">
-              <strong>Transparent intake</strong>
-              <p>Clear service routing so you always know what's being handled and by whom.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="dd-section dd-how">
-        <div className="dd-container">
-          <h2>How It Works</h2>
-          <ol className="dd-steps">
-            <li>
-              <span className="dd-step-num">1</span>
-              <div>
-                <strong>Submit a Request</strong>
-                <p>Fill out the service intake form. Select your lane and describe your need.</p>
+      </div>
+      <div style={{ padding: '60px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <h2 style={{ textAlign: 'center', fontSize: '32px', color: '#8B1E2E', marginBottom: '12px' }}>Choose Your Service Lane</h2>
+        <p style={{ textAlign: 'center', color: '#666', fontSize: '16px', marginBottom: '40px' }}>Select an operation lane below to route your request straight down to our deployment teams.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '30px' }}>
+          {lanes.map((lane) => (
+            <div key={lane.title} style={{ backgroundColor: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ height: '220px', backgroundColor: '#eee' }}><img src={lane.img} alt={lane.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e)=>{e.target.src='/images/festival/festival-promo-gradient.jpg';}} /></div>
+              <div style={{ padding: '24px', flexGrow: '1', display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ fontSize: '20px', color: '#222', margin: '0 0 12px 0', fontWeight: 'bold' }}>{lane.title}</h3>
+                <p style={{ color: '#555', fontSize: '15px', lineHeight: '1.5', marginBottom: '20px', flexGrow: '1' }}>{lane.text}</p>
+                <Link to={lane.path} style={{ color: '#8B1E2E', textDecoration: 'none', fontWeight: 'bold', fontSize: '15px', display: 'inline-block' }}>Request This Service &rarr;</Link>
               </div>
-            </li>
-            <li>
-              <span className="dd-step-num">2</span>
-              <div>
-                <strong>We Review &amp; Confirm</strong>
-                <p>We follow up to confirm details, timeline, location, and scope.</p>
-              </div>
-            </li>
-            <li>
-              <span className="dd-step-num">3</span>
-              <div>
-                <strong>We Execute</strong>
-                <p>We coordinate and carry out the service — mobile, on-site, or remotely.</p>
-              </div>
-            </li>
-            <li>
-              <span className="dd-step-num">4</span>
-              <div>
-                <strong>Completion &amp; Documentation</strong>
-                <p>You receive confirmation, documentation, and any relevant follow-up.</p>
-              </div>
-            </li>
-          </ol>
+            </div>
+          ))}
         </div>
-      </section>
-
-      {/* Who This Helps */}
-      <section className="dd-section dd-who dd-alt-bg">
-        <div className="dd-container">
-          <h2>Who This Helps</h2>
-          <div className="dd-who-grid">
-            <div className="dd-who-card">
-              <strong>Individuals &amp; Families</strong>
-              <p>Personal document needs, property transitions, and event coordination.</p>
-            </div>
-            <div className="dd-who-card">
-              <strong>Business Owners &amp; Professionals</strong>
-              <p>Back-office support, compliance documentation, and admin execution.</p>
-            </div>
-            <div className="dd-who-card">
-              <strong>Property Managers &amp; Landlords</strong>
-              <p>Rental turnovers, move-in/out cleans, and property reset coordination.</p>
-            </div>
-            <div className="dd-who-card">
-              <strong>Law Firms &amp; Title Companies</strong>
-              <p>Court runs, document delivery, notary coordination, and filing support.</p>
-            </div>
-            <div className="dd-who-card">
-              <strong>Carriers &amp; Logistics Companies</strong>
-              <p>Back-office support, facility visits, and compliance documentation.</p>
-            </div>
-            <div className="dd-who-card">
-              <strong>Event Clients &amp; Organizations</strong>
-              <p>Full event execution from planning through breakdown and wrap-up.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <section className="dd-section dd-bottom-cta">
-        <div className="dd-container">
-          <h2>Ready to Get It Handled?</h2>
-          <p className="dd-bottom-cta-sub">Submit a request and we'll route you to the right service lane.</p>
-          <div className="dd-hero-ctas">
-            <Link to="/request-service" className="dd-btn-primary">Request Service</Link>
-            <a href="tel:4704857173" className="dd-btn-secondary">Call / Text (470) 485-7173</a>
-            <Link to="/services" className="dd-btn-outline">View All Services</Link>
-          </div>
-          <p className="dd-areas-note">Metro Atlanta &amp; surrounding areas &nbsp;•&nbsp; South Carolina &nbsp;•&nbsp; Travel available based on service</p>
-        </div>
-      </section>
-    </>
+      </div>
+    </div>
   );
-}
+};
+export default HomePage;
