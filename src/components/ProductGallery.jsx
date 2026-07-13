@@ -1,31 +1,30 @@
 import React, { useState } from "react";
 import Lightbox from "react-image-lightbox";
 import "react-image-lightbox/style.css";
-import "./ProductGallery.css"; // Ensure this CSS file exists and is styled appropriately
+import { APP_IMAGES, resolveImageFallback } from "../assets/images.js";
+import "./ProductGallery.css";
 
-// Sample product data
 const productGroups = [
   {
-    id: "1970c26d528",
-    title: "Empowerment Mug",
+    id: "cheaper-keep-dad-mug",
+    title: "Cheaper to Keep Dad Mug",
     images: [
-      "1970c26d528.jpg",
-      "1970c26d528 (1).jpg",
-      "1970c26d528 (2).jpg",
+      APP_IMAGES.products.gallery.cheaperKeepDadMug.primary,
+      APP_IMAGES.products.gallery.cheaperKeepDadMug.secondary,
+      APP_IMAGES.products.gallery.cheaperKeepDadMug.tertiary,
     ],
-    paylink: "https://g3umzm-cq.myshopify.com/products/empowerment-mug",
+    paylink: "https://g3umzm-cq.myshopify.com/products/cheaper-to-keep-dad-mug",
   },
   {
-    id: "1970c273ab8",
-    title: "Self-Love Towel",
+    id: "dad-documents-sleeve",
+    title: "Dad Documents Laptop Sleeve",
     images: [
-      "1970c273ab8.jpg",
-      "1970c273ab8 (1).jpg",
-      "1970c273ab8 (2).jpg",
+      APP_IMAGES.products.gallery.dadDocumentsLaptopSleeve.primary,
+      APP_IMAGES.products.gallery.dadDocumentsLaptopSleeve.secondary,
+      APP_IMAGES.products.gallery.dadDocumentsLaptopSleeve.tertiary,
     ],
-    paylink: "https://g3umzm-cq.myshopify.com/products/self-love-towel",
+    paylink: "https://g3umzm-cq.myshopify.com/products/dad-documents-laptop-sleeve",
   },
-  // Add more products as needed
 ];
 
 export default function ProductGallery() {
@@ -40,24 +39,26 @@ export default function ProductGallery() {
   };
 
   const closeLightbox = () => {
-    setLightbox({ ...lightbox, isOpen: false });
+    setLightbox((current) => ({ ...current, isOpen: false }));
   };
 
   const movePrev = () => {
     const group = productGroups[lightbox.groupIdx].images;
-    setLightbox({
-      ...lightbox,
-      imgIdx: (lightbox.imgIdx + group.length - 1) % group.length,
-    });
+    setLightbox((current) => ({
+      ...current,
+      imgIdx: (current.imgIdx + group.length - 1) % group.length,
+    }));
   };
 
   const moveNext = () => {
     const group = productGroups[lightbox.groupIdx].images;
-    setLightbox({
-      ...lightbox,
-      imgIdx: (lightbox.imgIdx + 1) % group.length,
-    });
+    setLightbox((current) => ({
+      ...current,
+      imgIdx: (current.imgIdx + 1) % group.length,
+    }));
   };
+
+  const activeImages = productGroups[lightbox.groupIdx].images;
 
   return (
     <div className="product-gallery">
@@ -65,12 +66,14 @@ export default function ProductGallery() {
         <div key={group.id} className="product-card">
           <h2 className="product-title">{group.title}</h2>
           <div className="product-images">
-            {group.images.map((img, imgIdx) => (
+            {group.images.map((imageKey, imgIdx) => (
               <img
-                key={imgIdx}
-                src={`/images/products/${img}`}
+                key={`${group.id}-${imgIdx}`}
+                src={resolveImageFallback(imageKey)}
                 alt={`${group.title} - ${imgIdx + 1}`}
                 className="product-image"
+                loading="lazy"
+                decoding="async"
                 onClick={() => openLightbox(groupIdx, imgIdx)}
               />
             ))}
@@ -88,21 +91,9 @@ export default function ProductGallery() {
 
       {lightbox.isOpen && (
         <Lightbox
-          mainSrc={`/images/products/${productGroups[lightbox.groupIdx].images[lightbox.imgIdx]}`}
-          nextSrc={`/images/products/${
-            productGroups[lightbox.groupIdx].images[
-              (lightbox.imgIdx + 1) %
-                productGroups[lightbox.groupIdx].images.length
-            ]
-          }`}
-          prevSrc={`/images/products/${
-            productGroups[lightbox.groupIdx].images[
-              (lightbox.imgIdx +
-                productGroups[lightbox.groupIdx].images.length -
-                1) %
-                productGroups[lightbox.groupIdx].images.length
-            ]
-          }`}
+          mainSrc={resolveImageFallback(activeImages[lightbox.imgIdx])}
+          nextSrc={resolveImageFallback(activeImages[(lightbox.imgIdx + 1) % activeImages.length])}
+          prevSrc={resolveImageFallback(activeImages[(lightbox.imgIdx + activeImages.length - 1) % activeImages.length])}
           onCloseRequest={closeLightbox}
           onMovePrevRequest={movePrev}
           onMoveNextRequest={moveNext}

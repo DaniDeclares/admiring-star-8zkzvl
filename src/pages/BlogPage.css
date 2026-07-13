@@ -133,3 +133,23 @@
     padding: var(--card-padding);
   }
 }
+
+
+.blog-subscribe-message {
+  text-align: center;
+  margin: -0.75rem 0 var(--section-gap);
+  font-family: var(--font-primary);
+}
+
+.blog-subscribe-message--success {
+  color: #1f6f43;
+}
+
+.blog-subscribe-message--error {
+  color: var(--burgundy);
+}
+
+.blog-mailchimp input[type="submit"]:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

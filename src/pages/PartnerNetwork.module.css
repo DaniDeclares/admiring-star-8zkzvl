@@ -58,3 +58,21 @@ button {
 button:hover {
   background: #6f1724;
 }
+
+.statusMessage {
+  margin: 0;
+  font-size: 14px;
+}
+
+.statusSuccess {
+  color: #1f6f43;
+}
+
+.statusError {
+  color: #8B1E2E;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
