@@ -218,11 +218,11 @@ insert into public.dd_intake_questions (
 values
   ('client_type', 'Who are you?', 'Select the customer type that best describes you.', 'dynamic_select', '[]'::jsonb, true, 10, true),
   ('desired_outcome', 'What are you trying to accomplish?', 'Choose the desired outcome for this request.', 'dynamic_select', '[]'::jsonb, true, 20, true),
-  ('service_scope', 'Tell us about this request.', 'Add details about the property, documents, delivery, event, or support needed.', 'long_text', '[]'::jsonb, true, 30, true),
+  ('request_details', 'Tell us about this request.', 'Add details about the property, documents, delivery, event, or support needed.', 'long_text', '[]'::jsonb, true, 30, true),
   ('property_type', 'What type of property is this?', null, 'single_select', '["single_family","apartment_unit","townhome","commercial_office","retail","other"]'::jsonb, false, 40, true),
   ('square_footage', 'Approximate square footage', null, 'number', '[]'::jsonb, false, 50, true),
   ('occupancy_status', 'Is the property occupied or vacant?', null, 'single_select', '["occupied","vacant","partially_occupied"]'::jsonb, false, 60, true),
-  ('turnover_deadline', 'What is the turnover deadline?', null, 'short_text', '[]'::jsonb, false, 70, true),
+  ('turnover_deadline', 'What is the turnover deadline?', null, 'date', '[]'::jsonb, false, 70, true),
   ('move_in_date', 'What is the move-in date?', null, 'date', '[]'::jsonb, false, 80, true),
   ('access_method', 'How will access be provided?', null, 'single_select', '["lockbox","onsite_contact","leasing_office","key_pickup","other"]'::jsonb, false, 90, true),
   ('file_uploads', 'Upload files', 'Attach photos, videos, PDFs, inspection reports, COIs, W-9s, or related documents.', 'file', '[]'::jsonb, false, 100, true)
@@ -256,7 +256,7 @@ select
   q.sort_order,
   true
 from public.dd_intake_questions q
-where q.question_key in ('client_type', 'desired_outcome', 'service_scope', 'file_uploads')
+where q.question_key in ('client_type', 'desired_outcome', 'request_details', 'file_uploads')
 and not exists (
   select 1
   from public.dd_question_rules r
