@@ -1,6 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { HelmetProvider } from "react-helmet-async";
+import { MemoryRouter } from "react-router-dom";
 import RequestServicePage from "./RequestServicePage";
 
 jest.mock("../lib/supabaseClient.js", () => ({
@@ -10,9 +11,11 @@ jest.mock("../lib/supabaseClient.js", () => ({
 
 const renderPage = () =>
   render(
-    <HelmetProvider>
-      <RequestServicePage />
-    </HelmetProvider>
+    <MemoryRouter>
+      <HelmetProvider>
+        <RequestServicePage />
+      </HelmetProvider>
+    </MemoryRouter>
   );
 
 describe("RequestServicePage", () => {
