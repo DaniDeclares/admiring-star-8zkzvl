@@ -21,7 +21,7 @@ You are strictly forbidden from writing code that updates the front-end user int
 
 This codebase serves multiple business divisions (Website & Platform, GovCon, Field Services, Logistics & Courier, Production & Events).
 
-- **Rule:** Never introduce feature logic or bundle dependencies for a parked workstream during an active core sprint. Keep all new components namespaced (for example, prefixing unique CSS classes with `.govcon-` or `.merch-`) to prevent silent runtime layout style bleeding into unrelated public funnels.
+- **Rule:** Never introduce feature logic or bundle dependencies for a parked workstream during an active core sprint. Keep all new components namespaced (e.g., prefixing unique CSS classes with `.govcon-` or `.merch-`) to prevent silent runtime layout style bleeding into unrelated public funnels.
 
 ### 3. Verification & Build Commands
 
