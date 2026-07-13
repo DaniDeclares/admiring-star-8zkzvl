@@ -66,6 +66,10 @@ export default function RequestServicePage() {
 
   const leadName = useMemo(() => form.fullName.trim(), [form.fullName]);
   const publicPhone = siteConfig.phoneNumbers.public;
+  const requestedDivision = useMemo(
+    () => new URLSearchParams(location.search).get("division")?.trim().toLowerCase() || "",
+    [location.search]
+  );
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -92,8 +96,6 @@ export default function RequestServicePage() {
   }, []);
 
   useEffect(() => {
-    const requestedDivision = new URLSearchParams(location.search).get("division")?.trim().toLowerCase();
-
     if (!requestedDivision) return;
 
     const matchingDivision = divisions.find((division) => {
@@ -106,16 +108,12 @@ export default function RequestServicePage() {
 
     if (!matchingDivision) return;
 
-    setForm((current) => {
-      const nextDivisionId = getDivisionOptionValue(matchingDivision);
+    const nextDivisionId = getDivisionOptionValue(matchingDivision);
 
-      if (current.divisionId === nextDivisionId) {
-        return current;
-      }
+    if (form.divisionId === nextDivisionId) return;
 
-      return { ...current, divisionId: nextDivisionId };
-    });
-  }, [divisions, location.search]);
+    setForm((current) => ({ ...current, divisionId: nextDivisionId }));
+  }, [divisions, form.divisionId, requestedDivision]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;

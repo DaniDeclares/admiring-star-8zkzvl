@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
+import { siteConfig } from "../data/siteConfig.js";
 import MerchPage from "./MerchPage.jsx";
 
 const renderPage = () =>
@@ -34,7 +35,7 @@ describe("MerchPage", () => {
     ).toHaveAttribute("href", "/request-service?division=ProductOps");
     expect(
       screen.getByRole("link", { name: /call \/ text \(470\) 485-7173/i })
-    ).toHaveAttribute("href", "tel:+14704857173");
+    ).toHaveAttribute("href", `tel:${siteConfig.phoneNumbers.public.tel}`);
 
     await waitFor(() => {
       expect(document.title).toBe("Custom Merch & Print Services • Dani Declares");
