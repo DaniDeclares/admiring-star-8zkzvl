@@ -15,7 +15,7 @@ export default function Navbar() {
     <nav className="dd-navbar" aria-label="Main navigation">
       <div className="dd-navbar-inner">
         <Link to="/" className="dd-navbar-logo" onClick={handleLinkClick}>
-          <img src={logoSeal} alt="Dani Declares LLC" />
+          <img src='/images/logo/logo-gold-seal.png' alt="Dani Declares LLC" />
           <span>Dani Declares</span>
         </Link>
         <ul className="dd-nav-links" role="list">
