@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 
 // Global Components
 import FestivalBanner from "./components/FestivalBanner.jsx";
@@ -172,6 +173,7 @@ export default function App() {
 
       <CookieConsent />
       <Footer />
+      <Analytics />
     </>
   );
 }
