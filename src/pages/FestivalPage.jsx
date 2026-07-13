@@ -2,17 +2,35 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { resolveImageFallback } from "../assets/images.js";
 import FestivalBanner from "../components/FestivalBanner.jsx";
 import { SHOW_FESTIVAL } from "../data/siteConfig.js";
-
-// festival highlights
-import highlight1 from "../assets/festival-images/istockphoto-147288826-612x612.webp";
-import highlight2 from "../assets/festival-images/istockphoto-1048325338-612x612.webp";
-import highlight3 from "../assets/festival-images/istockphoto-1266364936-612x612.jpg";
-import highlight4 from "../assets/festival-images/istockphoto-1495159969-612x612.webp";
 import "./FestivalPage.css";
 
 export default function FestivalPage() {
+  const highlights = [
+    {
+      src: resolveImageFallback("festival.highlights", "facePainting"),
+      alt: "Face painting for children",
+      caption: "Face Painting",
+    },
+    {
+      src: resolveImageFallback("festival.highlights", "vendorMarket"),
+      alt: "Families browsing vendor booths",
+      caption: "Vendor Market",
+    },
+    {
+      src: resolveImageFallback("festival.highlights", "liveMusic"),
+      alt: "Live band on stage",
+      caption: "Live Music",
+    },
+    {
+      src: resolveImageFallback("festival.highlights", "kidZone"),
+      alt: "Kids playing in the Kid Zone",
+      caption: "Kid Zone (Free!)",
+    },
+  ];
+
   if (!SHOW_FESTIVAL) {
     return (
       <main className="festival-page">
@@ -101,16 +119,11 @@ export default function FestivalPage() {
           music, kids’ activities, and interactive budgeting experiences.
         </p>
         <div className="highlights-grid">
-          {[
-            { src: highlight1, alt: "Face painting for children", caption: "Face Painting" },
-            { src: highlight2, alt: "Families browsing vendor booths", caption: "Vendor Market" },
-            { src: highlight3, alt: "Live band on stage", caption: "Live Music" },
-            { src: highlight4, alt: "Kids playing in the Kid Zone", caption: "Kid Zone (Free!)" },
-          ].map((item) => (
-            <figure key={item.alt} className="highlight-item">
-              <img src={item.src} alt={item.alt} />
-              <figcaption>{item.caption}</figcaption>
-            </figure>
+          {highlights.map((item) => (
+             <figure key={item.alt} className="highlight-item">
+               <img src={item.src} alt={item.alt} />
+               <figcaption>{item.caption}</figcaption>
+             </figure>
           ))}
         </div>
       </section>
