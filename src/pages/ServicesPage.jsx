@@ -1,3 +1,4 @@
+// filename: src/pages/ServicesPage.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -34,9 +35,9 @@ const ServicesPage = () => {
     },
     {
       id: 'business-solutions',
-      title: 'Business & Operations Solutions',
+      title: 'Business & Management Solutions',
       badge: 'Enterprise Support',
-      summary: 'Operational workflow execution, document management, compliance tracking, and administrative support for growing companies.',
+      summary: 'Workflow execution, document management, compliance tracking, and administrative support for growing companies.',
       features: ['Workflow & Document Management', 'Administrative Execution Support', 'Vendor Compliance & COI Coordination', 'Specialized Project Management'],
       link: '/services/business-solutions',
       cta: 'Explore Business Solutions'
@@ -53,7 +54,7 @@ const ServicesPage = () => {
     {
       id: 'government',
       title: 'Government Contracting (B2G)',
-      badge: 'Federal & Municipal Operations',
+      badge: 'Federal & Municipal Compliance',
       summary: 'SAM.gov active subcontractor offering document prep, administrative logistics, and facility support services.',
       features: ['Active SAM.gov Registration', 'UEI: TD4TSG48LHN9 | CAGE: 17VV2', 'Primary NAICS: 561410 (Doc Prep)', 'W-9 & Corporate COI Verified'],
       link: '/industries/government',
@@ -64,8 +65,8 @@ const ServicesPage = () => {
   return (
     <div className="dd-services-page">
       <Helmet>
-        <title>Services &amp; Operational Divisions | Dani Declares LLC</title>
-        <meta name="description" content="Explore the operational divisions of Dani Declares LLC: Property Logistics, Print & Merch Studio, Legal Compliance, Business Solutions, Express Goods, and Government Contracting." />
+        <title>Services &amp; Execution Divisions | Dani Declares LLC</title>
+        <meta name="description" content="Explore the execution divisions of Dani Declares LLC: Property Logistics, Print & Merch Studio, Legal Compliance, Business Solutions, Express Goods, and Government Contracting." />
       </Helmet>
 
       {/* Header Banner */}
@@ -78,7 +79,7 @@ const ServicesPage = () => {
             Execution Across Every Vertical
           </h1>
           <p style={{ fontSize: '18px', opacity: 0.9, lineHeight: 1.6, margin: '0 0 24px 0' }}>
-            We bring mobile operations, specialized equipment, and execution support directly to your business, property, or home.
+            We bring mobile field teams, specialized equipment, and execution support directly to your business, property, or home.
           </p>
           <Link to="/request-service" style={{ backgroundColor: '#D4AF37', color: '#111', padding: '14px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }}>
             Launch Custom Project Quote &rarr;
