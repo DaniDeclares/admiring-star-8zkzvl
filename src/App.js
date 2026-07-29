@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-// Main Pages
+// Main Brand Pages
 import HomePage from "./pages/HomePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
@@ -22,7 +22,7 @@ import ShopPage from "./pages/ShopPage.jsx";
 import GovConPage from "./pages/GovConPage.jsx";
 import RealEstatePage from "./pages/RealEstatePage.jsx";
 
-// Resources
+// Resources & Blog
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 
@@ -33,12 +33,12 @@ import RequestServicePage from "./pages/RequestServicePage.jsx";
 function App() {
   return (
     <Routes>
-      {/* MAIN BRAND PAGES */}
+      {/* MAIN BRAND ROUTES */}
       <Route path="/" element={<HomePage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
 
-      {/* SERVICES HUB & DIVISION PAGES */}
+      {/* SERVICES HUB & DIVISIONS */}
       <Route path="/services" element={<ServicesPage />} />
       <Route path="/services/business-solutions" element={<BusinessSolutionsPage />} />
       <Route path="/services/print-studio" element={<PrintStudioPage />} />
@@ -47,7 +47,7 @@ function App() {
       <Route path="/services/concierge" element={<ConciergePage />} />
       <Route path="/services/express-goods" element={<ExpressGoodsPage />} />
 
-      {/* MARKETPLACE & E-COMMERCE */}
+      {/* MARKETPLACE & SHOP */}
       <Route path="/shop" element={<ShopPage />} />
       <Route path="/marketplace" element={<ShopPage />} />
 
@@ -64,7 +64,7 @@ function App() {
       <Route path="/blog" element={<BlogPage />} />
       <Route path="/blog/:slug" element={<BlogPostPage />} />
 
-      {/* LEGACY URL REDIRECTS (PRESERVES SEO RANKINGS) */}
+      {/* LEGACY URL REDIRECTS */}
       <Route path="/field-services" element={<Navigate to="/services/property" replace />} />
       <Route path="/events" element={<Navigate to="/services/events" replace />} />
       <Route path="/signature-services" element={<Navigate to="/services" replace />} />
