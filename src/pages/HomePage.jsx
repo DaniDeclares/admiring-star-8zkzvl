@@ -1,4 +1,3 @@
-// filename: src/pages/HomePage.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -57,9 +56,9 @@ const HomePage = () => {
   ];
 
   const snackCombos = [
-    { name: '$3.00 Quick Snack Pack', desc: '1 Snack + 1 Cold Drink + 1 Sweet Treat' },
-    { name: '$5.00 Gamer Pack', desc: '2 Chip/Savory Snacks + 1 Gatorade + 1 Full-Size Candy + 1 Frozen Treat' },
-    { name: '$10.00 Family Movie Night', desc: '12 Items: 4 Snacks + 4 Drinks + 4 Sweet Treats' }
+    { name: '.00 Quick Snack Pack', desc: '1 Snack + 1 Cold Drink + 1 Sweet Treat' },
+    { name: '.00 Gamer Pack', desc: '2 Chip/Savory Snacks + 1 Gatorade + 1 Full-Size Candy + 1 Frozen Treat' },
+    { name: '0.00 Family Movie Night', desc: '12 Items: 4 Snacks + 4 Drinks + 4 Sweet Treats' }
   ];
 
   return (

@@ -22,7 +22,7 @@ export default function BusinessSolutionsPage() {
       desc: 'Prepare capability statements, W-9 attachments, Certificate of Insurance (COI) profiles, and vendor application packets.'
     },
     {
-      title: 'Side Hustle Launch Coaching ($97)',
+      title: 'Side Hustle Launch Coaching (7)',
       badge: '1:1 Coaching',
       desc: 'Step-by-step guidance to launch your business legally, set up payment processing, and acquire your first clients.'
     }

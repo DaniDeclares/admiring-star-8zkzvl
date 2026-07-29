@@ -1,54 +1,20 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
-import posts from "../posts/posts";
-import "./BlogPage.css";
 
 export default function BlogPostPage() {
   const { slug } = useParams();
 
-  const post = posts.find(
-    (p) =>
-      p.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "") === slug
-  );
-
-  if (!post) {
-    return (
-      <main className="blog-post-page not-found">
-        <Helmet>
-          <title>Post Not Found • Dani Declares Blog</title>
-        </Helmet>
-        <h2>Oops! Post Not Found.</h2>
-        <Link to="/blog" className="btn btn--secondary">
-          ← Back to Blog
-        </Link>
-      </main>
-    );
-  }
-
   return (
-    <main className="blog-post-page">
-      <Helmet>
-        <title>{post.title} • Dani Declares Blog</title>
-      </Helmet>
-
-      <Link to="/blog" className="btn btn--secondary back-btn">
-        ← Back to Blog
-      </Link>
-
-      <h1 className="blog-title">{post.title}</h1>
-
-      <div className="blog-meta">
-        {post.date} &nbsp;|&nbsp; {post.author}
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1B0A0E', backgroundColor: '#FFFFFF', minHeight: '100vh', padding: '4rem 1.5rem' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <Link to="/blog" style={{ color: '#8B1E2E', fontWeight: '700', textDecoration: 'none' }}>&larr; Back to Articles</Link>
+        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: '#1B0A0E', marginTop: '1.5rem', marginBottom: '1rem' }}>
+          {slug ? slug.replace(/-/g, ' ').toUpperCase() : "Blog Article"}
+        </h1>
+        <p style={{ fontSize: '1.1rem', color: '#4A3B43', lineHeight: '1.7' }}>
+          At Dani Declares LLC, we believe that execution is the bridge between strategy and growth. Whether managing property turnovers, coordinating mobile notary services, or executing custom print production, operational clarity is key.
+        </p>
       </div>
-
-      <div
-        className="blog-content"
-        dangerouslySetInnerHTML={{ __html: post.content }}
-      />
-    </main>
+    </div>
   );
 }

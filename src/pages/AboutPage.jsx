@@ -1,119 +1,66 @@
 import React from "react";
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import "./AboutPage.css";
 
 export default function AboutPage() {
-  const heroStyle = {
-    backgroundColor: "#8B1E2E",
-    color: "#fff",
-    padding: "60px 20px",
-    textAlign: "center",
-    borderBottom: "5px solid #D4AF37"
-  };
-
   return (
-    <>
-      <Helmet>
-        <title>About Us | Dani Declares LLC</title>
-        <meta
-          name="description"
-          content="Dani Declares LLC provides single-source mobile operations support across Metro Atlanta and South Carolina. We handle property turnovers, field logistics, courier runs, custom print production, and administrative compliance."
-        />
-      </Helmet>
-      
-      <div style={{ backgroundColor: "#F8F5F1", fontFamily: "system-ui, -apple-system, sans-serif", color: "#333", paddingBottom: "60px" }}>
-        {/* Banner Section */}
-        <header style={heroStyle}>
-          <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-            <span style={{ backgroundColor: "#D4AF37", color: "#111", padding: "4px 14px", borderRadius: "20px", fontWeight: "700", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px", display: "inline-block", marginBottom: "16px" }}>
-              Corporate Profile
-            </span>
-            <h1 style={{ fontSize: "38px", fontWeight: "800", margin: "0" }}>About Dani Declares LLC</h1>
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1B0A0E', backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
+      <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '4.5rem 1.5rem', textAlign: 'center' }}>
+        <div style={{ maxWidth: '850px', margin: '0 auto' }}>
+          <div style={{ color: '#C8B273', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+            Corporate Profile & Credentials
           </div>
-        </header>
+          <h1 style={{ fontSize: '2.75rem', fontWeight: '800', marginBottom: '1.25rem', color: '#F8F5F1' }}>
+            About DANI DECLARES LLC
+          </h1>
+          <p style={{ fontSize: '1.2rem', color: '#D1C7BD', lineHeight: '1.6' }}>
+            DANI DECLARES LLC is a registered, multi-division execution partner helping businesses, property managers, government agencies, and individuals launch, operate, promote, and maintain their assets with complete peace of mind.
+          </p>
+        </div>
+      </section>
 
-        {/* Brand Positioning Section */}
-        <section style={{ padding: "50px 20px", maxWidth: "1000px", margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "40px", alignItems: "center", marginBottom: "40px" }}>
-            <div>
-              <p style={{ fontSize: "18px", fontWeight: "700", color: "#8B1E2E", lineHeight: "1.6" }}>
-                Dani Declares LLC is built to serve as a complete, single-source mobile operations and enterprise execution partner.
-              </p>
-              <p style={{ lineHeight: "1.6", color: "#555" }}>
-                We don't just perform isolated tasks—we move your property and business checkpoints from overwhelmed to completely handled. Whether it is an immediate multi-family turnover clean, a critical court filing delivery, an on-site document signing verification, or custom branded apparel production, we show up and execute.
-              </p>
-              <p style={{ lineHeight: "1.6", color: "#555" }}>
-                Founded by Danielle Walker, Dani Declares LLC operates as a mobilized fleet across Metro Atlanta and South Carolina, serving clients who demand rigorous execution, clear photo documentation, and total accountability.
-              </p>
-            </div>
-            
-            <div style={{ height: "350px", borderRadius: "8px", overflow: "hidden", boxShadow: "0 6px 16px rgba(0,0,0,0.06)" }}>
-              <img 
-                src="/images/stock/legal paperwork desk.jpg" 
-                alt="Dani Declares Operations Desk" 
-                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
-                onError={(e) => { e.target.src = '/images/festival/festival-promo-gradient.jpg'; }} 
-              />
-            </div>
-          </div>
+      <section style={{ padding: '4.5rem 1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '3.5rem', lineHeight: '1.7', fontSize: '1.05rem', color: '#3A2B33' }}>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#8B1E2E', marginBottom: '1rem' }}>
+            Single-Source Execution vs. Fragmented Vendors
+          </h2>
+          <p style={{ marginBottom: '1rem' }}>
+            We are not just a cleaning company, a print shop, an officiant, or a courier—we are an **operational execution partner**. We provide single-source accountability so organizations and individuals do not have to manage a dozen disconnected subcontractors.
+          </p>
+          <p>
+            Founded and led by Managing Director Danielle Fong, DANI DECLARES LLC operates with standardized field SOP checklists, 2-hour digital HD photo logs, guaranteed SLA turnaround times, and complete pricing transparency.
+          </p>
+        </div>
 
-          {/* Value Matrix */}
-          <div style={{ backgroundColor: "#fff", padding: "30px", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.03)", marginBottom: "40px", border: "1px solid #E5E0DA" }}>
-            <h2 style={{ color: "#8B1E2E", fontSize: "24px", marginTop: "0", marginBottom: "20px", fontWeight: "800" }}>Our Core Execution Values</h2>
-            <ul style={{ listStyle: "none", padding: "0", lineHeight: "1.8" }}>
-              <li style={{ marginBottom: "12px", display: "flex", gap: "10px" }}>
-                <strong style={{ color: "#D4AF37", minWidth: "120px" }}>✓ Accuracy:</strong>
-                <span>Every document, turnover checklist, and tracking entry handled with precision.</span>
-              </li>
-              <li style={{ marginBottom: "12px", display: "flex", gap: "10px" }}>
-                <strong style={{ color: "#D4AF37", minWidth: "120px" }}>✓ Organization:</strong>
-                <span>Structured mobile routing updates and HD photo proof delivered digitally.</span>
-              </li>
-              <li style={{ marginBottom: "12px", display: "flex", gap: "10px" }}>
-                <strong style={{ color: "#D4AF37", minWidth: "120px" }}>✓ Reliability:</strong>
-                <span>We deploy onto your property or location exactly when scheduled.</span>
-              </li>
-              <li style={{ marginBottom: "12px", display: "flex", gap: "10px" }}>
-                <strong style={{ color: "#D4AF37", minWidth: "120px" }}>✓ Execution:</strong>
-                <span>Built for property and business managers who need tasks done, not just discussed.</span>
-              </li>
-              <li style={{ marginBottom: "12px", display: "flex", gap: "10px" }}>
-                <strong style={{ color: "#D4AF37", minWidth: "120px" }}>✓ Security:</strong>
-                <span>Your corporate records, resident logistics, and legal files remain strictly confidential.</span>
-              </li>
-            </ul>
-          </div>
+        {/* Corporate Credentials Block */}
+        <div style={{ backgroundColor: '#F8F5F1', border: '1px solid #E2D9D0', borderRadius: '8px', padding: '2.5rem', marginBottom: '3.5rem' }}>
+          <h3 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#1B0A0E', marginBottom: '1.25rem' }}>
+            Verified Credentials & Registrations
+          </h3>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', fontSize: '0.95rem', color: '#4A3B43' }}>
+            <li><strong>Georgia SOS Registration:</strong> #25079444</li>
+            <li><strong>SAM.gov Status:</strong> Active Subcontractor</li>
+            <li><strong>UEI:</strong> TD4TSG48LHN9</li>
+            <li><strong>CAGE Code:</strong> 17VV2</li>
+            <li><strong>Primary NAICS:</strong> 561410 (Document Prep & Admin Services)</li>
+            <li><strong>Insurance:</strong> Fully Insured (M+ General Liability)</li>
+          </ul>
+        </div>
 
-          {/* Verified Corporate Credentials Banner */}
-          <div style={{ backgroundColor: "#111", color: "#fff", padding: "36px", borderRadius: "8px", textAlign: "center" }}>
-            <h2 style={{ color: "#D4AF37", marginTop: 0, fontSize: "24px", fontWeight: "800" }}>Verified Corporate Credentials</h2>
-            <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap", margin: "20px 0", fontSize: "14px", color: "#ccc" }}>
-              <span>GA SOS Control No. 25079444</span>
-              <span>•</span>
-              <span>SAM.gov Active Subcontractor</span>
-              <span>•</span>
-              <span>UEI: TD4TSG48LHN9</span>
-              <span>•</span>
-              <span>CAGE Code: 17VV2</span>
-              <span>•</span>
-              <span>Primary NAICS: 561410</span>
-            </div>
-            <p style={{ color: "#aaa", fontSize: "14px", maxWidth: "650px", margin: "0 auto 20px auto" }}>
-              Form W-9, $1M/$2M General Liability Insurance (COI), and corporate governance credentials on file.
-            </p>
-            <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
-              <Link to="/request-service" style={{ backgroundColor: "#8B1E2E", color: "#fff", padding: "12px 28px", borderRadius: "4px", fontWeight: "700", textDecoration: "none", fontSize: "15px" }}>
-                Launch Custom Quote Request
-              </Link>
-              <Link to="/contact" style={{ border: "2px solid #D4AF37", color: "#D4AF37", padding: "10px 26px", borderRadius: "4px", fontWeight: "700", textDecoration: "none", fontSize: "15px" }}>
-                Contact Dispatch Line
-              </Link>
-            </div>
-          </div>
-        </section>
-      </div>
-    </>
+        <div style={{ textAlign: 'center' }}>
+          <Link to="/industries/government" style={{
+            backgroundColor: '#8B1E2E', color: '#FFFFFF', padding: '0.85rem 2rem',
+            borderRadius: '4px', fontWeight: '700', textDecoration: 'none', display: 'inline-block', marginRight: '1rem'
+          }}>
+            View GovCon Profile
+          </Link>
+          <Link to="/contact" style={{
+            border: '1px solid #8B1E2E', color: '#8B1E2E', padding: '0.85rem 2rem',
+            borderRadius: '4px', fontWeight: '700', textDecoration: 'none', display: 'inline-block'
+          }}>
+            Contact Our Team
+          </Link>
+        </div>
+      </section>
+    </div>
   );
-}
 }
