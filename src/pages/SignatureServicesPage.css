@@ -1,3 +1,5 @@
+/* SignatureServicesPage.css */
+
 :root {
   --burgundy: #8b1e2e;
   --ivory: #f8f5f1;
@@ -15,8 +17,9 @@
 .sig-header {
   background: var(--dark);
   color: #fff;
-  padding: 5rem 1.5rem 4rem;
+  padding: 4rem 1.5rem 3rem;
   text-align: center;
+  border-bottom: 4px solid var(--gold);
 }
 
 .sig-header h1 {
@@ -41,7 +44,7 @@
 }
 
 .sig-services {
-  padding: 4rem 0;
+  padding: 3rem 0;
   background: #fff;
 }
 
@@ -51,12 +54,14 @@
   border-radius: var(--radius);
   padding: 2rem;
   margin-bottom: 1.5rem;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
 }
 
 .sig-card h2 {
   font-family: Georgia, serif;
   color: var(--burgundy);
-  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
   margin-bottom: 0.6rem;
 }
 
@@ -70,6 +75,7 @@
 .sig-card-ideal {
   font-size: 0.9rem;
   color: #666;
+  margin-bottom: 0.4rem;
 }
 
 .sig-card-price {
@@ -81,54 +87,18 @@
 .sig-cta {
   background: var(--burgundy);
   color: #fff;
-  padding: 4.5rem 1.5rem;
+  padding: 4rem 1.5rem;
   text-align: center;
-}
-
-.sig-cta h2 {
-  font-family: Georgia, serif;
-  font-size: clamp(1.4rem, 3vw, 2rem);
-  margin-bottom: 0.75rem;
 }
 
 .sig-cta p {
   font-size: 1rem;
-  opacity: 0.9;
   margin-bottom: 2rem;
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.sig-cta-btns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.sig-btn-primary {
-  background: var(--gold);
-  color: var(--dark);
-  padding: 0.75rem 1.75rem;
-  border-radius: var(--radius);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.sig-btn-secondary {
-  background: transparent;
-  color: #fff;
-  border: 2px solid #fff;
-  padding: 0.75rem 1.75rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  text-decoration: none;
 }
 
 @media (max-width: 600px) {
-  .sig-cta-btns {
-    flex-direction: column;
-    align-items: center;
+  .sig-card {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
   }
 }
