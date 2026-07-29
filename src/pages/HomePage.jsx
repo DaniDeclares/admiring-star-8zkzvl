@@ -43,7 +43,7 @@ const HomePage = () => {
       text: 'On-demand neighborhood snack packs, back-to-school bundles, sweet & savory combo boxes, and daily doorstep delivery.',
       path: '/shop',
       cta: 'Shop Express Goods',
-      img: '/images/stock/file cabinet.jpg'
+      img: '/images/festival/festival-promo-gradient.jpg'
     },
     {
       title: 'Government Contracting (B2G)',
@@ -95,7 +95,7 @@ const HomePage = () => {
               <img 
                 src="/images/stock/property-cleaning-turnover.jpg" 
                 alt="Property Turnover Operations" 
-                onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }}
+                onError={(e) => { e.target.src = '/images/stock/legal paperwork desk.jpg'; }}
               />
               <span>Field Operations</span>
             </div>
@@ -103,7 +103,7 @@ const HomePage = () => {
               <img 
                 src="/images/stock/Clipboards.jpg" 
                 alt="Custom Print & Merch" 
-                onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }}
+                onError={(e) => { e.target.src = '/images/stock/legal paperwork desk.jpg'; }}
               />
               <span>Print &amp; Apparel</span>
             </div>
@@ -111,7 +111,7 @@ const HomePage = () => {
               <img 
                 src="/images/stock/legal paperwork desk.jpg" 
                 alt="Legal & Mobile Notary" 
-                onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }}
+                onError={(e) => { e.target.src = '/images/stock/legal paperwork desk.jpg'; }}
               />
               <span>Legal Compliance</span>
             </div>
@@ -123,7 +123,7 @@ const HomePage = () => {
       <section className="dd-intake-strip">
         <div className="dd-container dd-intake-inner">
           <p className="dd-intake-text">
-            Need urgent dispatch or custom job estimates? Direct Line: <strong>(470) 682-9348</strong>
+            Need urgent dispatch or custom job estimates? Direct Line: <strong>(470) 485-7173</strong>
           </p>
           <Link to="/book" className="dd-btn-intake">
             Book Appointment &rarr;
@@ -235,8 +235,8 @@ const HomePage = () => {
             <Link to="/request-service" className="dd-btn-primary">
               Launch Project Quote &rarr;
             </Link>
-            <a href="tel:4706829348" className="dd-btn-outline">
-              Call (470) 682-9348
+            <a href="tel:4704857173" className="dd-btn-outline">
+              Call (470) 485-7173
             </a>
           </div>
           <p className="dd-areas-note">Serving Metro Atlanta, GA &amp; Regional South Carolina</p>
