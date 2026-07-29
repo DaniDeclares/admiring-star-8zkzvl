@@ -1,3 +1,4 @@
+// filename: src/pages/ShopPage.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -5,13 +6,13 @@ import '../index.css';
 
 export default function ShopPage() {
   const products = [
-    { dept: "DANI DECLARES SMART", name: "SmartTap™ NFC Business Card", price: "9.00", desc: "NFC Card + Digital Profile Setup + Contact Download + Booking Link + Social Links." },
-    { dept: "DANI DECLARES SMART", name: "Smart Review Stand (Google Reviews)", price: "9.00", desc: "Countertop NFC & QR stand driving instant 5-star Google customer reviews." },
+    { dept: "DANI DECLARES SMART", name: "SmartTap™ NFC Business Card", price: "$49.00", desc: "NFC Card + Digital Profile Setup + Contact Download + Booking Link + Social Links." },
+    { dept: "DANI DECLARES SMART", name: "Smart Review Stand (Google Reviews)", price: "$49.00", desc: "Countertop NFC & QR stand driving instant 5-star Google customer reviews." },
     { dept: "DANI DECLARES CREATIVE", name: "Custom Heat-Press DTF Apparel", price: "50% Deposit Pre-Order", desc: "Branded t-shirts, team hoodies, and custom event apparel." },
     { dept: "DANI DECLARES CREATIVE", name: "Sublimated 20 oz Custom Tumbler", price: "Custom / Bulk Quote", desc: "High-durability insulated stainless steel tumblers with custom branding." },
-    { dept: "DANI DECLARES BUSINESS", name: "Business Startup Starter Kit", price: "99.00", desc: "Branded Business Cards + Packaging Labels + Stickers + NFC Business Card." },
-    { dept: "DANI DECLARES MARKET", name: "Quick Snack Pack ( &  Combo)", price: ".00 - .00", desc: "1 Snack + 1 Cold Beverage + 1 Sweet Treat delivered to doorstep or office." },
-    { dept: "DANI DECLARES MARKET", name: "Family Movie Night / Gamer Bundle", price: "0.00 - 5.00", desc: "12-item snack box with chips, candies, Gatorades, and sweet treats." }
+    { dept: "DANI DECLARES BUSINESS", name: "Business Startup Starter Kit", price: "$199.00", desc: "Branded Business Cards + Packaging Labels + Stickers + NFC Business Card." },
+    { dept: "DANI DECLARES MARKET", name: "Quick Snack Pack ($3 & $5 Combo)", price: "$3.00 - $5.00", desc: "1 Snack + 1 Cold Beverage + 1 Sweet Treat delivered to doorstep or office." },
+    { dept: "DANI DECLARES MARKET", name: "Family Movie Night / Gamer Bundle", price: "$10.00 - $15.00", desc: "12-item snack box with chips, candies, Gatorades, and sweet treats." }
   ];
 
   return (
@@ -47,7 +48,7 @@ export default function ShopPage() {
                 <div style={{ fontSize: '16px', fontWeight: '800', color: '#C8B273', marginBottom: '12px' }}>{p.price}</div>
                 <p style={{ fontSize: '14px', color: '#5A4A52', lineHeight: 1.5, margin: '0 0 20px 0' }}>{p.desc}</p>
               </div>
-              <Link to="/book?item=" + encodeURIComponent(p.name) className="dd-btn-red" style={{ textAlign: 'center', padding: '10px', fontSize: '14px' }}>
+              <Link to={"/book?item=" + encodeURIComponent(p.name)} className="dd-btn-red" style={{ textAlign: 'center', padding: '10px', fontSize: '14px' }}>
                 Order Product &rarr;
               </Link>
             </div>
