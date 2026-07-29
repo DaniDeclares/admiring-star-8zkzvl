@@ -1,0 +1,15 @@
+/* filename: src/pages/BusinessSolutionsPage.css */
+.dd-business-page {
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: #F8F5F1;
+  color: #1B0A0E;
+  min-height: 100vh;
+}
+
+.dd-business-hero {
+  background-color: #0F050A;
+  color: #F8F5F1;
+  padding: 60px 20px;
+  text-align: center;
+  border-bottom: 5px solid #C8B273;
+}
