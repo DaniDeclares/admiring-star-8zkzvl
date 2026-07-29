@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import './Homepage.css';
 
 const HomePage = () => {
   const divisions = [
@@ -61,174 +62,184 @@ const HomePage = () => {
   ];
 
   return (
-    <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#333', minHeight: '100vh' }}>
+    <div className="dd-page-wrapper">
       <Helmet>
         <title>Mobile Operations & Corporate Execution Support | Dani Declares LLC</title>
         <meta name="description" content="Dani Declares LLC provides property turnover cleaning, custom merchandise printing, mobile notary compliance, and local express goods delivery across Metro Atlanta." />
         <meta name="keywords" content="mobile operations, property turnover cleaning, custom t-shirt printing, mobile notary public, government subcontractor, express goods delivery" />
       </Helmet>
 
-      {/* Hero Section */}
-      <section style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '80px 20px 70px 20px', textAlign: 'center', borderBottom: '6px solid #D4AF37' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <span style={{ backgroundColor: '#D4AF37', color: '#111', padding: '6px 16px', borderRadius: '20px', fontWeight: '700', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1px', display: 'inline-block', marginBottom: '20px' }}>
-            Mobile Operations &amp; Execution Support
-          </span>
-          <h1 style={{ fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: '800', margin: '0 0 20px 0', lineHeight: '1.15', letterSpacing: '-0.5px' }}>
-            One Company. Total Execution.
-          </h1>
-          <p style={{ fontSize: 'clamp(17px, 2.5vw, 21px)', margin: '0 auto 36px auto', maxWidth: '780px', lineHeight: '1.5', opacity: '0.95' }}>
-            We come directly to your location and handle the process from start to submission. Serving property managers, business owners, legal firms, and families across Metro Atlanta and South Carolina.
+      {/* Visual Hero Section */}
+      <section className="dd-hero--visual">
+        <div className="dd-hero-inner">
+          <div className="dd-hero-content">
+            <p className="dd-hero-eyebrow">Mobile Operations &amp; Execution Support</p>
+            <h1>One Company. Total Execution.</h1>
+            <p className="dd-hero-sub">
+              We come directly to your location and handle the process from start to submission. Serving property managers, business owners, legal firms, and families across Metro Atlanta and South Carolina.
+            </p>
+
+            <div className="dd-hero-ctas">
+              <Link to="/request-service" className="dd-btn-primary">
+                Launch Project Quote &rarr;
+              </Link>
+              <Link to="/services" className="dd-btn-outline">
+                Explore All Divisions
+              </Link>
+            </div>
+          </div>
+
+          {/* Hero Visual Collage */}
+          <div className="dd-visual-collage">
+            <div className="dd-visual-card dd-visual-card--large">
+              <img 
+                src="/images/stock/property-cleaning-turnover.jpg" 
+                alt="Property Turnover Operations" 
+                onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }}
+              />
+              <span>Field Operations</span>
+            </div>
+            <div className="dd-visual-card">
+              <img 
+                src="/images/stock/Clipboards.jpg" 
+                alt="Custom Print & Merch" 
+                onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }}
+              />
+              <span>Print &amp; Apparel</span>
+            </div>
+            <div className="dd-visual-card">
+              <img 
+                src="/images/stock/legal paperwork desk.jpg" 
+                alt="Legal & Mobile Notary" 
+                onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }}
+              />
+              <span>Legal Compliance</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Fast Intake Banner */}
+      <section className="dd-intake-strip">
+        <div className="dd-container dd-intake-inner">
+          <p className="dd-intake-text">
+            Need urgent dispatch or custom job estimates? Direct Line: <strong>(470) 682-9348</strong>
           </p>
-
-          {/* Action CTAs */}
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '700px', margin: '0 auto 30px auto' }}>
-            <Link to="/book" style={{ backgroundColor: '#D4AF37', color: '#111', padding: '16px 36px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', fontSize: '17px', flex: '1 1 240px', minWidth: '220px', textAlign: 'center', boxShadow: '0 4px 14px rgba(0,0,0,0.25)', border: '2px solid #D4AF37' }}>
-              Launch Service Request &rarr;
-            </Link>
-            <Link to="/services" style={{ backgroundColor: 'transparent', color: '#fff', padding: '16px 36px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', fontSize: '17px', flex: '1 1 240px', minWidth: '220px', textAlign: 'center', border: '2px solid #fff' }}>
-              Explore All Divisions
-            </Link>
-          </div>
-
-          <div style={{ fontSize: '15px', fontWeight: '600' }}>
-            Direct Handler: <a href="tel:4706829348" style={{ color: '#D4AF37', textDecoration: 'underline' }}>(470) 682-9348</a>
-          </div>
+          <Link to="/book" className="dd-btn-intake">
+            Book Appointment &rarr;
+          </Link>
         </div>
       </section>
 
       {/* Trust Credential Anchor Bar */}
-      <section style={{ backgroundColor: '#fff', padding: '16px 20px', textAlign: 'center', borderBottom: '1px solid #E5E0DA', fontSize: '14px', color: '#555', fontWeight: '600' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-          <span>GA SOS Control No. 25079444</span>
-          <span>•</span>
-          <span>SAM.gov Registered</span>
-          <span>•</span>
-          <span>UEI: TD4TSG48LHN9</span>
-          <span>•</span>
-          <span>CAGE Code: 17VV2</span>
-          <span>•</span>
-          <span>W-9 &amp; COI Verified</span>
+      <section className="dd-section" style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '1rem 0' }}>
+        <div className="dd-container" style={{ textAlign: 'center', fontSize: '0.88rem', fontWeight: 600, color: '#555' }}>
+          GA SOS Control No. 25079444 &bull; SAM.gov Active &bull; UEI: TD4TSG48LHN9 &bull; CAGE: 17VV2 &bull; W-9 &amp; COI Verified
         </div>
       </section>
 
-      {/* Solutions Grid */}
-      <section style={{ padding: '70px 20px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <h2 style={{ fontSize: '36px', color: '#8B1E2E', margin: '0 0 12px 0', fontWeight: '800' }}>
-            Select Your Operation Lane
-          </h2>
-          <p style={{ color: '#666', fontSize: '17px', maxWidth: '650px', margin: '0 auto' }}>
-            Choose a specialized division below to review our capabilities or launch your project request.
-          </p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px' }}>
-          {divisions.map((item) => (
-            <Link 
-              to={item.path} 
-              key={item.title} 
-              style={{ textDecoration: 'none', color: 'inherit', backgroundColor: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 14px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', borderTop: '4px solid #8B1E2E', transition: 'transform 0.2s, box-shadow 0.2s' }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.06)'; }}
-            >
-              <div style={{ height: '180px', backgroundColor: '#e0e0e0' }}>
-                <img 
-                  src={item.img} 
-                  alt={item.title} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                  onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }} 
-                />
-              </div>
-              <div style={{ padding: '24px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
-                  {item.category}
-                </span>
-                <h3 style={{ fontSize: '20px', color: '#111', margin: '0 0 10px 0', fontWeight: '700' }}>
-                  {item.title}
-                </h3>
-                <p style={{ color: '#555', fontSize: '14px', lineHeight: '1.5', marginBottom: '20px', flexGrow: 1 }}>
-                  {item.text}
-                </p>
-                <span style={{ color: '#8B1E2E', fontWeight: '700', fontSize: '14px' }}>
-                  {item.cta} &rarr;
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Express & Goods Spotlight */}
-      <section style={{ backgroundColor: '#fff', padding: '60px 20px', borderTop: '1px solid #E5E0DA', borderBottom: '1px solid #E5E0DA' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: '40px', alignItems: 'center' }}>
-          <div style={{ flex: '1 1 400px' }}>
-            <span style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '4px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase' }}>
-              Local On-Demand
-            </span>
-            <h2 style={{ fontSize: '32px', color: '#111', margin: '12px 0', fontWeight: '800' }}>
-              Dani Declares Express &amp; Goods
+      {/* Core Solutions Grid */}
+      <section className="dd-section" style={{ padding: '4rem 1.25rem' }}>
+        <div className="dd-container">
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <h2 style={{ fontSize: '2.2rem', color: 'var(--color-burgundy, #800020)', margin: '0 0 0.5rem' }}>
+              Select Your Operation Lane
             </h2>
-            <p style={{ color: '#555', fontSize: '16px', lineHeight: '1.6', marginBottom: '24px' }}>
-              Your neighborhood spot for curated snack packs, combo boxes, cold drinks, and sweet treats—delivered directly to your door. Order single items or pre-packaged combo boxes online.
+            <p className="dd-section-sub">
+              Choose a specialized division below to review capabilities or launch your project request.
             </p>
-            <Link to="/shop" style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '12px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }}>
-              Browse Snack Menu &amp; Shop &rarr;
-            </Link>
           </div>
 
-          <div style={{ flex: '1 1 400px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {snackCombos.map((combo) => (
-              <div key={combo.name} style={{ backgroundColor: '#F8F5F1', padding: '16px 20px', borderRadius: '8px', borderLeft: '4px solid #D4AF37' }}>
-                <h4 style={{ margin: '0 0 4px 0', fontSize: '16px', color: '#111', fontWeight: '700' }}>{combo.name}</h4>
-                <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>{combo.desc}</p>
+          <div className="dd-lanes-grid">
+            {divisions.map((item) => (
+              <div key={item.title} className="dd-lane-card">
+                <span className="dd-lane-tag">{item.category}</span>
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+                <Link to={item.path} className="dd-btn-link">
+                  {item.cta} &rarr;
+                </Link>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section style={{ padding: '70px 20px', maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
-        <h2 style={{ fontSize: '32px', color: '#8B1E2E', marginBottom: '40px', fontWeight: '800' }}>
-          The Execution Model
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px' }}>
-          <div style={{ backgroundColor: '#fff', padding: '28px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#8B1E2E', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontWeight: '700' }}>1</div>
-            <h3 style={{ fontSize: '18px', margin: '0 0 10px 0', fontWeight: '700' }}>Submit Requirements</h3>
-            <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>Select your service line or product order and submit your project details via our digital intake form.</p>
+      {/* Express Goods & On-Demand Section */}
+      <section className="dd-section dd-alt-bg" style={{ padding: '4rem 1.25rem', borderTop: '1px solid rgba(128,0,32,0.1)', borderBottom: '1px solid rgba(128,0,32,0.1)' }}>
+        <div className="dd-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem', alignItems: 'center' }}>
+          <div>
+            <span className="dd-lane-tag" style={{ background: 'var(--color-gold, #c8b273)', color: '#1b0a0e' }}>Local On-Demand</span>
+            <h2 style={{ fontSize: '2rem', color: '#111', margin: '0.75rem 0' }}>Dani Declares Express &amp; Goods</h2>
+            <p style={{ color: '#444', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+              Curated neighborhood snack packs, combo boxes, sweet treats, and cold drinks delivered directly to your door. Order combo packs online with local delivery.
+            </p>
+            <Link to="/shop" className="dd-btn-primary">
+              Browse Snack Menu &amp; Shop &rarr;
+            </Link>
           </div>
 
-          <div style={{ backgroundColor: '#fff', padding: '28px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#8B1E2E', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontWeight: '700' }}>2</div>
-            <h3 style={{ fontSize: '18px', margin: '0 0 10px 0', fontWeight: '700' }}>Mobilized Dispatch</h3>
-            <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>Our team deploys directly on-site or handles print/packaging production with guaranteed turnaround times.</p>
-          </div>
-
-          <div style={{ backgroundColor: '#fff', padding: '28px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#8B1E2E', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', fontWeight: '700' }}>3</div>
-            <h3 style={{ fontSize: '18px', margin: '0 0 10px 0', fontWeight: '700' }}>Verified Completion</h3>
-            <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>Receive digital photo logs, proof of filing/sign-off, or doorstep delivery of your completed order.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {snackCombos.map((combo) => (
+              <div key={combo.name} className="dd-why-card">
+                <strong>{combo.name}</strong>
+                <p>{combo.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Bottom Conversion Callout */}
-      <section style={{ backgroundColor: '#111', color: '#fff', padding: '60px 20px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '32px', margin: '0 0 16px 0', fontWeight: '800' }}>Ready to Execute Your Project?</h2>
-          <p style={{ fontSize: '17px', color: '#ccc', marginBottom: '28px' }}>
+      {/* Execution Model Steps */}
+      <section className="dd-section" style={{ padding: '4rem 1.25rem' }}>
+        <div className="dd-container" style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: '2rem', color: 'var(--color-burgundy, #800020)', margin: '0 0 0.5rem' }}>
+            The Execution Model
+          </h2>
+          <p className="dd-section-sub">Simple, transparent process from initial intake to verified sign-off.</p>
+
+          <ol className="dd-steps">
+            <li>
+              <span className="dd-step-num">1</span>
+              <div>
+                <strong>Submit Requirements</strong>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>Submit specifications via digital intake.</p>
+              </div>
+            </li>
+            <li>
+              <span className="dd-step-num">2</span>
+              <div>
+                <strong>Mobilized Dispatch</strong>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>On-site deployment or print production.</p>
+              </div>
+            </li>
+            <li>
+              <span className="dd-step-num">3</span>
+              <div>
+                <strong>Verified Completion</strong>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>Photo logs, court filings, or doorstep delivery.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      {/* Bottom Conversion Section */}
+      <section className="dd-bottom-cta">
+        <div className="dd-container">
+          <h2>Ready to Execute Your Project?</h2>
+          <p className="dd-bottom-cta-sub">
             Whether you need property turnover cleaning, custom apparel printing, legal document filings, or local snack delivery—we have you covered.
           </p>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/book" style={{ backgroundColor: '#D4AF37', color: '#111', padding: '14px 32px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', fontSize: '16px' }}>
-              Launch Intake Form &rarr;
+          <div className="dd-hero-ctas" style={{ justifyContent: 'center' }}>
+            <Link to="/request-service" className="dd-btn-primary">
+              Launch Project Quote &rarr;
             </Link>
-            <a href="tel:4706829348" style={{ backgroundColor: 'transparent', color: '#fff', padding: '14px 32px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', fontSize: '16px', border: '1px solid #444' }}>
+            <a href="tel:4706829348" className="dd-btn-outline">
               Call (470) 682-9348
             </a>
           </div>
+          <p className="dd-areas-note">Serving Metro Atlanta, GA &amp; Regional South Carolina</p>
         </div>
       </section>
     </div>
