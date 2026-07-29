@@ -1,3 +1,4 @@
+// filename: src/pages/BlogPage.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -19,7 +20,7 @@ export default function BlogPage() {
             <div style={{ fontSize: '0.8rem', color: '#C8B273', fontWeight: '700', marginBottom: '0.5rem' }}>{p.date}</div>
             <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#8B1E2E', marginBottom: '0.5rem' }}>{p.title}</h2>
             <p style={{ color: '#5A4A52', marginBottom: '1rem', fontSize: '0.95rem' }}>{p.desc}</p>
-            <Link to={} style={{ color: '#8B1E2E', fontWeight: '700', textDecoration: 'none' }}>Read Article &rarr;</Link>
+            <Link to={"/blog/" + p.slug} style={{ color: '#8B1E2E', fontWeight: '700', textDecoration: 'none' }}>Read Article &rarr;</Link>
           </div>
         ))}
       </section>
