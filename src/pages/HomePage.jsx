@@ -1,3 +1,4 @@
+// filename: src/pages/HomePage.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -30,9 +31,9 @@ const HomePage = () => {
       img: '/images/stock/legal paperwork desk.jpg'
     },
     {
-      title: 'Business & Operations Solutions',
+      title: 'Business & Management Solutions',
       category: 'Enterprise Support',
-      text: 'Administrative execution, document management, operational workflows, and dedicated project coordination for growing companies.',
+      text: 'Administrative execution, document management, workflow systems, and dedicated project coordination for growing companies.',
       path: '/services/business-solutions',
       cta: 'View Business Solutions',
       img: '/images/stock/mobile notary public.jpg'
@@ -48,7 +49,7 @@ const HomePage = () => {
     {
       title: 'Government Contracting (B2G)',
       category: 'Federal & State Compliance',
-      text: 'SAM.gov registered subcontractor ready for agency operations. Credentials: UEI (TD4TSG48LHN9), CAGE Code (17VV2), Primary NAICS 561410.',
+      text: 'SAM.gov registered subcontractor ready for agency support. Credentials: UEI (TD4TSG48LHN9), CAGE Code (17VV2), Primary NAICS 561410.',
       path: '/industries/government',
       cta: 'GovCon Profile',
       img: '/images/stock/court%20building%20exterior.jpg'
@@ -64,16 +65,16 @@ const HomePage = () => {
   return (
     <div className="dd-page-wrapper">
       <Helmet>
-        <title>Mobile Operations & Corporate Execution Support | Dani Declares LLC</title>
+        <title>Mobile Field & Corporate Execution Support | Dani Declares LLC</title>
         <meta name="description" content="Dani Declares LLC provides property turnover cleaning, custom merchandise printing, mobile notary compliance, and local express goods delivery across Metro Atlanta." />
-        <meta name="keywords" content="mobile operations, property turnover cleaning, custom t-shirt printing, mobile notary public, government subcontractor, express goods delivery" />
+        <meta name="keywords" content="mobile field services, property turnover cleaning, custom t-shirt printing, mobile notary public, government subcontractor, express goods delivery" />
       </Helmet>
 
       {/* Visual Hero Section */}
       <section className="dd-hero--visual">
         <div className="dd-hero-inner">
           <div className="dd-hero-content">
-            <p className="dd-hero-eyebrow">Mobile Operations &amp; Execution Support</p>
+            <p className="dd-hero-eyebrow">Mobile Field &amp; Execution Support</p>
             <h1>One Company. Total Execution.</h1>
             <p className="dd-hero-sub">
               We come directly to your location and handle the process from start to submission. Serving property managers, business owners, legal firms, and families across Metro Atlanta and South Carolina.
@@ -94,10 +95,10 @@ const HomePage = () => {
             <div className="dd-visual-card dd-visual-card--large">
               <img 
                 src="/images/stock/property-cleaning-turnover.jpg" 
-                alt="Property Turnover Operations" 
+                alt="Property Turnover Services" 
                 onError={(e) => { e.target.src = '/images/stock/legal paperwork desk.jpg'; }}
               />
-              <span>Field Operations</span>
+              <span>Field Services</span>
             </div>
             <div className="dd-visual-card">
               <img 
@@ -143,7 +144,7 @@ const HomePage = () => {
         <div className="dd-container">
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
             <h2 style={{ fontSize: '2.2rem', color: 'var(--color-burgundy, #800020)', margin: '0 0 0.5rem' }}>
-              Select Your Operation Lane
+              Select Your Service Division
             </h2>
             <p className="dd-section-sub">
               Choose a specialized division below to review capabilities or launch your project request.
