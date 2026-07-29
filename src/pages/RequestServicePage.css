@@ -1,3 +1,5 @@
+/* RequestServicePage.css */
+
 :root {
   --dd-burgundy: #8b1e2e;
   --dd-ivory: #f8f5f1;
@@ -11,6 +13,7 @@
 .request-page {
   background: #fff;
   color: var(--dd-dark);
+  min-height: 100vh;
 }
 
 .request-container {
@@ -24,6 +27,7 @@
   color: #fff;
   padding: 5rem 0 4rem;
   text-align: center;
+  border-bottom: 5px solid var(--dd-gold);
 }
 
 .request-eyebrow {
@@ -165,6 +169,7 @@
   font-weight: 800;
   padding: 0.85rem 1.5rem;
   transition: opacity 0.2s ease, transform 0.2s ease;
+  width: 100%;
 }
 
 .request-submit:hover:not(:disabled) {
