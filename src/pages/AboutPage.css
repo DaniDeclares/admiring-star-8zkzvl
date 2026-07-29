@@ -1,74 +1,118 @@
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
-import "./AboutPage.css";
+/* AboutPage.css */
 
-export default function AboutPage() {
-  return (
-    <>
-      <Helmet>
-        <title>About Us | Dani Declares LLC</title>
-        <meta
-          name="description"
-          content="Dani Declares LLC provides single-source mobile operations support across Metro Atlanta and South Carolina. We handle property turnovers, field logistics, courier runs, custom print production, and administrative compliance."
-        />
-      </Helmet>
+:root {
+  --burgundy: #8b1e2e;
+  --gold: #d4af37;
+  --dark: #1a1a1a;
+  --radius: 8px;
+}
 
-      <div className="about-page">
-        {/* About Header */}
-        <header className="about-header">
-          <div className="about-container">
-            <h1>About Dani Declares LLC</h1>
-          </div>
-        </header>
+.about-page {
+  background-color: #f8f5f1;
+  min-height: 100vh;
+}
 
-        {/* Main Content Section */}
-        <section className="about-section">
-          <div className="about-container">
-            <p className="about-lead">
-              Dani Declares LLC is built to serve as a complete, single-source mobile operations and enterprise execution partner.
-            </p>
+.about-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
 
-            <p>
-              We don't just perform isolated tasks—we move your property and business checkpoints from overwhelmed to completely handled. Whether it is an immediate multi-family turnover clean, a critical court filing delivery, an on-site document signing verification, or custom branded apparel production, we show up and execute.
-            </p>
+.about-header {
+  background: var(--burgundy);
+  color: #fff;
+  padding: 4rem 1.5rem 3rem;
+  text-align: center;
+  border-bottom: 5px solid var(--gold);
+}
 
-            <p>
-              Founded by Danielle Walker, Dani Declares LLC operates as a mobilized fleet across Metro Atlanta and South Carolina, serving clients who demand rigorous execution, clear photo documentation, and total accountability.
-            </p>
+.about-header h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin: 0;
+}
 
-            <h2>Our Core Execution Values</h2>
-            <ul className="about-values">
-              <li><strong>Accuracy:</strong> Every document, turnover checklist, and tracking entry handled with precision.</li>
-              <li><strong>Organization:</strong> Structured mobile routing updates and HD photo proof delivered digitally.</li>
-              <li><strong>Reliability:</strong> We deploy onto your property or location exactly when scheduled.</li>
-              <li><strong>Execution:</strong> Built for property and business managers who need tasks done, not just discussed.</li>
-              <li><strong>Confidentiality:</strong> Your corporate records, resident logistics, and legal files remain strictly secure.</li>
-            </ul>
+.about-section {
+  padding: 3.5rem 0;
+  background: #f8f5f1;
+}
 
-            {/* Corporate Credentials Box */}
-            <div style={{ backgroundColor: "#1a1a1a", color: "#fff", padding: "2rem", borderRadius: "8px", margin: "2.5rem 0", textAlign: "center" }}>
-              <h3 style={{ color: "#d4af37", marginTop: 0, fontFamily: "Georgia, serif" }}>Verified Corporate Credentials</h3>
-              <p style={{ color: "#ccc", fontSize: "0.95rem", lineHeight: 1.6 }}>
-                GA SOS Control No. 25079444 &bull; SAM.gov Active Subcontractor &bull; UEI: TD4TSG48LHN9 &bull; CAGE: 17VV2 &bull; NAICS: 561410
-              </p>
-              <p style={{ color: "#aaa", fontSize: "0.88rem", margin: "0.5rem 0 0" }}>
-                Form W-9, $1M/$2M General Liability Insurance (COI), and corporate governance credentials on file.
-              </p>
-            </div>
+.about-lead {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--burgundy);
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
 
-            {/* Call to Action Buttons */}
-            <div className="about-ctas">
-              <Link to="/request-service" className="about-btn-primary">
-                Launch Custom Quote Request
-              </Link>
-              <Link to="/contact" className="about-btn-secondary">
-                Contact Dispatch Line
-              </Link>
-            </div>
-          </div>
-        </section>
-      </div>
-    </>
-  );
+.about-section p {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #444;
+  margin-bottom: 1.25rem;
+}
+
+.about-section h2 {
+  font-family: Georgia, serif;
+  color: var(--burgundy);
+  font-size: 1.5rem;
+  margin: 2rem 0 1rem;
+}
+
+.about-values {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.about-values li {
+  font-size: 0.98rem;
+  color: #333;
+  line-height: 1.6;
+}
+
+.about-values li strong {
+  color: var(--burgundy);
+}
+
+.about-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.about-btn-primary {
+  background: var(--burgundy);
+  color: #fff;
+  padding: 0.8rem 1.8rem;
+  border-radius: var(--radius);
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+  transition: opacity 0.2s ease;
+}
+
+.about-btn-secondary {
+  background: transparent;
+  color: var(--burgundy);
+  border: 2px solid var(--burgundy);
+  padding: 0.8rem 1.8rem;
+  border-radius: var(--radius);
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.about-btn-primary:hover {
+  opacity: 0.92;
+}
+
+.about-btn-secondary:hover {
+  background: var(--burgundy);
+  color: #fff;
 }
