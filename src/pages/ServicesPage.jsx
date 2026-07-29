@@ -45,7 +45,7 @@ const ServicesPage = () => {
       id: 'express-goods',
       title: 'Express Goods & On-Demand Delivery',
       badge: 'Convenience & Local Marketplace',
-      summary: 'Doorstep snack delivery, back-to-school packs, gamer boxes, sweet & savory combos, and local on-demand convenience runs.',
+      summary: 'Doorstep snack delivery, back-to-school packs, gamer boxes, sweet & savory combo boxes, and local on-demand convenience runs.',
       features: ['$3 Quick Snack Packs & $5 Combo Boxes', '$10 Family Movie Night Packs (12 Items)', 'On-Demand Local Doorstep Delivery', 'Individual Snacks, Drinks & Treats'],
       link: '/shop',
       cta: 'Shop Express Goods'
@@ -80,8 +80,8 @@ const ServicesPage = () => {
           <p style={{ fontSize: '18px', opacity: 0.9, lineHeight: 1.6, margin: '0 0 24px 0' }}>
             We bring mobile operations, specialized equipment, and execution support directly to your business, property, or home.
           </p>
-          <Link to="/book" style={{ backgroundColor: '#D4AF37', color: '#111', padding: '14px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }}>
-            Launch Universal Service Request &rarr;
+          <Link to="/request-service" style={{ backgroundColor: '#D4AF37', color: '#111', padding: '14px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }}>
+            Launch Custom Project Quote &rarr;
           </Link>
         </div>
       </section>
@@ -114,8 +114,8 @@ const ServicesPage = () => {
                 <Link to={cat.link} style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '10px 20px', borderRadius: '4px', fontWeight: '700', fontSize: '14px', textDecoration: 'none', flex: '1 1 140px', textAlign: 'center' }}>
                   {cat.cta}
                 </Link>
-                <Link to={`/book?type=${cat.id}`} style={{ backgroundColor: '#F8F5F1', color: '#111', padding: '10px 16px', borderRadius: '4px', fontWeight: '700', fontSize: '14px', textDecoration: 'none', border: '1px solid #CCC', textAlign: 'center' }}>
-                  Book Now
+                <Link to={`/request-service?type=${cat.id}`} style={{ backgroundColor: '#F8F5F1', color: '#111', padding: '10px 16px', borderRadius: '4px', fontWeight: '700', fontSize: '14px', textDecoration: 'none', border: '1px solid #CCC', textAlign: 'center' }}>
+                  Request Quote
                 </Link>
               </div>
             </div>
@@ -131,8 +131,8 @@ const ServicesPage = () => {
             Have a custom property portfolio, enterprise print order, or urgent legal filing? Contact our dispatch coordinator directly.
           </p>
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/book" style={{ backgroundColor: '#D4AF37', color: '#111', padding: '12px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none' }}>
-              Launch Fast Intake &rarr;
+            <Link to="/request-service" style={{ backgroundColor: '#D4AF37', color: '#111', padding: '12px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none' }}>
+              Launch Custom Quote Form &rarr;
             </Link>
             <a href="tel:4706829348" style={{ backgroundColor: 'transparent', color: '#fff', padding: '12px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', border: '1px solid #444' }}>
               Call (470) 682-9348
