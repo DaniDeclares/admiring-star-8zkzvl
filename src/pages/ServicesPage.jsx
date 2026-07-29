@@ -64,7 +64,7 @@ const ServicesPage = () => {
   return (
     <div className="dd-services-page">
       <Helmet>
-        <title>Services & Operational Divisions | Dani Declares LLC</title>
+        <title>Services &amp; Operational Divisions | Dani Declares LLC</title>
         <meta name="description" content="Explore the operational divisions of Dani Declares LLC: Property Logistics, Print & Merch Studio, Legal Compliance, Business Solutions, Express Goods, and Government Contracting." />
       </Helmet>
 
@@ -134,8 +134,8 @@ const ServicesPage = () => {
             <Link to="/request-service" style={{ backgroundColor: '#D4AF37', color: '#111', padding: '12px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none' }}>
               Launch Custom Quote Form &rarr;
             </Link>
-            <a href="tel:4706829348" style={{ backgroundColor: 'transparent', color: '#fff', padding: '12px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', border: '1px solid #444' }}>
-              Call (470) 682-9348
+            <a href="tel:4704857173" style={{ backgroundColor: 'transparent', color: '#fff', padding: '12px 28px', borderRadius: '6px', fontWeight: '700', textDecoration: 'none', border: '1px solid #444' }}>
+              Call (470) 485-7173
             </a>
           </div>
         </div>
