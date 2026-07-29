@@ -1,183 +1,147 @@
-.book-page {
-  background: var(--ivory);
-  color: var(--ink);
-  padding: var(--section-padding) var(--section-gap);
-}
+import React, { useMemo } from "react";
+import { Helmet } from "react-helmet-async";
+import { useSearchParams, Link } from "react-router-dom";
+import TidyCalEmbed from "../components/TidyCalEmbed.jsx";
+import { bookingServices } from "../data/services.js";
+import { buildTidyCalPath, buildTidyCalUrl } from "../data/tidycal.js";
+import "./BookPage.css";
 
-.book-hero {
-  max-width: 760px;
-  margin: 0 auto var(--section-gap);
-  text-align: center;
-}
+const getSelectedService = (serviceId) =>
+  bookingServices.find((service) => service.id === serviceId);
 
-.book-hero .eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.75rem;
-  color: var(--burgundy);
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
+export default function BookPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedId = searchParams.get("service");
 
-.book-hero h1 {
-  font-family: var(--font-secondary);
-  font-size: var(--heading-1);
-  margin-bottom: 0.75rem;
-}
+  const selectedService = useMemo(
+    () => getSelectedService(selectedId),
+    [selectedId]
+  );
 
-.book-hero p {
-  font-size: 1.05rem;
-  color: var(--ink-muted);
-}
+  const displayedServices = useMemo(() => {
+    if (selectedService) {
+      return [selectedService];
+    }
+    return bookingServices;
+  }, [selectedService]);
 
-.book-service-selector {
-  max-width: 960px;
-  margin: 0 auto var(--section-gap);
-}
+  return (
+    <>
+      <Helmet>
+        <title>Book Appointment &amp; Schedule Service • Dani Declares LLC</title>
+        <meta
+          name="description"
+          content="Schedule mobile notary, apostille, loan signing, and legal compliance appointments with Dani Declares LLC."
+        />
+      </Helmet>
 
-.book-service-selector h2 {
-  font-size: 1.35rem;
-  margin-bottom: 1rem;
-  color: var(--burgundy);
-}
+      <main className="book-page">
+        {/* Book Hero */}
+        <header className="book-hero">
+          <p className="eyebrow">Time-Specific Appointments</p>
+          <h1>Book Your Appointment</h1>
+          <p>
+            Select a time slot below for mobile notary signings, living trust execution, or apostille coordination. Your appointment is reserved upon payment completion.
+          </p>
+          <div style={{ marginTop: "1rem" }}>
+            <Link to="/request-service" className="service-chip" style={{ background: "var(--gold, #d4af37)", color: "#1a1a1a", borderColor: "var(--gold, #d4af37)" }}>
+              Need a Custom Project Quote Instead? Click Here &rarr;
+            </Link>
+          </div>
+        </header>
 
-.service-chip-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
+        {/* Service Selector Chips */}
+        <section className="book-service-selector">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <h2>Select a service</h2>
+            {selectedService && (
+              <button
+                onClick={() => setSearchParams({})}
+                style={{ background: "none", border: "1px solid rgba(139,30,46,0.3)", padding: "0.4rem 0.8rem", borderRadius: "4px", cursor: "pointer", fontSize: "0.85rem" }}
+              >
+                ✕ View All Appointment Types
+              </button>
+            )}
+          </div>
 
-.service-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(139, 30, 46, 0.2);
-  background: #fff;
-  color: var(--burgundy);
-  font-weight: 600;
-  transition: all 0.2s ease;
-  min-height: 44px;
-  text-align: center;
-}
+          <div className="service-chip-grid">
+            {bookingServices.map((service) => (
+              <button
+                key={service.id}
+                onClick={() => setSearchParams({ service: service.id })}
+                className={`service-chip ${selectedService?.id === service.id ? "active" : ""}`}
+              >
+                {service.title}
+              </button>
+            ))}
+          </div>
+        </section>
 
-.service-chip:hover,
-.service-chip.active {
-  background: var(--burgundy);
-  color: #fff;
-}
+        {/* Calendar Embeds Grid */}
+        <section className="booking-embeds">
+          {displayedServices.map((service) => {
+            const tidycalPath = buildTidyCalPath(service.tidycalSlug);
+            const tidycalUrl = buildTidyCalUrl(service.tidycalSlug);
 
-.booking-embeds {
-  display: grid;
-  gap: var(--grid-gap);
-  max-width: 1100px;
-  margin: 0 auto;
-}
+            return (
+              <article key={service.id} id={`booking-${service.id}`} className="booking-card">
+                <div className="booking-card__header">
+                  <div>
+                    <h3>{service.title}</h3>
+                    <p>{service.shortDescription}</p>
+                  </div>
+                  {service.priceLabel && (
+                    <span className="price-pill">{service.priceLabel}</span>
+                  )}
+                </div>
 
-.booking-card {
-  padding: var(--card-padding);
-}
+                <div className="booking-card__primary">
+                  <a
+                    className="service-chip active"
+                    style={{ width: "100%", display: "block" }}
+                    href={tidycalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Book Appointment on TidyCal &rarr;
+                  </a>
+                  <p className="booking-card__note">
+                    Appointments are pending until payment is completed.
+                  </p>
+                </div>
 
-.booking-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: var(--section-gap);
-}
+                <div className="booking-card__embed">
+                  <TidyCalEmbed path={tidycalPath} />
+                  <div className="booking-card__fallback">
+                    <p>
+                      If the embedded calendar does not load or shows as unavailable, use the direct scheduling window link below.
+                    </p>
+                    <a
+                      className="service-chip"
+                      style={{ width: "100%", display: "block" }}
+                      href={tidycalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open TidyCal Scheduling Window
+                    </a>
+                  </div>
+                </div>
 
-.booking-card__header h3 {
-  font-size: 1.35rem;
-  margin-bottom: 0.35rem;
-}
-
-.booking-card__header p {
-  color: var(--ink-muted);
-}
-
-.booking-card .tidycal-embed {
-  min-height: 640px;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.booking-card__primary {
-  margin-bottom: var(--section-gap);
-}
-
-.booking-card__note {
-  color: var(--ink-muted);
-  margin: 0.75rem 0 0;
-  text-align: center;
-}
-
-.booking-card__primary .btn,
-.booking-card__payment .btn,
-.booking-card__fallback .btn {
-  width: 100%;
-}
-
-.booking-card__embed {
-  display: grid;
-  gap: var(--section-gap);
-}
-
-.booking-card__fallback {
-  background: rgba(139, 30, 46, 0.04);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
-  border: var(--card-border);
-}
-
-.booking-card__fallback p {
-  color: var(--ink-muted);
-  margin-bottom: 0.75rem;
-}
-
-.booking-card__payment {
-  margin-top: var(--section-gap);
-  padding-top: var(--section-gap);
-  border-top: 1px solid rgba(139, 30, 46, 0.12);
-  display: grid;
-  gap: 0.75rem;
-}
-
-.booking-card__payment h4 {
-  font-size: 1.1rem;
-  color: var(--burgundy);
-}
-
-.booking-card__payment p {
-  color: var(--ink-muted);
-  margin: 0;
-}
-
-.price-pill {
-  background: rgba(212, 175, 55, 0.18);
-  color: var(--burgundy);
-  font-weight: 600;
-  border-radius: 999px;
-  padding: 0.35rem 0.85rem;
-  white-space: nowrap;
-}
-
-@media (max-width: 720px) {
-  .service-chip-grid {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .service-chip {
-    width: 100%;
-  }
-
-  .booking-card__header {
-    flex-direction: column;
-  }
-
-  .booking-card .tidycal-embed {
-    min-height: 560px;
-  }
+                <div className="booking-card__payment">
+                  <h4>Step 2 — Complete payment after booking</h4>
+                  <p>
+                    Your time slot is reserved. Payment is required to confirm and hold your appointment. After booking above, continue to the payment page.
+                  </p>
+                  <a href={`/pay?service=${service.id}`} className="service-chip active" style={{ display: "inline-block", marginTop: "0.5rem" }}>
+                    Proceed to Payment Page &rarr;
+                  </a>
+                </div>
+              </article>
+            );
+          })}
+        </section>
+      </main>
+    </>
+  );
 }
