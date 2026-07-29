@@ -1,4 +1,3 @@
-/* Valid and fixed CSS for ServicesPage.css */
 :root {
   --burgundy: #8b1e2e;
   --ivory: #f8f5f1;
@@ -16,7 +15,7 @@
 .sig-header {
   background: var(--dark);
   color: #fff;
-  padding: 5rem 1.5rem 4rem;
+  padding: 4rem 1.5rem 3rem;
   text-align: center;
 }
 
@@ -42,7 +41,7 @@
 }
 
 .sig-services {
-  padding: 4rem 0;
+  padding: 3rem 0;
   background: #fff;
 }
 
@@ -52,6 +51,7 @@
   border-radius: var(--radius);
   padding: 2rem;
   margin-bottom: 1.5rem;
+  background: #fff;
 }
 
 .sig-card h2 {
@@ -83,13 +83,8 @@
 .sig-cta {
   background: var(--burgundy);
   color: #fff;
-  padding: 4.5rem 1.5rem;
+  padding: 4rem 1.5rem;
   text-align: center;
-}
-
-.sig-cta p {
-  font-size: 1rem;
-  margin-bottom: 2rem;
 }
 
 @media (max-width: 600px) {
