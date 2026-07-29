@@ -1,136 +1,57 @@
-/* filename: src/components/Navbar.css */
-.dd-navbar-header {
-  background-color: #0F050A;
-  border-bottom: 3px solid #C8B273;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+/* DANI DECLARES LLC — MASTER BRAND KIT STYLESHEET */
+:root {
+  --color-obsidian: #0F050A;
+  --color-warm-ivory: #F8F5F1;
+  --color-champagne-gold: #C8B273;
+  --color-deep-red: #8B1E2E;
+  --color-charcoal: #1B0A0E;
+  --color-taupe: #2D1B28;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: system-ui, -apple-system, sans-serif;
 }
 
-.dd-navbar-container {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 0.85rem 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-warm-ivory);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-.dd-navbar-brand {
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
+h1, h2, h3, h4 {
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
 }
 
-.dd-brand-badge {
-  font-size: 0.65rem;
+.dd-btn-gold {
+  background-color: var(--color-champagne-gold);
+  color: var(--color-obsidian);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
   font-weight: 800;
-  color: #C8B273;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.dd-brand-name {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #F8F5F1;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-.dd-brand-tagline {
-  font-size: 0.75rem;
-  color: #D1C7BD;
-  font-weight: 500;
-}
-
-.dd-navbar-nav {
-  display: flex;
-  gap: 1.25rem;
-  align-items: center;
-}
-
-.dd-nav-link {
-  color: #D1C7BD;
   text-decoration: none;
-  font-size: 0.925rem;
-  font-weight: 600;
-  transition: color 0.15s ease;
+  display: inline-block;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
-.dd-nav-link:hover, .dd-nav-link.active {
-  color: #C8B273;
-}
-
-.dd-navbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.dd-btn-nav-primary {
-  background-color: #C8B273;
-  color: #0F050A;
-  padding: 0.6rem 1.25rem;
-  border-radius: 4px;
-  font-weight: 800;
-  font-size: 0.875rem;
-  text-decoration: none;
-  transition: background-color 0.15s ease, transform 0.15s ease;
-  white-space: nowrap;
-}
-
-.dd-btn-nav-primary:hover {
+.dd-btn-gold:hover {
   background-color: #E2CA8A;
   transform: translateY(-1px);
 }
 
-.dd-mobile-toggle {
-  display: none;
-  background: transparent;
-  border: 1px solid #C8B273;
-  color: #C8B273;
-  font-size: 1.25rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Mobile Drawer */
-.dd-mobile-drawer {
-  display: flex;
-  flex-direction: column;
-  background-color: #1B0A0E;
-  border-top: 1px solid #3A202E;
-  padding: 1rem 1.25rem 1.5rem;
-  gap: 0.75rem;
-}
-
-.dd-mobile-link {
-  color: #F8F5F1;
+.dd-btn-red {
+  background-color: var(--color-deep-red);
+  color: var(--color-warm-ivory);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-weight: 800;
   text-decoration: none;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid #2D1B28;
+  display: inline-block;
+  transition: transform 0.15s ease;
 }
 
-.dd-mobile-link:hover {
-  color: #C8B273;
-}
-
-.dd-mobile-cta-wrap {
-  margin-top: 0.75rem;
-  text-align: center;
-}
-
-@media (max-width: 900px) {
-  .dd-navbar-nav {
-    display: none;
-  }
-  .dd-mobile-toggle {
-    display: block;
-  }
+.dd-btn-red:hover {
+  background-color: #A32537;
+  transform: translateY(-1px);
 }

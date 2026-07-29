@@ -1,44 +1,55 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import '../index.css';
 
 export default function ShopPage() {
   const products = [
-    { name: "SmartTap™ NFC Business Card", price: "9.00", cat: "Smart Products", desc: "Instant digital contact and website sharing with one tap." },
-    { name: "Smart Review Stand (Google Reviews)", price: "9.00", cat: "Smart Products", desc: "NFC & QR counter stand driving instant Google customer reviews." },
-    { name: "Custom Heat-Press Apparel", price: "Custom / 50% Deposit", cat: "Print Studio", desc: "Branded t-shirts, hoodies, and team uniforms." },
-    { name: "Sublimated Custom Tumblers", price: "Custom / 50% Deposit", cat: "Print Studio", desc: "High-quality insulated tumblers with branded graphics." },
-    { name: "Quick Snack Pack ( &  Combo)", price: ".00 - .00", cat: "Express Goods", desc: "Curated snack combos for quick daily convenience." },
-    { name: "Gamer & Movie Night Family Pack", price: "0.00 - 5.00", cat: "Express Goods", desc: "Premium snack and beverage bundles for families and events." }
+    { dept: "DANI DECLARES SMART", name: "SmartTap™ NFC Business Card", price: "9.00", desc: "NFC Card + Digital Profile Setup + Contact Download + Booking Link + Social Links." },
+    { dept: "DANI DECLARES SMART", name: "Smart Review Stand (Google Reviews)", price: "9.00", desc: "Countertop NFC & QR stand driving instant 5-star Google customer reviews." },
+    { dept: "DANI DECLARES CREATIVE", name: "Custom Heat-Press DTF Apparel", price: "50% Deposit Pre-Order", desc: "Branded t-shirts, team hoodies, and custom event apparel." },
+    { dept: "DANI DECLARES CREATIVE", name: "Sublimated 20 oz Custom Tumbler", price: "Custom / Bulk Quote", desc: "High-durability insulated stainless steel tumblers with custom branding." },
+    { dept: "DANI DECLARES BUSINESS", name: "Business Startup Starter Kit", price: "99.00", desc: "Branded Business Cards + Packaging Labels + Stickers + NFC Business Card." },
+    { dept: "DANI DECLARES MARKET", name: "Quick Snack Pack ( &  Combo)", price: ".00 - .00", desc: "1 Snack + 1 Cold Beverage + 1 Sweet Treat delivered to doorstep or office." },
+    { dept: "DANI DECLARES MARKET", name: "Family Movie Night / Gamer Bundle", price: "0.00 - 5.00", desc: "12-item snack box with chips, candies, Gatorades, and sweet treats." }
   ];
 
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1B0A0E', backgroundColor: '#F8F5F1', minHeight: '100vh' }}>
-      <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '4rem 1.5rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem', color: '#F8F5F1' }}>
-            Marketplace & Express Goods
+      <Helmet>
+        <title>Marketplace &amp; Products | DANI DECLARES LLC</title>
+        <meta name="description" content="Order SmartTap™ NFC Cards, custom apparel, business startup kits, and Express Goods snack bundles directly from DANI DECLARES LLC." />
+      </Helmet>
+
+      <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '60px 20px', textAlign: 'center', borderBottom: '4px solid #C8B273' }}>
+        <div style={{ maxWidth: '850px', margin: '0 auto' }}>
+          <span style={{ backgroundColor: '#C8B273', color: '#0F050A', padding: '4px 14px', borderRadius: '20px', fontWeight: '700', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', display: 'inline-block', marginBottom: '16px' }}>
+            Creative Commerce Marketplace
+          </span>
+          <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '800', margin: '0 0 16px 0', color: '#F8F5F1' }}>
+            DANI DECLARES MARKETPLACE
           </h1>
-          <p style={{ fontSize: '1.15rem', color: '#D1C7BD' }}>
-            SmartTap™ NFC cards, custom branded print apparel, and Express Goods snack combos delivered on-demand.
+          <p style={{ fontSize: '18px', color: '#D1C7BD', lineHeight: 1.6, margin: '0 0 24px 0' }}>
+            Smart NFC business technology, custom DTF print apparel, business startup kits, and everyday snack convenience bundles.
           </p>
         </div>
       </section>
 
-      <section style={{ padding: '4rem 1.5rem', maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.75rem' }}>
-          {products.map((p, i) => (
-            <div key={i} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D9D0', borderRadius: '8px', padding: '1.75rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <section style={{ padding: '60px 20px', maxWidth: '1180px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+          {products.map((p, idx) => (
+            <div key={idx} style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', border: '1px solid #E2D9D0', borderTop: '4px solid #C8B273', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
               <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#8B1E2E', backgroundColor: '#F3ECE7', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>{p.cat}</span>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginTop: '0.75rem', marginBottom: '0.25rem' }}>{p.name}</h3>
-                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#C8B273', marginBottom: '0.75rem' }}>{p.price}</div>
-                <p style={{ fontSize: '0.9rem', color: '#5A4A52', lineHeight: '1.5', marginBottom: '1.5rem' }}>{p.desc}</p>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: '#8B1E2E', textTransform: 'uppercase', letterSpacing: '0.8px', backgroundColor: '#F3ECE7', padding: '3px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '10px' }}>
+                  {p.dept}
+                </span>
+                <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#1B0A0E', margin: '0 0 6px 0' }}>{p.name}</h3>
+                <div style={{ fontSize: '16px', fontWeight: '800', color: '#C8B273', marginBottom: '12px' }}>{p.price}</div>
+                <p style={{ fontSize: '14px', color: '#5A4A52', lineHeight: 1.5, margin: '0 0 20px 0' }}>{p.desc}</p>
               </div>
-              <button style={{
-                backgroundColor: '#8B1E2E', color: '#FFFFFF', border: 'none', padding: '0.75rem',
-                borderRadius: '4px', fontWeight: '700', cursor: 'pointer'
-              }}>
-                Order / Add to Cart
-              </button>
+              <Link to="/book?item=" + encodeURIComponent(p.name) className="dd-btn-red" style={{ textAlign: 'center', padding: '10px', fontSize: '14px' }}>
+                Order Product &rarr;
+              </Link>
             </div>
           ))}
         </div>

@@ -1,5 +1,4 @@
-// prisma/schema.prisma
-
+// filename: prisma/schema.prisma
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -9,76 +8,43 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  role          UserRole  @default(VISITOR)
-  stripeAccount String?   // for Stripe Connect partners
-  orders        Order[]   @relation("UserOrders")
-  posts         BlogPost[]@relation("AuthorPosts")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+enum RequestStatus {
+  NEW
+  QUOTED
+  DISPATCHED
+  INVOICED
+  PAID
 }
 
-model Product {
-  id            String    @id @default(cuid())
-  name          String
-  description   String?
-  price         Int       // in cents
-  stripePriceId String    @unique
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+model Lead {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  requests  ServiceRequest[]
 }
 
-model Order {
-  id         String    @id @default(cuid())
-  sessionId  String    @unique
-  customer   String
-  email      String
-  amount     Int       // in cents
-  currency   String
-  status     String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-
-  // link back to the purchasing user, if applicable
-  user     User?   @relation("UserOrders", fields: [userId], references: [id])
-  userId   String?
+model ServiceRequest {
+  id          String        @id @default(uuid())
+  publicId    String        @unique
+  leadId      String
+  lead        Lead          @relation(fields: [leadId], references: [id])
+  serviceType String
+  details     String
+  status      RequestStatus @default(NEW)
+  photoLogs   JobPhoto[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
-model BlogPost {
-  id         String    @id @default(cuid())
-  slug       String    @unique
-  title      String
-  content    String    // markdown or HTML
-  published  Boolean   @default(false)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-
-  // optional relation to an author
-  author    User?     @relation("AuthorPosts", fields: [authorId], references: [id])
-  authorId  String?
-}
-
-model Membership {
-  id            String    @id @default(cuid())
-  name          String
-  description   String?
-  stripePriceId String    @unique
-  billingCycle  Billing   @default(MONTHLY)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-enum UserRole {
-  ADMIN
-  EDITOR
-  CUSTOMER
-  VISITOR
-}
-
-enum Billing {
-  MONTHLY
-  YEARLY
+model JobPhoto {
+  id          String         @id @default(uuid())
+  requestId   String
+  request     ServiceRequest @relation(fields: [requestId], references: [id])
+  photoUrl    String
+  photoType   String         // e.g., 'Before Clean', 'After Clean'
+  capturedAt  DateTime       @default(now())
 }
