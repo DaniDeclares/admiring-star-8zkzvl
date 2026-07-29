@@ -1,249 +1,432 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import './Homepage.css';
+/* Homepage Specific CSS
+   Layered with DANI DECLARES brand tokens and responsive layouts.
+*/
 
-const HomePage = () => {
-  const divisions = [
-    {
-      title: 'Property & Field Logistics',
-      category: 'Property Management & Real Estate',
-      text: 'Multi-family unit turnover resets, deep cleaning, carpet hot-water extraction, post-construction debris removal, and HD photo condition logs.',
-      path: '/services/property',
-      cta: 'View Property Services',
-      img: '/images/stock/property-cleaning-turnover.jpg'
-    },
-    {
-      title: 'Print & Merchandise Studio',
-      category: 'Branding & Apparel',
-      text: 'Custom heat-press apparel, branded corporate merch, retail product packaging labels, stickers, and promotional marketing collateral.',
-      path: '/services/print-studio',
-      cta: 'Explore Print Studio',
-      img: '/images/stock/Clipboards.jpg'
-    },
-    {
-      title: 'Legal Compliance & Mobile Notary',
-      category: 'Legal & Administrative',
-      text: 'Mobilized document preparation, loan signings, living trusts, durable POAs, regional court filings, and international apostille processing.',
-      path: '/services/concierge',
-      cta: 'Book Notary & Filings',
-      img: '/images/stock/legal paperwork desk.jpg'
-    },
-    {
-      title: 'Business & Operations Solutions',
-      category: 'Enterprise Support',
-      text: 'Administrative execution, document management, operational workflows, and dedicated project coordination for growing companies.',
-      path: '/services/business-solutions',
-      cta: 'View Business Solutions',
-      img: '/images/stock/mobile notary public.jpg'
-    },
-    {
-      title: 'Express Goods & Local Delivery',
-      category: 'Marketplace & Convenience',
-      text: 'On-demand neighborhood snack packs, back-to-school bundles, sweet & savory combo boxes, and daily doorstep delivery.',
-      path: '/shop',
-      cta: 'Shop Express Goods',
-      img: '/images/stock/file cabinet.jpg'
-    },
-    {
-      title: 'Government Contracting (B2G)',
-      category: 'Federal & State Compliance',
-      text: 'SAM.gov registered subcontractor ready for agency operations. Credentials: UEI (TD4TSG48LHN9), CAGE Code (17VV2), Primary NAICS 561410.',
-      path: '/industries/government',
-      cta: 'GovCon Profile',
-      img: '/images/stock/court%20building%20exterior.jpg'
-    }
-  ];
+:root {
+  --color-burgundy: #8b1e2e;
+  --color-gold: #d4af37;
+  --color-ivory: #f8f5f1;
+  --color-dark: #1b0a0e;
+  --color-black: #161616;
+  --border-radius-base: 8px;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+}
 
-  const snackCombos = [
-    { name: '$3.00 Quick Snack Pack', desc: '1 Snack + 1 Cold Drink + 1 Sweet Treat' },
-    { name: '$5.00 Gamer Pack', desc: '2 Chip/Savory Snacks + 1 Gatorade + 1 Full-Size Candy + 1 Frozen Treat' },
-    { name: '$10.00 Family Movie Night', desc: '12 Items: 4 Snacks + 4 Drinks + 4 Sweet Treats' }
-  ];
+.brand-hero {
+  background: var(--color-burgundy, #8b1e2e);
+  color: var(--color-ivory, #f8f5f1);
+}
 
-  return (
-    <div className="dd-page-wrapper">
-      <Helmet>
-        <title>Mobile Operations & Corporate Execution Support | Dani Declares LLC</title>
-        <meta name="description" content="Dani Declares LLC provides property turnover cleaning, custom merchandise printing, mobile notary compliance, and local express goods delivery across Metro Atlanta." />
-        <meta name="keywords" content="mobile operations, property turnover cleaning, custom t-shirt printing, mobile notary public, government subcontractor, express goods delivery" />
-      </Helmet>
+.dd-hero--visual {
+  background: linear-gradient(135deg, #2d0c10 0%, var(--color-burgundy, #8b1e2e) 58%, #4b111c 100%);
+  color: var(--color-ivory, #f8f5f1);
+  padding: clamp(4rem, 7vw, 7rem) 1.5rem;
+  overflow: hidden;
+  border-bottom: 6px solid var(--color-gold, #d4af37);
+}
 
-      {/* Visual Hero Section */}
-      <section className="dd-hero--visual">
-        <div className="dd-hero-inner">
-          <div className="dd-hero-content">
-            <p className="dd-hero-eyebrow">Mobile Operations &amp; Execution Support</p>
-            <h1>One Company. Total Execution.</h1>
-            <p className="dd-hero-sub">
-              We come directly to your location and handle the process from start to submission. Serving property managers, business owners, legal firms, and families across Metro Atlanta and South Carolina.
-            </p>
+.dd-hero-inner {
+  align-items: center;
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  margin: 0 auto;
+  max-width: 1180px;
+}
 
-            <div className="dd-hero-ctas">
-              <Link to="/book" className="dd-btn-primary">
-                Launch Service Request &rarr;
-              </Link>
-              <Link to="/services" className="dd-btn-outline">
-                Explore All Divisions
-              </Link>
-            </div>
-          </div>
+.dd-hero-content h1,
+.dd-hero--visual h1 {
+  color: var(--color-ivory, #f8f5f1);
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.08;
+  margin-bottom: 1rem;
+  max-width: 780px;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.22);
+}
 
-          {/* Hero Visual Collage */}
-          <div className="dd-visual-collage">
-            <div className="dd-visual-card dd-visual-card--large">
-              <img 
-                src="/images/stock/property-cleaning-turnover.jpg" 
-                alt="Property Turnover Operations" 
-                onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }}
-              />
-              <span>Field Operations</span>
-            </div>
-            <div className="dd-visual-card">
-              <img 
-                src="/images/stock/Clipboards.jpg" 
-                alt="Custom Print & Merch" 
-                onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }}
-              />
-              <span>Print &amp; Apparel</span>
-            </div>
-            <div className="dd-visual-card">
-              <img 
-                src="/images/stock/legal paperwork desk.jpg" 
-                alt="Legal & Mobile Notary" 
-                onError={(e) => { e.target.src = '/images/stock/file cabinet.jpg'; }}
-              />
-              <span>Legal Compliance</span>
-            </div>
-          </div>
-        </div>
-      </section>
+.dd-hero-sub {
+  color: rgba(248, 245, 241, 0.94);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.6;
+  max-width: 740px;
+}
 
-      {/* Fast Intake Banner */}
-      <section className="dd-intake-strip">
-        <div className="dd-container dd-intake-inner">
-          <p className="dd-intake-text">
-            Need urgent dispatch or custom job estimates? Direct Line: <strong>(470) 682-9348</strong>
-          </p>
-          <Link to="/book" className="dd-btn-intake">
-            Book Fast Intake &rarr;
-          </Link>
-        </div>
-      </section>
+.dd-hero-eyebrow {
+  color: var(--color-gold, #d4af37);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.9rem;
+  text-transform: uppercase;
+}
 
-      {/* Trust Credential Anchor Bar */}
-      <section className="dd-section" style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '1rem 0' }}>
-        <div className="dd-container" style={{ textAlign: 'center', fontSize: '0.88rem', fontWeight: 600, color: '#555' }}>
-          GA SOS Control No. 25079444 &bull; SAM.gov Active &bull; UEI: TD4TSG48LHN9 &bull; CAGE: 17VV2 &bull; W-9 &amp; COI Verified
-        </div>
-      </section>
+.dd-hero-ctas,
+.dd-divisions-footer {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+}
 
-      {/* Core Solutions Grid */}
-      <section className="dd-section" style={{ padding: '4rem 1.25rem' }}>
-        <div className="dd-container">
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <h2 style={{ fontSize: '2.2rem', color: 'var(--color-burgundy, #800020)', margin: '0 0 0.5rem' }}>
-              Select Your Operation Lane
-            </h2>
-            <p className="dd-section-sub">
-              Choose a specialized division below to review capabilities or launch your project request.
-            </p>
-          </div>
+.dd-btn-primary,
+.dd-btn-secondary,
+.dd-btn-outline {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  line-height: 1.1;
+  min-height: 48px;
+  padding: 0.88rem 1.4rem;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
 
-          <div className="dd-lanes-grid">
-            {divisions.map((item) => (
-              <div key={item.title} className="dd-lane-card">
-                <span className="dd-lane-tag">{item.category}</span>
-                <h3>{item.title}</h3>
-                <p>{item.text}</p>
-                <Link to={item.path} className="dd-btn-link">
-                  {item.cta} &rarr;
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+.dd-btn-primary {
+  background: var(--color-gold, #d4af37);
+  border: 2px solid var(--color-gold, #d4af37);
+  color: #1b0a0e;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
 
-      {/* Express Goods & On-Demand Section */}
-      <section className="dd-section dd-alt-bg" style={{ padding: '4rem 1.25rem', borderTop: '1px solid rgba(128,0,32,0.1)', borderBottom: '1px solid rgba(128,0,32,0.1)' }}>
-        <div className="dd-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem', alignItems: 'center' }}>
-          <div>
-            <span className="dd-lane-tag" style={{ background: 'var(--color-gold, #c8b273)', color: '#1b0a0e' }}>Local On-Demand</span>
-            <h2 style={{ fontSize: '2rem', color: '#111', margin: '0.75rem 0' }}>Dani Declares Express &amp; Goods</h2>
-            <p style={{ color: '#444', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-              Curated neighborhood snack packs, combo boxes, sweet treats, and cold drinks delivered directly to your door. Order combo packs online with local delivery.
-            </p>
-            <Link to="/shop" className="dd-btn-primary">
-              Browse Snack Menu &amp; Shop &rarr;
-            </Link>
-          </div>
+.dd-btn-secondary {
+  background: var(--color-ivory, #f8f5f1);
+  border: 2px solid var(--color-ivory, #f8f5f1);
+  color: var(--color-burgundy, #8b1e2e);
+}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {snackCombos.map((combo) => (
-              <div key={combo.name} className="dd-why-card">
-                <strong>{combo.name}</strong>
-                <p>{combo.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+.dd-btn-outline {
+  background: transparent;
+  border: 2px solid rgba(248, 245, 241, 0.78);
+  color: var(--color-ivory, #f8f5f1);
+}
 
-      {/* Execution Model Steps */}
-      <section className="dd-section" style={{ padding: '4rem 1.25rem' }}>
-        <div className="dd-container" style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: '2rem', color: 'var(--color-burgundy, #800020)', margin: '0 0 0.5rem' }}>
-            The Execution Model
-          </h2>
-          <p className="dd-section-sub">Simple, transparent process from initial intake to verified sign-off.</p>
+.dd-btn-primary:hover,
+.dd-btn-secondary:hover,
+.dd-btn-outline:hover {
+  transform: translateY(-2px);
+}
 
-          <ol className="dd-steps">
-            <li>
-              <span className="dd-step-num">1</span>
-              <div>
-                <strong>Submit Requirements</strong>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>Submit specifications via digital intake.</p>
-              </div>
-            </li>
-            <li>
-              <span className="dd-step-num">2</span>
-              <div>
-                <strong>Mobilized Dispatch</strong>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>On-site deployment or print production.</p>
-              </div>
-            </li>
-            <li>
-              <span className="dd-step-num">3</span>
-              <div>
-                <strong>Verified Completion</strong>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>Photo logs, court filings, or doorstep delivery.</p>
-              </div>
-            </li>
-          </ol>
-        </div>
-      </section>
+/* Visual Collage */
+.dd-visual-collage {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-rows: repeat(2, minmax(150px, 1fr));
+  min-height: 430px;
+}
 
-      {/* Bottom Conversion Section */}
-      <section className="dd-bottom-cta">
-        <div className="dd-container">
-          <h2>Ready to Execute Your Project?</h2>
-          <p className="dd-bottom-cta-sub">
-            Whether you need property turnover cleaning, custom apparel printing, legal document filings, or local snack delivery—we have you covered.
-          </p>
-          <div className="dd-hero-ctas" style={{ justifyContent: 'center' }}>
-            <Link to="/book" className="dd-btn-primary">
-              Launch Intake Form &rarr;
-            </Link>
-            <a href="tel:4706829348" className="dd-btn-outline">
-              Call (470) 682-9348
-            </a>
-          </div>
-          <p className="dd-areas-note">Serving Metro Atlanta, GA &amp; Regional South Carolina</p>
-        </div>
-      </section>
-    </div>
-  );
-};
+.dd-visual-card {
+  background: rgba(248, 245, 241, 0.08);
+  border: 1px solid rgba(248, 245, 241, 0.22);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+  min-height: 180px;
+  overflow: hidden;
+  position: relative;
+}
 
-export default HomePage;
+.dd-visual-card--large {
+  grid-row: span 2;
+}
+
+.dd-visual-card img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.dd-visual-card::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(27, 10, 14, 0.72));
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.dd-visual-card span {
+  background: rgba(248, 245, 241, 0.92);
+  border: 1px solid rgba(212, 175, 55, 0.7);
+  border-radius: 999px;
+  bottom: 1rem;
+  color: var(--color-burgundy, #8b1e2e);
+  font-size: 0.82rem;
+  font-weight: 800;
+  left: 1rem;
+  padding: 0.45rem 0.75rem;
+  position: absolute;
+  z-index: 1;
+}
+
+.dd-section {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.dd-container {
+  margin: 0 auto;
+  max-width: 1120px;
+}
+
+/* Fast Intake Strip */
+.dd-intake-strip {
+  background: var(--color-burgundy, #8b1e2e);
+  color: var(--color-ivory, #f8f5f1);
+  padding: 1.25rem 1.5rem;
+}
+
+.dd-intake-inner {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.dd-intake-text {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dd-btn-intake {
+  background: var(--color-gold, #d4af37);
+  border-radius: 999px;
+  color: #1b0a0e;
+  font-weight: 800;
+  padding: 0.65rem 1.35rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.dd-btn-intake:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+/* Service Lanes Grid */
+.dd-section-sub {
+  color: #555;
+  font-size: 1rem;
+  margin: 0.4rem 0 0;
+}
+
+.dd-lanes-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  margin-top: 1.5rem;
+}
+
+.dd-lane-card {
+  background: #fff;
+  border: 1px solid rgba(139, 30, 46, 0.18);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(139, 30, 46, 0.07);
+  padding: 1.5rem;
+  transition: box-shadow 160ms ease, transform 160ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.dd-lane-card:hover {
+  box-shadow: 0 12px 32px rgba(139, 30, 46, 0.13);
+  transform: translateY(-2px);
+}
+
+.dd-lane-tag {
+  background: var(--color-burgundy, #8b1e2e);
+  border-radius: 999px;
+  color: var(--color-ivory, #f8f5f1);
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+.dd-lane-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: #111;
+}
+
+.dd-lane-card p {
+  color: #444;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin: 0 0 1rem;
+  flex-grow: 1;
+}
+
+.dd-btn-link {
+  color: var(--color-burgundy, #8b1e2e);
+  display: inline-flex;
+  font-weight: 800;
+  margin-top: 0.55rem;
+  text-decoration: none;
+}
+
+/* Steps Process */
+.dd-steps {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.dd-steps li {
+  align-items: center;
+  background: #fff;
+  border: 1px solid rgba(139, 30, 46, 0.16);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(139, 30, 46, 0.08);
+  display: flex;
+  gap: 0.85rem;
+  padding: 1.2rem;
+}
+
+.dd-step-num {
+  align-items: center;
+  background: var(--color-gold, #d4af37);
+  border-radius: 50%;
+  color: #1b0a0e;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-weight: 900;
+  height: 2.2rem;
+  justify-content: center;
+  width: 2.2rem;
+}
+
+/* Why Choose Grid */
+.dd-why-card {
+  background: #fff;
+  border: 1px solid rgba(139, 30, 46, 0.14);
+  border-radius: 8px;
+  padding: 1.2rem;
+  border-left: 4px solid var(--color-gold, #d4af37);
+}
+
+.dd-why-card strong {
+  color: var(--color-burgundy, #8b1e2e);
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.dd-why-card p {
+  color: #444;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Bottom Conversion CTA */
+.dd-bottom-cta {
+  background: linear-gradient(135deg, #2d0c10 0%, var(--color-burgundy, #8b1e2e) 58%, #4b111c 100%);
+  color: var(--color-ivory, #f8f5f1);
+  padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+  text-align: center;
+}
+
+.dd-bottom-cta h2 {
+  color: var(--color-ivory, #f8f5f1);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.dd-bottom-cta-sub {
+  color: rgba(248, 245, 241, 0.88);
+  font-size: 1.05rem;
+  margin: 0 auto 1.5rem;
+  max-width: 580px;
+}
+
+.dd-areas-note {
+  color: rgba(248, 245, 241, 0.65);
+  font-size: 0.85rem;
+  margin: 1.75rem auto 0;
+}
+
+.dd-alt-bg {
+  background: #f8f5f1;
+}
+
+/* Media Queries for Mobile Responsiveness */
+@media (max-width: 900px) {
+  .dd-hero--visual {
+    padding: 3.5rem 1rem 2.5rem;
+  }
+
+  .dd-hero-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-hero-content h1,
+  .dd-hero--visual h1 {
+    font-size: clamp(2rem, 10vw, 3.2rem);
+  }
+
+  .dd-hero-ctas,
+  .dd-divisions-footer {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .dd-btn-primary,
+  .dd-btn-secondary,
+  .dd-btn-outline {
+    width: 100%;
+  }
+
+  .dd-visual-collage {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    min-height: auto;
+  }
+
+  .dd-visual-card,
+  .dd-visual-card--large {
+    grid-row: auto;
+    min-height: 200px;
+  }
+
+  .dd-lanes-grid,
+  .dd-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-intake-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .dd-btn-intake {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .dd-hero--visual {
+    padding: 2.5rem 1rem 2rem;
+  }
+
+  .dd-lane-card,
+  .dd-why-card {
+    border-radius: 6px;
+  }
+}
