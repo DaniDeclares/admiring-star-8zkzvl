@@ -1,110 +1,53 @@
-/* ShopPage.css */
-
-.shop-page {
-  background-color: var(--ivory, #f8f5f1);
-  padding: 2rem 1.5rem 4rem;
-  font-family: system-ui, -apple-system, sans-serif;
-  color: #333;
-  min-height: 100vh;
+/* ShopPage.css - Dani Declares Master Brand Kit Styles */
+/* DANI DECLARES LLC — MASTER BRAND KIT STYLESHEET */
+:root {
+  --color-obsidian: #0F050A;
+  --color-warm-ivory: #F8F5F1;
+  --color-champagne-gold: #C8B273;
+  --color-deep-red: #8B1E2E;
+  --color-charcoal: #1B0A0E;
+  --color-taupe: #2D1B28;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: system-ui, -apple-system, sans-serif;
 }
 
-.shop-hero {
-  text-align: center;
-  margin-bottom: 2.2rem;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-warm-ivory);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-.shop-hero h1 {
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  color: var(--burgundy, #8b1e2e);
-  font-family: Georgia, serif;
-  margin-bottom: 0.6rem;
+.dd-btn-gold {
+  background-color: var(--color-champagne-gold);
+  color: var(--color-obsidian);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
-.shop-hero p {
-  font-size: 1.05rem;
-  color: #555;
-  max-width: 680px;
-  margin: 0 auto;
+.dd-btn-gold:hover {
+  background-color: #E2CA8A;
+  transform: translateY(-1px);
 }
 
-.shop-feature-banner {
-  background-color: var(--gold, #d4af37);
-  color: #111;
-  font-weight: bold;
-  text-align: center;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-  font-size: 1.05rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+.dd-btn-red {
+  background-color: var(--color-deep-red);
+  color: var(--color-warm-ivory);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.15s ease;
 }
 
-.product-grid {
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  padding: 1rem 0;
-}
-
-.product-card {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid rgba(139, 30, 46, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-}
-
-.product-card img {
-  width: 100%;
-  height: auto;
-  max-height: 240px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 0.8rem;
-}
-
-.product-card h2 {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: var(--burgundy, #8b1e2e);
-  margin-bottom: 0.4rem;
-}
-
-.product-card p {
-  font-size: 0.92rem;
-  color: #555;
-  margin-bottom: 0.7rem;
-  flex-grow: 1;
-}
-
-.product-card .price {
-  color: var(--burgundy, #8b1e2e);
-  font-weight: bold;
-  font-size: 1.15rem;
-  margin-bottom: 0.8rem;
-}
-
-.contact-info {
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  text-align: center;
-  margin-top: 3rem;
-  border: 1px solid #e5e0da;
-}
-
-@media (max-width: 700px) {
-  .shop-hero h1 {
-    font-size: 2rem;
-  }
-  .shop-feature-banner {
-    font-size: 0.95rem;
-  }
-  .product-card img {
-    max-height: 200px;
-  }
+.dd-btn-red:hover {
+  background-color: #A32537;
+  transform: translateY(-1px);
 }

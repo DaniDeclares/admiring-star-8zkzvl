@@ -1,199 +1,53 @@
-/* BookPage.css */
-
-.book-page {
-  background: var(--ivory, #f8f5f1);
-  color: var(--ink, #333);
-  padding: 2rem 1.5rem 4rem;
-  min-height: 100vh;
+/* BookPage.css - Dani Declares Master Brand Kit Styles */
+/* DANI DECLARES LLC — MASTER BRAND KIT STYLESHEET */
+:root {
+  --color-obsidian: #0F050A;
+  --color-warm-ivory: #F8F5F1;
+  --color-champagne-gold: #C8B273;
+  --color-deep-red: #8B1E2E;
+  --color-charcoal: #1B0A0E;
+  --color-taupe: #2D1B28;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: system-ui, -apple-system, sans-serif;
 }
 
-.book-hero {
-  max-width: 760px;
-  margin: 0 auto 2rem;
-  text-align: center;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-warm-ivory);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-.book-hero .eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.75rem;
-  color: var(--burgundy, #8b1e2e);
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
-
-.book-hero h1 {
-  font-family: Georgia, serif;
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
-  margin-bottom: 0.75rem;
-  color: var(--burgundy, #8b1e2e);
-}
-
-.book-hero p {
-  font-size: 1.05rem;
-  color: #555;
-}
-
-.book-service-selector {
-  max-width: 960px;
-  margin: 0 auto 2rem;
-}
-
-.book-service-selector h2 {
-  font-size: 1.35rem;
-  margin-bottom: 1rem;
-  color: var(--burgundy, #8b1e2e);
-}
-
-.service-chip-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.service-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 1.2rem;
-  border-radius: 999px;
-  border: 1px solid rgba(139, 30, 46, 0.25);
-  background: #fff;
-  color: var(--burgundy, #8b1e2e);
-  font-weight: 600;
-  transition: all 0.2s ease;
-  min-height: 44px;
-  text-align: center;
+.dd-btn-gold {
+  background-color: var(--color-champagne-gold);
+  color: var(--color-obsidian);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-weight: 800;
   text-decoration: none;
-  cursor: pointer;
+  display: inline-block;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
-.service-chip:hover,
-.service-chip.active {
-  background: var(--burgundy, #8b1e2e);
-  color: #fff;
+.dd-btn-gold:hover {
+  background-color: #E2CA8A;
+  transform: translateY(-1px);
 }
 
-.booking-embeds {
-  display: grid;
-  gap: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
+.dd-btn-red {
+  background-color: var(--color-deep-red);
+  color: var(--color-warm-ivory);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.15s ease;
 }
 
-.booking-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 2rem;
-  border: 1px solid #e5e0da;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-}
-
-.booking-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.booking-card__header h3 {
-  font-size: 1.35rem;
-  margin-bottom: 0.35rem;
-  color: var(--burgundy, #8b1e2e);
-}
-
-.booking-card__header p {
-  color: #666;
-  margin: 0;
-}
-
-.booking-card .tidycal-embed {
-  min-height: 640px;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.booking-card__primary {
-  margin-bottom: 1.5rem;
-}
-
-.booking-card__note {
-  color: #777;
-  margin: 0.75rem 0 0;
-  text-align: center;
-  font-size: 0.85rem;
-}
-
-.booking-card__primary .btn,
-.booking-card__payment .btn,
-.booking-card__fallback .btn {
-  width: 100%;
-}
-
-.booking-card__embed {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.booking-card__fallback {
-  background: rgba(139, 30, 46, 0.04);
-  border-radius: 8px;
-  padding: 1.25rem;
-  border: 1px solid rgba(139, 30, 46, 0.15);
-}
-
-.booking-card__fallback p {
-  color: #666;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-}
-
-.booking-card__payment {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(139, 30, 46, 0.12);
-  display: grid;
-  gap: 0.75rem;
-}
-
-.booking-card__payment h4 {
-  font-size: 1.1rem;
-  color: var(--burgundy, #8b1e2e);
-  margin: 0;
-}
-
-.booking-card__payment p {
-  color: #555;
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.price-pill {
-  background: rgba(212, 175, 55, 0.22);
-  color: var(--burgundy, #8b1e2e);
-  font-weight: 700;
-  border-radius: 999px;
-  padding: 0.35rem 0.85rem;
-  white-space: nowrap;
-}
-
-@media (max-width: 720px) {
-  .service-chip-grid {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .service-chip {
-    width: 100%;
-  }
-
-  .booking-card__header {
-    flex-direction: column;
-  }
-
-  .booking-card .tidycal-embed {
-    min-height: 560px;
-  }
+.dd-btn-red:hover {
+  background-color: #A32537;
+  transform: translateY(-1px);
 }

@@ -1,29 +1,53 @@
-.dashboard-page {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: var(--section-padding) var(--section-gap);
-  background: var(--ivory);
-  color: var(--ink);
-  font-family: var(--font-primary);
+/* DashboardPage.css - Dani Declares Master Brand Kit Styles */
+/* DANI DECLARES LLC — MASTER BRAND KIT STYLESHEET */
+:root {
+  --color-obsidian: #0F050A;
+  --color-warm-ivory: #F8F5F1;
+  --color-champagne-gold: #C8B273;
+  --color-deep-red: #8B1E2E;
+  --color-charcoal: #1B0A0E;
+  --color-taupe: #2D1B28;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: system-ui, -apple-system, sans-serif;
 }
 
-.dashboard-page h1 {
-  color: var(--burgundy);
-  margin-bottom: 1rem;
-  font-family: var(--font-secondary);
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-warm-ivory);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-.dashboard-page ul {
-  list-style: disc inside;
-  margin: 1rem 0 1.5rem 0;
-  padding-left: 1rem;
+.dd-btn-gold {
+  background-color: var(--color-champagne-gold);
+  color: var(--color-obsidian);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
-.dashboard-page a {
-  color: var(--gold);
-  text-decoration: underline;
+.dd-btn-gold:hover {
+  background-color: #E2CA8A;
+  transform: translateY(-1px);
 }
 
-.dashboard-page a:hover {
-  color: var(--burgundy);
+.dd-btn-red {
+  background-color: var(--color-deep-red);
+  color: var(--color-warm-ivory);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.dd-btn-red:hover {
+  background-color: #A32537;
+  transform: translateY(-1px);
 }
