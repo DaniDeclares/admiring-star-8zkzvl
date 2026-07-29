@@ -1,56 +1,73 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import "./Navbar.css";
+// filename: src/components/Navbar.jsx
+import React, { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import './Navbar.css';
 
 export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation();
-  const handleLinkClick = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    setMenuOpen(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
-  const isActive = (path) => location.pathname === path;
+
+  const closeMenu = () => {
+    setMobileMenuOpen(false);
+  };
 
   return (
-    <nav className="dd-navbar" aria-label="Main navigation">
-      <div className="dd-navbar-inner">
-        <Link to="/" className="dd-navbar-logo" onClick={handleLinkClick}>
-          <img src='/images/logo/logo-gold-seal.png' style={{ mixBlendMode: 'multiply', backgroundColor: 'transparent' }} alt="Dani Declares LLC" />
-          <span>Dani Declares</span>
+    <header className="dd-navbar-header">
+      <div className="dd-navbar-container">
+        {/* Brand Logo & Title */}
+        <Link to="/" className="dd-navbar-brand" onClick={closeMenu}>
+          <span className="dd-brand-badge">GA SOS #25079444</span>
+          <span className="dd-brand-name">DANI DECLARES LLC</span>
+          <span className="dd-brand-tagline">We Handle the Execution</span>
         </Link>
-        <ul className="dd-nav-links" role="list">
-          <li><Link to="/" className={isActive("/") ? "active" : ""} onClick={handleLinkClick}>Home</Link></li>
-          <li><Link to="/field-services" className={isActive("/field-services") ? "active" : ""} onClick={handleLinkClick}>Field Services</Link></li>
-          <li><Link to="/events" className={isActive("/events") ? "active" : ""} onClick={handleLinkClick}>Events</Link></li>
-          <li><Link to="/services" className={isActive("/services") ? "active" : ""} onClick={handleLinkClick}>Services</Link></li>
-          <li><Link to="/signature-services" className={isActive("/signature-services") ? "active" : ""} onClick={handleLinkClick}>Signature Services</Link></li>
-          <li><Link to="/govcon" className={isActive("/govcon") ? "active" : ""} onClick={handleLinkClick}>GovCon</Link></li>
-          <li><Link to="/request-service" className={isActive("/request-service") ? "active" : ""} onClick={handleLinkClick}>Request Service</Link></li>
-          <li><Link to="/about" className={isActive("/about") ? "active" : ""} onClick={handleLinkClick}>About</Link></li>
-          <li><Link to="/contact" className={isActive("/contact") ? "active" : ""} onClick={handleLinkClick}>Contact</Link></li>
-        </ul>
-        <button
-          className="dd-nav-hamburger"
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((o) => !o)}
-        >
-          <span /><span /><span />
-        </button>
+
+        {/* Desktop Navigation Links */}
+        <nav className="dd-navbar-nav">
+          <NavLink to="/" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Home</NavLink>
+          <NavLink to="/services" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Services</NavLink>
+          <NavLink to="/shop" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Marketplace</NavLink>
+          <NavLink to="/industries/government" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>GovCon</NavLink>
+          <NavLink to="/network" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Network</NavLink>
+          <NavLink to="/about" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>About</NavLink>
+          <NavLink to="/contact" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Contact</NavLink>
+        </nav>
+
+        {/* Primary CTA & Mobile Toggle */}
+        <div className="dd-navbar-actions">
+          <Link to="/book" className="dd-btn-nav-primary">
+            Book Appointment &rarr;
+          </Link>
+          <button className="dd-mobile-toggle" onClick={toggleMenu} aria-label="Toggle Menu">
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
+        </div>
       </div>
-      {menuOpen && (
-        <ul className="dd-nav-mobile" role="list">
-          <li><Link to="/" onClick={handleLinkClick}>Home</Link></li>
-          <li><Link to="/field-services" onClick={handleLinkClick}>Field Services</Link></li>
-          <li><Link to="/events" onClick={handleLinkClick}>Events</Link></li>
-          <li><Link to="/services" onClick={handleLinkClick}>Services</Link></li>
-          <li><Link to="/signature-services" onClick={handleLinkClick}>Signature Services</Link></li>
-          <li><Link to="/govcon" onClick={handleLinkClick}>GovCon</Link></li>
-          <li><Link to="/request-service" onClick={handleLinkClick}>Request Service</Link></li>
-          <li><Link to="/about" onClick={handleLinkClick}>About</Link></li>
-          <li><Link to="/contact" onClick={handleLinkClick}>Contact</Link></li>
-        </ul>
+
+      {/* Mobile Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="dd-mobile-drawer">
+          <NavLink to="/" className="dd-mobile-link" onClick={closeMenu}>Home</NavLink>
+          <NavLink to="/services" className="dd-mobile-link" onClick={closeMenu}>Services Directory</NavLink>
+          <NavLink to="/services/business-solutions" className="dd-mobile-link" onClick={closeMenu}>Business Solutions</NavLink>
+          <NavLink to="/services/print-studio" className="dd-mobile-link" onClick={closeMenu}>Print &amp; Apparel Studio</NavLink>
+          <NavLink to="/events/weddings" className="dd-mobile-link" onClick={closeMenu}>Weddings &amp; Celebrations</NavLink>
+          <NavLink to="/services/property" className="dd-mobile-link" onClick={closeMenu}>Property &amp; Field Logistics</NavLink>
+          <NavLink to="/services/concierge" className="dd-mobile-link" onClick={closeMenu}>Legal Compliance &amp; Mobile Notary</NavLink>
+          <NavLink to="/shop" className="dd-mobile-link" onClick={closeMenu}>Marketplace &amp; Express Goods</NavLink>
+          <NavLink to="/industries/government" className="dd-mobile-link" onClick={closeMenu}>Government Contracting (GovCon)</NavLink>
+          <NavLink to="/network" className="dd-mobile-link" onClick={closeMenu}>Partner &amp; Vendor Network</NavLink>
+          <NavLink to="/about" className="dd-mobile-link" onClick={closeMenu}>About Us</NavLink>
+          <NavLink to="/contact" className="dd-mobile-link" onClick={closeMenu}>Contact &amp; Dispatch</NavLink>
+          <div className="dd-mobile-cta-wrap">
+            <Link to="/book" className="dd-btn-nav-primary" onClick={closeMenu}>
+              Launch Project Quote &rarr;
+            </Link>
+          </div>
+        </div>
       )}
-    </nav>
+    </header>
   );
 }

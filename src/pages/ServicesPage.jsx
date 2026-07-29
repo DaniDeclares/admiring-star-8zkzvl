@@ -1,4 +1,3 @@
-// filename: src/pages/ServicesPage.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -47,7 +46,7 @@ const ServicesPage = () => {
       title: 'Express Goods & On-Demand Delivery',
       badge: 'Convenience & Local Marketplace',
       summary: 'Doorstep snack delivery, back-to-school packs, gamer boxes, sweet & savory combo boxes, and local on-demand convenience runs.',
-      features: ['$3 Quick Snack Packs & $5 Combo Boxes', '$10 Family Movie Night Packs (12 Items)', 'On-Demand Local Doorstep Delivery', 'Individual Snacks, Drinks & Treats'],
+      features: [' Quick Snack Packs &  Combo Boxes', '0 Family Movie Night Packs (12 Items)', 'On-Demand Local Doorstep Delivery', 'Individual Snacks, Drinks & Treats'],
       link: '/shop',
       cta: 'Shop Express Goods'
     },
