@@ -6,7 +6,7 @@ export const SERVICES_DATA = {
       { name: "PMO Governance & Project Management", price: "Custom Proposal", desc: "Process gap analysis, standardized charters, stage-gate approval workflows, and risk registers." },
       { name: "SOP Manual Development", price: "00 - ,500", desc: "Operational workflow documentation and digital checklist creation." },
       { name: "Vendor Readiness Packets", price: "50", desc: "Capability statements, W-9, COI attachments, and vendor application profiles." },
-      { name: "Side Hustle Launch Coaching", price: "7", desc: "1:1 step-by-step launch guidance." }
+      { name: "Business Infrastructure & Setup", price: "99", desc: "Complete physical and digital business startup infrastructure." }
     ]
   },
   creative: {
@@ -40,7 +40,7 @@ export const SERVICES_DATA = {
     ]
   },
   concierge: {
-    title: "Concierge & Execution",
+    title: "Concierge & Operations",
     tagline: "Coordinate. Execute. Simplify.",
     services: [
       { name: "Mobile Notary Visit", price: "0 Flat Fee", desc: "Up to 3 signatures within 20 miles. Available 7 days/week." },

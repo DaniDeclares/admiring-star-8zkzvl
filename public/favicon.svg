@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Red Wax Seal Outer Stamp -->
+  <circle cx="32" cy="32" r="28" fill="#6B1F2B" stroke="#4F1720" stroke-width="2" />
+  <path d="M32 2 Q36 6 40 4 Q44 2 48 6 Q52 10 50 14 Q54 18 56 22 Q58 26 56 30 Q58 34 56 38 Q58 42 54 46 Q50 50 46 54 Q42 58 38 56 Q34 58 30 56 Q26 58 22 54 Q18 50 14 46 Q10 42 12 38 Q10 34 12 30 Q10 26 12 22 Q10 18 14 14 Q18 10 22 6 Q26 2 30 4 Z" fill="#6B1F2B" />
+  <!-- Inner Gold Ring -->
+  <circle cx="32" cy="32" r="22" fill="none" stroke="#C9A45C" stroke-width="1.5" stroke-dasharray="2 1" />
+  <!-- Monogram DD / Wax Seal Stamp Mark -->
+  <text x="32" y="38" font-family="Georgia, serif" font-size="20" font-weight="bold" fill="#C9A45C" text-anchor="middle" letter-spacing="-1">DD</text>
+</svg>

@@ -1,24 +1,37 @@
 // filename: api/intake-webhook.js
-// Vercel Serverless Function - Dual Lead & Service Request Processor
+import { submitProjectIntake } from '../src/services/supabaseClient.js';
+import { sendNewRequestNotification } from '../src/services/notificationService.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { name, email, phone, category = 'business', message, timeline } = req.body || {};
+  const { name, email, phone, category, details, pathway, zipCode, urgency } = req.body || {};
 
-  if (!name || (!email && !phone)) {
-    return res.status(400).json({ error: 'Missing required contact information' });
+  const result = await submitProjectIntake({
+    name,
+    email,
+    phone,
+    category,
+    details,
+    pathway,
+    zipCode,
+    urgency
+  });
+
+  if (!result.success) {
+    return res.status(400).json({ success: false, error: result.error });
   }
 
-  // Generates public DDOS Request ID
-  const requestId = 'REQ-' + Math.floor(1000 + Math.random() * 9000);
+  // Non-blocking fire-and-forget notification (Prevents Vercel serverless execution timeouts)
+  sendNewRequestNotification(result.publicId, name, category).catch((err) => {
+    console.error('Background notification failed silently:', err.message);
+  });
 
   return res.status(200).json({
     success: true,
-    requestId,
-    message: 'Your execution request has been received by DANI DECLARES LLC. A deployment coordinator is reviewing your specifications.',
-    leadData: { name, email, phone, category, timeline }
+    publicId: result.publicId,
+    message: 'Project intake received and queued for dispatch review.'
   });
 }

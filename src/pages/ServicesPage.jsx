@@ -6,17 +6,17 @@ import '../index.css';
 export default function ServicesPage() {
   const departments = [
     {
-      id: 'execution',
+      id: 'operations',
       name: 'DANI DECLARES OPERATIONS',
       tagline: 'Concierge • Administrative • Field Execution',
       summary: 'Administrative execution, document preparation, mobile notary, living trust coordination, court filing couriers, and apostille processing.',
       link: '/services/concierge',
-      cta: 'Explore Execution & Concierge'
+      cta: 'Explore Operations & Concierge'
     },
     {
       id: 'property',
       name: 'DANI DECLARES PROPERTY',
-      tagline: 'Property Execution • Turnovers • Hospitality',
+      tagline: 'Property Operations • Turnovers • Hospitality',
       summary: 'Multi-family unit turnover resets, deep cleaning, carpet extraction, 2-hour digital HD photo logs, 24-48 hr SLAs, and resident concierge perks.',
       link: '/services/property',
       cta: 'Explore Property Services'
@@ -49,7 +49,7 @@ export default function ServicesPage() {
       id: 'business',
       name: 'DANI DECLARES BUSINESS',
       tagline: 'Business Startup Kits • Infrastructure',
-      summary: 'PMO project governance frameworks, SOP manual development, capability statements, W-9 packets, and Side Hustle Launch Coaching (7).',
+      summary: 'PMO project governance frameworks, SOP manual development, capability statements, W-9 packets, and Business Startup Infrastructure Kits (99).',
       link: '/services/business-solutions',
       cta: 'Explore Business Solutions'
     },
@@ -67,7 +67,7 @@ export default function ServicesPage() {
     <div style={{ fontFamily: 'system-ui, sans-serif', backgroundColor: '#F8F5F1', color: '#1B0A0E', minHeight: '100vh' }}>
       <Helmet>
         <title>Solutions Directory | DANI DECLARES LLC</title>
-        <meta name="description" content="DANI DECLARES LLC provides concierge execution, property resets, weddings, creative print, smart NFC products, business startup kits, and convenience goods." />
+        <meta name="description" content="DANI DECLARES LLC provides concierge operations, property resets, weddings, creative print, smart NFC products, business startup kits, and convenience goods." />
       </Helmet>
 
       {/* Hero Banner */}
@@ -83,7 +83,7 @@ export default function ServicesPage() {
             WE HANDLE THE EXECUTION. Single-source delivery across concierge tasks, property preparation, events, creative production, smart NFC technology, business setup, and curated goods.
           </p>
           <Link to="/book" className="dd-btn-gold">
-            Launch Custom Project Quote &rarr;
+            TELL US WHAT YOU NEED &rarr;
           </Link>
         </div>
       </section>
@@ -110,7 +110,7 @@ export default function ServicesPage() {
                   {dept.cta}
                 </Link>
                 <Link to={"/book?department=" + dept.id} style={{ backgroundColor: '#F8F5F1', color: '#111', padding: '10px 16px', borderRadius: '4px', fontWeight: '700', fontSize: '14px', textDecoration: 'none', border: '1px solid #CCC', textAlign: 'center' }}>
-                  Book Service
+                  GET STARTED
                 </Link>
               </div>
             </div>

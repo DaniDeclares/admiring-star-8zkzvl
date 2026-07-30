@@ -1,46 +1,89 @@
-import React from "react";
-import { Link } from "react-router-dom";
+// filename: src/pages/BusinessSolutionsPage.jsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import './BusinessSolutionsPage.css';
 
 export default function BusinessSolutionsPage() {
-  const businessOffers = [
-    { title: "PMO Setup & Governance Frameworks", desc: "Establish project charters, stage-gate workflows, risk logs, and portfolio scoring models." },
-    { title: "SOP Manuals & Operational Workflows", desc: "Document internal business processes into easy-to-follow SOP manuals and digital checklists." },
-    { title: "Vendor Readiness Packets", desc: "Prepare capability statements, W-9s, COI attachments, and vendor application profiles." },
-    { title: "Side Hustle Launch Coaching (7)", desc: "Step-by-step 1:1 guidance to turn ideas into profitable business execution." }
+  const businessServices = [
+    {
+      title: 'PMO Setup & Project Governance',
+      badge: 'Enterprise Architecture',
+      desc: 'Process gap analysis, standardized charters, stage-gate approval workflows, and risk registers for growing organizations.'
+    },
+    {
+      title: 'SOP Manuals & Workflow Documentation',
+      badge: 'Operational Systems',
+      desc: 'Transform internal workflows into easy-to-follow SOP manuals, digital inspection checklists, and training guides.'
+    },
+    {
+      title: 'Vendor Readiness & Capability Packets',
+      badge: 'Procurement Ready',
+      desc: 'Prepare capability statements, W-9 attachments, Certificate of Insurance (COI) profiles, and vendor application packets.'
+    },
+    {
+      title: 'Business Infrastructure & Setup',
+      badge: 'Infrastructure',
+      desc: 'Complete digital and physical business startup infrastructure, printed forms, and organization systems.'
+    }
   ];
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1B0A0E', backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
-      <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '4.5rem 1.5rem', textAlign: 'center' }}>
+    <div className="dd-business-page">
+      <Helmet>
+        <title>Business Infrastructure &amp; Solutions | Dani Declares LLC</title>
+        <meta name="description" content="DANI DECLARES LLC provides business management solutions, SOP manual development, PMO project governance, and vendor readiness packets." />
+      </Helmet>
+
+      {/* Hero Header */}
+      <section className="dd-business-hero" style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '60px 20px', textAlign: 'center', borderBottom: '5px solid #C8B273' }}>
         <div style={{ maxWidth: '850px', margin: '0 auto' }}>
-          <div style={{ color: '#C8B273', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-            Government & Admin & Business Architecture
-          </div>
-          <h1 style={{ fontSize: '2.75rem', fontWeight: '800', marginBottom: '1.25rem', color: '#F8F5F1' }}>
-            Business Solutions & Infrastructure
+          <span style={{ backgroundColor: '#C8B273', color: '#0F050A', padding: '4px 14px', borderRadius: '20px', fontWeight: '700', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', display: 'inline-block', marginBottom: '16px' }}>
+            Enterprise &amp; Small Business Division
+          </span>
+          <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '800', margin: '0 0 16px 0', color: '#F8F5F1' }}>
+            Business Infrastructure &amp; Management Solutions
           </h1>
-          <p style={{ fontSize: '1.2rem', color: '#D1C7BD', lineHeight: '1.6' }}>
-            Building the operational infrastructure, SOP manuals, PMO governance, and vendor readiness tools your business needs to scale.
+          <p style={{ fontSize: '18px', color: '#D1C7BD', lineHeight: 1.6, margin: '0 0 24px 0' }}>
+            Building the operational workflows, SOP manuals, project governance, and vendor readiness systems your business needs to scale cleanly.
           </p>
+          <Link to="/book" style={{ backgroundColor: '#C8B273', color: '#0F050A', padding: '14px 28px', borderRadius: '6px', fontWeight: '800', textDecoration: 'none', display: 'inline-block' }}>
+            GET STARTED &rarr;
+          </Link>
         </div>
       </section>
 
-      <section style={{ padding: '4.5rem 1.5rem', maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.75rem', marginBottom: '4rem' }}>
-          {businessOffers.map((b, i) => (
-            <div key={i} style={{ backgroundColor: '#F8F5F1', border: '1px solid #E2D9D0', padding: '1.75rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      {/* Solutions Grid */}
+      <section style={{ padding: '60px 20px', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '50px' }}>
+          {businessServices.map((b, i) => (
+            <div key={i} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D9D0', borderTop: '4px solid #8B1E2E', padding: '28px', borderRadius: '8px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#8B1E2E', marginBottom: '0.5rem' }}>{b.title}</h3>
-                <p style={{ fontSize: '0.9rem', color: '#5A4A52', lineHeight: '1.5', marginBottom: '1.5rem' }}>{b.desc}</p>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: '#8B1E2E', textTransform: 'uppercase', letterSpacing: '0.8px', backgroundColor: '#F3ECE7', padding: '3px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '12px' }}>
+                  {b.badge}
+                </span>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1B0A0E', margin: '0 0 10px 0' }}>{b.title}</h3>
+                <p style={{ fontSize: '15px', color: '#5A4A52', lineHeight: 1.5, margin: '0 0 20px 0' }}>{b.desc}</p>
               </div>
               <Link to="/book" style={{
-                backgroundColor: '#8B1E2E', color: '#FFFFFF', padding: '0.65rem', borderRadius: '4px',
-                fontWeight: '700', textDecoration: 'none', textAlign: 'center', fontSize: '0.9rem'
+                backgroundColor: '#8B1E2E', color: '#FFFFFF', padding: '10px 18px', borderRadius: '4px',
+                fontWeight: '700', textDecoration: 'none', textAlign: 'center', fontSize: '14px'
               }}>
-                Schedule Consultation &rarr;
+                GET STARTED &rarr;
               </Link>
             </div>
           ))}
+        </div>
+
+        {/* Callout Box */}
+        <div style={{ backgroundColor: '#FAF8F5', border: '1px solid #C8B273', padding: '30px', borderRadius: '8px', textAlign: 'center' }}>
+          <h3 style={{ fontSize: '22px', fontWeight: '800', color: '#1B0A0E', margin: '0 0 10px 0' }}>Need Vendor Onboarding or Proposal Support?</h3>
+          <p style={{ color: '#5A4A52', maxWidth: '700px', margin: '0 auto 20px', fontSize: '15px' }}>
+            We help business owners prepare complete capability statements, W-9 packets, and Certificate of Insurance (COI) profiles for immediate client onboarding.
+          </p>
+          <Link to="/contact" style={{ backgroundColor: '#8B1E2E', color: '#FFFFFF', padding: '12px 24px', borderRadius: '4px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }}>
+            TELL US WHAT YOU NEED &rarr;
+          </Link>
         </div>
       </section>
     </div>

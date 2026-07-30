@@ -1,53 +1,80 @@
-/* RequestServicePage.css - Dani Declares Master Brand Kit Styles */
-/* DANI DECLARES LLC — MASTER BRAND KIT STYLESHEET */
+/* DANI DECLARES LLC — LOCKED BRAND COLOR SYSTEM */
 :root {
-  --color-obsidian: #0F050A;
-  --color-warm-ivory: #F8F5F1;
-  --color-champagne-gold: #C8B273;
-  --color-deep-red: #8B1E2E;
-  --color-charcoal: #1B0A0E;
-  --color-taupe: #2D1B28;
-  --font-serif: "Playfair Display", Georgia, serif;
-  --font-sans: system-ui, -apple-system, sans-serif;
+  --brand-burgundy: #6B1F2B;
+  --brand-burgundy-dark: #4F1720;
+  --brand-burgundy-light: #873340;
+  --brand-ivory: #F6F0E4;
+  --brand-cream: #EDE2D0;
+  --brand-gold: #C9A45C;
+  --brand-gold-light: #DCC58F;
+  --brand-dark: #21191A;
+  --font-serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
+  --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--color-warm-ivory);
-  color: var(--color-charcoal);
+  background-color: var(--brand-ivory);
+  color: var(--brand-dark);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-.dd-btn-gold {
-  background-color: var(--color-champagne-gold);
-  color: var(--color-obsidian);
+h1, h2, h3, h4, .dd-serif {
+  font-family: var(--font-sans);
+  color: var(--brand-dark);
+}
+
+.dd-btn-primary, .dd-btn-red {
+  background-color: var(--brand-burgundy);
+  color: var(--brand-ivory);
   padding: 0.85rem 2rem;
   border-radius: 6px;
-  font-weight: 800;
+  font-weight: 700;
+  font-size: 1rem;
   text-decoration: none;
   display: inline-block;
-  transition: transform 0.15s ease, background-color 0.15s ease;
+  border: 1px solid var(--brand-burgundy);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.dd-btn-primary:hover, .dd-btn-red:hover {
+  background-color: var(--brand-burgundy-dark);
+  color: var(--brand-ivory);
+  transform: translateY(-1px);
+}
+
+.dd-btn-gold {
+  background-color: var(--brand-gold);
+  color: var(--brand-dark);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .dd-btn-gold:hover {
-  background-color: #E2CA8A;
+  background-color: var(--brand-gold-light);
   transform: translateY(-1px);
 }
 
-.dd-btn-red {
-  background-color: var(--color-deep-red);
-  color: var(--color-warm-ivory);
+.dd-btn-outline {
+  background-color: transparent;
+  color: var(--brand-burgundy);
+  border: 1px solid var(--brand-burgundy);
   padding: 0.85rem 2rem;
   border-radius: 6px;
-  font-weight: 800;
+  font-weight: 700;
+  font-size: 1rem;
   text-decoration: none;
   display: inline-block;
-  transition: transform 0.15s ease;
+  transition: background-color 0.2s ease;
 }
 
-.dd-btn-red:hover {
-  background-color: #A32537;
-  transform: translateY(-1px);
+.dd-btn-outline:hover {
+  background-color: var(--brand-cream);
 }

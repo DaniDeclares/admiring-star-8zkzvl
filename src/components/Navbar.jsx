@@ -5,69 +5,52 @@ import './Navbar.css';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const toggleMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setMobileMenuOpen(false);
-  };
+  const toggleMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const closeMenu = () => setMobileMenuOpen(false);
 
   return (
-    <header className="dd-navbar-header">
-      <div className="dd-navbar-container">
-        {/* Brand Logo & Title */}
-        <Link to="/" className="dd-navbar-brand" onClick={closeMenu}>
-          <span className="dd-brand-badge">GA SOS #25079444</span>
-          <span className="dd-brand-name">DANI DECLARES LLC</span>
-          <span className="dd-brand-tagline">We Handle the Execution</span>
+    <header className="dd-navbar-header" style={{ backgroundColor: '#F6F0E4', borderBottom: '3px solid #C9A45C' }}>
+      <div className="dd-navbar-container" style={{ maxWidth: '1240px', margin: '0 auto', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        
+        {/* OFFICIAL BRAND LOGO LOCKUP */}
+        <Link to="/" className="dd-navbar-brand-logo" onClick={closeMenu} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline' }}>
+            <span style={{ fontFamily: 'Georgia, serif', fontSize: '2.2rem', fontWeight: '800', color: '#6B1F2B', lineHeight: '0.9', marginRight: '-0.3rem' }}>D</span>
+            <span style={{ fontFamily: 'Georgia, serif', fontSize: '2.2rem', fontWeight: '800', color: '#C9A45C', lineHeight: '0.9' }}>D</span>
+          </div>
+          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.4rem', margin: '0.25rem 0 0.15rem' }}>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#C9A45C' }}></div>
+            <span style={{ color: '#C9A45C', fontSize: '0.65rem' }}>⚜</span>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#C9A45C' }}></div>
+          </div>
+          <span style={{ fontFamily: 'Georgia, serif', fontSize: '1.15rem', fontWeight: '800', color: '#6B1F2B', letterSpacing: '0.05em', lineHeight: '1.1' }}>
+            DANI DECLARES LLC
+          </span>
+          <span style={{ fontSize: '0.6rem', fontWeight: '700', color: '#21191A', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '0.1rem' }}>
+            OPERATIONS • EXECUTION • SUPPORT
+          </span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="dd-navbar-nav">
-          <NavLink to="/" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Home</NavLink>
-          <NavLink to="/services" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Services</NavLink>
-          <NavLink to="/shop" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Marketplace</NavLink>
-          <NavLink to="/industries/government" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>GovCon</NavLink>
-          <NavLink to="/network" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Network</NavLink>
-          <NavLink to="/about" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>About</NavLink>
-          <NavLink to="/contact" className={({ isActive }) => isActive ? "dd-nav-link active" : "dd-nav-link"}>Contact</NavLink>
+        {/* Navigation Links */}
+        <nav className="dd-navbar-nav" style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+          <NavLink to="/" style={({ isActive }) => ({ color: isActive ? '#6B1F2B' : '#21191A', textDecoration: 'none', fontWeight: '700', fontSize: '0.925rem' })}>Home</NavLink>
+          <NavLink to="/services" style={({ isActive }) => ({ color: isActive ? '#6B1F2B' : '#21191A', textDecoration: 'none', fontWeight: '700', fontSize: '0.925rem' })}>Services</NavLink>
+          <NavLink to="/shop" style={({ isActive }) => ({ color: isActive ? '#6B1F2B' : '#21191A', textDecoration: 'none', fontWeight: '700', fontSize: '0.925rem' })}>Marketplace</NavLink>
+          <NavLink to="/industries/government" style={({ isActive }) => ({ color: isActive ? '#6B1F2B' : '#21191A', textDecoration: 'none', fontWeight: '700', fontSize: '0.925rem' })}>GovCon</NavLink>
+          <NavLink to="/network" style={({ isActive }) => ({ color: isActive ? '#6B1F2B' : '#21191A', textDecoration: 'none', fontWeight: '700', fontSize: '0.925rem' })}>Network</NavLink>
+          <NavLink to="/about" style={({ isActive }) => ({ color: isActive ? '#6B1F2B' : '#21191A', textDecoration: 'none', fontWeight: '700', fontSize: '0.925rem' })}>About</NavLink>
+          <NavLink to="/contact" style={({ isActive }) => ({ color: isActive ? '#6B1F2B' : '#21191A', textDecoration: 'none', fontWeight: '700', fontSize: '0.925rem' })}>Contact</NavLink>
         </nav>
 
-        {/* Primary CTA & Mobile Toggle */}
         <div className="dd-navbar-actions">
-          <Link to="/book" className="dd-btn-nav-primary">
+          <Link to="/book" style={{ backgroundColor: '#6B1F2B', color: '#F6F0E4', padding: '0.65rem 1.25rem', borderRadius: '4px', fontWeight: '800', fontSize: '0.875rem', textDecoration: 'none' }}>
             Book Appointment &rarr;
           </Link>
-          <button className="dd-mobile-toggle" onClick={toggleMenu} aria-label="Toggle Menu">
+          <button onClick={toggleMenu} style={{ background: 'transparent', border: '1px solid #6B1F2B', color: '#6B1F2B', padding: '0.3rem 0.6rem', borderRadius: '4px', cursor: 'pointer', display: 'none' }} className="dd-mobile-toggle">
             {mobileMenuOpen ? '✕' : '☰'}
           </button>
         </div>
       </div>
-
-      {/* Mobile Navigation Drawer */}
-      {mobileMenuOpen && (
-        <div className="dd-mobile-drawer">
-          <NavLink to="/" className="dd-mobile-link" onClick={closeMenu}>Home</NavLink>
-          <NavLink to="/services" className="dd-mobile-link" onClick={closeMenu}>Services Directory</NavLink>
-          <NavLink to="/services/business-solutions" className="dd-mobile-link" onClick={closeMenu}>Business Solutions</NavLink>
-          <NavLink to="/services/print-studio" className="dd-mobile-link" onClick={closeMenu}>Print &amp; Apparel Studio</NavLink>
-          <NavLink to="/events/weddings" className="dd-mobile-link" onClick={closeMenu}>Weddings &amp; Celebrations</NavLink>
-          <NavLink to="/services/property" className="dd-mobile-link" onClick={closeMenu}>Property &amp; Field Logistics</NavLink>
-          <NavLink to="/services/concierge" className="dd-mobile-link" onClick={closeMenu}>Legal Compliance &amp; Mobile Notary</NavLink>
-          <NavLink to="/shop" className="dd-mobile-link" onClick={closeMenu}>Marketplace &amp; Express Goods</NavLink>
-          <NavLink to="/industries/government" className="dd-mobile-link" onClick={closeMenu}>Government Contracting (GovCon)</NavLink>
-          <NavLink to="/network" className="dd-mobile-link" onClick={closeMenu}>Partner &amp; Vendor Network</NavLink>
-          <NavLink to="/about" className="dd-mobile-link" onClick={closeMenu}>About Us</NavLink>
-          <NavLink to="/contact" className="dd-mobile-link" onClick={closeMenu}>Contact &amp; Dispatch</NavLink>
-          <div className="dd-mobile-cta-wrap">
-            <Link to="/book" className="dd-btn-nav-primary" onClick={closeMenu}>
-              Launch Project Quote &rarr;
-            </Link>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

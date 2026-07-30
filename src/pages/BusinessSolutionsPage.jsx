@@ -17,21 +17,21 @@ export default function BusinessSolutionsPage() {
       desc: 'Transform internal workflows into easy-to-follow SOP manuals, digital inspection checklists, and training guides.'
     },
     {
-      title: 'Vendor Readiness Packets',
+      title: 'Vendor Readiness & Capability Packets',
       badge: 'Procurement Ready',
       desc: 'Prepare capability statements, W-9 attachments, Certificate of Insurance (COI) profiles, and vendor application packets.'
     },
     {
-      title: 'Side Hustle Launch Coaching (7)',
-      badge: '1:1 Coaching',
-      desc: 'Step-by-step guidance to launch your business legally, set up payment processing, and acquire your first clients.'
+      title: 'Business Infrastructure & Setup',
+      badge: 'Infrastructure',
+      desc: 'Complete digital and physical business startup infrastructure, printed forms, and organization systems.'
     }
   ];
 
   return (
     <div className="dd-business-page">
       <Helmet>
-        <title>Business &amp; Management Solutions | Dani Declares LLC</title>
+        <title>Business Infrastructure &amp; Solutions | Dani Declares LLC</title>
         <meta name="description" content="DANI DECLARES LLC provides business management solutions, SOP manual development, PMO project governance, and vendor readiness packets." />
       </Helmet>
 
@@ -48,7 +48,7 @@ export default function BusinessSolutionsPage() {
             Building the operational workflows, SOP manuals, project governance, and vendor readiness systems your business needs to scale cleanly.
           </p>
           <Link to="/book" style={{ backgroundColor: '#C8B273', color: '#0F050A', padding: '14px 28px', borderRadius: '6px', fontWeight: '800', textDecoration: 'none', display: 'inline-block' }}>
-            Schedule Consultation &rarr;
+            GET STARTED &rarr;
           </Link>
         </div>
       </section>
@@ -69,7 +69,7 @@ export default function BusinessSolutionsPage() {
                 backgroundColor: '#8B1E2E', color: '#FFFFFF', padding: '10px 18px', borderRadius: '4px',
                 fontWeight: '700', textDecoration: 'none', textAlign: 'center', fontSize: '14px'
               }}>
-                Schedule Consultation &rarr;
+                GET STARTED &rarr;
               </Link>
             </div>
           ))}
@@ -82,7 +82,7 @@ export default function BusinessSolutionsPage() {
             We help business owners prepare complete capability statements, W-9 packets, and Certificate of Insurance (COI) profiles for immediate client onboarding.
           </p>
           <Link to="/contact" style={{ backgroundColor: '#8B1E2E', color: '#FFFFFF', padding: '12px 24px', borderRadius: '4px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }}>
-            Contact Business Consultant &rarr;
+            TELL US WHAT YOU NEED &rarr;
           </Link>
         </div>
       </section>
