@@ -1,21 +1,21 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App.js";
-import { BrowserRouter } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
-import { CartProvider } from "./context/CartContext.jsx";
-import "./index.css";
-import "./styles/responsive.css";
+// filename: src/index.js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { CartProvider } from './context/CartContext.js';
+import App from './App.js';
+import './index.css';
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <CartProvider>
-      <HelmetProvider>
+    <HelmetProvider>
+      <CartProvider>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </HelmetProvider>
-    </CartProvider>
+      </CartProvider>
+    </HelmetProvider>
   </React.StrictMode>
 );
