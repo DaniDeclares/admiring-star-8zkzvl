@@ -1,0 +1,25 @@
+Dept ID,Offer Name,Transaction Type,Retail Rate,Wholesale Cost,Net Margin %,Net Profit Dollar
+01-ADM,Admin Execution Support,CUSTOM_QUOTE,5.00 / hr,/usr/bin/bash.00,100%,5.00 / hr
+01-DOC,Non-Attorney Doc Prep,STARTING_AT,5.00,.00,93.3%,0.00
+01-NOT,Mobile Notary Public Visit,STARTING_AT,0.00,/usr/bin/bash.00,100%,0.00
+01-LON,Loan Signing Package,FIXED_PRICE,50.00,2.00,92.0%,38.00
+01-I9V,Remote I-9 Verification,FIXED_PRICE,0.00,/usr/bin/bash.00,100%,0.00
+01-APO,Expedited Apostille,STARTING_AT,75.00,5.00,91.4%,60.00
+02-TO1,Multi-Family Turnover (1BR),STARTING_AT,50.00,50.00,40% Platform Fee,00.00
+02-TO2,Multi-Family Turnover (2BR),STARTING_AT,50.00,10.00,40% Platform Fee,40.00
+02-TO3,Multi-Family Turnover (3BR),STARTING_AT,50.00,70.00,40% Platform Fee,80.00
+02-STR,STR / Airbnb Turnover,STARTING_AT,25.00,5.00,40% Platform Fee,0.00
+02-RES,Residential Deep Cleaning,STARTING_AT,00.00,20.00,40% Platform Fee,0.00
+02-ELO,Pop-Up Elopement Officiant,STARTING_AT,9.00,/usr/bin/bash.00,100%,9.00
+02-WED,Full Wedding Officiant,FIXED_PRICE,99.00,/usr/bin/bash.00,100%,99.00
+03-APP,Custom Heat-Press Apparel,DEPOSIT,8.00,2.00,65.0%,6.00
+03-TUM,Sublimated 20 oz Tumbler,DEPOSIT,8.00,.00,79.2%,3.00
+03-LBL,Custom Packaging Labels,STARTING_AT,5.00,4.00,68.8%,1.00
+04-NFC,SmartTap™ Business Card,FIXED_PRICE,9.00,.50,90.8%,4.50
+04-GCR,Smart Google Review Stand,FIXED_PRICE,9.00,.00,87.7%,3.00
+04-TAG,Smart Property Tag Set,STARTING_AT,5.00,.00,89.3%,7.00
+05-STU,Startup Infrastructure Kit,FIXED_PRICE,99.00,1.50,84.1%,67.50
+05-SOP,SOP Manual & Checklists,STARTING_AT,00.00,/usr/bin/bash.00,100%,00.00
+05-MK3,Quick Snack Pack ( Combo),FIXED_PRICE,.00,.10,63.3%,.90
+05-MK5,Gamer Box ( Combo),FIXED_PRICE,.00,.85,63.0%,.15
+05-MK15,Family Movie Night Box,FIXED_PRICE,5.00,.20,65.3%,.80
