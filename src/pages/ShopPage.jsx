@@ -18,37 +18,40 @@ export default function ShopPage() {
     <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1B0A0E', backgroundColor: '#F8F5F1', minHeight: '100vh' }}>
       <Helmet>
         <title>Marketplace &amp; Products | DANI DECLARES LLC</title>
-        <meta name="description" content="Order SmartTap™ NFC Cards, custom apparel, business startup kits, and Express Goods snack bundles directly from DANI DECLARES LLC." />
+        <meta name="description" content="Shop SmartTap NFC cards, Google review stands, custom apparel, business startup kits, and snack bundles." />
       </Helmet>
 
+      {/* Hero Banner */}
       <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '60px 20px', textAlign: 'center', borderBottom: '4px solid #C8B273' }}>
         <div style={{ maxWidth: '850px', margin: '0 auto' }}>
           <span style={{ backgroundColor: '#C8B273', color: '#0F050A', padding: '4px 14px', borderRadius: '20px', fontWeight: '700', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', display: 'inline-block', marginBottom: '16px' }}>
-            Creative Commerce Marketplace
+            DANI DECLARES MARKETPLACE
           </span>
           <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '800', margin: '0 0 16px 0', color: '#F8F5F1' }}>
-            DANI DECLARES MARKETPLACE
+            Smart Business Tools, Print &amp; Market Goods
           </h1>
           <p style={{ fontSize: '18px', color: '#D1C7BD', lineHeight: 1.6, margin: '0 0 24px 0' }}>
-            Smart NFC business technology, custom DTF print apparel, business startup kits, and everyday snack convenience bundles.
+            Explore SmartTap™ NFC digital business cards, review stands, business startup infrastructure, custom DTF print merchandise, and curated convenience snack bundles.
           </p>
         </div>
       </section>
 
-      <section style={{ padding: '60px 20px', maxWidth: '1180px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-          {products.map((p, idx) => (
-            <div key={idx} style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', border: '1px solid #E2D9D0', borderTop: '4px solid #C8B273', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
+      {/* Products Grid */}
+      <section style={{ padding: '60px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          {products.map((p, i) => (
+            <div key={i} style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', border: '1px solid #E5E0DA', borderTop: '4px solid #8B1E2E', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
-                <span style={{ fontSize: '11px', fontWeight: '800', color: '#8B1E2E', textTransform: 'uppercase', letterSpacing: '0.8px', backgroundColor: '#F3ECE7', padding: '3px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '10px' }}>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: '#C8B273', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '8px' }}>
                   {p.dept}
                 </span>
-                <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#1B0A0E', margin: '0 0 6px 0' }}>{p.name}</h3>
-                <div style={{ fontSize: '16px', fontWeight: '800', color: '#C8B273', marginBottom: '12px' }}>{p.price}</div>
-                <p style={{ fontSize: '14px', color: '#5A4A52', lineHeight: 1.5, margin: '0 0 20px 0' }}>{p.desc}</p>
+                <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1B0A0E', margin: '0 0 8px 0' }}>{p.name}</h3>
+                <div style={{ fontSize: '18px', fontWeight: '800', color: '#8B1E2E', marginBottom: '12px' }}>{p.price}</div>
+                <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.5, margin: '0 0 20px 0' }}>{p.desc}</p>
               </div>
-              <Link to={"/book?item=" + encodeURIComponent(p.name)} className="dd-btn-red" style={{ textAlign: 'center', padding: '10px', fontSize: '14px' }}>
-                Order Product &rarr;
+
+              <Link to={"/book?item=" + encodeURIComponent(p.name)} className="dd-btn-red" style={{ textAlign: 'center', width: '100%', boxSizing: 'border-block-box' }}>
+                BUY NOW &rarr;
               </Link>
             </div>
           ))}
