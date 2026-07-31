@@ -3,7 +3,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // Main Brand Pages
-import HomePage from "./pages/Homepage.jsx";
+import HomePage from "./pages/HomePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 
