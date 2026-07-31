@@ -114,8 +114,8 @@ const buildPaymentService = (service) => {
     ...service,
     price: catalogEntry.price ?? null,
     buyButtonId: catalogEntry.buyButtonId ?? null,
-    stripePaymentLink:
-      catalogEntry.payLinkUrl || getStripeLink(service.catalogKey),
+    // Public-facing link should route to intake, not a direct Stripe Checkout link
+    stripePaymentLink: getStripeLink(service.catalogKey),
     tidycalUrl: catalogEntry.tidycalUrl || null,
   };
 };

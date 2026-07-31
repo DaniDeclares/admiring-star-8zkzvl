@@ -1,4 +1,4 @@
-export const STRIPE_LINKS = {
+export const ADMIN_STRIPE_LINKS = {
   printing_scanning: "https://buy.stripe.com/7sYeVc8lXf1kfyn2CJ6kg1d",
   mobile_notary: "https://buy.stripe.com/eVqeVcfOpdXgdqf3GN6kg1a",
   poa: process.env.REACT_APP_STRIPE_POA || "https://buy.stripe.com/9B6aEWgStg5ocmbelr6kg15",
@@ -21,4 +21,10 @@ export const STRIPE_LINKS = {
 export const isValidStripeUrl = (url) =>
   typeof url === "string" && url.startsWith("https://");
 
-export const getStripeLink = (serviceKey) => STRIPE_LINKS[serviceKey] || "";
+export const getAdminStripeLink = (serviceKey) => ADMIN_STRIPE_LINKS[serviceKey] || "";
+
+// Public-facing payment routing: route users to the centralized intake flow
+// rather than directly to Stripe Checkout links. Admins can still use
+// getAdminStripeLink() to access the raw buy.stripe.com URLs.
+export const getStripeLink = (serviceKey) =>
+  `/request-service?service=${encodeURIComponent(serviceKey)}`;
