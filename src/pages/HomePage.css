@@ -1,12 +1,12 @@
-/* DANI DECLARES LLC — MASTER OPERATING GUIDE BRAND SYSTEM */
+/* DANI DECLARES LLC — LOCKED BRAND COLOR SYSTEM */
 :root {
-  --brand-burgundy: #8B1E2E;
-  --brand-burgundy-dark: #681521;
-  --brand-burgundy-light: #A52A3E;
-  --brand-ivory: #F8F5F1;
-  --brand-cream: #EFE8DF;
-  --brand-gold: #D4AF37;
-  --brand-gold-light: #E5C862;
+  --brand-burgundy: #6B1F2B;
+  --brand-burgundy-dark: #4F1720;
+  --brand-burgundy-light: #873340;
+  --brand-ivory: #F6F0E4;
+  --brand-cream: #EDE2D0;
+  --brand-gold: #C9A45C;
+  --brand-gold-light: #DCC58F;
   --brand-dark: #21191A;
   --font-serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
   --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
@@ -21,17 +21,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Headings use Sans or Serif based on class */
-h1, h2, h3, h4 {
+h1, h2, h3, h4, .dd-serif {
   font-family: var(--font-sans);
   color: var(--brand-dark);
 }
 
-.dd-serif {
-  font-family: var(--font-serif);
-}
-
-/* BUTTON SYSTEM */
 .dd-btn-primary, .dd-btn-red {
   background-color: var(--brand-burgundy);
   color: var(--brand-ivory);
