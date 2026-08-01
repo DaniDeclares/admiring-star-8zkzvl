@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* DANI DECLARES LLC — LOCKED BRAND COLOR SYSTEM */
 :root {
   --brand-burgundy: #6B1F2B;

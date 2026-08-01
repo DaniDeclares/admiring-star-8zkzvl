@@ -78,3 +78,36 @@ h1, h2, h3, h4, .dd-serif {
 .dd-btn-outline:hover {
   background-color: var(--brand-cream);
 }
+
+/* Responsive visibility rules for Navbar */
+@media (min-width: 900px) {
+  .dd-mobile-toggle {
+    display: none !important;
+  }
+  .dd-mobile-menu {
+    display: none !important;
+  }
+  .desktop-only {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 899px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .dd-mobile-toggle {
+    display: inline-flex !important;
+  }
+  .dd-mobile-menu {
+    display: flex !important;
+  }
+}
+
+/* Small accessibility focus styles */
+.dd-navbar-nav a:focus,
+.dd-mobile-menu a:focus,
+.dd-navbar-actions a:focus {
+  outline: 3px solid rgba(201,164,92,0.2);
+  outline-offset: 3px;
+}

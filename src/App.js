@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import Layout from "./components/Layout.jsx";
 
 // Core Brand Pages
 import HomePage from "./pages/HomePage.jsx";
@@ -40,59 +41,61 @@ import BookingPage from "./pages/BookingPage.jsx";
 
 function App() {
   return (
-    <Routes>
-      {/* PARENT ENTERPRISE BRAND */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/marketing" element={<ContentMarketingPage />} />
+    <Layout>
+      <Routes>
+        {/* PARENT ENTERPRISE BRAND */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/marketing" element={<ContentMarketingPage />} />
 
-      {/* SERVICE DIVISIONS */}
-      <Route path="/services" element={<ServicesPage />} />
-      <Route path="/services/business" element={<BusinessSolutionsPage />} />
-      <Route path="/services/business-solutions" element={<BusinessSolutionsPage />} />
-      <Route path="/services/creative" element={<PrintStudioPage />} />
-      <Route path="/services/print-studio" element={<PrintStudioPage />} />
-      <Route path="/services/property" element={<PropertyPage />} />
-      <Route path="/services/concierge" element={<ConciergePage />} />
+        {/* SERVICE DIVISIONS */}
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/services/business" element={<BusinessSolutionsPage />} />
+        <Route path="/services/business-solutions" element={<BusinessSolutionsPage />} />
+        <Route path="/services/creative" element={<PrintStudioPage />} />
+        <Route path="/services/print-studio" element={<PrintStudioPage />} />
+        <Route path="/services/property" element={<PropertyPage />} />
+        <Route path="/services/concierge" element={<ConciergePage />} />
 
-      {/* EVENTS & WEDDINGS DIVISION */}
-      <Route path="/services/events" element={<EventsPage />} />
-      <Route path="/events/weddings" element={<WeddingsDivisionPage />} />
+        {/* EVENTS & WEDDINGS DIVISION */}
+        <Route path="/services/events" element={<EventsPage />} />
+        <Route path="/events/weddings" element={<WeddingsDivisionPage />} />
 
-      {/* MARKETPLACE COMMERCE */}
-      <Route path="/shop" element={<ShopPage />} />
-      <Route path="/marketplace" element={<ShopPage />} />
+        {/* MARKETPLACE COMMERCE */}
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/marketplace" element={<ShopPage />} />
 
-      {/* INDUSTRIES */}
-      <Route path="/industries/government" element={<GovConPage />} />
-      <Route path="/industries/real-estate" element={<RealEstatePage />} />
+        {/* INDUSTRIES */}
+        <Route path="/industries/government" element={<GovConPage />} />
+        <Route path="/industries/real-estate" element={<RealEstatePage />} />
 
-      {/* PARTNER NETWORK */}
-      <Route path="/network" element={<NetworkHubPage />} />
+        {/* PARTNER NETWORK */}
+        <Route path="/network" element={<NetworkHubPage />} />
 
-      {/* INTERNAL OPERATIONS (HIDDEN FROM PUBLIC NAV) */}
-      <Route path="/portal/admin" element={<DashboardPage />} />
-      <Route path="/portal/dashboard" element={<DashboardPage />} />
-      <Route path="/portal/photos" element={<ClientPhotoPortal />} />
-      <Route path="/portal/vendors" element={<VendorPortal />} />
+        {/* INTERNAL OPERATIONS (HIDDEN FROM PUBLIC NAV) */}
+        <Route path="/portal/admin" element={<DashboardPage />} />
+        <Route path="/portal/dashboard" element={<DashboardPage />} />
+        <Route path="/portal/photos" element={<ClientPhotoPortal />} />
+        <Route path="/portal/vendors" element={<VendorPortal />} />
 
-      {/* UNIVERSAL INTAKE & BOOKING */}
-      <Route path="/book" element={<BookingPage />} />
+        {/* UNIVERSAL INTAKE & BOOKING */}
+        <Route path="/book" element={<BookingPage />} />
 
-      {/* BLOG */}
-      <Route path="/blog" element={<BlogPage />} />
-      <Route path="/blog/:slug" element={<BlogPostPage />} />
+        {/* BLOG */}
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
 
-      {/* LEGACY REDIRECTS */}
-      <Route path="/request-service" element={<Navigate to="/book" replace />} />
-      <Route path="/field-services" element={<Navigate to="/services/property" replace />} />
-      <Route path="/events" element={<Navigate to="/services/events" replace />} />
-      <Route path="/signature-services" element={<Navigate to="/services" replace />} />
+        {/* LEGACY REDIRECTS */}
+        <Route path="/request-service" element={<Navigate to="/book" replace />} />
+        <Route path="/field-services" element={<Navigate to="/services/property" replace />} />
+        <Route path="/events" element={<Navigate to="/services/events" replace />} />
+        <Route path="/signature-services" element={<Navigate to="/services" replace />} />
 
-      {/* 404 FALLBACK */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* 404 FALLBACK */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Layout>
   );
 }
 
