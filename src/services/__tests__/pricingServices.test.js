@@ -1,6 +1,7 @@
-import { calculateQuote } from '../pricingEngine';
+import { calculateQuote, calculateInvestmentQuote, SERVICE_RELATIONSHIPS } from '../pricingEngine';
 import { getSuggestedAddOns } from '../bundleEngine';
 import { generateProposalTemplate } from '../proposalEngine';
+import { RETAINER_PLANS_2026 } from '../../data/retainerPlansData';
 
 describe('pricing engine', () => {
   it('calculates a property quote with market-based pricing', () => {
@@ -48,5 +49,27 @@ describe('proposal engine', () => {
 
     expect(proposal.subject).toContain('Apartment Communities');
     expect(proposal.body).toContain('Apartment Turnover Reset');
+  });
+});
+
+describe('investment and membership pricing', () => {
+  it('calculates an investment-based quote with margin controls', () => {
+    const quote = calculateInvestmentQuote('PO-101', {
+      beds: 2,
+      baths: 2,
+      squareFeet: 1400,
+      urgency: 'standard',
+      volume: 'monthly',
+      membershipTier: 'silver'
+    });
+
+    expect(quote.investment).toBeGreaterThan(0);
+    expect(quote.pricingTier).toBe('standard');
+    expect(quote.membershipDiscount).toBeGreaterThan(0);
+  });
+
+  it('exposes service relationships and membership plans', () => {
+    expect(SERVICE_RELATIONSHIPS['PO-101'].recommendedAddOns).toEqual(expect.arrayContaining(['PO-115', 'ND-101']));
+    expect(RETAINER_PLANS_2026[0].planId).toBe('ret-multi-family-5');
   });
 });

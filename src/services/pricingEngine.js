@@ -1,5 +1,33 @@
 import { getMarketConfig } from '../config/markets';
 
+const MEMBERSHIP_DISCOUNTS = {
+  bronze: 0.04,
+  silver: 0.08,
+  gold: 0.12,
+  executive: 0.15
+};
+
+const SERVICE_RELATIONSHIPS = {
+  'PO-101': {
+    prerequisites: ['PO-111'],
+    recommendedAddOns: ['PO-115', 'ND-101'],
+    followUpServices: ['PO-150'],
+    recurringOpportunities: ['ret-multi-family-5']
+  },
+  'ND-101': {
+    prerequisites: [],
+    recommendedAddOns: ['BP-505', 'LG-801'],
+    followUpServices: ['AS-201'],
+    recurringOpportunities: []
+  },
+  'EV-401': {
+    prerequisites: [],
+    recommendedAddOns: ['BP-507', 'RS-903'],
+    followUpServices: ['OC-1005'],
+    recurringOpportunities: []
+  }
+};
+
 function roundCurrency(value) {
   return Number(value.toFixed(2));
 }
@@ -122,6 +150,43 @@ export function calculateEventQuote(options = {}) {
   };
 }
 
+export function calculateInvestmentQuote(serviceCode, options = {}) {
+  const normalizedCode = String(serviceCode || '').toUpperCase();
+  const baseQuote = calculateQuote(normalizedCode, options);
+  const baseInvestment = baseQuote.total;
+  const beds = options.beds || 1;
+  const baths = options.baths || 1;
+  const squareFeet = options.squareFeet || 1000;
+  const urgency = options.urgency || 'standard';
+  const volume = options.volume || 'single';
+  const membershipTier = String(options.membershipTier || 'bronze').toLowerCase();
+
+  const bedAdjustment = beds > 2 ? 60 : 0;
+  const bathAdjustment = baths > 2 ? 45 : 0;
+  const sizeAdjustment = squareFeet > 1800 ? 75 : 0;
+  const urgencyAdjustment = urgency === 'rush' ? 90 : urgency === 'same-day' ? 140 : 0;
+  const volumeAdjustment = volume === 'monthly' ? -0.08 * baseInvestment : 0;
+  const membershipDiscount = MEMBERSHIP_DISCOUNTS[membershipTier] || 0;
+  const targetInvestment = roundCurrency(baseInvestment + bedAdjustment + bathAdjustment + sizeAdjustment + urgencyAdjustment + volumeAdjustment);
+  const discountedInvestment = roundCurrency(targetInvestment * (1 - membershipDiscount));
+
+  return {
+    serviceCode: normalizedCode,
+    investment: discountedInvestment,
+    pricingTier: urgency === 'same-day' ? 'premium' : 'standard',
+    membershipDiscount,
+    baseInvestment,
+    adjustments: {
+      bedAdjustment,
+      bathAdjustment,
+      sizeAdjustment,
+      urgencyAdjustment,
+      volumeAdjustment
+    },
+    relationships: SERVICE_RELATIONSHIPS[normalizedCode] || {}
+  };
+}
+
 export function calculateQuote(serviceCode, options = {}) {
   const normalizedCode = String(serviceCode || '').toUpperCase();
 
@@ -143,3 +208,5 @@ export function calculateQuote(serviceCode, options = {}) {
 
   throw new Error(`Unsupported service code: ${serviceCode}`);
 }
+
+export { SERVICE_RELATIONSHIPS };

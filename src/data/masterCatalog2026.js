@@ -132,6 +132,21 @@ export const catalog = [
     startingPrice: "50.00",
     wholesaleCost: 150.00,
     grossMargin: "40% Platform Fee",
+    pricingMethod: "Per Unit",
+    pricing: {
+      baseInvestment: 275,
+      minimumInvestment: 250,
+      premiumInvestment: 375
+    },
+    idealClients: ["Multifamily Property Managers", "Realtors", "Small Businesses"],
+    operationalMetadata: {
+      estimatedDuration: "4-8 hours",
+      crewSize: 1,
+      requiredEquipment: ["Cleaning supplies", "Photo documentation kit"],
+      leadTime: "24-48 hours",
+      availableAddOns: ["Carpet cleaning", "Welcome basket placement", "Photo documentation"]
+    },
+    relatedServices: ["PO-115", "ND-101", "BP-102"],
     status: "LOCKED_2026"
   },
   {
