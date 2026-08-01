@@ -19,5 +19,5 @@ export const BRAND_KIT = {
     dark: "#21191A"
   },
 
-  hqLocation: "Tucker, Georgia 30084 (Serving Metro Atlanta, GA & Regional SC)"
+  hqLocation: "Serving Metro Atlanta, GA & Regional SC"
 };

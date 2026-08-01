@@ -19,7 +19,7 @@ export function calculateTravelFee(destinationAddress, state = "GA", miles = 0) 
   let travelFee = excessMiles * perMileRate;
 
   return {
-    dispatchOriginRegion: state.toUpperCase() === "SC" ? "Piedmont, SC Region" : "Metro Atlanta / Stone Mountain, GA Region",
+    dispatchOriginRegion: state.toUpperCase() === "SC" ? "Regional SC Base" : "Metro Atlanta, GA Base",
     includedMiles,
     excessMiles,
     travelFee,

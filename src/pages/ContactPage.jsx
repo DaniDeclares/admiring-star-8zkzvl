@@ -15,10 +15,10 @@ export default function ContactPage() {
       <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '4rem 1.5rem', textAlign: 'center' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ color: '#C8B273', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            Headquartered in Tucker, Georgia
+            Serving Metro Atlanta, GA & Regional SC
           </div>
           <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem', color: '#F8F5F1' }}>What Do You Need Executed?</h1>
-          <p style={{ fontSize: '1.15rem', color: '#D1C7BD' }}>Connect directly with a DANI DECLARES LLC deployment coordinator. Serving Metro Atlanta, Tucker, GA, and nationwide virtual services.</p>
+          <p style={{ fontSize: '1.15rem', color: '#D1C7BD' }}>Connect directly with a DANI DECLARES LLC deployment coordinator. Serving Metro Atlanta, GA & Regional SC, plus nationwide virtual services.</p>
         </div>
       </section>
       <section style={{ padding: '4rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
@@ -65,7 +65,7 @@ export default function ContactPage() {
         </div>
 
         <div style={{ marginTop: '3rem', textAlign: 'center', color: '#5A4A52', fontSize: '0.95rem', backgroundColor: '#FFFFFF', border: '1px solid #E2D9D0', borderRadius: '8px', padding: '1.5rem' }}>
-          <p><strong>Headquarters:</strong> Tucker, Georgia 30084 (Metro Atlanta Operational Base)</p>
+          <p><strong>Service Area:</strong> Serving Metro Atlanta, GA & Regional SC</p>
           <p><strong>Direct Dispatch Line:</strong> (470) 485-7173 | (470) 523-4892</p>
           <p><strong>Vendor & Contracting Email:</strong> vendors@danideclares.com | admin@danideclares.com</p>
         </div>

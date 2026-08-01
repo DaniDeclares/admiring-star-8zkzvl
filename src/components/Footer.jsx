@@ -8,6 +8,9 @@ export default function Footer() {
         <div style={{ fontSize: '0.95rem', color: 'var(--brand-bg-ivory)' }}>
           GA SOS Registered #25079444 &nbsp;•&nbsp; SAM.gov UEI: TD4TSG48LHN9 &nbsp;•&nbsp; CAGE: 17VV2
         </div>
+        <div style={{ fontSize: '0.9rem', color: 'rgba(249,246,240,0.85)' }}>
+          Serving Metro Atlanta, GA & Regional SC
+        </div>
         <div style={{ fontSize: '0.9rem', color: 'rgba(249,246,240,0.85)', marginTop: '0.5rem' }}>
           © {new Date().getFullYear()} Dani Declares LLC — Operations • Execution • Support
         </div>

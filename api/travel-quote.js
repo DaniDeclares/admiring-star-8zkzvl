@@ -16,7 +16,7 @@ export default function handler(req, res) {
 
   return res.status(200).json({
     success: true,
-    region: state.toUpperCase() === 'SC' ? 'Piedmont, SC Region' : 'Metro Atlanta, GA Region',
+    region: state.toUpperCase() === 'SC' ? 'Regional SC Base' : 'Metro Atlanta, GA Base',
     includedMiles,
     excessMiles,
     travelFee,
