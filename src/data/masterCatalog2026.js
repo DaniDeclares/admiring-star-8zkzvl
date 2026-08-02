@@ -1,3 +1,4 @@
+import { IMAGE_ASSETS_2026 } from './imageCatalog2026.js';
 // filename: src/data/masterCatalog2026.js
 // DANI DECLARES LLC — 2026 LOCKED MASTER COMMERCIAL CATALOG
 
