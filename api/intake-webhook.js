@@ -1,7 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -13,7 +12,6 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Missing required contact parameters (Name and Email or Phone)' });
     }
 
-    // 1. Create or update Lead record
     const lead = await prisma.lead.create({
       data: {
         name,
@@ -23,7 +21,6 @@ module.exports = async (req, res) => {
       },
     });
 
-    // 2. Create ServiceRequest tied to Lead
     const request = await prisma.serviceRequest.create({
       data: {
         leadId: lead.id,
@@ -41,8 +38,6 @@ module.exports = async (req, res) => {
     });
   } catch (error) {
     console.error('Intake Webhook Persistence Error:', error);
-    return res.status(500).json({ error: 'Internal Server Error', details: error.message });
-  } finally {
-    await prisma.$disconnect();
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
-};
+}
