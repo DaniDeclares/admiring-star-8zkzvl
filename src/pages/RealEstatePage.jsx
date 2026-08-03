@@ -1,89 +1,39 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Home, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function RealEstatePage() {
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1B0A0E', backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
-      <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '4.5rem 1.5rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ color: '#C8B273', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-            Property & Hospitality Solutions
-          </div>
-          <h1 style={{ fontSize: '2.75rem', fontWeight: '800', marginBottom: '1.25rem', color: '#F8F5F1' }}>
-            Field Services for Property Managers
-          </h1>
-          <p style={{ fontSize: '1.2rem', color: '#D1C7BD', lineHeight: '1.6' }}>
-            Streamline multi-family unit turnovers, deep cleaning, key couriers, and resident concierge support across Metro Atlanta with a single, reliable vendor.
-          </p>
-        </div>
-      </section>
-
-      <section style={{ padding: '4.5rem 1.5rem', maxWidth: '1100px', margin: '0 auto' }}>
-        {/* Core SLA Commitments */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.75rem', marginBottom: '4rem' }}>
-          <div style={{ backgroundColor: '#F8F5F1', borderLeft: '4px solid #8B1E2E', padding: '2rem', borderRadius: '8px' }}>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#8B1E2E', marginBottom: '0.5rem' }}>24–48 Hour Turnover SLA</h3>
-            <p style={{ fontSize: '0.95rem', color: '#4A3B43', lineHeight: '1.5' }}>
-              Rapid move-in/move-out unit resets, steam sanitization, carpet extraction, and trash-outs to keep units market-ready.
-            </p>
-          </div>
-
-          <div style={{ backgroundColor: '#F8F5F1', borderLeft: '4px solid #C8B273', padding: '2rem', borderRadius: '8px' }}>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#C8B273', marginBottom: '0.5rem' }}>2-Hour Digital HD Photo Logs</h3>
-            <p style={{ fontSize: '0.95rem', color: '#4A3B43', lineHeight: '1.5' }}>
-              Field units capture digital inspection checklists and HD photo condition logs delivered to your portal within 2 hours of completion.
-            </p>
-          </div>
-
-          <div style={{ backgroundColor: '#F8F5F1', borderLeft: '4px solid #8B1E2E', padding: '2rem', borderRadius: '8px' }}>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#8B1E2E', marginBottom: '0.5rem' }}>100% Inspection Guarantee</h3>
-            <p style={{ fontSize: '0.95rem', color: '#4A3B43', lineHeight: '1.5' }}>
-              Standardized digital checklists ensure every unit passes property manager move-in standards before job sign-off.
-            </p>
-          </div>
+    <div className="bg-slate-950 text-slate-100 min-h-screen pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-amber-400 font-mono text-sm uppercase tracking-wider">Multi-Family & Property Management</span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mt-2 mb-4">Property Turnover & Operations</h1>
+          <p className="text-slate-300 text-lg">Turnkey unit resets, mandatory 2-hour HD photo inspection logs, high-temp steam sanitization, and priority lock/key logistics.</p>
         </div>
 
-        {/* Complete Property Services List */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: '800', color: '#1B0A0E', marginBottom: '2rem', textAlign: 'center' }}>
-            Services for Property Management Teams
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D9D0', padding: '1.75rem', borderRadius: '8px' }}>
-              <h4 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#8B1E2E', marginBottom: '0.5rem' }}>Property Turnovers & Resets</h4>
-              <p style={{ fontSize: '0.9rem', color: '#5A4A52' }}>Deep cleaning, appliance detailing, wall washing, trash-outs, and carpet extraction.</p>
-            </div>
-
-            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D9D0', padding: '1.75rem', borderRadius: '8px' }}>
-              <h4 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#8B1E2E', marginBottom: '0.5rem' }}>Legal & Document Couriers</h4>
-              <p style={{ fontSize: '0.9rem', color: '#5A4A52' }}>Eviction document delivery, notice postings, key transfers, court filings, and mobile notary support.</p>
-            </div>
-
-            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D9D0', padding: '1.75rem', borderRadius: '8px' }}>
-              <h4 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#8B1E2E', marginBottom: '0.5rem' }}>Print & Marketing Collateral</h4>
-              <p style={{ fontSize: '0.9rem', color: '#5A4A52' }}>Lease packet printing, floor plans, banners, staff apparel, and Smart Review Stands for leasing offices.</p>
-            </div>
-
-            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D9D0', padding: '1.75rem', borderRadius: '8px' }}>
-              <h4 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#8B1E2E', marginBottom: '0.5rem' }}>/usr/bin/bash-Cost Resident Concierge Perks</h4>
-              <p style={{ fontSize: '0.9rem', color: '#5A4A52' }}>On-demand tenant mobile notary, lease document signing, move-in assistance, and mid-lease deep cleans.</p>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800 text-center">
+            <span className="text-amber-400 font-bold text-sm uppercase tracking-wider">1 Bedroom Unit</span>
+            <div className="text-4xl font-extrabold text-white my-3">$250.00</div>
+            <p className="text-slate-400 text-sm mb-6">Complete move-in/move-out reset, deep sanitization, and 2-hr photo log delivery.</p>
+            <Link to="/request-service" className="inline-flex justify-center w-full py-3 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-amber-400 font-semibold text-sm transition-all">Book 1BR Reset</Link>
+          </div>
+          <div className="p-8 rounded-2xl bg-slate-900 border border-amber-500/40 text-center relative">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-xs font-bold px-3 py-1 rounded-full">Most Popular</span>
+            <span className="text-amber-400 font-bold text-sm uppercase tracking-wider">2 Bedroom Unit</span>
+            <div className="text-4xl font-extrabold text-white my-3">$350.00</div>
+            <p className="text-slate-400 text-sm mb-6">Full unit reset, steam sanitization, key handoffs, and digital photo inspection audit.</p>
+            <Link to="/request-service" className="inline-flex justify-center w-full py-3 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm transition-all">Book 2BR Reset</Link>
+          </div>
+          <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800 text-center">
+            <span className="text-amber-400 font-bold text-sm uppercase tracking-wider">3 Bedroom Unit</span>
+            <div className="text-4xl font-extrabold text-white my-3">$450.00</div>
+            <p className="text-slate-400 text-sm mb-6">Large unit reset, comprehensive detail clean, lockbox maintenance, and photo log.</p>
+            <Link to="/request-service" className="inline-flex justify-center w-full py-3 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-amber-400 font-semibold text-sm transition-all">Book 3BR Reset</Link>
           </div>
         </div>
-
-        {/* Vendor Onboarding Call */}
-        <div style={{ textAlign: 'center', backgroundColor: '#F8F5F1', border: '1px solid #E2D9D0', padding: '3rem 2rem', borderRadius: '8px' }}>
-          <h3 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#1B0A0E', marginBottom: '0.75rem' }}>Request Vendor Packet & W-9</h3>
-          <p style={{ color: '#5A4A52', marginBottom: '1.75rem', maxWidth: '650px', margin: '0 auto 1.75rem' }}>
-            We are fully insured, SAM.gov registered, and W-9 ready for zero-friction vendor roster onboarding.
-          </p>
-          <Link to="/contact" style={{
-            backgroundColor: '#8B1E2E', color: '#FFFFFF', padding: '0.85rem 2rem', borderRadius: '4px', fontWeight: '800', textDecoration: 'none'
-          }}>
-            Request Approved Vendor Packet &rarr;
-          </Link>
-        </div>
-      </section>
+      </div>
     </div>
   );
 }
