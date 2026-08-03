@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Building2, Briefcase, Scale, Store, ShieldCheck,
   PartyPopper, HeartHandshake, ArrowRight, CheckCircle2,
-  Printer, Sparkles, Home, ConciergeBell, ShoppingBag, Cpu
+  Printer, Sparkles, Home, ConciergeBell, ShoppingBag, Cpu, Ticket
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -19,7 +19,7 @@ export default function HomePage() {
           {/* Brand Tagline Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs sm:text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" />
-            <span>Business Operations & Execution</span>
+            <span>Business Operations, Festivals & Execution Services</span>
           </div>
 
           {/* Core Value Proposition */}
@@ -31,11 +31,11 @@ export default function HomePage() {
           </h1>
 
           <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 mb-10 leading-relaxed font-normal">
-            <strong className="text-amber-300 font-semibold">DANI DECLARES LLC</strong> is an operations and execution company that helps businesses, property teams, and organizations launch, operate, promote, maintain, and grow through integrated division workflows.
+            <strong className="text-amber-300 font-semibold">DANI DECLARES LLC</strong> is a multi-division operations and execution company delivering B2B services, turnkey festival management, property resets, and creative commerce workflows.
           </p>
 
           {/* Call to Action Group */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto">
             <Link
               to="/book"
               className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-all shadow-lg shadow-amber-500/25 hover:scale-[1.02]"
@@ -44,28 +44,27 @@ export default function HomePage() {
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
             <Link
-              to="/services"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-base transition-all"
+              to="/festival"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-semibold text-base transition-all"
             >
-              Explore Solutions
+              <Ticket className="mr-2 w-5 h-5" />
+              Festival & Event Operations
             </Link>
           </div>
 
           {/* Sub-tagline anchoring Creative Commerce */}
           <p className="mt-8 text-xs sm:text-sm text-slate-500 uppercase tracking-widest font-mono">
-            Concierge Execution + Creative Commerce Across 7 Operating Divisions
+            Concierge Execution + B2B Operations Across 7 Operating Divisions
           </p>
         </div>
       </section>
-
 
       {/* 2. WHO WE SERVE (INDUSTRY-FIRST ANCHOR) */}
       <section className="py-20 bg-slate-900/50 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
-<h2 className="text-3xl font-bold text-white mb-3">Built for High-Stakes Operations</h2>
+            <h2 className="text-3xl font-bold text-white mb-3">Built for High-Stakes Operations</h2>
             <p className="text-slate-400">
               Why manage five specialized vendors when you can rely on one accountable execution partner?
             </p>
@@ -78,14 +77,13 @@ export default function HomePage() {
               { icon: Scale, label: "Law Firms & B2B", desc: "Court couriers, loan signings, binding" },
               { icon: Store, label: "Small Businesses", desc: "Startup kits, apparel, NFC touchpoints" },
               { icon: ShieldCheck, label: "Government (GovCon)", desc: "CAGE: 17VV2 | SAM.gov: TD4TSG48LHN9" },
-              { icon: PartyPopper, label: "Event Planners", desc: "Decor setup, staging, snack stations" },
-              { icon: HeartHandshake, label: "Families & Individuals", desc: "Weddings, custom prints, notary visits" },
+              { icon: PartyPopper, label: "Festivals & Events", desc: "Vendor coordination, permitting & stage operations" },
+              { icon: HeartHandshake, label: "Weddings & Galas", desc: "Custom decor, print packages, on-site logistics" },
               { icon: Cpu, label: "Enterprise Teams", desc: "Brand compliance & automated ordering" },
             ].map((item, idx) => (
               <div key={idx} className="p-5 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-amber-500/40 transition-all group">
                 <item.icon className="w-8 h-8 text-amber-400 mb-3 group-hover:scale-110 transition-transform" />
-                <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
-<h3 className="font-semibold text-white text-base mb-1">{item.label}</h3>
+                <h3 className="font-semibold text-white text-base mb-1">{item.label}</h3>
                 <p className="text-xs text-slate-400 leading-snug">{item.desc}</p>
               </div>
             ))}
@@ -94,16 +92,14 @@ export default function HomePage() {
         </div>
       </section>
 
-
-      {/* 3. WHAT WE DO (THE 7 INTEGRATED DIVISIONS) */}
+      {/* 3. WHAT WE DO (THE INTEGRATED DIVISIONS) */}
       <section className="py-20 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
             <div>
               <span className="text-amber-400 font-mono text-sm tracking-wider uppercase">Integrated Divisions</span>
-              <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
-<h2 className="text-3xl font-bold text-white mt-1">One Operating System. Every Capability.</h2>
+              <h2 className="text-3xl font-bold text-white mt-1">One Operating System. Every Capability.</h2>
             </div>
             <Link to="/services" className="inline-flex items-center text-amber-400 hover:text-amber-300 font-medium text-sm">
               View Complete Services Hub <ArrowRight className="ml-1 w-4 h-4" />
@@ -132,9 +128,9 @@ export default function HomePage() {
               },
               {
                 icon: PartyPopper,
-                title: "Events & Weddings",
-                link: "/services/events",
-                items: ["Grand Opening Decor", "Wedding Package Execution", "Custom Snack Bar Setups", "On-Site Coordination"]
+                title: "Festivals & Large Events",
+                link: "/festival",
+                items: ["Turnkey Festival Operations", "Vendor & Permit Logistics", "Stage & Crowd Management", "On-Site Production"]
               },
               {
                 icon: ConciergeBell,
@@ -146,16 +142,15 @@ export default function HomePage() {
                 icon: ShoppingBag,
                 title: "Express & Marketplace",
                 link: "/shop",
-                items: ["Curated Snack Boxes", "On-Demand Everyday Essentials", "Branded Merch", "Smart NFC Hardware"]
+                items: ["Curated Snack Boxes", "On-Demand Essentials", "Branded Merch", "Smart NFC Hardware"]
               },
             ].map((div, idx) => (
-              <div key={idx} className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between">
+              <div key={idx} className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-amber-500/40 transition-all flex flex-col justify-between">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4">
                     <div.icon className="w-6 h-6" />
                   </div>
-                  <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
-<h3 className="text-xl font-bold text-white mb-3">{div.title}</h3>
+                  <h3 className="text-xl font-bold text-white mb-3">{div.title}</h3>
                   <ul className="space-y-2 mb-6">
                     {div.items.map((item, i) => (
                       <li key={i} className="flex items-center text-sm text-slate-300">
@@ -175,14 +170,12 @@ export default function HomePage() {
         </div>
       </section>
 
-
       {/* 4. HOW WE WORK (EXECUTION FRAMEWORK) */}
       <section className="py-20 bg-slate-900/30 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
-<h2 className="text-3xl font-bold text-white mb-3">The Execution Framework</h2>
+            <h2 className="text-3xl font-bold text-white mb-3">The Execution Framework</h2>
             <p className="text-slate-400">How we turn multi-division complexity into predictable, zero-latency results.</p>
           </div>
 
@@ -195,8 +188,7 @@ export default function HomePage() {
             ].map((phase, idx) => (
               <div key={idx} className="relative p-6 rounded-2xl bg-slate-900 border border-slate-800">
                 <span className="text-4xl font-extrabold text-amber-500/20 font-mono mb-2 block">{phase.step}</span>
-                <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
-<h3 className="text-xl font-bold text-white mb-2">{phase.name}</h3>
+                <h3 className="text-xl font-bold text-white mb-2">{phase.name}</h3>
                 <p className="text-sm text-slate-400 leading-relaxed">{phase.desc}</p>
               </div>
             ))}
@@ -208,20 +200,27 @@ export default function HomePage() {
       {/* 5. CALL TO ACTION FOOTER BANNER */}
       <section className="py-20 bg-gradient-to-b from-slate-950 to-slate-900 text-center">
         <div className="max-w-4xl mx-auto px-4">
-          <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
-<h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
             Ready for an Execution Partner Who Handles It All?
           </h2>
           <p className="text-slate-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
             Stop juggling fragmented contractors. Get instant quotes, multi-division bundles, and guaranteed operational execution today.
           </p>
-          <Link
-            to="/book"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-lg shadow-lg shadow-amber-500/20 transition-all hover:scale-105"
-          >
-            Start Your Project Now
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              to="/book"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-lg shadow-lg shadow-amber-500/20 transition-all hover:scale-105"
+            >
+              Start Your Project Now
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+            <Link
+              to="/festival"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-bold text-lg transition-all"
+            >
+              Request Festival Proposal
+            </Link>
+          </div>
         </div>
       </section>
 
