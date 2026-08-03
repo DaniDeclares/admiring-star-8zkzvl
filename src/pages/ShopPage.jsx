@@ -45,7 +45,8 @@ export default function ShopPage() {
                 <span style={{ fontSize: '11px', fontWeight: '800', color: '#C8B273', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '8px' }}>
                   {p.dept}
                 </span>
-                <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1B0A0E', margin: '0 0 8px 0' }}>{p.name}</h3>
+                <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1B0A0E', margin: '0 0 8px 0' }}>{p.name}</h3>
                 <div style={{ fontSize: '18px', fontWeight: '800', color: '#8B1E2E', marginBottom: '12px' }}>{p.price}</div>
                 <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.5, margin: '0 0 20px 0' }}>{p.desc}</p>
               </div>

@@ -26,12 +26,14 @@ export default function PackagesPage() {
       </header>
 
       <section className="service-section">
-        <h2>Book a service</h2>
+        <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h2>Book a service</h2>
         <div className="service-grid">
           {bookingServices.map((service) => (
             <div key={service.id} className="service-card">
               <div>
-                <h3>{service.title}</h3>
+                <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h3>{service.title}</h3>
                 <p>{service.shortDescription}</p>
                 {service.priceLabel && (
                   <span className="price">{service.priceLabel}</span>

@@ -97,7 +97,8 @@ export default function ServicesPage() {
                 <span style={{ fontSize: '12px', fontWeight: '800', color: '#C8B273', letterSpacing: '0.05em' }}>
                   {dept.name}
                 </span>
-                <h2 style={{ fontSize: '20px', color: '#1B0A0E', margin: '8px 0 6px 0', fontWeight: '800' }}>
+                <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h2 style={{ fontSize: '20px', color: '#1B0A0E', margin: '8px 0 6px 0', fontWeight: '800' }}>
                   {dept.tagline}
                 </h2>
                 <p style={{ color: '#555', fontSize: '15px', lineHeight: 1.5, marginBottom: '20px' }}>

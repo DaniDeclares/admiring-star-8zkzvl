@@ -64,7 +64,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold text-white mb-3">Built for High-Stakes Operations</h2>
+            <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h2 className="text-3xl font-bold text-white mb-3">Built for High-Stakes Operations</h2>
             <p className="text-slate-400">
               Why manage five specialized vendors when you can rely on one accountable execution partner?
             </p>
@@ -83,7 +84,8 @@ export default function HomePage() {
             ].map((item, idx) => (
               <div key={idx} className="p-5 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-amber-500/40 transition-all group">
                 <item.icon className="w-8 h-8 text-amber-400 mb-3 group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-white text-base mb-1">{item.label}</h3>
+                <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h3 className="font-semibold text-white text-base mb-1">{item.label}</h3>
                 <p className="text-xs text-slate-400 leading-snug">{item.desc}</p>
               </div>
             ))}
@@ -100,7 +102,8 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
             <div>
               <span className="text-amber-400 font-mono text-sm tracking-wider uppercase">Integrated Divisions</span>
-              <h2 className="text-3xl font-bold text-white mt-1">One Operating System. Every Capability.</h2>
+              <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h2 className="text-3xl font-bold text-white mt-1">One Operating System. Every Capability.</h2>
             </div>
             <Link to="/services" className="inline-flex items-center text-amber-400 hover:text-amber-300 font-medium text-sm">
               View Complete Services Hub <ArrowRight className="ml-1 w-4 h-4" />
@@ -151,7 +154,8 @@ export default function HomePage() {
                   <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4">
                     <div.icon className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-3">{div.title}</h3>
+                  <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h3 className="text-xl font-bold text-white mb-3">{div.title}</h3>
                   <ul className="space-y-2 mb-6">
                     {div.items.map((item, i) => (
                       <li key={i} className="flex items-center text-sm text-slate-300">
@@ -177,7 +181,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold text-white mb-3">The Execution Framework</h2>
+            <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h2 className="text-3xl font-bold text-white mb-3">The Execution Framework</h2>
             <p className="text-slate-400">How we turn multi-division complexity into predictable, zero-latency results.</p>
           </div>
 
@@ -190,7 +195,8 @@ export default function HomePage() {
             ].map((phase, idx) => (
               <div key={idx} className="relative p-6 rounded-2xl bg-slate-900 border border-slate-800">
                 <span className="text-4xl font-extrabold text-amber-500/20 font-mono mb-2 block">{phase.step}</span>
-                <h3 className="text-xl font-bold text-white mb-2">{phase.name}</h3>
+                <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h3 className="text-xl font-bold text-white mb-2">{phase.name}</h3>
                 <p className="text-sm text-slate-400 leading-relaxed">{phase.desc}</p>
               </div>
             ))}
@@ -202,7 +208,8 @@ export default function HomePage() {
       {/* 5. CALL TO ACTION FOOTER BANNER */}
       <section className="py-20 bg-gradient-to-b from-slate-950 to-slate-900 text-center">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+          <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
+<h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
             Ready for an Execution Partner Who Handles It All?
           </h2>
           <p className="text-slate-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
