@@ -1,1 +1,2 @@
-export { default } from './services/BusinessSolutionsPage';
+export * from "./services/BusinessSolutionsPage";
+export { default } from "./services/BusinessSolutionsPage";
