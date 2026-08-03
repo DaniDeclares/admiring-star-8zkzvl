@@ -1,66 +1,72 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ShieldCheck, Target, Award, Users, ArrowRight, Ticket, Briefcase } from 'lucide-react';
 
 export default function AboutPage() {
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1B0A0E', backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
-      <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '4.5rem 1.5rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: '850px', margin: '0 auto' }}>
-          <div style={{ color: '#C8B273', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-            Corporate Profile & Credentials
-          </div>
-          <h1 style={{ fontSize: '2.75rem', fontWeight: '800', marginBottom: '1.25rem', color: '#F8F5F1' }}>
-            About DANI DECLARES LLC
+    <div className="bg-slate-950 text-slate-100 min-h-screen pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Hero */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-amber-400 font-mono text-sm uppercase tracking-wider">About Dani Declares</span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mt-2 mb-4">
+            Built for High-Stakes Operational Execution
           </h1>
-          <p style={{ fontSize: '1.2rem', color: '#D1C7BD', lineHeight: '1.6' }}>
-            DANI DECLARES LLC is a registered, multi-division execution partner helping businesses, property managers, government agencies, and individuals launch, operate, promote, and maintain their assets with complete peace of mind.
-          </p>
-        </div>
-      </section>
-
-      <section style={{ padding: '4.5rem 1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '3.5rem', lineHeight: '1.7', fontSize: '1.05rem', color: '#3A2B33' }}>
-          <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#8B1E2E', marginBottom: '1rem' }}>
-            Single-Source Execution vs. Fragmented Vendors
-          </h2>
-          <p style={{ marginBottom: '1rem' }}>
-            We are not just a cleaning company, a print shop, an officiant, or a courier—we are an **operational execution partner**. We provide single-source accountability so organizations and individuals do not have to manage a dozen disconnected subcontractors.
-          </p>
-          <p>
-            Founded and led by Managing Director Danielle Fong, DANI DECLARES LLC operates with standardized field SOP checklists, 2-hour digital HD photo logs, guaranteed SLA turnaround times, and complete pricing transparency.
+          <p className="text-slate-300 text-lg leading-relaxed">
+            DANI DECLARES LLC bridges the gap between vision and reality—delivering turnkey festival management, corporate B2B solutions, property resets, and creative commerce.
           </p>
         </div>
 
-        {/* Corporate Credentials Block */}
-        <div style={{ backgroundColor: '#F8F5F1', border: '1px solid #E2D9D0', borderRadius: '8px', padding: '2.5rem', marginBottom: '3.5rem' }}>
-          <h3 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#1B0A0E', marginBottom: '1.25rem' }}>
-            Verified Credentials & Registrations
-          </h3>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', fontSize: '0.95rem', color: '#4A3B43' }}>
-            <li><strong>Georgia SOS Registration:</strong> #25079444</li>
-            <li><strong>SAM.gov Status:</strong> Active Subcontractor</li>
-            <li><strong>UEI:</strong> TD4TSG48LHN9</li>
-            <li><strong>CAGE Code:</strong> 17VV2</li>
-            <li><strong>Primary NAICS:</strong> 561410 (Document Prep & Admin Services)</li>
-            <li><strong>Insurance:</strong> Fully Insured (M+ General Liability)</li>
-          </ul>
+        {/* Pillars */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+          <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800">
+            <Target className="w-10 h-10 text-amber-400 mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Our Mission</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              To eliminate operational friction for businesses, government entities, and event organizers through single-source execution teams.
+            </p>
+          </div>
+          <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800">
+            <Ticket className="w-10 h-10 text-amber-400 mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Festival & Public Events</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Full-scale vendor coordination, stage operations, permitting, and crowd management built to handle large public turnouts smoothly.
+            </p>
+          </div>
+          <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800">
+            <ShieldCheck className="w-10 h-10 text-amber-400 mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Verified Compliance</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              SAM.gov registered (UEI: TD4TSG48LHN9, CAGE: 17VV2) with strict SLA timelines and mandatory photo-logged verification.
+            </p>
+          </div>
         </div>
 
-        <div style={{ textAlign: 'center' }}>
-          <Link to="/industries/government" style={{
-            backgroundColor: '#8B1E2E', color: '#FFFFFF', padding: '0.85rem 2rem',
-            borderRadius: '4px', fontWeight: '700', textDecoration: 'none', display: 'inline-block', marginRight: '1rem'
-          }}>
-            View GovCon Profile
-          </Link>
-          <Link to="/contact" style={{
-            border: '1px solid #8B1E2E', color: '#8B1E2E', padding: '0.85rem 2rem',
-            borderRadius: '4px', fontWeight: '700', textDecoration: 'none', display: 'inline-block'
-          }}>
-            Contact Our Team
-          </Link>
+        {/* Bottom CTA */}
+        <div className="text-center p-8 rounded-2xl bg-slate-900/80 border border-slate-800 max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-white mb-3">Partner With Us on Your Next Project</h2>
+          <p className="text-slate-400 text-sm mb-6">
+            Whether you are hosting a major community festival or scaling B2B field operations, our team is ready.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              to="/festival"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition-all"
+            >
+              Festival Operations
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Link>
+            <Link
+              to="/book"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm transition-all border border-slate-700"
+            >
+              Start B2B Project
+            </Link>
+          </div>
         </div>
-      </section>
+
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Briefcase, Printer, Home, PartyPopper, ConciergeBell, ShoppingBag,
-  CheckCircle2, ArrowRight, ShieldCheck, Ticket
+  CheckCircle2, ArrowRight, Ticket
 } from 'lucide-react';
 
 export default function ServicesPage() {
