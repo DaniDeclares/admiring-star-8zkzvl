@@ -1,4 +1,3 @@
-// filename: src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -7,7 +6,6 @@ import { CartProvider } from './context/CartContext.js';
 import App from './App.js';
 import './index.css';
 
-const root = 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -35,15 +33,20 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <ErrorBoundary><App /></ErrorBoundary>
-        </BrowserRouter>
-      </CartProvider>
-    </HelmetProvider>
-  </React.StrictMode>
-);
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <HelmetProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <ErrorBoundary>
+              <App />
+            </ErrorBoundary>
+          </BrowserRouter>
+        </CartProvider>
+      </HelmetProvider>
+    </React.StrictMode>
+  );
+}
