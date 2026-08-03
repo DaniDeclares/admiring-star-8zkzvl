@@ -1,51 +1,152 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
-import "../index.css";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  Briefcase, Printer, Home, PartyPopper, ConciergeBell, ShoppingBag,
+  CheckCircle2, ArrowRight, ShieldCheck, Ticket
+} from 'lucide-react';
 
 export default function ServicesPage() {
-  const departments = [
-    { id: "operations", name: "DANI DECLARES OPERATIONS", tagline: "Concierge • Administrative • Field Execution", summary: "Administrative execution, document preparation, mobile notary, living trust coordination, court filing couriers, and apostille processing.", link: "/services/concierge", cta: "Explore Operations & Concierge", image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=800&q=80" },
-    { id: "property", name: "DANI DECLARES PROPERTY", tagline: "Property Operations • Turnovers • Hospitality", summary: "Multi-family unit turnover resets, deep cleaning, carpet extraction, 2-hour digital HD photo logs, 24-48 hr SLAs, and resident concierge perks.", link: "/services/property", cta: "Explore Property Services", image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80" },
-    { id: "events", name: "DANI DECLARES EVENTS", tagline: "Events • Weddings • Hospitality", summary: "On-site event logistics, setup and breakdown teams, vendor coordination, and direct wedding officiant services.", link: "/events/weddings", cta: "Explore Weddings & Events", image: process.env.PUBLIC_URL + "/weddings/MansionWedding_FirstLook.jpg" },
-    { id: "creative", name: "DANI DECLARES CREATIVE", tagline: "Creative Production • Printing • Merchandise", summary: "Custom DTF heat-press apparel, sublimated tumblers, packaging labels, product packaging, stickers, signage, and marketing collateral.", link: "/services/print-studio", cta: "Explore Print & Merch Studio", image: process.env.PUBLIC_URL + "/images/products/Declare_Your_Worth_Tee.jpg" },
-    { id: "smart", name: "DANI DECLARES SMART", tagline: "NFC • QR • Connected Products", summary: "SmartTap™ NFC Business Cards, Smart Review Counter Stands (Google Reviews), NFC booking cards, and digital profile configurations.", link: "/shop", cta: "Explore Smart Products", image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80" },
-    { id: "business", name: "DANI DECLARES BUSINESS", tagline: "Business Startup Kits • Infrastructure", summary: "PMO project governance frameworks, SOP manual development, capability statements, W-9 packets, and Business Startup Infrastructure Kits.", link: "/services/business-solutions", cta: "Explore Business Solutions", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80" },
-    { id: "market", name: "DANI DECLARES MARKET", tagline: "Snacks • Drinks • Convenience • Curated Goods", summary: "Curated neighborhood snack packs, event concession bundles, care packages, and daily doorstep delivery.", link: "/shop", cta: "Explore Marketplace & Snacks", image: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=800&q=80" }
+  const divisions = [
+    {
+      icon: PartyPopper,
+      title: "Festivals & Major Events",
+      badge: "Featured Capability",
+      link: "/festival",
+      desc: "Turnkey production, vendor logistics, permitting, stage management, and crowd control for public events.",
+      features: [
+        "Full Event Permitting & Compliance",
+        "Vendor Onboarding & On-Site Logistics",
+        "Stage, Sound & Equipment Coordination",
+        "Crowd Control & Safety Protocols"
+      ]
+    },
+    {
+      icon: Briefcase,
+      title: "Business Solutions",
+      link: "/services/business-solutions",
+      desc: "Comprehensive operational and legal support for growing organizations.",
+      features: [
+        "Mobile Notary Public & Loan Signing",
+        "Business Startup Kits & Registration",
+        "Legal Document Preparation",
+        "Executive Administrative Support"
+      ]
+    },
+    {
+      icon: Printer,
+      title: "Print & Merch Studio",
+      link: "/services/print-studio",
+      desc: "High-quality custom apparel, signage, and promotional products.",
+      features: [
+        "Custom DTF & Screen Printed Apparel",
+        "Vinyl Banners & Event Signage",
+        "NFC Touchpoint Review Plaaques",
+        "Promotional Merchandise"
+      ]
+    },
+    {
+      icon: Home,
+      title: "Property Operations",
+      link: "/services/property",
+      desc: "Turnkey property resets and maintenance for real estate teams.",
+      features: [
+        "3BR Turnover Resets",
+        "High-Temp Steam Sanitization",
+        "2-Hour HD Photo Audit Logs",
+        "Key Handoffs & Lock Logistics"
+      ]
+    },
+    {
+      icon: ConciergeBell,
+      title: "Concierge & Courier",
+      link: "/services/concierge",
+      desc: "Fast, reliable dispatch and errand execution when timing is critical.",
+      features: [
+        "Court Filing Express Dispatch",
+        "Priority Key Handoffs",
+        "Document Pickup & Delivery",
+        "On-Demand Field Tasks"
+      ]
+    },
+    {
+      icon: ShoppingBag,
+      title: "Express & Marketplace",
+      link: "/shop",
+      desc: "Curated goods, snack packages, and branded products delivered fast.",
+      features: [
+        "Curated Event Snack Boxes",
+        "On-Demand Essentials",
+        "Branded Apparel & Merch",
+        "Smart NFC Hardware & Displays"
+      ]
+    }
   ];
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", backgroundColor: "#F8F5F1", color: "#1B0A0E", minHeight: "100vh" }}>
-      <Helmet>
-        <title>Solutions Directory | DANI DECLARES LLC</title>
-        <meta name="description" content="DANI DECLARES LLC provides concierge operations, property resets, weddings, creative print, smart NFC products, business startup kits, and convenience goods." />
-      </Helmet>
-      <section style={{ backgroundColor: "#0F050A", color: "#F8F5F1", padding: "60px 20px", textAlign: "center", borderBottom: "4px solid #C8B273" }}>
-        <div style={{ maxWidth: "850px", margin: "0 auto" }}>
-          <span style={{ backgroundColor: "#C8B273", color: "#0F050A", padding: "4px 14px", borderRadius: "20px", fontWeight: "700", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px", display: "inline-block", marginBottom: "16px" }}>Solutions Directory</span>
-          <h1 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: "800", margin: "0 0 16px 0", color: "#F8F5F1" }}>Seven Specialized Operating Departments</h1>
-          <p style={{ fontSize: "18px", color: "#D1C7BD", lineHeight: 1.6, margin: "0 0 24px 0" }}>WE HANDLE THE EXECUTION. Single-source delivery across concierge tasks, property preparation, events, creative production, smart NFC technology, business setup, and curated goods.</p>
-          <Link to="/book" className="dd-btn-gold">TELL US WHAT YOU NEED &rarr;</Link>
+    <div className="bg-slate-950 text-slate-100 min-h-screen pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-amber-400 font-mono text-sm uppercase tracking-wider">Service Hub</span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mt-2 mb-4">
+            Integrated Division Services
+          </h1>
+          <p className="text-slate-300 text-lg">
+            Deploy specialized execution teams across any stage of your operation.
+          </p>
         </div>
-      </section>
-      <section style={{ padding: "60px 20px", maxWidth: "1200px", margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "28px" }}>
-          {departments.map((dept) => (
-            <div key={dept.id} style={{ backgroundColor: "#FFFFFF", borderRadius: "8px", padding: "28px", border: "1px solid #E5E0DA", borderTop: "4px solid #8B1E2E", boxShadow: "0 4px 14px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+
+        {/* Division Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {divisions.map((div, idx) => (
+            <div key={idx} className="p-8 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between hover:border-amber-500/40 transition-all relative">
+              {div.badge && (
+                <span className="absolute top-4 right-4 bg-amber-500/20 text-amber-300 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-500/30">
+                  {div.badge}
+                </span>
+              )}
               <div>
-                <span style={{ fontSize: "12px", fontWeight: "800", color: "#C8B273", letterSpacing: "0.05em" }}>{dept.name}</span>
-                <img src={dept.image} alt={dept.name} style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "6px", margin: "12px 0" }} />
-                <h2 style={{ fontSize: "20px", color: "#1B0A0E", margin: "8px 0 6px 0", fontWeight: "800" }}>{dept.tagline}</h2>
-                <p style={{ color: "#555", fontSize: "15px", lineHeight: 1.5, marginBottom: "20px" }}>{dept.summary}</p>
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6">
+                  <div.icon className="w-6 h-6" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">{div.title}</h3>
+                <p className="text-slate-400 text-sm mb-6">{div.desc}</p>
+                <ul className="space-y-3 mb-8">
+                  {div.features.map((f, i) => (
+                    <li key={i} className="flex items-start text-sm text-slate-300">
+                      <CheckCircle2 className="w-4 h-4 text-amber-400 mr-2.5 mt-0.5 flex-shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                <Link to={dept.link} className="dd-btn-red" style={{ padding: "10px 18px", fontSize: "14px", textAlign: "center", flex: "1 1 140px", textDecoration: "none" }}>{dept.cta}</Link>
-                <Link to={"/book?department=" + dept.id} style={{ backgroundColor: "#F8F5F1", color: "#111", padding: "10px 16px", borderRadius: "4px", fontWeight: "700", fontSize: "14px", textDecoration: "none", border: "1px solid #CCC", textAlign: "center" }}>GET STARTED</Link>
-              </div>
+              <Link 
+                to={div.link}
+                className="inline-flex items-center justify-center w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-amber-400 font-semibold text-sm transition-all"
+              >
+                Explore {div.title} <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
             </div>
           ))}
         </div>
-      </section>
+
+        {/* Bottom CTA Banner */}
+        <div className="p-8 rounded-2xl bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/30 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Planning a Festival or Large Community Event?</h2>
+          <p className="text-slate-300 max-w-2xl mx-auto mb-6">
+            Get a tailored operational proposal covering vendor logistics, stage management, permits, and on-site staff.
+          </p>
+          <Link
+            to="/festival"
+            className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-all"
+          >
+            <Ticket className="mr-2 w-5 h-5" />
+            Request Festival Proposal
+          </Link>
+        </div>
+
+      </div>
     </div>
   );
 }
