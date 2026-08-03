@@ -98,10 +98,10 @@ export default function FestivalPage() {
         </p>
         <div className="highlights-grid">
           {[
-            { src: highlight1, alt: "Face painting for children", caption: "Face Painting" },
-            { src: highlight2, alt: "Families browsing vendor booths", caption: "Vendor Market" },
-            { src: highlight3, alt: "Live band on stage", caption: "Live Music" },
-            { src: highlight4, alt: "Kids playing in the Kid Zone", caption: "Kid Zone (Free!)" },
+            { src: "On-Site Vendor Logistics", alt: "Face painting for children", caption: "Face Painting" },
+            { src: "Stage & Sound Coordination", alt: "Families browsing vendor booths", caption: "Vendor Market" },
+            { src: "Permitting & Compliance", alt: "Live band on stage", caption: "Live Music" },
+            { src: "Staffing & Crowd Management", alt: "Kids playing in the Kid Zone", caption: "Kid Zone (Free!)" },
           ].map((item) => (
             <figure key={item.alt} className="highlight-item">
               <img onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} src={item.src} alt={item.alt} />

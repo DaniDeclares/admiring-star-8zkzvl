@@ -1,3 +1,11 @@
+import TravelQuotePage from "./pages/TravelQuotePage";
+import RequestServicePage from "./pages/RequestServicePage";
+import NotaryPage from "./pages/NotaryPage";
+import MembershipPage from "./pages/MembershipPage";
+import FestivalPage from "./pages/FestivalPage";
+import FederalPage from "./pages/FederalPage";
+import FacilityVisitsPage from "./pages/FacilityVisitsPage";
+import ExpressGoodsPage from "./pages/ExpressGoodsPage";
 import PackagesPage from "./pages/PackagesPage";
 import PartnerNetwork from "./pages/PartnerNetwork";
 import PrivacyPage from "./pages/PrivacyPage";
@@ -104,6 +112,14 @@ function App() {
   <Route path="/privacy" element={<PrivacyPage />} />
   <Route path="/partner-network" element={<PartnerNetwork />} />
   <Route path="/packages" element={<PackagesPage />} />
+  <Route path="/services/express-goods" element={<ExpressGoodsPage />} />
+  <Route path="/services/facility-visits" element={<FacilityVisitsPage />} />
+  <Route path="/services/federal" element={<FederalPage />} />
+  <Route path="/events/festivals" element={<FestivalPage />} />
+  <Route path="/membership" element={<MembershipPage />} />
+  <Route path="/services/notary" element={<NotaryPage />} />
+  <Route path="/request-service" element={<RequestServicePage />} />
+  <Route path="/travel-quote" element={<TravelQuotePage />} />
 </Routes>
     </Layout>
   );
