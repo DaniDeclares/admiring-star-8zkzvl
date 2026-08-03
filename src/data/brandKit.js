@@ -33,3 +33,4 @@ export const BRAND_KIT = {
     { name: "DANI DECLARES MARKET", tagline: "Snacks • Drinks • Curated Care Packages", route: "/shop" }
   ]
 };
+export default BRAND_KIT;
