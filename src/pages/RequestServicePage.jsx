@@ -1,18 +1,168 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function RequestServicePage() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    category: 'FESTIVAL_EVENTS',
+    details: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/intake-webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          serviceType: formData.category
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSubmitted(true);
+      } else {
+        setError(data.error || 'Failed to submit intake request.');
+      }
+    } catch (err) {
+      setError(err.message || 'Network error.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1B0A0E', backgroundColor: '#F8F5F1', minHeight: '100vh' }}>
-      <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '4rem 1.5rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem', color: '#F8F5F1' }}>Project Execution Request</h1>
-        <p style={{ fontSize: '1.15rem', color: '#D1C7BD' }}>Submit your project specifications directly to our deployment coordination team.</p>
-      </section>
-      <section style={{ padding: '4rem 1.5rem', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-        <Link to="/book" style={{ backgroundColor: '#C8B273', color: '#0F050A', padding: '0.9rem 2.25rem', borderRadius: '4px', fontWeight: '800', textDecoration: 'none', display: 'inline-block' }}>
-          Proceed to Universal Intake & Booking &rarr;
-        </Link>
-      </section>
+    <div className="bg-slate-950 text-slate-100 min-h-screen pt-24 pb-20">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs sm:text-sm font-medium mb-4">
+            <Sparkles className="w-4 h-4" />
+            <span>Single-Source Execution Intake</span>
+          </div>
+          <h1 className="text-4xl font-extrabold text-white">Request Service & Quote</h1>
+          <p className="text-slate-300 mt-2">
+            Direct routing to Dani Declares operating division leads.
+          </p>
+        </div>
+
+        {submitted ? (
+          <div className="p-8 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center">
+            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">Service Request Logged!</h2>
+            <p className="text-slate-300 mb-6">
+              Your request has been routed into our dispatch pipeline. Our operations team will issue your proposal within 4 hours.
+            </p>
+            <button
+              onClick={() => setSubmitted(false)}
+              className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-all"
+            >
+              Submit Another Request
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-8 rounded-2xl bg-slate-900 border border-slate-800 space-y-6">
+            {error && (
+              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm">
+                {error}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Division Category</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+              >
+                <option value="FESTIVAL_EVENTS">Festivals & Large Events</option>
+                <option value="BUSINESS_SOLUTIONS">Business Solutions & Notary</option>
+                <option value="PRINT_STUDIO">Print & Merch Studio</option>
+                <option value="PROPERTY_OPERATIONS">Property Resets & Operations</option>
+                <option value="CONCIERGE_COURIER">Concierge & Courier Dispatch</option>
+                <option value="MARKETPLACE">Express Marketplace</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Full Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Jane Doe"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="jane@company.com"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Phone Number</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="(404) 555-0199"
+                className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Scope & Operational Details</label>
+              <textarea
+                name="details"
+                rows={4}
+                required
+                value={formData.details}
+                onChange={handleChange}
+                placeholder="Provide event headcount, location, property unit details, or required turnaround timelines..."
+                className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+              ></textarea>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loading ? 'Submitting...' : 'Submit Request'}
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </form>
+        )}
+
+      </div>
     </div>
   );
 }
