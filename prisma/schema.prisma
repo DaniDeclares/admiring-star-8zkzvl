@@ -1,56 +1,638 @@
-// filename: prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-enum RequestStatus {
-  NEW
-  QUOTED
-  DISPATCHED
-  INVOICED
-  PAID
-}
-
 model Lead {
-  id        String           @id @default(uuid())
-  name      String
-  email     String?
-  phone     String?
-  category  String
-  createdAt DateTime         @default(now()) @map("created_at")
-  updatedAt DateTime         @updatedAt @map("updated_at")
-  requests  ServiceRequest[]
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  full_name          String
+  phone              String?
+  email              String?
+  organization_name  String?
+  city               String?
+  state              String?
+  source_id          String?              @db.Uuid
+  source_text        String?
+  status             String               @default("new")
+  notes              String?
+  createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  dd_estimates       dd_estimates[]
+  dd_followup_tasks  dd_followup_tasks[]
+  dd_invoices        dd_invoices[]
+  dd_jobs            dd_jobs[]
+  fieldops_estimates fieldops_estimates[]
+  followups          followups[]
+  marketing_sources  marketing_sources?   @relation(fields: [source_id], references: [id], onUpdate: NoAction)
+  requests           ServiceRequest[]
 
+  @@index([source_id], map: "idx_leads_source_id")
+  @@index([status], map: "idx_leads_status")
   @@map("leads")
 }
 
 model ServiceRequest {
-  id          String        @id @default(uuid())
-  publicId    String        @unique @default(cuid()) @map("public_id")
-  leadId      String        @map("lead_id")
-  lead        Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  serviceType String        @map("service_type")
-  details     String
-  status      RequestStatus @default(NEW)
-  photoLogs   JobPhoto[]
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId             String?              @map("lead_id") @db.Uuid
+  division_id        BigInt?
+  service_id         String?              @db.Uuid
+  service_category   String?
+  service_needed     String?
+  location_address   String?
+  timeline           String?
+  budget_range       String?
+  request_details    String?
+  property_details   Json                 @default("{}")
+  document_details   Json                 @default("{}")
+  event_details      Json                 @default("{}")
+  courier_details    Json                 @default("{}")
+  govcon_details     Json                 @default("{}")
+  status             String               @default("new")
+  priority           String               @default("normal")
+  quote_amount       Decimal?             @db.Decimal(10, 2)
+  internal_notes     String?
+  createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  dd_estimates       dd_estimates[]
+  dd_jobs            dd_jobs[]
+  fieldops_estimates fieldops_estimates[]
+  followups          followups[]
+  divisions          divisions?           @relation(fields: [division_id], references: [id], onUpdate: NoAction)
+  lead               Lead?                @relation(fields: [leadId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  services           services?            @relation(fields: [service_id], references: [id], onUpdate: NoAction)
 
+  @@index([division_id], map: "idx_service_requests_division_id")
+  @@index([leadId], map: "idx_service_requests_lead_id")
+  @@index([status], map: "idx_service_requests_status")
   @@map("service_requests")
 }
 
-model JobPhoto {
-  id         String         @id @default(uuid())
-  requestId  String         @map("request_id")
-  request    ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  photoUrl   String         @map("photo_url")
-  photoType  String         @map("photo_type")
-  capturedAt DateTime       @default(now()) @map("captured_at")
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_estimate_addons {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estimate_id       String             @db.Uuid
+  addon_id          String?            @db.Uuid
+  division_slug     String?
+  addon_slug        String?
+  addon_name        String
+  quantity          Decimal            @default(1) @db.Decimal(10, 2)
+  unit_price        Decimal?           @db.Decimal(10, 2)
+  min_price         Decimal?           @db.Decimal(10, 2)
+  max_price         Decimal?           @db.Decimal(10, 2)
+  line_total        Decimal            @default(0) @db.Decimal(10, 2)
+  notes             String?
+  created_at        DateTime           @default(now()) @db.Timestamptz(6)
+  dd_service_addons dd_service_addons? @relation(fields: [addon_id], references: [id], onUpdate: NoAction)
+  dd_estimates      dd_estimates       @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
 
-  @@map("job_photos")
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_estimate_media {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estimate_id     String       @db.Uuid
+  bucket_id       String       @default("dd-estimate-media")
+  object_path     String
+  media_type      String
+  file_name       String?
+  mime_type       String?
+  file_size_bytes BigInt?
+  label           String?
+  client_caption  String?
+  internal_notes  String?
+  uploaded_by     String       @default("client")
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  dd_estimates    dd_estimates @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_estimate_packages {
+  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estimate_id         String               @db.Uuid
+  package_id          String?              @db.Uuid
+  division_slug       String?
+  package_slug        String?
+  package_name        String
+  quantity            Decimal              @default(1) @db.Decimal(10, 2)
+  unit_price          Decimal?             @db.Decimal(10, 2)
+  min_price           Decimal?             @db.Decimal(10, 2)
+  max_price           Decimal?             @db.Decimal(10, 2)
+  line_total          Decimal              @default(0) @db.Decimal(10, 2)
+  notes               String?
+  created_at          DateTime             @default(now()) @db.Timestamptz(6)
+  dd_estimates        dd_estimates         @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  dd_service_packages dd_service_packages? @relation(fields: [package_id], references: [id], onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_estimates {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  public_reference       String                   @unique @default(dbgenerated("('DD-'::text || upper(substr(replace((gen_random_uuid())::text, '-'::text, ''::text), 1, 10)))"))
+  division_slug          String
+  source_slug            String?
+  lead_id                String?                  @db.Uuid
+  service_request_id     String?                  @db.Uuid
+  client_name            String?
+  client_phone           String?
+  client_email           String?
+  client_type            String?
+  organization_name      String?
+  location_address       String?
+  city                   String?
+  state                  String?                  @default("GA")
+  zip_code               String?
+  timeline               String?
+  rush_requested         Boolean                  @default(false)
+  requested_date         DateTime?                @db.Date
+  intake_answers         Json                     @default("{}")
+  upload_summary         Json                     @default("{}")
+  client_notes           String?
+  internal_notes         String?
+  estimate_status        String                   @default("new")
+  priority               String                   @default("normal")
+  base_subtotal          Decimal                  @default(0) @db.Decimal(10, 2)
+  addon_subtotal         Decimal                  @default(0) @db.Decimal(10, 2)
+  travel_fee             Decimal                  @default(0) @db.Decimal(10, 2)
+  rush_fee               Decimal                  @default(0) @db.Decimal(10, 2)
+  supplies_fee           Decimal                  @default(0) @db.Decimal(10, 2)
+  pass_through_fee       Decimal                  @default(0) @db.Decimal(10, 2)
+  tax_amount             Decimal                  @default(0) @db.Decimal(10, 2)
+  estimated_total        Decimal                  @default(0) @db.Decimal(10, 2)
+  deposit_due            Decimal                  @default(0) @db.Decimal(10, 2)
+  quote_disclaimer       String                   @default("Online estimate only. Final quote may change after review of scope, files, timing, travel, supplies, pass-through costs, licensing/insurance boundaries, and client-provided details.")
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  dd_estimate_addons     dd_estimate_addons[]
+  dd_estimate_media      dd_estimate_media[]
+  dd_estimate_packages   dd_estimate_packages[]
+  leads                  Lead?                    @relation(fields: [lead_id], references: [id], onUpdate: NoAction)
+  service_requests       ServiceRequest?          @relation(fields: [service_request_id], references: [id], onUpdate: NoAction)
+  dd_followup_tasks      dd_followup_tasks[]
+  dd_invoices            dd_invoices[]
+  dd_jobs                dd_jobs[]
+  dd_travel_calculations dd_travel_calculations[]
+
+  @@index([division_slug, estimate_status, created_at(sort: Desc)], map: "idx_dd_estimates_status")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_estimator_settings {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  setting_scope String   @default("global")
+  division_slug String   @default("")
+  setting_key   String
+  setting_value Json     @default("{}")
+  description   String?
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([setting_scope, division_slug, setting_key])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_followup_tasks {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lead_id       String?       @db.Uuid
+  estimate_id   String?       @db.Uuid
+  job_id        String?       @db.Uuid
+  invoice_id    String?       @db.Uuid
+  division_slug String?
+  task_type     String        @default("follow_up")
+  status        String        @default("open")
+  due_at        DateTime?     @db.Timestamptz(6)
+  notes         String?
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime      @default(now()) @db.Timestamptz(6)
+  dd_estimates  dd_estimates? @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  dd_invoices   dd_invoices?  @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  dd_jobs       dd_jobs?      @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  leads         Lead?         @relation(fields: [lead_id], references: [id], onUpdate: NoAction)
+
+  @@index([status, due_at], map: "idx_dd_followup_tasks_due")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_invoices {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  public_reference    String              @unique @default(dbgenerated("('DD-INV-'::text || upper(substr(replace((gen_random_uuid())::text, '-'::text, ''::text), 1, 8)))"))
+  estimate_id         String?             @db.Uuid
+  job_id              String?             @db.Uuid
+  lead_id             String?             @db.Uuid
+  stripe_invoice_id   String?
+  stripe_payment_link String?
+  invoice_status      String              @default("draft")
+  subtotal            Decimal             @default(0) @db.Decimal(10, 2)
+  tax_amount          Decimal             @default(0) @db.Decimal(10, 2)
+  total_amount        Decimal             @default(0) @db.Decimal(10, 2)
+  deposit_due         Decimal             @default(0) @db.Decimal(10, 2)
+  balance_due         Decimal             @default(0) @db.Decimal(10, 2)
+  due_date            DateTime?           @db.Date
+  notes               String?
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  dd_followup_tasks   dd_followup_tasks[]
+  dd_estimates        dd_estimates?       @relation(fields: [estimate_id], references: [id], onUpdate: NoAction)
+  dd_jobs             dd_jobs?            @relation(fields: [job_id], references: [id], onUpdate: NoAction)
+  leads               Lead?               @relation(fields: [lead_id], references: [id], onUpdate: NoAction)
+
+  @@index([invoice_status, due_date], map: "idx_dd_invoices_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_job_tasks {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_id     String    @db.Uuid
+  task_name  String
+  task_type  String?
+  status     String    @default("open")
+  sort_order Int       @default(100)
+  due_at     DateTime? @db.Timestamptz(6)
+  notes      String?
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @default(now()) @db.Timestamptz(6)
+  dd_jobs    dd_jobs   @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_jobs {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  public_reference   String              @unique @default(dbgenerated("('DD-JOB-'::text || upper(substr(replace((gen_random_uuid())::text, '-'::text, ''::text), 1, 8)))"))
+  estimate_id        String?             @db.Uuid
+  lead_id            String?             @db.Uuid
+  service_request_id String?             @db.Uuid
+  division_slug      String
+  job_title          String
+  job_status         String              @default("new")
+  scheduled_start    DateTime?           @db.Timestamptz(6)
+  scheduled_end      DateTime?           @db.Timestamptz(6)
+  location_address   String?
+  assigned_to        String?
+  scope_summary      String?
+  internal_notes     String?
+  created_at         DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime            @default(now()) @db.Timestamptz(6)
+  dd_followup_tasks  dd_followup_tasks[]
+  dd_invoices        dd_invoices[]
+  dd_job_tasks       dd_job_tasks[]
+  dd_estimates       dd_estimates?       @relation(fields: [estimate_id], references: [id], onUpdate: NoAction)
+  leads              Lead?               @relation(fields: [lead_id], references: [id], onUpdate: NoAction)
+  service_requests   ServiceRequest?     @relation(fields: [service_request_id], references: [id], onUpdate: NoAction)
+
+  @@index([division_slug, job_status, scheduled_start], map: "idx_dd_jobs_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_service_addons {
+  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  division_slug       String
+  addon_slug          String
+  addon_name          String
+  category            String?
+  pricing_type        String               @default("flat")
+  base_price          Decimal?             @db.Decimal(10, 2)
+  min_price           Decimal?             @db.Decimal(10, 2)
+  max_price           Decimal?             @db.Decimal(10, 2)
+  unit_label          String?
+  inventory_used      String[]             @default([])
+  applies_to_packages String[]             @default([])
+  quote_notes         String?
+  is_active           Boolean              @default(true)
+  sort_order          Int                  @default(100)
+  created_at          DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime             @default(now()) @db.Timestamptz(6)
+  dd_estimate_addons  dd_estimate_addons[]
+
+  @@unique([division_slug, addon_slug])
+  @@index([division_slug, is_active, sort_order], map: "idx_dd_service_addons_division")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_service_packages {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  division_slug        String
+  package_slug         String
+  package_name         String
+  public_name          String?
+  outcome_label        String?
+  category             String?
+  locked_price         Decimal?               @db.Decimal(10, 2)
+  starting_price       Decimal?               @db.Decimal(10, 2)
+  typical_min          Decimal?               @db.Decimal(10, 2)
+  typical_max          Decimal?               @db.Decimal(10, 2)
+  pricing_model        String                 @default("fixed")
+  deposit_type         String                 @default("policy")
+  deposit_value        Decimal?               @db.Decimal(10, 2)
+  scope_included       String[]               @default([])
+  addon_notes          String[]               @default([])
+  exclusions           String[]               @default([])
+  status_boundary      String?
+  is_public            Boolean                @default(true)
+  is_active            Boolean                @default(true)
+  sort_order           Int                    @default(100)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime               @default(now()) @db.Timestamptz(6)
+  dd_estimate_packages dd_estimate_packages[]
+
+  @@unique([division_slug, package_slug])
+  @@index([division_slug, is_active, sort_order], map: "idx_dd_service_packages_division")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dd_travel_calculations {
+  id                  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estimate_id         String       @db.Uuid
+  origin_address      String?
+  destination_address String?
+  distance_miles      Decimal?     @db.Decimal(10, 2)
+  drive_minutes       Int?
+  mileage_rate        Decimal?     @db.Decimal(10, 2)
+  base_travel_fee     Decimal      @default(0) @db.Decimal(10, 2)
+  mileage_fee         Decimal      @default(0) @db.Decimal(10, 2)
+  parking_tolls_fee   Decimal      @default(0) @db.Decimal(10, 2)
+  total_travel_fee    Decimal      @default(0) @db.Decimal(10, 2)
+  provider            String?
+  calculation_notes   String?
+  created_at          DateTime     @default(now()) @db.Timestamptz(6)
+  dd_estimates        dd_estimates @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model divisions {
+  id               BigInt           @id @default(autoincrement())
+  name             String
+  slug             String           @unique
+  created_at       DateTime?        @default(now()) @db.Timestamptz(6)
+  description      String?
+  is_active        Boolean          @default(true)
+  sort_order       Int              @default(0)
+  updated_at       DateTime         @default(now()) @db.Timestamptz(6)
+  service_requests ServiceRequest[]
+  services         services[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fieldops_addons {
+  id                       String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                     String                     @unique
+  name                     String
+  category                 String                     @default("general")
+  pricing_type             String                     @default("flat")
+  base_price               Decimal?                   @db.Decimal(10, 2)
+  min_price                Decimal?                   @db.Decimal(10, 2)
+  max_price                Decimal?                   @db.Decimal(10, 2)
+  unit_label               String?
+  inventory_used           String[]                   @default([])
+  quote_notes              String?
+  is_active                Boolean                    @default(true)
+  sort_order               Int                        @default(100)
+  created_at               DateTime                   @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime                   @default(now()) @db.Timestamptz(6)
+  fieldops_estimate_addons fieldops_estimate_addons[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fieldops_estimate_addons {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estimate_id        String             @db.Uuid
+  addon_id           String?            @db.Uuid
+  addon_slug         String?
+  addon_name         String
+  quantity           Decimal            @default(1) @db.Decimal(10, 2)
+  unit_price         Decimal?           @db.Decimal(10, 2)
+  min_price          Decimal?           @db.Decimal(10, 2)
+  max_price          Decimal?           @db.Decimal(10, 2)
+  line_total         Decimal            @default(0) @db.Decimal(10, 2)
+  notes              String?
+  created_at         DateTime           @default(now()) @db.Timestamptz(6)
+  fieldops_addons    fieldops_addons?   @relation(fields: [addon_id], references: [id], onUpdate: NoAction)
+  fieldops_estimates fieldops_estimates @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fieldops_estimate_media {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estimate_id        String             @db.Uuid
+  bucket_id          String             @default("fieldops-estimate-media")
+  object_path        String
+  media_type         String
+  file_name          String?
+  mime_type          String?
+  file_size_bytes    BigInt?
+  room_area          String?
+  client_caption     String?
+  internal_notes     String?
+  uploaded_by        String             @default("client")
+  created_at         DateTime           @default(now()) @db.Timestamptz(6)
+  fieldops_estimates fieldops_estimates @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([estimate_id], map: "idx_fieldops_estimate_media_estimate")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fieldops_estimate_packages {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estimate_id        String             @db.Uuid
+  package_id         String?            @db.Uuid
+  package_slug       String?
+  package_name       String
+  quantity           Decimal            @default(1) @db.Decimal(10, 2)
+  unit_price         Decimal            @default(0) @db.Decimal(10, 2)
+  line_total         Decimal            @default(0) @db.Decimal(10, 2)
+  notes              String?
+  created_at         DateTime           @default(now()) @db.Timestamptz(6)
+  fieldops_estimates fieldops_estimates @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  fieldops_packages  fieldops_packages? @relation(fields: [package_id], references: [id], onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fieldops_estimate_tasks {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estimate_id        String             @db.Uuid
+  task_type          String             @default("review")
+  status             String             @default("open")
+  due_at             DateTime?          @db.Timestamptz(6)
+  notes              String?
+  created_at         DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime           @default(now()) @db.Timestamptz(6)
+  fieldops_estimates fieldops_estimates @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([status, due_at], map: "idx_fieldops_estimate_tasks_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fieldops_estimates {
+  id                           String                         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  public_reference             String                         @unique @default(dbgenerated("('DD-FS-'::text || upper(substr(replace((gen_random_uuid())::text, '-'::text, ''::text), 1, 8)))"))
+  lead_id                      String?                        @db.Uuid
+  service_request_id           String?                        @db.Uuid
+  client_name                  String?
+  client_phone                 String?
+  client_email                 String?
+  client_type                  String?
+  organization_name            String?
+  property_address             String?
+  city                         String?
+  state                        String?                        @default("GA")
+  zip_code                     String?
+  property_type                String?
+  bedrooms                     Decimal?                       @db.Decimal(4, 1)
+  bathrooms                    Decimal?                       @db.Decimal(4, 1)
+  square_feet                  Int?
+  stories                      Int?
+  occupied_status              String?
+  utilities_on                 Boolean?
+  pets_present                 Boolean?
+  smoking_or_odor              Boolean?
+  condition_level              String?
+  timeline                     String?
+  rush_requested               Boolean                        @default(false)
+  requested_date               DateTime?                      @db.Date
+  access_notes                 String?
+  parking_notes                String?
+  client_notes                 String?
+  internal_notes               String?
+  estimate_status              String                         @default("new")
+  priority                     String                         @default("normal")
+  base_subtotal                Decimal                        @default(0) @db.Decimal(10, 2)
+  addon_subtotal               Decimal                        @default(0) @db.Decimal(10, 2)
+  travel_fee                   Decimal                        @default(0) @db.Decimal(10, 2)
+  rush_fee                     Decimal                        @default(0) @db.Decimal(10, 2)
+  supplies_fee                 Decimal                        @default(0) @db.Decimal(10, 2)
+  tax_amount                   Decimal                        @default(0) @db.Decimal(10, 2)
+  estimated_total              Decimal                        @default(0) @db.Decimal(10, 2)
+  deposit_due                  Decimal                        @default(0) @db.Decimal(10, 2)
+  quote_disclaimer             String                         @default("Online estimate only. Final quote may change after photo/video review, walkthrough, access review, travel review, supply needs, scope changes, or hazardous/unsafe conditions.")
+  source_slug                  String?
+  created_at                   DateTime                       @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime                       @default(now()) @db.Timestamptz(6)
+  fieldops_estimate_addons     fieldops_estimate_addons[]
+  fieldops_estimate_media      fieldops_estimate_media[]
+  fieldops_estimate_packages   fieldops_estimate_packages[]
+  fieldops_estimate_tasks      fieldops_estimate_tasks[]
+  leads                        Lead?                          @relation(fields: [lead_id], references: [id], onUpdate: NoAction)
+  service_requests             ServiceRequest?                @relation(fields: [service_request_id], references: [id], onUpdate: NoAction)
+  fieldops_travel_calculations fieldops_travel_calculations[]
+
+  @@index([created_at(sort: Desc)], map: "idx_fieldops_estimates_created_at")
+  @@index([client_email], map: "idx_fieldops_estimates_email")
+  @@index([client_phone], map: "idx_fieldops_estimates_phone")
+  @@index([estimate_status], map: "idx_fieldops_estimates_status")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fieldops_estimator_settings {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  setting_key   String   @unique
+  setting_value Json     @default("{}")
+  description   String?
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fieldops_packages {
+  id                         String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                       String                       @unique
+  name                       String
+  outcome_label              String?
+  starting_price             Decimal?                     @db.Decimal(10, 2)
+  typical_min                Decimal?                     @db.Decimal(10, 2)
+  typical_max                Decimal?                     @db.Decimal(10, 2)
+  deposit_type               String                       @default("policy")
+  deposit_value              Decimal?                     @db.Decimal(10, 2)
+  description                String?
+  scope_included             String[]                     @default([])
+  exclusions                 String[]                     @default([])
+  is_active                  Boolean                      @default(true)
+  sort_order                 Int                          @default(100)
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  fieldops_estimate_packages fieldops_estimate_packages[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model fieldops_travel_calculations {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  estimate_id         String             @db.Uuid
+  origin_address      String?
+  destination_address String?
+  distance_miles      Decimal?           @db.Decimal(10, 2)
+  drive_minutes       Int?
+  mileage_rate        Decimal?           @db.Decimal(10, 2)
+  base_travel_fee     Decimal            @default(0) @db.Decimal(10, 2)
+  mileage_fee         Decimal            @default(0) @db.Decimal(10, 2)
+  parking_tolls_fee   Decimal            @default(0) @db.Decimal(10, 2)
+  total_travel_fee    Decimal            @default(0) @db.Decimal(10, 2)
+  provider            String?
+  calculation_notes   String?
+  created_at          DateTime           @default(now()) @db.Timestamptz(6)
+  fieldops_estimates  fieldops_estimates @relation(fields: [estimate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model followups {
+  id                 String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lead_id            String?         @db.Uuid
+  service_request_id String?         @db.Uuid
+  followup_type      String          @default("call")
+  due_at             DateTime?       @db.Timestamptz(6)
+  completed_at       DateTime?       @db.Timestamptz(6)
+  status             String          @default("pending")
+  notes              String?
+  created_at         DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime        @default(now()) @db.Timestamptz(6)
+  leads              Lead?           @relation(fields: [lead_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  service_requests   ServiceRequest? @relation(fields: [service_request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([due_at], map: "idx_followups_due_at")
+  @@index([status], map: "idx_followups_status")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model marketing_sources {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug        String   @unique
+  name        String
+  channel     String?
+  description String?
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  leads       Lead[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model services {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  division_id      BigInt?
+  slug             String           @unique
+  name             String
+  description      String?
+  starting_price   Decimal?         @db.Decimal(10, 2)
+  price_note       String?
+  is_active        Boolean          @default(true)
+  sort_order       Int              @default(0)
+  created_at       DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime         @default(now()) @db.Timestamptz(6)
+  service_requests ServiceRequest[]
+  divisions        divisions?       @relation(fields: [division_id], references: [id], onUpdate: NoAction)
+
+  @@index([division_id], map: "idx_services_division_id")
 }
