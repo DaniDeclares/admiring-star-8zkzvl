@@ -104,7 +104,7 @@ export default function FestivalPage() {
             { src: highlight4, alt: "Kids playing in the Kid Zone", caption: "Kid Zone (Free!)" },
           ].map((item) => (
             <figure key={item.alt} className="highlight-item">
-              <img src={item.src} alt={item.alt} />
+              <img onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} src={item.src} alt={item.alt} />
               <figcaption>{item.caption}</figcaption>
             </figure>
           ))}

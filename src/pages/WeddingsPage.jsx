@@ -60,7 +60,7 @@ export default function WeddingsPage() {
         <div className="gallery-grid">
           {GALLERY_IMAGES.map((filename) => (
             <div className="gallery-img-wrapper" key={filename}>
-              <img
+              <img onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }}
                 src={`${process.env.PUBLIC_URL}/images/weddings/${filename}`}
                 alt={`Wedding inspiration ${filename}`}
                 className="gallery-img"

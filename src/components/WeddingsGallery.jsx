@@ -17,7 +17,7 @@ export default function WeddingsGallery() {
     <div className="weddings-gallery">
       {IMAGES.map((img, idx) => (
         <div key={idx} className="gallery-item">
-          <img src={img.src} alt={img.alt} />
+          <img onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} src={img.src} alt={img.alt} />
         </div>
       ))}
     </div>

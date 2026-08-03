@@ -66,7 +66,7 @@ export default function ProductGallery() {
           <h2 className="product-title">{group.title}</h2>
           <div className="product-images">
             {group.images.map((img, imgIdx) => (
-              <img
+              <img onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }}
                 key={imgIdx}
                 src={`/images/products/${img}`}
                 alt={`${group.title} - ${imgIdx + 1}`}
