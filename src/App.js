@@ -1,3 +1,8 @@
+import PackagesPage from "./pages/PackagesPage";
+import PartnerNetwork from "./pages/PartnerNetwork";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
+import WeddingsPage from "./pages/WeddingsPage";
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
@@ -94,7 +99,12 @@ function App() {
 
         {/* 404 FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+        <Route path="/events/weddings" element={<WeddingsPage />} />
+  <Route path="/terms" element={<TermsPage />} />
+  <Route path="/privacy" element={<PrivacyPage />} />
+  <Route path="/partner-network" element={<PartnerNetwork />} />
+  <Route path="/packages" element={<PackagesPage />} />
+</Routes>
     </Layout>
   );
 }
