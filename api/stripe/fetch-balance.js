@@ -1,36 +1,39 @@
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
-
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { account } = req.query || {};
-  if (!account) {
-    return res.status(400).json({ error: 'Missing required query parameter: account' });
+  // Enforce Admin Secret Authorization Header
+  const authHeader = req.headers.authorization;
+  const adminSecret = process.env.ADMIN_API_KEY;
+
+  if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
+    return res.status(401).json({ error: 'Unauthorized access to financial balance reporting.' });
   }
 
-  try {
-    // Retrieve balance for a connected account (Stripe Connect)
-    // Use the second argument to pass the connected account context.
-    const balance = await stripe.balance.retrieve({}, { stripeAccount: String(account) });
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecretKey) {
+    return res.status(500).json({ error: 'Stripe configuration missing.' });
+  }
 
-    // Ensure arrays are present and return only the safe fields the frontend expects
-    const available = Array.isArray(balance?.available) ? balance.available : [];
-    const pending = Array.isArray(balance?.pending) ? balance.pending : [];
+  const stripe = new Stripe(stripeSecretKey);
+  const { account } = req.query || {};
+
+  try {
+    const options = account ? { stripeAccount: account } : {};
+    const balance = await stripe.balance.retrieve(options);
+
+    const available = balance.available && balance.available.length > 0 ? balance.available : [{ amount: 0, currency: 'usd' }];
+    const pending = balance.pending && balance.pending.length > 0 ? balance.pending : [{ amount: 0, currency: 'usd' }];
 
     return res.status(200).json({
       success: true,
-      balance: {
-        available,
-        pending,
-        livemode: !!balance?.livemode,
-      },
+      balance: { ...balance, available, pending, livemode: balance.livemode || false }
     });
-  } catch (err) {
-    console.error('api/stripe/fetch-balance error:', err?.message || err);
-    return res.status(500).json({ success: false, error: 'Failed to retrieve balance' });
+  } catch (error) {
+    console.error('Fetch Stripe Balance Error:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to retrieve balance data.' });
   }
 }

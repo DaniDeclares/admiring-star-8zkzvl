@@ -17,34 +17,40 @@ enum RequestStatus {
 }
 
 model Lead {
-  id        String   @id @default(uuid())
+  id        String           @id @default(uuid())
   name      String
   email     String?
   phone     String?
   category  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
   requests  ServiceRequest[]
+
+  @@map("leads")
 }
 
 model ServiceRequest {
   id          String        @id @default(uuid())
-  publicId String @unique @default(cuid())
-  leadId      String
-  lead        Lead          @relation(fields: [leadId], references: [id])
-  serviceType String
+  publicId    String        @unique @default(cuid()) @map("public_id")
+  leadId      String        @map("lead_id")
+  lead        Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  serviceType String        @map("service_type")
   details     String
   status      RequestStatus @default(NEW)
-  photoLogs JobPhoto[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  photoLogs   JobPhoto[]
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  @@map("service_requests")
 }
 
 model JobPhoto {
-  id          String         @id @default(uuid())
-  requestId   String
-  request     ServiceRequest @relation(fields: [requestId], references: [id])
-  photoUrl    String
-  photoType   String         // e.g., 'Before Clean', 'After Clean'
-  capturedAt  DateTime       @default(now())
+  id         String         @id @default(uuid())
+  requestId  String         @map("request_id")
+  request    ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  photoUrl   String         @map("photo_url")
+  photoType  String         @map("photo_type")
+  capturedAt DateTime       @default(now()) @map("captured_at")
+
+  @@map("job_photos")
 }
