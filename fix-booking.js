@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+const fs = require("fs");
+const pagePath = "src/pages/BookingPage.jsx";
+
+const code = `import React, { useState } from 'react';
 import { Ticket, Briefcase, Building2, Calendar, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function BookingPage() {
@@ -126,3 +129,7 @@ export default function BookingPage() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync(pagePath, code, "utf8");
+console.log("BookingPage.jsx updated cleanly!");

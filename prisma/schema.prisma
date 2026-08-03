@@ -29,13 +29,13 @@ model Lead {
 
 model ServiceRequest {
   id          String        @id @default(uuid())
-  publicId    String        @unique
+  publicId String @unique @default(cuid())
   leadId      String
   lead        Lead          @relation(fields: [leadId], references: [id])
   serviceType String
   details     String
   status      RequestStatus @default(NEW)
-  photoLogs   JobPhoto[]
+  photoLogs JobPhoto[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }

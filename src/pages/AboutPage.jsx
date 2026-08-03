@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Target, Award, Users, ArrowRight, Ticket, Briefcase } from 'lucide-react';
+import { ShieldCheck, Target, ArrowRight, Ticket } from 'lucide-react';
 
 export default function AboutPage() {
   return (

@@ -1,6 +1,6 @@
 // filename: api/travel-quote.js
 // Vercel Serverless Function - Internal Travel Mileage Calculator
-// Confidential Origins: 650 Abberley Way, Stone Mountain, GA 30083 & 110 Dill Rd, Piedmont, SC 29673
+// Confidential Origins: Stone Mountain, GA & Piedmont, SC
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {
