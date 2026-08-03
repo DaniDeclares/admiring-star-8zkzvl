@@ -1,9 +1,15 @@
-// filename: src/pages/ContactPage.jsx
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { Mail, Phone, MapPin, Send, CheckCircle2 } from 'lucide-react';
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", category: "business", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    category: 'business',
+    message: ''
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -11,65 +17,92 @@ export default function ContactPage() {
   };
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1B0A0E', backgroundColor: '#F8F5F1', minHeight: '100vh' }}>
-      <section style={{ backgroundColor: '#0F050A', color: '#F8F5F1', padding: '4rem 1.5rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <div style={{ color: '#C8B273', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            Serving Metro Atlanta, GA & Regional SC
-          </div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem', color: '#F8F5F1' }}>What Do You Need Executed?</h1>
-          <p style={{ fontSize: '1.15rem', color: '#D1C7BD' }}>Connect directly with a DANI DECLARES LLC deployment coordinator. Serving Metro Atlanta, GA & Regional SC, plus nationwide virtual services.</p>
-        </div>
-      </section>
-      <section style={{ padding: '4rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D9D0', borderRadius: '8px', padding: '2.5rem' }}>
-          {submitted ? (
-            <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <h3 style={{ color: '#8B1E2E', fontSize: '1.5rem', fontWeight: '800' }}>Request Received!</h3>
-              <p style={{ color: '#5A4A52', marginTop: '0.5rem' }}>A deployment coordinator is reviewing your specifications and will respond within 24 hours.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div>
-                <label style={{ fontWeight: '700', fontSize: '0.9rem', display: 'block', marginBottom: '0.4rem' }}>What type of execution do you need?</label>
-                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }}>
-                  <option value="business">Business Solutions & PMO Support</option>
-                  <option value="property">Property Turnover & Real Estate Support</option>
-                  <option value="concierge">Mobile Notary, POAs & Legal Couriers</option>
-                  <option value="print">Custom Printing, Apparel & SmartTap™ NFC</option>
-                  <option value="events">Event Logistics & Officiant Services</option>
-                  <option value="shop">Express Goods & Snack Orders</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ fontWeight: '700', fontSize: '0.9rem', display: 'block', marginBottom: '0.4rem' }}>Your Name</label>
-                <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontWeight: '700', fontSize: '0.9rem', display: 'block', marginBottom: '0.4rem' }}>Email Address</label>
-                  <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }} />
-                </div>
-                <div>
-                  <label style={{ fontWeight: '700', fontSize: '0.9rem', display: 'block', marginBottom: '0.4rem' }}>Phone Number</label>
-                  <input type="tel" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }} />
-                </div>
-              </div>
-              <div>
-                <label style={{ fontWeight: '700', fontSize: '0.9rem', display: 'block', marginBottom: '0.4rem' }}>Project Specifications / Details</label>
-                <textarea rows="4" required value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #CCC' }} placeholder="Describe timeline, location, and specific deliverables..."></textarea>
-              </div>
-              <button type="submit" style={{ backgroundColor: '#8B1E2E', color: '#FFFFFF', padding: '0.9rem', border: 'none', borderRadius: '4px', fontWeight: '800', fontSize: '1rem', cursor: 'pointer' }}>Submit Execution Specifications &rarr;</button>
-            </form>
-          )}
+    <div className="bg-slate-950 text-slate-100 min-h-screen pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-amber-400 font-mono text-sm uppercase tracking-wider">Direct Dispatch & Execution HQ</span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mt-2 mb-4">Connect With Our Deployment Team</h1>
+          <p className="text-slate-300 text-lg">Single-source execution support serving Metro Atlanta, GA, and Upstate SC.</p>
         </div>
 
-        <div style={{ marginTop: '3rem', textAlign: 'center', color: '#5A4A52', fontSize: '0.95rem', backgroundColor: '#FFFFFF', border: '1px solid #E2D9D0', borderRadius: '8px', padding: '1.5rem' }}>
-          <p><strong>Service Area:</strong> Serving Metro Atlanta, GA & Regional SC</p>
-          <p><strong>Direct Dispatch Line:</strong> (470) 485-7173 | (470) 523-4892</p>
-          <p><strong>Vendor & Contracting Email:</strong> vendors@danideclares.com | admin@danideclares.com</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+          <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800">
+            <h3 className="text-2xl font-bold text-white mb-6">Submit Project Specifications</h3>
+            {submitted ? (
+              <div className="p-6 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center gap-3">
+                <CheckCircle2 className="w-6 h-6 flex-shrink-0" />
+                <div>
+                  <h4 className="font-bold">Execution Specifications Received!</h4>
+                  <p className="text-sm text-slate-300">A deployment coordinator will review your request and contact you within 24 hours.</p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 uppercase mb-1">Your Name</label>
+                  <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 uppercase mb-1">Email Address</label>
+                    <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 uppercase mb-1">Phone Number</label>
+                    <input type="tel" required value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 uppercase mb-1">Project Category</label>
+                  <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none">
+                    <option value="business">Business Infrastructure & PMO</option>
+                    <option value="property">Property Turnover & Field Resets</option>
+                    <option value="notary">Mobile Notary & Legal Couriers</option>
+                    <option value="creative">Custom Printing, Apparel & NFC</option>
+                    <option value="events">Weddings & Event Logistics</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 uppercase mb-1">Project Details / Scope</label>
+                  <textarea rows="4" required value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})} placeholder="Describe timeline, location, and specific deliverables..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none"></textarea>
+                </div>
+                <button type="submit" className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition-all flex items-center justify-center gap-2">
+                  Submit Execution Specifications <Send className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800">
+              <h3 className="text-xl font-bold text-white mb-6">Corporate Office & Dispatch HQ</h3>
+              <div className="space-y-4 text-sm text-slate-300">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-white">Public Headquarters:</strong>
+                    <p>Tucker, Georgia 30084 (Serving Metro Atlanta, GA & Regional SC)</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Phone className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-white">Direct Dispatch Lines:</strong>
+                    <p>(470) 485-7173 | (470) 523-4892</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Mail className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-white">Official Email Channels:</strong>
+                    <p>vendors@danideclares.com | admin@danideclares.com</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
