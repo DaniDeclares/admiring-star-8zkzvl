@@ -20,6 +20,7 @@ export default function FestivalBanner() {
 
   const [timeLeft, setTimeLeft] = useState(getDelta());
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const timer = setInterval(() => setTimeLeft(getDelta()), 60_000);
     return () => clearInterval(timer);
