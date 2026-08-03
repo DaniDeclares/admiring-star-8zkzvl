@@ -1,37 +1,48 @@
-// filename: api/intake-webhook.js
-import { submitProjectIntake } from '../src/services/supabaseClient.js';
-import { sendNewRequestNotification } from '../src/services/notificationService.js';
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { name, email, phone, category, details, pathway, zipCode, urgency } = req.body || {};
+  try {
+    const { name, email, phone, category, serviceType, details } = req.body || {};
 
-  const result = await submitProjectIntake({
-    name,
-    email,
-    phone,
-    category,
-    details,
-    pathway,
-    zipCode,
-    urgency
-  });
+    if (!name || (!email && !phone)) {
+      return res.status(400).json({ error: 'Missing required contact parameters (Name and Email or Phone)' });
+    }
 
-  if (!result.success) {
-    return res.status(400).json({ success: false, error: result.error });
+    // 1. Create or update Lead record
+    const lead = await prisma.lead.create({
+      data: {
+        name,
+        email: email || null,
+        phone: phone || null,
+        category: category || 'GENERAL_INTAKE',
+      },
+    });
+
+    // 2. Create ServiceRequest tied to Lead
+    const request = await prisma.serviceRequest.create({
+      data: {
+        leadId: lead.id,
+        serviceType: serviceType || category || 'GENERAL',
+        details: details || 'Intake request submitted via web form.',
+        status: 'NEW',
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Intake request received and persisted successfully.',
+      trackingId: request.publicId,
+      requestId: request.id,
+    });
+  } catch (error) {
+    console.error('Intake Webhook Persistence Error:', error);
+    return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  } finally {
+    await prisma.$disconnect();
   }
-
-  // Non-blocking fire-and-forget notification (Prevents Vercel serverless execution timeouts)
-  sendNewRequestNotification(result.publicId, name, category).catch((err) => {
-    console.error('Background notification failed silently:', err.message);
-  });
-
-  return res.status(200).json({
-    success: true,
-    publicId: result.publicId,
-    message: 'Project intake received and queued for dispatch review.'
-  });
-}
+};
