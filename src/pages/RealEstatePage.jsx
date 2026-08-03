@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
+import { Home, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function RealEstatePage() {
   return (

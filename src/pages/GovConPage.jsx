@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Building2, CheckCircle2, ArrowRight, FileText } from 'lucide-react';
 
 export default function GovConPage() {
   return (
