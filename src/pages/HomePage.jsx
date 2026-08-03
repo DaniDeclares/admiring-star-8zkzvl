@@ -23,7 +23,8 @@ export default function HomePage() {
           </div>
 
           {/* Core Value Proposition */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+          <img src="/logo-script.png" alt="Dani Declares LLC Logo" className="h-20 sm:h-28 w-auto mx-auto mb-6 drop-shadow-md" />
+<h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">
             One Partner. Every Stage. <br />
             <span className="bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 bg-clip-text text-transparent">
               Complete Execution.

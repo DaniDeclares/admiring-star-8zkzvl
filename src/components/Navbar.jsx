@@ -29,7 +29,7 @@ export default function Navbar() {
           </div>
           <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.4rem', margin: '0.25rem 0 0.15rem' }}>
             <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--brand-gold-champagne)' }}></div>
-            <span style={{ color: 'var(--brand-gold-champagne)', fontSize: '0.65rem' }}>⚜</span>
+            <img src="/logo-script.png" alt="Dani Declares Logo" className="h-10 w-auto inline-block mx-2" />
             <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--brand-gold-champagne)' }}></div>
           </div>
           <span style={{ fontFamily: 'Georgia, serif', fontSize: '1.05rem', fontWeight: '800', color: 'var(--brand-card-cream)', letterSpacing: '0.05em', lineHeight: '1.1' }}>
