@@ -1,8 +1,7 @@
 -- DANI DECLARES LLC
 -- Phase 4 / Migration 1: Operations Command Center Foundation
 --
--- SAFETY STATUS: DRAFT ONLY. DO NOT RUN AGAINST PRODUCTION UNTIL THE LIVE
--- DATABASE CATALOG HAS BEEN VERIFIED AGAINST THIS MIGRATION.
+-- SAFETY STATUS: DRAFT ONLY. DO NOT RUN AGAINST PRODUCTION UNTIL REVIEWED.
 --
 -- Design goals:
 --   * additive only
@@ -10,10 +9,12 @@
 --   * no data movement
 --   * explicit dependencies on Supabase auth.users
 --   * RLS enabled on every new application table
+--   * reuse the existing public.set_updated_at() trigger function
 --
--- Existing repository evidence shows an established schema containing leads,
--- service_requests, divisions, services, estimates, jobs, invoices, fieldops,
--- and related tables. See docs/database-baseline-phase4.md.
+-- Live baseline verification confirms these tables do not currently exist:
+--   dd_portal_profiles, dd_user_roles, dd_audit_logs
+-- Existing production tables, foreign keys, RLS policies, and triggers are
+-- intentionally left untouched.
 
 begin;
 
@@ -91,29 +92,17 @@ create index if not exists idx_dd_audit_logs_action
 -- ---------------------------------------------------------------------------
 -- 4. Timestamp maintenance
 -- ---------------------------------------------------------------------------
-create or replace function public.dd_set_updated_at()
-returns trigger
-language plpgsql
-security invoker
-set search_path = public
-as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$;
-
--- Drop/recreate only the trigger objects owned by this migration; this does
--- not touch rows or table definitions.
+-- The live production schema already provides public.set_updated_at().
+-- Reuse it rather than introducing a duplicate timestamp function.
 drop trigger if exists trg_dd_portal_profiles_updated_at on public.dd_portal_profiles;
 create trigger trg_dd_portal_profiles_updated_at
 before update on public.dd_portal_profiles
-for each row execute function public.dd_set_updated_at();
+for each row execute function public.set_updated_at();
 
 drop trigger if exists trg_dd_user_roles_updated_at on public.dd_user_roles;
 create trigger trg_dd_user_roles_updated_at
 before update on public.dd_user_roles
-for each row execute function public.dd_set_updated_at();
+for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- 5. Row-level security
@@ -139,18 +128,19 @@ using (user_id = auth.uid())
 with check (user_id = auth.uid());
 
 -- A user may read only their own explicit role row. Administrative writes are
--- reserved for service_role until a dedicated admin RPC is introduced.
+-- reserved for trusted backend/service-role code until a dedicated admin RPC
+-- is introduced.
 drop policy if exists dd_user_roles_select_own on public.dd_user_roles;
 create policy dd_user_roles_select_own
 on public.dd_user_roles
 for select to authenticated
 using (user_id = auth.uid());
 
--- Audit records are append-only from trusted backend/service-role code.
--- No authenticated client policy is created in Migration 1.
+-- Audit records have no client-facing INSERT/UPDATE/DELETE policies in this
+-- migration. Trusted backend/service-role code is responsible for appending.
 
 commit;
 
--- IMPORTANT: service_role bypasses RLS. Future admin RPCs should use
--- SECURITY DEFINER only where required, with a fixed search_path and explicit
--- authorization checks. Do not expose service_role credentials to React.
+-- IMPORTANT: service_role bypasses RLS. Never expose service_role credentials
+-- to React. Future admin RPCs should use SECURITY DEFINER only where required,
+-- with a fixed search_path and explicit authorization checks.
