@@ -2,15 +2,53 @@
 
 ## Verification status
 
-**Repository baseline: audited. Live Supabase database: not yet queried.**
+**Repository baseline: audited. Live Supabase public-table catalog: verified read-only on 2026-08-12.**
 
-The connection details supplied for the live database contain a placeholder (`[YOUR-PASSWORD]`), not an actual password. Therefore no live database connection or production query has been attempted. This is intentional: the password should not be committed to GitHub, pasted into source files, or embedded in a migration.
+The live catalog was supplied from the Supabase SQL Editor using a read-only `information_schema.tables` query. No production data was modified and no migration was executed.
 
-The repository can establish the application-side baseline, but it cannot prove the current live catalog until a read-only database connection is available.
+## Live `public` table inventory
+
+The verified base tables currently present in `public` are:
+
+- `dd_estimate_addons`
+- `dd_estimate_media`
+- `dd_estimate_packages`
+- `dd_estimates`
+- `dd_estimator_settings`
+- `dd_followup_tasks`
+- `dd_invoices`
+- `dd_job_tasks`
+- `dd_jobs`
+- `dd_service_addons`
+- `dd_service_packages`
+- `dd_travel_calculations`
+- `divisions`
+- `fieldops_addons`
+- `fieldops_estimate_addons`
+- `fieldops_estimate_media`
+- `fieldops_estimate_packages`
+- `fieldops_estimate_tasks`
+- `fieldops_estimates`
+- `fieldops_estimator_settings`
+- `fieldops_packages`
+- `fieldops_travel_calculations`
+- `followups`
+- `leads`
+- `marketing_sources`
+- `service_requests`
+- `services`
+
+### Baseline conclusion
+
+The live catalog confirms that the core operational schema already exists. In particular, `services`, `divisions`, estimates, jobs, invoices, field-operations tables, leads, followups, and service requests are already present.
+
+Migration 1 therefore **must not create replacement versions** of those tables. Future catalog work should extend or reference these canonical tables rather than introduce parallel `services`, `properties`, `work_orders`, or payment tables without first reconciling the existing schema.
+
+The three Migration 1 application tables — `dd_portal_profiles`, `dd_user_roles`, and `dd_audit_logs` — do **not** appear in the supplied live table inventory, so there is no table-name collision with the proposed foundation layer.
 
 ## Existing repository schema evidence
 
-`prisma/schema.prisma` already models an established operational database. Confirmed model families include:
+`prisma/schema.prisma` models the same established operational families confirmed in the live inventory, including:
 
 - `leads`
 - `service_requests`
@@ -35,9 +73,9 @@ The repository can establish the application-side baseline, but it cannot prove 
 - `fieldops_estimate_packages`
 - `fieldops_estimate_tasks`
 - `fieldops_travel_calculations`
-- `fieldops_packages` / related field-operations models where present in the Prisma schema
+- `fieldops_packages`
 
-The exact live table set must still be verified with `pg_catalog` / `information_schema` before any destructive or structural migration.
+This alignment is strong evidence that the existing Prisma schema and deployed database were built from substantially the same operational model.
 
 ## Existing database/RLS artifacts in the repository
 
@@ -77,28 +115,38 @@ That documentation explicitly says the schema was **not executed**. Migration 1 
 
 It does **not** alter, rename, drop, migrate, or backfill any existing business table.
 
-## Live verification gate before execution
+## Remaining live verification gate before execution
 
-Before running Migration 1 against Supabase, execute read-only catalog checks equivalent to:
+The table-name inventory is now verified, but **Migration 1 should still not be executed yet**. Before execution, run read-only checks for:
 
 ```sql
-select table_schema, table_name
-from information_schema.tables
-where table_schema not in ('pg_catalog', 'information_schema')
-order by table_schema, table_name;
-
 select table_schema, table_name, column_name, data_type, is_nullable, column_default
 from information_schema.columns
-where table_schema not in ('pg_catalog', 'information_schema')
+where table_schema = 'public'
 order by table_schema, table_name, ordinal_position;
 
 select schemaname, tablename, policyname, roles, cmd
 from pg_policies
 where schemaname = 'public'
 order by tablename, policyname;
+
+select n.nspname as schema_name,
+       c.relname as table_name,
+       con.conname as constraint_name,
+       pg_get_constraintdef(con.oid) as definition
+from pg_constraint con
+join pg_class c on c.oid = con.conrelid
+join pg_namespace n on n.oid = c.relnamespace
+where n.nspname = 'public'
+order by c.relname, con.conname;
+
+select event_object_schema, event_object_table, trigger_name, action_timing, event_manipulation
+from information_schema.triggers
+where event_object_schema = 'public'
+order by event_object_table, trigger_name;
 ```
 
-Also inspect foreign keys and triggers before applying any migration that touches existing tables.
+These checks verify column-level compatibility, existing RLS policies, foreign-key/constraint conflicts, and trigger/function collisions before the new tables are applied.
 
 ## Safety rule
 
