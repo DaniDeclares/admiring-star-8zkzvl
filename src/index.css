@@ -24,3 +24,13 @@ body {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(30,30,30,0.05);
 }
+
+/* Resident Concierge ticket must sit above the global navbar while open. */
+.rd-page .rd-overlay {
+  z-index: 100 !important;
+  pointer-events: auto;
+}
+
+.rd-page .rd-overlay .rd-ticket {
+  z-index: 101;
+}
