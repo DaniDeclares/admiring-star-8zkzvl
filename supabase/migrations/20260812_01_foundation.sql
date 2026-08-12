@@ -10,6 +10,8 @@
 --   * explicit dependencies on Supabase auth.users
 --   * RLS enabled on every new application table
 --   * reuse the existing public.set_updated_at() trigger function
+--   * dd_user_roles is the sole application authorization source of truth
+--   * dd_audit_logs are append-only at the database level
 --
 -- Live baseline verification confirms these tables do not currently exist:
 --   dd_portal_profiles, dd_user_roles, dd_audit_logs
@@ -23,10 +25,11 @@ create extension if not exists pgcrypto;
 -- ---------------------------------------------------------------------------
 -- 1. Portal profiles
 -- ---------------------------------------------------------------------------
+-- Identity/display metadata only. Authorization belongs exclusively to
+-- dd_user_roles; do not add a role column here.
 create table if not exists public.dd_portal_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references auth.users(id) on delete cascade,
-  role text not null default 'customer',
   full_name text,
   phone text,
   company_name text,
@@ -35,22 +38,16 @@ create table if not exists public.dd_portal_profiles (
   referred_by_profile_id uuid references public.dd_portal_profiles(id) on delete set null,
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  constraint dd_portal_profiles_role_not_blank check (char_length(trim(role)) > 0)
+  updated_at timestamptz not null default now()
 );
-
-create index if not exists idx_dd_portal_profiles_role
-  on public.dd_portal_profiles(role);
 
 create index if not exists idx_dd_portal_profiles_active
   on public.dd_portal_profiles(is_active);
 
-create index if not exists idx_dd_portal_profiles_role_active
-  on public.dd_portal_profiles(role, is_active);
-
 -- ---------------------------------------------------------------------------
 -- 2. Explicit application roles
 -- ---------------------------------------------------------------------------
+-- Sole authorization source of truth for application/RLS role checks.
 create table if not exists public.dd_user_roles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   role text not null,
@@ -105,7 +102,28 @@ before update on public.dd_user_roles
 for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
--- 5. Row-level security
+-- 5. Audit immutability
+-- ---------------------------------------------------------------------------
+-- RLS intentionally has no client INSERT/UPDATE/DELETE policies on the audit
+-- table, but RLS alone is not an immutability guarantee because service_role
+-- bypasses RLS. This trigger enforces append-only behavior at the table level.
+create or replace function public.dd_prevent_audit_log_mutation()
+returns trigger
+language plpgsql
+set search_path to 'public', 'pg_temp'
+as $function$
+begin
+  raise exception 'dd_audit_logs is append-only; UPDATE and DELETE are prohibited';
+end;
+$function$;
+
+drop trigger if exists trg_dd_audit_logs_immutable on public.dd_audit_logs;
+create trigger trg_dd_audit_logs_immutable
+before update or delete on public.dd_audit_logs
+for each row execute function public.dd_prevent_audit_log_mutation();
+
+-- ---------------------------------------------------------------------------
+-- 6. Row-level security
 -- ---------------------------------------------------------------------------
 alter table public.dd_portal_profiles enable row level security;
 alter table public.dd_user_roles enable row level security;
@@ -141,6 +159,7 @@ using (user_id = auth.uid());
 
 commit;
 
--- IMPORTANT: service_role bypasses RLS. Never expose service_role credentials
--- to React. Future admin RPCs should use SECURITY DEFINER only where required,
--- with a fixed search_path and explicit authorization checks.
+-- IMPORTANT: service_role bypasses RLS, but the audit immutability trigger
+-- still blocks UPDATE/DELETE. Never expose service_role credentials to React.
+-- Future admin RPCs should use SECURITY DEFINER only where required, with a
+-- fixed search_path and explicit authorization checks against dd_user_roles.
