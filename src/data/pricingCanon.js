@@ -1,33 +1,37 @@
-import { SERVICES } from "./servicesCatalog.js";
+import { MASTER_CATALOG_2026 } from './masterCatalog2026.js';
 
-const SERVICE_KEY_MAP = {
-  notary: "mobile_notary",
-  loansigning: "loan_signing",
-  loan_signing: "loan_signing",
-  trust: "trust_signing",
-  trust_signing: "trust_signing",
-  officiant: "officiant",
+const SERVICE_OFFER_MAP = {
+  notary: '01-NOT',
+  mobile_notary: '01-NOT',
+  loansigning: '01-LON',
+  loan_signing: '01-LON',
+  trust: '01-LON',
+  trust_signing: '01-LON',
+  apostille: '01-APO',
+  officiant: '02-WED',
 };
 
-const formatPrice = (price) => {
-  if (typeof price === "number") {
-    return `$${price}`;
+const formatPrice = (entry) => {
+  if (!entry) return 'Starting at / Quoted';
+
+  if (typeof entry.workingBaselineRate === 'number') {
+    return `$${entry.workingBaselineRate}`;
   }
 
-  return price;
+  if (entry.startingPrice) {
+    return entry.startingPrice;
+  }
+
+  return 'Starting at / Quoted';
 };
 
 export function getPriceLabel(serviceId) {
-  if (!serviceId) {
-    return "Starting at / Quoted";
-  }
+  if (!serviceId) return 'Starting at / Quoted';
 
-  const catalogKey = SERVICE_KEY_MAP[serviceId] || serviceId;
-  const catalogEntry = SERVICES[catalogKey];
+  const offerId = SERVICE_OFFER_MAP[serviceId] || serviceId;
+  const catalogEntry = MASTER_CATALOG_2026.find((entry) => entry.offerId === offerId);
 
-  if (!catalogEntry) {
-    return "Starting at / Quoted";
-  }
-
-  return formatPrice(catalogEntry.price);
+  return formatPrice(catalogEntry);
 }
+
+export { SERVICE_OFFER_MAP };
