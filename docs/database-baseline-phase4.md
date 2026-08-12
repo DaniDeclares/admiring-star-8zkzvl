@@ -72,8 +72,9 @@ The three Migration 1 application tables — `dd_portal_profiles`, `dd_user_role
 - `fieldops_estimate_media`
 - `fieldops_estimate_packages`
 - `fieldops_estimate_tasks`
-- `fieldops_travel_calculations`
+- `fieldops_estimator_settings`
 - `fieldops_packages`
+- `fieldops_travel_calculations`
 
 This alignment is strong evidence that the existing Prisma schema and deployed database were built from substantially the same operational model.
 
@@ -101,7 +102,7 @@ The existing RLS policy design also grants public anonymous insert access to lea
 - timestamps
 - planned indexes and RLS
 
-That documentation explicitly says the schema was **not executed**. Migration 1 therefore uses the same table name and extends the plan with the minimum security foundation required for the authenticated operations layer.
+That documentation explicitly says the schema was **not executed**. Migration 1 therefore uses the same table name but deliberately removes `role` from the profile table and establishes `dd_user_roles` as the sole application authorization source of truth.
 
 ## Migration 1 scope
 
@@ -110,43 +111,48 @@ That documentation explicitly says the schema was **not executed**. Migration 1 
 1. `dd_portal_profiles`
 2. `dd_user_roles`
 3. `dd_audit_logs`
-4. shared `dd_set_updated_at()` trigger function
-5. RLS on the three new tables
+4. reuse of the existing `public.set_updated_at()` trigger function
+5. database-level append-only protection for `dd_audit_logs`
+6. RLS on the three new tables
 
 It does **not** alter, rename, drop, migrate, or backfill any existing business table.
 
-## Remaining live verification gate before execution
+## Static safety review status
 
-The table-name inventory is now verified, but **Migration 1 should still not be executed yet**. Before execution, run read-only checks for:
+The draft migration was reviewed line-by-line against the verified baseline.
+
+### Safe characteristics confirmed
+
+- Wrapped in an explicit transaction (`begin` / `commit`), so a migration error should roll back the migration's DDL as a unit.
+- No `ALTER`, `DROP`, `RENAME`, `UPDATE`, `DELETE`, or `INSERT` operations target existing business tables.
+- The only trigger drops are guarded `drop trigger if exists` statements on the three new tables.
+- `dd_portal_profiles` contains no authorization `role` column.
+- `dd_user_roles` is the sole role store introduced by Migration 1.
+- `dd_audit_logs` has no client-facing INSERT/UPDATE/DELETE policies.
+- `dd_audit_logs` has a database trigger that rejects UPDATE and DELETE, including attempts made by roles that bypass RLS.
+- The migration reuses the already-verified `public.set_updated_at()` function instead of creating a duplicate timestamp helper.
+- No production credentials are present in the migration.
+
+### Remaining pre-production checks
+
+The static review cannot prove the current live state of function names that are not represented in the table inventory. Before execution, run a read-only function collision check for `public.dd_prevent_audit_log_mutation()` and confirm that `public.set_updated_at()` still has the expected trigger signature/definition.
+
+Also confirm the final live columns, RLS policies, constraints, and triggers immediately before execution if any production changes have occurred since the 2026-08-12 baseline capture.
+
+Suggested function check:
 
 ```sql
-select table_schema, table_name, column_name, data_type, is_nullable, column_default
-from information_schema.columns
-where table_schema = 'public'
-order by table_schema, table_name, ordinal_position;
-
-select schemaname, tablename, policyname, roles, cmd
-from pg_policies
-where schemaname = 'public'
-order by tablename, policyname;
-
-select n.nspname as schema_name,
-       c.relname as table_name,
-       con.conname as constraint_name,
-       pg_get_constraintdef(con.oid) as definition
-from pg_constraint con
-join pg_class c on c.oid = con.conrelid
-join pg_namespace n on n.oid = c.relnamespace
+select
+  n.nspname as schema_name,
+  p.proname as function_name,
+  pg_get_function_identity_arguments(p.oid) as identity_arguments,
+  pg_get_functiondef(p.oid) as definition
+from pg_proc p
+join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
-order by c.relname, con.conname;
-
-select event_object_schema, event_object_table, trigger_name, action_timing, event_manipulation
-from information_schema.triggers
-where event_object_schema = 'public'
-order by event_object_table, trigger_name;
+  and p.proname in ('set_updated_at', 'dd_prevent_audit_log_mutation')
+order by p.proname;
 ```
-
-These checks verify column-level compatibility, existing RLS policies, foreign-key/constraint conflicts, and trigger/function collisions before the new tables are applied.
 
 ## Safety rule
 
