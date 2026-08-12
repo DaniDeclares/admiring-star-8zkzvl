@@ -1,4 +1,4 @@
-export const ADMIN_STRIPE_LINKS = {
+const ADMIN_STRIPE_LINKS = {
   printing_scanning: "https://buy.stripe.com/7sYeVc8lXf1kfyn2CJ6kg1d",
   mobile_notary: "https://buy.stripe.com/eVqeVcfOpdXgdqf3GN6kg1a",
   poa: process.env.REACT_APP_STRIPE_POA || "https://buy.stripe.com/9B6aEWgStg5ocmbelr6kg15",
@@ -9,7 +9,8 @@ export const ADMIN_STRIPE_LINKS = {
     process.env.REACT_APP_STRIPE_LOAN_SIGNING_DEPOSIT ||
     "https://buy.stripe.com/6oU7sK45H4mGae3fpv6kg18",
   trust_signing:
-    process.env.REACT_APP_STRIPE_TRUST_DEPOSIT || "https://buy.stripe.com/28E4gy0Tv9H01Hx7X36kg19",
+    process.env.REACT_APP_STRIPE_TRUST_DEPOSIT ||
+    "https://buy.stripe.com/28E4gy0Tv9H01Hx7X36kg19",
   process_serving: "https://buy.stripe.com/14A00ifOp06q2LB2CJ6kg0O",
   court_courier: "https://buy.stripe.com/eVq5kC45H5qKfyna5b6kg0N",
   digital_court_reporting: "https://buy.stripe.com/bJe8wOeKl5qK0Dt1yF6kg0M",
@@ -18,10 +19,15 @@ export const ADMIN_STRIPE_LINKS = {
   officiant: process.env.REACT_APP_STRIPE_OFFICIANT_DEPOSIT || "",
 };
 
+// Canonical application-facing dictionary. Keep the admin name as an alias
+// so existing internal imports remain compatible during migration.
+export const STRIPE_LINKS = ADMIN_STRIPE_LINKS;
+export { ADMIN_STRIPE_LINKS };
+
 export const isValidStripeUrl = (url) =>
   typeof url === "string" && url.startsWith("https://");
 
-export const getAdminStripeLink = (serviceKey) => ADMIN_STRIPE_LINKS[serviceKey] || "";
+export const getAdminStripeLink = (serviceKey) => STRIPE_LINKS[serviceKey] || "";
 
 // Public-facing payment routing: route users to the centralized intake flow
 // rather than directly to Stripe Checkout links. Admins can still use
