@@ -9,29 +9,44 @@ import ContactPage from "./pages/ContactPage.jsx";
 
 // Services
 import ServicesPage from "./pages/ServicesPage.jsx";
-import BusinessSolutionsPage from "./pages/services/BusinessSolutionsPage.jsx";
+import BusinessSolutionsPage from "./pages/BusinessSolutionsPage.jsx";
 import PrintStudioPage from "./pages/services/PrintStudioPage.jsx";
 import EventsPage from "./pages/services/EventsPage.jsx";
-import PropertyPage from "./pages/services/PropertyPage.jsx";
-import ConciergePage from "./pages/services/ConciergePage.jsx";
-
-// Weddings Division & Subpages
-import WeddingsDivisionPage from "./divisions/events/WeddingsDivisionPage.jsx";
-import WeddingsPage from "./pages/WeddingsPage.jsx";
-import FestivalPage from "./pages/FestivalPage.jsx";
+import PropertyServicesPage from "./pages/services/PropertyPage.jsx";
+import ConciergePage from "./pages/ConciergePage.jsx";
 import FederalPage from "./pages/FederalPage.jsx";
 import FacilityVisitsPage from "./pages/FacilityVisitsPage.jsx";
 import ExpressGoodsPage from "./pages/ExpressGoodsPage.jsx";
+import NotaryPage from "./pages/NotaryPage.jsx";
+
+// Weddings & Events
+import WeddingsDivisionPage from "./divisions/events/WeddingsDivisionPage.jsx";
+import WeddingsPage from "./pages/WeddingsPage.jsx";
+import FestivalPage from "./pages/FestivalPage.jsx";
+
+// Commerce / Booking / Property
+import BookingPage from "./pages/BookingPage.jsx";
+import ShopPage from "./pages/ShopPage.jsx";
+import RealEstatePage from "./pages/RealEstatePage.jsx";
+
+// Network / Membership
 import PackagesPage from "./pages/PackagesPage.jsx";
 import PartnerNetwork from "./pages/PartnerNetwork";
+import MembershipPage from "./pages/MembershipPage.jsx";
+import NetworkHubPage from "./pages/NetworkHubPage.jsx";
+import VendorPortal from "./pages/VendorPortal.jsx";
+
+// Other Tools
+import RequestServicePage from "./pages/RequestServicePage.jsx";
+import TravelQuotePage from "./pages/TravelQuotePage.jsx";
+
+// Blog
+import BlogPage from "./pages/BlogPage.jsx";
+import BlogPostPage from "./pages/BlogPostPage.jsx";
+
+// Legal
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
-import MembershipPage from "./pages/MembershipPage";
-import NotaryPage from "./pages/NotaryPage";
-import RequestServicePage from "./pages/RequestServicePage";
-import TravelQuotePage from "./pages/TravelQuotePage";
-import BlogPage from "./pages/BlogPage";
-import BlogPostPage from "./pages/BlogPostPage";
 
 export default function App() {
   return (
@@ -45,26 +60,42 @@ export default function App() {
         {/* Services */}
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/services/business" element={<BusinessSolutionsPage />} />
+        <Route path="/services/business-solutions" element={<BusinessSolutionsPage />} />
         <Route path="/services/print-studio" element={<PrintStudioPage />} />
         <Route path="/services/events" element={<EventsPage />} />
-        <Route path="/services/property" element={<PropertyPage />} />
+        <Route path="/services/property" element={<PropertyServicesPage />} />
+        <Route path="/property" element={<PropertyServicesPage />} />
         <Route path="/services/concierge" element={<ConciergePage />} />
         <Route path="/services/express-goods" element={<ExpressGoodsPage />} />
         <Route path="/services/facility-visits" element={<FacilityVisitsPage />} />
         <Route path="/services/federal" element={<FederalPage />} />
         <Route path="/services/notary" element={<NotaryPage />} />
 
-        {/* Weddings & Events Subpages */}
+        {/* Weddings & Events */}
         <Route path="/weddings" element={<WeddingsDivisionPage />} />
         <Route path="/events/weddings" element={<WeddingsPage />} />
         <Route path="/events/festivals" element={<FestivalPage />} />
+        <Route path="/festival" element={<FestivalPage />} />
 
-        {/* Client Portals, Packages & Tools */}
+        {/* Booking / Commerce */}
+        <Route path="/book" element={<BookingPage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/travel-quote" element={<TravelQuotePage />} />
+        <Route path="/request-service" element={<RequestServicePage />} />
+
+        {/* Property / Real Estate */}
+        <Route path="/real-estate" element={<RealEstatePage />} />
+        <Route path="/industries/real-estate" element={<RealEstatePage />} />
+
+        {/* Client Portals, Packages & Network */}
         <Route path="/packages" element={<PackagesPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/partner-network" element={<PartnerNetwork />} />
-        <Route path="/travel-quote" element={<TravelQuotePage />} />
-        <Route path="/request-service" element={<RequestServicePage />} />
+        <Route path="/network" element={<NetworkHubPage />} />
+        <Route path="/portal/vendors" element={<VendorPortal />} />
+
+        {/* Government / Industry Alias */}
+        <Route path="/industries/government" element={<FederalPage />} />
 
         {/* Blog */}
         <Route path="/blog" element={<BlogPage />} />
