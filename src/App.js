@@ -13,7 +13,7 @@ import BusinessSolutionsPage from "./pages/BusinessSolutionsPage.jsx";
 import PrintStudioPage from "./pages/services/PrintStudioPage.jsx";
 import EventsPage from "./pages/services/EventsPage.jsx";
 import PropertyServicesPage from "./pages/services/PropertyPage.jsx";
-import ConciergePage from "./pages/ConciergePage.jsx";
+import ConciergePage from "./pages/services/ConciergePage.jsx";
 import FederalPage from "./pages/FederalPage.jsx";
 import FacilityVisitsPage from "./pages/FacilityVisitsPage.jsx";
 import ExpressGoodsPage from "./pages/ExpressGoodsPage.jsx";
@@ -31,7 +31,7 @@ import RealEstatePage from "./pages/RealEstatePage.jsx";
 
 // Network / Membership
 import PackagesPage from "./pages/PackagesPage.jsx";
-import PartnerNetwork from "./pages/PartnerNetwork";
+import PartnerNetwork from "./pages/PartnerNetwork.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import NetworkHubPage from "./pages/NetworkHubPage.jsx";
 import VendorPortal from "./pages/VendorPortal.jsx";
