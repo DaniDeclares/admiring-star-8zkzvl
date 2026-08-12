@@ -1,10 +1,122 @@
 -- DANI DECLARES LLC
 -- Phase 4 / Migration 1: Foundation preflight
--- READ-ONLY: This script performs catalog inspection only.
--- It does NOT CREATE, ALTER, DROP, INSERT, UPDATE, DELETE, or execute functions.
--- Run in Supabase SQL Editor before applying 20260812_01_foundation.sql.
+--
+-- READ-ONLY ONLY. Run this in the Supabase SQL Editor before applying
+-- supabase/migrations/20260812_01_foundation.sql.
+--
+-- This script performs catalog reads only. It contains NO CREATE, ALTER,
+-- DROP, INSERT, UPDATE, DELETE, TRUNCATE, or data-changing function calls.
+--
+-- Expected pre-Migration-1 state:
+--   * auth.users exists
+--   * dd_portal_profiles does not exist
+--   * dd_user_roles does not exist
+--   * dd_audit_logs does not exist
+--   * public.set_updated_at() exists exactly once with zero arguments
+--   * dd_prevent_audit_log_mutation() does not exist in public
+--   * Migration 1 trigger/policy names do not already exist
 
--- 1. Existing object collisions for Migration 1.
+-- ---------------------------------------------------------------------------
+-- 1. Required Supabase auth dependency
+-- ---------------------------------------------------------------------------
+select
+  case when exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'auth'
+      and c.relname = 'users'
+      and c.relkind = 'r'
+  ) then 'PASS' else 'FAIL' end as result,
+  'auth.users exists' as check_name;
+
+-- ---------------------------------------------------------------------------
+-- 2. Migration 1 table collision check
+-- ---------------------------------------------------------------------------
+select
+  expected.table_name,
+  case when c.oid is null then 'PASS' else 'FAIL' end as result,
+  case when c.oid is null then 'not found' else 'ALREADY EXISTS' end as observed
+from (
+  values
+    ('dd_portal_profiles'),
+    ('dd_user_roles'),
+    ('dd_audit_logs')
+) as expected(table_name)
+left join pg_class c
+  on c.relname = expected.table_name
+left join pg_namespace n
+  on n.oid = c.relnamespace
+ and n.nspname = 'public'
+where c.oid is null or n.oid is not null
+order by expected.table_name;
+
+-- ---------------------------------------------------------------------------
+-- 3. Existing public.set_updated_at() signature
+-- ---------------------------------------------------------------------------
+select
+  case when count(*) = 1 then 'PASS' else 'FAIL' end as result,
+  'public.set_updated_at() zero-argument signature' as check_name,
+  count(*)::text as observed_count,
+  coalesce(string_agg(pg_get_function_identity_arguments(p.oid), ', '), '(none)') as arguments
+from pg_proc p
+join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname = 'set_updated_at'
+  and pg_get_function_identity_arguments(p.oid) = '';
+
+-- ---------------------------------------------------------------------------
+-- 4. Audit mutation function collision
+-- ---------------------------------------------------------------------------
+select
+  case when count(*) = 0 then 'PASS' else 'FAIL' end as result,
+  'public.dd_prevent_audit_log_mutation() must be absent before migration' as check_name,
+  count(*)::text as observed_count
+from pg_proc p
+join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname = 'dd_prevent_audit_log_mutation'
+  and pg_get_function_identity_arguments(p.oid) = '';
+
+-- ---------------------------------------------------------------------------
+-- 5. Trigger-name collision checks
+-- ---------------------------------------------------------------------------
+select
+  expected.trigger_name,
+  case when t.oid is null then 'PASS' else 'FAIL' end as result,
+  case when t.oid is null then 'not found' else 'ALREADY EXISTS' end as observed
+from (
+  values
+    ('trg_dd_portal_profiles_updated_at'),
+    ('trg_dd_user_roles_updated_at'),
+    ('trg_dd_audit_logs_immutable')
+) as expected(trigger_name)
+left join pg_trigger t
+  on t.tgname = expected.trigger_name
+ and not t.tgisinternal
+order by expected.trigger_name;
+
+-- ---------------------------------------------------------------------------
+-- 6. Policy-name collision checks
+-- ---------------------------------------------------------------------------
+select
+  expected.policy_name,
+  case when p.policyname is null then 'PASS' else 'FAIL' end as result,
+  case when p.policyname is null then 'not found' else 'ALREADY EXISTS' end as observed
+from (
+  values
+    ('dd_portal_profiles_select_own'),
+    ('dd_portal_profiles_update_own'),
+    ('dd_user_roles_select_own')
+) as expected(policy_name)
+left join pg_policies p
+  on p.schemaname = 'public'
+ and p.policyname = expected.policy_name
+order by expected.policy_name;
+
+-- ---------------------------------------------------------------------------
+-- 7. Existing target objects, if any
+-- ---------------------------------------------------------------------------
 select
   n.nspname as schema_name,
   c.relname as object_name,
@@ -13,28 +125,35 @@ select
     when 'p' then 'partitioned table'
     when 'v' then 'view'
     when 'm' then 'materialized view'
+    when 'S' then 'sequence'
     when 'f' then 'foreign table'
     else c.relkind::text
-  end as object_type
+  end as object_type,
+  'REVIEW' as result
 from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
 where n.nspname = 'public'
   and c.relname in ('dd_portal_profiles', 'dd_user_roles', 'dd_audit_logs')
 order by c.relname;
 
--- 2. Existing function signatures relevant to Migration 1.
+-- ---------------------------------------------------------------------------
+-- 8. Existing columns on target objects, if any
+-- ---------------------------------------------------------------------------
 select
-  n.nspname as schema_name,
-  p.proname as function_name,
-  pg_get_function_identity_arguments(p.oid) as arguments,
-  pg_get_function_result(p.oid) as return_type
-from pg_proc p
-join pg_namespace n on n.oid = p.pronamespace
-where n.nspname = 'public'
-  and p.proname in ('set_updated_at', 'dd_prevent_audit_log_mutation')
-order by p.proname, arguments;
+  table_name,
+  column_name,
+  data_type,
+  udt_name,
+  is_nullable,
+  column_default
+from information_schema.columns
+where table_schema = 'public'
+  and table_name in ('dd_portal_profiles', 'dd_user_roles', 'dd_audit_logs')
+order by table_name, ordinal_position;
 
--- 3. Existing triggers on the three target tables.
+-- ---------------------------------------------------------------------------
+-- 9. Existing triggers on target objects, if any
+-- ---------------------------------------------------------------------------
 select
   n.nspname as schema_name,
   c.relname as table_name,
@@ -48,7 +167,9 @@ where n.nspname = 'public'
   and not t.tgisinternal
 order by c.relname, t.tgname;
 
--- 4. Existing policies on the three target tables.
+-- ---------------------------------------------------------------------------
+-- 10. Existing policies on target objects, if any
+-- ---------------------------------------------------------------------------
 select
   schemaname,
   tablename,
@@ -62,7 +183,9 @@ where schemaname = 'public'
   and tablename in ('dd_portal_profiles', 'dd_user_roles', 'dd_audit_logs')
 order by tablename, policyname;
 
--- 5. RLS state on the three target tables, if they already exist.
+-- ---------------------------------------------------------------------------
+-- 11. RLS state on target objects, if any
+-- ---------------------------------------------------------------------------
 select
   n.nspname as schema_name,
   c.relname as table_name,
@@ -74,21 +197,9 @@ where n.nspname = 'public'
   and c.relname in ('dd_portal_profiles', 'dd_user_roles', 'dd_audit_logs')
 order by c.relname;
 
--- 6. Columns on any existing target tables. Useful for detecting drift before
--- an IF NOT EXISTS migration is ever considered safe to re-run.
-select
-  c.table_name,
-  c.column_name,
-  c.data_type,
-  c.udt_name,
-  c.is_nullable,
-  c.column_default
-from information_schema.columns c
-where c.table_schema = 'public'
-  and c.table_name in ('dd_portal_profiles', 'dd_user_roles', 'dd_audit_logs')
-order by c.table_name, c.ordinal_position;
-
--- 7. Foreign keys involving the three target tables.
+-- ---------------------------------------------------------------------------
+-- 12. Foreign keys involving target objects, if any
+-- ---------------------------------------------------------------------------
 select
   tc.table_name,
   tc.constraint_name,
@@ -111,32 +222,43 @@ where tc.constraint_type = 'FOREIGN KEY'
   )
 order by tc.table_name, tc.constraint_name, kcu.ordinal_position;
 
--- 8. Compact pass/fail summary. These are catalog reads only.
+-- ---------------------------------------------------------------------------
+-- 13. Compact final safety summary
+-- ---------------------------------------------------------------------------
 select
-  'target_table_collision' as check_name,
-  case when count(*) = 0 then 'PASS' else 'REVIEW' end as result,
-  count(*)::text as observed_count
-from pg_class c
-join pg_namespace n on n.oid = c.relnamespace
-where n.nspname = 'public'
-  and c.relname in ('dd_portal_profiles', 'dd_user_roles', 'dd_audit_logs')
-  and c.relkind in ('r', 'p');
+  (select count(*)
+   from pg_class c
+   join pg_namespace n on n.oid = c.relnamespace
+   where n.nspname = 'public'
+     and c.relname in ('dd_portal_profiles', 'dd_user_roles', 'dd_audit_logs')
+     and c.relkind in ('r', 'p')) as existing_foundation_tables,
+  (select count(*)
+   from pg_proc p
+   join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public'
+     and p.proname = 'dd_prevent_audit_log_mutation'
+     and pg_get_function_identity_arguments(p.oid) = '') as existing_audit_mutation_functions,
+  (select count(*)
+   from pg_proc p
+   join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public'
+     and p.proname = 'set_updated_at'
+     and pg_get_function_identity_arguments(p.oid) = '') as existing_set_updated_at_functions,
+  'Expected: 0, 0, 1' as expected_counts;
 
+-- ---------------------------------------------------------------------------
+-- 14. Production baseline inventory (read-only)
+-- ---------------------------------------------------------------------------
 select
-  'set_updated_at_zero_arg_signature' as check_name,
-  case when count(*) = 1 then 'PASS' else 'REVIEW' end as result,
-  count(*)::text as observed_count
-from pg_proc p
-join pg_namespace n on n.oid = p.pronamespace
-where n.nspname = 'public'
-  and p.proname = 'set_updated_at'
-  and pg_get_function_identity_arguments(p.oid) = '';
+  table_name,
+  table_type
+from information_schema.tables
+where table_schema = 'public'
+order by table_name;
 
-select
-  'audit_mutation_function_collision' as check_name,
-  case when count(*) = 0 then 'PASS' else 'REVIEW' end as result,
-  count(*)::text as observed_count
-from pg_proc p
-join pg_namespace n on n.oid = p.pronamespace
-where n.nspname = 'public'
-  and p.proname = 'dd_prevent_audit_log_mutation';
+-- ---------------------------------------------------------------------------
+-- IMPORTANT
+-- ---------------------------------------------------------------------------
+-- This file is a verification artifact only. It does not execute Migration 1.
+-- Do not treat a PASS result as authorization to apply the migration until the
+-- returned results have been reviewed against the branch SQL and live baseline.
