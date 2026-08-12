@@ -38,7 +38,7 @@ import VendorPortal from "./pages/VendorPortal.jsx";
 
 // Other Tools
 import RequestServicePage from "./pages/RequestServicePage.jsx";
-import ResidentConciergePage from "./pages/ResidentConciergePage.jsx";
+import ResidentConciergePage from "./pages/ResidentConciergeSafePage.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
 
 // Blog
@@ -53,12 +53,9 @@ export default function App() {
   return (
     <Layout>
       <Routes>
-        {/* Core Pages */}
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
-
-        {/* Services */}
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/services/business" element={<BusinessSolutionsPage />} />
         <Route path="/services/business-solutions" element={<BusinessSolutionsPage />} />
@@ -71,51 +68,31 @@ export default function App() {
         <Route path="/services/facility-visits" element={<FacilityVisitsPage />} />
         <Route path="/services/federal" element={<FederalPage />} />
         <Route path="/services/notary" element={<NotaryPage />} />
-
-        {/* Resident Concierge */}
         <Route path="/resident-concierge" element={<ResidentConciergePage />} />
         <Route path="/resident-dispatch" element={<ResidentConciergePage />} />
-
-        {/* Weddings & Events */}
         <Route path="/weddings" element={<WeddingsDivisionPage />} />
         <Route path="/events/weddings" element={<WeddingsPage />} />
         <Route path="/events/festivals" element={<FestivalPage />} />
         <Route path="/festival" element={<FestivalPage />} />
-
-        {/* Booking / Commerce */}
         <Route path="/book" element={<BookingPage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/travel-quote" element={<TravelQuotePage />} />
         <Route path="/request-service" element={<RequestServicePage />} />
-
-        {/* Property / Real Estate */}
         <Route path="/real-estate" element={<RealEstatePage />} />
         <Route path="/industries/real-estate" element={<RealEstatePage />} />
-
-        {/* Client Portals, Packages & Network */}
         <Route path="/packages" element={<PackagesPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/partner-network" element={<PartnerNetwork />} />
         <Route path="/network" element={<NetworkHubPage />} />
         <Route path="/portal/vendors" element={<VendorPortal />} />
-
-        {/* Government / Industry Alias */}
         <Route path="/industries/government" element={<FederalPage />} />
-
-        {/* Blog */}
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
-
-        {/* Legal */}
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
-
-        {/* Clean Legacy Redirects */}
         <Route path="/field-services" element={<Navigate to="/services/property" replace />} />
         <Route path="/events" element={<Navigate to="/services/events" replace />} />
         <Route path="/signature-services" element={<Navigate to="/services" replace />} />
-
-        {/* 404 Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
