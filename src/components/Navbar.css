@@ -1,4 +1,3 @@
-/* DANI DECLARES LLC — LOCKED BRAND COLOR SYSTEM */
 :root {
   --brand-bg-ivory: #F9F6F0;
   --brand-card-cream: #FFFFFF;
@@ -19,74 +18,151 @@ body {
 }
 
 .dd-navbar-header {
-  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: var(--brand-burgundy-royal);
+  border-bottom: 3px solid var(--brand-gold-champagne);
+  box-shadow: 0 8px 24px rgba(42, 14, 19, 0.12);
 }
 
-.dd-btn-primary, .dd-btn-red {
-  background-color: var(--brand-burgundy-royal);
-  color: var(--brand-card-cream);
-  padding: 0.85rem 2rem;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 1rem;
+.dd-navbar-container {
+  max-width: 1240px;
+  min-height: 92px;
+  margin: 0 auto;
+  padding: 0.65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dd-navbar-brand-logo {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   text-decoration: none;
-  display: inline-block;
-  border: 1px solid var(--brand-burgundy-royal);
-  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.dd-btn-primary:hover, .dd-btn-red:hover {
-  background-color: #370912;
+.dd-logo-monogram {
+  color: var(--brand-gold-champagne);
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.12em;
+  line-height: 0.85;
+}
+
+.dd-logo-rule {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.22rem 0 0.12rem;
+}
+
+.dd-logo-rule span { flex: 1; height: 1px; background: var(--brand-gold-champagne); }
+.dd-logo-rule img { width: 58px; height: 26px; object-fit: contain; }
+.dd-logo-name { color: var(--brand-card-cream); font-family: var(--font-serif); font-size: 0.88rem; font-weight: 800; letter-spacing: 0.05em; }
+.dd-logo-tagline { color: var(--brand-gold-champagne); font-size: 0.49rem; font-weight: 700; letter-spacing: 0.12em; margin-top: 0.08rem; }
+
+.dd-navbar-nav { display: flex; align-items: center; gap: 0.35rem; margin-left: auto; }
+.dd-top-link {
   color: var(--brand-card-cream);
-  transform: translateY(-1px);
+  background: transparent;
+  border: 0;
+  text-decoration: none;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0.7rem 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
 }
+.dd-top-link:hover, .dd-top-link.is-open, .dd-top-link.active { color: var(--brand-gold-champagne); }
+.dd-nav-trigger span { font-size: 0.65rem; margin-left: 0.15rem; }
+.dd-nav-group { position: relative; }
 
-.dd-btn-gold {
-  background-color: var(--brand-gold-champagne);
+.dd-mega-menu {
+  position: absolute;
+  top: calc(100% + 0.85rem);
+  right: 0;
+  min-width: 510px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  padding: 1.25rem;
+  background: var(--brand-bg-ivory);
+  border: 1px solid rgba(200, 162, 82, 0.45);
+  border-top: 4px solid var(--brand-gold-champagne);
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 16px 36px rgba(42, 14, 19, 0.22);
+}
+.dd-mega-column { display: flex; flex-direction: column; gap: 0.25rem; }
+.dd-mega-title { color: var(--brand-burgundy-royal); font-family: var(--font-serif); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.45rem; }
+.dd-mega-link { color: var(--brand-text-wine); text-decoration: none; font-size: 0.9rem; font-weight: 650; padding: 0.48rem 0.5rem; border-radius: 5px; }
+.dd-mega-link:hover { background: rgba(200, 162, 82, 0.14); color: var(--brand-burgundy-royal); }
+
+.dd-navbar-actions { display: flex; align-items: center; gap: 0.55rem; flex: 0 0 auto; }
+.dd-project-cta, .dd-mobile-project-cta {
+  background: var(--brand-gold-champagne);
   color: var(--brand-burgundy-royal);
-  padding: 0.85rem 2rem;
+  padding: 0.65rem 0.9rem;
   border-radius: 6px;
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 850;
+  font-size: 0.78rem;
   text-decoration: none;
-  display: inline-block;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+.dd-project-cta:hover, .dd-mobile-project-cta:hover { transform: translateY(-1px); }
+.dd-mobile-toggle { display: none; }
+
+.dd-mobile-menu {
+  display: none;
+  background: var(--brand-bg-ivory);
+  border-top: 1px solid var(--brand-gold-champagne);
+  padding: 1rem;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+}
+.dd-mobile-home, .dd-mobile-group-trigger {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--brand-burgundy-royal);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(42, 14, 19, 0.08);
+  text-decoration: none;
+  font: inherit;
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 0.85rem 0.25rem;
+  cursor: pointer;
+  text-align: left;
+}
+.dd-mobile-submenu { display: flex; flex-direction: column; padding: 0.35rem 0 0.5rem 0.85rem; border-bottom: 1px solid rgba(42, 14, 19, 0.08); }
+.dd-mobile-submenu a { color: var(--brand-text-wine); text-decoration: none; font-size: 0.95rem; font-weight: 650; padding: 0.62rem 0; }
+.dd-mobile-project-cta { display: block; text-align: center; margin-top: 1rem; padding: 0.9rem 1rem; }
+
+.dd-top-link:focus-visible, .dd-mega-link:focus-visible, .dd-mobile-home:focus-visible, .dd-mobile-group-trigger:focus-visible, .dd-project-cta:focus-visible, .dd-mobile-project-cta:focus-visible, .dd-mobile-toggle:focus-visible {
+  outline: 3px solid rgba(200, 162, 82, 0.45);
+  outline-offset: 3px;
 }
 
-.dd-btn-gold:hover {
-  background-color: #d1a850;
-  transform: translateY(-1px);
-}
-
-/* Responsive visibility rules for Navbar */
-@media (min-width: 900px) {
-  .dd-mobile-toggle {
-    display: none !important;
-  }
-  .dd-mobile-menu {
-    display: none !important;
-  }
-  .desktop-only {
-    display: flex !important;
-  }
+@media (max-width: 1150px) and (min-width: 900px) {
+  .dd-navbar-container { padding-left: 0.75rem; padding-right: 0.75rem; }
+  .dd-navbar-nav { gap: 0.05rem; }
+  .dd-top-link { font-size: 0.74rem; padding-left: 0.35rem; padding-right: 0.35rem; }
+  .dd-project-cta { font-size: 0.72rem; padding-left: 0.7rem; padding-right: 0.7rem; }
 }
 
 @media (max-width: 899px) {
-  .desktop-only {
-    display: none !important;
-  }
-  .dd-mobile-toggle {
-    display: inline-flex !important;
-  }
-  .dd-mobile-menu {
-    display: flex !important;
-  }
-}
-
-/* Small accessibility focus styles */
-.dd-navbar-nav a:focus,
-.dd-mobile-menu a:focus,
-.dd-navbar-actions a:focus {
-  outline: 3px solid rgba(200,162,82,0.18);
-  outline-offset: 3px;
+  .desktop-only, .dd-project-cta { display: none !important; }
+  .dd-navbar-container { min-height: 76px; padding: 0.55rem 1rem; }
+  .dd-mobile-toggle { display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--brand-gold-champagne); color: var(--brand-gold-champagne); min-width: 42px; min-height: 42px; border-radius: 5px; cursor: pointer; font-size: 1.2rem; font-weight: 800; }
+  .dd-mobile-menu { display: block; }
 }

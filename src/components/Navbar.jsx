@@ -2,79 +2,174 @@ import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
 
-export default function Navbar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const toggleMenu = () => setMobileMenuOpen(!mobileMenuOpen);
-  const closeMenu = () => setMobileMenuOpen(false);
+const desktopGroups = [
+  {
+    key: 'services',
+    label: 'Services',
+    columns: [
+      {
+        title: 'Core Capabilities',
+        links: [
+          ['Business Solutions', '/services/business'],
+          ['Property & Field Services', '/services/property'],
+          ['Notary & Document Signings', '/services/notary'],
+          ['Events & Office Staging', '/services/events'],
+        ],
+      },
+      {
+        title: 'Specialized Services',
+        links: [
+          ['Weddings Division', '/weddings'],
+          ['Real Estate Solutions', '/real-estate'],
+          ['Print Studio', '/services/print-studio'],
+          ['Facility Visits', '/services/facility-visits'],
+        ],
+      },
+    ],
+  },
+  {
+    key: 'business',
+    label: 'B2B Enterprise',
+    columns: [
+      {
+        title: 'Business Operations',
+        links: [
+          ['Corporate Infrastructure', '/services/business'],
+          ['Property & Field Operations', '/services/property'],
+          ['Property Retainer Network', '/partner-network'],
+          ['Corporate Memberships', '/membership'],
+        ],
+      },
+      {
+        title: 'Enterprise Paths',
+        links: [
+          ['Real Estate Solutions', '/real-estate'],
+          ['Partner Network', '/partner-network'],
+          ['Business Packages', '/packages'],
+          ['Start a Project', '/book'],
+        ],
+      },
+    ],
+  },
+  {
+    key: 'residents',
+    label: 'Direct Residents',
+    columns: [
+      {
+        title: 'Resident Ecosystem',
+        links: [
+          ['Resident Concierge Hub', '/resident-concierge'],
+          ['À La Carte Service Packages', '/packages'],
+          ['Direct Product Shop', '/shop'],
+        ],
+      },
+      {
+        title: 'Quick Access',
+        links: [
+          ['Request a Service', '/request-service'],
+          ['Book a Service', '/book'],
+          ['Contact Dani Declares', '/contact'],
+        ],
+      },
+    ],
+  },
+  {
+    key: 'government',
+    label: 'Government',
+    columns: [
+      {
+        title: 'Government Desk',
+        links: [
+          ['Federal & Government Services', '/industries/government'],
+          ['Capability Statement', '/industries/government'],
+          ['Government Intake', '/request-service'],
+        ],
+      },
+      {
+        title: 'Procurement Context',
+        links: [
+          ['GovCon Services', '/industries/government'],
+          ['Partner Network', '/partner-network'],
+          ['Contact Procurement Desk', '/contact'],
+        ],
+      },
+    ],
+  },
+];
 
-  const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Services', path: '/services' },
-    { label: 'Marketplace', path: '/shop' },
-    { label: 'GovCon', path: '/industries/government' },
-    { label: 'Network', path: '/network' },
-    { label: 'About', path: '/about' },
-    { label: 'Contact', path: '/contact' },
-  ];
+const mobileGroups = desktopGroups.map((group) => ({
+  ...group,
+  links: group.columns.flatMap((column) => column.links),
+}));
+
+export default function Navbar() {
+  const [openMenu, setOpenMenu] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(null);
+
+  const closeAll = () => {
+    setOpenMenu(null);
+    setMobileMenuOpen(false);
+    setMobileExpanded(null);
+  };
+
+  const toggleDesktopMenu = (key) => {
+    setOpenMenu((current) => (current === key ? null : key));
+  };
+
+  const toggleMobileGroup = (key) => {
+    setMobileExpanded((current) => (current === key ? null : key));
+  };
 
   return (
-    <header className="dd-navbar-header" style={{ backgroundColor: 'var(--brand-burgundy-royal)', borderBottom: '3px solid var(--brand-gold-champagne)', position: 'sticky', top: 0, zIndex: 60 }}>
-      <div className="dd-navbar-container" style={{ maxWidth: '1240px', margin: '0 auto', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-
-        {/* OFFICIAL BRAND LOGO LOCKUP */}
-        <Link to="/" className="dd-navbar-brand-logo" onClick={closeMenu} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline' }}>
-            <span style={{ fontFamily: 'Georgia, serif', fontSize: '2.2rem', fontWeight: '800', color: 'var(--brand-gold-champagne)', lineHeight: '0.9', marginRight: '-0.3rem' }}>D</span>
-            <span style={{ fontFamily: 'Georgia, serif', fontSize: '2.2rem', fontWeight: '800', color: 'var(--brand-gold-champagne)', lineHeight: '0.9' }}>D</span>
-          </div>
-          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.4rem', margin: '0.25rem 0 0.15rem' }}>
-            <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--brand-gold-champagne)' }}></div>
-            <img src="/logo-script.png" alt="Dani Declares Logo" className="h-10 w-auto inline-block mx-2" />
-            <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--brand-gold-champagne)' }}></div>
-          </div>
-          <span style={{ fontFamily: 'Georgia, serif', fontSize: '1.05rem', fontWeight: '800', color: 'var(--brand-card-cream)', letterSpacing: '0.05em', lineHeight: '1.1' }}>
-            DANI DECLARES LLC
-          </span>
-          <span style={{ fontSize: '0.6rem', fontWeight: '700', color: 'var(--brand-gold-champagne)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '0.1rem' }}>
-            OPERATIONS • EXECUTION • SUPPORT
-          </span>
+    <header className="dd-navbar-header">
+      <div className="dd-navbar-container">
+        <Link to="/" className="dd-navbar-brand-logo" onClick={closeAll} aria-label="Dani Declares home">
+          <div className="dd-logo-monogram" aria-hidden="true">DD</div>
+          <div className="dd-logo-rule"><span /> <img src="/logo-script.png" alt="Dani Declares" /> <span /></div>
+          <span className="dd-logo-name">DANI DECLARES LLC</span>
+          <span className="dd-logo-tagline">OPERATIONS • EXECUTION • SUPPORT</span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="dd-navbar-nav desktop-only" style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={closeMenu}
-              style={({ isActive }) => ({
-                color: isActive ? 'var(--brand-gold-champagne)' : 'var(--brand-card-cream)',
-                textDecoration: 'none',
-                fontWeight: '700',
-                fontSize: '0.925rem',
-                borderBottom: isActive ? '2px solid var(--brand-gold-champagne)' : '2px solid transparent',
-                paddingBottom: '0.2rem'
-              })}
-            >
-              {item.label}
-            </NavLink>
+        <nav className="dd-navbar-nav desktop-only" aria-label="Primary navigation">
+          <NavLink className="dd-top-link" to="/" onClick={closeAll}>Home</NavLink>
+          {desktopGroups.map((group) => (
+            <div className="dd-nav-group" key={group.key}>
+              <button
+                type="button"
+                className={`dd-top-link dd-nav-trigger ${openMenu === group.key ? 'is-open' : ''}`}
+                aria-expanded={openMenu === group.key}
+                onClick={() => toggleDesktopMenu(group.key)}
+              >
+                {group.label} <span aria-hidden="true">▾</span>
+              </button>
+              {openMenu === group.key && (
+                <div className="dd-mega-menu" role="region" aria-label={`${group.label} menu`}>
+                  {group.columns.map((column) => (
+                    <div className="dd-mega-column" key={column.title}>
+                      <div className="dd-mega-title">{column.title}</div>
+                      {column.links.map(([label, path]) => (
+                        <Link key={`${label}-${path}`} to={path} onClick={closeAll} className="dd-mega-link">
+                          {label}
+                        </Link>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
+          <NavLink className="dd-top-link" to="/about" onClick={closeAll}>About</NavLink>
+          <NavLink className="dd-top-link" to="/contact" onClick={closeAll}>Contact</NavLink>
         </nav>
 
-        {/* Action Button & Mobile Toggle */}
-        <div className="dd-navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Link
-            to="/book"
-            onClick={closeMenu}
-            style={{ backgroundColor: 'var(--brand-gold-champagne)', color: 'var(--brand-burgundy-royal)', padding: '0.65rem 1.25rem', borderRadius: '6px', fontWeight: '800', fontSize: '0.875rem', textDecoration: 'none' }}
-          >
-            Start a Project →
-          </Link>
-
+        <div className="dd-navbar-actions">
+          <Link to="/book" onClick={closeAll} className="dd-project-cta">Start a Project →</Link>
           <button
-            onClick={toggleMenu}
-            aria-label="Toggle Navigation Menu"
-            style={{ background: 'transparent', border: '1px solid var(--brand-gold-champagne)', color: 'var(--brand-gold-champagne)', padding: '0.4rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '1.2rem', fontWeight: 'bold' }}
+            type="button"
+            onClick={() => setMobileMenuOpen((current) => !current)}
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileMenuOpen}
             className="dd-mobile-toggle"
           >
             {mobileMenuOpen ? '✕' : '☰'}
@@ -82,26 +177,26 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* MOBILE DRAWER MENU (Renders when open) */}
       {mobileMenuOpen && (
-        <div className="dd-mobile-menu" style={{ backgroundColor: 'var(--brand-bg-ivory)', borderTop: '1px solid var(--brand-gold-champagne)', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={closeMenu}
-              style={({ isActive }) => ({
-                color: isActive ? 'var(--brand-burgundy-royal)' : 'var(--brand-text-wine)',
-                textDecoration: 'none',
-                fontWeight: '800',
-                fontSize: '1.1rem',
-                padding: '0.5rem 0',
-                borderBottom: '1px solid rgba(0,0,0,0.03)'
-              })}
-            >
-              {item.label}
-            </NavLink>
+        <div className="dd-mobile-menu" aria-label="Mobile navigation">
+          <NavLink to="/" onClick={closeAll} className="dd-mobile-home">Home</NavLink>
+          {mobileGroups.map((group) => (
+            <div className="dd-mobile-group" key={group.key}>
+              <button type="button" className="dd-mobile-group-trigger" onClick={() => toggleMobileGroup(group.key)} aria-expanded={mobileExpanded === group.key}>
+                <span>{group.label}</span><span aria-hidden="true">{mobileExpanded === group.key ? '−' : '+'}</span>
+              </button>
+              {mobileExpanded === group.key && (
+                <div className="dd-mobile-submenu">
+                  {group.links.map(([label, path]) => (
+                    <Link key={`${label}-${path}`} to={path} onClick={closeAll}>{label}</Link>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
+          <Link to="/about" onClick={closeAll} className="dd-mobile-home">About</Link>
+          <Link to="/contact" onClick={closeAll} className="dd-mobile-home">Contact</Link>
+          <Link to="/book" onClick={closeAll} className="dd-mobile-project-cta">Start a Project →</Link>
         </div>
       )}
     </header>
