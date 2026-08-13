@@ -9,12 +9,12 @@
 --
 -- Expected pre-Migration-1 state:
 --   * auth.users exists
---   * dd_portal_profiles does not exist
---   * dd_user_roles does not exist
---   * dd_audit_logs does not exist
+--   * dd_portal_profiles does not exist in public
+--   * dd_user_roles does not exist in public
+--   * dd_audit_logs does not exist in public
 --   * public.set_updated_at() exists exactly once with zero arguments
---   * dd_prevent_audit_log_mutation() does not exist in public
---   * Migration 1 trigger/policy names do not already exist
+--   * public.dd_prevent_audit_log_mutation() does not exist
+--   * Migration 1 trigger/policy names do not already exist in public
 
 -- ---------------------------------------------------------------------------
 -- 1. Required Supabase auth dependency
@@ -48,7 +48,7 @@ left join pg_class c
 left join pg_namespace n
   on n.oid = c.relnamespace
  and n.nspname = 'public'
-where c.oid is null or n.oid is not null
+ and c.relkind in ('r', 'p')
 order by expected.table_name;
 
 -- ---------------------------------------------------------------------------
@@ -81,6 +81,7 @@ where n.nspname = 'public'
 -- ---------------------------------------------------------------------------
 -- 5. Trigger-name collision checks
 -- ---------------------------------------------------------------------------
+-- These names exactly match the triggers created by Migration 1.
 select
   expected.trigger_name,
   case when t.oid is null then 'PASS' else 'FAIL' end as result,
@@ -99,6 +100,7 @@ order by expected.trigger_name;
 -- ---------------------------------------------------------------------------
 -- 6. Policy-name collision checks
 -- ---------------------------------------------------------------------------
+-- These names exactly match the policies created by Migration 1.
 select
   expected.policy_name,
   case when p.policyname is null then 'PASS' else 'FAIL' end as result,
