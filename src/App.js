@@ -38,7 +38,8 @@ import VendorPortal from "./pages/VendorPortal.jsx";
 
 // Other Tools
 import RequestServicePage from "./pages/RequestServicePage.jsx";
-import ResidentConciergePage from "./pages/ResidentConciergeSafePage.jsx";
+import ResidentConciergePage from "./pages/ResidentConciergeProductionPage.jsx";
+import ResidentFulfillmentPage from "./pages/ResidentFulfillmentPage.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
 
 // Blog
@@ -70,6 +71,7 @@ export default function App() {
         <Route path="/services/notary" element={<NotaryPage />} />
         <Route path="/resident-concierge" element={<ResidentConciergePage />} />
         <Route path="/resident-dispatch" element={<ResidentConciergePage />} />
+        <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/weddings" element={<WeddingsDivisionPage />} />
         <Route path="/events/weddings" element={<WeddingsPage />} />
         <Route path="/events/festivals" element={<FestivalPage />} />
