@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { listResidentDispatches, updateResidentDispatch } from '../services/residentDispatchService';
 
@@ -34,12 +34,12 @@ export default function ResidentFulfillmentPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setBusy(true); setError('');
     const result = await listResidentDispatches({ status });
     if (!result.success) setError(result.error || 'Unable to load dispatches.');
     setDispatches(result.data || []); setBusy(false);
-  };
+  }, [status]);
 
   useEffect(() => {
     let active = true;
@@ -48,7 +48,7 @@ export default function ResidentFulfillmentPage() {
     return () => { active = false; listener.subscription.unsubscribe(); };
   }, []);
 
-  useEffect(() => { if (session) load(); }, [session, status]);
+  useEffect(() => { if (session) load(); }, [session, load]);
 
   const stats = useMemo(() => {
     const count = s => dispatches.filter(x => x.status === s).length;
