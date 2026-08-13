@@ -1,15 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Sparkles, Printer, ArrowRight, ShieldCheck } from 'lucide-react';
+import { getPriceLabel } from '../data/pricingCanon';
 
 export default function ShopPage() {
   const products = [
-    { name: "SmartTap™ NFC Business Card", category: "Smart Hardware", price: "$49.00", margin: "High-Tech NFC", icon: Sparkles, desc: "Instant contact & profile sharing via NFC tap." },
-    { name: "Smart Review Counter Stand", category: "Smart Hardware", price: "$49.00", margin: "NFC + QR", icon: Sparkles, desc: "Direct Google Review capture plaque for retail counters." },
-    { name: "Custom Heat-Press DTF Apparel (4-Pack)", category: "Creative Merch", price: "$98.00", margin: "Volume Apparel", icon: Printer, desc: "High-grade DTF printed branded tees or event shirts." },
-    { name: "Sublimated 20 oz Tumbler (2-Pack)", category: "Creative Merch", price: "$48.00", margin: "Drinkware", icon: Printer, desc: "Double-wall insulated custom branded tumblers." },
+    { name: "SmartTap™ NFC Business Card", category: "Smart Hardware", priceKey: "nfc", margin: "High-Tech NFC", icon: Sparkles, desc: "Instant contact & profile sharing via NFC tap." },
+    { name: "Smart Review Counter Stand", category: "Smart Hardware", priceKey: "review_stand", margin: "NFC + QR", icon: Sparkles, desc: "Direct Google Review capture plaque for retail counters." },
+    { name: "Custom Heat-Press DTF Apparel (4-Pack)", category: "Creative Merch", priceKey: "apparel", margin: "Volume Apparel", icon: Printer, desc: "High-grade DTF printed branded tees or event shirts." },
+    { name: "Sublimated 20 oz Tumbler (2-Pack)", category: "Creative Merch", priceKey: "tumbler", margin: "Drinkware", icon: Printer, desc: "Double-wall insulated custom branded tumblers." },
     { name: "Express Family Care Snack Box", category: "Market Goods", price: "$15.00", margin: "Curated Box", icon: ShoppingBag, desc: "Premium snack assortment for move-in gifts or event staff." },
-    { name: "Business Startup Infrastructure Kit", category: "Business Kits", price: "$199.00", margin: "Turnkey SOPs", icon: ShieldCheck, desc: "Complete registration binders, corporate seals, and setup." }
+    { name: "Business Startup Infrastructure Kit", category: "Business Kits", priceKey: "startup_kit", margin: "Turnkey SOPs", icon: ShieldCheck, desc: "Complete registration binders, corporate seals, and setup." }
   ];
 
   return (
@@ -32,7 +33,9 @@ export default function ShopPage() {
                 <p className="text-slate-400 text-sm mb-6">{p.desc}</p>
               </div>
               <div>
-                <div className="text-2xl font-extrabold text-amber-400 mb-4">{p.price}</div>
+                <div className="text-2xl font-extrabold text-amber-400 mb-4">
+                  {p.priceKey ? getPriceLabel(p.priceKey) : p.price}
+                </div>
                 <Link to="/request-service" className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-white font-semibold text-sm transition-all">
                   Order Deliverable <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
