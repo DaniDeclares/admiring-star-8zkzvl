@@ -59,10 +59,44 @@ const CATALOG = [
 ];
 
 const css = `
-.rc-page{min-height:100vh;padding-bottom:130px;background:#faf6f0;color:#231a1a;font-family:Inter,system-ui,sans-serif}.rc-page *{box-sizing:border-box}.rc-head{padding:26px 18px 20px;text-align:center;color:#fff;background:linear-gradient(180deg,#6b1426,#4a0d19);border-bottom:3px solid #a9824c}.rc-eye{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#a9824c}.rc-head h1{font-family:'Playfair Display',Georgia,serif;margin:8px 0 4px;font-size:26px}.rc-head p{margin:0;font-size:13px}.rc-discount{max-width:640px;margin:14px auto 0;padding:12px 15px;background:#fffdfa;color:#231a1a;border:1px dashed #a9824c;border-radius:6px;font-size:12.5px}.rc-discount b{color:#6b1426}.rc-tabs{position:sticky;top:0;z-index:20;display:flex;overflow:auto;background:#fffdfa;border-bottom:1px solid #e4d9cc}.rc-tabs button{flex:0 0 auto;border:0;background:none;padding:14px;font-weight:700;color:#8a7a75;white-space:nowrap}.rc-tabs button.active{color:#6b1426;border-bottom:3px solid #6b1426}.rc-main{max-width:640px;margin:auto;padding:16px}.rc-heading{font-family:'Playfair Display',Georgia,serif;color:#6b1426;font-size:20px;font-weight:700}.rc-sub{font-size:12.5px;color:#7a6c66;line-height:1.5;margin:4px 0 14px}.rc-card{background:#fffdfa;border:1px solid #e4d9cc;border-radius:10px;padding:14px;margin-bottom:12px}.rc-name{font-weight:700;font-size:15px}.rc-desc{font-size:12px;color:#7a6c66;line-height:1.45;margin:4px 0 10px}.rc-row{display:flex;gap:10px;align-items:center;justify-content:space-between}.rc-select,.rc-form input,.rc-form select{width:100%;padding:9px;border:1px solid #e4d9cc;border-radius:6px;background:#faf6f0}.rc-price{font-family:'IBM Plex Mono',monospace;color:#6b1426;font-weight:700;white-space:nowrap}.rc-controls{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px}.rc-qty{width:30px;height:30px;border-radius:50%;border:1px solid #e4d9cc;background:#f3e7de;color:#6b1426;font-weight:700}.rc-add{border:0;border-radius:6px;padding:8px 16px;background:#6b1426;color:#fff;font-weight:700}.rc-note{font-size:11px;color:#a9824c;font-style:italic;margin-top:6px}.rc-bar{position:fixed;z-index:30;left:0;right:0;bottom:0;background:#fffdfa;border-top:1px solid #e4d9cc;padding:12px 16px}.rc-bar button{width:100%;max-width:640px;margin:auto;display:flex;justify-content:space-between;align-items:center;border:0;background:none}.rc-total{font-family:'IBM Plex Mono',monospace;font-size:18px;color:#6b1426;font-weight:700}.rc-count{display:block;text-align:left;font-size:12px;color:#7a6c66}.rc-view{color:#a9824c;font-size:12px;font-weight:700}.rc-overlay{position:fixed;inset:0;z-index:100;pointer-events:auto;background:rgba(35,26,26,.6);display:flex;align-items:flex-end;justify-content:center}.rc-ticket{position:relative;z-index:101;width:100%;max-width:640px;max-height:90vh;overflow:auto;background:#fffdfa;border-radius:16px 16px 0 0;padding:20px}.rc-line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dotted #e4d9cc}.rc-line-meta{font-size:11px;color:#8a7a75}.rc-remove{border:0;background:none;color:#b0453f;text-decoration:underline;font-size:11px}.rc-total-row{display:flex;justify-content:space-between;border-top:2px dashed #e4d9cc;margin-top:10px;padding-top:12px;color:#6b1426;font-weight:700}.rc-form{margin-top:14px}.rc-form label{display:block;margin:10px 0 5px;font-size:11px;font-weight:700;text-transform:uppercase}.rc-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}.rc-actions a,.rc-actions button{padding:13px;border-radius:8px;text-align:center;font-weight:700;text-decoration:none;border:0}.rc-wa{background:#25d366;color:#fff}.rc-sms{background:#6b1426;color:#fff}.rc-close{background:none;color:#8a7a75}.rc-disclosure{text-align:center;font-size:10.5px;color:#9b8d87;line-height:1.5;margin-top:14px}
+.rc-page{min-height:100vh;padding-bottom:130px;background:#faf6f0;color:#231a1a;font-family:Inter,system-ui,sans-serif}.rc-page *{box-sizing:border-box}.rc-head{padding:26px 18px 20px;text-align:center;color:#fff;background:linear-gradient(180deg,#6b1426,#4a0d19);border-bottom:3px solid #a9824c}.rc-eye{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#a9824c}.rc-head h1{font-family:'Playfair Display',Georgia,serif;margin:8px 0 4px;font-size:26px}.rc-head p{margin:0;font-size:13px}.rc-discount{max-width:640px;margin:14px auto 0;padding:12px 15px;background:#fffdfa;color:#231a1a;border:1px dashed #a9824c;border-radius:6px;font-size:12.5px}.rc-discount b{color:#6b1426}.rc-tabs{position:sticky;top:0;z-index:20;display:flex;overflow:auto;background:#fffdfa;border-bottom:1px solid #e4d9cc}.rc-tabs button{flex:0 0 auto;border:0;background:none;padding:14px;font-weight:700;color:#8a7a75;white-space:nowrap}.rc-tabs button.active{color:#6b1426;border-bottom:3px solid #6b1426}.rc-main{max-width:640px;margin:auto;padding:16px}.rc-heading{font-family:'Playfair Display',Georgia,serif;color:#6b1426;font-size:20px;font-weight:700}.rc-sub{font-size:12.5px;color:#7a6c66;line-height:1.5;margin:4px 0 14px}.rc-card{background:#fffdfa;border:1px solid #e4d9cc;border-radius:10px;padding:14px;margin-bottom:12px}.rc-name{font-weight:700;font-size:15px}.rc-desc{font-size:12px;color:#7a6c66;line-height:1.45;margin:4px 0 10px}.rc-row{display:flex;gap:10px;align-items:center;justify-content:space-between}.rc-select,.rc-form input,.rc-form select{width:100%;padding:9px;border:1px solid #e4d9cc;border-radius:6px;background:#faf6f0}.rc-price{font-family:'IBM Plex Mono',monospace;color:#6b1426;font-weight:700;white-space:nowrap}.rc-controls{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px}.rc-qty{width:30px;height:30px;border-radius:50%;border:1px solid #e4d9cc;background:#f3e7de;color:#6b1426;font-weight:700}.rc-add{border:0;border-radius:6px;padding:8px 16px;background:#6b1426;color:#fff;font-weight:700}.rc-note{font-size:11px;color:#a9824c;font-style:italic;margin-top:6px}.rc-bar{position:fixed;z-index:30;left:0;right:0;bottom:0;background:#fffdfa;border-top:1px solid #e4d9cc;padding:12px 16px}.rc-bar button{width:100%;max-width:640px;margin:auto;display:flex;justify-content:space-between;align-items:center;border:0;background:none}.rc-total{font-family:'IBM Plex Mono',monospace;font-size:18px;color:#6b1426;font-weight:700}.rc-count{display:block;text-align:left;font-size:12px;color:#7a6c66}.rc-view{color:#a9824c;font-size:12px;font-weight:700}.rc-overlay{position:fixed;inset:0;z-index:100;pointer-events:auto;background:rgba(35,26,26,.6);display:flex;align-items:flex-end;justify-content:center}.rc-ticket{position:relative;z-index:101;width:100%;max-width:640px;max-height:90vh;overflow:auto;background:#fffdfa;border-radius:16px 16px 0 0;padding:20px}.rc-line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dotted #e4d9cc}.rc-line-meta{font-size:11px;color:#8a7a75}.rc-remove{border:0;background:none;color:#b0453f;text-decoration:underline;font-size:11px}.rc-total-row{display:flex;justify-content:space-between;border-top:2px dashed #e4d9cc;margin-top:10px;padding-top:12px;color:#6b1426;font-weight:700}.rc-fee-row{display:flex;justify-content:space-between;font-size:12px;color:#7a6c66;padding:4px 0}.rc-modifier{margin-top:14px;padding:12px;border:1px dashed #d5c3b1;border-radius:8px;background:#faf6f0}.rc-modifier label{display:flex;align-items:flex-start;gap:8px;margin:8px 0;font-size:12px;color:#5f514c}.rc-modifier input[type=number]{width:100%;padding:9px;border:1px solid #e4d9cc;border-radius:6px;background:#fffdfa}.rc-form{margin-top:14px}.rc-form label{display:block;margin:10px 0 5px;font-size:11px;font-weight:700;text-transform:uppercase}.rc-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}.rc-actions a,.rc-actions button{padding:13px;border-radius:8px;text-align:center;font-weight:700;text-decoration:none;border:0}.rc-wa{background:#25d366;color:#fff}.rc-sms{background:#6b1426;color:#fff}.rc-close{background:none;color:#8a7a75}.rc-disclosure{text-align:center;font-size:10.5px;color:#9b8d87;line-height:1.5;margin-top:14px}
 `;
 
 const money = (value) => `$${Number(value).toFixed(2)}`;
+
+/**
+ * Deterministic B2C Calculation Engine.
+ * CATALOG prices are authoritative Resident Rates; no additional 0.85 multiplier is applied.
+ */
+export function calculateOrderTotals(cart, options = {}) {
+  const {
+    moveOutHeavySoil = false,
+    eventBudget = 0,
+  } = options;
+
+  const lines = Object.values(cart || {});
+  const baseTotal = lines.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty || 0)), 0);
+
+  const snackLines = lines.filter((item) => item.category === 'snacks');
+  const snackSubtotal = snackLines.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty || 0)), 0);
+  const snackDelivery = snackLines.length > 0 && snackSubtotal < 10 ? 1 : 0;
+
+  const hasMoveOutItem = lines.some((item) => item.itemId === 'clean-moveout');
+  const moveOutSurcharge = hasMoveOutItem && moveOutHeavySoil ? 150 : 0;
+
+  const hasFullEventItem = lines.some((item) => item.itemId === 'event-full');
+  const normalizedEventBudget = Math.max(0, Number(eventBudget) || 0);
+  const eventPlanningFee = hasFullEventItem && normalizedEventBudget > 0 ? normalizedEventBudget * 0.1 : 0;
+
+  return {
+    baseTotal,
+    snackSubtotal,
+    snackDelivery,
+    moveOutSurcharge,
+    eventPlanningFee,
+    grandTotal: baseTotal + snackDelivery + moveOutSurcharge + eventPlanningFee,
+  };
+}
 
 export default function ResidentConciergeSafePage() {
   const [category, setCategory] = useState(CATALOG[0].cat);
@@ -73,26 +107,74 @@ export default function ResidentConciergeSafePage() {
   const [resident, setResident] = useState('');
   const [payment, setPayment] = useState('Zelle');
   const [note, setNote] = useState('');
+  const [moveOutHeavySoil, setMoveOutHeavySoil] = useState(false);
+  const [eventBudget, setEventBudget] = useState('');
 
   const active = CATALOG.find((entry) => entry.cat === category) || CATALOG[0];
   const lines = Object.keys(cart).map((key) => ({ key, ...cart[key] }));
-  const total = lines.reduce((sum, line) => sum + line.price * line.qty, 0);
   const count = lines.reduce((sum, line) => sum + line.qty, 0);
+  const totals = calculateOrderTotals(cart, { moveOutHeavySoil, eventBudget });
+  const hasMoveOutItem = lines.some((line) => line.itemId === 'clean-moveout');
+  const hasFullEventItem = lines.some((line) => line.itemId === 'event-full');
 
   const add = (item) => {
     const index = Number(variant[item.id] || 0);
     const selected = item.variants[index] || item.variants[0];
     const amount = Math.max(1, Number(qty[item.id] || 1));
     const key = `${item.id}:${index}`;
-    setCart((current) => ({ ...current, [key]: current[key] ? { ...current[key], qty: current[key].qty + amount } : { name: item.name, variantLabel: selected.label, price: selected.price, qty: amount, unit: item.unit || '', note: item.note || '' } }));
+    setCart((current) => ({
+      ...current,
+      [key]: current[key]
+        ? { ...current[key], qty: current[key].qty + amount }
+        : {
+            itemId: item.id,
+            category: item.cat,
+            name: item.name,
+            variantLabel: selected.label,
+            price: selected.price,
+            qty: amount,
+            unit: item.unit || '',
+            note: item.note || '',
+          },
+    }));
     setQty((current) => ({ ...current, [item.id]: 1 }));
+  };
+
+  const removeLine = (key) => {
+    setCart((current) => {
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
   };
 
   const send = (channel) => {
     if (!count) return window.alert('Add at least one item before sending your ticket.');
     if (!resident.trim()) return window.alert('Please enter your name and unit number.');
-    const items = lines.map((line) => `• ${line.qty}x ${line.name}${line.variantLabel || line.unit ? ` — ${[line.variantLabel, line.unit].filter(Boolean).join(' ')}` : ''} (${money(line.price * line.qty)})`).join('\n');
-    const message = ['DANI DECLARES SERVICE TICKET', '=====================', `Name/Unit: ${resident.trim()}`, `Payment: ${payment}`, note.trim() ? `Notes: ${note.trim()}` : '', '=====================', `ITEMS:\n${items}`, `ESTIMATED TOTAL: ${money(total)}`].filter(Boolean).join('\n');
+
+    const items = lines
+      .map((line) => `• ${line.qty}x ${line.name}${line.variantLabel || line.unit ? ` — ${[line.variantLabel, line.unit].filter(Boolean).join(' ')}` : ''} (${money(line.price * line.qty)})`)
+      .join('\n');
+
+    const feeLines = [
+      totals.snackDelivery ? `Snack delivery: ${money(totals.snackDelivery)}` : '',
+      totals.moveOutSurcharge ? `Heavy-soil move-out surcharge: ${money(totals.moveOutSurcharge)}` : '',
+      totals.eventPlanningFee ? `Event coordination fee (10%): ${money(totals.eventPlanningFee)}` : '',
+    ].filter(Boolean).join('\n');
+
+    const message = [
+      'DANI DECLARES SERVICE TICKET',
+      '=====================',
+      `Name/Unit: ${resident.trim()}`,
+      `Payment: ${payment}`,
+      note.trim() ? `Notes: ${note.trim()}` : '',
+      '=====================',
+      `ITEMS:\n${items}`,
+      feeLines ? `FEES:\n${feeLines}` : '',
+      `BASE SUBTOTAL: ${money(totals.baseTotal)}`,
+      `ESTIMATED TOTAL: ${money(totals.grandTotal)}`,
+    ].filter(Boolean).join('\n');
+
     const encoded = encodeURIComponent(message);
     window.location.href = channel === 'whatsapp' ? `https://wa.me/${PHONE}?text=${encoded}` : `sms:+${PHONE}?body=${encoded}`;
   };
@@ -101,13 +183,55 @@ export default function ResidentConciergeSafePage() {
     <div className="rc-overlay" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
       <section className="rc-ticket" role="dialog" aria-modal="true" aria-labelledby="rc-ticket-title">
         <div className="rc-eye">Dispatch Ticket</div><h2 id="rc-ticket-title">Your Service Request</h2>
-        {!lines.length ? <p>No items yet — add something from the menu.</p> : lines.map((line) => <div className="rc-line" key={line.key}><div><strong>{line.qty} × {line.name}</strong>{(line.variantLabel || line.unit) && <div className="rc-line-meta">{[line.variantLabel, line.unit].filter(Boolean).join(' ')}</div>}{line.note && <div className="rc-line-meta">{line.note}</div>}<button className="rc-remove" type="button" onClick={() => setCart((current) => { const next = { ...current }; delete next[line.key]; return next; })}>Remove</button></div><span>{money(line.price * line.qty)}</span></div>)}
-        <div className="rc-total-row"><span>Estimated Total</span><span>{money(total)}</span></div>
-        <div className="rc-form"><label htmlFor="rc-name">Name &amp; Unit Number</label><input id="rc-name" value={resident} onChange={(event) => setResident(event.target.value)} placeholder="e.g. Jordan — Unit 214" /><label htmlFor="rc-payment">Preferred Payment Method</label><select id="rc-payment" value={payment} onChange={(event) => setPayment(event.target.value)}><option>Zelle</option><option>Venmo</option><option>Apple Pay</option><option>PayPal</option><option>Cash upon arrival</option></select><label htmlFor="rc-note">Notes for the field team</label><input id="rc-note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="Gate code, preferred time, etc." /></div>
+        {!lines.length ? <p>No items yet — add something from the menu.</p> : lines.map((line) => (
+          <div className="rc-line" key={line.key}>
+            <div>
+              <strong>{line.qty} × {line.name}</strong>
+              {(line.variantLabel || line.unit) && <div className="rc-line-meta">{[line.variantLabel, line.unit].filter(Boolean).join(' ')}</div>}
+              {line.note && <div className="rc-line-meta">{line.note}</div>}
+              <button className="rc-remove" type="button" onClick={() => removeLine(line.key)}>Remove</button>
+            </div>
+            <span>{money(line.price * line.qty)}</span>
+          </div>
+        ))}
+
+        {hasMoveOutItem && (
+          <div className="rc-modifier">
+            <strong>Move-Out Condition</strong>
+            <label>
+              <input type="checkbox" checked={moveOutHeavySoil} onChange={(event) => setMoveOutHeavySoil(event.target.checked)} />
+              Severe pet mess / heavy soil (+$150.00)
+            </label>
+          </div>
+        )}
+
+        {hasFullEventItem && (
+          <div className="rc-modifier">
+            <strong>Event Budget</strong>
+            <div className="rc-line-meta">Enter the total event budget so the 10% coordination fee can be calculated.</div>
+            <input type="number" min="0" step="0.01" value={eventBudget} onChange={(event) => setEventBudget(event.target.value)} placeholder="e.g. 2500" aria-label="Total event budget" />
+          </div>
+        )}
+
+        <div className="rc-total-row"><span>Base Subtotal</span><span>{money(totals.baseTotal)}</span></div>
+        {totals.snackDelivery > 0 && <div className="rc-fee-row"><span>Snack delivery</span><span>{money(totals.snackDelivery)}</span></div>}
+        {totals.moveOutSurcharge > 0 && <div className="rc-fee-row"><span>Heavy-soil surcharge</span><span>{money(totals.moveOutSurcharge)}</span></div>}
+        {totals.eventPlanningFee > 0 && <div className="rc-fee-row"><span>Event coordination (10%)</span><span>{money(totals.eventPlanningFee)}</span></div>}
+        <div className="rc-total-row"><span>Estimated Total</span><span>{money(totals.grandTotal)}</span></div>
+
+        <div className="rc-form">
+          <label htmlFor="rc-name">Name &amp; Unit Number</label>
+          <input id="rc-name" value={resident} onChange={(event) => setResident(event.target.value)} placeholder="e.g. Jordan — Unit 214" />
+          <label htmlFor="rc-payment">Preferred Payment Method</label>
+          <select id="rc-payment" value={payment} onChange={(event) => setPayment(event.target.value)}><option>Zelle</option><option>Venmo</option><option>Apple Pay</option><option>PayPal</option><option>Cash upon arrival</option></select>
+          <label htmlFor="rc-note">Notes for the field team</label>
+          <input id="rc-note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="Gate code, preferred time, etc." />
+        </div>
+
         <div className="rc-actions"><a className="rc-wa" href="#whatsapp" onClick={(event) => { event.preventDefault(); send('whatsapp'); }}>📱 Send via WhatsApp</a><a className="rc-sms" href="#sms" onClick={(event) => { event.preventDefault(); send('sms'); }}>💬 Send via Text Message</a><button className="rc-close" type="button" onClick={() => setOpen(false)}>Keep Browsing</button></div>
-        <div className="rc-disclosure">Rates shown are the standard Resident Rate. Items marked + travel or + event budget % are finalized at booking. Dani Declares LLC does not draft legal documents or provide legal advice for notary services.<br />Field office: (470) 485-7173 · admin@danideclares.com</div>
+        <div className="rc-disclosure">Rates shown are the standard Resident Rate. Items marked + travel or + event budget % are finalized at booking. Dani Declares LLC does not draft legal documents, provide legal advice, or determine which document a resident should use for notary services.<br />Field office: (470) 485-7173 · admin@danideclares.com</div>
       </section>
     </div>, document.body) : null;
 
-  return <div className="rc-page"><style>{css}</style><header className="rc-head"><div className="rc-eye">Field Office Dispatch</div><h1>Dani Declares LLC</h1><p>Resident Concierge Menu &amp; Service Requests</p><div className="rc-discount">Every item below already reflects your <b>15% Resident Discount</b>. Submit your ticket and our field office confirms scheduling by text.</div></header><nav className="rc-tabs" aria-label="Resident concierge categories">{CATALOG.map((entry) => <button type="button" key={entry.cat} className={entry.cat === category ? 'active' : ''} onClick={() => setCategory(entry.cat)}>{entry.label}</button>)}</nav><main className="rc-main"><div className="rc-heading">{active.heading}</div>{active.sub && <div className="rc-sub">{active.sub}</div>}{active.items.map((item) => { const selected = item.variants[Number(variant[item.id] || 0)] || item.variants[0]; return <article className="rc-card" key={item.id}><div className="rc-name">{item.name}</div>{item.desc && <div className="rc-desc">{item.desc}</div>}<div className="rc-row">{item.variants.length > 1 ? <select className="rc-select" value={Number(variant[item.id] || 0)} onChange={(event) => setVariant((current) => ({ ...current, [item.id]: Number(event.target.value) }))}>{item.variants.map((option, index) => <option value={index} key={`${item.id}-${index}`}>{option.label} — {money(option.price)}</option>)}</select> : <div className="rc-price">{money(selected.price)}{item.unit ? ` ${item.unit}` : ''}</div>}</div><div className="rc-controls"><button type="button" className="rc-qty" onClick={() => setQty((current) => ({ ...current, [item.id]: Math.max(1, (current[item.id] || 1) - 1) }))}>−</button><span>{qty[item.id] || 1}</span><button type="button" className="rc-qty" onClick={() => setQty((current) => ({ ...current, [item.id]: (current[item.id] || 1) + 1 }))}>+</button><button type="button" className="rc-add" onClick={() => add(item)}>Add</button></div>{item.note && <div className="rc-note">{item.note}</div>}</article>; })}</main><div className="rc-bar"><button type="button" onClick={() => setOpen(true)}><span><span className="rc-total">{money(total)}</span><span className="rc-count">{count ? `${count} item${count === 1 ? '' : 's'} on your ticket` : 'Your ticket is empty'}</span></span><span className="rc-view">View Ticket →</span></button></div>{ticket}</div>;
+  return <div className="rc-page"><style>{css}</style><header className="rc-head"><div className="rc-eye">Field Office Dispatch</div><h1>Dani Declares LLC</h1><p>Resident Concierge Menu &amp; Service Requests</p><div className="rc-discount">Every item below already reflects your <b>15% Resident Discount</b>. Submit your ticket and our field office confirms scheduling by text.</div></header><nav className="rc-tabs" aria-label="Resident concierge categories">{CATALOG.map((entry) => <button type="button" key={entry.cat} className={entry.cat === category ? 'active' : ''} onClick={() => setCategory(entry.cat)}>{entry.label}</button>)}</nav><main className="rc-main"><div className="rc-heading">{active.heading}</div>{active.sub && <div className="rc-sub">{active.sub}</div>}{active.items.map((item) => { const selected = item.variants[Number(variant[item.id] || 0)] || item.variants[0]; return <article className="rc-card" key={item.id}><div className="rc-name">{item.name}</div>{item.desc && <div className="rc-desc">{item.desc}</div>}<div className="rc-row">{item.variants.length > 1 ? <select className="rc-select" value={Number(variant[item.id] || 0)} onChange={(event) => setVariant((current) => ({ ...current, [item.id]: Number(event.target.value) }))}>{item.variants.map((option, index) => <option value={index} key={`${item.id}-${index}`}>{option.label} — {money(option.price)}</option>)}</select> : <div className="rc-price">{money(selected.price)}{item.unit ? ` ${item.unit}` : ''}</div>}</div><div className="rc-controls"><button type="button" className="rc-qty" onClick={() => setQty((current) => ({ ...current, [item.id]: Math.max(1, (current[item.id] || 1) - 1) }))}>−</button><span>{qty[item.id] || 1}</span><button type="button" className="rc-qty" onClick={() => setQty((current) => ({ ...current, [item.id]: (current[item.id] || 1) + 1 }))}>+</button><button type="button" className="rc-add" onClick={() => add(item)}>Add</button></div>{item.note && <div className="rc-note">{item.note}</div>}</article>; })}</main><div className="rc-bar"><button type="button" onClick={() => setOpen(true)}><span><span className="rc-total">{money(totals.grandTotal)}</span><span className="rc-count">{count ? `${count} item${count === 1 ? '' : 's'} on your ticket` : 'Your ticket is empty'}</span></span><span className="rc-view">View Ticket →</span></button></div>{ticket}</div>;
 }
