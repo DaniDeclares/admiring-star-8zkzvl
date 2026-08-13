@@ -2,12 +2,9 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 
-// Core Brand Pages
 import HomePage from "./pages/HomePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
-
-// Services
 import ServicesPage from "./pages/ServicesPage.jsx";
 import BusinessSolutionsPage from "./pages/BusinessSolutionsPage.jsx";
 import PrintStudioPage from "./pages/services/PrintStudioPage.jsx";
@@ -18,34 +15,23 @@ import FederalPage from "./pages/FederalPage.jsx";
 import FacilityVisitsPage from "./pages/FacilityVisitsPage.jsx";
 import ExpressGoodsPage from "./pages/ExpressGoodsPage.jsx";
 import NotaryPage from "./pages/NotaryPage.jsx";
-
-// Weddings & Events
 import WeddingsDivisionPage from "./divisions/events/WeddingsDivisionPage.jsx";
 import WeddingsPage from "./pages/WeddingsPage.jsx";
 import FestivalPage from "./pages/FestivalPage.jsx";
-
-// Commerce / Booking / Property
 import BookingPage from "./pages/BookingPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
 import RealEstatePage from "./pages/RealEstatePage.jsx";
-
-// Network / Membership
 import PackagesPage from "./pages/PackagesPage.jsx";
 import PartnerNetwork from "./pages/PartnerNetwork.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import NetworkHubPage from "./pages/NetworkHubPage.jsx";
 import VendorPortal from "./pages/VendorPortal.jsx";
-
-// Other Tools
 import RequestServicePage from "./pages/RequestServicePage.jsx";
-import ResidentConciergePage from "./pages/ResidentConciergeSafePage.jsx";
+import ResidentConciergePage from "./pages/ResidentConciergeLivePage.jsx";
+import ResidentFulfillmentPage from "./pages/ResidentFulfillmentPage.jsx";
 import TravelQuotePage from "./pages/TravelQuotePage.jsx";
-
-// Blog
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
-
-// Legal
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 
@@ -70,6 +56,7 @@ export default function App() {
         <Route path="/services/notary" element={<NotaryPage />} />
         <Route path="/resident-concierge" element={<ResidentConciergePage />} />
         <Route path="/resident-dispatch" element={<ResidentConciergePage />} />
+        <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/weddings" element={<WeddingsDivisionPage />} />
         <Route path="/events/weddings" element={<WeddingsPage />} />
         <Route path="/events/festivals" element={<FestivalPage />} />
