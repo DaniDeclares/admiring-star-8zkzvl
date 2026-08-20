@@ -20,9 +20,17 @@ export function workflowFamily(channel) {
   return null;
 }
 
+export function normalizeWorkflowState(state) {
+  const normalized = String(state || '').trim().toUpperCase();
+  if (normalized === 'NEW') return 'INTAKE';
+  return normalized;
+}
+
 export function canTransition(channel, from, to) {
   const family = workflowFamily(channel);
   if (!family) return false;
+  const fromState = normalizeWorkflowState(from);
+  const toState = normalizeWorkflowState(to);
   const allowed = {
     B2C: {
       INTAKE: ['PRICED', 'CANCELLED'],
@@ -64,14 +72,14 @@ export function canTransition(channel, from, to) {
       CANCELLED: [],
     },
   }[family];
-  return Boolean(allowed?.[from]?.includes(to));
+  return Boolean(allowed?.[fromState]?.includes(toState));
 }
 
 export function assertTransition(channel, from, to) {
   if (!canTransition(channel, from, to)) {
     throw new Error(`Invalid workflow transition: ${channel} ${from} -> ${to}`);
   }
-  return to;
+  return normalizeWorkflowState(to);
 }
 
 export function nextStateAfterPayment(channel) {
