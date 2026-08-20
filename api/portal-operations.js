@@ -162,13 +162,32 @@ export default async function handler(req, res) {
 
     if (action === 'create_evidence_upload') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      const { jobId, fileName, contentType } = payload;
+      const { jobId, taskId, fileName, contentType, evidenceType = 'FIELD_PHOTO', fileMetadata = {} } = payload;
       if (!jobId || !fileName) return fail(res, 'jobId and fileName are required.');
+      if (!context.isStaff) {
+        const { data: job } = await context.supabase.from('dd_jobs').select('assigned_to').eq('id', jobId).single();
+        if (!job || String(job.assigned_to || '') !== String(context.identity.entity_id)) return fail(res, 'Job is not assigned to this provider.', 403);
+      }
       const safeName = String(fileName).replace(/[^a-zA-Z0-9._-]/g, '_');
       const actor = context.isStaff ? context.user.id : context.identity.entity_id;
       const path = `${jobId}/${actor}/${Date.now()}-${safeName}`;
       const { data, error } = await context.supabase.storage.from('dd-job-evidence').createSignedUploadUrl(path); if (error) throw error;
-      return ok(res, { path, token: data.token, contentType: contentType || 'application/octet-stream' });
+      return ok(res, { path, token: data.token, contentType: contentType || 'application/octet-stream', finalizePayload: { jobId, taskId: taskId || null, evidenceType, fileMetadata, storageUrl: path, providerId: actor } });
+    }
+
+    if (action === 'finalize_evidence') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const { jobId, taskId, storageUrl, evidenceType = 'FIELD_PHOTO', fileMetadata = {} } = payload;
+      if (!jobId || !storageUrl) return fail(res, 'jobId and storageUrl are required.');
+      const providerId = context.isStaff ? payload.providerId : context.identity.entity_id;
+      if (!providerId) return fail(res, 'Provider identity is required.');
+      if (!context.isStaff) {
+        const { data: job } = await context.supabase.from('dd_jobs').select('assigned_to').eq('id', jobId).single();
+        if (!job || String(job.assigned_to || '') !== String(providerId)) return fail(res, 'Job is not assigned to this provider.', 403);
+      }
+      const { data: evidence, error } = await context.supabase.from('dd_job_evidence').insert({ job_id: jobId, task_id: taskId || null, provider_id: providerId, evidence_type: evidenceType, storage_url: storageUrl, file_metadata: fileMetadata }).select().single();
+      if (error) throw error;
+      return ok(res, { evidence });
     }
 
     return fail(res, `Unknown portal action: ${action}`);
