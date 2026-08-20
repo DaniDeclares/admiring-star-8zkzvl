@@ -1,17 +1,47 @@
 import React, { useState } from 'react';
 import { Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import { OPERATIONS_CHANNELS } from '../lib/operations/intakeRouting2026';
+
+const CHANNEL_OPTIONS = [
+  {
+    value: OPERATIONS_CHANNELS.B2C,
+    label: 'Resident / Individual Service',
+  },
+  {
+    value: OPERATIONS_CHANNELS.B2B_APT,
+    label: 'Apartment / Property Management',
+  },
+  {
+    value: OPERATIONS_CHANNELS.B2B_RE,
+    label: 'Real Estate / Brokerage',
+  },
+  {
+    value: OPERATIONS_CHANNELS.B2B,
+    label: 'Business / Corporate',
+  },
+  {
+    value: OPERATIONS_CHANNELS.B2G,
+    label: 'Government / Institutional',
+  },
+];
 
 export default function RequestServicePage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    channelType: OPERATIONS_CHANNELS.B2C,
     category: 'FESTIVAL_EVENTS',
-    details: ''
+    organizationName: '',
+    locationAddress: '',
+    timeline: '',
+    budgetRange: '',
+    details: '',
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [routing, setRouting] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,12 +58,13 @@ export default function RequestServicePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          serviceType: formData.category
-        })
+          serviceType: formData.category,
+        }),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
+        setRouting(data.routing || null);
         setSubmitted(true);
       } else {
         setError(data.error || 'Failed to submit intake request.');
@@ -48,15 +79,14 @@ export default function RequestServicePage() {
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen pt-24 pb-20">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs sm:text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
-            <span>Single-Source Execution Intake</span>
+            <span>DDOS Operating Intake</span>
           </div>
           <h1 className="text-4xl font-extrabold text-white">Request Service & Quote</h1>
           <p className="text-slate-300 mt-2">
-            Direct routing to Dani Declares operating division leads.
+            Tell us what you need and how you are engaging Dani Declares so your request enters the correct operating workflow.
           </p>
         </div>
 
@@ -64,9 +94,14 @@ export default function RequestServicePage() {
           <div className="p-8 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center">
             <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Service Request Logged!</h2>
-            <p className="text-slate-300 mb-6">
-              Your request has been routed into our dispatch pipeline. Our operations team will issue your proposal within 4 hours.
+            <p className="text-slate-300 mb-4">
+              Your request has been routed into the appropriate Dani Declares operating workflow.
             </p>
+            {routing?.workflow && (
+              <p className="text-xs text-slate-400 mb-6">
+                Workflow: {routing.workflow.replaceAll('_', ' ')}
+              </p>
+            )}
             <button
               onClick={() => setSubmitted(false)}
               className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-all"
@@ -83,6 +118,26 @@ export default function RequestServicePage() {
             )}
 
             <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Engagement Type</label>
+              <select
+                name="channelType"
+                value={formData.channelType}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+              >
+                {CHANNEL_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-500 mt-2">
+                This determines whether your request enters resident booking, a commercial proposal, or government SOW review. It does not by itself set a price.
+              </p>
+            </div>
+
+            <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Division Category</label>
               <select
                 name="category"
@@ -96,6 +151,8 @@ export default function RequestServicePage() {
                 <option value="PROPERTY_OPERATIONS">Property Resets & Operations</option>
                 <option value="CONCIERGE_COURIER">Concierge & Courier Dispatch</option>
                 <option value="MARKETPLACE">Express Marketplace</option>
+                <option value="REAL_ESTATE">Real Estate Support</option>
+                <option value="GOVERNMENT">Government & Institutional</option>
               </select>
             </div>
 
@@ -126,27 +183,77 @@ export default function RequestServicePage() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="(404) 555-0199"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Organization</label>
+                <input
+                  type="text"
+                  name="organizationName"
+                  value={formData.organizationName}
+                  onChange={handleChange}
+                  placeholder="Company, property, agency, or agency/division"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Phone Number</label>
+              <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Service Location</label>
               <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
+                type="text"
+                name="locationAddress"
+                value={formData.locationAddress}
                 onChange={handleChange}
-                placeholder="(404) 555-0199"
+                placeholder="Property, office, event, or service address"
                 className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
               />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Timeline</label>
+                <input
+                  type="text"
+                  name="timeline"
+                  value={formData.timeline}
+                  onChange={handleChange}
+                  placeholder="ASAP, this week, specific date, etc."
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Budget / Contract Range</label>
+                <input
+                  type="text"
+                  name="budgetRange"
+                  value={formData.budgetRange}
+                  onChange={handleChange}
+                  placeholder="Optional"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Scope & Operational Details</label>
               <textarea
                 name="details"
-                rows={4}
+                rows={5}
                 required
                 value={formData.details}
                 onChange={handleChange}
-                placeholder="Provide event headcount, location, property unit details, or required turnaround timelines..."
+                placeholder="Describe the service, property/unit count, event headcount, deliverables, procurement requirements, or required turnaround timeline..."
                 className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none"
               ></textarea>
             </div>
@@ -156,12 +263,11 @@ export default function RequestServicePage() {
               disabled={loading}
               className="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {loading ? 'Submitting...' : 'Submit Request'}
+              {loading ? 'Routing Request...' : 'Submit Request'}
               <ArrowRight className="w-5 h-5" />
             </button>
           </form>
         )}
-
       </div>
     </div>
   );

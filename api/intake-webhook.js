@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma.js';
+import { buildIntakeRoutingContext, routeIntake } from '../src/lib/operations/intakeRouting2026.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -6,35 +7,71 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, email, phone, category, serviceType, details } = req.body || {};
+    const {
+      name,
+      email,
+      phone,
+      category,
+      serviceType,
+      details,
+      channelType,
+      organizationName,
+      locationAddress,
+      timeline,
+      budgetRange,
+    } = req.body || {};
 
     if (!name || (!email && !phone)) {
-      return res.status(400).json({ error: 'Missing required contact parameters (Name and Email or Phone)' });
+      return res.status(400).json({
+        error: 'Missing required contact parameters (Name and Email or Phone)',
+      });
     }
+
+    const routing = routeIntake({ channelType, category });
+
+    if (!routing.channel) {
+      return res.status(400).json({
+        error: 'A valid engagement channel is required before this request can be routed.',
+        code: routing.reason,
+      });
+    }
+
+    const routingContext = buildIntakeRoutingContext({ channelType, category });
 
     const lead = await prisma.lead.create({
       data: {
-        name,
+        full_name: name,
         email: email || null,
         phone: phone || null,
-        category: category || 'GENERAL_INTAKE',
+        organization_name: organizationName || null,
+        status: 'new',
+        notes: null,
       },
     });
 
     const request = await prisma.serviceRequest.create({
       data: {
         leadId: lead.id,
-        serviceType: serviceType || category || 'GENERAL',
-        details: details || 'Intake request submitted via web form.',
-        status: 'NEW',
+        service_category: category || null,
+        service_needed: serviceType || category || null,
+        location_address: locationAddress || null,
+        timeline: timeline || null,
+        budget_range: budgetRange || null,
+        request_details: details || 'Intake request submitted via web form.',
+        property_details: {
+          operationsRouting: routingContext,
+        },
+        status: routing.initialState.toLowerCase(),
+        priority: 'normal',
       },
     });
 
     return res.status(200).json({
       success: true,
-      message: 'Intake request received and persisted successfully.',
-      trackingId: request.publicId,
+      message: 'Intake request received and routed successfully.',
+      trackingId: request.id,
       requestId: request.id,
+      routing: routingContext,
     });
   } catch (error) {
     console.error('Intake Webhook Persistence Error:', error);
