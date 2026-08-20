@@ -11,8 +11,8 @@ describe('canonical pricing spine', () => {
     expect(result.label).toBe('$50');
   });
 
-  test('does not expose B2C pricing through an unauthorized channel', () => {
-    const result = resolvePricing('01-ELO', { channel: PRICING_CHANNELS.B2B });
+  test('does not expose a B2C-only service through the B2B channel', () => {
+    const result = resolvePricing('02-ELO', { channel: PRICING_CHANNELS.B2B });
 
     expect(result.amount).toBeNull();
     expect(result.reason).toBe('CHANNEL_NOT_AUTHORIZED');
