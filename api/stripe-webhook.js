@@ -1,6 +1,8 @@
 import Stripe from 'stripe';
 import prisma from '../lib/prisma.js';
 import { nextStateAfterPayment, assertTransition } from '../src/lib/operations/workflowStateMachines2026.js';
+import { reconcileStripePayment } from '../src/lib/operations/accountingReconciliation2026.js';
+import { publishPaymentReconciled } from '../src/lib/operations/eventBroker2026.js';
 
 const secretKey = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -37,6 +39,7 @@ export default async function handler(req, res) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const requestId = session.metadata?.request_id;
+    const changeOrderId = session.metadata?.change_order_id;
 
     if (requestId) {
       try {
@@ -85,10 +88,21 @@ export default async function handler(req, res) {
           data: { status: 'job_created' },
         });
 
+        const reconciliation = await reconcileStripePayment(event);
+        await publishPaymentReconciled(reconciliation);
+
         console.log(`B2C payment accepted; request ${request.id} -> job ${job.public_reference}.`);
       } catch (dbErr) {
-        console.error('Failed to transition paid B2C request:', dbErr.message);
-        return res.status(500).json({ error: 'Payment received but operational transition failed' });
+        console.error('Failed to transition/reconcile paid B2C request:', dbErr.message);
+        return res.status(500).json({ error: 'Payment received but operational/accounting transition failed' });
+      }
+    } else if (changeOrderId) {
+      try {
+        const reconciliation = await reconcileStripePayment(event);
+        await publishPaymentReconciled(reconciliation);
+      } catch (dbErr) {
+        console.error('Failed to reconcile change-order payment:', dbErr.message);
+        return res.status(500).json({ error: 'Payment received but change-order reconciliation failed' });
       }
     }
   }
