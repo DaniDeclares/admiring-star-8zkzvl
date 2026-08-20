@@ -34,12 +34,18 @@ async function getProviderSnapshot(supabase, providerId) {
   return { assignments: assignments || [], tasks: tasks.data || [], evidence: evidence.data || [] };
 }
 
-async function getCustomerSnapshot(supabase, identity) {
-  if (!identity.entity_id) return { requests: [], jobs: [], invoices: [], changes: [] };
-  const { data: requests, error: requestError } = await supabase.from('service_requests').select('*').eq('lead_id', identity.entity_id).order('created_at', { ascending: false }).limit(100);
+async function getCustomerSnapshot(supabase, identity, role) {
+  const isOrgScoped = ['property_manager', 'procurement'].includes(role);
+  const scopeId = isOrgScoped ? identity.organization_id : identity.entity_id;
+  if (!scopeId) return { requests: [], jobs: [], invoices: [], changes: [] };
+
+  let requestQuery = supabase.from('service_requests').select('*');
+  requestQuery = isOrgScoped ? requestQuery.eq('organization_id', scopeId) : requestQuery.eq('lead_id', scopeId);
+  const { data: requests, error: requestError } = await requestQuery.order('created_at', { ascending: false }).limit(100);
   if (requestError) throw requestError;
   const requestIds = (requests || []).map(row => row.id);
   if (!requestIds.length) return { requests: requests || [], jobs: [], invoices: [], changes: [] };
+
   const { data: jobs, error: jobsError } = await supabase.from('dd_jobs').select('*').in('service_request_id', requestIds).order('created_at', { ascending: false });
   if (jobsError) throw jobsError;
   const jobIds = (jobs || []).map(row => row.id);
@@ -74,7 +80,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       if (context.isStaff) return ok(res, { role: context.role, ...await getStaffSnapshot(context.supabase) });
       if (context.role === 'provider') return ok(res, { role: context.role, ...await getProviderSnapshot(context.supabase, context.identity.entity_id) });
-      return ok(res, { role: context.role, ...await getCustomerSnapshot(context.supabase, context.identity) });
+      return ok(res, { role: context.role, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
     }
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
     const { action, ...payload } = req.body || {};
@@ -138,6 +144,22 @@ export default async function handler(req, res) {
       const { data: changeOrder, error: fetchError } = await context.supabase.from('dd_change_orders').select('*').eq('id', changeOrderId).single();
       if (fetchError || !changeOrder) return fail(res, 'Change order not found.', 404);
       if (changeOrder.status !== 'PENDING_APPROVAL') return fail(res, `Change order is ${changeOrder.status}.`, 409);
+
+      const { data: job, error: jobError } = await context.supabase
+        .from('dd_jobs')
+        .select('id, lead_id, organization_id')
+        .eq('id', changeOrder.job_id)
+        .single();
+      if (jobError || !job) return fail(res, 'Change order job not found.', 404);
+
+      let authorized = false;
+      if (['customer', 'resident'].includes(context.role)) {
+        authorized = Boolean(context.identity?.entity_id && job.lead_id && String(job.lead_id) === String(context.identity.entity_id));
+      } else if (['property_manager', 'procurement'].includes(context.role)) {
+        authorized = Boolean(context.identity?.organization_id && job.organization_id && String(job.organization_id) === String(context.identity.organization_id));
+      }
+      if (!authorized && !context.isStaff) return fail(res, 'This change order is outside the current portal account scope.', 403);
+
       const update = decision === 'APPROVED' ? { status: 'APPROVED', approved_at: new Date().toISOString(), approval_reference: `PORTAL-${context.user.id}` } : { status: 'REJECTED', rejection_reason: reason || null };
       const { error } = await context.supabase.from('dd_change_orders').update(update).eq('id', changeOrderId).eq('status', 'PENDING_APPROVAL'); if (error) throw error;
       return ok(res, { changeOrderStatus: decision });
