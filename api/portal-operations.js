@@ -1,7 +1,6 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 
 const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
-
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
 function fail(res, error, status = 400) { return res.status(status).json({ success: false, error }); }
 
@@ -72,26 +71,21 @@ export default async function handler(req, res) {
   try {
     const context = await authenticatePortalRequest(req);
     if (context.error) return fail(res, context.error, context.status);
-
     if (req.method === 'GET') {
       if (context.isStaff) return ok(res, { role: context.role, ...await getStaffSnapshot(context.supabase) });
       if (context.role === 'provider') return ok(res, { role: context.role, ...await getProviderSnapshot(context.supabase, context.identity.entity_id) });
       return ok(res, { role: context.role, ...await getCustomerSnapshot(context.supabase, context.identity) });
     }
-
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
     const { action, ...payload } = req.body || {};
 
     if (action === 'dispatch_offer') {
-      const guard = requireRole(context, STAFF_ROLES);
-      if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      const assignment = await createDispatchOffer(context.supabase, context.user.id, payload);
-      return ok(res, { assignment });
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) });
     }
 
     if (action === 'schedule_appointment') {
-      const guard = requireRole(context, STAFF_ROLES);
-      if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { jobId, providerId, startsAt, endsAt, customerNotes, internalNotes } = payload;
       if (!jobId || !providerId || !startsAt || !endsAt) return fail(res, 'jobId, providerId, startsAt and endsAt are required.');
       if (new Date(endsAt) <= new Date(startsAt)) return fail(res, 'Appointment end must be after start.');
@@ -104,8 +98,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'assignment_response') {
-      const guard = requireRole(context, ['provider']);
-      if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const providerId = context.isStaff ? payload.providerId : context.identity.entity_id;
       const { assignmentId, decision, reason } = payload;
       if (!assignmentId || !['ACCEPT', 'REJECT'].includes(decision)) return fail(res, 'assignmentId and ACCEPT/REJECT are required.');
@@ -121,8 +114,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'task_update') {
-      const guard = requireRole(context, ['provider']);
-      if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { taskId, status, note, evidenceRef } = payload;
       if (!taskId || !status) return fail(res, 'taskId and status are required.');
       const allowed = new Set(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'BLOCKED', 'SKIPPED']);
@@ -135,46 +127,47 @@ export default async function handler(req, res) {
       const update = { status, notes: note || task.notes || null, updated_at: new Date().toISOString() };
       if (status === 'COMPLETED') update.completed_at = new Date().toISOString();
       if (evidenceRef) update.evidence_ref = evidenceRef;
-      const { error } = await context.supabase.from('dd_job_tasks').update(update).eq('id', taskId);
-      if (error) throw error;
+      const { error } = await context.supabase.from('dd_job_tasks').update(update).eq('id', taskId); if (error) throw error;
       return ok(res, { taskStatus: status });
     }
 
     if (action === 'change_order_decision') {
-      const guard = requireRole(context, ['customer', 'resident', 'property_manager', 'procurement']);
-      if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const guard = requireRole(context, ['customer', 'resident', 'property_manager', 'procurement']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { changeOrderId, decision, reason } = payload;
       if (!changeOrderId || !['APPROVED', 'REJECTED'].includes(decision)) return fail(res, 'changeOrderId and APPROVED/REJECTED are required.');
       const { data: changeOrder, error: fetchError } = await context.supabase.from('dd_change_orders').select('*').eq('id', changeOrderId).single();
       if (fetchError || !changeOrder) return fail(res, 'Change order not found.', 404);
       if (changeOrder.status !== 'PENDING_APPROVAL') return fail(res, `Change order is ${changeOrder.status}.`, 409);
       const update = decision === 'APPROVED' ? { status: 'APPROVED', approved_at: new Date().toISOString(), approval_reference: `PORTAL-${context.user.id}` } : { status: 'REJECTED', rejection_reason: reason || null };
-      const { error } = await context.supabase.from('dd_change_orders').update(update).eq('id', changeOrderId).eq('status', 'PENDING_APPROVAL');
-      if (error) throw error;
+      const { error } = await context.supabase.from('dd_change_orders').update(update).eq('id', changeOrderId).eq('status', 'PENDING_APPROVAL'); if (error) throw error;
       return ok(res, { changeOrderStatus: decision });
     }
 
     if (action === 'completion_review') {
-      const guard = requireRole(context, STAFF_ROLES);
-      if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { jobId, decision, notes } = payload;
       if (!jobId || !['APPROVED', 'REJECTED'].includes(decision)) return fail(res, 'jobId and APPROVED/REJECTED are required.');
-      const { error } = await context.supabase.from('dd_completion_reviews').insert({ job_id: jobId, reviewer_id: context.user.id, review_type: 'SUPERVISOR', status: decision, notes: notes || null, reviewed_at: new Date().toISOString() });
-      if (error) throw error;
+      const { error } = await context.supabase.from('dd_completion_reviews').insert({ job_id: jobId, reviewer_id: context.user.id, review_type: 'SUPERVISOR', status: decision, notes: notes || null, reviewed_at: new Date().toISOString() }); if (error) throw error;
       if (decision === 'APPROVED') await context.supabase.from('dd_jobs').update({ job_status: 'COMPLETED' }).eq('id', jobId);
       return ok(res, { reviewStatus: decision });
     }
 
+    if (action === 'evidence_verify') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const { evidenceId, decision } = payload;
+      if (!evidenceId || !['VERIFIED', 'REJECTED'].includes(decision)) return fail(res, 'evidenceId and VERIFIED/REJECTED are required.');
+      const { error } = await context.supabase.from('dd_job_evidence').update({ verification_status: decision, verified_by: context.user.id, verified_at: new Date().toISOString() }).eq('id', evidenceId); if (error) throw error;
+      return ok(res, { evidenceStatus: decision });
+    }
+
     if (action === 'create_evidence_upload') {
-      const guard = requireRole(context, ['provider']);
-      if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { jobId, fileName, contentType } = payload;
       if (!jobId || !fileName) return fail(res, 'jobId and fileName are required.');
       const safeName = String(fileName).replace(/[^a-zA-Z0-9._-]/g, '_');
       const actor = context.isStaff ? context.user.id : context.identity.entity_id;
       const path = `${jobId}/${actor}/${Date.now()}-${safeName}`;
-      const { data, error } = await context.supabase.storage.from('dd-job-evidence').createSignedUploadUrl(path);
-      if (error) throw error;
+      const { data, error } = await context.supabase.storage.from('dd-job-evidence').createSignedUploadUrl(path); if (error) throw error;
       return ok(res, { path, token: data.token, contentType: contentType || 'application/octet-stream' });
     }
 
