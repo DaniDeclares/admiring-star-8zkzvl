@@ -13,6 +13,7 @@ export default async function handler(req, res) {
       phone,
       category,
       serviceType,
+      pricingServiceId,
       details,
       channelType,
       organizationName,
@@ -60,6 +61,7 @@ export default async function handler(req, res) {
         request_details: details || 'Intake request submitted via web form.',
         property_details: {
           operationsRouting: routingContext,
+          pricingServiceId: pricingServiceId || null,
         },
         status: routing.initialState.toLowerCase(),
         priority: 'normal',
@@ -72,6 +74,7 @@ export default async function handler(req, res) {
       trackingId: request.id,
       requestId: request.id,
       routing: routingContext,
+      pricingServiceId: pricingServiceId || null,
     });
   } catch (error) {
     console.error('Intake Webhook Persistence Error:', error);
