@@ -47,7 +47,10 @@ begin
     from public.dd_provider_organizations o
     join public.dd_provider_capabilities c on c.provider_org_id = o.id and c.is_authorized = true
     left join public.dd_provider_coverage cv on cv.provider_org_id = o.id
-    where o.is_active = true and o.accepts_new_work = true and o.compliance_status = 'ACTIVE'
+    where o.is_active = true
+      and o.accepts_new_work = true
+      and o.capacity_status = 'AVAILABLE'
+      and o.compliance_status = 'ACTIVE'
       and (p_service_id is null or c.service_id = p_service_id)
       and (p_capability_key is null or c.capability_key = p_capability_key or c.service_line = p_capability_key)
       and (p_zip_code is null or cv.zip_code = p_zip_code or cv.territory_id = p_zip_code)
@@ -61,7 +64,11 @@ begin
     join public.dd_provider_organizations o on o.id = p.org_id
     join public.dd_provider_capabilities c on c.provider_id = p.id and c.is_authorized = true
     left join public.dd_provider_coverage cv on cv.provider_id = p.id
-    where p.is_active = true and o.is_active = true and o.accepts_new_work = true and o.compliance_status = 'ACTIVE'
+    where p.is_active = true
+      and o.is_active = true
+      and o.accepts_new_work = true
+      and o.capacity_status = 'AVAILABLE'
+      and o.compliance_status = 'ACTIVE'
       and (p_service_id is null or c.service_id = p_service_id)
       and (p_capability_key is null or c.capability_key = p_capability_key or c.service_line = p_capability_key)
       and (p_zip_code is null or cv.zip_code = p_zip_code or cv.territory_id = p_zip_code)
@@ -96,7 +103,9 @@ begin
   if v_job_id is not null and v_selected_org is not null then
     select a.id into v_existing_offer
     from public.dd_job_assignments a
-    where a.job_id = v_job_id and a.assignment_status = 'OFFERED'
+    where a.job_id = v_job_id
+      and a.provider_org_id = v_selected_org
+      and a.assignment_status = 'OFFERED'
     order by a.created_at desc
     limit 1;
 
@@ -109,7 +118,9 @@ begin
       ) returning id into v_assignment_id;
 
       update public.dd_jobs
-      set job_status = 'ASSIGNMENT_OFFERED', assigned_to = v_selected_provider, updated_at = now()
+      set job_status = 'ASSIGNMENT_OFFERED',
+          assigned_to = v_selected_provider,
+          updated_at = now()
       where id = v_job_id;
     else
       v_assignment_id := v_existing_offer;
