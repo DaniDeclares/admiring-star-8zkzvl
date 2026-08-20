@@ -1,6 +1,5 @@
 import { getStripeLink } from "../config/stripeLinks.js";
-import { getPriceLabel } from "./pricingCanon.js";
-import { SERVICES } from "./servicesCatalog.js";
+import { getPriceLabel, getPriceValue } from "./pricingCanon.js";
 
 export const travelFeeDefaults = {
   baseRadiusMiles: 10,
@@ -63,7 +62,7 @@ const paymentServiceData = [
       "Complete payment to confirm your scheduled general notary appointment.",
     category: "payment",
     actionType: "pay",
-    catalogKey: "mobile_notary",
+    catalogKey: "notary",
     bookingServiceId: "notary",
   },
   {
@@ -107,18 +106,13 @@ const paymentServiceData = [
   },
 ];
 
-const buildPaymentService = (service) => {
-  const catalogEntry = SERVICES[service.catalogKey] || {};
-
-  return {
-    ...service,
-    price: catalogEntry.price ?? null,
-    buyButtonId: catalogEntry.buyButtonId ?? null,
-    // Public-facing link should route to intake, not a direct Stripe Checkout link
-    stripePaymentLink: getStripeLink(service.catalogKey),
-    tidycalUrl: catalogEntry.tidycalUrl || null,
-  };
-};
+const buildPaymentService = (service) => ({
+  ...service,
+  price: getPriceValue(service.catalogKey),
+  // Public-facing payment routing always goes through the governed intake flow.
+  stripePaymentLink: getStripeLink(service.catalogKey),
+  priceLabel: getPriceLabel(service.catalogKey),
+});
 
 export const bookingServices = bookingServiceData;
 export const paymentServices = paymentServiceData.map(buildPaymentService);
@@ -201,7 +195,7 @@ export const serviceCatalog = [
   {
     id: "i9-admin",
     name: "I-9 & Administrative Support",
-    shortDesc:
+    shortDescription:
       "Employer I-9 verification and administrative document assistance for HR teams.",
     category: "I-9/Admin",
     tidycalSlug: "notary",
