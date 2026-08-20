@@ -3,26 +3,301 @@
 @tailwind utilities;
 
 :root {
-  --brand-bg-ivory: #F9F6F0;
-  --brand-card-cream: #FFFFFF;
-  --brand-burgundy-royal: #4A0D18;
-  --brand-gold-champagne: #C8A252;
-  --brand-text-wine: #2A0E13;
+  /* DANI DECLARES canonical brand palette */
+  --dd-burgundy: #6B1F2B;
+  --dd-burgundy-deep: #45141D;
+  --dd-gold: #C9A45C;
+  --dd-gold-soft: #E5D2A5;
+  --dd-ivory: #F6F0E4;
+  --dd-cream: #FBF8F1;
+  --dd-white: #FFFFFF;
+  --dd-ink: #24151A;
+  --dd-muted: #6E6264;
+  --dd-border: rgba(107, 31, 43, 0.14);
+  --dd-border-gold: rgba(201, 164, 92, 0.42);
+  --dd-success: #2F6B4F;
+  --dd-danger: #9B2C2C;
+
+  /* Typography */
+  --dd-font-serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
+  --dd-font-sans: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Layout */
+  --dd-content-max: 1240px;
+  --dd-reading-max: 760px;
+  --dd-radius-sm: 6px;
+  --dd-radius-md: 10px;
+  --dd-radius-lg: 16px;
+  --dd-shadow-sm: 0 4px 14px rgba(36, 21, 26, 0.07);
+  --dd-shadow-md: 0 12px 32px rgba(36, 21, 26, 0.11);
+  --dd-shadow-lg: 0 22px 55px rgba(36, 21, 26, 0.16);
+
+  /* Compatibility aliases for existing components */
+  --brand-bg-ivory: var(--dd-ivory);
+  --brand-card-cream: var(--dd-white);
+  --brand-burgundy-royal: var(--dd-burgundy);
+  --brand-gold-champagne: var(--dd-gold);
+  --brand-text-wine: var(--dd-ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--dd-ivory);
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--brand-bg-ivory);
-  color: var(--brand-text-wine);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: var(--dd-ivory);
+  color: var(--dd-ink);
+  font-family: var(--dd-font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Basic card surface */
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--dd-font-sans);
+}
+
+img,
+picture,
+video {
+  max-width: 100%;
+}
+
+img {
+  display: block;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+::selection {
+  background: var(--dd-gold-soft);
+  color: var(--dd-burgundy-deep);
+}
+
+:focus-visible {
+  outline: 3px solid rgba(201, 164, 92, 0.72);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  color: var(--dd-burgundy-deep);
+  font-family: var(--dd-font-serif);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--dd-burgundy);
+}
+
+/* Shared content primitives for pages that have not yet adopted a page-local stylesheet. */
+.dd-page-shell {
+  width: min(100%, var(--dd-content-max));
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 2rem);
+}
+
+.dd-section {
+  padding-block: clamp(3.5rem, 7vw, 6.5rem);
+}
+
+.dd-section--ivory { background: var(--dd-ivory); }
+.dd-section--cream { background: var(--dd-cream); }
+.dd-section--white { background: var(--dd-white); }
+.dd-section--burgundy { background: var(--dd-burgundy); color: var(--dd-white); }
+
+.dd-eyebrow {
+  margin: 0 0 0.7rem;
+  color: var(--dd-gold);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.dd-display {
+  margin-bottom: 1rem;
+  font-family: var(--dd-font-serif);
+  font-size: clamp(2.2rem, 5vw, 4.75rem);
+  letter-spacing: -0.025em;
+}
+
+.dd-lede {
+  max-width: var(--dd-reading-max);
+  color: var(--dd-muted);
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
+}
+
+.dd-grid {
+  display: grid;
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+.dd-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dd-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dd-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.dd-card {
+  background: var(--dd-white);
+  border: 1px solid var(--dd-border);
+  border-radius: var(--dd-radius-md);
+  box-shadow: var(--dd-shadow-sm);
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.dd-card--featured {
+  border-color: var(--dd-border-gold);
+  box-shadow: var(--dd-shadow-md);
+}
+
+.dd-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--dd-radius-md);
+  background: var(--dd-burgundy-deep);
+}
+
+.dd-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dd-media--wide { aspect-ratio: 16 / 9; }
+.dd-media--portrait { aspect-ratio: 4 / 5; }
+.dd-media--square { aspect-ratio: 1 / 1; }
+
+.dd-media--hero {
+  min-height: clamp(420px, 62vh, 760px);
+}
+
+.dd-media--hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(69, 20, 29, 0.72), rgba(69, 20, 29, 0.18) 60%, rgba(69, 20, 29, 0.04));
+  pointer-events: none;
+}
+
+.dd-btn {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid transparent;
+  border-radius: var(--dd-radius-sm);
+  padding: 0.75rem 1.1rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.dd-btn:hover {
+  transform: translateY(-1px);
+}
+
+.dd-btn--primary {
+  background: var(--dd-gold);
+  color: var(--dd-burgundy-deep);
+  box-shadow: 0 5px 14px rgba(69, 20, 29, 0.12);
+}
+
+.dd-btn--secondary {
+  background: var(--dd-burgundy);
+  color: var(--dd-white);
+}
+
+.dd-btn--outline {
+  border-color: var(--dd-burgundy);
+  background: transparent;
+  color: var(--dd-burgundy);
+}
+
+.dd-btn--light {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--dd-white);
+}
+
+.dd-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.dd-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--dd-burgundy-deep);
+  font-weight: 750;
+}
+
+.dd-form input,
+.dd-form select,
+.dd-form textarea {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(36, 21, 26, 0.2);
+  border-radius: var(--dd-radius-sm);
+  background: var(--dd-white);
+  color: var(--dd-ink);
+  padding: 0.72rem 0.85rem;
+  outline: none;
+}
+
+.dd-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.dd-form input:focus,
+.dd-form select:focus,
+.dd-form textarea:focus {
+  border-color: var(--dd-gold);
+  box-shadow: 0 0 0 3px rgba(201, 164, 92, 0.18);
+}
+
+/* Keep legacy card usage visually consistent while components migrate to .dd-card. */
 .card {
-  background: var(--brand-card-cream);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(30,30,30,0.05);
+  background: var(--dd-white);
+  border: 1px solid var(--dd-border);
+  border-radius: var(--dd-radius-md);
+  box-shadow: var(--dd-shadow-sm);
 }
 
 /* Resident Concierge ticket must sit above the global navbar while open. */
@@ -33,4 +308,28 @@ body {
 
 .rd-page .rd-overlay .rd-ticket {
   z-index: 101;
+}
+
+@media (max-width: 900px) {
+  .dd-grid--4,
+  .dd-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .dd-section { padding-block: 3.25rem; }
+  .dd-grid--2,
+  .dd-grid--3,
+  .dd-grid--4 { grid-template-columns: 1fr; }
+  .dd-btn { width: 100%; }
+  .dd-media--hero { min-height: 440px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
