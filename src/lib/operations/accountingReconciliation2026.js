@@ -8,6 +8,8 @@ function money(value) {
  * Reconciles a provider payment event against frozen commercial records.
  * This module never resolves catalog prices and never changes an estimate.
  * It only consolidates the frozen base estimate plus APPROVED change-order deltas.
+ * G7 change orders are intentionally queried through SQL because they are additive
+ * raw-SQL tables and are not Prisma models on this branch.
  */
 export async function reconcileStripePayment(event) {
   const session = event?.data?.object || {};
@@ -38,15 +40,24 @@ export async function reconcileStripePayment(event) {
     }
 
     let job = null;
-    let request = null;
-    let changeOrder = null;
 
     if (changeOrderId) {
-      changeOrder = await tx.dd_change_orders.findUnique({ where: { id: changeOrderId } });
+      const changeOrderRows = await tx.$queryRaw`
+        select id, job_id, status
+        from public.dd_change_orders
+        where id = ${changeOrderId}::uuid
+        limit 1
+      `;
+
+      const changeOrder = changeOrderRows[0];
       if (!changeOrder) throw new Error(`Change order ${changeOrderId} not found.`);
+      if (changeOrder.status !== 'APPROVED') {
+        throw new Error(`Change order ${changeOrderId} is not approved for payment reconciliation.`);
+      }
+
       job = await tx.dd_jobs.findUnique({ where: { id: changeOrder.job_id } });
     } else if (requestId) {
-      request = await tx.serviceRequest.findUnique({ where: { id: requestId } });
+      const request = await tx.serviceRequest.findUnique({ where: { id: requestId } });
       if (!request) throw new Error(`ServiceRequest ${requestId} not found.`);
       job = await tx.dd_jobs.findFirst({
         where: { service_request_id: requestId },
@@ -67,19 +78,21 @@ export async function reconcileStripePayment(event) {
 
     if (!estimate) throw new Error(`No frozen estimate found for job ${job.id}.`);
 
-    const approvedDeltas = await tx.dd_change_orders.findMany({
-      where: { job_id: job.id, status: 'APPROVED' },
-      select: {
-        id: true,
-        delta_base_subtotal: true,
-        delta_addon_subtotal: true,
-        delta_travel: true,
-        delta_rush: true,
-        delta_supplies: true,
-        delta_tax: true,
-        delta_estimated_total: true,
-      },
-    });
+    const approvedDeltas = await tx.$queryRaw`
+      select
+        id,
+        delta_base_subtotal,
+        delta_addon_subtotal,
+        delta_travel,
+        delta_rush,
+        delta_supplies,
+        delta_tax,
+        delta_estimated_total
+      from public.dd_change_orders
+      where job_id = ${job.id}::uuid
+        and status = 'APPROVED'
+      order by created_at asc
+    `;
 
     const baseSubtotal = money(estimate.base_subtotal) + money(estimate.addon_subtotal)
       + money(estimate.travel_fee) + money(estimate.rush_fee)
