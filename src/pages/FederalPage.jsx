@@ -1,48 +1,123 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const GovConLayout = () => {
-  return (
-    <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'sans-serif', color: '#333', paddingBottom: '60px' }}>
-      <Helmet><title>Government Procurement &amp; Compliance Portal | Dani Declares LLC</title></Helmet>
-      
-      {/* Premium Courthouse Hero Banner */}
-      <div style={{ backgroundImage: 'linear-gradient(180deg, rgba(139,30,46,0.85), rgba(45,12,16,0.9)), url(/images/stock/court%20building%20exterior.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', color: '#fff', padding: '60px 20px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '38px', margin: '0 0 12px 0', fontWeight: 'bold' }}>Government Contracting Portal</h1>
-        <p style={{ fontSize: '18px', maxWidth: '800px', margin: '0 auto 24px auto', lineHeight: '1.5', opacity: '0.95' }}>Dani Declares LLC is a verified, fully registered federal subcontractor providing mobile administrative compliance, on-site field cleaning logistics, and secure courier routing.</p>
-        
-        {/* Core Identifiers */}
-        <div style={{ display: 'inline-flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.15)', padding: '12px 24px', borderRadius: '6px', backdropFilter: 'blur(4px)', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.2)' }}>
-          <span>UEI: <span style={{ color: '#D4AF37' }}>TD4TSG48LHN9</span></span>
-          <span style={{ borderLeft: '1px solid rgba(255,255,255,0.3)', paddingLeft: '20px' }}>CAGE CODE: <span style={{ color: '#D4AF37' }}>17VV2</span></span>
-        </div>
-      </div>
+const capabilityRows = [
+  ['561720', 'Janitorial Services', 'Custodial execution, property resets, turnover and cleaning support'],
+  ['561210', 'Facilities Support Services', 'Coordinated facility upkeep, work-order execution and vendor support'],
+  ['561790', 'Other Services to Buildings and Dwellings', 'Use where solicitation scope matches property/facility-support work'],
+  ['561410', 'Document Preparation Services', 'Administrative and document-preparation support'],
+  ['561110', 'Office Administrative Services', 'Administrative execution and operational coordination'],
+];
 
-      {/* Capabilities Block */}
-      <div style={{ padding: '50px 20px', maxWidth: '1000px', margin: '0 auto' }}>
-        <div style={{ backgroundColor: '#fff', padding: '35px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
-          <h2 style={{ color: '#8B1E2E', margin: '0 0 20px 0', borderBottom: '2px solid #8B1E2E', paddingBottom: '10px' }}>Core Capabilities Summary</h2>
-          <p style={{ lineHeight: '1.6', fontSize: '16px', color: '#555', marginBottom: '24px' }}>
-            We serve federal buyers, prime vendors, municipal offices, and institutional tracking agencies by deploying mobile execution teams across Georgia and South Carolina. Our operations are fully structured under NAICS standards to satisfy small business capacity set-asides cleanly.
-          </p>
-          
-          <h3 style={{ fontSize: '18px', color: '#222', marginBottom: '12px' }}>Primary NAICS Classifications Locked:</h3>
-          <ul style={{ lineHeight: '2', paddingLeft: '20px', color: '#444' }}>
-            <li><strong>561110</strong> &mdash; Office Administrative Support Services</li>
-            <li><strong>561410</strong> &mdash; Document Preparation and Compliance Services</li>
-            <li><strong>561720</strong> &mdash; Janitorial, Residential Turnovers &amp; Airbnb Cleaning</li>
-            <li><strong>561790</strong> &mdash; Property Operations, Trash-Outs &amp; Deep Reset Logistics</li>
-            <li><strong>561210</strong> &mdash; Facilities Operations and Management Support Services</li>
-            <li><strong>323113</strong> &mdash; Commercial Apparel Printing &amp; Screen Merchandise Prep</li>
-          </ul>
+const GovConLayout = () => (
+  <div style={{ backgroundColor: '#F8F5F1', fontFamily: 'sans-serif', color: '#333', paddingBottom: '60px' }}>
+    <Helmet>
+      <title>Government & Institutional Procurement | DANI DECLARES LLC</title>
+      <meta
+        name="description"
+        content="DANI DECLARES LLC government and institutional procurement capabilities for janitorial, facilities support, administrative execution and field logistics."
+      />
+    </Helmet>
 
-          <div style={{ textAlign: 'center', marginTop: '35px' }}>
-            <a href="/request-service" style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '14px 28px', textDecoration: 'none', borderRadius: '4px', fontWeight: 'bold', display: 'inline-block' }}>Access Secure Prime Teaming Portal &rarr;</a>
-          </div>
-        </div>
+    <section
+      style={{
+        background: 'linear-gradient(180deg, rgba(139,30,46,0.94), rgba(45,12,16,0.96))',
+        color: '#fff',
+        padding: '64px 20px',
+        textAlign: 'center',
+      }}
+    >
+      <p style={{ letterSpacing: '0.12em', textTransform: 'uppercase', fontSize: '13px', marginBottom: '12px' }}>
+        Channel 04 · Government / Institutional Procurement
+      </p>
+      <h1 style={{ fontSize: '40px', margin: '0 0 14px', fontWeight: '700' }}>
+        Facilities, Janitorial &amp; Execution Support
+      </h1>
+      <p style={{ fontSize: '18px', maxWidth: '820px', margin: '0 auto 28px', lineHeight: '1.6', opacity: 0.96 }}>
+        DANI DECLARES LLC provides coordinated administrative, property, facilities and field-execution support for government entities, institutional buyers and prime contractors.
+      </p>
+
+      <div
+        style={{
+          display: 'inline-flex',
+          gap: '20px',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(255,255,255,0.12)',
+          padding: '14px 24px',
+          borderRadius: '8px',
+          border: '1px solid rgba(255,255,255,0.22)',
+          fontWeight: '700',
+        }}
+      >
+        <span>UEI: <span style={{ color: '#D4AF37' }}>TD4TSG48LHN9</span></span>
+        <span style={{ opacity: 0.55 }}>|</span>
+        <span>CAGE: <span style={{ color: '#D4AF37' }}>17VV2</span></span>
       </div>
-    </div>
-  );
-};
+      <p style={{ maxWidth: '760px', margin: '18px auto 0', fontSize: '12px', opacity: 0.72 }}>
+        Registration identifiers are presented from company records. Verify current SAM.gov status and all certification status before formal submission.
+      </p>
+    </section>
+
+    <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '48px 20px' }}>
+      <section style={{ background: '#fff', padding: '32px', borderRadius: '10px', boxShadow: '0 4px 18px rgba(0,0,0,0.05)', marginBottom: '24px' }}>
+        <h2 style={{ color: '#8B1E2E', marginTop: 0 }}>Core Capabilities</h2>
+        <p style={{ lineHeight: 1.65, color: '#555' }}>
+          Our initial procurement focus is federal, state, municipal, airport and institutional facility support, with an emphasis on janitorial execution, facilities support, property resets, administrative support and coordinated field logistics.
+        </p>
+
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '24px' }}>
+            <thead>
+              <tr>
+                {['NAICS', 'Classification', 'Application'].map((heading) => (
+                  <th key={heading} style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #8B1E2E', color: '#222' }}>{heading}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {capabilityRows.map(([naics, name, application]) => (
+                <tr key={naics}>
+                  <td style={{ padding: '12px', borderBottom: '1px solid #eee', fontWeight: '700' }}>{naics}</td>
+                  <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{name}</td>
+                  <td style={{ padding: '12px', borderBottom: '1px solid #eee', color: '#555' }}>{application}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px', marginBottom: '24px' }}>
+        {[
+          ['Prime Teaming', 'Provide a defined work package to established primes that need dependable small-business field capacity.'],
+          ['Task-Order Execution', 'Support formal scopes of work with documented work orders, completion evidence and escalation controls.'],
+          ['Multi-Site Support', 'Coordinate recurring property and facility work across supportable Georgia and Southeast service areas.'],
+        ].map(([title, text]) => (
+          <article key={title} style={{ background: '#fff', padding: '24px', borderRadius: '10px', boxShadow: '0 4px 18px rgba(0,0,0,0.04)' }}>
+            <h3 style={{ marginTop: 0, color: '#222' }}>{title}</h3>
+            <p style={{ lineHeight: 1.6, color: '#555', marginBottom: 0 }}>{text}</p>
+          </article>
+        ))}
+      </section>
+
+      <section style={{ background: '#2D0C10', color: '#fff', padding: '30px', borderRadius: '10px', marginBottom: '24px' }}>
+        <h2 style={{ marginTop: 0 }}>Procurement Integrity</h2>
+        <p style={{ lineHeight: 1.65, opacity: 0.9 }}>
+          DANI DECLARES does not represent a socioeconomic certification, contract award, past-performance record or federal-subcontractor status unless the underlying government or company record supports the claim. Certification and solicitation eligibility are evaluated separately for each opportunity.
+        </p>
+      </section>
+
+      <div style={{ textAlign: 'center' }}>
+        <a href="/request-service" style={{ backgroundColor: '#8B1E2E', color: '#fff', padding: '14px 28px', textDecoration: 'none', borderRadius: '5px', fontWeight: '700', display: 'inline-block', marginRight: '10px' }}>
+          Start Procurement Intake →
+        </a>
+        <a href="/Capability_Statement_Dani_Declares.txt" style={{ color: '#8B1E2E', padding: '14px 20px', textDecoration: 'none', fontWeight: '700', display: 'inline-block' }}>
+          View Capability Statement
+        </a>
+      </div>
+    </main>
+  </div>
+);
 
 export default GovConLayout;
