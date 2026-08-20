@@ -46,7 +46,7 @@ describe('pricing compliance guardrails', () => {
 
     expect(standard.amount).toBe(350);
     expect(deep.amount).toBe(450);
-    expect(standard.disclaimers.join(' ')).toMatch(/B2B|resident/i);
-    expect(deep.disclaimers.join(' ')).toMatch(/B2B|resident/i);
+    expect(standard.disclaimers.map((d) => d.id)).toContain('B2B_NO_RESIDENT_DISCOUNT');
+    expect(deep.disclaimers.map((d) => d.id)).toContain('B2B_NO_RESIDENT_DISCOUNT');
   });
 });
