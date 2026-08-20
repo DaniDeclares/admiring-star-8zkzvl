@@ -22,17 +22,19 @@ async function sendEmail(payload) {
 }
 
 async function sendSms(payload) {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const apiKeySid = process.env.TWILIO_API_KEY_SID;
+  const apiKeySecret = process.env.TWILIO_API_KEY_SECRET;
   const from = process.env.TWILIO_FROM_NUMBER;
-  if (!sid || !token || !from) throw new Error('TWILIO_NOT_CONFIGURED');
+  if (!accountSid || !apiKeySid || !apiKeySecret || !from) throw new Error('TWILIO_NOT_CONFIGURED');
   const body = new URLSearchParams({
     To: payload.to,
     From: from,
     Body: payload.text || payload.message || 'Dani Declares update.',
   });
-  const auth = Buffer.from(`${sid}:${token}`).toString('base64');
-  const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+  // Use a revokable Twilio API key rather than the account master Auth Token.
+  const auth = Buffer.from(`${apiKeySid}:${apiKeySecret}`).toString('base64');
+  const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
     method: 'POST',
     headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
