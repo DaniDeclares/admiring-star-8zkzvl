@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Briefcase, Scale, Store, ShieldCheck, PartyPopper, HeartHandshake, ArrowRight, CheckCircle2, Printer, Sparkles, Home, ConciergeBell, ShoppingBag, Cpu, Ticket } from 'lucide-react';
+import { Building2, Briefcase, Scale, Store, ShieldCheck, PartyPopper, HeartHandshake, ArrowRight, CheckCircle2, Printer, Sparkles, Home, ConciergeBell, ShoppingBag, Cpu, Truck, ClipboardCheck } from 'lucide-react';
 import { getPrimaryServiceImage } from '../data/serviceVisuals2026.js';
 
 export default function HomePage() {
@@ -13,6 +13,8 @@ export default function HomePage() {
     { icon: ShoppingBag, visual: 'marketplace', title: 'Express & Marketplace', link: '/shop', items: ['Curated Snack Boxes', 'On-Demand Essentials', 'Branded Merch', 'Smart NFC Hardware'] }
   ];
 
+  const credibility = ['Mobile Support', 'Metro Atlanta', 'South Carolina Available', 'Documentation Included', 'Fast Response', 'Vendor Readiness In Progress'];
+
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen selection:bg-amber-500 selection:text-slate-950">
       <section className="relative pt-24 pb-20 md:pt-32 md:pb-28 overflow-hidden border-b border-slate-800">
@@ -21,12 +23,35 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs sm:text-sm font-medium mb-6"><Sparkles className="w-4 h-4" /><span>Business Operations, Festivals & Execution Services</span></div>
           <img src="/logo-script.png" alt="Dani Declares LLC Logo" className="h-20 sm:h-28 w-auto mx-auto mb-6 drop-shadow-md" />
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">One Partner. Every Stage. <br /><span className="bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 bg-clip-text text-transparent">Complete Execution.</span></h1>
-          <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 mb-10 leading-relaxed font-normal"><strong className="text-amber-300 font-semibold">DANI DECLARES LLC</strong> is a multi-division operations and execution company delivering B2B services, turnkey festival management, property resets, and creative commerce workflows.</p>
+          <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 mb-10 leading-relaxed font-normal"><strong className="text-amber-300 font-semibold">DANI DECLARES LLC</strong> is a mobile operations and execution support company helping property managers, businesses, agencies, and individuals get documents, logistics, properties, events, and critical support work handled from start to finish.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto">
-            <Link to="/services" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-all shadow-lg shadow-amber-500/25 hover:scale-[1.02]">Explore Services<ArrowRight className="ml-2 w-5 h-5" /></Link>
-            <Link to="/festival" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-semibold text-base transition-all"><Ticket className="mr-2 w-5 h-5" />Festival & Event Operations</Link>
+            <Link to="/request-service" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-all shadow-lg shadow-amber-500/25 hover:scale-[1.02]">Request Service<ArrowRight className="ml-2 w-5 h-5" /></Link>
+            <Link to="/services" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-semibold text-base transition-all">Explore Services</Link>
           </div>
-          <p className="mt-8 text-xs sm:text-sm text-slate-500 uppercase tracking-widest font-mono">Concierge Execution + B2B Operations Across 7 Operating Divisions</p>
+          <p className="mt-8 text-xs sm:text-sm text-slate-500 uppercase tracking-widest font-mono">Mobile Operations + B2B Execution + Resident Concierge + Government Procurement Readiness</p>
+        </div>
+      </section>
+
+      <section className="py-6 bg-slate-900/80 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {credibility.map((item) => <div key={item} className="text-center text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 py-2">{item}</div>)}
+        </div>
+      </section>
+
+      <section className="py-20 bg-slate-900/40 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1.05fr_.95fr] gap-10 items-center">
+          <div>
+            <span className="text-amber-400 font-mono text-sm tracking-wider uppercase">Property Managers & Businesses</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mt-2 mb-5">The small-but-critical work should not require five vendors.</h2>
+            <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">Need a reliable mobile support partner for turnovers, move-ready prep, inspections, document handling, courier runs, event execution, or administrative support? Dani Declares provides one accountable operating layer from intake through field completion.</p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link to="/request-service" className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold">Start a Project<ArrowRight className="ml-2 w-5 h-5" /></Link>
+              <Link to="/services/property" className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-slate-700 bg-slate-950 text-slate-200 hover:border-amber-500/40">Property Operations</Link>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[{icon:ClipboardCheck,title:'FieldOps / Property Reset',items:['Move-out and move-in prep','Deep cleaning and turnovers','Inspection/photo documentation','Key and access logistics']},{icon:Truck,title:'LogisticsOps / Courier Support',items:['Court and document runs','Facility visits and business errands','Pickup and delivery coordination','Executive and administrative support']}].map((card) => <div key={card.title} className="p-6 rounded-2xl bg-slate-950 border border-slate-800"><card.icon className="w-9 h-9 text-amber-400 mb-4"/><h3 className="text-lg font-bold text-white mb-4">{card.title}</h3><ul className="space-y-3">{card.items.map((item)=><li key={item} className="flex gap-2 text-sm text-slate-300"><CheckCircle2 className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0"/>{item}</li>)}</ul></div>)}
+          </div>
         </div>
       </section>
 
@@ -51,9 +76,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-20 bg-slate-900/30 border-b border-slate-800"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div className="text-center max-w-2xl mx-auto mb-16"><h2 className="text-3xl font-bold text-white mb-3">The Execution Framework</h2><p className="text-slate-400">How we turn multi-division complexity into predictable, zero-latency results.</p></div><div className="grid grid-cols-1 md:grid-cols-4 gap-8">{[{step:'01',name:'Discover',desc:'Single-point intake identifies cross-division requirements and scope.'},{step:'02',name:'Plan',desc:'Unified pricing, 50% deposit lock, and immediate SLA timeline assignment.'},{step:'03',name:'Execute',desc:'Division field teams deploy with mandatory photo logs and live updates.'},{step:'04',name:'Deliver',desc:'Final walk, digital verification upload, and seamless invoice closing.'}].map((phase,idx)=><div key={idx} className="relative p-6 rounded-2xl bg-slate-900 border border-slate-800"><span className="text-4xl font-extrabold text-amber-500/20 font-mono mb-2 block">{phase.step}</span><h3 className="text-xl font-bold text-white mb-2">{phase.name}</h3><p className="text-sm text-slate-400 leading-relaxed">{phase.desc}</p></div>)}</div></div></section>
+      <section className="py-20 bg-slate-900/30 border-b border-slate-800"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div className="text-center max-w-2xl mx-auto mb-16"><h2 className="text-3xl font-bold text-white mb-3">The Execution Framework</h2><p className="text-slate-400">How we turn multi-division complexity into predictable, documented results.</p></div><div className="grid grid-cols-1 md:grid-cols-4 gap-8">{[{step:'01',name:'Discover',desc:'Single-point intake identifies audience, channel, scope, and cross-division requirements.'},{step:'02',name:'Plan',desc:'Commercial authority establishes the approved scope and downstream operations receive the frozen job baseline.'},{step:'03',name:'Execute',desc:'Assigned field teams deploy with checklists, scheduling controls, evidence capture, and live operational updates.'},{step:'04',name:'Verify',desc:'Completion review, evidence, approved scope changes, and payment events close the operational loop.'}].map((phase,idx)=><div key={idx} className="relative p-6 rounded-2xl bg-slate-900 border border-slate-800"><span className="text-4xl font-extrabold text-amber-500/20 font-mono mb-2 block">{phase.step}</span><h3 className="text-xl font-bold text-white mb-2">{phase.name}</h3><p className="text-sm text-slate-400 leading-relaxed">{phase.desc}</p></div>)}</div></div></section>
 
-      <section className="py-20 bg-gradient-to-b from-slate-950 to-slate-900 text-center"><div className="max-w-4xl mx-auto px-4"><h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">Ready for an Execution Partner Who Handles It All?</h2><p className="text-slate-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto">Stop juggling fragmented contractors. Get instant quotes, multi-division bundles, and guaranteed operational execution today.</p><div className="flex flex-col sm:flex-row items-center justify-center gap-4"><Link to="/services" className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-lg shadow-lg shadow-amber-500/20 transition-all hover:scale-105">Explore Services<ArrowRight className="ml-2 w-5 h-5"/></Link><Link to="/festival" className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-bold text-lg transition-all">Request Festival Proposal</Link></div></div></section>
+      <section className="py-20 bg-gradient-to-b from-slate-950 to-slate-900 text-center"><div className="max-w-4xl mx-auto px-4"><h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">Ready for an Execution Partner Who Handles It All?</h2><p className="text-slate-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto">Stop juggling fragmented contractors. Start with a governed service request and let Dani Declares route the work through the right commercial and operational path.</p><div className="flex flex-col sm:flex-row items-center justify-center gap-4"><Link to="/request-service" className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-lg shadow-lg shadow-amber-500/20 transition-all hover:scale-105">Request Service<ArrowRight className="ml-2 w-5 h-5"/></Link><Link to="/festival" className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-bold text-lg transition-all">Request Festival Proposal</Link></div></div></section>
     </div>
   );
 }
