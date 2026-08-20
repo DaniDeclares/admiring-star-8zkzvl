@@ -18,7 +18,7 @@ const bookingServiceData = [
     category: "notary",
     actionType: "book",
     tidycalSlug: "notary",
-    priceLabel: "$35 per signature",
+    priceLabel: getPriceLabel("notary"),
     paymentServiceId: "notary-payment",
   },
   {
@@ -29,7 +29,7 @@ const bookingServiceData = [
     category: "notary",
     actionType: "book",
     tidycalSlug: "loansigning",
-    priceLabel: "Packages from $175",
+    priceLabel: getPriceLabel("loansigning"),
     paymentServiceId: "loan-signing-payment",
   },
   {
@@ -40,7 +40,7 @@ const bookingServiceData = [
     category: "notary",
     actionType: "book",
     tidycalSlug: "apostille",
-    priceLabel: "Starting at $175",
+    priceLabel: getPriceLabel("apostille"),
     paymentServiceId: "apostille-payment",
   },
   {
@@ -50,7 +50,7 @@ const bookingServiceData = [
     category: "weddings",
     actionType: "book",
     tidycalSlug: "officiant",
-    priceLabel: "Packages from $200",
+    priceLabel: getPriceLabel("officiant"),
     paymentServiceId: "officiant-payment",
   },
 ];
