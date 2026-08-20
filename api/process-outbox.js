@@ -48,8 +48,12 @@ async function deliver(item) {
 }
 
 export default async function handler(req, res) {
-  if (!['POST', 'GET'].includes(req.method)) return res.status(405).json({ error: 'Method not allowed' });
-  if (CRON_SECRET && req.headers.authorization !== `Bearer ${CRON_SECRET}` && req.headers['x-cron-secret'] !== CRON_SECRET) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!CRON_SECRET) return res.status(503).json({ error: 'Outbox worker is not configured' });
+
+  const authorization = req.headers.authorization;
+  const headerSecret = req.headers['x-cron-secret'];
+  if (authorization !== `Bearer ${CRON_SECRET}` && headerSecret !== CRON_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -88,7 +92,7 @@ export default async function handler(req, res) {
         const delayMinutes = Math.min(60, 2 ** Math.min(attempts, 5));
         await prisma.$executeRaw`
           update public.dd_event_outbox
-          set status = ${terminal ? 'FAILED' : 'FAILED'},
+          set status = 'FAILED',
               last_error = ${String(error.message || error)},
               available_at = ${terminal ? new Date() : new Date(Date.now() + delayMinutes * 60 * 1000)},
               updated_at = now()
