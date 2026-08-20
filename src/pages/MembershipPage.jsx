@@ -1,45 +1,32 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { getB2BPriceLabel } from '../data/b2bPricingResolver2026';
+import { B2B_SUBCHANNELS } from '../data/b2bChannelPolicy2026';
 
 export default function MembershipPage() {
   const tiers = [
     {
-      name: "Bronze Retainer",
-      price: "$500",
-      period: "/month",
-      desc: "Ideal for small offices needing reliable mobile notary, document prep, and express local courier delivery.",
-      features: [
-        "Priority Mobile Notary Dispatch",
-        "Express Document Courier",
-        "10% Discount on Print & Apparel",
-        "Dedicated Account Coordinator"
-      ]
+      name: 'Property Support Retainer',
+      price: getB2BPriceLabel('B2B-APT-RETAINER-1500', undefined, B2B_SUBCHANNELS.APT),
+      period: '/month',
+      desc: 'Baseline property-management support for recurring maintenance, coordination, and operational requests.',
+      features: ['Property support coordination', 'Defined monthly service scope', 'Priority operational routing', 'Commercial account coordination'],
     },
     {
-      name: "Silver Retainer",
-      price: "$1,250",
-      period: "/month",
-      desc: "Designed for growing real estate brokerages and law firms requiring weekly loan signings and admin execution.",
-      features: [
-        "4-Hour Priority Dispatch SLA",
-        "Weekly Loan Signing Package Runs",
-        "15% Discount on All Divisions",
-        "Smart Review Counter Stand Included"
-      ]
+      name: 'Resident Experience Program',
+      price: getB2BPriceLabel('B2B-APT-RETAINER-3250', 'B2B2C', B2B_SUBCHANNELS.COMMUNITY),
+      period: '/month',
+      desc: 'Business-funded resident experience support. Business contract pricing remains separate from resident-facing perks.',
+      features: ['Resident experience coordination', 'Gifting / perk program routing', 'Community support scope', 'B2B2C commercial separation'],
     },
     {
-      name: "Gold Retainer",
-      price: "$2,500",
-      period: "/month",
-      desc: "Enterprise package for multi-family property communities needing guaranteed turnover resets and 2-hr HD photo logs.",
-      features: [
-        "Guaranteed 24-48 Hr Turnover SLA",
-        "2-Hour Digital HD Photo Logs",
-        "Sponsored Resident Perk Program",
-        "20% Discount across All Catalog Items"
-      ]
-    }
+      name: 'Operations Partner Retainer',
+      price: getB2BPriceLabel('B2B-OPS-RETAINER-4500', undefined, B2B_SUBCHANNELS.RE),
+      period: '/month',
+      desc: 'Expanded operational partnership for businesses requiring recurring coordination, dispatch, and execution support.',
+      features: ['Expanded operations support', 'Priority coordination', 'Recurring workflow execution', 'Commercial account management'],
+    },
   ];
 
   return (
@@ -47,8 +34,8 @@ export default function MembershipPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-amber-400 font-mono text-sm uppercase tracking-wider">B2B Recurring Retainers</span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mt-2 mb-4">Prepaid B2B Credit Retainers</h1>
-          <p className="text-slate-300 text-lg">Predictable monthly service credits, SLA guarantees, and priority dispatch windows for corporate partners.</p>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mt-2 mb-4">Commercial Retainer Programs</h1>
+          <p className="text-slate-300 text-lg">Predictable recurring support built from the canonical B2B commercial catalog. Enterprise portfolio packages are proposed/custom and require a formal agreement before activation.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
@@ -71,11 +58,12 @@ export default function MembershipPage() {
                 </ul>
               </div>
               <Link to="/request-service" className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-white font-semibold text-sm transition-all">
-                Select Retainer Plan <ArrowRight className="ml-2 w-4 h-4" />
+                Request Retainer Proposal <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </div>
           ))}
         </div>
+        <p className="text-center text-slate-500 text-xs max-w-3xl mx-auto">B2B commercial pricing is not subject to automatic B2C resident discounts. Retainer pricing covers only the services, capacity, response windows, and exclusions stated in the applicable agreement.</p>
       </div>
     </div>
   );
