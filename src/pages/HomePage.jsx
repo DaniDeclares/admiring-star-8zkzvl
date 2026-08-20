@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Briefcase, Scale, Store, ShieldCheck, PartyPopper, HeartHandshake, ArrowRight, CheckCircle2, Printer, Sparkles, Home, ConciergeBell, ShoppingBag, Cpu, Ticket, Truck, ClipboardCheck } from 'lucide-react';
+import { Building2, Briefcase, Scale, Store, ShieldCheck, PartyPopper, HeartHandshake, ArrowRight, CheckCircle2, Printer, Sparkles, Home, ConciergeBell, ShoppingBag, Cpu, Truck, ClipboardCheck } from 'lucide-react';
 import { getPrimaryServiceImage } from '../data/serviceVisuals2026.js';
 
 export default function HomePage() {
