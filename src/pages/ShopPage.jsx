@@ -9,7 +9,7 @@ export default function ShopPage() {
     { name: "Smart Review Counter Stand", category: "Smart Hardware", priceKey: "review_stand", margin: "NFC + QR", icon: Sparkles, desc: "Direct Google Review capture plaque for retail counters." },
     { name: "Custom Heat-Press DTF Apparel (4-Pack)", category: "Creative Merch", priceKey: "apparel", margin: "Volume Apparel", icon: Printer, desc: "High-grade DTF printed branded tees or event shirts." },
     { name: "Sublimated 20 oz Tumbler (2-Pack)", category: "Creative Merch", priceKey: "tumbler", margin: "Drinkware", icon: Printer, desc: "Double-wall insulated custom branded tumblers." },
-    { name: "Express Family Care Snack Box", category: "Market Goods", priceKey: "snack_box", margin: "Curated Box", icon: ShoppingBag, desc: "Premium snack assortment for move-in gifts or event staff." },
+    { name: "Express Family Care Snack Box", category: "Market Goods", priceKey: "05-MK15", margin: "Curated Box", icon: ShoppingBag, desc: "Premium snack assortment for move-in gifts or event staff." },
     { name: "Business Startup Infrastructure Kit", category: "Business Kits", priceKey: "startup_kit", margin: "Turnkey SOPs", icon: ShieldCheck, desc: "Complete registration binders, corporate seals, and setup." }
   ];
 
