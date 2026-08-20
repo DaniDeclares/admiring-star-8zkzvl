@@ -21,10 +21,9 @@ export const SERVICES = {
     buyButtonId: "buy_btn_1SrfoSChHm1uJK9xGWWY0swD",
     tidycalUrl: "https://tidycal.com/danideclaresns/notary",
   },
-
   mobile_notary: {
     label: "Mobile Notary Service",
-    price: 25,
+    price: 50,
     buyButtonId: "buy_btn_1SrfqiChHm1uJK9x9Ug064kv",
     payLinkUrl: "https://buy.stripe.com/eVqeVcfOpdXgdqf3GN6kg1a",
     tidycalUrl: "https://tidycal.com/danideclaresns/notary",
@@ -50,7 +49,6 @@ export const SERVICES = {
     payLinkUrl: "https://buy.stripe.com/bJecN4eKl9H04TJ5OV6kg17",
     tidycalUrl: "https://tidycal.com/danideclaresns/apostille",
   },
-
   loan_signing: {
     label: "Loan Signing Appointment",
     price: 150,
@@ -65,7 +63,6 @@ export const SERVICES = {
     payLinkUrl: "https://buy.stripe.com/28E4gy0Tv9H01Hx7X36kg19",
     tidycalUrl: "https://tidycal.com/danideclaresns/loansigning",
   },
-
   process_serving: {
     label: "Process Serving",
     price: 125,
@@ -94,7 +91,6 @@ export const SERVICES = {
     payLinkUrl: "https://buy.stripe.com/bJe8wOcCdf1k85V0uB6kg0Q",
     tidycalUrl: "https://tidycal.com/danideclaresns/notary",
   },
-
   field_property_inspections: {
     label: "Field Property Inspections",
     price: 135,
@@ -107,7 +103,6 @@ export const SERVICES = {
     buyButtonId: "buy_btn_1SrfzsChHm1uJK9xDfGhusHl",
     tidycalUrl: "https://tidycal.com/danideclaresns/loansigning",
   },
-
   general_document_signing: {
     label: "General Document Signing",
     price: 125,
