@@ -13,22 +13,30 @@ export default function HomePage() {
     { icon: ShoppingBag, visual: 'marketplace', title: 'Express & Marketplace', link: '/shop', items: ['Curated Snack Boxes', 'On-Demand Essentials', 'Branded Merch', 'Smart NFC Hardware'] }
   ];
 
-  const credibility = ['Mobile Support', 'Metro Atlanta', 'South Carolina Available', 'Documentation Included', 'Fast Response', 'Vendor Readiness In Progress'];
+  const buyerChannels = [
+    { icon: ConciergeBell, label: 'Residents', desc: 'Concierge, errands, documents, and direct service support', link: '/resident-concierge' },
+    { icon: Building2, label: 'Property Managers', desc: 'Turnovers, field operations, resident experience, and facility support', link: '/services/property' },
+    { icon: Briefcase, label: 'Real Estate Professionals', desc: 'Listing, transaction, field, notary, and closing support', link: '/real-estate' },
+    { icon: Store, label: 'Businesses', desc: 'Administrative, operations, notary, events, and project support', link: '/services/business-solutions' },
+    { icon: ShieldCheck, label: 'Government & Institutions', desc: 'Facilities, janitorial, administrative, document, and field support', link: '/industries/government' }
+  ];
+
+  const credibility = ['Mobile Support', 'Metro Atlanta', 'South Carolina Available', 'Documentation Included', 'Fast Response', 'Procurement Ready'];
 
   return (
     <div className="dd-homepage bg-slate-950 text-slate-100 min-h-screen selection:bg-amber-500 selection:text-slate-950">
       <section className="relative pt-24 pb-20 md:pt-32 md:pb-28 overflow-hidden border-b border-slate-800">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-slate-950 to-slate-950 pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs sm:text-sm font-medium mb-6"><Sparkles className="w-4 h-4" /><span>Business Operations, Festivals & Execution Services</span></div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs sm:text-sm font-medium mb-6"><Sparkles className="w-4 h-4" /><span>Mobile Operations, Property Support &amp; Institutional Execution</span></div>
           <img src="/logo-script.png" alt="Dani Declares LLC Logo" className="h-20 sm:h-28 w-auto mx-auto mb-6 drop-shadow-md" />
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">One Partner. Every Stage. <br /><span className="bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 bg-clip-text text-transparent">Complete Execution.</span></h1>
-          <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 mb-10 leading-relaxed font-normal"><strong className="text-amber-300 font-semibold">DANI DECLARES LLC</strong> is a mobile operations and execution support company helping property managers, businesses, agencies, and individuals get documents, logistics, properties, events, and critical support work handled from start to finish.</p>
+          <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 mb-10 leading-relaxed font-normal"><strong className="text-amber-300 font-semibold">DANI DECLARES LLC</strong> is a mobile operations and execution support company helping residents, property managers, real estate professionals, businesses, agencies, and institutional partners get documents, logistics, properties, and critical support work handled from start to finish.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto">
             <Link to="/request-service" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-all shadow-lg shadow-amber-500/25 hover:scale-[1.02]">Request Service<ArrowRight className="ml-2 w-5 h-5" /></Link>
             <Link to="/services" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-semibold text-base transition-all">Explore Services</Link>
           </div>
-          <p className="mt-8 text-xs sm:text-sm text-slate-500 uppercase tracking-widest font-mono">Mobile Operations + B2B Execution + Resident Concierge + Government Procurement Readiness</p>
+          <p className="mt-8 text-xs sm:text-sm text-slate-500 uppercase tracking-widest font-mono">Residents + Property Managers + Real Estate + Businesses + Government &amp; Institutions</p>
         </div>
       </section>
 
@@ -39,13 +47,22 @@ export default function HomePage() {
       </section>
 
       <section className="py-20 bg-slate-900/40 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12"><span className="text-amber-400 font-mono text-sm tracking-wider uppercase">Choose Your Path</span><h2 className="text-3xl sm:text-4xl font-bold text-white mt-2 mb-4">Support Built Around the Buyer, Not the Vendor.</h2><p className="text-slate-300 text-base sm:text-lg leading-relaxed">Start with the market you belong to. DANI DECLARES routes the request into the right commercial and operational path while keeping one accountable execution layer.</p></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {buyerChannels.map((item) => <Link key={item.label} to={item.link} className="p-6 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 transition-all group"><item.icon className="w-8 h-8 text-amber-400 mb-4 group-hover:scale-110 transition-transform"/><h3 className="font-semibold text-white text-lg mb-2">{item.label}</h3><p className="text-sm text-slate-400 leading-relaxed">{item.desc}</p><span className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-amber-400 mt-5">Explore<ArrowRight className="ml-1 w-3.5 h-3.5"/></span></Link>)}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-slate-900/40 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1.05fr_.95fr] gap-10 items-center">
           <div>
-            <span className="text-amber-400 font-mono text-sm tracking-wider uppercase">Property Managers & Businesses</span>
+            <span className="text-amber-400 font-mono text-sm tracking-wider uppercase">Property Managers &amp; Businesses</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mt-2 mb-5">The small-but-critical work should not require five vendors.</h2>
             <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">Need a reliable mobile support partner for turnovers, move-ready prep, inspections, document handling, courier runs, event execution, or administrative support? Dani Declares provides one accountable operating layer from intake through field completion.</p>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link to="/request-service" className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold">Start a Project<ArrowRight className="ml-2 w-5 h-5" /></Link>
+              <Link to="/request-service" className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold">Request Service<ArrowRight className="ml-2 w-5 h-5" /></Link>
               <Link to="/services/property" className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-slate-700 bg-slate-950 text-slate-200 hover:border-amber-500/40">Property Operations</Link>
             </div>
           </div>
@@ -57,9 +74,9 @@ export default function HomePage() {
 
       <section className="py-20 bg-slate-900/50 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16"><h2 className="text-3xl font-bold text-white mb-3">Built for High-Stakes Operations</h2><p className="text-slate-400">Why manage five specialized vendors when you can rely on one accountable execution partner?</p></div>
+          <div className="text-center max-w-2xl mx-auto mb-16"><h2 className="text-3xl font-bold text-white mb-3">Built for High-Stakes Operations</h2><p className="text-slate-400">One accountable execution partner, with specialized capabilities behind the buyer-facing experience.</p></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {[{icon:Building2,label:'Property Managers',desc:'Turnover resets, lock changes, photo logs'},{icon:Briefcase,label:'Realtors & Brokers',desc:'Signage, closing kits, notary services'},{icon:Scale,label:'Law Firms & B2B',desc:'Court couriers, loan signings, binding'},{icon:Store,label:'Small Businesses',desc:'Startup kits, apparel, NFC touchpoints'},{icon:ShieldCheck,label:'Government (GovCon)',desc:'CAGE: 17VV2 | SAM.gov: TD4TSG48LHN9'},{icon:PartyPopper,label:'Festivals & Events',desc:'Vendor coordination, permitting & stage operations'},{icon:HeartHandshake,label:'Weddings & Galas',desc:'Custom decor, print packages, on-site logistics'},{icon:Cpu,label:'Enterprise Teams',desc:'Brand compliance & automated ordering'}].map((item,idx)=><div key={idx} className="p-5 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-amber-500/40 transition-all group"><item.icon className="w-8 h-8 text-amber-400 mb-3 group-hover:scale-110 transition-transform"/><h3 className="font-semibold text-white text-base mb-1">{item.label}</h3><p className="text-xs text-slate-400 leading-snug">{item.desc}</p></div>)}
+            {[{icon:Building2,label:'Property Operations',desc:'Turnover resets, lock changes, photo logs'},{icon:Briefcase,label:'Real Estate Support',desc:'Signage, closing kits, notary services'},{icon:Scale,label:'Legal & Administrative',desc:'Court couriers, document handling, binding'},{icon:Store,label:'Business Support',desc:'Startup kits, apparel, operational support'},{icon:ShieldCheck,label:'Government & Institutions',desc:'Facilities, janitorial, administrative support'},{icon:PartyPopper,label:'Festivals & Events',desc:'Vendor coordination, permitting & production'},{icon:HeartHandshake,label:'Weddings & Galas',desc:'Custom decor, print packages, on-site logistics'},{icon:Cpu,label:'Enterprise Teams',desc:'Brand compliance & governed ordering'}].map((item,idx)=><div key={idx} className="p-5 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-amber-500/40 transition-all group"><item.icon className="w-8 h-8 text-amber-400 mb-3 group-hover:scale-110 transition-transform"/><h3 className="font-semibold text-white text-base mb-1">{item.label}</h3><p className="text-xs text-slate-400 leading-snug">{item.desc}</p></div>)}
           </div>
         </div>
       </section>
