@@ -30,12 +30,21 @@ Therefore:
 - `src/config/stripeLinks.js` now treats legacy Stripe keys as routing aliases and refuses to guess when no exact canonical service exists.
 - `src/data/pricingCanon.js` reads the reconciliation registry before falling back to the legacy 2026 catalog.
 - `src/lib/operations/masterCommercialResolver.test.js` locks the core price and deprecated-token invariants.
+- Twilio notifications use the dedicated revokable API-key pair (`TWILIO_API_KEY_SID` + `TWILIO_API_KEY_SECRET`), never the master Twilio Auth Token.
+
+## Reconciliation inventory
+
+The Library `payment_links.csv` contains **87 Payment Links: 82 active and 5 inactive**. The export contains link IDs, status, URLs, names, and limited metadata, but no Stripe Product/Price amount fields. Therefore the offline audit is evidence-only: **77 rows are `UNMAPPED` and 10 rows are `MATCHED_REVIEW`**. None is treated as amount-verified until the live Stripe API is queried.
+
+The live Stripe crosswalk remains read-only. No Product, Price, Payment Link, or historical object may be mutated merely because its name resembles a canonical service.
 
 ## Remaining production activation gates
 
-### 1. Complete the reconciliation inventory
+### 1. Live Stripe reconciliation
 
-Run a Stripe export/API comparison against the registry. Each active Payment Link must be classified as:
+Run `npm run audit:stripe-crosswalk` in a server-side/admin environment with the existing production `STRIPE_SECRET_KEY`. The live audit must compare Stripe Product/Price amounts against the canonical registry before any legacy object is retired or repointed.
+
+Each active Payment Link must be classified as:
 
 - `MATCH` — canonical service and amount agree.
 - `AMOUNT_MISMATCH` — service identity is known but Stripe amount differs.
@@ -58,9 +67,9 @@ The route should accept `?service=<canonical serviceId>`, display the resolved o
 
 Every paid fixed-price path must obtain a successful `/api/verify-commercial-intent` response before creating or redirecting to checkout. The client must never submit an arbitrary amount.
 
-### 5. Stripe reconciliation
+### 5. Stripe reconciliation metadata
 
-Stripe metadata should carry at least:
+When Stripe execution objects are newly created or updated, metadata should carry at least:
 
 - `service_id`
 - `commercial_registry_version`
@@ -74,26 +83,39 @@ Provider payout data must not be written into customer-facing Stripe metadata.
 
 ### 6. Production secrets
 
-Set `CRON_SECRET` in the production Vercel environment and store the matching secret in Supabase Vault under `dd_cron_secret`. Never commit the token to Git.
+The current Vercel project already contains the Stripe and Supabase production credentials shown in the project settings. Do **not** add a Twilio `AUTH_TOKEN`; the application is already implemented for the dedicated Twilio API-key credentials.
 
-Also configure production `RESEND_API_KEY` and `TWILIO_AUTH_TOKEN` only in the production secret store.
+The remaining notification/cron configuration is:
 
-### 7. Portal identities
+- `CRON_SECRET` — a new random secret shared between Vercel and Supabase Vault as `dd_cron_secret`.
+- `RESEND_API_KEY` — the Resend API key used by the email adapter.
+- `RESEND_FROM_EMAIL` — the verified sender, currently defaulted/documented as `DANI DECLARES <noreply@danideclares.biz>`.
+- `TWILIO_ACCOUNT_SID` — existing Twilio account identifier.
+- `TWILIO_API_KEY_SID` — the dedicated Twilio API key SID.
+- `TWILIO_API_KEY_SECRET` — the dedicated Twilio API key secret.
+- `TWILIO_FROM_NUMBER` — the Twilio sending number.
 
-Provision the actual staff administrator and provider accounts using the already-deployed Supabase provisioning functions. Never hard-code Auth UUIDs in source.
+The repository contains no production secret values. `CRON_SECRET` must not be committed or pasted into source control.
 
-### 8. Notification smoke test
+### 7. Scheduler architecture
 
-Insert one controlled test event into `dd_event_outbox`, verify the worker processes it, then remove/mark the test record according to the production audit policy.
+Vercel Hobby only supports daily native Cron Jobs, so `vercel.json` intentionally remains on its once-daily schedule. The actual notification worker is already protected by the Supabase `pg_cron` job `process-notification-outbox-secure`, which is live at `*/5 * * * *` and fail-closed until `dd_cron_secret` exists in Vault. Supabase currently has **no Vault secrets**, so the worker is intentionally dormant until the shared secret is configured.
 
-### 9. Build and deployment verification
+### 8. Portal identities
 
-Run:
+Provision the actual staff administrator and provider accounts using the already-deployed Supabase provisioning functions. Never hard-code Auth UUIDs in source. The current Supabase project has **zero Auth users**, so this remains a real-world identity-provisioning gate rather than a code gap.
 
-```bash
-npm test -- --watchAll=false
-npm run build
-```
+### 9. NAWFside fulfillment activation
+
+Commercial autonomy is already established separately from fulfillment activation. NAWFside remains `compliance_status = PENDING` and `accepts_new_work = false` until the documentary requirements are verified. Do not bypass that gate merely because DANI DECLARES controls customer pricing and marketing.
+
+### 10. Notification smoke test
+
+After the secrets are configured, insert one controlled test event into `dd_event_outbox`, verify the five-minute Supabase scheduler reaches `/api/process-outbox`, verify the notification succeeds, then remove/mark the test record according to the production audit policy.
+
+### 11. Build and deployment verification
+
+Node.js CI passes on the current commercial-activation branch. The latest Vercel build completed the application build successfully, but Vercel reports a project deployment/build-rate-limit failure rather than an application compilation error. Production deployment should be re-verified after the current Vercel limit clears.
 
 Then verify the deployed `/request-service` flow in a browser and exercise:
 
@@ -107,6 +129,7 @@ Then verify the deployed `/request-service` flow in a browser and exercise:
 - deprecated token rejection
 - bespoke quote routing
 - provider-lane isolation
+- notification outbox delivery
 
 ## Do not activate yet
 
