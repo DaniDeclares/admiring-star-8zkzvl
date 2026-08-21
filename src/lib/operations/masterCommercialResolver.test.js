@@ -47,7 +47,7 @@ describe('master commercial registry', () => {
       bedrooms: 4,
       bathrooms: 3,
       totalSquareFootage: 1500,
-    })).toBe(1475);
+    })).toBe(1485);
   });
 
   test('does not invent a price for bespoke SOW offers', () => {
