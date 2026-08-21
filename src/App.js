@@ -17,7 +17,6 @@ import NotaryPage from "./pages/NotaryPage.jsx";
 import WeddingsDivisionPage from "./divisions/events/WeddingsDivisionPage.jsx";
 import WeddingsPage from "./pages/WeddingsPage.jsx";
 import FestivalPage from "./pages/FestivalPage.jsx";
-import BookingPage from "./pages/BookingPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
 import RealEstatePage from "./pages/RealEstatePage.jsx";
 import PackagesPage from "./pages/PackagesPage.jsx";
