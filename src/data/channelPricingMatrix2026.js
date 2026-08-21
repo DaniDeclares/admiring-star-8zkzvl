@@ -5,8 +5,11 @@ import { CHANNELS, PRICING_MODELS, TRANSACTION_TYPES } from './masterCatalog2026
  * DANI DECLARES — Channel Pricing Matrix 2026
  *
  * One service record can serve multiple channels, but its commercial treatment
- * is channel-specific. This module is the presentation/governance layer over
- * the master catalog; it must never copy a B2C price into B2B/B2B2C/B2G.
+ * is channel-specific. This is a governance/presentation layer only.
+ *
+ * IMPORTANT: legacy master-catalog numbers are NOT commercial authority for
+ * B2B or B2B2C. Those channels must resolve against their own contract/perk
+ * records. Government pricing is never numeric here.
  */
 
 export const CHANNEL_PRICING_POLICY = Object.freeze({
@@ -44,16 +47,19 @@ export const CHANNEL_PRICING_POLICY = Object.freeze({
   }),
 });
 
-const isPubliclyPriced = (channel) =>
-  CHANNEL_PRICING_POLICY[channel]?.publicPriceVisibility === 'PUBLIC';
-
 /**
  * Returns every catalog service with its channel-specific commercial treatment.
  * The same offerId remains canonical across channels.
+ *
+ * B2B and B2B2C deliberately return null numeric price fields here. A legacy
+ * `workingBaselineRate` is not a valid substitute for a commercial contract
+ * price or a resident perk price.
  */
 export const channelPricingMatrix = catalog.flatMap((service) =>
   (service.customerChannels || []).map((channel) => {
     const policy = CHANNEL_PRICING_POLICY[channel];
+    const isB2C = channel === CHANNELS.DIRECT_B2C;
+
     return {
       serviceId: service.offerId,
       serviceName: service.offerName,
@@ -63,10 +69,10 @@ export const channelPricingMatrix = catalog.flatMap((service) =>
       pricingModel: policy?.pricingModel || null,
       transactionType: service.transactionType || TRANSACTION_TYPES.CUSTOM_QUOTE,
       publicPriceVisibility: policy?.publicPriceVisibility || 'HIDDEN',
-      publicPrice: isPubliclyPriced(channel) ? service.startingPrice ?? null : null,
-      workingBaselineRate: isPubliclyPriced(channel) ? service.workingBaselineRate ?? null : null,
-      commercialBaselineRate: channel === CHANNELS.BUSINESS_B2B ? service.workingBaselineRate ?? null : null,
-      residentPerkEligible: channel === CHANNELS.COMMUNITY_B2B2C ? true : false,
+      publicPrice: isB2C ? service.startingPrice ?? null : null,
+      workingBaselineRate: isB2C ? service.workingBaselineRate ?? null : null,
+      commercialBaselineRate: null,
+      residentPerkEligible: channel === CHANNELS.COMMUNITY_B2B2C,
       governmentPricing: channel === CHANNELS.GOVERNMENT_B2G ? 'SOLICITATION_OR_CONTRACT' : null,
       quoteRequired: channel !== CHANNELS.DIRECT_B2C,
       residentDiscountAllowed: policy?.residentDiscountAllowed === true,
@@ -86,7 +92,8 @@ export const getChannelPricingRecords = (serviceId) =>
 
 /**
  * Public presentation guard. Government pages never receive numeric pricing,
- * and B2B never inherits B2C resident pricing.
+ * B2B never inherits B2C pricing, and B2B2C never substitutes retail pricing
+ * for property contract economics.
  */
 export const getPublicPricePresentation = (serviceId, channel) => {
   const record = getChannelPricingRecord(serviceId, channel);
@@ -116,8 +123,8 @@ export const getPublicPricePresentation = (serviceId, channel) => {
     return {
       serviceId,
       channel,
-      label: record.publicPrice || 'Resident Program Pricing',
-      amount: record.workingBaselineRate,
+      label: 'Resident Program Pricing',
+      amount: null,
       quoteRequired: true,
     };
   }
