@@ -1,47 +1,22 @@
 // DANI DECLARES LLC — 2026 SERVICE VISUAL BRIDGE
-// Single visual-asset source: IMAGE_ASSETS_2026.
-// The image catalog's current canonical categories are:
-// public, weddings, stock, products.
-// Division keys below are intentionally presentation-level aliases so the
-// service hub can evolve without duplicating or renaming the asset registry.
+// Curated visual routing: each buyer-facing division receives imagery that
+// actually depicts the work instead of inheriting the first image in a broad
+// category. This prevents the same stock photo from appearing across unrelated cards.
+import { getMediaById } from './mediaData.js';
 
-import { IMAGE_ASSETS_2026 } from './imageCatalog2026.js';
-
-const assetsByCategory = (category) =>
-  IMAGE_ASSETS_2026.filter((asset) => asset.category === category && asset.url);
-
-const firstAvailable = (...categories) => {
-  for (const category of categories) {
-    const assets = assetsByCategory(category);
-    if (assets.length) return assets;
-  }
-  return [];
-};
+const byIds = (...ids) => ids.map((id) => getMediaById(id)).filter((asset) => asset?.imageUrl);
 
 export const SERVICE_VISUALS_2026 = {
-  // Events uses the dedicated wedding/event photography first.
-  events: firstAvailable('weddings', 'stock', 'products'),
-
-  // Business/legal/admin services use the stock operational photography.
-  business: firstAvailable('stock', 'products'),
-
-  // Print/merch uses the product photography.
-  print: firstAvailable('products', 'stock'),
-
-  // Property currently has no dedicated property category in the image
-  // registry, so use the operational stock library rather than returning []
-  // and forcing the UI to fall back to the logo.
-  property: firstAvailable('stock', 'products'),
-
-  // Concierge/courier currently uses the operational stock library.
-  concierge: firstAvailable('stock', 'products'),
-
-  // Marketplace uses the product catalog photography.
-  marketplace: firstAvailable('products', 'stock')
+  events: byIds('evt-elopement', 'evt-wedding-officiant'),
+  business: byIds('op-doc-prep', 'op-admin-support', 'op-notary-visit', 'op-i9-verify'),
+  print: byIds('crt-dtf-apparel', 'crt-tumblers', 'crt-labels-stickers'),
+  property: byIds('prop-unit-turnover', 'prop-str-turnover', 'prop-b2c-deep-clean'),
+  concierge: byIds('op-notary-visit', 'op-loan-signing', 'op-apostille'),
+  marketplace: byIds('mkt-snack-pack-3', 'mkt-gamer-pack-5', 'mkt-movie-night-15')
 };
 
 export const getServiceVisuals = (division) =>
   SERVICE_VISUALS_2026[division] || SERVICE_VISUALS_2026.business;
 
 export const getPrimaryServiceImage = (division) =>
-  getServiceVisuals(division)[0]?.url || '/logo-script.png';
+  getServiceVisuals(division)[0]?.imageUrl || '/dd-monogram.svg';
