@@ -26,6 +26,9 @@ test('government pricing is never exposed as a numeric public amount', () => {
     expect(presentation.amount).toBeNull();
     expect(presentation.quoteRequired).toBe(true);
     expect(presentation.label).toBe('Contract / Solicitation Pricing');
+    expect(record.publicPrice).toBeNull();
+    expect(record.workingBaselineRate).toBeNull();
+    expect(record.commercialBaselineRate).toBeNull();
   }
 });
 
@@ -34,6 +37,9 @@ test('B2B public presentation does not inherit B2C retail price', () => {
     (item) => item.channel === CHANNELS.BUSINESS_B2B
   );
   expect(record).toBeTruthy();
+  expect(record.publicPrice).toBeNull();
+  expect(record.workingBaselineRate).toBeNull();
+  expect(record.commercialBaselineRate).toBeNull();
 
   const presentation = getPublicPricePresentation(
     record.serviceId,
@@ -41,6 +47,25 @@ test('B2B public presentation does not inherit B2C retail price', () => {
   );
   expect(presentation.amount).toBeNull();
   expect(presentation.quoteRequired).toBe(true);
+});
+
+test('B2B2C never substitutes a B2C retail amount for contract economics', () => {
+  const record = channelPricingMatrix.find(
+    (item) => item.channel === CHANNELS.COMMUNITY_B2B2C
+  );
+  expect(record).toBeTruthy();
+  expect(record.publicPrice).toBeNull();
+  expect(record.workingBaselineRate).toBeNull();
+  expect(record.commercialBaselineRate).toBeNull();
+  expect(record.residentPerkEligible).toBe(true);
+
+  const presentation = getPublicPricePresentation(
+    record.serviceId,
+    CHANNELS.COMMUNITY_B2B2C
+  );
+  expect(presentation.amount).toBeNull();
+  expect(presentation.quoteRequired).toBe(true);
+  expect(presentation.label).toBe('Resident Program Pricing');
 });
 
 test('B2C keeps its retail price when one exists', () => {
