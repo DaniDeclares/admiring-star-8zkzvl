@@ -2,9 +2,7 @@ import prisma from '../lib/prisma.js';
 import { buildIntakeRoutingContext, routeIntake } from '../src/lib/operations/intakeRouting2026.js';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
     const {
@@ -13,7 +11,9 @@ export default async function handler(req, res) {
       phone,
       category,
       serviceType,
+      serviceId,
       pricingServiceId,
+      commercialIntent,
       details,
       channelType,
       organizationName,
@@ -23,13 +23,10 @@ export default async function handler(req, res) {
     } = req.body || {};
 
     if (!name || (!email && !phone)) {
-      return res.status(400).json({
-        error: 'Missing required contact parameters (Name and Email or Phone)',
-      });
+      return res.status(400).json({ error: 'Missing required contact parameters (Name and Email or Phone)' });
     }
 
     const routing = routeIntake({ channelType, category });
-
     if (!routing.channel) {
       return res.status(400).json({
         error: 'A valid engagement channel is required before this request can be routed.',
@@ -38,6 +35,7 @@ export default async function handler(req, res) {
     }
 
     const routingContext = buildIntakeRoutingContext({ channelType, category });
+    const canonicalServiceId = pricingServiceId || serviceId || commercialIntent?.serviceId || null;
 
     const lead = await prisma.lead.create({
       data: {
@@ -61,7 +59,8 @@ export default async function handler(req, res) {
         request_details: details || 'Intake request submitted via web form.',
         property_details: {
           operationsRouting: routingContext,
-          pricingServiceId: pricingServiceId || null,
+          pricingServiceId: canonicalServiceId,
+          commercialIntent: commercialIntent || null,
         },
         status: routing.initialState.toLowerCase(),
         priority: 'normal',
@@ -74,7 +73,7 @@ export default async function handler(req, res) {
       trackingId: request.id,
       requestId: request.id,
       routing: routingContext,
-      pricingServiceId: pricingServiceId || null,
+      pricingServiceId: canonicalServiceId,
     });
   } catch (error) {
     console.error('Intake Webhook Persistence Error:', error);
