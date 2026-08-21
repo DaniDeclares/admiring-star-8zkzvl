@@ -68,7 +68,7 @@ export default function App() {
         <Route path="/events/weddings" element={<WeddingsPage />} />
         <Route path="/events/festivals" element={<FestivalPage />} />
         <Route path="/festival" element={<FestivalPage />} />
-        <Route path="/book" element={<BookingPage />} />
+        <Route path="/book" element={<Navigate to="/request-service" replace />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/travel-quote" element={<TravelQuotePage />} />
         <Route path="/request-service" element={<RequestServicePage />} />
@@ -87,6 +87,7 @@ export default function App() {
         <Route path="/field-services" element={<Navigate to="/services/property" replace />} />
         <Route path="/events" element={<Navigate to="/services/events" replace />} />
         <Route path="/signature-services" element={<Navigate to="/services" replace />} />
+        <Route path="/govcon" element={<Navigate to="/industries/government" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

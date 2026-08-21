@@ -2,73 +2,94 @@ import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
 
+// Public navigation is channel-first. Internal capability silos remain addressable,
+// but buyers enter through the market they belong to and then reach the canonical
+// /request-service intake path.
 const desktopGroups = [
   {
-    key: 'services',
-    label: 'Services',
+    key: 'residents',
+    label: 'Residents',
     columns: [
       {
-        title: 'Core Capabilities',
+        title: 'Resident Concierge',
         links: [
-          ['Business Solutions', '/services/business'],
-          ['Property & Field Services', '/services/property'],
-          ['Notary & Document Signings', '/services/notary'],
-          ['Events & Office Staging', '/services/events'],
+          ['Resident Concierge Hub', '/resident-concierge'],
+          ['Service Packages', '/packages'],
+          ['Request a Service', '/request-service'],
         ],
       },
       {
-        title: 'Specialized Services',
+        title: 'Resident Support',
         links: [
-          ['Weddings Division', '/weddings'],
-          ['Real Estate Solutions', '/real-estate'],
-          ['Print Studio', '/services/print-studio'],
+          ['Membership', '/membership'],
+          ['Direct Shop', '/shop'],
+          ['Contact Dani Declares', '/contact'],
+        ],
+      },
+    ],
+  },
+  {
+    key: 'property',
+    label: 'Property Managers',
+    columns: [
+      {
+        title: 'Property Operations',
+        links: [
+          ['Property Operations', '/services/property'],
+          ['Resident Experience', '/resident-concierge'],
           ['Facility Visits', '/services/facility-visits'],
+        ],
+      },
+      {
+        title: 'Enterprise Support',
+        links: [
+          ['Property Retainer Network', '/partner-network'],
+          ['Request Property Support', '/request-service'],
+          ['Contact Operations', '/contact'],
+        ],
+      },
+    ],
+  },
+  {
+    key: 'real-estate',
+    label: 'Real Estate',
+    columns: [
+      {
+        title: 'Transaction & Listing Support',
+        links: [
+          ['Real Estate Solutions', '/real-estate'],
+          ['Field & Facility Support', '/services/facility-visits'],
+          ['Request Real Estate Support', '/request-service'],
+        ],
+      },
+      {
+        title: 'Professional Support',
+        links: [
+          ['Business Solutions', '/services/business-solutions'],
+          ['Notary & Documents', '/services/notary'],
+          ['Contact Real Estate Desk', '/contact'],
         ],
       },
     ],
   },
   {
     key: 'business',
-    label: 'B2B Enterprise',
+    label: 'Businesses',
     columns: [
       {
-        title: 'Business Operations',
+        title: 'Administrative & Operations',
         links: [
-          ['Corporate Infrastructure', '/services/business'],
-          ['Property & Field Operations', '/services/property'],
-          ['Property Retainer Network', '/partner-network'],
-          ['Corporate Memberships', '/membership'],
+          ['Business Solutions', '/services/business-solutions'],
+          ['Notary & Document Services', '/services/notary'],
+          ['Events & Office Support', '/services/events'],
         ],
       },
       {
-        title: 'Enterprise Paths',
+        title: 'Project Support',
         links: [
-          ['Real Estate Solutions', '/real-estate'],
-          ['Partner Network', '/partner-network'],
-          ['Business Packages', '/packages'],
-          ['Start a Project', '/book'],
-        ],
-      },
-    ],
-  },
-  {
-    key: 'residents',
-    label: 'Direct Residents',
-    columns: [
-      {
-        title: 'Resident Ecosystem',
-        links: [
-          ['Resident Concierge Hub', '/resident-concierge'],
-          ['À La Carte Service Packages', '/packages'],
-          ['Direct Product Shop', '/shop'],
-        ],
-      },
-      {
-        title: 'Quick Access',
-        links: [
-          ['Request a Service', '/request-service'],
-          ['Book a Service', '/book'],
-          ['Contact Dani Declares', '/contact'],
+          ['Print Studio', '/services/print-studio'],
+          ['Request Business Support', '/request-service'],
+          ['Start a Project', '/request-service'],
         ],
       },
     ],
@@ -78,19 +99,19 @@ const desktopGroups = [
     label: 'Government',
     columns: [
       {
-        title: 'Government Desk',
+        title: 'Procurement & Facilities',
         links: [
-          ['Federal & Government Services', '/industries/government'],
-          ['Capability Statement', '/industries/government'],
-          ['Government Intake', '/request-service'],
+          ['Government Services', '/industries/government'],
+          ['Federal Services', '/services/federal'],
+          ['Facilities Support', '/services/property'],
         ],
       },
       {
-        title: 'Procurement Context',
+        title: 'Procurement Intake',
         links: [
-          ['GovCon Services', '/industries/government'],
+          ['Government Intake', '/request-service'],
+          ['Capability / Procurement Desk', '/contact'],
           ['Partner Network', '/partner-network'],
-          ['Contact Procurement Desk', '/contact'],
         ],
       },
     ],
@@ -164,7 +185,7 @@ export default function Navbar() {
         </nav>
 
         <div className="dd-navbar-actions">
-          <Link to="/book" onClick={closeAll} className="dd-project-cta">Start a Project →</Link>
+          <Link to="/request-service" onClick={closeAll} className="dd-project-cta">Request Service →</Link>
           <button
             type="button"
             onClick={() => setMobileMenuOpen((current) => !current)}
@@ -196,7 +217,7 @@ export default function Navbar() {
           ))}
           <Link to="/about" onClick={closeAll} className="dd-mobile-home">About</Link>
           <Link to="/contact" onClick={closeAll} className="dd-mobile-home">Contact</Link>
-          <Link to="/book" onClick={closeAll} className="dd-mobile-project-cta">Start a Project →</Link>
+          <Link to="/request-service" onClick={closeAll} className="dd-mobile-project-cta">Request Service →</Link>
         </div>
       )}
     </header>
