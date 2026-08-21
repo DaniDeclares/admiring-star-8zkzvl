@@ -19,12 +19,12 @@ const ADMIN_STRIPE_LINKS = {
 export const STRIPE_LINKS = ADMIN_STRIPE_LINKS;
 export { ADMIN_STRIPE_LINKS };
 
-// Legacy UI keys are aliases only. Pricing is resolved by canonical serviceId.
+// Only aliases with an exact semantic match are allowed. Unresolved legacy
+// keys intentionally fall back to intake instead of silently changing price.
 export const SERVICE_ID_ALIASES = Object.freeze({
-  mobile_notary: 'B2C-NOTARY-POA',
   poa: 'B2C-NOTARY-POA',
-  loan_signing: 'B2C-NOTARY-LOAN',
   apostille: 'B2C-NOTARY-APOSTILLE',
+  loan_signing: 'B2C-NOTARY-LOAN',
 });
 
 export const isValidStripeUrl = (url) =>
@@ -37,8 +37,6 @@ export const getCanonicalServiceId = (serviceKey) => {
   return getCommercialRecord(candidate)?.serviceId || null;
 };
 
-// Public-facing routing never trusts a Stripe URL or client-supplied amount.
-// It sends the canonical service ID to the controlled request/verification flow.
 export const getStripeLink = (serviceKey) => {
   const serviceId = getCanonicalServiceId(serviceKey);
   if (!serviceId) return '/request-service';
