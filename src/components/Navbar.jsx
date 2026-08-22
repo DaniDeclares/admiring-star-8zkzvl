@@ -2,25 +2,20 @@ import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
 
-// Public navigation is channel-first. Internal capability silos remain addressable,
-// but buyers enter through the market they belong to and then reach the canonical
-// /request-service intake path.
+// Public navigation is locked to the four commercial channels. Internal capability
+// silos remain addressable, but they are not presented as separate buyer markets.
 const desktopGroups = [
   { key: 'residents', label: 'Residents', columns: [
     { title: 'Resident Concierge', links: [['Resident Concierge Hub', '/resident-concierge'], ['Service Packages', '/packages'], ['Request a Service', '/request-service']] },
     { title: 'Resident Support', links: [['Membership', '/membership'], ['Direct Shop', '/shop'], ['Contact Dani Declares', '/contact']] },
   ]},
-  { key: 'property', label: 'Property Managers', columns: [
+  { key: 'property', label: 'Property & Facilities', columns: [
     { title: 'Property Operations', links: [['Property Operations', '/services/property'], ['Resident Experience', '/resident-concierge'], ['Facility Visits', '/services/facility-visits']] },
     { title: 'Enterprise Support', links: [['Property Retainer Network', '/partner-network'], ['Request Property Support', '/request-service'], ['Contact Operations', '/contact']] },
   ]},
   { key: 'real-estate', label: 'Real Estate', columns: [
     { title: 'Transaction & Listing Support', links: [['Real Estate Solutions', '/real-estate'], ['Field & Facility Support', '/services/facility-visits'], ['Request Real Estate Support', '/request-service']] },
-    { title: 'Professional Support', links: [['Business Solutions', '/services/business-solutions'], ['Notary & Documents', '/services/notary'], ['Contact Real Estate Desk', '/contact']] },
-  ]},
-  { key: 'business', label: 'Businesses', columns: [
-    { title: 'Administrative & Operations', links: [['Business Solutions', '/services/business-solutions'], ['Notary & Document Services', '/services/notary'], ['Events & Office Support', '/services/events']] },
-    { title: 'Project Support', links: [['Print Studio', '/services/print-studio'], ['Request Business Support', '/request-service'], ['Start a Project', '/request-service']] },
+    { title: 'Professional Support', links: [['Notary & Documents', '/services/notary'], ['Business & Office Support', '/services/business-solutions'], ['Contact Real Estate Desk', '/contact']] },
   ]},
   { key: 'government', label: 'Government', columns: [
     { title: 'Procurement & Facilities', links: [['Government Services', '/industries/government'], ['Federal Services', '/services/federal'], ['Facilities Support', '/services/property']] },
