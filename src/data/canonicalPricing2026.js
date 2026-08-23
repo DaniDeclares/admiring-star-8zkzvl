@@ -1,20 +1,23 @@
-// DANI DECLARES LLC — PRICING GOVERNANCE GATE
-// Numeric customer pricing is intentionally frozen pending reconciliation.
-// See docs/legacy-pricing-quarantine-2026-08-23.md.
+// DANI DECLARES LLC — CUSTOMER PRICING GOVERNANCE GATE
+// Numeric customer pricing remains frozen while the company-wide catalog is
+// reconciled. Legacy numeric values are evidence only and never fallbacks.
 
 export const PRICING_STATUS = Object.freeze({
   LOCKED: 'LOCKED',
-  PROPOSED: 'PROPOSED',
-  UNDEFINED: 'UNDEFINED',
+  PENDING_RECONCILIATION: 'PENDING_RECONCILIATION',
+  APPROVED: 'APPROVED',
   CUSTOM: 'CUSTOM',
-  DISCARDED: 'DISCARDED',
+  CONTRACT_ONLY: 'CONTRACT_ONLY',
+  UNAVAILABLE: 'UNAVAILABLE',
 });
 
 export const PRICING_CHANNELS = Object.freeze({
-  B2C: 'B2C',
-  B2B: 'B2B',
-  B2B2C: 'B2B2C',
-  B2G: 'B2G',
+  CH01: 'CH01',
+  CH02: 'CH02',
+  CH03: 'CH03',
+  CH04: 'CH04',
+  CH05: 'CH05',
+  CH06: 'CH06',
 });
 
 export const PRICING_UNITS = Object.freeze({
@@ -34,17 +37,22 @@ export const PRICING_METHODS = Object.freeze({
   FLAT: 'FLAT',
   PER_UNIT: 'PER_UNIT',
   PERCENT: 'PERCENT',
+  CONFIGURED: 'CONFIGURED',
   CUSTOM_QUOTE: 'CUSTOM_QUOTE',
+  SOW: 'SOW',
 });
 
+// Intentionally empty until service-level reconciliation authorizes records.
 export const SERVICE_PRICING_POLICY = Object.freeze({});
 export const MODIFIERS = Object.freeze({});
 
 export const DISCOUNT_POLICY = Object.freeze({
-  B2C: 'No numeric discount is executable until the service record is canonical.',
-  B2B: 'No B2C resident discount inheritance.',
-  B2B2C: 'Contract price and resident benefit remain separate records.',
-  B2G: 'Government pricing is solicitation/contract specific.',
+  CH01: '15% discount on qualifying canonical services only; exclusions remain subject to the approved commercial record.',
+  CH02: 'Standard direct-resident pricing after reconciliation.',
+  CH03: 'Property-management/commercial terms after reconciliation.',
+  CH04: 'Real-estate/listing terms after reconciliation.',
+  CH05: 'Business/commercial terms after reconciliation.',
+  CH06: 'Government/institutional pricing is solicitation or contract specific.',
 });
 
 export const SCOPE_SHIELD_POLICY = Object.freeze({
