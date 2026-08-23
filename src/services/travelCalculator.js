@@ -1,20 +1,12 @@
-// filename: src/services/travelCalculator.js
-// INTERNAL ONLY - Travel mileage calculator with input sanitization
+// DANI DECLARES LLC — MARKET TREATMENT GATE
+// Legacy mileage / per-mile pricing is quarantined.
+// Geographic treatment must come from the seven-market commercial architecture.
+// See docs/legacy-pricing-quarantine-2026-08-23.md.
 
-export function calculateTravelFee(destinationAddress, state = "GA", miles = 0) {
-  const includedMiles = 20;
-  const perMileRate = 1.00;
-
-  // Sanitize miles input to prevent negative or non-numeric values
-  const parsedMiles = Math.max(0, parseFloat(miles) || 0);
-  const excessMiles = Math.max(0, parsedMiles - includedMiles);
-  const travelFee = excessMiles * perMileRate;
-
+export function calculateTravelFee() {
   return {
-    dispatchOriginRegion: state.toUpperCase() === "SC" ? "Regional SC Base" : "Metro Atlanta, GA Base",
-    includedMiles,
-    excessMiles,
-    travelFee,
-    formattedTravelFee: "$" + travelFee.toFixed(2)
+    status: 'PENDING_RECONCILIATION',
+    travelFee: null,
+    formattedTravelFee: 'Market treatment pending reconciliation',
   };
 }
