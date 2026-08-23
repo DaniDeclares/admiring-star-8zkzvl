@@ -1,221 +1,49 @@
-import { getStripeLink } from "../config/stripeLinks.js";
-import { getPriceLabel, getPriceValue } from "./pricingCanon.js";
+/**
+ * DANI DECLARES LLC — PUBLIC SERVICE PROJECTION
+ *
+ * Compatibility layer for existing UI imports. The Company-Wide Catalog
+ * Master is the authority. No legacy pricing, travel-fee engine, provider
+ * economics, obsolete packages, or unreconciled service catalog lives here.
+ *
+ * Phase 0: capabilities can be requested, but no customer price or payment
+ * route is authorized until reconciliation promotes the commercial object.
+ */
 
-export const travelFeeDefaults = {
-  baseRadiusMiles: 10,
-  mileageRate: 1.0,
-  baseTravelFee: 25,
-  note:
-    "Travel fees are calculated round trip using Google mileage. The base travel fee covers the first 10 miles round trip.",
-};
+import {
+  COMPANY_WIDE_CATALOG,
+  getCatalogEntry,
+} from "../config/canonicalCatalogRegistry.js";
 
-const bookingServiceData = [
-  {
-    id: "notary",
-    title: "General Notary",
-    shortDescription: "Mobile notarization for everyday documents and affidavits.",
-    category: "notary",
-    actionType: "book",
-    tidycalSlug: "notary",
-    priceLabel: getPriceLabel("notary"),
-    paymentServiceId: "notary-payment",
-  },
-  {
-    id: "loansigning",
-    title: "Loan Signing",
-    shortDescription:
-      "Certified signing agent support for refinance, purchase, and seller packages.",
-    category: "notary",
-    actionType: "book",
-    tidycalSlug: "loansigning",
-    priceLabel: getPriceLabel("loansigning"),
-    paymentServiceId: "loan-signing-payment",
-  },
-  {
-    id: "apostille",
-    title: "Apostille Facilitation",
-    shortDescription:
-      "Document authentication coordination for domestic and international use.",
-    category: "notary",
-    actionType: "book",
-    tidycalSlug: "apostille",
-    priceLabel: getPriceLabel("apostille"),
-    paymentServiceId: "apostille-payment",
-  },
-  {
-    id: "officiant",
-    title: "Wedding Officiant",
-    shortDescription: "Elopements and ceremonies crafted to fit your story.",
-    category: "weddings",
-    actionType: "book",
-    tidycalSlug: "officiant",
-    priceLabel: getPriceLabel("officiant"),
-    paymentServiceId: "officiant-payment",
-  },
-];
+export const travelFeeDefaults = Object.freeze(null);
 
-const paymentServiceData = [
-  {
-    id: "notary-payment",
-    title: "Notary Appointment Payment",
-    shortDescription:
-      "Complete payment to confirm your scheduled general notary appointment.",
-    category: "payment",
-    actionType: "pay",
-    catalogKey: "notary",
-    bookingServiceId: "notary",
-  },
-  {
-    id: "loan-signing-payment",
-    title: "Loan Signing Payment",
-    shortDescription:
-      "Confirm your loan signing appointment with secure payment.",
-    category: "payment",
-    actionType: "pay",
-    catalogKey: "loan_signing",
-    bookingServiceId: "loansigning",
-  },
-  {
-    id: "apostille-payment",
-    title: "Apostille Service Payment",
-    shortDescription:
-      "Finalize payment for your apostille facilitation appointment.",
-    category: "payment",
-    actionType: "pay",
-    catalogKey: "apostille",
-    bookingServiceId: "apostille",
-  },
-  {
-    id: "officiant-payment",
-    title: "Officiant Service Payment",
-    shortDescription: "Reserve and confirm your officiant package with payment.",
-    category: "payment",
-    actionType: "pay",
-    catalogKey: "officiant",
-    bookingServiceId: "officiant",
-  },
-  {
-    id: "process-serving-payment",
-    title: "Process Serving Payment",
-    shortDescription:
-      "Submit payment for process serving and case-related document delivery.",
-    category: "payment",
-    actionType: "pay",
-    catalogKey: "process_serving",
-    bookingServiceId: "notary",
-  },
-];
+const publicCapabilities = COMPANY_WIDE_CATALOG.filter(
+  (entry) => entry.lifecycleState === "CANONICAL_ACTIVE"
+);
 
-const buildPaymentService = (service) => ({
-  ...service,
-  price: getPriceValue(service.catalogKey),
-  // Public-facing payment routing always goes through the governed intake flow.
-  stripePaymentLink: getStripeLink(service.catalogKey),
-  priceLabel: getPriceLabel(service.catalogKey),
+const toPublicService = (entry) => ({
+  id: entry.capabilityId,
+  canonicalCapabilityId: entry.capabilityId,
+  title: entry.name,
+  name: entry.name,
+  shortDescription: `${entry.serviceFamily} capability. Request intake is required while commercial reconciliation is in progress.`,
+  category: entry.serviceFamily,
+  divisionId: entry.divisionId,
+  actionType: "request",
+  pricingStatus: "PENDING_RECONCILIATION",
+  price: null,
+  priceLabel: "Request a scope review",
+  paymentEnabled: false,
+  bookingEnabled: false,
+  lifecycleState: entry.lifecycleState,
+  objectTypes: entry.objectTypes,
+  dependencies: entry.dependencies,
 });
 
-export const bookingServices = bookingServiceData;
-export const paymentServices = paymentServiceData.map(buildPaymentService);
-
-export const services = [...bookingServices, ...paymentServices];
-
-export const getServiceById = (serviceId) =>
-  services.find((service) => service.id === serviceId);
-
-export const serviceCatalog = [
-  {
-    id: "notary",
-    name: "Mobile Notary",
-    shortDesc:
-      "On-site notarizations for personal, legal, and business documents with flexible scheduling.",
-    category: "Notary",
-    tidycalSlug: "notary",
-    priceLabel: getPriceLabel("notary"),
-    bookingServiceId: "notary",
-    paymentServiceId: "notary-payment",
-    group: "general-notary",
-  },
-  {
-    id: "apostille",
-    name: "Apostille Facilitation",
-    shortDesc:
-      "Document authentication support with clear guidance for domestic and international use.",
-    category: "Apostille",
-    tidycalSlug: "apostille",
-    priceLabel: getPriceLabel("apostille"),
-    bookingServiceId: "apostille",
-    paymentServiceId: "apostille-payment",
-    group: "apostille-auth",
-  },
-  {
-    id: "loansigning",
-    name: "Loan Signing",
-    shortDesc:
-      "Certified signing agent support for purchase, refinance, and loan packages.",
-    category: "Loan Signing",
-    tidycalSlug: "loansigning",
-    priceLabel: getPriceLabel("loansigning"),
-    bookingServiceId: "loansigning",
-    paymentServiceId: "loan-signing-payment",
-    group: "tax-legal",
-  },
-  {
-    id: "courier-field",
-    name: "Courier & Field Support",
-    shortDesc:
-      "Court runs, document drops, and field support handled with clear pickup and delivery updates.",
-    category: "Courier/Field",
-    tidycalSlug: "notary",
-    bookingServiceId: "notary",
-    paymentServiceId: "notary-payment",
-    group: "tax-legal",
-  },
-  {
-    id: "facility-visits",
-    name: "Facility Visits",
-    shortDesc:
-      "Mobile notary visits for hospitals, nursing homes, detention centers, and care facilities.",
-    category: "Facility Visits",
-    tidycalSlug: "notary",
-    bookingServiceId: "notary",
-    paymentServiceId: "notary-payment",
-    group: "general-notary",
-  },
-  {
-    id: "school-family",
-    name: "School & Family Documentation",
-    shortDesc:
-      "Notarization for school enrollment, travel consent, guardianship, and family affidavits.",
-    category: "School/Family",
-    tidycalSlug: "notary",
-    bookingServiceId: "notary",
-    paymentServiceId: "notary-payment",
-    group: "school-family",
-  },
-  {
-    id: "i9-admin",
-    name: "I-9 & Administrative Support",
-    shortDescription:
-      "Employer I-9 verification and administrative document assistance for HR teams.",
-    category: "I-9/Admin",
-    tidycalSlug: "notary",
-    bookingServiceId: "notary",
-    paymentServiceId: "notary-payment",
-    group: "employer-admin",
-  },
-  {
-    id: "officiant",
-    name: "Officiant Services",
-    shortDesc:
-      "Ceremony officiation for elopements, courthouse-style vows, and custom celebrations.",
-    category: "Officiant",
-    tidycalSlug: "officiant",
-    priceLabel: getPriceLabel("officiant"),
-    bookingServiceId: "officiant",
-    paymentServiceId: "officiant-payment",
-    group: "school-family",
-  },
-];
+export const bookingServices = publicCapabilities.map(toPublicService);
+export const paymentServices = [];
+export const services = bookingServices;
+export const serviceCatalog = bookingServices;
+export const serviceBundles = [];
 
 export const servicePages = {
   financial: [],
@@ -224,6 +52,10 @@ export const servicePages = {
   weddings: [],
 };
 
-export const serviceBundles = [];
+export const getServiceById = (serviceId) =>
+  services.find((service) => service.id === serviceId) ?? null;
 
 export const getServiceSections = (sections) => sections || [];
+export const getCanonicalCapability = (capabilityId) => getCatalogEntry(capabilityId);
+
+export default serviceCatalog;
