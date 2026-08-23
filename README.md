@@ -1,801 +1,471 @@
-# Dani Declares LLC — Master Operating Guide
+# DANI DECLARES LLC — MASTER OPERATING AUTHORITY
 
-## 1. Current Business Identity
+**Effective:** August 23, 2026  
+**Status:** Architecture locked; commercial catalog still under reconciliation
 
-**Dani Declares LLC** is a **Mobile Operations & Execution Support Company** serving Georgia, South Carolina, and remote clients where appropriate.
+> **DANI DECLARES LLC is an Operational Asset Protection & Experience Infrastructure Company.**
 
-The company is not a notary-only business, cleaning-only business, event-only business, or product-only business. Dani Declares LLC is the parent operating company that captures requests, coordinates services, routes fulfillment, manages documentation, and builds systems across multiple divisions.
+This repository is the software/operations implementation layer for DANI DECLARES. The website, database, pricing logic, provider routing, documents, and AI-assisted workflows must follow the operating architecture below.
 
-Core positioning:
+---
 
-> We come to you and handle what needs to be done.
+## 🚨 CRITICAL: LEGACY PRICING IS QUARANTINED
 
-Primary operating flow:
+The repository previously contained multiple generations of pricing catalogs, pricing resolvers, geographic calculators, package engines, Stripe mappings, and provider-economics assumptions.
 
-```txt
-Lead Capture
-→ Intake
-→ Quote
-→ Coordinate
-→ Execute or Route Fulfillment
-→ Document
-→ Follow Up
-→ Review / Repeat Client
+Those generations are **historical evidence only**.
+
+They are no longer commercial authority and must not be used to calculate, display, quote, or checkout a customer price.
+
+See:
+
+**`docs/legacy-pricing-quarantine-2026-08-23.md`**
+
+That document contains the recovered legacy pricing evidence and the list of quarantined pricing engines.
+
+### Runtime rule
+
+Until a new canonical pricing registry is intentionally established:
+
+- no legacy numeric price may be returned as customer pricing;
+- unreconciled services must return `PENDING RECONCILIATION`, `CUSTOM QUOTE`, `STARTING AT / QUOTED`, or `CONTRACT / SOLICITATION PRICING`;
+- the system must fail closed rather than guess;
+- historical prices remain available only for audit/reconciliation purposes.
+
+---
+
+# 1. COMPANY IDENTITY
+
+DANI DECLARES is not a cleaning company, notary-only company, event-only company, product-only company, or single-purpose field-service company.
+
+It is a parent operating company that captures needs, coordinates execution, protects customer time/assets, manages operational infrastructure, and routes fulfillment across multiple divisions.
+
+Core proposition:
+
+> **We protect your time and assets by handling the operational work that keeps things moving.**
+
+---
+
+# 2. MASTER OPERATING ARCHITECTURE
+
+The authoritative hierarchy is:
+
+```text
+COMPANY
+→ GOVERNANCE / AUTHORITY
+→ DIVISION
+→ CAPABILITY UNIVERSE
+→ SERVICE FAMILY
+→ CAPABILITY
+→ SERVICE
+→ TASK
+→ COMMERCIAL OBJECT
+→ SKU / PRODUCT IDENTITY
+→ SCOPE
+→ EXCLUSIONS
+→ DEPENDENCIES
+→ MODIFIERS
+→ DELIVERY MODEL
+→ COMMERCIALIZATION TYPE
+→ PACKAGE
+→ RECURRING PLAN
+→ MEMBERSHIP
+→ RETAINER / CONTRACT
+→ CUSTOMER CHANNEL
+→ BUYER TYPE
+→ MARKET
+→ SERVICE AREA / DISPATCH ZONE
+→ CUSTOMER PRICE
+→ TRANSACTION
+→ FULFILLMENT WALL
+→ FULFILLMENT LANE
+→ PROVIDER
+→ QUALIFICATIONS
+→ INTERNAL COST
+→ PAYOUT
+→ MARGIN
+→ SOP / WORKFLOW
+→ QA / DOCUMENTATION
+→ SLA
+→ INTAKE
+→ COMPLIANCE
+→ CUSTOMER EXPERIENCE
+→ LIFECYCLE
+→ VERSION
+→ LEGACY ID
+→ SOURCE AUTHORITY
+→ CONFLICT REGISTER
+→ CROSS-DIVISION / DEPENDENCY MAP
 ```
 
-Primary goals:
-
-1. Immediate cash flow
-2. Lead capture and conversion
-3. Property manager acquisition
-4. Vendor readiness
-5. Repeat clients and recurring service relationships
-6. Government and subcontracting readiness
-7. Media and content-driven lead generation
-8. Product and production add-on revenue
-9. Scalable internal operations systems
-10. Unified Dani Declares Ops Portal
-
-Current cash-flow rule:
-
-- Prioritize immediate cash flow over ideal job selection until business reserves are stronger.
-- Prioritize services that can create $300–$500+ tickets quickly.
-- Property manager and recurring B2B relationships are higher priority than one-off low-margin work.
+No layer may overwrite, impersonate, or determine another layer.
 
 ---
 
-## 2. Revenue Engine Framework
+# 3. THE SIX FUNDAMENTAL QUESTIONS
 
-Dani Declares should be built around multiple money engines, not one service category.
+### WHAT?
+Capability → Service Family → Service → Task → SKU
 
-Primary money engines:
+### HOW?
+Scope → Exclusions → SOP → Workflow → Delivery Model → Modifiers
 
-1. Immediate Cash Field Services
-2. Logistics Operations
-3. Compliance / Document Services
-4. Courier & Mobile Services
-5. Government Contracts / Subcontracting
-6. Media / Content
-7. Network / Referrals
+### WHO BUYS?
+Channel → Buyer Type → Commercial Ownership
 
-Revenue path:
+### WHERE?
+Market → Service Area → Dispatch Zone
 
-```txt
-Entry Service
-→ Expand Need
-→ Bundle Services
-→ Increase Ticket
-→ Capture Review
-→ Convert to Repeat / Referral
+### WHO DOES IT?
+Fulfillment Lane → Provider → Qualifications → Internal Economics
+
+### WHICH VERSION IS REAL?
+Lifecycle → Version → Legacy ID → Source → Conflict Register
+
+---
+
+# 4. 13-DIVISION ORGANIZATIONAL ARCHITECTURE
+
+## Division 01 — Home, Pet, Plant & Household Support
+
+Home cleaning, household maintenance/support, pet support, indoor plant care, organization/decluttering, household concierge, home watch, vacation preparation, seasonal support, move/transition support, and related household programs.
+
+**Division 01 is NOT fully reconciled or SKU-locked.**
+
+## Division 02 — Property, Facilities & Field Operations
+
+Multifamily turns, make-ready, property readiness, facility maintenance coordination, inspections, field verification, work-order oversight, vendor coordination, and property inventory/supply support.
+
+## Division 03 — Real Estate & Closing Support
+
+Listing preparation, showing support, open-house readiness, transaction support, closing support, mobile closing logistics, vacancy checks, and real-estate field services.
+
+## Division 04 — Administrative & Business Operations
+
+Administrative assistance, scheduling, document handling, research, data entry, office operations, workflow support, business administration, and back-office execution.
+
+## Division 05 — Notary & Document Services
+
+Mobile notary, loan signing support, authorized witnessing/document services, authentication support, and document field support subject to applicable law and authorization.
+
+## Division 06 — Business Formation & Digital Infrastructure
+
+Business formation support, digital infrastructure, Google Workspace, domains/hosting, systems configuration, application/database support, and technical setup.
+
+## Division 07 — Marketing, Content & Media Production
+
+Marketing strategy, campaign operations, social media, content, property photography/video, walkthroughs, amenity media, video production, and editing.
+
+**Chris's computer/PC, technical, recording, editing, and property-media capabilities remain represented here where applicable.**
+
+## Division 08 — Business Development & Growth
+
+Sales pipeline development, partnerships, referrals, vendor-network development, growth strategy, client acquisition, and commercial relationship architecture.
+
+## Division 09 — Classes, Workshops & Training
+
+Educational programs, entrepreneurship workshops, skills training, career development, lifestyle/skills classes, and resident/community education.
+
+## Division 10 — Experiences & Resident Programming
+
+Event planning, event production, community events, resident appreciation, pop-ups, hospitality, resident programming, setup/takedown, and vendor coordination.
+
+**Event planning is a real company capability. It is not waiting to be discovered later.**
+
+## Division 11 — Creative Design & Production
+
+Graphic design, print production, branding assets, custom merchandise, DTF printing, heat press, custom apparel, and physical product fabrication.
+
+**Chris's DTF, heat-press, and technical fabrication capabilities remain here where applicable.**
+
+## Division 12 — Logistics, Courier & Asset Sourcing
+
+Courier, delivery, errands, asset movement, document transport, material sourcing, procurement support, key handoff, chain-of-custody logistics, and field logistics.
+
+## Division 13 — Government & Institutional Procurement
+
+Government/institutional contracting readiness, procurement support, compliance packaging, solicitation support, contract administration, public-sector execution, and institutional delivery.
+
+Division 13 is primarily an institutional/contract wrapper for capabilities originating in Divisions 01–12.
+
+---
+
+# 5. CUSTOMER CHANNELS
+
+The six current customer channels are:
+
+- **CH01 — Property Residents**
+- **CH02 — Direct / Regular Residents**
+- **CH03 — Property Management**
+- **CH04 — Real Estate**
+- **CH05 — Business / Commercial**
+- **CH06 — Government / Institutional**
+
+Channels are NOT divisions.
+
+Channels are NOT delivery models.
+
+A service may be usable through multiple channels without changing its organizational division.
+
+---
+
+# 6. CORE MARKETS
+
+The current geographic framework contains seven core markets:
+
+- Jonesboro
+- Tucker
+- Stone Mountain
+- Chamblee
+- Brookhaven
+- Midtown
+- Buckhead
+
+Deprecated travel-surcharge engines must not be used.
+
+Market treatment must come from the current commercial architecture and must not double-count location costs.
+
+---
+
+# 7. PROVIDER WALL
+
+Customer pricing and fulfillment economics are independent branches.
+
+```text
+SKU
+├── COMMERCIAL BRANCH
+│   └── CHANNEL → MARKET → CUSTOMER PRICE
+│
+└── FULFILLMENT BRANCH
+    └── LANE → PROVIDER → INTERNAL COST → PAYOUT → MARGIN
 ```
 
-Examples:
+### DANI
 
-- Field Execution Training job → property reset → photo documentation → key/courier support → recurring property manager relationship
-- Event Planning & On-Site Setup job → planning/setup → custom labels/stickers → shirts/merch → breakdown support
-- Document Lifecycle Management job → printing/scanning → document prep → courier → packaging/submission support
-- BusinessOps job → setup packet → digital folders → labels/stickers → admin system
-- VendorOps/REACH job → Dani captures lead → routes fulfillment → documents quality → builds partner capacity
+Operational authority, commercial ownership, QA, scheduling, complex management, customer relationship management, coordination, and approved execution.
 
-Revenue priority order:
+### CAYLA
 
-1. Fast paid work
-2. Higher ticket bundles
-3. Repeat B2B relationships
-4. Vendor/subcontractor-enabled fulfillment
-5. Government/subcontracting pipeline
-6. Product/Media add-on revenue
-7. Long-term automation and portal systems
+Indoor plant/botanical care specialist. Internal benchmark: **$20/hour**. This is private fulfillment economics and must never become customer pricing.
 
----
+### CHRIS
 
-## 3. Brand Rules
+Technical/creative fulfillment capabilities including computer/PC support, hardware configuration, technical setup, video recording/editing, property media, DTF printing, heat press, and technical fabrication.
 
-### Visual Identity
+### CASS
 
-- Burgundy: `#8B1E2E`
-- Ivory: `#F8F5F1`
-- Gold: `#D4AF37`
+Project/SOW fulfillment lane. Do not invent a universal hourly rate.
 
-Design direction:
+### NAWFside
 
-- Clean
-- Professional
-- Trusted
-- Easy to scan
-- Conversion-focused
-- No overdesigned luxury clutter
+Negotiated trade/volume/project fulfillment lane. Trade economics do not determine customer price.
 
-### Voice and Positioning
+### EXTERNAL SPECIALISTS
 
-Use:
-
-- Mobile Operations & Execution Support
-- We come to you and handle what needs to be done
-- Document, compliance, logistics, property, event, production, and business support
-- Request Service
-- Mobile support
-- Property operations
-- Execution support
-- Vendor readiness
-- Administrative support
-
-Avoid:
-
-- Notary-only positioning
-- Cleaning-only positioning
-- Overpromising legal services
-- Treating officiant services as the main brand anchor
-- Flashy sales language on government pages
-- Creating separate disconnected apps or systems
+Use qualified/licensed/insured specialists where required by scope or law.
 
 ---
 
-## 4. Compliance Rules
+# 8. COMMERCIAL OBJECT TYPES
 
-Compliance overrides speed, creativity, and marketing.
+The system distinguishes:
 
-Notary rule:
+- `SERV` — Service
+- `PROD` — Product
+- `DIGITAL` — Digital Product/Service
+- `KIT` — Kit
+- `RET` — Retainer
+- `EVENT` — Event
+- `WORK-ORDER` — Operational Work Order
 
-- Notarial services may only be described as available where legally authorized and commissioned.
-- Do not claim active Georgia notary services unless commission status is verified.
-- Notary is a tool within Document & Compliance, not the whole business identity.
+Not every capability becomes a public SKU.
 
-Legal support rule:
-
-- Dani Declares LLC may provide administrative and document preparation support.
-- Do not imply legal advice, legal representation, or attorney services.
-- Use “non-attorney document preparation support” where needed.
-
-Government rule:
-
-- Government pages must remain conservative, capability-based, and compliance-focused.
-- Do not use Stripe/payment CTAs on government pages.
-- Do not use exaggerated claims.
-
-Insurance/vendor readiness rule:
-
-- Current priority is general liability and COI readiness.
-- Hired/non-owned auto may be considered when needed.
-- Workers compensation should be pursued only when required by contract, staffing structure, or platform requirements.
+Not every task becomes a commercial object.
 
 ---
 
-## 5. Internal Divisions
-
-Dani Declares LLC operates as a parent company with internal operating divisions. Divisions may share the same intake, CRM, backend, vendor network, and fulfillment workflows.
-
-### 5.1 Document Lifecycle Management / Document & Compliance
-
-Purpose:
-
-Document handling, document preparation, compliance support, I-9, apostille facilitation, printing, scanning, packaging, submission support, and notarial services where legally authorized.
-
-Includes:
-
-- Document preparation support
-- Legal/admin paperwork support, non-attorney
-- I-9 employment verification support
-- Apostille facilitation
-- Printing, scanning, organizing, and packaging
-- Document Packaging & Submission Support
-- Compliance organization
-- Records organization
-- Notarial services where legally authorized and commissioned
-
-### 5.2 Field Execution Training / Property Operations & Reset Services
-
-Purpose:
-
-Property reset, cleaning, turnover, inspection readiness, move-ready and guest-ready property support.
-
-Includes:
-
-- Move-in / move-out cleaning
-- Deep cleaning
-- Property resets
-- Airbnb / short-term rental turnovers
-- Post-construction cleanup
-- Inspection and photo documentation
-- Trash-out coordination
-- Carpet and steam cleaning add-ons
-- Recurring property support
-- Property manager support
-
-Positioning:
-
-Field Execution Training is not basic maid service. It is property operations and reset support.
-
-### 5.3 Courier Logistics Support / Logistics & Courier
-
-Purpose:
-
-Mobile logistics, courier, document runs, court/agency support, and carrier back-office support.
-
-Includes:
-
-- Court filing support
-- Agency runs
-- Courier delivery
-- Medical, legal, and business document transport
-- Facility visits
-- Carrier paperwork support
-- Broker packets
-- Invoicing support
-- Compliance tracking for small carriers
-
-Positioning:
-
-Dispatch is not the main identity. Carrier back-office and logistics operations support are stronger.
-
-### 5.4 Event Planning & On-Site Setup / Event Planning & Execution
-
-Purpose:
-
-Event planning, setup, breakdown, coordination, decor production, and custom event product support.
-
-Includes:
-
-- Birthday parties
-- Weddings and coordination
-- Setup and breakdown
-- Vendor coordination
-- Timeline management
-- Balloon/decor support
-- Custom party products
-- Event product collections
-- Stickers, labels, chip bags, treat labels, signage
-- Day-of execution support
-
-Positioning:
-
-Dani Declares handles execution, not just planning ideas.
-
-### 5.5 Custom Print & Merchandise Prep / Stickers, Labels, Heat Press, Merch & Event Products
-
-Purpose:
-
-Physical product production as an add-on revenue stream and support system for service packages.
-
-Includes:
-
-- Stickers
-- Labels
-- QR stickers
-- Packaging stickers
-- Business packet stickers
-- Event labels
-- Heat press apparel
-- Merch
-- Branded shirts
-- Business starter kits
-- Client kits
-- Custom event product collections
-- Product samples for marketing
-- Bundled service add-ons
-
-Rule:
-
-Custom Print & Merchandise Prep supports higher-ticket bundles, events, branding, marketing packets, and client deliverables. It should not distract from revenue-generating service execution.
-
-### 5.6 DesignOps / Canva, CADlink, Print Prep, DTF & Production Workflow
-
-Purpose:
-
-Design-to-production workflow for printed and physical products.
-
-Includes:
-
-- Canva design
-- CADlink workflow
-- Print prep
-- Label layout
-- Sticker layout
-- Heat press design prep
-- DTF vendor coordination
-- File organization
-- Mockups
-- Product templates
-- Production-ready artwork
-
-Positioning:
-
-DesignOps is internal production support unless intentionally packaged as a public service.
-
-### 5.7 MediaOps / Content & Lead Generation
-
-Purpose:
-
-Content strategy, storytelling, social media, business-building documentation, and lead generation.
-
-Includes:
-
-- Personal creator content
-- Dani Declares business content
-- Logistics content
-- Field service content
-- Event content
-- Product/merch content
-- Behind-the-scenes work
-- Facebook monetization tasks
-- Affiliate posts
-- Lead generation posts
-- Market research from social media groups
-
-Content channels:
-
-1. Personal creator page
-2. Dani Declares business page
-3. Dani’s Logistics / trucking operations content
-
-### 5.8 Government & Compliance Support / Government Contracting Support
-
-Purpose:
-
-Federal, state, local, and subcontracting readiness.
-
-Includes:
-
-- Capability statements
-- Administrative support
-- Document support
-- Courier/logistics support
-- Compliance support
-- Vendor readiness
-- Subcontractor positioning
-- APEX / DSBS / SAM alignment
-
-Known GovCon details:
-
-- UEI: `TD4TSG48LHN9`
-- Primary NAICS: `561410`
-- Secondary NAICS: `541120`, `541199`, `561611`, `531390`
-- PSC: `R699`, `R499`, `R707`, `R418`
-
-### 5.9 VendorOps / Vendor Readiness & Subcontractor Network
-
-Purpose:
-
-Build and manage a roster of people and businesses who can fulfill work Dani Declares brings in.
-
-Includes:
-
-- Vendor list
-- Subcontractor intake
-- Insurance/compliance tracking
-- Partner readiness
-- Job routing
-- Quality control
-- Follow-up documentation
-- Work assignment support
-- Relationship tracking
-
-### 5.10 BusinessOps / Administrative Support & Business Systems
-
-Purpose:
-
-Business administration, internal systems, documents, CRM, client follow-up, and business support services.
-
-Includes:
-
-- Admin setup
-- Spreadsheet systems
-- Client tracking
-- Follow-up workflows
-- Quote tracking
-- File organization
-- Business starter packets
-- Digital folders
-- USB/client package systems
-- SOPs
-- Excel/Sheets workflows
-- Business organization and scaling support
+# 9. COMMERCIALIZATION TYPES
+
+Possible commercialization states include:
+
+- Fixed Price
+- Configured Price
+- Starting At / Quoted
+- SOW / Custom Quote
+- Recurring
+- Package Component
+- Membership Benefit
+- Retainer
+- Contract / Solicitation
+
+These are delivery/commercialization mechanisms, not customer channels.
 
 ---
 
-## 6. Strategic External Business Relationships
+# 10. LIFECYCLE STATES
 
-### REACH Strategy
+Use only:
 
-REACH is an external business relationship connected to Dani Declares in two ways:
+- `CANONICAL_ACTIVE`
+- `ABSORBED_REDIRECTED`
+- `DEPRECATED_HISTORICAL`
+- `PENDING_RECONCILIATION`
 
-1. Subcontract / fulfillment partner
-2. Business development client / scaling project
+Legacy IDs must be preserved for traceability.
 
-REACH is not a Dani Declares division and should not be merged into Dani Declares.
-
-Dani Declares may:
-
-- Generate and route suitable job opportunities to REACH
-- Help organize REACH’s service structure
-- Build pricing, intake, and quoting systems
-- Support marketing and outreach
-- Create business documents, flyers, and client-facing materials
-- Help build vendor readiness
-- Help create operations systems
-- Help with lead tracking and follow-up
-- Support website/app/system planning when needed
-- Help REACH become more scalable and professional
-
-REACH may:
-
-- Fulfill suitable field, service, cleaning, property, or related jobs when agreed
-- Maintain its own business identity
-- Maintain its own pricing, labor, insurance, and compliance responsibilities unless separately agreed
-
-Rule:
-
-Do not present REACH as part of Dani Declares unless there is a formal written agreement.
-
-Strategic purpose:
-
-Dani Declares is building its own lead capture and operations engine while also helping REACH grow into a stronger fulfillment and business partner.
+Historical documents are evidence repositories, not competing authorities.
 
 ---
 
-## 7. Website Purpose
+# 11. 47-POINT RECONCILIATION RULE
 
-The website is not just a brochure. It is the front end of the Dani Declares operating system.
+Every surviving service/commercial object must eventually be evaluated against the full reconciliation vector covering:
 
-The website should:
+1. Division
+2. Section
+3. Capability
+4. Service Family
+5. Service
+6. Task
+7. Commercial Object Type
+8. SKU
+9. Scope
+10. Exclusions
+11. Dependencies
+12. Add-ons
+13. Condition/Severity
+14. Package Eligibility
+15. Recurring Eligibility
+16. Membership Eligibility
+17. Retainer Eligibility
+18. CH01 Rule
+19. CH02 Rule
+20. CH03 Rule
+21. CH04 Rule
+22. CH05 Rule
+23. CH06 Rule
+24. Market Treatment
+25. Service Area / Dispatch Zone
+26. Customer Price
+27. Commercial Ownership
+28. Fulfillment Lane
+29. Assigned Provider
+30. Provider Qualifications
+31. Internal Cost
+32. Provider Payout
+33. Margin/Economics
+34. SOP
+35. Workflow
+36. QA
+37. Documentation
+38. SLA
+39. Intake Requirements
+40. Compliance / Legal Boundaries
+41. Customer Experience
+42. Lifecycle Status
+43. Version
+44. Legacy IDs
+45. Source Authority
+46. Conflict Register
+47. Cross-Division / Dependency Relationships
 
-1. Explain what Dani Declares does
-2. Build trust quickly
-3. Convert visitors into leads
-4. Route visitors into the Request Service form
-5. Support all divisions
-6. Collect service requests in Supabase
-7. Feed the future Ops Portal
-8. Support public services and government credibility separately
+Unknown information must be marked `PENDING RECONCILIATION`, never guessed.
 
-Primary public flow:
+---
 
-```txt
-Homepage
-→ Service pages
-→ Request Service
-→ Supabase
-→ Follow-up
-→ Quote
-→ Job
-→ Payment
-→ Review
-```
+# 12. DIVISION 01 STATUS
+
+Division 01 remains OPEN for deep reconciliation.
+
+Known historical families include:
+
+- 01-A Home Cleaning & Household Maintenance
+- 01-B Pet & Companion Support
+- 01-C Indoor Plant / Botanical Care
+- 01-D Household Organization / Decluttering / Concierge
+- 01-E Home Watch / Household Support / Vacation Preparation
+- 01-F Move / Transition / Household Relocation Support
+- 01-G+ Seasonal / Holiday / additional recovered household families
+
+The section taxonomy is not final until historical source recovery is complete.
+
+Known cleaning duplicate families include historical bathroom, kitchen, appliance, floor, and bedroom/living generations. Preserve legacy IDs; reconcile them before final SKU promotion.
+
+---
+
+# 13. PHASE STATUS
+
+### Phase 0 — Capability Universe
+
+**STRUCTURALLY ESTABLISHED** across all 13 divisions.
+
+### Phase 1 — Enterprise Reconciliation
+
+**ACTIVE.** Historical material is being reconciled against the current architecture.
+
+### Division 01
+
+**OPEN.** Deep reconciliation is incomplete.
+
+### Divisions 02–13
+
+**STRUCTURAL MAP ESTABLISHED.** Deep reconciliation remains pending.
+
+### Pricing / Packages / Memberships / Retainers
+
+**FROZEN WHERE RECONCILIATION IS INCOMPLETE.**
+
+---
+
+# 14. WEBSITE / RUNTIME RULES
+
+The website is the front end of the operating system.
 
 Primary intake route:
 
-```txt
-/request-service
-```
+`/request-service`
+
+The site must not expose or calculate legacy prices from quarantined engines.
+
+Stripe is payment execution, not commercial authority.
+
+Supabase is the operational backend foundation, not permission to bypass the commercial authority.
+
+The website must fail closed when a service has no current canonical price.
 
 ---
 
-## 8. Lead Generation and Outreach Systems
+# 15. LEGACY PRICING QUARANTINE
 
-### 8.1 10-Platform Lead System
+The following files contain or participate in historical pricing logic and must not be treated as current authority:
 
-Dani Declares uses a multi-platform lead generation system to create immediate and recurring opportunities.
+- `src/data/masterCatalog2026.js`
+- `src/data/pricingCanon.js`
+- `src/data/pricingResolver2026.js`
+- `src/data/channelPricingMatrix2026.js`
+- `src/data/b2bCommercialCatalog2026.js`
+- `src/data/b2bEnterprisePackages2026.js`
+- `src/data/b2bPricingResolver2026.js`
+- `src/config/commercialRegistry.js`
+- `src/config/stripeLinks.js`
+- `src/services/travelCalculator.js`
+- `api/travel-quote.js`
+- `src/lib/operations/estimatePricingSnapshot2026.js`
+- `src/lib/operations/pricingConnector2026.js`
+- `src/services/proposalEngine.js`
+- `scripts/generateStripeProducts.js`
 
-Primary platforms:
+See `docs/legacy-pricing-quarantine-2026-08-23.md` for the recovered values and audit rules.
 
-1. Thumbtack
-2. Bark
-3. Google Business Profile
-4. Facebook local groups
-5. Nextdoor
-6. Craigslist
-7. Fiverr
-8. TaskRabbit
-9. LinkedIn Services
-10. Wedding/event platforms
-
-Rule:
-
-- Fast response matters.
-- Always evaluate lead cost, competition, number of pros contacted, number of pros responded, ticket potential, urgency, and repeat-client potential.
-- Paid lead platforms should be judged by expected return, not just interest.
-
-### 8.2 Property Manager Acquisition System
-
-Highest-priority B2B targets:
-
-- Regional managers
-- Property managers
-- Vendor coordinators
-- Facilities managers
-- Procurement contacts
-- Ownership groups managing multiple buildings
-- Apartment communities
-- STR/Airbnb operators
-- Landlords with multiple doors
-
-Primary outreach methods:
-
-- Calls
-- Emails
-- LinkedIn
-- HubSpot/CRM tracking
-- Google Sheets or Airtable tracking
-- Follow-up systems
-- Property manager packets
-- QR/NFC lead capture
-
-Rule:
-
-Prioritize organized outreach and follow-up before random walk-ins.
-
-### 8.3 Marketing Packet System
-
-Packets should convert, not just look pretty.
-
-Packet assets may include:
-
-- One-page service flyer
-- Simple pricing or starting-rate sheet
-- CTA card
-- QR sticker
-- NFC card
-- Property manager packet
-- Vendor readiness packet
-- Capability statement
-- Door hangers
-- Yard signs
-- Car magnets
-- Client kit inserts
-
-Design rule:
-
-Use burgundy, ivory, and gold. Keep layouts clean, professional, trusted, and easy to scan.
+**Do not import these files as pricing authority.**
 
 ---
 
-## 9. Production Assets and Equipment Capabilities
+# 16. DEVELOPMENT RULE
 
-Dani Declares has in-house and vendor-supported production capabilities that support service delivery, packets, event products, and add-on revenue.
+Audit first.
 
-Known assets/capabilities:
-
-- Brother color laser all-in-one printer
-- Heat press
-- Label and sticker printing workflow
-- Cardstock and packet production
-- QR code sticker production
-- NFC card strategy
-- DTF vendor relationship
-- Epson-based DTF vendor workflow support
-- Canva design workflow
-- CADlink design-to-production workflow
-- Packaging labels and inserts
-- Business starter kit materials
-- Event product sample production
-
-Rule:
-
-Production tools should support revenue, conversion, client deliverables, and higher-ticket bundles. Do not let production become a side mission that delays lead generation or sales.
-
----
-
-## 10. Event Product Collection System
-
-Dani Declares Event Product Collections follow a structured product-development system.
-
-Default framework:
-
-1. Lock strategy before image generation.
-2. Use the 72-item master product catalog.
-3. Define phrase assignments.
-4. Define design matrix.
-5. Create master artwork assets.
-6. Build phased product roadmap.
-7. Prioritize product tiers.
-8. Create products one at a time.
-9. Use e-commerce style mockups only.
-10. Package strategy comes after product library creation.
-
-Rule:
-
-Do not create random event products without locking the product collection strategy first.
-
----
-
-## 11. Youth and Family Work Opportunities
-
-Dani Declares may include age-appropriate youth/family work opportunities as the business grows.
-
-Examples:
-
-- Sticker sorting
-- Packet assembly
-- Label placement
-- Simple inventory organization
-- Safe packaging support
-- Age-appropriate creative input
-- Basic non-client-facing admin support
-
-Rule:
-
-Youth/family work must remain age-appropriate, safe, supervised, and legally compliant.
-
----
-
-## 12. Current Website Routes
-
-Public routes:
-
-```txt
-/
-/field-services
-/events
-/services
-/signature-services
-/request-service
-/about
-/facility-visits
-/federal
-/tax-services
-/shop
-/book
-/pay
-/travel-quote
-/festival
-/membership
-/contact
-/terms
-/privacy
-/partner-onboarding
-/partners
-/blog
-/blog/:slug
-```
-
-Protected/internal routes:
-
-```txt
-/login
-/dashboard
-/notary-dashboard
-/vendor-portal
-/festival-dashboard
-/success
-/cancel
-```
-
-Current issue:
-
-Some routes and CTAs still reflect older notary/book/contact flows. Future updates should prioritize `/request-service` for new requests and keep `/contact` as support/contact, not the main quote flow.
-
----
-
-## 13. Technology Stack and Tool Operating Map
-
-Frontend:
-
-- React / Create React App
-- React Router
-- CSS files and CSS modules
-
-Hosting and deployment:
-
-- Vercel
-- GitHub auto-deploy
-
-Repository:
-
-```txt
-DaniDeclares/admiring-star-8zkzvl
-```
-
-Database/backend foundation:
-
-- Supabase
-- Project ref: `ajxezpczaemunlcmqlgl`
-
-Current Supabase tables:
-
-- `divisions`
-- `services`
-- `marketing_sources`
-- `leads`
-- `service_requests`
-- `followups`
-
-Payments:
-
-- Stripe Payment Links
-- Payment logic should stay centralized on `/pay`
-- Do not replace payment systems without approval
-
-Scheduling:
-
-- TidyCal links only
-- Current authoritative booking paths:
-  - `danideclaresns/notary`
-  - `danideclaresns/apostille`
-  - `danideclaresns/officiant`
-  - `danideclaresns/loansigning`
-
-Tool operating map:
-
-- Supabase = website/backend source of truth
-- HubSpot = sales CRM and follow-up system
-- Airtable = flexible operations databases, vendor/product/REACH trackers
-- Asana = task execution and project management
-- Google Drive/Docs/Sheets = documents, packets, SOPs, trackers
-- Gmail/Contacts/Calendar = communications and scheduling
-- Formula Genius = formulas, spreadsheet logic, scripts, and automation support
-- Stripe = payments, invoices, products, prices, payment links
-- GitHub/Vercel = website, codebase, deployment, and future portal build
-
-Data rule:
-
-Do not spread the same data everywhere without purpose. Each tool must have a defined role.
-
----
-
-## 14. Request Service Intake
-
-The `/request-service` page is the current lead capture foundation.
-
-It should:
-
-- Load active divisions from Supabase
-- Load active marketing sources from Supabase
-- Create a lead record in `leads`
-- Create a service request record in `service_requests`
-- Support all divisions over time
-- Feed the future Ops Portal
-
-Known follow-up improvement:
-
-- Update fallback divisions to include Custom Print & Merchandise Prep, DesignOps, and MediaOps.
-- Replace any outdated notary-specific public notes with compliance-safe operations language.
-- Complete live form test after deployment.
-
----
-
-## 15. Ops Portal Direction
-
-Do not create separate disconnected systems.
-
-The goal is one unified Ops Portal that can support:
-
-- Document Lifecycle Management
-- Field Execution Training
-- Courier Logistics Support
-- Event Planning & On-Site Setup
-- Custom Print & Merchandise Prep
-- DesignOps
-- MediaOps
-- Government & Compliance Support
-- VendorOps
-- BusinessOps
-
-The future Ops Portal should manage:
-
-- leads
-- service requests
-- quotes
-- jobs
-- vendors
-- followups
-- divisions
-- services
-- client records
-- status tracking
-- fulfillment routing
-- REACH-related business support tasks
-
----
-
-## 16. Project Execution Rules
-
-### Master Rule
-
-Audit first. Do not modify before verifying the current state.
-
-Workflow:
-
-```txt
+```text
 Audit
 → Verify
 → Modify
@@ -807,109 +477,20 @@ Audit
 → Live Test
 ```
 
-### Operating Rules
-
-1. Stay on the original objective.
-2. No side missions unless required for the current objective.
-3. Use the minimum necessary change.
-4. One branch per issue or task.
-5. Audit branch status before editing.
-6. Audit database schema before coding against it.
-7. Confirm changed files before merging.
-8. Verify deployment and live behavior before closing issues.
-9. Report only what matters: current status, done, blocker, next action.
-10. Identify one next highest-priority action.
-
-### Priority Order
-
-1. Revenue
-2. Conversion
-3. Lead Capture
-4. Operations System
-5. Automation
-6. Nice-to-have Features
-
-### Website Build Order
-
-1. Foundation
-2. Intake
-3. CRM
-4. Operations
-5. Automation
-6. Client Portal
+No new pricing engine, SKU catalog, package table, provider payout table, or checkout rule may be introduced outside the Master Operating Architecture.
 
 ---
 
-## 17. Current Roadmap
+# 17. CURRENT NEXT STEP
 
-Phase 1: Website Foundation
+Continue **Phase 1 Enterprise Reconciliation**.
 
-- Status: Complete
+The immediate catalog work is Division 01 deep reconciliation using the full 47-point schema.
 
-Phase 2: Supabase Foundation
+Do not prematurely lock prices, packages, providers, or section numbers.
 
-- Status: Complete
+Do not restart Phase 0.
 
-Phase 3: Request Service Intake
+Do not resurrect legacy generations.
 
-- Status: Built, merged, and deployed
-- Remaining: live form submission test and record verification
-
-Phase 4: Operations Dashboard
-
-- Next major build phase after README and site scope reset
-
-Phase 5: Division-Specific Workflows
-
-- Build after shared dashboard foundation
-
-Phase 6: Unified Dani Declares Ops System
-
-- Long-term target
-
----
-
-## 18. Known Site Audit Findings
-
-Current gaps to address after this README update:
-
-1. Homepage should prioritize `/request-service` as the main intake CTA.
-2. Contact page is outdated and still notary-first.
-3. Services page says “five service divisions” and needs expansion or repositioning.
-4. Custom Print & Merchandise Prep, DesignOps, MediaOps, and VendorOps need clearer placement.
-5. Partner Network page has placeholder HubSpot endpoint code and is not production-ready.
-6. Phone numbers are inconsistent across pages.
-7. Notary language must be compliance-safe across the site.
-8. Signature Services page includes some writing/editing services that may need repositioning.
-9. CTAs should be standardized around Request Service, Call/Text, and division-specific booking only where appropriate.
-10. REACH strategy needs to be documented internally but not publicly positioned as part of Dani Declares without agreement.
-
----
-
-## 19. What Not To Change Without Approval
-
-Do not change:
-
-- Stripe payment architecture
-- TidyCal booking links
-- Public pricing structure
-- Legal/compliance claims
-- Government page positioning
-- Notary commission language
-- REACH public relationship language
-- Core brand colors
-- Primary business positioning
-- Existing protected routes or dashboard access assumptions
-
----
-
-## 20. Immediate Next Development Sequence
-
-1. Complete live `/request-service` form test.
-2. Verify `leads` and `service_requests` records in Supabase.
-3. Patch outdated Request Service notary note.
-4. Patch homepage CTAs toward `/request-service`.
-5. Patch Contact page to stop being the main quote flow.
-6. Patch Services page division language.
-7. Fix Partner Network form direction or route it into Supabase.
-8. Begin Phase 4: Operations Dashboard.
+**Architecture is locked. Catalog reconciliation is still in progress.**
