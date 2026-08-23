@@ -1,31 +1,37 @@
-// DANI DECLARES LLC — LEGACY CATALOG RUNTIME SHIM
-// Historical numeric catalog quarantined on 2026-08-23.
-// See docs/legacy-pricing-quarantine-2026-08-23.md.
+// DANI DECLARES LLC — MASTER CATALOG COMPATIBILITY SHIM
+// The authoritative Phase 0 catalog lives in
+// ../config/canonicalCatalogRegistry.js.
+//
+// This module remains only for compatibility with legacy imports. It contains
+// no prices, no provider economics, no legacy package values, and no alternate
+// channel taxonomy.
+
+import {
+  COMPANY_WIDE_CATALOG,
+  COMMERCIAL_OBJECT_TYPES,
+  CHANNELS,
+  LIFECYCLE_STATES,
+  MARKETS,
+} from '../config/canonicalCatalogRegistry.js';
 
 export const TRANSACTION_TYPES = Object.freeze({
-  FIXED_PRICE: 'FIXED_PRICE',
-  STARTING_AT: 'STARTING_AT',
-  CUSTOM_QUOTE: 'CUSTOM_QUOTE',
-  DEPOSIT: 'DEPOSIT',
-  REQUEST_BOOK: 'REQUEST_BOOK',
-  CONTRACT_PROCUREMENT: 'CONTRACT_PROCUREMENT',
+  REQUEST: 'REQUEST',
+  QUOTE: 'QUOTE',
+  PURCHASE: 'PURCHASE',
+  CONTRACT: 'CONTRACT',
 });
 
 export const PRICING_MODELS = Object.freeze({
-  B2C_RETAIL: 'B2C_RETAIL',
-  B2B_VOLUME: 'B2B_VOLUME',
-  B2B2C_RESIDENT_PERK: 'B2B2C_RESIDENT_PERK',
-  B2G_PROCUREMENT: 'B2G_PROCUREMENT',
-  CUSTOM_PROJECT: 'CUSTOM_PROJECT',
+  FIXED: 'FIXED',
+  CONFIGURED: 'CONFIGURED',
+  STARTING_AT: 'STARTING_AT',
+  SOW: 'SOW',
+  CONTRACT: 'CONTRACT',
+  PENDING_RECONCILIATION: 'PENDING_RECONCILIATION',
 });
 
-export const CHANNELS = Object.freeze({
-  DIRECT_B2C: '01 DIRECT (B2C)',
-  BUSINESS_B2B: '02 BUSINESS (B2B)',
-  COMMUNITY_B2B2C: '03 COMMUNITY (B2B2C)',
-  GOVERNMENT_B2G: '04 GOVERNMENT (B2G)',
-});
+export { CHANNELS, MARKETS, COMMERCIAL_OBJECT_TYPES, LIFECYCLE_STATES };
 
-// Intentionally empty: legacy records are no longer executable pricing.
-export const catalog = Object.freeze([]);
+// Compatibility aliases. No numeric or executable legacy catalog is exposed.
+export const catalog = Object.freeze(COMPANY_WIDE_CATALOG);
 export const MASTER_CATALOG_2026 = catalog;
