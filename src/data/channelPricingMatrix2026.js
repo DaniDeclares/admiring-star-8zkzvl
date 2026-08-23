@@ -1,16 +1,24 @@
-// DANI DECLARES LLC — CHANNEL PRICING GATE
-// Legacy numeric channel records are quarantined.
-// See docs/legacy-pricing-quarantine-2026-08-23.md.
+// DANI DECLARES LLC — CHANNEL ARCHITECTURE GATE
+// Numeric channel records are intentionally empty pending company-wide catalog reconciliation.
+// B2C/B2B/B2B2C/B2G are commercial-model classifications, NOT replacements for CH01–CH06.
+// See docs/catalog-audit-2026-08-23.md and docs/legacy-pricing-quarantine-2026-08-23.md.
 
-import { CHANNELS, PRICING_MODELS, TRANSACTION_TYPES } from './masterCatalog2026.js';
+export const CHANNELS = Object.freeze({
+  CH01: 'CH01',
+  CH02: 'CH02',
+  CH03: 'CH03',
+  CH04: 'CH04',
+  CH05: 'CH05',
+  CH06: 'CH06',
+});
 
-export { CHANNELS, PRICING_MODELS, TRANSACTION_TYPES };
-
-export const CHANNEL_PRICING_POLICY = Object.freeze({
-  [CHANNELS.DIRECT_B2C]: { channel: CHANNELS.DIRECT_B2C, pricingModel: PRICING_MODELS.B2C_RETAIL, publicPriceVisibility: 'HIDDEN_PENDING_RECONCILIATION', quoteBehavior: 'PENDING_RECONCILIATION' },
-  [CHANNELS.BUSINESS_B2B]: { channel: CHANNELS.BUSINESS_B2B, pricingModel: PRICING_MODELS.B2B_VOLUME, publicPriceVisibility: 'HIDDEN', quoteBehavior: 'COMMERCIAL_SCOPE' },
-  [CHANNELS.COMMUNITY_B2B2C]: { channel: CHANNELS.COMMUNITY_B2B2C, pricingModel: PRICING_MODELS.B2B2C_RESIDENT_PERK, publicPriceVisibility: 'HIDDEN', quoteBehavior: 'CONTRACT_PLUS_RESIDENT_PERK' },
-  [CHANNELS.GOVERNMENT_B2G]: { channel: CHANNELS.GOVERNMENT_B2G, pricingModel: PRICING_MODELS.B2G_PROCUREMENT, publicPriceVisibility: 'HIDDEN', quoteBehavior: 'SOLICITATION_OR_CONTRACT' },
+export const CHANNEL_DEFINITIONS = Object.freeze({
+  CH01: { id: 'CH01', name: 'Property Residents', pricingStatus: 'PENDING_RECONCILIATION', residentBenefit: '15% on qualifying canonical services only' },
+  CH02: { id: 'CH02', name: 'Direct / Regular Residents', pricingStatus: 'PENDING_RECONCILIATION', residentBenefit: 'NONE' },
+  CH03: { id: 'CH03', name: 'Property Management', pricingStatus: 'PENDING_RECONCILIATION', residentBenefit: 'NONE' },
+  CH04: { id: 'CH04', name: 'Real Estate', pricingStatus: 'PENDING_RECONCILIATION', residentBenefit: 'NONE' },
+  CH05: { id: 'CH05', name: 'Business / Commercial', pricingStatus: 'PENDING_RECONCILIATION', residentBenefit: 'NONE' },
+  CH06: { id: 'CH06', name: 'Government / Institutional', pricingStatus: 'CONTRACT_OR_SOLICITATION', residentBenefit: 'NONE' },
 });
 
 export const channelPricingMatrix = Object.freeze([]);
