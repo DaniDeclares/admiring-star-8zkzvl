@@ -1,74 +1,47 @@
 # DANI DECLARES LLC — FULL CATALOG AUDIT
 
-**Date:** 2026-08-23
-**Status:** CATALOG AUDIT COMPLETE — SKU RECONCILIATION BLOCKED UNTIL CATALOG AUTHORITY IS CLEAN
-**Governing Authority:** Master Operating Architecture Authority v1.0
+**Date:** 2026-08-23  
+**Status:** PHASE 0 COMPANY-WIDE CATALOG MASTER ESTABLISHED — SKU RECONCILIATION REMAINS BLOCKED UNTIL PHASE 1 47-POINT RECONCILIATION  
+**Governing Authority:** Master Operating Architecture Authority v1.0  
+**Authoritative Phase 0 catalog:** `docs/company-wide-catalog-master-2026-08-23.md`
 
 ## Executive Finding
 
-The repository does **not** currently contain one clean, authoritative service catalog. It contains multiple historical catalog generations, commercial registries, solution bundles, channel matrices, service data, and documentation that overlap or contradict the current 13-division / 6-channel / 7-market architecture.
+The repository contains multiple historical catalog generations, commercial registries, solution bundles, channel matrices, service data, and documentation that overlap or contradict the current 13-division / 6-channel / 7-market architecture.
 
-The correct action is **not** to choose the newest catalog and continue to SKUs. The catalog universe must first be separated into:
+The correct action was not to choose the newest catalog. The repository has now been separated conceptually into:
 
 1. governing architecture;
-2. canonical capability universe;
-3. reconciled commercial objects;
+2. authoritative Phase 0 capability universe;
+3. future reconciled commercial objects;
 4. quarantined historical evidence; and
-5. runtime presentation/checkout data that consumes only canonical records.
+5. runtime presentation/checkout data that must consume only promoted canonical records.
 
-## Audit Scope
+The Phase 0 Company-Wide Catalog Master now exists and covers Divisions 01–13 without assigning new SKUs or customer prices.
 
-Audited repository artifacts include:
+## Audit Findings Retained
 
-- `README.md`
-- `docs/dani-declares-master-service-catalog.md`
-- `docs/DANI_DECLARES_COMMERCIAL_MASTER_2026.md`
-- `docs/channel-pricing-reconciliation-2026-08-21.md`
-- `docs/master-commercial-activation.md`
-- `docs/legacy-pricing-quarantine-2026-08-23.md`
-- `src/data/masterCatalog2026.js`
-- `src/data/services.js`
-- `src/data/canonicalPricing2026.js`
-- `src/data/channelPricingMatrix2026.js`
-- `src/config/commercialRegistry.js`
-- `src/data/solutionsData.js`
-- related pricing, Stripe, proposal, travel, and Supabase seed references discovered through repository search.
+### 1. Older master service catalog is historical evidence
 
-## Major Findings
+`docs/dani-declares-master-service-catalog.md` uses an older 10-division taxonomy and legacy prefixes such as `PO`, `AS`, `ND`, `EV`, `BP`, `BS`, `CS`, `LG`, `RS`, and `OC`.
 
-### 1. The old Master Service Catalog is structurally obsolete
+It is **not** the current structural authority. Its entries remain useful historical evidence and must not be converted directly into SKUs.
 
-`docs/dani-declares-master-service-catalog.md` uses an older 10-division model with prefixes such as `PO`, `AS`, `ND`, `EV`, `BP`, `BS`, `CS`, `LG`, `RS`, and `OC`.
+### 2. Older Commercial Master is evidence, not Phase 0 authority
 
-This conflicts with the current 13-division architecture and must be treated as **historical evidence**, not master authority.
+`docs/DANI_DECLARES_COMMERCIAL_MASTER_2026.md` contains multiple pricing generations and unresolved commercial taxonomies. It must not be treated as the current customer-price authority until individual records are reconciled and promoted.
 
-It also contains a very large task/service inventory. Those entries must not be converted directly into SKUs. They must first pass Capability → Service Family → Service → Task → Commercial Object reconciliation.
+### 3. Runtime pricing remains fail-closed
 
-### 2. The old Commercial Master contains useful evidence but is not current catalog authority
+Legacy pricing registries and travel/mileage engines must not be allowed to silently recreate customer pricing. No old price is a fallback.
 
-`docs/DANI_DECLARES_COMMERCIAL_MASTER_2026.md` contains historical/current-generation pricing and channel structures, including B2C, B2B, B2B2C, and B2G models. It also explicitly contains conflicting generations and unresolved taxonomies.
+### 4. Legacy service presentation data remains a migration target
 
-Therefore it is a reconciliation source, not a final catalog.
+`src/data/services.js`, `src/data/solutionsData.js`, and legacy catalog/config files may contain useful service descriptions but are not allowed to become independent catalog authorities. They must eventually consume promoted canonical records.
 
-### 3. Runtime pricing is correctly fail-closed, but the catalog itself is not rebuilt yet
+### 5. Channels and commercial models remain separate
 
-`src/data/masterCatalog2026.js`, `src/config/commercialRegistry.js`, `src/data/canonicalPricing2026.js`, and `src/data/channelPricingMatrix2026.js` have been reduced to quarantine/gate behavior rather than executable numeric pricing. This is correct as a safety state, but it means there is intentionally no replacement canonical catalog yet.
-
-### 4. `src/data/services.js` still contains a legacy presentation catalog
-
-It contains notary, loan signing, apostille, officiant, courier/field support, facility visits, school/family documentation, I-9/admin support, and other public service records. It also contains a legacy `travelFeeDefaults` object.
-
-Even though its pricing functions now fail closed, these service definitions can still act as an implicit catalog authority. They must eventually be replaced by records derived from the canonical catalog registry.
-
-### 5. `src/data/solutionsData.js` contains legacy priced solution bundles
-
-This is a significant catalog contamination point. It contains solution records with `basePrice` values and obsolete component IDs. These are package/solution objects that bypass the current reconciliation hierarchy.
-
-They must remain quarantined and must not be used to reconstruct pricing or package eligibility.
-
-### 6. Channel architecture is inconsistent across generations
-
-The current architecture is:
+Current channels:
 
 - CH01 — Property Residents
 - CH02 — Direct / Regular Residents
@@ -77,50 +50,17 @@ The current architecture is:
 - CH05 — Business / Commercial
 - CH06 — Government / Institutional
 
-Older runtime artifacts use B2C/B2B/B2B2C/B2G. Those are commercial model classifications, not substitutes for CH01–CH06.
+Older B2C/B2B/B2C/B2G labels can remain as commercial-model evidence but do not replace the six-channel architecture.
 
-The runtime must eventually represent both dimensions separately.
+### 6. Markets remain separate from travel pricing
 
-### 7. Market architecture must remain separate from travel pricing
+Core markets are Jonesboro, Tucker, Stone Mountain, Chamblee, Brookhaven, Midtown, and Buckhead.
 
-The seven core markets are Jonesboro, Tucker, Stone Mountain, Chamblee, Brookhaven, Midtown, and Buckhead.
+The old mileage/per-mile/travel-surcharge engine is not authoritative. Geographic treatment must be resolved through the commercial architecture and must not double-count location costs.
 
-The old mileage/per-mile/travel-surcharge model is not authoritative. Market modifiers must be applied only through the current commercial architecture after service-level reconciliation.
+### 7. Commercial object types remain distinct
 
-### 8. Packages, memberships, retainers, events, products, digital goods, kits, and work orders are different commercial objects
-
-The audit confirms that the repository historically mixed:
-
-- services;
-- tasks;
-- packages;
-- recurring plans;
-- memberships;
-- retainers;
-- events;
-- physical products;
-- digital products;
-- kits;
-- work orders; and
-- solution bundles.
-
-These must not be flattened into one SKU list.
-
-### 9. Provider identities are not catalog categories
-
-Cayla, Chris, Cass, NAWFside, DANI, and external specialists are fulfillment resources. Their presence in historical catalog records does not establish service ownership or division ownership.
-
-Provider routing must occur after commercial object reconciliation.
-
-### 10. Historical numeric prices remain evidence only
-
-The repository contains multiple generations of customer prices, starting prices, baseline rates, package values, travel charges, retainer values, provider economics, and obsolete placeholder amounts. The existing quarantine document correctly identifies these as historical evidence.
-
-No historical numeric value may be reactivated simply because it appears in a catalog document.
-
-## Catalog Objects That Must Be Reconciled Before SKU Work
-
-The canonical catalog must be capable of representing at least:
+The master system must preserve:
 
 - `SERV` — Service
 - `PROD` — Physical Product
@@ -130,78 +70,89 @@ The canonical catalog must be capable of representing at least:
 - `EVENT` — Event / Experience
 - `WORK-ORDER` — Operational Work Order
 
-And it must preserve the distinction between:
+These cannot be flattened into one service list.
 
-**Capability → Service Family → Service → Task → Commercial Object → SKU**
+### 8. Provider identities are fulfillment resources
 
-## Division Coverage Requirement
+DANI, Cayla, Chris, Cass, NAWFside, and qualified external specialists do not determine division ownership or customer pricing.
 
-Before SKU creation resumes, the catalog universe must be swept across all 13 divisions:
+Known provider boundaries remain:
 
-1. Home, Pet, Plant & Household Support
-2. Property, Facilities & Field Operations
-3. Real Estate & Closing Support
-4. Administrative & Business Operations
-5. Notary & Document Services
-6. Business Formation & Digital Infrastructure
-7. Marketing, Content & Media Production
-8. Business Development & Growth
-9. Classes, Workshops & Training
-10. Experiences & Resident Programming
-11. Creative Design & Production
-12. Logistics, Courier & Asset Sourcing
-13. Government & Institutional Procurement
+- Cayla — indoor plant/botanical primary lane; $20/hour is internal benchmark only.
+- Chris — computer/PC support, technical setup, recording/editing, property media, DTF/heat press and related technical production where qualified.
+- Cass — approved project/SOW and administrative/financial support; no invented universal rate.
+- NAWFside — trade/volume/project fulfillment; no customer pricing authority.
+- DANI — commercial/operational authority and approved execution.
+- External specialists — licensed/regulated/specialized work where required.
 
-Division 13 is primarily a contracting/procurement wrapper and does not automatically duplicate every underlying Division 01–12 service.
+### 9. Equipment is a fulfillment constraint, not a catalog authority
 
-## Cross-Division Catalog Rules
+Current known DANI-side equipment includes a Bissell machine with a broken hose/limited status and a McCulloch MC1385 steam cleaner. DANI must not represent the Bissell as a commercial carpet extractor. Carpet extraction remains equipment/qualification gated until reconciled.
 
-- Computer repair/support remains a technical capability even when Chris fulfills it.
-- Event planning remains an event/experience capability even when DANI fulfills it.
-- DTF/heat-press/custom apparel belongs in creative production.
-- Property media/video belongs in marketing/media.
-- Plant care remains a botanical capability even when Cayla fulfills it.
-- Bookkeeping/financial administrative work belongs in the appropriate administrative/business capability only to the extent actually qualified and scoped.
-- Notary services remain notary/document capabilities even when used in a real-estate transaction.
-- Cleaning used inside a property turn is a dependency/application of the cleaning capability, not an excuse to create an uncontrolled duplicate SKU.
-- Logistics may support another service without becoming the service itself.
+Other known operating supplies may support fulfillment but do not automatically create commercial promises.
 
-## Catalog Gate Decision
+### 10. Cross-division capabilities are explicitly retained
 
-**SKU creation is BLOCKED.**
+The Phase 0 master includes, among other things:
 
-The next phase is **Catalog Authority Reconciliation**, not SKU generation.
+- computer/technical support in Division 06;
+- property media and video in Division 07;
+- event planning and event production in Division 10;
+- DTF/heat-press and physical creative production in Division 11;
+- logistics/sourcing in Division 12;
+- institutional contracting/procurement wrapper in Division 13;
+- plant care in Division 01;
+- notary in Division 05; and
+- administrative/financial project support in Division 04 where properly qualified and scoped.
 
-### Required sequence
+Provider fulfillment does not move these capabilities into another division.
 
-1. Inventory every historical catalog/service/product/package/event/kit/retainer object.
-2. Classify each object by commercial object type.
-3. Map each object to the 13-division architecture.
-4. Map Capability → Service Family → Service → Task.
-5. Identify duplicates, absorbed families, and cross-division dependencies.
-6. Preserve every legacy ID and source reference.
-7. Assign lifecycle state: `CANONICAL_ACTIVE`, `ABSORBED_REDIRECTED`, `DEPRECATED_HISTORICAL`, or `PENDING_RECONCILIATION`.
-8. Identify whether each object is commercially eligible, quote-only, contract-only, unavailable, or still pending.
-9. Only after this is complete, begin the 47-point reconciliation at the service/SKU level.
+## Phase 0 Catalog Authority
 
-## Non-Override Rules
+The authoritative structural catalog is now:
 
-No catalog document, old spreadsheet, website page, Stripe product, provider rate, package total, travel calculator, or AI-generated service list may override the Master Operating Architecture.
+`docs/company-wide-catalog-master-2026-08-23.md`
 
-No provider can determine a division.
+It defines the company-wide capability universe across all 13 divisions and intentionally contains **no new SKU assignments and no customer-price authority**.
 
-No channel can determine a delivery model.
+The catalog follows:
 
-No delivery model can determine a SKU.
+**Division → Capability Area → Capability → Service Family → Service → Task → Commercial Object → SKU**
 
-No historical price can become current pricing without explicit reconciliation and promotion.
+and preserves the distinctions among scope, exclusions, dependencies, commercialization, channels, buyer types, markets, fulfillment, qualifications, economics, compliance, lifecycle, version and source authority.
 
-No SKU may be considered canonical merely because it has a price.
+## Phase 1 Gate — Still Required
 
-## Audit Conclusion
+The next operation is not to invent more services and not to create SKUs. It is to reconcile the Phase 0 universe against historical evidence.
 
-The company was right to stop before continuing SKU work.
+Required sequence:
 
-The repository now has a safe **architecture and quarantine layer**, but it does not yet have the fully reconciled company-wide catalog required to serve as the source for the future SKU registry.
+1. Recover every historical object.
+2. Classify commercial object type.
+3. Map to the 13-division catalog.
+4. Deduplicate and absorb duplicates while preserving legacy IDs.
+5. Map capability → service family → service → task.
+6. Map dependencies and cross-division relationships.
+7. Resolve scope/exclusions/qualifications/safety boundaries.
+8. Resolve commercialization state.
+9. Resolve channel/buyer/market treatment.
+10. Resolve fulfillment eligibility and equipment dependencies.
+11. Resolve customer pricing state and internal economics separately.
+12. Apply lifecycle state and source authority.
+13. Populate the 47-point reconciliation vector.
+14. Only then create/promote runtime SKUs.
 
-**Next authoritative task: complete the company-wide catalog reconciliation before returning to SKU construction.**
+## Gate Decision
+
+**PHASE 0: COMPLETE STRUCTURALLY.**  
+**PHASE 1: OPEN.**  
+**SKU CREATION: BLOCKED UNTIL RECONCILIATION.**  
+**LEGACY PRICES: QUARANTINED.**  
+**PROVIDER ECONOMICS: PRIVATE.**  
+**RUNTIME: FAIL CLOSED WHEN NO PROMOTED CANONICAL RECORD EXISTS.**
+
+## Authority Conclusion
+
+The repository now has a clean structural catalog layer to reconcile against historical evidence. The old service catalog, old commercial master, legacy solution bundles, travel engines, provider rates, and Stripe objects cannot independently become current truth.
+
+**Next authoritative task: Phase 1 47-point reconciliation, beginning with Division 01 and then progressing through Divisions 02–13.**
