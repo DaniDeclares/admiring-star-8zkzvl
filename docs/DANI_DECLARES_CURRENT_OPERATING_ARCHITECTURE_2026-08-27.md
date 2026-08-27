@@ -3,16 +3,19 @@
 **Effective:** 2026-08-27  
 **Status:** CURRENT / GOVERNING
 
-## 1. Customer Side — Six Official Commercial Channels
+## 1. Customer Side — Five Official Commercial Channels
 
-1. CH01 — Property Residents
-2. CH02 — Direct / Regular Residents
-3. CH03 — Property Management & Apartments
-4. CH04 — Real Estate Offices & Brokerages
-5. CH05 — Businesses / Commercial
-6. CH06 — Government & Institutional Procurement
+These five channels are the only official DANI DECLARES commercial/customer channels:
 
-No additional official customer channels are created for specialists, products, use cases, commercial models, or fulfillment resources.
+1. **CH01 — Resident Concierge**
+2. **CH02 — Property Management & Apartments**
+3. **CH03 — Real Estate Offices & Brokerages**
+4. **CH04 — Businesses**
+5. **CH05 — Government & Institutional Procurement**
+
+No additional official customer channels are created for specialists, products, use cases, commercial models, events, partners, or fulfillment resources.
+
+The former database labels `CH01 Property Residents`, `CH02 Direct / Regular Residents`, `CH03 Property Management & Apartments`, `CH04 Real Estate Offices & Brokerages`, `CH05 Businesses / Commercial`, and `CH06 Government & Institutional Procurement` were reconciled on 2026-08-27. The duplicate resident channel was removed and the remaining channels were renumbered to the canonical five-channel architecture.
 
 ## 2. Worker Side — Capability Network
 
@@ -49,9 +52,7 @@ A qualifying Business Setup, Launch, Scaling, project, deferred-payment, or othe
 
 ## 4. Business-Build / Commercialization Clients
 
-DANI may build, launch, commercialize, or scale a client's business/capability. Examples currently identified in the recovery work include Renee, Cayla, Cassandra/Cass, and NAWFside/Joho, subject to each relationship's actual agreement and authorization.
-
-Business-build work may include:
+DANI may build, launch, commercialize, or scale a client's business/capability. Business-build work may include:
 - business/service architecture
 - pricing
 - packaging
@@ -64,6 +65,8 @@ Business-build work may include:
 - operational coordination
 - scaling support
 - network access where contractually included
+
+Business-build relationships are relationship types, not additional commercial channels.
 
 ## 5. Commercial Models
 
@@ -84,25 +87,56 @@ DANI may fulfill directly, use employees, independent providers, subcontractors,
 - Active offerings require a defined commercial owner, customer/channel fit, service/product class, price model, fulfillment method, and applicable compliance status.
 - Regulated/specialized work requires appropriate credential/license/insurance verification and contract scope.
 - Network access does not guarantee work.
+- Public customer-facing commercial data must not expose provider economics, private fulfillment agreements, internal margins, restricted finance, or internal funding records.
 
-## 8. Current Recovery Cohort
+## 8. Platform System-of-Record Map
 
-| Relationship | Current working role |
+| System | Governing role |
 |---|---|
-| Renee | Business-Build Client / commercialization pilot |
-| Cayla | Business-Build Client / indoor plant-care capability |
-| Cassandra (Cass) | Business/Financial Operations specialist; agreement-defined scope |
-| Joho / NAWFside | Business/commercialization relationship + multi-capability fulfillment partner; scope subject to agreement/verification |
-| Chris | Multi-capability technical/creative/production candidate; recover and formalize scope |
+| GitHub | Source code and technical history |
+| Vercel | Application deployment/runtime |
+| Supabase | Canonical application data, operational state, identity linkage, permissions |
+| Stripe | Payment execution and reconciliation |
+| Shopify | Product commerce execution |
+| HubSpot | CRM, sales relationships, opportunities and communications |
+| Apollo / FullEnrich | B2B prospecting and enrichment |
+| Semrush | SEO and market intelligence |
+| Clutch | B2B provider/service-provider intelligence |
+| PostHog | Product and funnel analytics |
 
-## 9. Out of Active Scope
+No connected platform may silently become a competing source of commercial truth.
 
-- Older five-channel architecture
+## 9. Core Commercial Architecture
+
+Master commercial catalog → channel → customer/segment/use case → pricing → pricing rules → service execution → package/membership/retainer → capability/provider → dispatch/network → portal/workflow.
+
+The canonical customer transaction is:
+
+**discover → identify → request → qualify → estimate/quote → approve → pay → match → schedule → fulfill → verify → complete → review → retain → repeat**
+
+The canonical provider transaction is:
+
+**apply → verify → activate → set availability → receive opportunity → accept → fulfill → evidence → complete → settlement → performance → repeat**
+
+## 10. Current Production State — 2026-08-27
+
+- Canonical five-channel database migration applied successfully.
+- Duplicate resident channel removed after confirming its pricing rows duplicated the canonical resident pricing rows.
+- Supabase currently contains five active commercial channels after reconciliation.
+- Supabase Vault contains the `dd_cron_secret` secret name; the secret value is never stored in source control.
+- Production Auth currently has zero users; intentional staff/provider/customer identities remain an activation gate.
+- Provider organizations exist, but no individual provider records are currently active; provider compliance/authorization remains a hard routing gate.
+- Public provider/private economics separation remains mandatory.
+- Live Stripe crosswalk and final end-to-end payment/job verification remain required before declaring commerce fully activated.
+
+## 11. Out of Active Scope
+
+- Six-channel customer architecture
 - Superseded pricing/package definitions
 - Legacy product/price records in customer-facing commerce
 - South Carolina as an active commercial catalog jurisdiction
 - Unverified regulated services
 - Guaranteed-work representations for network participants
-- New official channels created merely for customer types, specialists, products, or fulfillment resources
+- New official channels created merely for customer types, specialists, products, events, commercial models, or fulfillment resources
 
 Historical records may remain available for audit and provenance but are not active commercial authority.
