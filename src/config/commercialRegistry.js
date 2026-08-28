@@ -1,7 +1,6 @@
 // DANI DECLARES LLC — COMMERCIAL REGISTRY AUTHORITY
 // Current architecture lock: 5 customer channels + capability-network worker side.
-// CH01 contains resident subchannels; these are routing segments, not additional official channels.
-// Legacy commercial models remain below channel level and must not be treated as channels.
+// CH01 contains resident customer subchannels; these are routing/relationship segments, not additional official channels.
 
 export const CHANNELS = Object.freeze({
   CH01_RESIDENT_CONCIERGE: 'CH01',
@@ -11,14 +10,10 @@ export const CHANNELS = Object.freeze({
   CH05_GOVERNMENT_INSTITUTIONAL: 'CH05',
 });
 
-// CH01 Resident Concierge subchannels. These do not create new official channels.
+// CH01 Resident Concierge subchannels: resident relationship type.
 export const CH01_SUBCHANNELS = Object.freeze({
-  CH01A_HOME_CLEANING: '01A',
-  CH01B_PET_CARE: '01B',
-  CH01D_HOUSEHOLD_CONCIERGE: '01D',
-  CH01E_MOVE_TRANSITION: '01E',
-  CH01F_SEASONAL: '01F',
-  CH01G_HOUSEHOLD_PROGRAMS: '01G',
+  CH01_APARTMENT_PROPERTY_RESIDENTS: 'CH01-A',
+  CH01_REGULAR_DIRECT_RESIDENTS: 'CH01-B',
 });
 
 export const CHANNEL_TYPES = Object.freeze({
@@ -28,7 +23,6 @@ export const CHANNEL_TYPES = Object.freeze({
   B2G_PROCUREMENT: 'B2G_PROCUREMENT',
 });
 
-// Commercial models describe economics/relationships; they are NOT customer channels.
 export const COMMERCIAL_RELATIONSHIP_MODELS = Object.freeze({
   B2C: 'B2C',
   B2B: 'B2B',
@@ -71,8 +65,6 @@ export const STRIPE_MODES = Object.freeze({
 });
 
 export const PROVIDER_LANES = Object.freeze({
-  NAWFSIDE: 'NAWFSIDE',
-  CASS: 'CASS',
   STAFF_DIRECT: 'STAFF_DIRECT',
   SPECIALIST_NETWORK: 'SPECIALIST_NETWORK',
   UNASSIGNED: 'UNASSIGNED',
