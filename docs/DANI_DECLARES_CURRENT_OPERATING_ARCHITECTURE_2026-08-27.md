@@ -17,18 +17,14 @@ No additional official customer channels are created for specialists, products, 
 
 ### CH01 Resident Concierge Subchannels
 
-CH01 is internally segmented into resident service subchannels. These are **not additional commercial channels**; they are routing/service-family segments beneath CH01:
+CH01 is internally segmented into **two resident customer subchannels**. These are not additional official commercial channels; they distinguish how the resident relationship enters DANI DECLARES:
 
-- **01A — Home & Cleaning**
-- **01B — Pet Care & Household Pet Support**
-- **01D — Household Concierge**
-- **01E — Move & Transition**
-- **01F — Seasonal**
-- **01G — Household Programs**
+- **CH01-A — Apartment / Property Residents**: residents connected to a participating apartment community, property, or property-management relationship. May receive applicable resident benefits, property-specific offers, portal access, and resident pricing.
+- **CH01-B — Regular / Direct Residents**: residents/customers who purchase directly from DANI DECLARES without a participating apartment/property relationship. They receive applicable direct Resident Concierge offerings and standard eligibility rules.
 
-A resident request may touch multiple CH01 subchannels and may also route to other DANI divisions when the requested work requires them.
+A resident request may touch multiple DANI divisions. The subchannel identifies the customer relationship; it does not restrict which DANI service/division can fulfill the request.
 
-The former database labels `CH01 Property Residents`, `CH02 Direct / Regular Residents`, `CH03 Property Management & Apartments`, `CH04 Real Estate Offices & Brokerages`, `CH05 Businesses / Commercial`, and `CH06 Government & Institutional Procurement` were reconciled on 2026-08-27. The duplicate resident channel was removed and the remaining channels were renumbered to the canonical five-channel architecture.
+The former duplicate resident-channel architecture (`CH01 Property Residents` and `CH02 Direct / Regular Residents`) was reconciled on 2026-08-27 into **CH01 Resident Concierge with CH01-A and CH01-B beneath it**. The remaining official channels are CH02–CH05.
 
 ## 2. Worker Side — Capability Network
 
@@ -65,19 +61,7 @@ A qualifying Business Setup, Launch, Scaling, project, deferred-payment, or othe
 
 ## 4. Business-Build / Commercialization Clients
 
-DANI may build, launch, commercialize, or scale a client's business/capability. Business-build work may include:
-- business/service architecture
-- pricing
-- packaging
-- branding/marketing
-- website and intake infrastructure
-- payment systems
-- administrative systems
-- SOPs/workflows
-- sales/customer acquisition
-- operational coordination
-- scaling support
-- network access where contractually included
+DANI may build, launch, commercialize, or scale a client's business/capability. Business-build work may include business/service architecture, pricing, packaging, branding/marketing, website/intake infrastructure, payment systems, administrative systems, SOPs/workflows, sales/customer acquisition, operational coordination, scaling support, and network access where contractually included.
 
 Business-build relationships are relationship types, not additional commercial channels.
 
@@ -134,9 +118,8 @@ The canonical provider transaction is:
 ## 10. Current Production State — 2026-08-27
 
 - Canonical five-channel database migration applied successfully.
-- Duplicate resident channel removed after confirming its pricing rows duplicated the canonical resident pricing rows.
+- Duplicate resident channel was consolidated into CH01 Resident Concierge with CH01-A Apartment / Property Residents and CH01-B Regular / Direct Residents.
 - Supabase currently contains five active commercial channels after reconciliation.
-- CH01 resident subchannels are now explicitly governed as 01A, 01B, 01D, 01E, 01F and 01G beneath CH01.
 - Supabase Vault contains the `dd_cron_secret` secret name; the secret value is never stored in source control.
 - Production Auth currently has zero users; intentional staff/provider/customer identities remain an activation gate.
 - Provider organizations exist, but no individual provider records are currently active; provider compliance/authorization remains a hard routing gate.
@@ -146,6 +129,7 @@ The canonical provider transaction is:
 ## 11. Out of Active Scope
 
 - Six-channel customer architecture
+- Treating CH01-A or CH01-B as separate official channels
 - Superseded pricing/package definitions
 - Legacy product/price records in customer-facing commerce
 - South Carolina as an active commercial catalog jurisdiction
