@@ -1,14 +1,24 @@
 // DANI DECLARES LLC — COMMERCIAL REGISTRY AUTHORITY
-// Current architecture lock: 6 customer channels + capability-network worker side.
+// Current architecture lock: 5 customer channels + capability-network worker side.
+// CH01 contains resident subchannels; these are routing segments, not additional official channels.
 // Legacy commercial models remain below channel level and must not be treated as channels.
 
 export const CHANNELS = Object.freeze({
-  CH01_PROPERTY_RESIDENTS: 'CH01',
-  CH02_DIRECT_REGULAR_RESIDENTS: 'CH02',
-  CH03_PROPERTY_MANAGEMENT_APARTMENTS: 'CH03',
-  CH04_REAL_ESTATE_OFFICES_BROKERAGES: 'CH04',
-  CH05_BUSINESSES_COMMERCIAL: 'CH05',
-  CH06_GOVERNMENT_INSTITUTIONAL: 'CH06',
+  CH01_RESIDENT_CONCIERGE: 'CH01',
+  CH02_PROPERTY_MANAGEMENT_APARTMENTS: 'CH02',
+  CH03_REAL_ESTATE_OFFICES_BROKERAGES: 'CH03',
+  CH04_BUSINESSES: 'CH04',
+  CH05_GOVERNMENT_INSTITUTIONAL: 'CH05',
+});
+
+// CH01 Resident Concierge subchannels. These do not create new official channels.
+export const CH01_SUBCHANNELS = Object.freeze({
+  CH01A_HOME_CLEANING: '01A',
+  CH01B_PET_CARE: '01B',
+  CH01D_HOUSEHOLD_CONCIERGE: '01D',
+  CH01E_MOVE_TRANSITION: '01E',
+  CH01F_SEASONAL: '01F',
+  CH01G_HOUSEHOLD_PROGRAMS: '01G',
 });
 
 export const CHANNEL_TYPES = Object.freeze({
@@ -78,6 +88,7 @@ export const masterCommercialRegistry = Object.freeze({
   architectureVersion: '2026-08-27',
   geography: 'GA',
   channels: CHANNELS,
+  ch01Subchannels: CH01_SUBCHANNELS,
   workerSide: 'CAPABILITY_NETWORK',
   networkAccessIsEntitlement: true,
   workIsNotGuaranteed: true,
