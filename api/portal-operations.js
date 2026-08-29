@@ -4,6 +4,46 @@ const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
 function fail(res, error, status = 400) { return res.status(status).json({ success: false, error }); }
 
+// Provider-facing jobs are deliberately whitelisted. Do not expose customer billing,
+// provider economics, internal notes, pricing context, lead IDs, organization IDs,
+// estimate IDs, or other internal commercial data to provider clients.
+function sanitizeProviderJob(job) {
+  if (!job) return null;
+  return {
+    id: job.id,
+    public_reference: job.public_reference,
+    division_slug: job.division_slug,
+    job_title: job.job_title,
+    job_status: job.job_status,
+    scheduled_start: job.scheduled_start,
+    scheduled_end: job.scheduled_end,
+    location_address: job.location_address,
+    assigned_to: job.assigned_to,
+    scope_summary: job.scope_summary,
+    created_at: job.created_at,
+    updated_at: job.updated_at,
+  };
+}
+
+function sanitizeProviderAssignment(assignment) {
+  if (!assignment) return null;
+  return {
+    id: assignment.id,
+    job_id: assignment.job_id,
+    provider_id: assignment.provider_id,
+    assignment_status: assignment.assignment_status,
+    provider_notes: assignment.provider_notes,
+    offered_at: assignment.offered_at,
+    accepted_at: assignment.accepted_at,
+    rejected_at: assignment.rejected_at,
+    cancelled_at: assignment.cancelled_at,
+    offer_expires_at: assignment.offer_expires_at,
+    response_at: assignment.response_at,
+    offer_sequence: assignment.offer_sequence,
+    job: sanitizeProviderJob(assignment.job),
+  };
+}
+
 async function getStaffSnapshot(supabase) {
   const [requests, jobs, appointments, providers, changes, evidence, payments] = await Promise.all([
     supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100),
@@ -21,17 +61,23 @@ async function getStaffSnapshot(supabase) {
 
 async function getProviderSnapshot(supabase, providerId) {
   if (!providerId) return { assignments: [], tasks: [], evidence: [] };
-  const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*, dd_jobs(*)').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
+  const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
-  const jobIds = (assignments || []).map(row => row.job_id);
+  const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
   if (!jobIds.length) return { assignments: [], tasks: [], evidence: [] };
-  const [tasks, evidence] = await Promise.all([
+
+  const [jobsResult, tasks, evidence] = await Promise.all([
+    supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
     supabase.from('dd_job_evidence').select('*').in('job_id', jobIds).order('created_at', { ascending: false }),
   ]);
+  if (jobsResult.error) throw jobsResult.error;
   if (tasks.error) throw tasks.error;
   if (evidence.error) throw evidence.error;
-  return { assignments: assignments || [], tasks: tasks.data || [], evidence: evidence.data || [] };
+
+  const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
+  const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
+  return { assignments: safeAssignments, tasks: tasks.data || [], evidence: evidence.data || [] };
 }
 
 async function getCustomerSnapshot(supabase, identity, role) {
@@ -144,22 +190,12 @@ export default async function handler(req, res) {
       const { data: changeOrder, error: fetchError } = await context.supabase.from('dd_change_orders').select('*').eq('id', changeOrderId).single();
       if (fetchError || !changeOrder) return fail(res, 'Change order not found.', 404);
       if (changeOrder.status !== 'PENDING_APPROVAL') return fail(res, `Change order is ${changeOrder.status}.`, 409);
-
-      const { data: job, error: jobError } = await context.supabase
-        .from('dd_jobs')
-        .select('id, lead_id, organization_id')
-        .eq('id', changeOrder.job_id)
-        .single();
+      const { data: job, error: jobError } = await context.supabase.from('dd_jobs').select('id, lead_id, organization_id').eq('id', changeOrder.job_id).single();
       if (jobError || !job) return fail(res, 'Change order job not found.', 404);
-
       let authorized = false;
-      if (['customer', 'resident'].includes(context.role)) {
-        authorized = Boolean(context.identity?.entity_id && job.lead_id && String(job.lead_id) === String(context.identity.entity_id));
-      } else if (['property_manager', 'procurement'].includes(context.role)) {
-        authorized = Boolean(context.identity?.organization_id && job.organization_id && String(job.organization_id) === String(context.identity.organization_id));
-      }
+      if (['customer', 'resident'].includes(context.role)) authorized = Boolean(context.identity?.entity_id && job.lead_id && String(job.lead_id) === String(context.identity.entity_id));
+      else if (['property_manager', 'procurement'].includes(context.role)) authorized = Boolean(context.identity?.organization_id && job.organization_id && String(job.organization_id) === String(context.identity.organization_id));
       if (!authorized && !context.isStaff) return fail(res, 'This change order is outside the current portal account scope.', 403);
-
       const update = decision === 'APPROVED' ? { status: 'APPROVED', approved_at: new Date().toISOString(), approval_reference: `PORTAL-${context.user.id}` } : { status: 'REJECTED', rejection_reason: reason || null };
       const { error } = await context.supabase.from('dd_change_orders').update(update).eq('id', changeOrderId).eq('status', 'PENDING_APPROVAL'); if (error) throw error;
       return ok(res, { changeOrderStatus: decision });
