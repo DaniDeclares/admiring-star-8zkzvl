@@ -19,7 +19,7 @@ export default function HomePage() {
     { icon: Store, label: 'Businesses', desc: 'Administrative, operations, notary, events, and project support', link: '/services/business-solutions' },
     { icon: ShieldCheck, label: 'Government & Institutions', desc: 'Facilities, janitorial, administrative, document, and field support', link: '/industries/government' }
   ];
-  const credibility = ['Mobile Support', 'Metro Atlanta', 'South Carolina Available', 'Documentation Included', 'Fast Response', 'Procurement Ready'];
+  const credibility = ['Mobile Support', 'Georgia Service Area', 'Documentation Included', 'Fast Response', 'Procurement Ready', 'Five Commercial Channels'];
   return (
     <div className="dd-homepage bg-slate-950 text-slate-100 min-h-screen selection:bg-amber-500 selection:text-slate-950">
       <section className="relative pt-24 pb-20 md:pt-32 md:pb-28 overflow-hidden border-b border-slate-800">
