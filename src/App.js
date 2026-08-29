@@ -13,10 +13,6 @@ import ConciergePage from "./pages/services/ConciergePage.jsx";
 import FederalPage from "./pages/FederalPage.jsx";
 import FacilityVisitsPage from "./pages/FacilityVisitsPage.jsx";
 import ExpressGoodsPage from "./pages/ExpressGoodsPage.jsx";
-import NotaryPage from "./pages/NotaryPage.jsx";
-import WeddingsDivisionPage from "./divisions/events/WeddingsDivisionPage.jsx";
-import WeddingsPage from "./pages/WeddingsPage.jsx";
-import FestivalPage from "./pages/FestivalPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
 import RealEstatePage from "./pages/RealEstatePage.jsx";
 import PackagesPage from "./pages/PackagesPage.jsx";
@@ -25,11 +21,9 @@ import MembershipPage from "./pages/MembershipPage.jsx";
 import NetworkHubPage from "./pages/NetworkHubPage.jsx";
 import VendorPortal from "./pages/VendorPortal.jsx";
 import RequestServicePage from "./pages/RequestServicePage.jsx";
-import ResidentConciergePage from "./pages/ResidentConciergeSafePage.jsx";
 import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx";
 import OperationsConsolePage from "./pages/portal/OperationsConsolePage.jsx";
 import PortalWorkspacePage from "./pages/portal/PortalWorkspacePage.jsx";
-import TravelQuotePage from "./pages/TravelQuotePage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import PrivacyPage from "./pages/PrivacyPage";
@@ -53,9 +47,8 @@ export default function App() {
         <Route path="/services/express-goods" element={<ExpressGoodsPage />} />
         <Route path="/services/facility-visits" element={<FacilityVisitsPage />} />
         <Route path="/services/federal" element={<FederalPage />} />
-        <Route path="/services/notary" element={<NotaryPage />} />
-        <Route path="/resident-concierge" element={<ResidentConciergePage />} />
-        <Route path="/resident-dispatch" element={<ResidentConciergePage />} />
+        <Route path="/resident-concierge" element={<Navigate to="/request-service" replace />} />
+        <Route path="/resident-dispatch" element={<Navigate to="/request-service" replace />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
         <Route path="/portal/provider" element={<PortalWorkspacePage />} />
@@ -63,13 +56,13 @@ export default function App() {
         <Route path="/portal/customer" element={<PortalWorkspacePage />} />
         <Route path="/portal/property-manager" element={<PortalWorkspacePage />} />
         <Route path="/portal/procurement" element={<PortalWorkspacePage />} />
-        <Route path="/weddings" element={<WeddingsDivisionPage />} />
-        <Route path="/events/weddings" element={<WeddingsPage />} />
-        <Route path="/events/festivals" element={<FestivalPage />} />
-        <Route path="/festival" element={<FestivalPage />} />
+        <Route path="/weddings" element={<Navigate to="/request-service" replace />} />
+        <Route path="/events/weddings" element={<Navigate to="/request-service" replace />} />
+        <Route path="/events/festivals" element={<FestivalRedirect />} />
+        <Route path="/festival" element={<FestivalRedirect />} />
         <Route path="/book" element={<Navigate to="/request-service" replace />} />
         <Route path="/shop" element={<ShopPage />} />
-        <Route path="/travel-quote" element={<TravelQuotePage />} />
+        <Route path="/travel-quote" element={<Navigate to="/request-service" replace />} />
         <Route path="/request-service" element={<RequestServicePage />} />
         <Route path="/real-estate" element={<RealEstatePage />} />
         <Route path="/industries/real-estate" element={<RealEstatePage />} />
@@ -91,4 +84,8 @@ export default function App() {
       </Routes>
     </Layout>
   );
+}
+
+function FestivalRedirect() {
+  return <Navigate to="/request-service" replace />;
 }
