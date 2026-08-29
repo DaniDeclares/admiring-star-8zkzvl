@@ -43,10 +43,10 @@ const D01_LAUNCH_OFFERS = Object.freeze({
 
 export const masterCommercialRegistry = Object.freeze({
   architectureVersion:'2026-08-29',
-  // Commercial activation is currently Georgia-only. Other states remain expansion
-  // architecture until separately cleared through commercial, pricing, fulfillment,
-  // and compliance gates.
-  geography:{ activeMarkets:['GA'], nationalReady:false },
+  // Georgia and South Carolina are authorized commercial markets for the current
+  // architecture. Individual offers remain independently gated by service, pricing,
+  // fulfillment, and compliance readiness; future states are not implicitly active.
+  geography:{ activeMarkets:['GA','SC'], nationalReady:false },
   channels:CHANNELS,
   ch01Subchannels:CH01_SUBCHANNELS,
   workerSide:'CAPABILITY_NETWORK',
