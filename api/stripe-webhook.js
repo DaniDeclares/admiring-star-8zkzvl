@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import prisma from '../lib/prisma.js';
+import { getCommercialRecord, isCanonicalActive } from '../src/config/commercialRegistry';
 import { nextStateAfterPayment, assertTransition } from '../src/lib/operations/workflowStateMachines2026.js';
 import { reconcileStripePayment } from '../src/lib/operations/accountingReconciliation2026.js';
 import { publishPaymentReconciled } from '../src/lib/operations/eventBroker2026.js';
@@ -18,6 +19,10 @@ async function getRawBody(req) {
 
 function readChannel(propertyDetails) {
   return propertyDetails?.operationsRouting?.channelType || propertyDetails?.operationsRouting?.channel || null;
+}
+
+function money(value) {
+  return Number(Number(value || 0).toFixed(2));
 }
 
 export default async function handler(req, res) {
@@ -43,12 +48,40 @@ export default async function handler(req, res) {
 
     if (requestId) {
       try {
+        // Make webhook processing idempotent before attempting any workflow transition.
+        const priorEvent = await prisma.$queryRaw`
+          select id from public.dd_payment_events
+          where provider_event_id = ${event.id}
+          limit 1
+        `;
+        if (priorEvent.length) return res.status(200).json({ received: true, idempotent: true });
+
+        const serviceId = String(session.metadata?.service_id || '').trim();
+        const registryRecord = getCommercialRecord(serviceId);
+        if (!registryRecord || !isCanonicalActive(registryRecord)) {
+          return res.status(422).json({ error: 'Payment references a non-canonical or inactive commercial offer.' });
+        }
+
         const request = await prisma.serviceRequest.findUnique({ where: { id: requestId } });
         if (!request) throw new Error(`ServiceRequest ${requestId} not found`);
 
         const channel = readChannel(request.property_details);
         if (channel !== 'B2C') {
           throw new Error(`Payment webhook cannot auto-create a job for channel ${channel || 'UNKNOWN'}`);
+        }
+
+        const frozenSnapshot = Number(request.property_details?.commercialIntent?.frozenPriceSnapshot);
+        const paidAmount = money(Number(session.amount_total || 0) / 100);
+        if (!Number.isFinite(frozenSnapshot) || frozenSnapshot <= 0) {
+          return res.status(422).json({ error: 'Paid request has no valid frozen commercial price snapshot.' });
+        }
+        if (money(frozenSnapshot) !== paidAmount) {
+          return res.status(422).json({ error: 'Payment amount does not match the frozen commercial price.' });
+        }
+
+        const metadataServiceId = request.property_details?.commercialIntent?.serviceId || request.property_details?.pricingServiceId;
+        if (String(metadataServiceId || '') !== serviceId) {
+          return res.status(422).json({ error: 'Payment service metadata does not match the submitted service request.' });
         }
 
         const currentState = String(request.status || 'new').toUpperCase();
@@ -67,13 +100,14 @@ export default async function handler(req, res) {
             orderBy: { created_at: 'desc' },
             select: { id: true, division_slug: true },
           });
+          if (!estimate) throw new Error(`No frozen estimate found for paid request ${request.id}`);
 
           job = await prisma.dd_jobs.create({
             data: {
-              estimate_id: estimate?.id || null,
+              estimate_id: estimate.id,
               lead_id: request.leadId || null,
               service_request_id: request.id,
-              division_slug: estimate?.division_slug || 'concierge',
+              division_slug: estimate.division_slug || 'concierge',
               job_title: request.service_needed || request.service_category || 'Dani Declares Service',
               job_status: 'new',
               location_address: request.location_address || null,
