@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
+import CommercialCatalogPage from "./pages/CommercialCatalogPage.jsx";
 import BusinessSolutionsPage from "./pages/BusinessSolutionsPage.jsx";
 import PrintStudioPage from "./pages/services/PrintStudioPage.jsx";
 import EventsPage from "./pages/services/EventsPage.jsx";
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/services" element={<ServicesPage />} />
+        <Route path="/catalog" element={<CommercialCatalogPage />} />
         <Route path="/services/business" element={<BusinessSolutionsPage />} />
         <Route path="/services/business-solutions" element={<BusinessSolutionsPage />} />
         <Route path="/services/print-studio" element={<PrintStudioPage />} />
@@ -80,12 +82,10 @@ export default function App() {
         <Route path="/events" element={<Navigate to="/services/events" replace />} />
         <Route path="/signature-services" element={<Navigate to="/services" replace />} />
         <Route path="/govcon" element={<Navigate to="/industries/government" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Layout>
   );
 }
 
-function FestivalRedirect() {
-  return <Navigate to="/request-service" replace />;
-}
+function FestivalRedirect() { return <Navigate to="/request-service" replace />; }
