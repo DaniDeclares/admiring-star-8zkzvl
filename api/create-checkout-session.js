@@ -6,16 +6,19 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 const json = (res, status, payload) => res.status(status).json(payload);
 const siteOrigin = (req) => `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
 
-// Legacy relationship codes are intentionally not accepted here. Checkout consumes
-// the five-channel commercial authority and CH01's two resident subchannels.
-const CHANNEL_TO_RELATIONSHIP = Object.freeze({
-  CH01: 'B2C_RETAIL',
-  CH02: 'B2B2C_RESIDENT_PERK',
-  CH03: 'B2B_VOLUME',
-  CH04: 'B2B_VOLUME',
-  CH05: 'B2G_PROCUREMENT',
+// The public form still uses the legacy relationship tokens for intake compatibility.
+// Convert them here to the five official commercial channels. No legacy token is a
+// pricing authority and no database fallback is permitted for checkout.
+const INTAKE_TO_CHANNEL = Object.freeze({
+  B2C: 'CH01',
+  B2B_APT: 'CH02',
+  B2B_RE: 'CH03',
+  B2B: 'CH04',
+  B2G: 'CH05',
 });
 
+// Until each offer has a governed channel-specific commercial variant, it is only
+// sellable through the channel explicitly activated for that offer.
 const OFFER_ALLOWED_CHANNELS = Object.freeze({
   'DNI-01A-009': ['CH01'],
   'DNI-01A-010': ['CH01'],
@@ -33,15 +36,15 @@ export default async function handler(req, res) {
     const serviceId = String(body.serviceId || '').trim();
     const requestId = String(body.requestId || '').trim();
     const email = String(body.email || '').trim();
-    const channel = String(body.channel || body.channelCode || '').trim();
+    const intakeChannel = String(body.channelType || '').trim();
+    const channel = INTAKE_TO_CHANNEL[intakeChannel] || String(body.channel || '').trim();
     const subchannel = String(body.subchannelCode || '').trim();
 
     if (!requestId || !email || !serviceId || !channel) {
       return json(res, 400, { error: 'Please complete the service request before payment.' });
     }
 
-    const relationship = CHANNEL_TO_RELATIONSHIP[channel];
-    if (!relationship) {
+    if (!['CH01', 'CH02', 'CH03', 'CH04', 'CH05'].includes(channel)) {
       return json(res, 400, { error: 'Please select a valid customer channel before payment.' });
     }
 
@@ -88,7 +91,7 @@ export default async function handler(req, res) {
         service_id: serviceId,
         channel,
         subchannel,
-        commercial_relationship: relationship,
+        commercial_relationship: record.channel,
       },
       payment_intent_data: recurring ? undefined : { metadata: { request_id: requestId, service_id: serviceId, channel } },
       success_url: `${siteOrigin(req)}/request-service?service=${encodeURIComponent(serviceId)}&paid=1&request_id=${encodeURIComponent(requestId)}`,
