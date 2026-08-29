@@ -48,14 +48,6 @@ export default async function handler(req, res) {
 
     if (requestId) {
       try {
-        // Make webhook processing idempotent before attempting any workflow transition.
-        const priorEvent = await prisma.$queryRaw`
-          select id from public.dd_payment_events
-          where provider_event_id = ${event.id}
-          limit 1
-        `;
-        if (priorEvent.length) return res.status(200).json({ received: true, idempotent: true });
-
         const serviceId = String(session.metadata?.service_id || '').trim();
         const registryRecord = getCommercialRecord(serviceId);
         if (!registryRecord || !isCanonicalActive(registryRecord)) {
@@ -88,12 +80,11 @@ export default async function handler(req, res) {
         assertTransition('B2C', currentState, 'PAID');
         assertTransition('B2C', 'PAID', nextStateAfterPayment('B2C'));
 
-        const existingJob = await prisma.dd_jobs.findFirst({
+        let job = await prisma.dd_jobs.findFirst({
           where: { service_request_id: request.id },
           select: { id: true, public_reference: true },
         });
 
-        let job = existingJob;
         if (!job) {
           const estimate = await prisma.dd_estimates.findFirst({
             where: { service_request_id: request.id },
@@ -102,19 +93,30 @@ export default async function handler(req, res) {
           });
           if (!estimate) throw new Error(`No frozen estimate found for paid request ${request.id}`);
 
-          job = await prisma.dd_jobs.create({
-            data: {
-              estimate_id: estimate.id,
-              lead_id: request.leadId || null,
-              service_request_id: request.id,
-              division_slug: estimate.division_slug || 'concierge',
-              job_title: request.service_needed || request.service_category || 'Dani Declares Service',
-              job_status: 'new',
-              location_address: request.location_address || null,
-              scope_summary: request.request_details || null,
-            },
-            select: { id: true, public_reference: true },
-          });
+          try {
+            job = await prisma.dd_jobs.create({
+              data: {
+                estimate_id: estimate.id,
+                lead_id: request.leadId || null,
+                service_request_id: request.id,
+                division_slug: estimate.division_slug || 'concierge',
+                job_title: request.service_needed || request.service_category || 'Dani Declares Service',
+                job_status: 'new',
+                location_address: request.location_address || null,
+                scope_summary: request.request_details || null,
+              },
+              select: { id: true, public_reference: true },
+            });
+          } catch (createErr) {
+            // A unique service_request_id constraint closes the concurrent duplicate-job race.
+            // If another webhook won the race, reuse its job rather than failing or creating a second one.
+            if (createErr?.code !== 'P2002') throw createErr;
+            job = await prisma.dd_jobs.findFirst({
+              where: { service_request_id: request.id },
+              select: { id: true, public_reference: true },
+            });
+            if (!job) throw createErr;
+          }
         }
 
         await prisma.serviceRequest.update({
