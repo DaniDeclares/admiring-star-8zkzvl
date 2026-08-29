@@ -77,6 +77,11 @@ export default async function handler(req, res) {
         r.job_id,
         r.assignment_id,
         r.notification_attempts,
+        r.selected_provider_org_id,
+        r.selected_provider_id,
+        r.capability_key,
+        r.service_id,
+        r.location_zip,
         d.channel,
         d.destination,
         sr.service_needed,
@@ -100,6 +105,38 @@ export default async function handler(req, res) {
       where r.offer_status = 'OFFERED'
         and r.notification_status = 'PENDING'
         and r.notification_attempts < ${MAX_RETRIES}
+        -- Never notify a provider unless the complete authorization boundary is met.
+        and exists (
+          select 1
+          from public.dd_provider_organizations po
+          where po.id = r.selected_provider_org_id
+            and po.is_active = true
+            and po.network_access_level in ('AUTHORIZED', 'PREFERRED', 'STRATEGIC')
+            and po.accepts_new_work = true
+            and po.capacity_status = 'AVAILABLE'
+            and po.agreement_status = 'EXECUTED'
+            and po.compliance_status = 'VERIFIED'
+            and po.permission_status in ('APPROVED', 'AUTHORIZED', 'PERMISSION_GRANTED')
+            and po.qualification_status = 'VERIFIED'
+        )
+        and exists (
+          select 1
+          from public.dd_provider_capabilities pc
+          where pc.provider_org_id = r.selected_provider_org_id
+            and pc.is_authorized = true
+            and (r.service_id is null or pc.service_id = r.service_id)
+            and (r.capability_key is null or pc.capability_key = r.capability_key)
+        )
+        and exists (
+          select 1
+          from public.dd_provider_coverage cov
+          where cov.provider_org_id = r.selected_provider_org_id
+            and (
+              r.location_zip is null
+              or cov.zip_code = r.location_zip
+              or cov.territory_id = r.location_zip
+            )
+        )
       order by r.created_at
       limit ${BATCH_SIZE}
     `;
