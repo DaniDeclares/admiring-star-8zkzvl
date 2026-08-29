@@ -27,7 +27,7 @@ export async function publishOperationalEvent({
     insert into public.dd_event_outbox
       (event_key, event_type, channel, aggregate_type, aggregate_id, payload)
     values
-      (${eventKey}, ${eventType}, ${channel}, ${aggregateType}, ${aggregateId ? prisma.raw(`${aggregateId}::uuid`) : null}, ${JSON.stringify(payload)}::jsonb)
+      (${eventKey}, ${eventType}, ${channel}, ${aggregateType}, ${aggregateId || null}::uuid, ${JSON.stringify(payload)}::jsonb)
     on conflict (event_key) do nothing
     returning id, event_key, status
   `;
