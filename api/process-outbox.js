@@ -25,14 +25,13 @@ async function sendSms(payload) {
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const apiKeySid = process.env.TWILIO_API_KEY_SID;
   const apiKeySecret = process.env.TWILIO_API_KEY_SECRET;
-  const from = process.env.TWILIO_FROM_NUMBER;
+  const from = process.env.TWILIO_FROM_NUMBER || process.env.TWILIO_PHONE_NUMBER;
   if (!accountSid || !apiKeySid || !apiKeySecret || !from) throw new Error('TWILIO_NOT_CONFIGURED');
   const body = new URLSearchParams({
     To: payload.to,
     From: from,
     Body: payload.text || payload.message || 'Dani Declares update.',
   });
-  // Use a revokable Twilio API key rather than the account master Auth Token.
   const auth = Buffer.from(`${apiKeySid}:${apiKeySecret}`).toString('base64');
   const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
     method: 'POST',
@@ -52,25 +51,16 @@ async function deliver(item) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!CRON_SECRET) return res.status(503).json({ error: 'Outbox worker is not configured' });
-
   const authorization = req.headers.authorization;
   const headerSecret = req.headers['x-cron-secret'];
-  if (authorization !== `Bearer ${CRON_SECRET}` && headerSecret !== CRON_SECRET) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
+  if (authorization !== `Bearer ${CRON_SECRET}` && headerSecret !== CRON_SECRET) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const items = await prisma.$queryRaw`
       select id, event_key, event_type, channel, aggregate_type, aggregate_id, payload, attempts
       from public.dd_event_outbox
-      where status in ('PENDING','FAILED')
-        and available_at <= now()
-        and attempts < ${MAX_RETRIES}
-      order by created_at
-      limit ${BATCH_SIZE}
-      for update skip locked
+      where status in ('PENDING','FAILED') and available_at <= now() and attempts < ${MAX_RETRIES}
+      order by created_at limit ${BATCH_SIZE} for update skip locked
     `;
-
     const results = [];
     for (const item of items) {
       try {
@@ -80,12 +70,9 @@ export default async function handler(req, res) {
           where id = ${item.id}::uuid and status in ('PENDING','FAILED') and attempts < ${MAX_RETRIES}
         `;
         if (!claimed) continue;
-
         await deliver(item);
         await prisma.$executeRaw`
-          update public.dd_event_outbox
-          set status = 'PROCESSED', processed_at = now(), updated_at = now(), last_error = null
-          where id = ${item.id}::uuid
+          update public.dd_event_outbox set status = 'PROCESSED', processed_at = now(), updated_at = now(), last_error = null where id = ${item.id}::uuid
         `;
         results.push({ eventKey: item.event_key, status: 'PROCESSED' });
       } catch (error) {
@@ -93,17 +80,11 @@ export default async function handler(req, res) {
         const terminal = attempts >= MAX_RETRIES;
         const delayMinutes = Math.min(60, 2 ** Math.min(attempts, 5));
         await prisma.$executeRaw`
-          update public.dd_event_outbox
-          set status = 'FAILED',
-              last_error = ${String(error.message || error)},
-              available_at = ${terminal ? new Date() : new Date(Date.now() + delayMinutes * 60 * 1000)},
-              updated_at = now()
-          where id = ${item.id}::uuid
+          update public.dd_event_outbox set status = 'FAILED', last_error = ${String(error.message || error)}, available_at = ${terminal ? new Date() : new Date(Date.now() + delayMinutes * 60 * 1000)}, updated_at = now() where id = ${item.id}::uuid
         `;
         results.push({ eventKey: item.event_key, status: 'FAILED', terminal, error: String(error.message || error) });
       }
     }
-
     return res.status(200).json({ success: true, processed: results.length, maxRetries: MAX_RETRIES, results });
   } catch (error) {
     console.error('Outbox worker failed:', error);
