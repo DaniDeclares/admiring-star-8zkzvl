@@ -11,8 +11,20 @@ export default async function handler(req,res){
   if(!routing.channel)return res.status(400).json({error:'Please select the customer type that best fits your request.'});
   const routingContext=buildIntakeRoutingContext({channelType,category});
   const serviceRef=pricingServiceId||serviceId||commercialIntent?.serviceId||null;
+  const frozenPrice=commercialIntent?.frozenPriceSnapshot==null?null:Number(commercialIntent.frozenPriceSnapshot);
+  if(commercialIntent&&(!serviceRef||!Number.isFinite(frozenPrice)||frozenPrice<=0))return res.status(400).json({error:'The selected commercial offer could not be securely frozen. Please start the request again.'});
+  const paymentEligible=channelType==='B2C'&&frozenPrice!=null;
+  const requestState=paymentEligible?'payment_pending':routing.initialState.toLowerCase();
+
   const lead=await prisma.lead.create({data:{full_name:name,email:email||null,phone:phone||null,organization_name:organizationName||null,status:'new',notes:null}});
-  const request=await prisma.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:routingContext,pricingServiceId:serviceRef,commercialIntent:commercialIntent||null},status:routing.initialState.toLowerCase(),priority:'normal'}});
+  const request=await prisma.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:routingContext,pricingServiceId:serviceRef,commercialIntent:commercialIntent||null},status:requestState,priority:'normal'}});
+
+  // A paid launch offer needs a frozen estimate before Stripe can reconcile it.
+  // This is a customer-price snapshot only; provider payout/economics remain separate.
+  if(paymentEligible){
+   await prisma.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:locationAddress||null,timeline:timeline||null,intake_answers:{serviceId:serviceRef,commercialIntent},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});
+  }
+
   const notificationText=['New DANI DECLARES service request',`Name: ${name}`,`Email: ${email||'not provided'}`,`Phone: ${phone||'not provided'}`,`Customer type: ${channelType||'not specified'}`,`Service: ${serviceType||category||'not specified'}`,`Service reference: ${serviceRef||'not specified'}`,`Location: ${locationAddress||'not provided'}`,`Timeline: ${timeline||'not provided'}`,`Budget: ${budgetRange||'not provided'}`,`Request ID: ${request.id}`].join('\n');
   try{
    if(process.env.NOTIFICATION_EMAIL)await publishOperationalEvent({eventType:'LEAD_CREATED',aggregateType:'SERVICE_REQUEST',aggregateId:request.id,eventKey:`lead-created-email:${request.id}`,channel:'EMAIL',payload:{to:process.env.NOTIFICATION_EMAIL,subject:`New DANI DECLARES service request — ${serviceType||category||'New lead'}`,text:notificationText}});
