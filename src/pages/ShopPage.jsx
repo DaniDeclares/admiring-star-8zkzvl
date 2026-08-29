@@ -1,45 +1,64 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Sparkles, Printer, ArrowRight, ShieldCheck } from 'lucide-react';
-import { getPriceLabel } from '../data/pricingCanon';
+import { ArrowRight, CreditCard, Package, Printer, Sparkles } from 'lucide-react';
+
+const FEATURED = [
+  { serviceId: 'DNI-11A-017', label: 'Custom DTF Apparel', description: 'Custom printed shirts and apparel for teams, businesses, residents and events.', icon: Printer },
+  { serviceId: 'DNI-11A-018', label: 'Heat-Press Apparel', description: 'Custom heat-press apparel for small runs, uniforms and event gear.', icon: Printer },
+  { serviceId: 'DNI-11A-013', label: 'Business Card Printing', description: 'Professional business cards for launches, teams and client-facing brands.', icon: Package },
+  { serviceId: 'DNI-11A-016', label: 'Yard Sign Production', description: 'High-visibility signs for listings, events, businesses and community use.', icon: Package },
+  { serviceId: 'DNI-11A-019', label: 'Promotional Merchandise', description: 'Branded merchandise and customer-facing promotional pieces.', icon: Sparkles },
+  { serviceId: 'DNI-11A-020', label: 'Custom Product Fabrication', description: 'Custom branded physical products and specialty production.', icon: Package },
+];
 
 export default function ShopPage() {
-  const products = [
-    { name: "SmartTap™ NFC Business Card", category: "Smart Hardware", priceKey: "nfc", margin: "High-Tech NFC", icon: Sparkles, desc: "Instant contact & profile sharing via NFC tap." },
-    { name: "Smart Review Counter Stand", category: "Smart Hardware", priceKey: "review_stand", margin: "NFC + QR", icon: Sparkles, desc: "Direct Google Review capture plaque for retail counters." },
-    { name: "Custom Heat-Press DTF Apparel (4-Pack)", category: "Creative Merch", priceKey: "apparel", margin: "Volume Apparel", icon: Printer, desc: "High-grade DTF printed branded tees or event shirts." },
-    { name: "Sublimated 20 oz Tumbler (2-Pack)", category: "Creative Merch", priceKey: "tumbler", margin: "Drinkware", icon: Printer, desc: "Double-wall insulated custom branded tumblers." },
-    { name: "Express Family Care Snack Box", category: "Market Goods", priceKey: "05-MK15", margin: "Curated Box", icon: ShoppingBag, desc: "Premium snack assortment for move-in gifts or event staff." },
-    { name: "Business Startup Infrastructure Kit", category: "Business Kits", priceKey: "startup_kit", margin: "Turnkey SOPs", icon: ShieldCheck, desc: "Complete registration binders, corporate seals, and setup." }
-  ];
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/verify-commercial-intent?catalog=1')
+      .then((r) => r.json())
+      .then((data) => setServices(data.success ? data.services || [] : []))
+      .catch(() => setServices([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const byId = useMemo(() => new Map(services.map((service) => [service.serviceId, service])), [services]);
 
   return (
-    <div className="bg-slate-950 text-slate-100 min-h-screen pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-amber-400 font-mono text-sm uppercase tracking-wider">Express Commerce & Smart Hardware</span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mt-2 mb-4">Dani Declares Shop & Catalog</h1>
-          <p className="text-slate-300 text-lg">SmartTap™ NFC hardware, custom printed merchandise, care bundles, and business startup kits.</p>
+    <div className="bg-[#fffaf1] text-[#302226] min-h-screen pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8">
+        <div className="max-w-3xl mb-12">
+          <p className="text-[#a8791c] font-black uppercase tracking-[.18em] text-xs">Print • Branding • Merchandise</p>
+          <h1 className="mt-3 text-4xl sm:text-5xl font-black text-[#5b1624]">Products made for your next move.</h1>
+          <p className="mt-5 text-lg leading-relaxed text-[#6d5b60]">From branded apparel and business cards to signs and custom production, choose a current offer or tell us what you want made.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {products.map((p, idx) => (
-            <div key={idx} className="p-8 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between hover:border-amber-500/40 transition-all">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-mono text-amber-400 uppercase tracking-wider">{p.category}</span>
-                  <span className="text-xs font-bold text-slate-400 bg-slate-800 px-2.5 py-1 rounded-full">{p.margin}</span>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURED.map((item) => {
+            const service = byId.get(item.serviceId);
+            const Icon = item.icon;
+            return (
+              <article key={item.serviceId} className="rounded-3xl bg-white border border-[#e3d2a8] p-7 shadow-sm flex flex-col">
+                <Icon className="w-9 h-9 text-[#b58627]" />
+                <h2 className="mt-5 text-xl font-black text-[#5b1624]">{item.label}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-[#6d5b60] flex-1">{item.description}</p>
+                <div className="mt-6 flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-xs uppercase tracking-wider font-black text-[#a8791c]">Current pricing</div>
+                    <div className="mt-1 text-xl font-black text-[#5b1624]">{loading ? 'Checking…' : service?.pricingLabel || 'Request a quote'}</div>
+                  </div>
+                  <Link to={`/request-service?service=${encodeURIComponent(item.serviceId)}`} className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#6b1f2b] px-4 py-3 text-white font-black text-sm">Order <ArrowRight className="w-4 h-4" /></Link>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">{p.name}</h3>
-                <p className="text-slate-400 text-sm mb-6">{p.desc}</p>
-              </div>
-              <div>
-                <div className="text-2xl font-extrabold text-amber-400 mb-4">{getPriceLabel(p.priceKey)}</div>
-                <Link to="/request-service" className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-white font-semibold text-sm transition-all">
-                  Order Deliverable <ArrowRight className="ml-2 w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          ))}
+              </article>
+            );
+          })}
+        </div>
+        <div className="mt-12 rounded-3xl bg-[#5a1422] text-white p-8 sm:p-10 grid md:grid-cols-[1fr_auto] gap-6 items-center">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-black">Need something custom?</h2>
+            <p className="mt-2 text-[#f1e4e6]">Tell us the quantity, artwork, size, deadline and delivery needs. We’ll route it to the right production offer.</p>
+          </div>
+          <Link to="/request-service" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d2a83f] px-6 py-4 text-[#45101b] font-black">Request Custom Production <CreditCard className="w-5 h-5" /></Link>
         </div>
       </div>
     </div>

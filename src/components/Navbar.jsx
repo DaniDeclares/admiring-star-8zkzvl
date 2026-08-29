@@ -17,7 +17,7 @@ export default function Navbar() {
   return <header className="dd-navbar-header">
     <div className="dd-navbar-container">
       <Link to="/" className="dd-navbar-brand-logo" onClick={closeAll} aria-label="DANI DECLARES home">
-        <img src="/logo-script.png" alt="DANI DECLARES LLC" className="dd-primary-logo" />
+        <img src="/dani-declares-logo.svg" alt="DANI DECLARES LLC" className="dd-primary-logo" />
       </Link>
       <nav className="dd-navbar-nav desktop-only" aria-label="Primary navigation">
         <NavLink className="dd-top-link" to="/">Home</NavLink>
