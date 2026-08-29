@@ -70,10 +70,10 @@ There is no CH06. Customer channel, buyer type, delivery model, and fulfillment 
 ## 4. GEOGRAPHY
 The national architecture is state → market → service area → dispatch zone.
 
-**Commercial catalog/compliance build currently authorized:** Georgia.  
-**Long-term architecture:** national expansion after deliberate state activation.
+**Current authorized commercial markets:** Georgia and South Carolina, subject to the applicable service, pricing, fulfillment and compliance gates documented in the current control point and commercial matrix.  
+**Long-term architecture:** national expansion toward all 50 states after deliberate state activation.
 
-South Carolina and other states remain future/expansion geography unless deliberately opened through the commercial, pricing, fulfillment and compliance gates. Do not silently treat a future-state market as active.
+A state or market is not represented as commercially active merely because it exists in the national architecture. State-specific offers must still pass service, pricing, fulfillment and compliance gates.
 
 ## 5. COMMERCIALIZATION ORDER
 **Services → Buyers/Customers → Channels → Locations → Prices → Pricing Rules → Fulfillment → Compliance → SOP/QA → Commercial Variants → SKUs → System Activation**
@@ -137,12 +137,12 @@ Additional already-approved/reconciled services may be activated as their canoni
 
 ## 12. COMMERCIAL EXPANSION RULE
 The commercial universe is expanded through:
-**Capability × Channel × Buyer × Use Case × Variant × Package × Add-on × Recurring × Fulfillment**.
+**Capability × Channel × Buyer × Use Case × Variant × Package × Add-On × Recurring × Fulfillment**.
 
 This creates multiple legitimate offers from one capability without duplicating the underlying canonical service. Marketing collateral, historical files, provider capabilities and prior catalogs are evidence inputs. They do not override the authoritative registry.
 
 ## 13. MARKET-RESEARCH RULE
-Every existing service family and every new commercial variant receives a market benchmark review appropriate to its pricing model. Research should use current Georgia/Atlanta evidence where available and record:
+Every existing service family and every new commercial variant receives a market benchmark review appropriate to its pricing model. Research should use current Georgia/South Carolina evidence where available and record:
 
 - market range / benchmark
 - comparable scope
