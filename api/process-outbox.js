@@ -3,11 +3,16 @@ import prisma from '../lib/prisma.js';
 const CRON_SECRET = process.env.CRON_SECRET;
 const MAX_RETRIES = Number(process.env.NOTIFICATION_MAX_RETRIES || 5);
 const BATCH_SIZE = Math.min(100, Math.max(1, Number(process.env.NOTIFICATION_BATCH_SIZE || 20)));
+const DEFAULT_RESEND_FROM = 'notifications@danideclares.com';
 
 async function sendEmail(payload) {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM_EMAIL || process.env.NOTIFICATION_FROM_EMAIL;
-  if (!apiKey || !from) throw new Error('RESEND_NOT_CONFIGURED');
+  const configuredFrom = process.env.RESEND_FROM_EMAIL || process.env.NOTIFICATION_FROM_EMAIL;
+  // Resend's onboarding sender is test-only. Never allow it into production delivery.
+  const from = configuredFrom && !configuredFrom.endsWith('@resend.dev')
+    ? configuredFrom
+    : DEFAULT_RESEND_FROM;
+  if (!apiKey) throw new Error('RESEND_NOT_CONFIGURED');
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
