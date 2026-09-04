@@ -22,6 +22,7 @@ import MembershipPage from "./pages/MembershipPage.jsx";
 import NetworkHubPage from "./pages/NetworkHubPage.jsx";
 import VendorPortal from "./pages/VendorPortal.jsx";
 import RequestServicePage from "./pages/RequestServicePage.jsx";
+import ResidentWelcomePage from "./pages/ResidentWelcomePage.jsx";
 import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx";
 import OperationsConsolePage from "./pages/portal/OperationsConsolePage.jsx";
 import PortalWorkspacePage from "./pages/portal/PortalWorkspacePage.jsx";
@@ -49,7 +50,8 @@ export default function App() {
         <Route path="/services/express-goods" element={<ExpressGoodsPage />} />
         <Route path="/services/facility-visits" element={<FacilityVisitsPage />} />
         <Route path="/services/federal" element={<FederalPage />} />
-        <Route path="/resident-concierge" element={<Navigate to="/request-service" replace />} />
+        <Route path="/resident-concierge" element={<ResidentWelcomePage />} />
+        <Route path="/resident-welcome" element={<ResidentWelcomePage />} />
         <Route path="/resident-dispatch" element={<Navigate to="/request-service" replace />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
