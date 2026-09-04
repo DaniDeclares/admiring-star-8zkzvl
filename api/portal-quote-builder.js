@@ -1,6 +1,7 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 
 const CHANNELS = Object.freeze({ regular_resident: 'CH01', apartment_resident: 'CH01', property_manager: 'CH02', realtor: 'CH03', business: 'CH04', government: 'CH05' });
+const ESTIMATE_CLIENT_TYPES = Object.freeze({ regular_resident: 'other', apartment_resident: 'renter', property_manager: 'property_manager', realtor: 'realtor', business: 'business', government: 'other' });
 const json = (res, status, payload) => res.status(status).json(payload);
 const money = value => Math.round(Number(value || 0) * 100) / 100;
 
@@ -29,7 +30,7 @@ async function loadRules(supabase, serviceId, channelCode) {
 function calculate({ service, rule, answers }) {
   const a = answers || {};
   let base = Number(a.manual_base_price || 0);
-  if (!base) base = rule?.base_price_cents != null ? Number(rule.base_price_cents) / 100 : Number(service.starting_price || 0);
+  if (!base) base = rule?.base_price_cents != null ? Number(rule.base_price_cents) / 100 : Number(service.starting_price || service.public_price_low || 0);
   const quantity = Math.max(1, Number(a.quantity || 1));
   const hours = Math.max(0, Number(a.hours || 0));
   const pricingType = String(rule?.pricing_type || service.pricing_type || '').toUpperCase();
@@ -90,10 +91,10 @@ export default async function handler(req, res) {
     const payload = {
       public_reference: publicReference, division_slug: String(service.division_id).padStart(2,'0'), source_slug: 'admin_quote_builder',
       client_name: String(body.clientName || '').trim() || null, client_phone: String(body.clientPhone || '').trim() || null, client_email: String(body.clientEmail || '').trim() || null,
-      client_type: clientType, organization_name: String(body.organizationName || '').trim() || null, location_address: String(body.locationAddress || '').trim() || null,
+      client_type: ESTIMATE_CLIENT_TYPES[clientType] || 'other', organization_name: String(body.organizationName || '').trim() || null, location_address: String(body.locationAddress || '').trim() || null,
       city: String(body.city || '').trim() || null, state: String(body.state || 'GA').trim().toUpperCase() || null, zip_code: String(body.zipCode || '').trim() || null,
       timeline: String(body.timeline || '').trim() || null, rush_requested: Boolean(answers.rush), requested_date: body.requestedDate || null,
-      intake_answers: { serviceSku, serviceName: offer.service_name, channelCode, answers, pricingSnapshot: { capturedAt: new Date().toISOString(), pricingRuleId: rule?.id || null, lockStatus: rule?.lock_status || null, ...calculation } },
+      intake_answers: { serviceSku, serviceName: offer.service_name, originalClientType: clientType, channelCode, answers, pricingSnapshot: { capturedAt: new Date().toISOString(), pricingRuleId: rule?.id || null, lockStatus: rule?.lock_status || null, ...calculation } },
       client_notes: String(body.clientNotes || '').trim() || null, internal_notes: String(body.internalNotes || '').trim() || null,
       estimate_status: calculation.needsReview ? 'needs_review' : 'estimated', priority: String(body.priority || 'normal'), base_subtotal: calculation.baseSubtotal, addon_subtotal: 0,
       travel_fee: calculation.travelFee, rush_fee: calculation.rushFee, supplies_fee: calculation.sourcingFee + calculation.materials, pass_through_fee: calculation.passThrough,
