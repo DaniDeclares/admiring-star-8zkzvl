@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const columns=[
-  {title:'Services',links:[['Browse All Services','/catalog'],['Resident Services','/catalog?audience=residents'],['Property Operations','/services/property'],['Business Services','/services/business-solutions'],['Events & Experiences','/services/events']]},
-  {title:'Who We Serve',links:[['Residents','/catalog?audience=residents'],['Property Managers','/services/property'],['Real Estate Professionals','/real-estate'],['Businesses','/services/business-solutions'],['Government & Institutions','/industries/government']]},
+  {title:'Services',links:[['Browse All Services','/catalog'],['Resident Services','/resident-concierge'],['Property Operations','/services/property'],['Business Services','/services/business-solutions'],['Events & Experiences','/services/events']]},
+  {title:'Who We Serve',links:[['Residents','/resident-concierge'],['Property Managers','/services/property'],['Real Estate Professionals','/real-estate'],['Businesses','/services/business-solutions'],['Government & Institutions','/industries/government']]},
   {title:'Company',links:[['About','/about'],['Contact','/contact'],['Request Service','/request-service'],['Privacy','/privacy'],['Terms','/terms']]}
 ];
 
