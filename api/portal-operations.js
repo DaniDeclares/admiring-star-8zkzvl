@@ -1,4 +1,5 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
+import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
 
 const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
@@ -9,41 +10,12 @@ function fail(res, error, status = 400) { return res.status(status).json({ succe
 // estimate IDs, or other internal commercial data to provider clients.
 function sanitizeProviderJob(job) {
   if (!job) return null;
-  return {
-    id: job.id,
-    public_reference: job.public_reference,
-    division_slug: job.division_slug,
-    job_title: job.job_title,
-    job_status: job.job_status,
-    scheduled_start: job.scheduled_start,
-    scheduled_end: job.scheduled_end,
-    location_address: job.location_address,
-    assigned_to: job.assigned_to,
-    scope_summary: job.scope_summary,
-    created_at: job.created_at,
-    updated_at: job.updated_at,
-  };
+  return { id: job.id, public_reference: job.public_reference, division_slug: job.division_slug, job_title: job.job_title, job_status: job.job_status, scheduled_start: job.scheduled_start, scheduled_end: job.scheduled_end, location_address: job.location_address, assigned_to: job.assigned_to, scope_summary: job.scope_summary, created_at: job.created_at, updated_at: job.updated_at };
 }
-
 function sanitizeProviderAssignment(assignment) {
   if (!assignment) return null;
-  return {
-    id: assignment.id,
-    job_id: assignment.job_id,
-    provider_id: assignment.provider_id,
-    assignment_status: assignment.assignment_status,
-    provider_notes: assignment.provider_notes,
-    offered_at: assignment.offered_at,
-    accepted_at: assignment.accepted_at,
-    rejected_at: assignment.rejected_at,
-    cancelled_at: assignment.cancelled_at,
-    offer_expires_at: assignment.offer_expires_at,
-    response_at: assignment.response_at,
-    offer_sequence: assignment.offer_sequence,
-    job: sanitizeProviderJob(assignment.job),
-  };
+  return { id: assignment.id, job_id: assignment.job_id, provider_id: assignment.provider_id, assignment_status: assignment.assignment_status, provider_notes: assignment.provider_notes, offered_at: assignment.offered_at, accepted_at: assignment.accepted_at, rejected_at: assignment.rejected_at, cancelled_at: assignment.cancelled_at, offer_expires_at: assignment.offer_expires_at, response_at: assignment.response_at, offer_sequence: assignment.offer_sequence, job: sanitizeProviderJob(assignment.job) };
 }
-
 async function getStaffSnapshot(supabase) {
   const [requests, jobs, appointments, providers, changes, evidence, payments] = await Promise.all([
     supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100),
@@ -58,14 +30,12 @@ async function getStaffSnapshot(supabase) {
   if (errors.length) throw errors[0].error;
   return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: evidence.data || [], payments: payments.data || [] };
 }
-
 async function getProviderSnapshot(supabase, providerId) {
   if (!providerId) return { assignments: [], tasks: [], evidence: [] };
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
   const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
   if (!jobIds.length) return { assignments: [], tasks: [], evidence: [] };
-
   const [jobsResult, tasks, evidence] = await Promise.all([
     supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
@@ -74,24 +44,20 @@ async function getProviderSnapshot(supabase, providerId) {
   if (jobsResult.error) throw jobsResult.error;
   if (tasks.error) throw tasks.error;
   if (evidence.error) throw evidence.error;
-
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
   return { assignments: safeAssignments, tasks: tasks.data || [], evidence: evidence.data || [] };
 }
-
 async function getCustomerSnapshot(supabase, identity, role) {
   const isOrgScoped = ['property_manager', 'procurement'].includes(role);
   const scopeId = isOrgScoped ? identity.organization_id : identity.entity_id;
   if (!scopeId) return { requests: [], jobs: [], invoices: [], changes: [] };
-
   let requestQuery = supabase.from('service_requests').select('*');
   requestQuery = isOrgScoped ? requestQuery.eq('organization_id', scopeId) : requestQuery.eq('lead_id', scopeId);
   const { data: requests, error: requestError } = await requestQuery.order('created_at', { ascending: false }).limit(100);
   if (requestError) throw requestError;
   const requestIds = (requests || []).map(row => row.id);
   if (!requestIds.length) return { requests: requests || [], jobs: [], invoices: [], changes: [] };
-
   const { data: jobs, error: jobsError } = await supabase.from('dd_jobs').select('*').in('service_request_id', requestIds).order('created_at', { ascending: false });
   if (jobsError) throw jobsError;
   const jobIds = (jobs || []).map(row => row.id);
@@ -103,7 +69,6 @@ async function getCustomerSnapshot(supabase, identity, role) {
   if (changes.error) throw changes.error;
   return { requests: requests || [], jobs: jobs || [], invoices: invoices.data || [], changes: changes.data || [] };
 }
-
 async function createDispatchOffer(supabase, actorId, payload) {
   const { jobId, providerId, adminNotes, providerNotes } = payload;
   if (!jobId || !providerId) throw new Error('JOB_AND_PROVIDER_REQUIRED');
@@ -124,18 +89,25 @@ export default async function handler(req, res) {
     const context = await authenticatePortalRequest(req);
     if (context.error) return fail(res, context.error, context.status);
     if (req.method === 'GET') {
-      if (context.isStaff) return ok(res, { role: context.role, ...await getStaffSnapshot(context.supabase) });
-      if (context.role === 'provider') return ok(res, { role: context.role, ...await getProviderSnapshot(context.supabase, context.identity.entity_id) });
-      return ok(res, { role: context.role, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
+      if (!context.isStaff) {
+        if (context.role === 'provider') return ok(res, { role: context.role, ...await getProviderSnapshot(context.supabase, context.identity.entity_id) });
+        return ok(res, { role: context.role, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
+      }
+      if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
+      return ok(res, { role: context.role, ...await getStaffSnapshot(context.supabase) });
     }
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
     const { action, ...payload } = req.body || {};
+
+    if (action === 'create_estimate') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      return ok(res, await createEstimate(context.supabase, payload));
+    }
 
     if (action === 'dispatch_offer') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) });
     }
-
     if (action === 'schedule_appointment') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { jobId, providerId, startsAt, endsAt, customerNotes, internalNotes } = payload;
@@ -148,7 +120,6 @@ export default async function handler(req, res) {
       await context.supabase.from('dd_jobs').update({ job_status: 'SCHEDULED', scheduled_start: startsAt, scheduled_end: endsAt, assigned_to: providerId }).eq('id', jobId);
       return ok(res, { appointment });
     }
-
     if (action === 'assignment_response') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const providerId = context.isStaff ? payload.providerId : context.identity.entity_id;
@@ -164,7 +135,6 @@ export default async function handler(req, res) {
       await context.supabase.from('dd_jobs').update({ job_status: decision === 'ACCEPT' ? 'SCHEDULED' : 'DISPATCH_REVIEW', assigned_to: decision === 'ACCEPT' ? providerId : null }).eq('id', assignment.job_id);
       return ok(res, { assignmentStatus: next.assignment_status });
     }
-
     if (action === 'task_update') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { taskId, status, note, evidenceRef } = payload;
@@ -182,7 +152,6 @@ export default async function handler(req, res) {
       const { error } = await context.supabase.from('dd_job_tasks').update(update).eq('id', taskId); if (error) throw error;
       return ok(res, { taskStatus: status });
     }
-
     if (action === 'change_order_decision') {
       const guard = requireRole(context, ['customer', 'resident', 'property_manager', 'procurement']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { changeOrderId, decision, reason } = payload;
@@ -200,7 +169,6 @@ export default async function handler(req, res) {
       const { error } = await context.supabase.from('dd_change_orders').update(update).eq('id', changeOrderId).eq('status', 'PENDING_APPROVAL'); if (error) throw error;
       return ok(res, { changeOrderStatus: decision });
     }
-
     if (action === 'completion_review') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { jobId, decision, notes } = payload;
@@ -209,7 +177,6 @@ export default async function handler(req, res) {
       if (decision === 'APPROVED') await context.supabase.from('dd_jobs').update({ job_status: 'COMPLETED' }).eq('id', jobId);
       return ok(res, { reviewStatus: decision });
     }
-
     if (action === 'evidence_verify') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { evidenceId, decision } = payload;
@@ -217,7 +184,6 @@ export default async function handler(req, res) {
       const { error } = await context.supabase.from('dd_job_evidence').update({ verification_status: decision, verified_by: context.user.id, verified_at: new Date().toISOString() }).eq('id', evidenceId); if (error) throw error;
       return ok(res, { evidenceStatus: decision });
     }
-
     if (action === 'create_evidence_upload') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { jobId, taskId, fileName, contentType, evidenceType = 'FIELD_PHOTO', fileMetadata = {} } = payload;
@@ -232,7 +198,6 @@ export default async function handler(req, res) {
       const { data, error } = await context.supabase.storage.from('dd-job-evidence').createSignedUploadUrl(path); if (error) throw error;
       return ok(res, { path, token: data.token, contentType: contentType || 'application/octet-stream', finalizePayload: { jobId, taskId: taskId || null, evidenceType, fileMetadata, storageUrl: path, providerId: actor } });
     }
-
     if (action === 'finalize_evidence') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { jobId, taskId, storageUrl, evidenceType = 'FIELD_PHOTO', fileMetadata = {} } = payload;
@@ -247,7 +212,6 @@ export default async function handler(req, res) {
       if (error) throw error;
       return ok(res, { evidence });
     }
-
     return fail(res, `Unknown portal action: ${action}`);
   } catch (error) {
     console.error('Portal operations error:', error);

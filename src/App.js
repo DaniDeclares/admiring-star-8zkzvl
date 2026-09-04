@@ -26,6 +26,7 @@ import ResidentWelcomePage from "./pages/ResidentWelcomePage.jsx";
 import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx";
 import OperationsConsolePage from "./pages/portal/OperationsConsolePage.jsx";
 import PortalWorkspacePage from "./pages/portal/PortalWorkspacePage.jsx";
+import QuoteBuilderPage from "./pages/portal/QuoteBuilderPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import PrivacyPage from "./pages/PrivacyPage";
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="/resident-dispatch" element={<Navigate to="/request-service" replace />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
+        <Route path="/portal/quotes" element={<QuoteBuilderPage />} />
         <Route path="/portal/provider" element={<PortalWorkspacePage />} />
         <Route path="/portal/resident" element={<PortalWorkspacePage />} />
         <Route path="/portal/customer" element={<PortalWorkspacePage />} />
