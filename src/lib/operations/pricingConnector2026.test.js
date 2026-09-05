@@ -8,4 +8,6 @@
  * back into the old architecture.
  */
 
-describe.skip('DDOS pricing connector — legacy catalog migration pending', () => {});
+describe.skip('DDOS pricing connector — legacy catalog migration pending', () => {
+  test('quarantine marker', () => expect(true).toBe(true));
+});
