@@ -1,17 +1,13 @@
 import Stripe from 'stripe';
-import { authenticatePortalRequest, requireRole } from '../_portalAuth.js';
+import { authenticatePortalRequest } from '../_portalAuth.js';
 
 const WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS = 5;
 const rateBuckets = new Map();
+const FINANCIAL_ROLES = new Set(['admin', 'owner', 'staff_admin']);
 
 function requestId(req) {
   return req.headers['x-request-id'] || (globalThis.crypto?.randomUUID?.() || `bal-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
-}
-
-function getClientIp(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  return (Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(',')[0])?.trim() || req.socket?.remoteAddress || 'unknown';
 }
 
 function consumeRateLimit(key) {
@@ -40,7 +36,9 @@ function hasMfaSession(req) {
   if (!token) return false;
 
   try {
-    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
     const aal = payload.aal;
     const amr = Array.isArray(payload.amr) ? payload.amr : [];
     return aal === 'aal2' || amr.some((method) => {
@@ -76,10 +74,9 @@ export default async function handler(req, res) {
     return res.status(context.status || 401).json({ error: context.error });
   }
 
-  const roleError = requireRole(context, ['admin', 'owner', 'staff_admin']);
-  if (roleError) {
+  if (!FINANCIAL_ROLES.has(context.role)) {
     console.warn(JSON.stringify({ event: 'stripe_balance_access', requestId: id, outcome: 'forbidden', userId: context.user.id, role: context.role }));
-    return res.status(roleError.status).json({ error: roleError.error });
+    return res.status(403).json({ error: 'This financial reporting action is not authorized for the current account.' });
   }
 
   if (!hasMfaSession(req)) {
