@@ -7,14 +7,13 @@ const OWNER_EMAIL = 'vendors@danideclares.com';
 
 export default function PortalLoginPage(){
  const [email,setEmail]=useState(''); const [password,setPassword]=useState(''); const [error,setError]=useState(''); const [busy,setBusy]=useState(false); const navigate=useNavigate();
- const routeAuthenticatedUser = async (session) => {
-   if (!session?.user) return false;
-   const normalized = (session.user.email || '').trim().toLowerCase();
-   if (normalized === OWNER_EMAIL) { navigate('/portal/change-password', {replace:true}); return true; }
-   navigate('/portal', {replace:true}); return true;
- };
  useEffect(()=>{
    let mounted = true;
+   const routeAuthenticatedUser = async (session) => {
+     if (!session?.user) return;
+     const normalized = (session.user.email || '').trim().toLowerCase();
+     navigate(normalized === OWNER_EMAIL ? '/portal/change-password' : '/portal', {replace:true});
+   };
    const finishAuth = async () => {
      try {
        const params = new URLSearchParams(window.location.search);
