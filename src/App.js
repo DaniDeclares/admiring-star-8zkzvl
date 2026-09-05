@@ -27,6 +27,7 @@ import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx"
 import OperationsConsolePage from "./pages/portal/OperationsConsolePage.jsx";
 import PortalWorkspacePage from "./pages/portal/PortalWorkspacePage.jsx";
 import QuoteBuilderPage from "./pages/portal/QuoteBuilderPage.jsx";
+import ContractAcquisitionPage from "./pages/portal/ContractAcquisitionPage.jsx";
 import PortalAccessPage from "./pages/PortalAccessPage.jsx";
 import PortalLoginPage from "./pages/PortalLoginPage.jsx";
 import ChangePasswordPage from "./pages/portal/ChangePasswordPage.jsx";
@@ -68,6 +69,7 @@ export default function App() {
         <Route path="/portal/vendor-onboarding" element={<VendorOnboardingUploadPage />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
+        <Route path="/portal/acquisition" element={<ContractAcquisitionPage />} />
         <Route path="/portal/quotes" element={<QuoteBuilderPage />} />
         <Route path="/portal/provider" element={<PortalWorkspacePage />} />
         <Route path="/portal/resident" element={<PortalWorkspacePage />} />
