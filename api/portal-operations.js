@@ -5,9 +5,6 @@ const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
 function fail(res, error, status = 400) { return res.status(status).json({ success: false, error }); }
 
-// Provider-facing jobs are deliberately whitelisted. Do not expose customer billing,
-// provider economics, internal notes, pricing context, lead IDs, organization IDs,
-// estimate IDs, or other internal commercial data to provider clients.
 function sanitizeProviderJob(job) {
   if (!job) return null;
   return { id: job.id, public_reference: job.public_reference, division_slug: job.division_slug, job_title: job.job_title, job_status: job.job_status, scheduled_start: job.scheduled_start, scheduled_end: job.scheduled_end, location_address: job.location_address, assigned_to: job.assigned_to, scope_summary: job.scope_summary, created_at: job.created_at, updated_at: job.updated_at };
@@ -31,22 +28,26 @@ async function getStaffSnapshot(supabase) {
   return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: evidence.data || [], payments: payments.data || [] };
 }
 async function getProviderSnapshot(supabase, providerId) {
-  if (!providerId) return { assignments: [], tasks: [], evidence: [] };
+  if (!providerId) return { assignments: [], tasks: [], evidence: [], appointments: [], payouts: [] };
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
   const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
-  if (!jobIds.length) return { assignments: [], tasks: [], evidence: [] };
-  const [jobsResult, tasks, evidence] = await Promise.all([
+  if (!jobIds.length) return { assignments: [], tasks: [], evidence: [], appointments: [], payouts: [] };
+  const [jobsResult, tasks, evidence, appointments, payouts] = await Promise.all([
     supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
-    supabase.from('dd_job_evidence').select('*').in('job_id', jobIds).order('created_at', { ascending: false }),
+    supabase.from('dd_job_evidence').select('id, job_id, task_id, provider_id, evidence_type, storage_url, file_metadata, verification_status, verified_at, created_at').in('job_id', jobIds).order('created_at', { ascending: false }),
+    supabase.from('dd_job_appointments').select('id, job_id, provider_id, starts_at, ends_at, timezone, appointment_status, customer_notes, created_at, updated_at').eq('provider_id', providerId).order('starts_at', { ascending: true }).limit(50),
+    supabase.from('dd_provider_payouts').select('id, provider_id, provider_org_id, payable_id, amount, currency, payout_method, payout_status, processor, processor_reference, initiated_at, completed_at, failure_reason, created_at').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(100),
   ]);
   if (jobsResult.error) throw jobsResult.error;
   if (tasks.error) throw tasks.error;
   if (evidence.error) throw evidence.error;
+  if (appointments.error) throw appointments.error;
+  if (payouts.error) throw payouts.error;
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
-  return { assignments: safeAssignments, tasks: tasks.data || [], evidence: evidence.data || [] };
+  return { assignments: safeAssignments, tasks: tasks.data || [], evidence: evidence.data || [], appointments: appointments.data || [], payouts: payouts.data || [] };
 }
 async function getCustomerSnapshot(supabase, identity, role) {
   const isOrgScoped = ['property_manager', 'procurement'].includes(role);
@@ -98,16 +99,8 @@ export default async function handler(req, res) {
     }
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
     const { action, ...payload } = req.body || {};
-
-    if (action === 'create_estimate') {
-      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      return ok(res, await createEstimate(context.supabase, payload));
-    }
-
-    if (action === 'dispatch_offer') {
-      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) });
-    }
+    if (action === 'create_estimate') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, await createEstimate(context.supabase, payload)); }
+    if (action === 'dispatch_offer') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) }); }
     if (action === 'schedule_appointment') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { jobId, providerId, startsAt, endsAt, customerNotes, internalNotes } = payload;
@@ -169,52 +162,25 @@ export default async function handler(req, res) {
       const { error } = await context.supabase.from('dd_change_orders').update(update).eq('id', changeOrderId).eq('status', 'PENDING_APPROVAL'); if (error) throw error;
       return ok(res, { changeOrderStatus: decision });
     }
-    if (action === 'completion_review') {
-      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      const { jobId, decision, notes } = payload;
-      if (!jobId || !['APPROVED', 'REJECTED'].includes(decision)) return fail(res, 'jobId and APPROVED/REJECTED are required.');
-      const { error } = await context.supabase.from('dd_completion_reviews').insert({ job_id: jobId, reviewer_id: context.user.id, review_type: 'SUPERVISOR', status: decision, notes: notes || null, reviewed_at: new Date().toISOString() }); if (error) throw error;
-      if (decision === 'APPROVED') await context.supabase.from('dd_jobs').update({ job_status: 'COMPLETED' }).eq('id', jobId);
-      return ok(res, { reviewStatus: decision });
-    }
-    if (action === 'evidence_verify') {
-      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      const { evidenceId, decision } = payload;
-      if (!evidenceId || !['VERIFIED', 'REJECTED'].includes(decision)) return fail(res, 'evidenceId and VERIFIED/REJECTED are required.');
-      const { error } = await context.supabase.from('dd_job_evidence').update({ verification_status: decision, verified_by: context.user.id, verified_at: new Date().toISOString() }).eq('id', evidenceId); if (error) throw error;
-      return ok(res, { evidenceStatus: decision });
-    }
+    if (action === 'completion_review') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); const { jobId, decision, notes } = payload; if (!jobId || !['APPROVED', 'REJECTED'].includes(decision)) return fail(res, 'jobId and APPROVED/REJECTED are required.'); const { error } = await context.supabase.from('dd_completion_reviews').insert({ job_id: jobId, reviewer_id: context.user.id, review_type: 'SUPERVISOR', status: decision, notes: notes || null, reviewed_at: new Date().toISOString() }); if (error) throw error; if (decision === 'APPROVED') await context.supabase.from('dd_jobs').update({ job_status: 'COMPLETED' }).eq('id', jobId); return ok(res, { reviewStatus: decision }); }
+    if (action === 'evidence_verify') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); const { evidenceId, decision } = payload; if (!evidenceId || !['VERIFIED', 'REJECTED'].includes(decision)) return fail(res, 'evidenceId and VERIFIED/REJECTED are required.'); const { error } = await context.supabase.from('dd_job_evidence').update({ verification_status: decision, verified_by: context.user.id, verified_at: new Date().toISOString() }).eq('id', evidenceId); if (error) throw error; return ok(res, { evidenceStatus: decision }); }
     if (action === 'create_evidence_upload') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { jobId, taskId, fileName, contentType, evidenceType = 'FIELD_PHOTO', fileMetadata = {} } = payload;
       if (!jobId || !fileName) return fail(res, 'jobId and fileName are required.');
-      if (!context.isStaff) {
-        const { data: job } = await context.supabase.from('dd_jobs').select('assigned_to').eq('id', jobId).single();
-        if (!job || String(job.assigned_to || '') !== String(context.identity.entity_id)) return fail(res, 'Job is not assigned to this provider.', 403);
-      }
-      const safeName = String(fileName).replace(/[^a-zA-Z0-9._-]/g, '_');
-      const actor = context.isStaff ? context.user.id : context.identity.entity_id;
-      const path = `${jobId}/${actor}/${Date.now()}-${safeName}`;
+      if (!context.isStaff) { const { data: job } = await context.supabase.from('dd_jobs').select('assigned_to').eq('id', jobId).single(); if (!job || String(job.assigned_to || '') !== String(context.identity.entity_id)) return fail(res, 'Job is not assigned to this provider.', 403); }
+      const safeName = String(fileName).replace(/[^a-zA-Z0-9._-]/g, '_'); const actor = context.isStaff ? context.user.id : context.identity.entity_id; const path = `${jobId}/${actor}/${Date.now()}-${safeName}`;
       const { data, error } = await context.supabase.storage.from('dd-job-evidence').createSignedUploadUrl(path); if (error) throw error;
       return ok(res, { path, token: data.token, contentType: contentType || 'application/octet-stream', finalizePayload: { jobId, taskId: taskId || null, evidenceType, fileMetadata, storageUrl: path, providerId: actor } });
     }
     if (action === 'finalize_evidence') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      const { jobId, taskId, storageUrl, evidenceType = 'FIELD_PHOTO', fileMetadata = {} } = payload;
-      if (!jobId || !storageUrl) return fail(res, 'jobId and storageUrl are required.');
-      const providerId = context.isStaff ? payload.providerId : context.identity.entity_id;
-      if (!providerId) return fail(res, 'Provider identity is required.');
-      if (!context.isStaff) {
-        const { data: job } = await context.supabase.from('dd_jobs').select('assigned_to').eq('id', jobId).single();
-        if (!job || String(job.assigned_to || '') !== String(providerId)) return fail(res, 'Job is not assigned to this provider.', 403);
-      }
-      const { data: evidence, error } = await context.supabase.from('dd_job_evidence').insert({ job_id: jobId, task_id: taskId || null, provider_id: providerId, evidence_type: evidenceType, storage_url: storageUrl, file_metadata: fileMetadata }).select().single();
-      if (error) throw error;
+      const { jobId, taskId, storageUrl, evidenceType = 'FIELD_PHOTO', fileMetadata = {} } = payload; if (!jobId || !storageUrl) return fail(res, 'jobId and storageUrl are required.');
+      const providerId = context.isStaff ? payload.providerId : context.identity.entity_id; if (!providerId) return fail(res, 'Provider identity is required.');
+      if (!context.isStaff) { const { data: job } = await context.supabase.from('dd_jobs').select('assigned_to').eq('id', jobId).single(); if (!job || String(job.assigned_to || '') !== String(providerId)) return fail(res, 'Job is not assigned to this provider.', 403); }
+      const { data: evidence, error } = await context.supabase.from('dd_job_evidence').insert({ job_id: jobId, task_id: taskId || null, provider_id: providerId, evidence_type: evidenceType, storage_url: storageUrl, file_metadata: fileMetadata }).select().single(); if (error) throw error;
       return ok(res, { evidence });
     }
     return fail(res, `Unknown portal action: ${action}`);
-  } catch (error) {
-    console.error('Portal operations error:', error);
-    return fail(res, 'Operational request failed.', 500);
-  }
+  } catch (error) { console.error('Portal operations error:', error); return fail(res, 'Operational request failed.', 500); }
 }
