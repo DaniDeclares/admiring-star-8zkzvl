@@ -62,7 +62,7 @@ export const MASTER_ECOSYSTEM_V5 = {
       internalCode: "GOVERNMENT (B2G)",
       publicLabel: "Government & Contracting Partners",
       target: "Federal, State, Municipal Agencies & Prime Contractors",
-      desc: "SAM.gov active subcontractor (UEI: TD4TSG48LHN9 | CAGE: 17VV2 | NAICS: 561410). Administrative logistics, document prep, facility cleaning, custom print, and public event execution.",
+      desc: "Active SAM.gov registration (UEI: TD4TSG48LHN9). Government positioning is centered on janitorial and facilities-support procurement; CAGE and federal classification details are pending authoritative SAM-record reconciliation.",
       cta: "REQUEST A CAPABILITY STATEMENT",
       route: "/industries/government"
     }
@@ -70,13 +70,13 @@ export const MASTER_ECOSYSTEM_V5 = {
 
   verifiedGovernmentCredentials: {
     stateRegistration: "Georgia SOS Control No. #25079444",
-    samStatus: "Active Subcontractor / Vendor Readiness",
+    samStatus: "Active registration verified in SAM.gov workspace",
     uei: "TD4TSG48LHN9",
-    cageCode: "17VV2",
-    primaryNaics: "561410 (Document Preparation & Administrative Services)",
-    secondaryNaics: ["541611", "561110", "541990"],
-    insurance: "Fully Insured (M+ General Liability Coverage)",
-    w9Status: "W-9 Verified & Ready",
+    cageCode: "Pending authoritative SAM record verification",
+    primaryNaics: "Pending authoritative SAM record reconciliation",
+    secondaryNaics: [],
+    insurance: "Not represented here until current coverage evidence is verified",
+    w9Status: "Not represented here until current W-9 evidence is verified",
     capabilityDocumentUrl: "/assets/capability-statement.txt"
   },
 
