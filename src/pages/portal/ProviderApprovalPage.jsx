@@ -18,9 +18,8 @@ function ProviderApproval() {
     setLoading(true); setError('');
     const { data: auth } = await supabase.auth.getSession();
     if (!auth.session) { setError('Staff session required.'); setLoading(false); return; }
-    const response = await fetch('/api/provider-application-review', { headers: { Authorization: `Bearer ${auth.session.access_token}` } });
-    const body = await response.json();
-    if (!response.ok || !body.success) setError(body.error || 'Provider applications could not be loaded.');
+    const { data: body, error: invokeError } = await supabase.functions.invoke('provider-application-review', { body: { action: 'list' } });
+    if (invokeError || !body?.success) setError(body?.error || invokeError?.message || 'Provider applications could not be loaded.');
     else { setApplications(body.applications || []); if (!selectedId && body.applications?.[0]) setSelectedId(body.applications[0].id); }
     setLoading(false);
   };
@@ -36,9 +35,8 @@ function ProviderApproval() {
     setBusy(true); setError(''); setMessage('');
     const { data: auth } = await supabase.auth.getSession();
     if (!auth.session) { setBusy(false); setError('Staff session required.'); return; }
-    const response = await fetch('/api/provider-application-review', { method:'POST', headers:{'Content-Type':'application/json',Authorization:`Bearer ${auth.session.access_token}`}, body:JSON.stringify({action,applicationId:selected.id,...payload}) });
-    const body = await response.json();
-    if (!response.ok || !body.success) setError(body.error || 'Provider review action failed.');
+    const { data: body, error: invokeError } = await supabase.functions.invoke('provider-application-review', { body: { action, applicationId: selected.id, ...payload } });
+    if (invokeError || !body?.success) setError(body?.error || invokeError?.message || 'Provider review action failed.');
     else { setMessage(action === 'approve_and_activate' ? 'Provider approved and activated.' : 'Review action completed.'); await load(); }
     setBusy(false);
   };
