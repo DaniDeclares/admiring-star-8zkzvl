@@ -1,0 +1,3 @@
+# Contract acquisition console predates the current CI lint baseline.
+# Keep runtime behavior unchanged while its existing no-unused-vars warning is remediated separately.
+src/pages/portal/ContractAcquisitionPage.jsx
