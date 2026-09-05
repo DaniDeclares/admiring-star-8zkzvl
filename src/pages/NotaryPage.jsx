@@ -18,16 +18,16 @@ export default function NotaryPage() {
       </Helmet>
 
       <header className="notary-hero hero">
-        <h1>Trusted Mobile Notary & Signing Services</h1>
+        <h1>Mobile Notary & Signing Services</h1>
         <p>
           {siteConfig.serviceAreaText}
           <br />
-          <strong>Same-day, evening & weekend appointments available.</strong>
+          <strong>Appointments may be available same-day, evenings, and weekends based on scheduling and service area.</strong>
         </p>
         <p>
-          <span className="feature">NNA Certified</span> |{" "}
-          <span className="feature">Insured</span> |{" "}
-          <span className="feature">We Come to You</span>
+          <span className="feature">Mobile Service</span> |{" "}
+          <span className="feature">Transparent Fees</span> |{" "}
+          <span className="feature">Appointment-Based</span>
         </p>
       </header>
 
@@ -47,7 +47,7 @@ export default function NotaryPage() {
 
       <section className="dashboard-cta">
         <h3>Notary Partners</h3>
-        <p>Join our network to earn through the Dani Declares platform.</p>
+        <p>Join our network to apply for consideration for eligible DANI DECLARES work.</p>
         <a
           href="/partner-onboarding"
           className="btn btn--primary"
