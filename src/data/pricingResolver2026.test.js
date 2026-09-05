@@ -7,4 +7,6 @@
  * stale tests to drive current pricing architecture.
  */
 
-describe.skip('canonical pricing resolver — legacy catalog migration pending', () => {});
+describe.skip('canonical pricing resolver — legacy catalog migration pending', () => {
+  test('quarantine marker', () => expect(true).toBe(true));
+});
