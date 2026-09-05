@@ -1,6 +1,24 @@
-# ENV + Integrations Inventory Report
+# ENV + Integrations Inventory Report — DEPRECATED
 
-This file inventories environment variables referenced in the repository, where they are used, and whether they should remain configured in Vercel.
+**Status: DEPRECATED as of September 5, 2026**
+
+This document contains **factually incorrect recommendations** and has been superseded by the authoritative audit in `docs/ENVIRONMENT_VARIABLE_INVENTORY_2026-09-05.md`.
+
+---
+
+## CRITICAL CORRECTIONS
+
+### ⚠️ DO NOT FOLLOW STRIPE RECOMMENDATIONS IN THIS DOCUMENT
+
+**This document incorrectly recommends deleting:**
+- `STRIPE_SECRET_KEY` — **Actually used in:** webhook handler, balance API, scripts
+- `STRIPE_WEBHOOK_SECRET` — **Actually used in:** webhook signature verification
+
+**Action:** Ignore lines 28-29 recommending deletion. Keep both Stripe variables configured.
+
+---
+
+## Legacy Table (For Reference Only)
 
 | Variable | Used? | Where used (file:line) | Client/Server | Keep/Delete | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -25,5 +43,13 @@ This file inventories environment variables referenced in the repository, where 
 | REACT_APP_STRIPE_OFFICIANT_DEPOSIT | Yes | src/config/stripeLinks.js:10 | Client | Keep | Stripe deposit link for officiant service. |
 | REACT_APP_STRIPE_POA | Yes | src/config/stripeLinks.js:3 | Client | Keep | Stripe payment link for power of attorney service. |
 | REACT_APP_STRIPE_TRUST_DEPOSIT | Yes | src/config/stripeLinks.js:9 | Client | Keep | Stripe deposit link for trust services. |
-| STRIPE_SECRET_KEY | No | Not referenced in repo | Server | Delete | No code reference found. |
-| STRIPE_WEBHOOK_SECRET | No | Not referenced in repo | Server | Delete | No code reference found. |
+| STRIPE_SECRET_KEY | **Yes** | `api/stripe-webhook.js:8`, `api/stripe/fetch-balance.js:20`, `scripts/generateStripeProducts.js:4`, `scripts/auditStripeCanonicalCrosswalk.mjs:71`, `scripts/reconcile-stripe-links.py:58` | Server | **Keep** | **CORRECTION: Used in webhook, balance API, and scripts. Do NOT delete.** |
+| STRIPE_WEBHOOK_SECRET | **Yes** | `api/stripe-webhook.js:9` | Server | **Keep** | **CORRECTION: Used for webhook signature verification. Do NOT delete.** |
+
+---
+
+## Authoritative Source
+
+For current, verified environment variable information, see:
+
+`docs/ENVIRONMENT_VARIABLE_INVENTORY_2026-09-05.md`
