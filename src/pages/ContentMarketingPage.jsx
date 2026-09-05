@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export default function ContentMarketingPage() {
   const campaigns = [
     { title: "LinkedIn Business Carousel: 3 Turnover Bottlenecks", desc: "Targeting property managers with 2-hr HD photo log solutions and 24-48 hr SLAs." },
-    { title: "GovCon Subcontracting Feature", desc: "Promoting SAM.gov active status (UEI: TD4TSG48LHN9, CAGE: 17VV2) to prime contractors." },
+    { title: "GovCon Registration Feature", desc: "Promoting DANI DECLARES' active SAM.gov registration and UEI (TD4TSG48LHN9). CAGE, NAICS and other federal classification details remain subject to authoritative SAM-record reconciliation." },
     { title: "Short-Form Video Script: SmartTap™ NFC Cards", desc: "30-second demonstration showing one-tap Google review generation and digital business card sharing." },
     { title: "Legal & Notary Educational Snippet", desc: "Explainer graphics on remote I-9 verification, apostilles, and mobile loan signings for law firms." }
   ];
