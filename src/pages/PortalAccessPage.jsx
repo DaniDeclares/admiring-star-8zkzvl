@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import './PortalAccessPage.css';
 
@@ -11,18 +11,15 @@ const OPTIONS = [
   { key:'business', title:'Business', desc:'I need business, workplace, print or operational support.', portal:'Business Client Portal', relationship:'BUSINESS', channel:'CH04' },
   { key:'government', title:'Government / Institution', desc:'I represent a procurement or institutional organization.', portal:'Procurement Portal', relationship:'GOVERNMENT_INSTITUTION', channel:'CH05' },
   { key:'provider', title:'Provider / Contractor', desc:'I want to qualify to fulfill DANI DECLARES work.', portal:'Provider Application', relationship:'PROVIDER', channel:null },
-  { key:'remote_worker', title:'Remote Operations Applicant', desc:'I want to support DANI DECLARES remotely.', portal:'Remote Operations Application', relationship:'REMOTE_WORKER', channel:null },
 ];
 
 export default function PortalAccessPage() {
   const [mode,setMode]=useState('choose'); const [selected,setSelected]=useState(null); const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',address:'',city:'',state:'GA',zip:'',services:'',password:'',confirm:''}); const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [done,setDone]=useState('');
-  const navigate=useNavigate();
   const update=(e)=>setForm({...form,[e.target.name]:e.target.value});
   const choose=(option)=>{setSelected(option);setMode('form');setError('');};
   const submit=async(e)=>{e.preventDefault();setError('');setDone(''); if(form.password.length<8)return setError('Use a password with at least 8 characters.'); if(form.password!==form.confirm)return setError('Passwords do not match.'); setBusy(true);
     const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
-    if(authError){setBusy(false);return setError(authError.message);}
-    if(!data.user){setBusy(false);return setError('Account could not be created.');}
+    if(authError){setBusy(false);return setError(authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
     const portalRole=selected.key==='provider'?'provider':selected.key==='property_manager'?'property_manager':selected.key==='government'?'procurement':selected.key==='resident'||selected.key==='apartment_resident'?'resident':'customer';
     const {error:identityError}=await supabase.from('dd_portal_identities').insert({auth_user_id:data.user.id,portal_role:portalRole,is_active:true});
     if(identityError){setBusy(false);return setError(`Account created, but portal setup needs attention: ${identityError.message}`);}
