@@ -4,11 +4,12 @@ WE HANDLE THE EXECUTION.
 COMPANY OVERVIEW
 DANI DECLARES LLC provides execution-focused janitorial, facility-reset, field documentation, and operational support for public-sector and institutional procurement. Government engagements are handled through procurement-specific scopes, solicitations, task orders, quotations, teaming arrangements, and subcontracting structures.
 
-PRIMARY GOVERNMENT CLASSIFICATION
+PRIMARY GOVERNMENT CLASSIFICATION TARGET
 - NAICS 561720 — Janitorial Services
 - PSC S201 — Custodial/Janitorial
+- Federal registration status: Active SAM.gov registration verified in the owner's SAM.gov workspace
 
-STRATEGIC ADJACENT CLASSIFICATION
+STRATEGIC ADJACENT CLASSIFICATION TARGET
 - NAICS 561210 — Facilities Support Services
 
 CORE PUBLIC-SECTOR CAPABILITIES
@@ -17,7 +18,7 @@ CORE PUBLIC-SECTOR CAPABILITIES
 3. FACILITIES SUPPORT: Scope-dependent work-order coordination, scheduling, site support, completion verification, and facility documentation.
 4. FIELD DOCUMENTATION: Photographic documentation, checklists, condition reporting, and completion evidence when required by the contract scope.
 5. ADMINISTRATIVE SUPPORT: Defined records, scheduling, task tracking, contract documentation, and closeout support when included in an eligible procurement scope.
-6. SECONDARY / OPPORTUNITY-SPECIFIC: Supplies and materials, printing/signage, courier/delivery, and event/community support.
+6. SECONDARY / OPPORTUNITY-SPECIFIC: Supplies and materials, printing/signage, courier/delivery, event/community support, and notary services when specifically procured and currently authorized.
 
 GOVERNMENT CONTRACTING PATH
 DANI DECLARES is building government capacity progressively through local and institutional opportunities, subcontracting and teaming, documented performance, state and federal opportunities, and larger multi-location facility requirements as operational capacity and past performance develop.
@@ -28,13 +29,13 @@ Procurement examples reviewed by DANI DECLARES include approximately $708K, $1.8
 CERTIFICATION / ELIGIBILITY DISCLOSURE
 DANI DECLARES must not be represented as WOSB or EDWOSB certified unless and until SBA certification is approved and reflected in the applicable SBA systems. A certification application, target socioeconomic status, and approved certification are separate statuses.
 
-A listed NAICS or PSC does not by itself establish eligibility, certification, licensing, past performance, staffing capacity, or award history. Government classifications and eligibility are validated against applicable registration and solicitation requirements.
+A strategic target NAICS or PSC does not by itself establish current SAM registration, eligibility, certification, licensing, past performance, staffing capacity, or award history. CAGE and current federal classification details remain pending authoritative SAM-record reconciliation.
 
 CORPORATE IDENTIFIERS
 - Legal Name: DANI DECLARES LLC
 - Georgia SOS Control No.: #25079444
 - UEI: TD4TSG48LHN9
-- CAGE Code: 17VV2
+- CAGE Code: Pending authoritative SAM record verification
 - Government operating focus: Georgia
 - Vendor & Contracting Email: vendors@danideclares.com
 - General Admin Email: admin@danideclares.com

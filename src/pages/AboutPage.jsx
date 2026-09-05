@@ -36,9 +36,9 @@ export default function AboutPage() {
           </div>
           <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800">
             <ShieldCheck className="w-10 h-10 text-amber-400 mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">Verified Compliance</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Federal Registration</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
-              SAM.gov registered (UEI: TD4TSG48LHN9, CAGE: 17VV2) with strict SLA timelines and mandatory photo-logged verification.
+              DANI DECLARES maintains an active SAM.gov registration (UEI: TD4TSG48LHN9). CAGE and federal classification details are published only after authoritative SAM-record reconciliation.
             </p>
           </div>
         </div>

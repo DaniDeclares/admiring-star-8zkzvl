@@ -1,4 +1,3 @@
-CAGE CODE: 17VV2 | UEI: TD4TSG48LHN9
 DANI DECLARES LLC - GOVERNMENT CONTRACTING CAPABILITY STATEMENT
 
 Corporate Identification & Core Government Capabilities
@@ -6,8 +5,9 @@ Corporate Identification & Core Government Capabilities
 DANI DECLARES LLC provides execution-focused janitorial, facility-reset, and operational support services for commercial, institutional, municipal, and government environments. Government engagements are handled through procurement-specific scopes, solicitations, task orders, quotations, teaming arrangements, and subcontracting structures.
 
 PRIMARY GOVERNMENT CAPABILITY
-- NAICS 561720 — Janitorial Services
-- PSC S201 — Custodial/Janitorial
+- Strategic target: NAICS 561720 — Janitorial Services
+- Strategic target: PSC S201 — Custodial/Janitorial
+- Federal registration status: Active SAM.gov registration verified in the owner's SAM.gov workspace
 
 STRATEGIC ADJACENT CAPABILITY
 - NAICS 561210 — Facilities Support Services
@@ -26,6 +26,7 @@ ADDITIONAL OPPORTUNITY-SPECIFIC CAPABILITIES:
 - Printing and signage
 - Courier / delivery support
 - Event and community support
+- Notary services when specifically procured and currently authorized
 
 These are secondary or opportunity-specific capabilities and are not presented as the company's primary government classification.
 
@@ -38,12 +39,12 @@ Published procurement examples reviewed by DANI DECLARES include approximately $
 CERTIFICATION / ELIGIBILITY DISCLOSURE
 DANI DECLARES should not be represented as WOSB or EDWOSB certified unless and until SBA certification is approved and reflected in the applicable SBA systems. Certification applications, target socioeconomic status, and actual approved certifications are separate statuses.
 
-Government classifications and eligibility are validated against the applicable registration and solicitation requirements. A listed NAICS or PSC does not by itself establish eligibility, certification, licensing, past performance, staffing capacity, or award history.
+Government classifications and eligibility are validated against the applicable registration and solicitation requirements. Strategic target NAICS/PSC positioning is not evidence that those classifications are currently registered in SAM.gov. CAGE, current SAM NAICS, PSC, representations/certifications, insurance, and other federal registration details must be confirmed against authoritative current records before publication as verified credentials.
 
 COMPANY IDENTIFIERS
 - Legal Entity Name: DANI DECLARES LLC
 - UEI: TD4TSG48LHN9
-- CAGE Code: 17VV2
+- CAGE Code: Pending authoritative SAM record verification
 - Government operating focus: Georgia
 - Direct Contact: admin@danideclares.com
 - Website: https://danideclares.com
