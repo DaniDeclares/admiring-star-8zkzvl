@@ -41,10 +41,14 @@ SBA MySBA Certification application #109641 is a correction-required application
 
 ## System Separation
 
-- Airtable: government readiness, opportunity, classification, proposal, and performance control.
-- Supabase: canonical application/operational data; government records must respect production security boundaries.
-- GitHub: public-facing government content and application implementation.
-- Vercel: deployment/runtime layer.
+- **Airtable:** market research only. It stores source-backed market intelligence, competitor/pricing benchmarks, public-sector opportunity intelligence, procurement-pattern research, and capability-market translation. It is not the live operational, commercial, pricing-approval, provider, compliance, proposal, work-order, or performance system.
+- **Supabase:** canonical application/operational data; government records must respect production security boundaries.
+- **GitHub:** public-facing government content and application implementation.
+- **Vercel:** deployment/runtime layer.
+
+### Airtable Research Boundary
+
+Airtable research records must remain evidence-led. Every substantive market claim should identify its source and research date where practical. Primary-source review is distinguished from third-party market intelligence. AI-generated research drafts are not authoritative evidence and must never be treated as eligibility, staffing, insurance, competitor, past-performance, or bid instructions without source verification.
 
 ## Contract Families
 
@@ -60,4 +64,4 @@ SBA MySBA Certification application #109641 is a correction-required application
 
 ## Evidence Principle
 
-The government side is evidence-driven: capability, classification, eligibility, certification, insurance, licensing, past performance, and contract claims are separate controlled facts.
+The government side is evidence-driven: capability, classification, eligibility, certification, insurance, licensing, past performance, and contract claims are separate controlled facts. Airtable is the market-research layer for discovering and studying those facts; authoritative government systems and operational systems remain the authority for status and execution.
