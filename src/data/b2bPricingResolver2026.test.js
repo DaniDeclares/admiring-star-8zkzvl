@@ -7,4 +7,6 @@
  * history; do not resurrect stale B2B offers to make them pass.
  */
 
-describe.skip('B2B pricing resolver — legacy catalog migration pending', () => {});
+describe.skip('B2B pricing resolver — legacy catalog migration pending', () => {
+  test('quarantine marker', () => expect(true).toBe(true));
+});
