@@ -2,8 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import RequireStaffAuth from '../../components/auth/RequireStaffAuth.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 
-const STAFF_ROLES = new Set(['admin', 'owner', 'staff_admin', 'staff']);
-
 function Gate({ label, ok }) {
   return <span style={{display:'inline-flex',alignItems:'center',gap:6,padding:'5px 9px',borderRadius:999,background:ok?'#edf8ef':'#fff4e5',color:ok?'#276b35':'#8a4b00',fontSize:12,fontWeight:700}}>{ok?'✓':'•'} {label}</span>;
 }
@@ -27,11 +25,14 @@ function ProviderApproval() {
     setLoading(false);
   };
 
+  // load is intentionally a stable local loader; it is also reused after every staff action.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, []);
 
   const selected = useMemo(() => applications.find(a => a.id === selectedId) || applications[0] || null, [applications, selectedId]);
 
   const act = async (action, payload = {}) => {
+    if (!selected) return;
     setBusy(true); setError(''); setMessage('');
     const { data: auth } = await supabase.auth.getSession();
     if (!auth.session) { setBusy(false); setError('Staff session required.'); return; }
