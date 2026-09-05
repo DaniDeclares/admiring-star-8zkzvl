@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient.js';
 import './PortalWorkspacePage.css';
 
-const ROLE_LABELS = { provider: 'Provider Field Portal', resident: 'Resident Portal', customer: 'Customer Portal', property_manager: 'Property Manager Portal', procurement: 'Procurement Portal' };
+const ROLE_LABELS = { provider: 'Provider Field Portal', resident: 'Resident Portal', customer: 'Customer Portal', property_manager: 'Property Manager Portal', procurement: 'Procurement Portal', staff_admin: 'DANI DECLARES Owner Operations' };
 function Card({ title, children }) { return <section className="portal-card"><h2>{title}</h2>{children}</section>; }
 function Empty({ children = 'Nothing is waiting here.' }) { return <p className="portal-empty">{children}</p>; }
 
@@ -27,9 +27,11 @@ export default function PortalWorkspacePage() {
     const finalize = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action: 'finalize_evidence', ...body.finalizePayload }) }); const finalizeBody = await finalize.json();
     if (!finalize.ok || !finalizeBody.success) return setError(finalizeBody.error || 'Evidence record could not be finalized.'); setMessage('Evidence uploaded and attached to the task.'); await load();
   };
-  if (loading) return <main className="portal-shell"><p>Loading your Dani Declares workspace…</p></main>;
+  if (loading) return <main className="portal-shell"><p>Loading your DANI DECLARES workspace…</p></main>;
   if (error && !snapshot) return <main className="portal-shell"><div className="portal-alert">{error}</div></main>;
-  const role = snapshot?.role || 'customer'; const isProvider = role === 'provider'; const isCommercial = ['property_manager', 'procurement'].includes(role);
+  const role = snapshot?.role || 'customer';
+  if (role === 'staff_admin') return <main className="portal-shell"><header className="portal-hero"><div><p className="portal-eyebrow">DANI DECLARES</p><h1>Owner Operations</h1><p>Your authenticated control point for sales, quoting, fulfillment, dispatch, QA, customers, providers and business operations.</p></div><button className="portal-refresh" onClick={load}>Refresh</button></header><Card title="Operations Console"><p>Open the full operating console to manage work orders, quotes and fulfillment.</p><a className="portal-primary" href="/portal/operations">Open Operations Console</a></Card><Card title="Quote Desk"><p>Create and manage governed quotes without changing catalog authority.</p><a className="portal-primary" href="/portal/quotes">Open Quote Builder</a></Card><Card title="Business Control Principle"><p>This workspace is the daily operating layer. Customer and provider portals feed work into it; approved commercial and pricing systems remain authoritative upstream.</p></Card></main>;
+  const isProvider = role === 'provider'; const isCommercial = ['property_manager', 'procurement'].includes(role);
   return <main className="portal-shell">
     <header className="portal-hero"><div><p className="portal-eyebrow">DANI DECLARES</p><h1>{ROLE_LABELS[role] || 'Client Portal'}</h1><p>Requests, jobs, scheduling, field execution, approvals and documents — connected to the same operating system.</p></div><button className="portal-refresh" onClick={load}>Refresh</button></header>
     {error && <div className="portal-alert">{error}</div>}{message && <div className="portal-success">{message}</div>}
