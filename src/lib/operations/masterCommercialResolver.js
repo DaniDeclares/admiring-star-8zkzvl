@@ -1,9 +1,11 @@
 import { getCommercialRecord, isCanonicalActive } from '../../config/commercialRegistry';
 
 const roundMoney = (value) => Number(Number(value).toFixed(2));
+const RESIDENT_SUBCHANNELS = Object.freeze(['CH01-A', 'CH01-B']);
 
 export function resolveB2CCustomerPrice({
   baseServiceId,
+  residentSubchannel = 'CH01-A',
   isVerifiedResident = false,
   hasHeavySoilTier2 = false,
 }) {
@@ -12,7 +14,21 @@ export function resolveB2CCustomerPrice({
     throw new Error('Commercial Block: Unauthorized or malformed B2C service token.');
   }
 
-  let calculatedPrice = record.baseCustomerPrice;
+  if (!RESIDENT_SUBCHANNELS.includes(residentSubchannel)) {
+    throw new Error('Commercial Block: A valid CH01 resident subchannel is required.');
+  }
+
+  let calculatedPrice;
+  if (residentSubchannel === 'CH01-B') {
+    const apartmentPrice = record.apartmentResidentPrice;
+    if (!Number.isFinite(apartmentPrice)) {
+      throw new Error('Commercial Block: CH01-B apartment resident price is not governed for this service.');
+    }
+    calculatedPrice = apartmentPrice;
+  } else {
+    calculatedPrice = record.baseCustomerPrice;
+    if (isVerifiedResident && record.residentDiscountEligible) calculatedPrice *= 0.85;
+  }
 
   if (hasHeavySoilTier2) {
     if (!record.allowedModifiers.includes('SVR-SOIL-T2')) {
@@ -21,7 +37,6 @@ export function resolveB2CCustomerPrice({
     calculatedPrice += 150;
   }
 
-  if (isVerifiedResident && record.residentDiscountEligible) calculatedPrice *= 0.85;
   return roundMoney(calculatedPrice);
 }
 
@@ -52,7 +67,6 @@ export function resolveCommercialPrice(payload) {
     throw new Error('Commercial Block: Service is unavailable or deprecated.');
   }
 
-  // Bespoke means quote/SOW; its baseline is a planning anchor, never a checkout price.
   if (record.model === 'BESPOKE_SOW') return null;
   if (record.channel === 'B2C_RETAIL') return resolveB2CCustomerPrice(payload);
   if (record.channel === 'B2B_VOLUME' && payload?.bedrooms != null) return resolveB2BTurnPrice(payload);
