@@ -28,11 +28,11 @@ Reference capability families:
 | Provider identity/capability model | Architecture defined | Runtime capability lifecycle needs expansion | P0 |
 | Provider compliance/document vault | Partial architecture | Capability-specific compliance workflow/runtime enforcement | P0 |
 | Provider availability | Partial/limited | Native availability/capacity model | P0 |
-| Matching engine | Partial provider-routing infrastructure | Capability + compliance + geography + availability + capacity ranking | P0 |
+| Matching engine | Hardened routing infrastructure | Automated fallback and richer ranking | P0 |
 | Dispatch | Implemented basic offer/accept flow | Automated multi-provider dispatch/fallback | P0 |
 | Scheduling | Implemented basic appointments | Availability-aware scheduling and conflict controls | P0 |
 | Job/work-order lifecycle | Partial | Full state machine, dependencies, SLA, exceptions, closeout | P0 |
-| Provider tasks/evidence | Implemented | Storage authorization + richer QA/closeout | P0 |
+| Provider tasks/evidence | Implemented + DB scope gate | Storage authorization + richer QA/closeout | P0 |
 | Time tracking | Not verified as full runtime capability | Job-linked time/attendance/approval | P1 |
 | Customer CRM | HubSpot exists as CRM layer | Deeper lead/account/opportunity synchronization | P1 |
 | Quotes/estimates | Implemented staff quote builder | Full quote→approval→contract→job lifecycle | P0 |
@@ -50,7 +50,7 @@ Reference capability families:
 | Government workspace | Partial/general customer model | CH05 procurement/contract/reporting extensions | P1 |
 | Event operations | Catalog/services exist | Event lifecycle/run-of-show/staff/vendor execution | P2 |
 | Documents | Partial | Unified document vault, versioning, expiration, access rules | P0 |
-| Storage/evidence security | Database/API controls exist | Complete storage.objects audit and tests | P0 |
+| Storage/evidence security | Database/API controls exist; evidence scope gate added | Complete storage.objects audit and production abuse-path tests | P0 |
 | QA/reputation | Partial | Structured QA, reviews, rework, provider performance | P1 |
 | Inventory/equipment | Service engineering tables exist | Runtime equipment/assets/material usage | P2 |
 | Multi-state rules | Architecture direction exists | State/jurisdiction activation and compliance engine | P1 |
@@ -120,14 +120,24 @@ A provider prospect is never automatically dispatchable.
 24. AI-assisted operations.
 25. Advanced analytics/optimization.
 
-## 6. Governance rule
+## 6. Security work completed in this execution pass
+
+- Production Vercel deployment containing the contract-acquisition layer was verified READY after the unused legacy NFC function was retired to remain within the current function limit.
+- `dd_job_evidence` now has a database-level defense-in-depth gate requiring task/job consistency and an active provider with an ACCEPTED assignment.
+- Provider assignment insertion/update is now database-gated for service-linked jobs: the provider must have an explicitly authorized capability for the requested service.
+- Provider routing was corrected to derive a job's service from its linked request when the caller does not provide one, and provider selection within a selected organization is constrained to the already eligible provider set rather than any active provider.
+- Contract-to-job linkage was audited: there are currently no contract-linked jobs and no orphan contract references; this is consistent with the fact that no contracts have yet been activated in runtime.
+
+## 7. Governance rule
 
 A missing capability does not justify rebuilding an existing portal. Extend the current unified platform minimally, preserve locked architecture, and keep Airtable as commercial governance, Supabase as runtime/application data, GitHub as code/schema/tests, Vercel as deployment, HubSpot as CRM relationship infrastructure, and Stripe as payment infrastructure.
 
-## 7. Current security gate
+## 8. Current security gate
 
 Before expanding into the next P0 modules, finish:
 
 **Portal authorization → Storage authorization → endpoint authorization → production abuse-path tests.**
+
+The portal identity scope and evidence/assignment database gates have now been hardened. Remaining work is the broader endpoint matrix, storage policy reconciliation/testing, and production abuse-path test suite.
 
 Only after these pass should the remaining operational engines be expanded aggressively.
