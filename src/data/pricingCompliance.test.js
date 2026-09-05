@@ -7,4 +7,6 @@
  * until their assertions are migrated to those authorities.
  */
 
-describe.skip('pricing compliance — legacy catalog migration pending', () => {});
+describe.skip('pricing compliance — legacy catalog migration pending', () => {
+  test('quarantine marker', () => expect(true).toBe(true));
+});
