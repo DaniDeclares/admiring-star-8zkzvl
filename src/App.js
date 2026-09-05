@@ -60,6 +60,8 @@ export default function App() {
         <Route path="/request-service" element={<RequestServicePage />} />
         <Route path="/portal" element={<PortalWorkspacePage />} />
         <Route path="/portal/access" element={<PortalAccessPage />} />
+        <Route path="/portal/providers" element={<PortalAccessPage />} />
+        <Route path="/portal/partners" element={<PortalAccessPage />} />
         <Route path="/portal/login" element={<PortalLoginPage />} />
         <Route path="/portal/vendor-onboarding" element={<VendorOnboardingUploadPage />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
