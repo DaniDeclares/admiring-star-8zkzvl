@@ -114,10 +114,10 @@ export default async function handler(req, res) {
             and po.network_access_level in ('AUTHORIZED', 'PREFERRED', 'STRATEGIC')
             and po.accepts_new_work = true
             and po.capacity_status = 'AVAILABLE'
-            and po.agreement_status = 'EXECUTED'
+            and po.agreement_status in ('EXECUTED', 'ACTIVE')
             and po.compliance_status = 'VERIFIED'
             and po.permission_status in ('APPROVED', 'AUTHORIZED', 'PERMISSION_GRANTED')
-            and po.qualification_status = 'VERIFIED'
+            and po.qualification_status in ('QUALIFIED', 'VERIFIED')
         )
         and exists (
           select 1
