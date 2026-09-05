@@ -9,3 +9,4 @@ yarn-error.log
 *.ai
 *.bak
 *.DS_Store
+api/nfc-dispatch-init.js
