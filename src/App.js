@@ -29,6 +29,7 @@ import ProviderApprovalPage from "./pages/portal/ProviderApprovalPage.jsx";
 import PortalWorkspacePage from "./pages/portal/PortalWorkspacePage.jsx";
 import QuoteBuilderPage from "./pages/portal/QuoteBuilderPage.jsx";
 import ContractAcquisitionPage from "./pages/portal/ContractAcquisitionPage.jsx";
+import ContractingPeriodPage from "./pages/portal/ContractingPeriodPage.jsx";
 import PortalAccessPage from "./pages/PortalAccessPage.jsx";
 import PortalLoginPage from "./pages/PortalLoginPage.jsx";
 import ChangePasswordPage from "./pages/portal/ChangePasswordPage.jsx";
@@ -72,6 +73,7 @@ export default function App() {
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
         <Route path="/portal/provider-approval" element={<ProviderApprovalPage />} />
         <Route path="/portal/acquisition" element={<ContractAcquisitionPage />} />
+        <Route path="/portal/contracting" element={<ContractingPeriodPage />} />
         <Route path="/portal/quotes" element={<QuoteBuilderPage />} />
         <Route path="/portal/provider" element={<PortalWorkspacePage />} />
         <Route path="/portal/resident" element={<PortalWorkspacePage />} />
