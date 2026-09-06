@@ -1,6 +1,8 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/api/portal-dispatch", "destination": "/api/portal-fulfillment-dispatch" },
+    { "source": "/api/portal-fulfillment", "destination": "/api/portal-fulfillment-dispatch" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
