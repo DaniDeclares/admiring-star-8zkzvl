@@ -80,5 +80,5 @@ export const MASTER_ECOSYSTEM_V5 = {
     capabilityDocumentUrl: "/assets/capability-statement.txt"
   },
 
-  publicHQ: "Tucker, Georgia 30084 (Serving Metro Atlanta, GA)"
+  publicHQ: "Tucker, Georgia 30084 (Serving Metro Atlanta, GA & Regional SC)"
 };

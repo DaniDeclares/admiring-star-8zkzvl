@@ -6,14 +6,16 @@ export const BRAND_KIT = {
   primaryTagline: "WE HANDLE THE EXECUTION.",
   secondaryTagline: "CONSIDER IT HANDLED.",
   colors: {
-    trueBlack: "#111111",
-    warmIvory: "#F7F3EA",
-    softCream: "#EDE6D8",
-    champagne: "#C6A15B",
-    warmTaupe: "#B8AA98",
-    espresso: "#3A3028"
+    burgundy: "#6B1F2B",
+    burgundyDark: "#4F1720",
+    burgundyLight: "#873340",
+    ivory: "#F6F0E4",
+    cream: "#EDE2D0",
+    gold: "#C9A45C",
+    goldLight: "#DCC58F",
+    dark: "#21191A"
   },
-  hqLocation: "Tucker, Georgia 30084 (Serving Metro Atlanta, GA)",
+  hqLocation: "Tucker, Georgia 30084 (Serving Metro Atlanta, GA & Regional SC)",
   pillars: [
     { num: "01", name: "HANDLE", title: "Operations, Compliance & Concierge Execution", desc: "Administrative execution, document prep, mobile notary, loan signings, I-9s, and apostille processing." },
     { num: "02", name: "PREPARE", title: "Property, Hospitality & Events", desc: "Multi-family unit turnovers, 2-hr HD photo logs, deep cleans, and wedding officiating." },
