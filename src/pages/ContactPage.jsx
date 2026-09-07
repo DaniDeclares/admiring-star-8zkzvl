@@ -22,7 +22,7 @@ export default function ContactPage() {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-amber-400 font-mono text-sm uppercase tracking-wider">Direct Dispatch & Execution HQ</span>
           <h1 className="text-4xl sm:text-5xl font-extrabold text-white mt-2 mb-4">Connect With Our Deployment Team</h1>
-          <p className="text-slate-300 text-lg">Single-source execution support serving Metro Atlanta, GA, and Upstate SC.</p>
+          <p className="text-slate-300 text-lg">Single-source execution support serving Metro Atlanta and surrounding Georgia markets.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
@@ -81,14 +81,14 @@ export default function ContactPage() {
                   <MapPin className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <strong className="text-white">Public Headquarters:</strong>
-                    <p>Tucker, Georgia 30084 (Serving Metro Atlanta, GA & Regional SC)</p>
+                    <p>Tucker, Georgia 30084 (Serving Metro Atlanta, GA)</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Phone className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-white">Direct Dispatch Lines:</strong>
-                    <p>(470) 485-7173 | (470) 523-4892</p>
+                    <strong className="text-white">Direct Dispatch Line:</strong>
+                    <p>(470) 485-7173</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
