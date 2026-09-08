@@ -62,7 +62,15 @@ export default function App() {
         <Route path="/resident-welcome" element={<ResidentWelcomePage />} />
         <Route path="/resident-dispatch" element={<Navigate to="/request-service" replace />} />
         <Route path="/request-service" element={<RequestServicePage />} />
+
+        {/* One platform, three role-based experiences. */}
         <Route path="/portal" element={<PortalWorkspacePage />} />
+        <Route path="/portal/customer" element={<Navigate to="/portal" replace />} />
+        <Route path="/portal/provider" element={<Navigate to="/portal" replace />} />
+        <Route path="/portal/my-portal" element={<Navigate to="/portal" replace />} />
+        <Route path="/my-portal" element={<Navigate to="/portal" replace />} />
+        <Route path="/provider" element={<Navigate to="/portal/access?role=provider" replace />} />
+        <Route path="/provider/login" element={<Navigate to="/portal/login?role=provider" replace />} />
         <Route path="/portal/access" element={<PortalAccessPage />} />
         <Route path="/portal/providers" element={<PortalAccessPage />} />
         <Route path="/portal/partners" element={<PortalAccessPage />} />
@@ -75,9 +83,7 @@ export default function App() {
         <Route path="/portal/acquisition" element={<ContractAcquisitionPage />} />
         <Route path="/portal/contracting" element={<ContractingPeriodPage />} />
         <Route path="/portal/quotes" element={<QuoteBuilderPage />} />
-        <Route path="/portal/provider" element={<PortalWorkspacePage />} />
         <Route path="/portal/resident" element={<PortalWorkspacePage />} />
-        <Route path="/portal/customer" element={<PortalWorkspacePage />} />
         <Route path="/portal/property-manager" element={<PortalWorkspacePage />} />
         <Route path="/portal/procurement" element={<PortalWorkspacePage />} />
         <Route path="/weddings" element={<Navigate to="/request-service" replace />} />
