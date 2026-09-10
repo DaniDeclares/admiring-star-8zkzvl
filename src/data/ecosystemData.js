@@ -64,7 +64,7 @@ export const MASTER_ECOSYSTEM_V5 = {
       target: "Businesses and commercial clients",
       desc: "Business operations, workplace support, cleaning, products, printing, signage, startup infrastructure, gifting and recurring support.",
       cta: "TELL US WHAT YOU NEED",
-      route: "/industries/business"
+      route: "/services/business"
     },
     {
       id: "government",
