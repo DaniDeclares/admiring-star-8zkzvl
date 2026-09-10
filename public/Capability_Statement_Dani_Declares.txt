@@ -8,6 +8,12 @@ PRIMARY GOVERNMENT CONTRACTING LANE
 - Strategic target: PSC S201 — Custodial/Janitorial
 - Federal registration status: Active SAM.gov registration verified in the owner's SAM.gov workspace
 
+GOVERNMENT ACQUISITION TERRITORY
+- Primary acquisition territory: Atlanta, Georgia → Northeast Georgia corridor → Greenville, South Carolina
+- Hard maximum: Spartanburg, South Carolina
+- Multi-location/statewide opportunities are screened location-by-location; only qualifying places of performance inside the approved territory enter active pursuit
+- Opportunities materially beyond this territory are retained only as research/benchmark intelligence and are not active acquisition targets
+
 STRATEGIC ADJACENT GOVERNMENT LANE
 - NAICS 561210 — Facilities Support Services
 
@@ -87,7 +93,7 @@ ADDITIONAL OPPORTUNITY-SPECIFIC CAPABILITY
 These secondary capabilities are intentionally presented as procurement-specific capabilities, not as blanket claims of current classification, equipment, certification, staffing, licensing, past performance or specialized technical qualification.
 
 PROCUREMENT POSITIONING
-DANI DECLARES is building government contracting capacity progressively through Georgia local and institutional opportunities, state procurement, federal opportunities, subcontracting and teaming, documented performance, and larger multi-location facility requirements as operational capacity and past performance develop.
+DANI DECLARES is building government contracting capacity progressively through local and institutional opportunities inside its approved acquisition territory, state procurement, federal opportunities, subcontracting and teaming, documented performance, and larger multi-location facility requirements as operational capacity and past performance develop.
 
 DANI DECLARES can pursue work as applicable through:
 - Federal prime
@@ -113,6 +119,6 @@ COMPANY IDENTIFIERS
 - Legal Entity Name: DANI DECLARES LLC
 - UEI: TD4TSG48LHN9
 - CAGE Code: Pending authoritative SAM record verification
-- Government operating focus: Georgia
+- Government acquisition territory: Atlanta, Georgia → Northeast Georgia → Greenville, South Carolina; Spartanburg, South Carolina maximum
 - Direct Contact: admin@danideclares.com
 - Website: https://danideclares.com
