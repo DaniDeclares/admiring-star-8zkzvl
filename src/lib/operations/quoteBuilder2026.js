@@ -8,10 +8,16 @@ export async function getQuoteCatalog(supabase) {
     .neq('commercial_offer_status', 'DO_NOT_SELL').order('division').order('canonical_sku');
   if (error) throw error;
   const ids = (offers || []).map(o => o.runtime_service_id).filter(Boolean);
-  const { data: services, error: serviceError } = ids.length ? await supabase.from('services').select('id,sku,name,service_family,pricing_type,billing_cycle,starting_price,base_price_cents,price_note,public_price_low,public_price_high,public_price_display,quote_input_schema,commercial_status,commercial_intent_status,resident_discount_eligible,is_active').in('id', ids) : { data: [], error: null };
-  if (serviceError) throw serviceError;
-  const byId = new Map((services || []).map(s => [s.id, s]));
-  return (offers || []).map(o => { const s = byId.get(o.runtime_service_id) || {}; return { ...s, sku:o.canonical_sku, name:o.service_name, division_id:Number(o.division), service_family:s.service_family || null, governedOfferStatus:o.commercial_offer_status, fulfillmentGateStatus:o.fulfillment_gate_status, commercial_status:s.commercial_status || o.commercial_offer_status, commercial_intent_status:s.commercial_intent_status || o.fulfillment_gate_status, publicPrice:s.public_price_display || (s.starting_price != null ? `Starting at $${Number(s.starting_price).toFixed(2)}` : 'Quote required'), quoteQuestions:s.quote_input_schema?.fields || [] }; });
+  const skus = (offers || []).map(o => o.canonical_sku).filter(Boolean);
+  const { data: servicesById, error: serviceIdError } = ids.length ? await supabase.from('services').select('id,sku,name,service_family,pricing_type,billing_cycle,starting_price,base_price_cents,price_note,public_price_low,public_price_high,public_price_display,quote_input_schema,commercial_status,commercial_intent_status,resident_discount_eligible,is_active').in('id', ids) : { data: [], error: null };
+  if (serviceIdError) throw serviceIdError;
+  const resolvedIds = new Set((servicesById || []).map(s => s.id));
+  const missingSkus = (offers || []).filter(o => o.runtime_service_id && !resolvedIds.has(o.runtime_service_id)).map(o => o.canonical_sku).concat((offers || []).filter(o => !o.runtime_service_id).map(o => o.canonical_sku)).filter(Boolean);
+  const { data: servicesBySku, error: skuError } = missingSkus.length ? await supabase.from('services').select('id,sku,name,service_family,pricing_type,billing_cycle,starting_price,base_price_cents,price_note,public_price_low,public_price_high,public_price_display,quote_input_schema,commercial_status,commercial_intent_status,resident_discount_eligible,is_active').in('sku', [...new Set(missingSkus)]) : { data: [], error: null };
+  if (skuError) throw skuError;
+  const byId = new Map((servicesById || []).map(s => [s.id, s]));
+  const bySku = new Map((servicesBySku || []).map(s => [s.sku, s]));
+  return (offers || []).map(o => { const s = byId.get(o.runtime_service_id) || bySku.get(o.canonical_sku) || {}; return { ...s, sku:o.canonical_sku, name:o.service_name, division_id:Number(o.division), service_family:s.service_family || null, governedOfferStatus:o.commercial_offer_status, fulfillmentGateStatus:o.fulfillment_gate_status, commercial_status:s.commercial_status || o.commercial_offer_status, commercial_intent_status:s.commercial_intent_status || o.fulfillment_gate_status, publicPrice:s.public_price_display || (s.starting_price != null ? `Starting at $${Number(s.starting_price).toFixed(2)}` : 'Quote required'), quoteQuestions:s.quote_input_schema?.fields || [] }; });
 }
 
 async function loadRules(supabase, serviceId, channelCode) {
@@ -22,11 +28,12 @@ async function loadRules(supabase, serviceId, channelCode) {
 
 function calculate(service, rule, answers) {
   const a = answers || {};
-  let base = Number(a.manual_base_price || 0);
-  if (!base) base = rule?.base_price_cents != null ? Number(rule.base_price_cents)/100 : Number(service.starting_price || service.public_price_low || 0);
+  const pricingType = String(rule?.pricing_type || service.pricing_type || '').toUpperCase();
+  const ruleBase = rule?.base_price_cents != null ? Number(rule.base_price_cents)/100 : Number(service.starting_price || service.public_price_low || 0);
+  const canOverrideBase = !rule || String(rule.lock_status || '').toUpperCase() !== 'LOCKED';
+  let base = canOverrideBase && Number(a.manual_base_price || 0) > 0 ? Number(a.manual_base_price) : ruleBase;
   const quantity = Math.max(1, Number(a.quantity || 1));
   const hours = Math.max(0, Number(a.hours || 0));
-  const pricingType = String(rule?.pricing_type || service.pricing_type || '').toUpperCase();
   if (pricingType.includes('HOURLY')) base *= Math.max(1,hours || 1);
   else if (pricingType.includes('PER_UNIT') || pricingType.includes('PER_BASKET') || pricingType.includes('PER_ITEM')) base *= quantity;
   const travelFee = Boolean(a.apply_standard_travel) ? Math.max(0,Number(a.miles_one_way||0)-15)*2.5 : 0;
@@ -34,7 +41,7 @@ function calculate(service, rule, answers) {
   const sourcingFee = materials*0.10;
   const passThrough = Math.max(0,Number(a.pass_through_cost||0));
   const rushFee = Boolean(a.rush) ? (base+travelFee)*0.25 : 0;
-  const residentDiscount = Boolean(a.apartment_resident) && Boolean(rule?.resident_discount_eligible ?? service.resident_discount_eligible);
+  const residentDiscount = Boolean(a.apply_resident_discount) && Boolean(rule?.resident_discount_eligible ?? service.resident_discount_eligible);
   const discount = residentDiscount ? base*0.15 : 0;
   const subtotal = Math.max(0,base-discount+travelFee+rushFee+materials+sourcingFee+passThrough);
   const taxRate = Math.max(0,Number(a.tax_rate_percent||0));
@@ -63,7 +70,7 @@ export async function createEstimate(supabase, body) {
   const channelCode=CHANNELS[clientType]||'CH04';
   const rules=await loadRules(supabase,service.id,channelCode);
   const rule=rules.find(r=>r.base_price_cents!=null)||rules[0]||null;
-  const answers={...(body.answers||{}),apartment_resident:clientType==='apartment_resident'};
+  const answers={...(body.answers||{}),apply_resident_discount:false,apartment_resident:clientType==='apartment_resident'};
   const calcService={...service,commercial_intent_status:offer.fulfillment_gate_status==='READY'?(offer.commercial_offer_status==='SELL_NOW'?'SELL_NOW':offer.commercial_offer_status):offer.fulfillment_gate_status};
   const calculation=calculate(calcService,rule,answers);
   const publicReference=`EST-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
