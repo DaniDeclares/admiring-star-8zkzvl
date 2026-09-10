@@ -14,7 +14,7 @@ const audiences=[
 ];
 
 const popular=[
- ['Home & Household Support','Cleaning, organization, laundry, home watch, plant care and concierge help.'],
+ ['Home & Household Support','Cleaning, organization, laundry, home watch, and concierge help.'],
  ['Property Operations','Turns, inspections, photo documentation, punch-list coordination and readiness support.'],
  ['Business Support','Administrative help, research, systems setup, marketing, branding and growth support.'],
  ['Events & Experiences','Planning, coordination, setup, décor, logistics, merchandise and community programming.'],
