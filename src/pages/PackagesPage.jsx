@@ -1,59 +1,61 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { bookingServices } from "../data/services.js";
-import ServiceCta from "../components/ServiceCta.jsx";
+import { listCanonicalOffers } from "../config/commercialRegistry";
 import "./PackagesPage.css";
 
 export default function PackagesPage() {
+  const offers = listCanonicalOffers();
   return (
     <main className="packages-page">
       <Helmet>
-        <title>Services & Pricing • Dani Declares</title>
+        <title>DANI'S Current Services • DANI DECLARES</title>
         <meta
           name="description"
-          content="Explore Dani Declares notary, apostille, loan signing, and officiant services with clear booking and payment steps."
+          content="Current owner-executed DANI DECLARES services in Georgia. Request a service or contact us for a custom review."
         />
       </Helmet>
 
       <header className="packages-hero">
-        <p className="eyebrow">Service Catalog</p>
-        <h1>Services & Pricing</h1>
+        <p className="eyebrow">DANI'S CURRENT SERVICES</p>
+        <h1>Services you can book with DANI DECLARES.</h1>
         <p>
-          Book first, then complete payment to confirm your appointment. Select the
-          service that matches your needs and follow the guided flow.
+          This page shows the small, current owner-executed sales layer. Additional company capabilities
+          remain behind PASS 1 underwriting and activation controls.
         </p>
       </header>
 
       <section className="service-section">
-        <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
-<h2>Book a service</h2>
+        <h2>Current owner-executed services</h2>
         <div className="service-grid">
-          {bookingServices.map((service) => (
-            <div key={service.id} className="service-card">
+          {offers.map((service) => (
+            <div key={service.serviceId} className="service-card">
               <div>
-                <img src={process.env.PUBLIC_URL + "/images/festival/festival-promo-graphic-01.png"} alt="visual" className="w-full h-44 object-cover rounded-t-lg mb-3" onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }} />
-<h3>{service.title}</h3>
-                <p>{service.shortDescription}</p>
-                {service.priceLabel && (
-                  <span className="price">{service.priceLabel}</span>
-                )}
+                <h3>{service.name}</h3>
+                <p>Georgia • Direct owner execution</p>
+                <span className="price">{service.pricingLabel}</span>
+                {service.recurringOffer && <p>{service.recurringOffer.label}</p>}
               </div>
               <Link
-                to={`/book?service=${service.id}`}
+                to={`/request-service?service=${encodeURIComponent(service.serviceId)}`}
                 className="btn btn--primary"
               >
-                Book an Appointment
+                Request / Book
               </Link>
-              <p className="service-card__note">
-                Appointments are not confirmed until payment is completed.
-              </p>
+              <p className="service-card__note">Additional scope may require a custom quote.</p>
             </div>
           ))}
         </div>
       </section>
 
-      <ServiceCta serviceId="notary" bookingLabel="Book an Appointment" />
+      <section className="service-section">
+        <h2>Need something else?</h2>
+        <p>
+          The full DANI DECLARES capability universe is larger than the current direct-sales layer.
+          Submit the details and we can review whether the work is currently available.
+        </p>
+        <Link to="/request-service" className="btn btn--primary">Request a Custom Review</Link>
+      </section>
     </main>
   );
 }
