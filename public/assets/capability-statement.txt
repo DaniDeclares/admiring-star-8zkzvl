@@ -2,7 +2,7 @@ DANI DECLARES LLC — GOVERNMENT CAPABILITY PROFILE
 WE HANDLE THE EXECUTION.
 
 COMPANY OVERVIEW
-DANI DECLARES LLC provides execution-focused janitorial, facility-reset, field documentation, and operational support for public-sector and institutional procurement. Government engagements are handled through procurement-specific scopes, solicitations, task orders, quotations, teaming arrangements, and subcontracting structures.
+DANI DECLARES LLC provides execution-focused facility, field, administrative, logistics, supply and production support for public-sector and institutional procurement. Government engagements are handled through procurement-specific scopes, solicitations, task orders, quotations, teaming arrangements, and subcontracting structures.
 
 PRIMARY GOVERNMENT CLASSIFICATION TARGET
 - NAICS 561720 — Janitorial Services
@@ -12,16 +12,43 @@ PRIMARY GOVERNMENT CLASSIFICATION TARGET
 STRATEGIC ADJACENT CLASSIFICATION TARGET
 - NAICS 561210 — Facilities Support Services
 
-CORE PUBLIC-SECTOR CAPABILITIES
-1. CUSTODIAL: Recurring janitorial cleaning, deep facility cleaning, restroom/common-area service, trash/recycling support, and facility cleaning.
-2. FACILITY RESET: Vacant-space, occupancy-transition, move-in/move-out, readiness, and post-construction cleaning.
-3. FACILITIES SUPPORT: Scope-dependent work-order coordination, scheduling, site support, completion verification, and facility documentation.
-4. FIELD DOCUMENTATION: Photographic documentation, checklists, condition reporting, and completion evidence when required by the contract scope.
-5. ADMINISTRATIVE SUPPORT: Defined records, scheduling, task tracking, contract documentation, and closeout support when included in an eligible procurement scope.
-6. SECONDARY / OPPORTUNITY-SPECIFIC: Supplies and materials, printing/signage, courier/delivery, event/community support, and notary services when specifically procured and currently authorized.
+CORE PUBLIC-SECTOR CAPABILITY FAMILIES
+1. CUSTODIAL & FACILITY CARE
+   Recurring janitorial, deep cleaning, facility resets, turnover/readiness, restroom/common-area service and trash/recycling support.
+2. FACILITIES & SITE OPERATIONS
+   Scope-dependent work-order coordination, scheduling, inspections, site support, condition documentation and completion verification.
+3. EXTERIOR FACILITIES — OPPORTUNITY-SPECIFIC
+   Pressure washing, exterior surface cleaning, gutters/downspouts, debris removal and exterior window cleaning when solicitation requirements can be met.
+4. EMERGENCY SANITATION — CAPABILITY-GATED
+   Emergency cleaning/sanitizing and incident-driven response; specialized remediation is performed only when independently qualified or through qualified partners.
+5. SUPPLIES & DISTRIBUTION
+   Facility/custodial supplies, consumables, equipment, sourcing, packaging, distribution and delivery support.
+6. PRINTING & SIGNAGE
+   Forms, manuals, signs, banners, labels, print-on-demand, print-distribution and graphic production through verified production capacity or qualified partners.
+7. LOGISTICS & FIELD SERVICES
+   Courier, delivery, pickup/dropoff, supply distribution, field documentation and site-support logistics.
+8. ADMINISTRATIVE & DOCUMENTATION
+   Records support, scheduling, task tracking, contract documentation, scanning, document preparation and closeout support when included in an eligible procurement scope.
+9. PUBLIC EVENTS & COMMUNITY SUPPORT
+   Event setup/breakdown, cleanup, signage, printed materials, supplies and logistics when specifically procured.
+
+ADDITIONAL OPPORTUNITY-SPECIFIC CAPABILITY
+- Notary services when specifically procured and currently authorized.
+
+PRESENTATION & QUALIFICATION STANDARD
+DANI DECLARES separates verified credentials and established classifications from strategic targets and opportunity-specific capabilities. A capability family does not automatically establish a current NAICS/PSC registration, certification, license, insurance limit, equipment inventory, staffing capacity, past performance or award history. Those items are verified against authoritative records and the controlling solicitation before being presented as established qualifications.
 
 GOVERNMENT CONTRACTING PATH
-DANI DECLARES is building government capacity progressively through local and institutional opportunities, subcontracting and teaming, documented performance, state and federal opportunities, and larger multi-location facility requirements as operational capacity and past performance develop.
+DANI DECLARES is building government capacity progressively through Georgia local and institutional opportunities, state procurement, federal opportunities, subcontracting and teaming, documented performance, and larger multi-location facility requirements as operational capacity and past performance develop.
+
+PROCUREMENT POSITIONING
+- Federal Prime
+- Federal Subcontract
+- State Prime
+- County/Municipal Prime
+- Public Authority / Institutional
+- Education / Healthcare / Institutional
+- Teaming and qualified-prime support
 
 MARKET-SCALE REFERENCE
 Procurement examples reviewed by DANI DECLARES include approximately $708K, $1.83M, and $6.62M contract-scale examples. These are market signals only and are NOT DANI DECLARES awards, revenue, or past performance.
@@ -29,7 +56,7 @@ Procurement examples reviewed by DANI DECLARES include approximately $708K, $1.8
 CERTIFICATION / ELIGIBILITY DISCLOSURE
 DANI DECLARES must not be represented as WOSB or EDWOSB certified unless and until SBA certification is approved and reflected in the applicable SBA systems. A certification application, target socioeconomic status, and approved certification are separate statuses.
 
-A strategic target NAICS or PSC does not by itself establish current SAM registration, eligibility, certification, licensing, past performance, staffing capacity, or award history. CAGE and current federal classification details remain pending authoritative SAM-record reconciliation.
+A strategic target NAICS or PSC does not by itself establish current SAM registration, eligibility, certification, licensing, past performance, staffing capacity, equipment, or award history. CAGE and current federal classification details remain pending authoritative SAM-record reconciliation.
 
 CORPORATE IDENTIFIERS
 - Legal Name: DANI DECLARES LLC

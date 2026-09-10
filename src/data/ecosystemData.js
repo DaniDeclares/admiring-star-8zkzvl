@@ -28,41 +28,50 @@ export const MASTER_ECOSYSTEM_V5 = {
     { id: "market", name: "DANI DECLARES MARKET", tagline: "Snacks • Drinks • Curated Care Packages" }
   ],
 
-  // 4 CUSTOMER CHANNELS (INTERNAL DATA MODEL + PUBLIC UX LABELS)
+  // 5 LOCKED CUSTOMER CHANNELS — CANONICAL PUBLIC ARCHITECTURE
   channels: [
     {
-      id: "direct",
-      internalCode: "DIRECT (B2C)",
-      publicLabel: "Individuals & Families",
-      target: "Homeowners, Renters, Couples & Individuals",
-      desc: "Standalone access to home cleaning, deep cleaning, mobile notary, apostille assistance, wedding officiating, custom DTF apparel, SmartTap™ NFC cards, and Market snack bundles.",
+      id: "resident",
+      internalCode: "CHANNEL 01",
+      publicLabel: "Resident Concierge",
+      target: "Apartment/property residents and individual residential customers",
+      desc: "Direct-to-consumer lifestyle and residential services, including resident-discounted eligible services and resident portal access.",
       cta: "GET STARTED",
       route: "/book"
     },
     {
-      id: "business",
-      internalCode: "BUSINESS (B2B)",
-      publicLabel: "Businesses, Offices & Real Estate Professionals",
-      target: "Businesses, Real Estate Brokerages, Offices & Teams",
-      desc: "Loan signings, mobile notary, open-house setups, agent apparel, business cards, flyers, signage, Smart Review Stands, closing gifts, and office snack boxes.",
+      id: "propertyManagement",
+      internalCode: "CHANNEL 02",
+      publicLabel: "Property Management & Apartments",
+      target: "Property managers, apartment communities, ownership and operations teams",
+      desc: "Post-occupancy turnover, physical-plant support, property compliance, operational asset printing and community activations.",
+      cta: "REQUEST PROPERTY SUPPORT",
+      route: "/industries/real-estate"
+    },
+    {
+      id: "realEstate",
+      internalCode: "CHANNEL 03",
+      publicLabel: "Real Estate Offices & Brokerages",
+      target: "Realtors, teams, brokerages and real estate offices",
+      desc: "Listing support, open-house setup, signage, print collateral, client/closing support and related real-estate execution services.",
       cta: "TELL US WHAT YOU NEED",
       route: "/industries/real-estate"
     },
     {
-      id: "community",
-      internalCode: "COMMUNITY (B2B2C)",
-      publicLabel: "Apartment Communities & Their Residents",
-      target: "Property Managers, Leasing Offices & Tenants",
-      desc: "Turnkey unit turnovers, 24-48 hr SLAs, 2-hr digital HD photo logs, welcome bags, resident appreciation events, movie nights, and sponsored Resident Perks.",
+      id: "business",
+      internalCode: "CHANNEL 04",
+      publicLabel: "Businesses",
+      target: "Businesses and commercial clients",
+      desc: "Business operations, workplace support, cleaning, products, printing, signage, startup infrastructure, gifting and recurring support.",
       cta: "TELL US WHAT YOU NEED",
-      route: "/industries/real-estate"
+      route: "/services/business"
     },
     {
       id: "government",
-      internalCode: "GOVERNMENT (B2G)",
-      publicLabel: "Government & Contracting Partners",
-      target: "Federal, State, Municipal Agencies & Prime Contractors",
-      desc: "Active SAM.gov registration (UEI: TD4TSG48LHN9). Government positioning is centered on janitorial and facilities-support procurement; CAGE and federal classification details are pending authoritative SAM-record reconciliation.",
+      internalCode: "CHANNEL 05",
+      publicLabel: "Government & Institutional Procurement",
+      target: "Federal, State, County, Municipal, Public Authority, Education, Healthcare and Institutional buyers; prime contractors and teaming partners",
+      desc: "Procurement-specific government and institutional execution across custodial/facility care, facilities support, exterior services, emergency sanitation, supplies/distribution, printing/signage, logistics/field services, administrative/document support and public events/community support.",
       cta: "REQUEST A CAPABILITY STATEMENT",
       route: "/industries/government"
     }
@@ -80,5 +89,5 @@ export const MASTER_ECOSYSTEM_V5 = {
     capabilityDocumentUrl: "/assets/capability-statement.txt"
   },
 
-  publicHQ: "Tucker, Georgia 30084 (Serving Metro Atlanta, GA & Regional SC)"
+  publicHQ: "Tucker, Georgia 30084 (Serving Georgia)",
 };
