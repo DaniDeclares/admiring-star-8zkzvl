@@ -24,6 +24,21 @@ const GovConLayout = () => {
 
       <div style={section}>
         <div style={card}>
+          <h2 style={{ color: '#8B1E2E', marginTop: 0 }}>Current Government Acquisition Territory</h2>
+          <p style={{ lineHeight: '1.7', color: '#555' }}><strong>Atlanta, Georgia → Northeast Georgia corridor → Greenville, South Carolina</strong>, with <strong>Spartanburg, South Carolina as the hard maximum</strong>.</p>
+          <ul style={{ lineHeight: '1.9', paddingLeft: '20px', color: '#444' }}>
+            <li><strong>Core:</strong> Atlanta metro and immediate surrounding operating area.</li>
+            <li><strong>Corridor:</strong> qualifying Northeast Georgia / Upstate South Carolina opportunities along the Atlanta-to-Greenville operating path.</li>
+            <li><strong>Maximum:</strong> Spartanburg, SC — selective only based on operational economics.</li>
+            <li><strong>Site-qualified:</strong> statewide or multi-location opportunities are screened location-by-location; only qualifying sites enter active pursuit.</li>
+            <li><strong>Outside:</strong> materially beyond the approved territory is not an active DANI acquisition target.</li>
+          </ul>
+          <p style={{ lineHeight: '1.6', color: '#666', fontSize: '14px' }}>This is the GovCon acquisition boundary. It is separate from commercial service-area language and does not imply that every location in Georgia or South Carolina is an active government pursuit market.</p>
+        </div>
+      </div>
+
+      <div style={section}>
+        <div style={card}>
           <h2 style={{ color: '#8B1E2E', marginTop: 0 }}>Primary Government Contracting Lane</h2>
           <h3>Strategic target: 561720 — Janitorial Services</h3>
           <p><strong>Strategic target: PSC S201 — Custodial/Janitorial</strong></p>
