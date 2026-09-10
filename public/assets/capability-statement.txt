@@ -12,6 +12,12 @@ PRIMARY GOVERNMENT CLASSIFICATION TARGET
 STRATEGIC ADJACENT CLASSIFICATION TARGET
 - NAICS 561210 — Facilities Support Services
 
+GOVERNMENT ACQUISITION TERRITORY
+- Primary acquisition territory: Atlanta, Georgia → Northeast Georgia corridor → Greenville, South Carolina
+- Hard maximum: Spartanburg, South Carolina
+- Multi-location/statewide opportunities are screened location-by-location; only qualifying places of performance inside the approved territory enter active pursuit
+- Opportunities materially beyond this territory are retained only as research/benchmark intelligence and are not active acquisition targets
+
 CORE PUBLIC-SECTOR CAPABILITY FAMILIES
 1. CUSTODIAL & FACILITY CARE
    Recurring janitorial, deep cleaning, facility resets, turnover/readiness, restroom/common-area service and trash/recycling support.
@@ -39,7 +45,7 @@ PRESENTATION & QUALIFICATION STANDARD
 DANI DECLARES separates verified credentials and established classifications from strategic targets and opportunity-specific capabilities. A capability family does not automatically establish a current NAICS/PSC registration, certification, license, insurance limit, equipment inventory, staffing capacity, past performance or award history. Those items are verified against authoritative records and the controlling solicitation before being presented as established qualifications.
 
 GOVERNMENT CONTRACTING PATH
-DANI DECLARES is building government capacity progressively through Georgia local and institutional opportunities, state procurement, federal opportunities, subcontracting and teaming, documented performance, and larger multi-location facility requirements as operational capacity and past performance develop.
+DANI DECLARES is building government capacity progressively through local and institutional opportunities inside its approved acquisition territory, state procurement, federal opportunities, subcontracting and teaming, documented performance, and larger multi-location facility requirements as operational capacity and past performance develop.
 
 PROCUREMENT POSITIONING
 - Federal Prime
@@ -63,7 +69,7 @@ CORPORATE IDENTIFIERS
 - Georgia SOS Control No.: #25079444
 - UEI: TD4TSG48LHN9
 - CAGE Code: Pending authoritative SAM record verification
-- Government operating focus: Georgia
+- Government acquisition territory: Atlanta, Georgia → Northeast Georgia → Greenville, South Carolina; Spartanburg, South Carolina maximum
 - Vendor & Contracting Email: vendors@danideclares.com
 - General Admin Email: admin@danideclares.com
 - Government Portal: https://www.danideclares.com/industries/government
