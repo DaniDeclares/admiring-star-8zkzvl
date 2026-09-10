@@ -31,24 +31,23 @@ export const PROVIDER_LANES = Object.freeze({ STAFF_DIRECT:'STAFF_DIRECT', SPECI
 export const COMMERCIAL_STATUS = Object.freeze({ CANONICAL_ACTIVE:'CANONICAL_ACTIVE', DEPRECATED_HISTORICAL:'DEPRECATED_HISTORICAL', PENDING_RECONCILIATION:'PENDING_RECONCILIATION' });
 
 // These are the owner-approved D01 offers activated for immediate commercial launch.
-// Prices are customer prices, not provider payouts. The five offers use explicit
-// fixed/starting anchors; additional channel/location variants remain governed separately.
+// They are Georgia-only, owner-executed, and intentionally isolated from the broader
+// provider-dependent/PASS-1 catalog. Prices are exact customer prices for the defined scope.
 const D01_LAUNCH_OFFERS = Object.freeze({
-  'DNI-01A-009': { serviceId:'DNI-01A-009', name:'Bin Sanitation', division:'01', channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:59, pricingLabel:'Starting at $59', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE' },
-  'DNI-01A-010': { serviceId:'DNI-01A-010', name:'Odor Neutralization', division:'01', channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:99, pricingLabel:'Starting at $99', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE' },
-  'DNI-01D-002': { serviceId:'DNI-01D-002', name:'Home Watch / Household Absence Check', division:'01', channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:65, pricingLabel:'Starting at $65/visit', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE', recurringOffer:{ amount:149, interval:'month', label:'Basic recurring Home Watch — $149/month' } },
-  'DNI-01D-004': { serviceId:'DNI-01D-004', name:'Event / Party Home Preparation & Reset', division:'01', channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:175, pricingLabel:'Starting at $175', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE' },
+  'DNI-01A-009': { serviceId:'DNI-01A-009', name:'Bin Sanitation', division:'01', market:'GA', ownerExecutableLive:true, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:59, pricingLabel:'$59', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE' },
+  'DNI-01A-010': { serviceId:'DNI-01A-010', name:'Odor Neutralization', division:'01', market:'GA', ownerExecutableLive:true, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:99, pricingLabel:'$99', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE' },
+  'DNI-01D-002': { serviceId:'DNI-01D-002', name:'Home Watch / Household Absence Check', division:'01', market:'GA', ownerExecutableLive:true, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:65, pricingLabel:'$65/visit', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE', recurringOffer:{ amount:149, interval:'month', label:'Basic recurring Home Watch — $149/month' } },
+  'DNI-01D-004': { serviceId:'DNI-01D-004', name:'Event / Party Home Preparation & Reset', division:'01', market:'GA', ownerExecutableLive:true, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:175, pricingLabel:'$175', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE' },
 });
 
 export const masterCommercialRegistry = Object.freeze({
-  architectureVersion:'2026-08-29',
-  // Georgia and South Carolina are authorized commercial markets for the current
-  // architecture. Individual offers remain independently gated by service, pricing,
-  // fulfillment, and compliance readiness; future states are not implicitly active.
-  geography:{ activeMarkets:['GA','SC'], nationalReady:false },
+  architectureVersion:'2026-09-10-owner-executable-live-layer',
+  // The broader company architecture may preserve additional authorized markets,
+  // but DANI'S SPECIALS and this immediate owner-executed commercial layer are GA-only.
+  geography:{ activeMarkets:['GA'], nationalReady:false },
   channels:CHANNELS,
   ch01Subchannels:CH01_SUBCHANNELS,
-  workerSide:'CAPABILITY_NETWORK',
+  workerSide:'OWNER_OPERATOR',
   networkAccessIsEntitlement:true,
   workIsNotGuaranteed:true,
   commercialModels:COMMERCIAL_RELATIONSHIP_MODELS,
