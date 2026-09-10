@@ -39,7 +39,7 @@ export default function PrivacyPage() {
         <p>We retain information for as long as reasonably necessary for the purpose for which it was collected, including service history, accounting, tax, contractual, compliance, dispute-resolution, security, and legal obligations. Retention periods may differ by record type.</p>
 
         <h2>7. Security and Breach Response</h2>
-        <p>We use reasonable administrative, technical, and organizational safeguards appropriate to the information we handle. No internet system can be guaranteed completely secure. If a legally reportable security incident occurs, DANI DECLARES will follow applicable notification requirements, including applicable Georgia and South Carolina breach-notification laws.</p>
+        <p>We use reasonable administrative, technical, and organizational safeguards appropriate to the information we handle. No internet system can be guaranteed completely secure. If a legally reportable security incident occurs, DANI DECLARES will follow applicable notification requirements.</p>
 
         <h2>8. Your Choices and Requests</h2>
         <p>You may contact us to ask about information associated with your customer or business relationship, request correction of inaccurate information, or ask questions about our privacy practices. Certain records may need to be retained to satisfy legal, contractual, security, accounting, or operational requirements.</p>
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
         <p>Our services and portal are intended for adults and organizations. We do not knowingly solicit personal information from children through the website.</p>
 
         <h2>11. State and Service-Area Scope</h2>
-        <p>DANI DECLARES currently operates and activates services in Georgia and South Carolina, with additional markets activated as the applicable service, location, licensing, qualification, and operational requirements are satisfied. Privacy obligations may vary based on the customer, transaction, data involved, and jurisdiction.</p>
+        <p>DANI DECLARES' current commercial operating focus is Georgia. Other states may be part of long-term or opportunity-specific expansion only after the applicable service, location, licensing, qualification, pricing, fulfillment, and operational requirements are deliberately activated. Government or institutional opportunities are evaluated according to the controlling procurement requirements and applicable registration/eligibility rules.</p>
 
         <h2>12. Contact</h2>
         <p>DANI DECLARES LLC<br />Phone: (470) 485-7173<br />Email: admin@danideclares.com</p>
