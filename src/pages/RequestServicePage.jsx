@@ -1,6 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowRight,CalendarClock,CheckCircle2,MapPin,Phone,ShieldCheck} from 'lucide-react';
 import {OPERATIONS_CHANNELS} from '../lib/operations/intakeRouting2026';
+import {getFamilyVisuals} from '../data/serviceVisuals2026.js';
 
 const CHANNEL_OPTIONS=[
  {value:OPERATIONS_CHANNELS.B2C,label:'Resident / Household'},
@@ -11,10 +12,7 @@ const CHANNEL_OPTIONS=[
 ];
 
 const today=new Date().toISOString().slice(0,10);
-const baseServiceName=(name='')=>name
- .replace(/\s+(1BR|2BR|3BR|4BR)$/i,'')
- .replace(/\s+—\s+(30|60)\s*min$/i,'')
- .replace(/\s+—\s+(7|14|30)\s*Days$/i,'');
+const baseServiceName=(name='')=>name.replace(/\s+(1BR|2BR|3BR|4BR)$/i,'').replace(/\s+—\s+(30|60)\s*min$/i,'').replace(/\s+—\s+(7|14|30)\s*Days$/i,'');
 
 export default function RequestServicePage(){
  const params=useMemo(()=>typeof window==='undefined'?new URLSearchParams():new URLSearchParams(window.location.search),[]);
@@ -23,52 +21,20 @@ export default function RequestServicePage(){
  const [submitted,setSubmitted]=useState(false),[loading,setLoading]=useState(false),[error,setError]=useState(''),[requestId,setRequestId]=useState(''),[booking,setBooking]=useState(null);
  const [form,setForm]=useState({name:'',email:'',phone:'',channelType:OPERATIONS_CHANNELS.B2C,organizationName:'',locationAddress:'',requestedDate:'',requestedTime:'',budgetRange:'',details:'',serviceId:initialServiceId});
 
- useEffect(()=>{
-   fetch('/api/verify-commercial-intent?catalog=1')
-    .then(async r=>{const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not load the service catalog.');setServices(d.services||[]);if(initialServiceId)setSelected((d.services||[]).find(s=>s.serviceId===initialServiceId)||null);})
-    .catch(e=>setError(e.message||'We could not load the service catalog.'))
-    .finally(()=>setLoadingCatalog(false));
- },[initialServiceId]);
-
- const variants=useMemo(()=>{
-   if(!selected)return [];
-   const base=baseServiceName(selected.name);
-   return services.filter(s=>baseServiceName(s.name)===base).sort((a,b)=>Number(a.price)-Number(b.price));
- },[services,selected]);
-
+ useEffect(()=>{fetch('/api/verify-commercial-intent?catalog=1').then(async r=>{const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not load the service catalog.');setServices(d.services||[]);if(initialServiceId)setSelected((d.services||[]).find(s=>s.serviceId===initialServiceId)||null);}).catch(e=>setError(e.message||'We could not load the service catalog.')).finally(()=>setLoadingCatalog(false));},[initialServiceId]);
+ const variants=useMemo(()=>{if(!selected)return [];const base=baseServiceName(selected.name);return services.filter(s=>baseServiceName(s.name)===base).sort((a,b)=>Number(a.price)-Number(b.price));},[services,selected]);
+ const selectedVisual=useMemo(()=>selected?getFamilyVisuals(selected.family||'')[0]:null,[selected]);
  const change=e=>setForm(f=>({...f,[e.target.name]:e.target.value}));
- const selectVariant=e=>{
-   const next=services.find(s=>s.serviceId===e.target.value)||null;
-   setSelected(next);
-   setForm(f=>({...f,serviceId:next?.serviceId||''}));
- };
-
- const submit=async e=>{
-   e.preventDefault();setLoading(true);setError('');
-   try{
-     let commercial=null;
-     if(form.serviceId){
-       const vr=await fetch('/api/verify-commercial-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({serviceId:form.serviceId,channelType:form.channelType})});
-       commercial=await vr.json();
-       if(!vr.ok||!commercial.success)throw new Error(commercial.error||'That service is not available.');
-     }
-     const requestedStartAt=form.requestedDate&&form.requestedTime?`${form.requestedDate}T${form.requestedTime}:00-04:00`:null;
-     const r=await fetch('/api/intake-webhook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...form,serviceType:selected?.name||'Service request',pricingServiceId:form.serviceId||null,requestedStartAt,requestedTimezone:'America/New_York',commercialIntent:commercial?{serviceId:form.serviceId,frozenPriceSnapshot:commercial.frozenPriceSnapshot}:null})});
-     const d=await r.json();
-     if(!r.ok||!d.success)throw new Error(d.error||'We could not submit your request.');
-     setRequestId(d.requestId||'');setBooking(d.booking||null);setSubmitted(true);
-   }catch(err){setError(err.message||'We could not submit your request.')}finally{setLoading(false)}
- };
+ const selectVariant=e=>{const next=services.find(s=>s.serviceId===e.target.value)||null;setSelected(next);setForm(f=>({...f,serviceId:next?.serviceId||''}));};
+ const submit=async e=>{e.preventDefault();setLoading(true);setError('');try{let commercial=null;if(form.serviceId){const vr=await fetch('/api/verify-commercial-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({serviceId:form.serviceId,channelType:form.channelType})});commercial=await vr.json();if(!vr.ok||!commercial.success)throw new Error(commercial.error||'That service is not available.');}const requestedStartAt=form.requestedDate&&form.requestedTime?`${form.requestedDate}T${form.requestedTime}:00-04:00`:null;const r=await fetch('/api/intake-webhook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...form,serviceType:selected?.name||'Service request',pricingServiceId:form.serviceId||null,requestedStartAt,requestedTimezone:'America/New_York',commercialIntent:commercial?{serviceId:form.serviceId,frozenPriceSnapshot:commercial.frozenPriceSnapshot}:null})});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not submit your request.');setRequestId(d.requestId||'');setBooking(d.booking||null);setSubmitted(true);}catch(err){setError(err.message||'We could not submit your request.')}finally{setLoading(false)}};
 
  return <div className="min-h-screen bg-[#fffaf1] text-[#302226]">
-   <section className="bg-[#5a1422] text-white"><div className="max-w-4xl mx-auto px-5 py-14 text-center"><p className="text-[#efce72] font-black uppercase tracking-[.18em] text-xs">DANI DECLARES • REQUEST SERVICE</p><h1 className="mt-3 text-4xl sm:text-5xl font-black">Tell us what you need handled.</h1><p className="mt-4 text-lg text-[#f1e4e6]">Choose the service and any applicable options, then tell us about the project. We will confirm scope, timing, and the appropriate payment path.</p></div></section>
+   <section className="bg-[#5a1422] text-white"><div className="max-w-5xl mx-auto px-5 py-14 text-center"><p className="text-[#efce72] font-black uppercase tracking-[.18em] text-xs">DANI DECLARES • REQUEST SERVICE</p><h1 className="mt-3 text-4xl sm:text-5xl font-black">Tell us what you need handled.</h1><p className="mt-4 text-lg text-[#f1e4e6]">Choose the service and any applicable options, then tell us about the project. We will confirm scope, timing, and the appropriate payment path.</p></div></section>
    <div className="max-w-4xl mx-auto px-5 py-10">
      {loadingCatalog&&<div className="mb-6 rounded-xl border border-[#e3d2a8] bg-white p-4 text-[#6d5b60]">Loading service details…</div>}
-     {selected&&<div className="mb-7 rounded-2xl bg-white border border-[#e4d0a1] p-6">
-       <div className="text-xs font-black uppercase tracking-[.12em] text-[#a8791c]">Selected service</div>
-       <h2 className="mt-2 text-2xl font-black text-[#5b1624]">{baseServiceName(selected.name)}</h2>
-       {variants.length>1?<div className="mt-4"><label className="block text-sm font-black text-[#5b1624] mb-2">Choose an option</label><select value={selected.serviceId} onChange={selectVariant} className="w-full rounded-xl border border-[#dfcfaa] px-4 py-3.5 bg-white">{variants.map(v=><option key={v.serviceId} value={v.serviceId}>{v.name} — {v.pricingLabel}</option>)}</select></div>:<p className="mt-2 font-bold text-[#6d5b60]">{selected.pricingLabel}</p>}
-       <p className="mt-3 text-sm text-[#806d72]">The displayed price is the catalog reference for this option. Final scope may be confirmed before invoicing.</p>
+     {selected&&<div className="mb-7 overflow-hidden rounded-3xl bg-white border border-[#e4d0a1] shadow-sm">
+       {selectedVisual?.imageUrl&&<div className="relative h-56 sm:h-72 overflow-hidden"><img src={selectedVisual.imageUrl} alt={selectedVisual.altText||`${selected.family} services`} className="w-full h-full object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-[#351019]/85 via-[#351019]/15 to-transparent"/><div className="absolute left-6 bottom-5"><div className="text-xs font-black uppercase tracking-[.12em] text-[#f0cf78]">{selected.family||'DANI DECLARES Services'}</div><h2 className="mt-1 text-2xl sm:text-3xl font-black text-white drop-shadow">{baseServiceName(selected.name)}</h2></div></div>}
+       <div className="p-6"><div className="text-xs font-black uppercase tracking-[.12em] text-[#a8791c]">Selected service</div>{variants.length>1?<div className="mt-4"><label className="block text-sm font-black text-[#5b1624] mb-2">Choose an option</label><select value={selected.serviceId} onChange={selectVariant} className="w-full rounded-xl border border-[#dfcfaa] px-4 py-3.5 bg-white">{variants.map(v=><option key={v.serviceId} value={v.serviceId}>{v.name} — {v.pricingLabel}</option>)}</select></div>:<p className="mt-2 font-bold text-[#6d5b60]">{selected.pricingLabel}</p>}<p className="mt-3 text-sm text-[#806d72]">The displayed price is the catalog reference for this option. Final scope may be confirmed before invoicing.</p></div>
      </div>}
      {error&&<div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-red-800">{error}</div>}
      {submitted?<div className="rounded-3xl bg-white border border-[#e3d2a8] p-8 text-center"><CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto"/><h2 className="mt-4 text-2xl font-black text-[#5b1624]">Request received.</h2><p className="mt-3 text-[#6d5b60]">We received your request and preferred timing. A request is not a final appointment until DANI DECLARES confirms the scope and schedule.</p>{booking?.startsAt&&<div className="mt-5 rounded-2xl bg-[#f8f0dd] p-4"><div className="text-xs font-black uppercase tracking-[.12em] text-[#8b6b1f]">Requested time</div><strong className="mt-1 block text-[#5b1624]">{new Date(booking.startsAt).toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'full',timeStyle:'short'})}</strong><div className="mt-1 text-xs text-[#806d72]">Eastern Time • temporary hold</div></div>}<p className="mt-5 text-sm text-[#88747a]">Request reference: {requestId}</p></div>:<form onSubmit={submit} className="rounded-3xl bg-white border border-[#e3d2a8] p-6 sm:p-8 shadow-sm space-y-6">
