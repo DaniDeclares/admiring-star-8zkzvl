@@ -1,10 +1,111 @@
 import React,{useEffect,useMemo,useState} from 'react';
-import {ArrowRight,Search,ShieldCheck} from 'lucide-react';
-const GROUPS={'01':'Home & Resident Support','03':'Real Estate Support','04':'Business & Administrative Support','10':'Events & Experiences'};
+import {ArrowRight,ChevronDown,Search,SlidersHorizontal,X} from 'lucide-react';
+
+const familyLabel=(family='')=>family
+  .replace(/^\d+[A-Z]?\s+/,'')
+  .replace(/^\d+[A-Z]\s+/,'')
+  .replace(/^Home Watch$/,'Home Watch & Property Check')
+  .replace(/^RECURRING$/i,'Recurring Services')
+  .replace(/^PACKAGES$/i,'Packages & Bundles')
+  .replace(/^ADD-ONS$/i,'Add-Ons');
+
+const baseServiceName=(name='')=>name
+  .replace(/\s+(1BR|2BR|3BR|4BR)$/i,'')
+  .replace(/\s+—\s+(30|60)\s*min$/i,'')
+  .replace(/\s+—\s+(7|14|30)\s*Days$/i,'');
+
+const priceValue=s=>Number(s?.price||0);
+
 export default function CommercialCatalogPage(){
- const [services,setServices]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[q,setQ]=useState(''),[group,setGroup]=useState('ALL');
- useEffect(()=>{fetch('/api/danis-specials').then(async r=>{const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not load services right now.');setServices(d.services||[])}).catch(e=>setError(e.message)).finally(()=>setLoading(false))},[]);
- const groups=useMemo(()=>['ALL',...Array.from(new Set(services.map(s=>s.division))).sort()],[services]);
- const filtered=useMemo(()=>services.filter(s=>{const text=`${s.name} ${s.family||''} ${GROUPS[s.division]||''}`.toLowerCase();return(group==='ALL'||group===s.division)&&(!q||text.includes(q.toLowerCase()))}),[services,q,group]);
- return <div className="bg-[#fffaf1] text-[#302226] min-h-screen"><section className="bg-[#5a1422] text-white"><div className="max-w-6xl mx-auto px-5 sm:px-8 py-14 md:py-20 text-center"><p className="text-[#efce72] font-black uppercase tracking-[.2em] text-xs">DANI'S SPECIALS • GEORGIA</p><h1 className="mt-3 text-4xl sm:text-5xl font-black">The owner-executable service catalog.</h1><p className="max-w-3xl mx-auto mt-4 text-lg text-[#f0e2e4]">Browse the services Danielle can personally execute and fulfill in Georgia. Provider-dependent and separately gated capabilities are not included here.</p></div></section><div className="max-w-7xl mx-auto px-5 sm:px-8 py-10">{error&&<div className="p-4 mb-6 rounded-xl bg-red-50 border border-red-200 text-red-800">{error}</div>}<div className="grid md:grid-cols-[1fr_260px] gap-4 mb-7"><div className="relative"><Search className="absolute left-4 top-3.5 w-5 h-5 text-[#8c777b]"/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search DANI'S SPECIALS…" className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white border border-[#e3d2a8] text-[#35272b] shadow-sm"/></div><select value={group} onChange={e=>setGroup(e.target.value)} className="px-4 py-3.5 rounded-xl bg-white border border-[#e3d2a8] text-[#4e1621] font-bold shadow-sm">{groups.map(d=><option key={d} value={d}>{d==='ALL'?'All available services':GROUPS[d]||'Other services'}</option>)}</select></div>{loading?<div className="py-16 text-center text-[#756469]">Loading DANI'S SPECIALS…</div>:<><div className="mb-5 text-sm text-[#756469]">{filtered.length} owner-executed services</div><div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">{filtered.map(s=><article key={s.serviceId} className="rounded-2xl bg-white border border-[#ead9b3] p-6 shadow-sm hover:shadow-lg transition"><div className="text-[#a8791c] text-xs font-extrabold uppercase tracking-[.1em]">{GROUPS[s.division]||'DANI DECLARES Service'}</div><h2 className="text-xl font-black text-[#5a1624] mt-2">{s.name}</h2><p className="text-sm text-[#766369] mt-2">{s.family}</p><div className="mt-5 flex items-center justify-between gap-3"><span className="text-[#6b1f2b] font-black">{s.pricingLabel}</span><a href={`/request-service?service=${encodeURIComponent(s.serviceId)}`} className="inline-flex items-center gap-1 rounded-lg bg-[#6b1f2b] px-3.5 py-2 text-sm font-bold text-white">Select <ArrowRight className="w-4 h-4"/></a></div></article>)}</div></>}<div className="mt-12 rounded-2xl bg-[#f8ecd0] border border-[#dfc78e] p-7 text-center"><ShieldCheck className="w-7 h-7 mx-auto text-[#6b1f2b]"/><h2 className="mt-2 text-2xl font-black text-[#5a1624]">Owner-executed first.</h2><p className="mt-2 text-[#6e5b60]">Requests are accepted through the Specials intake layer. Payment remains invoice/manual until a specific checkout path is separately activated.</p></div></div></div>;
+ const [services,setServices]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[q,setQ]=useState(''),[openFamily,setOpenFamily]=useState(''),[showAll,setShowAll]=useState(false);
+
+ useEffect(()=>{
+   fetch('/api/verify-commercial-intent?catalog=1')
+     .then(async r=>{const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not load services right now.');setServices(d.services||[])})
+     .catch(e=>setError(e.message))
+     .finally(()=>setLoading(false));
+ },[]);
+
+ const families=useMemo(()=>{
+   const map=new Map();
+   services.forEach(s=>{
+     const key=familyLabel(s.family||'Services');
+     if(!map.has(key))map.set(key,[]);
+     map.get(key).push(s);
+   });
+   return Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
+ },[services]);
+
+ const visibleFamilies=useMemo(()=>{
+   const needle=q.trim().toLowerCase();
+   if(!needle)return families;
+   return families.map(([family,items])=>[family,items.filter(s=>`${s.name} ${s.family}`.toLowerCase().includes(needle))]).filter(([,items])=>items.length);
+ },[families,q]);
+
+ const groupedServices=items=>{
+   const map=new Map();
+   items.forEach(s=>{
+     const base=baseServiceName(s.name);
+     if(!map.has(base))map.set(base,[]);
+     map.get(base).push(s);
+   });
+   return Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
+ };
+
+ const money=n=>`$${Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2})}`;
+
+ return <div className="min-h-screen bg-[#fffaf1] text-[#302226]">
+   <section className="bg-[#5a1422] text-white">
+     <div className="max-w-6xl mx-auto px-5 sm:px-8 py-14 md:py-20 text-center">
+       <p className="text-[#efce72] font-black uppercase tracking-[.2em] text-xs">DANI DECLARES • SERVICES</p>
+       <h1 className="mt-3 text-4xl sm:text-5xl font-black">Professional support, organized around what you need handled.</h1>
+       <p className="max-w-3xl mx-auto mt-5 text-lg text-[#f0e2e4] leading-relaxed">Browse service areas, explore the work available within each area, and request the service that fits your project. Georgia service area.</p>
+     </div>
+   </section>
+
+   <main className="max-w-7xl mx-auto px-5 sm:px-8 py-10 md:py-14">
+     {error&&<div className="p-4 mb-6 rounded-xl bg-red-50 border border-red-200 text-red-800">{error}</div>}
+
+     <div className="max-w-3xl mx-auto mb-10">
+       <div className="relative">
+         <Search className="absolute left-4 top-3.5 w-5 h-5 text-[#8c777b]"/>
+         <input value={q} onChange={e=>{setQ(e.target.value);setOpenFamily('')}} placeholder="Search services…" aria-label="Search services" className="w-full pl-12 pr-12 py-4 rounded-2xl bg-white border border-[#e3d2a8] text-[#35272b] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#d2a83f]"/>
+         {q&&<button type="button" onClick={()=>setQ('')} aria-label="Clear search" className="absolute right-3 top-2.5 rounded-xl p-2 text-[#756469] hover:bg-[#f8ecd0]"><X className="w-5 h-5"/></button>}
+       </div>
+       <div className="mt-3 flex items-center justify-center gap-2 text-xs text-[#756469]"><SlidersHorizontal className="w-4 h-4"/> Choose a service area first, then narrow down to the exact service.</div>
+     </div>
+
+     {loading?<div className="py-20 text-center text-[#756469]">Loading services…</div>:<>
+       <div className="flex items-end justify-between gap-4 mb-5">
+         <div><p className="text-xs font-black uppercase tracking-[.14em] text-[#a8791c]">Service areas</p><h2 className="mt-1 text-3xl font-black text-[#5a1624]">What do you need handled?</h2></div>
+         <div className="hidden sm:block text-sm text-[#756469]">{services.length} services in the current catalog</div>
+       </div>
+
+       {visibleFamilies.length===0?<div className="rounded-2xl bg-white border border-[#ead9b3] p-10 text-center"><h2 className="text-xl font-black text-[#5a1624]">No matching services</h2><p className="mt-2 text-[#756469]">Try a broader search or clear the search to browse all service areas.</p></div>:<div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+         {visibleFamilies.map(([family,items])=>{
+           const isOpen=openFamily===family;
+           const groups=groupedServices(items);
+           return <section key={family} className={`rounded-2xl bg-white border ${isOpen?'border-[#caa24a] shadow-lg':'border-[#ead9b3] shadow-sm'} overflow-hidden`}>
+             <button type="button" onClick={()=>setOpenFamily(isOpen?'':family)} className="w-full text-left p-6 hover:bg-[#fffaf0] transition">
+               <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[.12em] text-[#a8791c]">Service area</p><h3 className="mt-2 text-xl font-black text-[#5a1624]">{family}</h3><p className="mt-2 text-sm text-[#756469]">{items.length} service{items.length===1?'':'s'} available</p></div><ChevronDown className={`w-5 h-5 mt-1 text-[#6b1f2b] transition-transform ${isOpen?'rotate-180':''}`}/></div>
+             </button>
+             {isOpen&&<div className="border-t border-[#ead9b3] bg-[#fffdf8] p-4 space-y-2">
+               {groups.map(([base,variants])=>{
+                 const sorted=[...variants].sort((a,b)=>priceValue(a)-priceValue(b));
+                 const hasVariants=sorted.length>1;
+                 const lowest=sorted[0];
+                 return <div key={base} className="rounded-xl border border-[#ead9b3] bg-white p-4">
+                   <div className="flex items-start justify-between gap-4"><div><h4 className="font-black text-[#5a1624]">{base}</h4><p className="mt-1 text-xs text-[#806d72]">{hasVariants?`${sorted.length} options available`:lowest.unit||'Service'}</p></div><span className="shrink-0 font-black text-[#6b1f2b]">{hasVariants?`From ${money(lowest.price)}`:lowest.pricingLabel}</span></div>
+                   <a href={`/request-service?service=${encodeURIComponent(lowest.serviceId)}`} className="mt-3 inline-flex items-center gap-1 text-sm font-black text-[#855d15] hover:text-[#5a1624]">{hasVariants?'Choose options':'Request service'}<ArrowRight className="w-4 h-4"/></a>
+                 </div>;
+               })}
+             </div>}
+           </section>;
+         })}
+       </div>}
+
+       {!q&&<div className="mt-8 text-center"><button type="button" onClick={()=>setShowAll(v=>!v)} className="text-sm font-black text-[#6b1f2b] underline underline-offset-4">{showAll?'Hide catalog notes':'How the catalog works'}</button>{showAll&&<div className="max-w-3xl mx-auto mt-4 rounded-2xl bg-[#f8ecd0] border border-[#dfc78e] p-6 text-left"><p className="font-black text-[#5a1624]">One service area. One clear next step.</p><p className="mt-2 text-sm leading-6 text-[#6e5b60]">Service variants such as bedroom count, duration, quantity, or project size are handled inside the request flow instead of creating a separate button for every variation. Some requests require scope confirmation before a final invoice is issued.</p></div>}</div>}
+     </>}
+   </main>
+ </div>;
 }
