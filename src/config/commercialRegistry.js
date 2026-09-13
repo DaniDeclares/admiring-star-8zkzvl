@@ -1,6 +1,7 @@
-// DANI DECLARES LLC — COMMERCIAL REGISTRY AUTHORITY
-// Current architecture: 5 official customer channels + CH01 resident subchannels.
-// Customer pricing is canonical commercial data; provider economics remain private.
+// DANI DECLARES LLC — COMMERCIAL REGISTRY CONSTANTS
+// Runtime commercial authority lives in Supabase governed-service controls.
+// This module retains stable channel/model constants and compatibility helpers;
+// it must not override runtime commercial status, pricing, fulfillment, or geography.
 
 export const CHANNELS = Object.freeze({
   CH01_RESIDENT_CONCIERGE: 'CH01',
@@ -28,23 +29,16 @@ export const NETWORK_ACCESS_LEVELS = Object.freeze({ NONE:'NONE', APPLICANT:'APP
 export const PRICE_MODELS = Object.freeze({ FIXED_FLAT:'FIXED_FLAT', VARIABLE_SCALAR:'VARIABLE_SCALAR', RETAINER_SUITE:'RETAINER_SUITE', BESPOKE_SOW:'BESPOKE_SOW' });
 export const STRIPE_MODES = Object.freeze({ DIRECT_LINK_MATCH:'DIRECT_LINK_MATCH', DYNAMIC_CHECKOUT:'DYNAMIC_CHECKOUT', FROZEN_ESTIMATE_CHECKOUT:'FROZEN_ESTIMATE_CHECKOUT', MANUAL_INVOICE:'MANUAL_INVOICE' });
 export const PROVIDER_LANES = Object.freeze({ STAFF_DIRECT:'STAFF_DIRECT', SPECIALIST_NETWORK:'SPECIALIST_NETWORK', UNASSIGNED:'UNASSIGNED' });
-export const COMMERCIAL_STATUS = Object.freeze({ CANONICAL_ACTIVE:'CANONICAL_ACTIVE', DEPRECATED_HISTORICAL:'DEPRECATED_HISTORICAL', PENDING_RECONCILIATION:'PENDING_RECONCILIATION' });
+export const COMMERCIAL_STATUS = Object.freeze({ CANONICAL_ACTIVE:'CANONICAL_ACTIVE', DEPRECATED_HISTORICAL:'DEPRECATED_HISTORICAL', PENDING_RECONCILIATION:'PENDING_RECONCILIATION', FULFILLMENT_GATED:'FULFILLMENT_GATED', INTAKE_ONLY:'INTAKE_ONLY' });
 
-// These are the owner-approved D01 offers activated for immediate commercial launch.
-// They are Georgia-only, owner-executed, and intentionally isolated from the broader
-// provider-dependent/PASS-1 catalog. Prices are exact customer prices for the defined scope.
-const D01_LAUNCH_OFFERS = Object.freeze({
-  'DNI-01A-009': { serviceId:'DNI-01A-009', name:'Bin Sanitation', division:'01', market:'GA', ownerExecutableLive:true, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:59, pricingLabel:'$59', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE' },
-  'DNI-01A-010': { serviceId:'DNI-01A-010', name:'Odor Neutralization', division:'01', market:'GA', ownerExecutableLive:true, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:99, pricingLabel:'$99', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE' },
-  'DNI-01D-002': { serviceId:'DNI-01D-002', name:'Home Watch / Household Absence Check', division:'01', market:'GA', ownerExecutableLive:true, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:65, pricingLabel:'$65/visit', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE', recurringOffer:{ amount:149, interval:'month', label:'Basic recurring Home Watch — $149/month' } },
-  'DNI-01D-004': { serviceId:'DNI-01D-004', name:'Event / Party Home Preparation & Reset', division:'01', market:'GA', ownerExecutableLive:true, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:175, pricingLabel:'$175', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'CANONICAL_ACTIVE' },
-});
+// IMPORTANT: do not hard-code launch offers here. Supabase is the runtime
+// commercial authority. These compatibility aliases intentionally fail closed
+// until a caller supplies/loads a runtime governed record.
+export const D01_LAUNCH_OFFERS = Object.freeze({});
 
 export const masterCommercialRegistry = Object.freeze({
-  architectureVersion:'2026-09-10-owner-executable-live-layer',
-  // The broader company architecture may preserve additional authorized markets,
-  // but DANI'S SPECIALS and this immediate owner-executed commercial layer are GA-only.
-  geography:{ activeMarkets:['GA'], nationalReady:false },
+  architectureVersion:'2026-09-13-runtime-commercial-authority',
+  geography:{ activeMarkets:[], nationalReady:false },
   channels:CHANNELS,
   ch01Subchannels:CH01_SUBCHANNELS,
   workerSide:'OWNER_OPERATOR',
@@ -64,11 +58,8 @@ export const providerCommercialGovernance = Object.freeze({
   insuranceVerificationRequiredWhenApplicable:true,
 });
 
-export function getCommercialRecord(serviceId) { return D01_LAUNCH_OFFERS[String(serviceId || '').trim()] || null; }
-export function isCanonicalActive(recordOrServiceId) {
-  const record = typeof recordOrServiceId === 'string' ? getCommercialRecord(recordOrServiceId) : recordOrServiceId;
-  return record?.status === COMMERCIAL_STATUS.CANONICAL_ACTIVE;
-}
-export function getCustomerBasePrice(serviceId) { return getCommercialRecord(serviceId)?.baseCustomerPrice ?? null; }
-export function listCanonicalOffers() { return Object.values(D01_LAUNCH_OFFERS); }
+export function getCommercialRecord() { return null; }
+export function isCanonicalActive() { return false; }
+export function getCustomerBasePrice() { return null; }
+export function listCanonicalOffers() { return []; }
 export default D01_LAUNCH_OFFERS;
