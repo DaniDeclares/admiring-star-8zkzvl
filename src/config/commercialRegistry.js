@@ -37,7 +37,9 @@ const D01_LAUNCH_OFFERS = Object.freeze({
 
 export const masterCommercialRegistry = Object.freeze({
   architectureVersion:'2026-09-13-runtime-commercial-authority',
-  geography:{ activeMarkets:[], nationalReady:false },
+  // Enterprise geography is GA + regional SC. Individual service records may
+  // still carry narrower eligibility until service-level compliance/market gates pass.
+  geography:{ activeMarkets:['GA','SC'], nationalReady:false },
   channels:CHANNELS,
   ch01Subchannels:CH01_SUBCHANNELS,
   workerSide:'OWNER_OPERATOR',
