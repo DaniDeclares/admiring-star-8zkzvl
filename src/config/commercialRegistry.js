@@ -1,7 +1,8 @@
-// DANI DECLARES LLC — COMMERCIAL REGISTRY CONSTANTS
-// Runtime commercial authority lives in Supabase governed-service controls.
-// This module retains stable channel/model constants and compatibility helpers;
-// it must not override runtime commercial status, pricing, fulfillment, or geography.
+// DANI DECLARES LLC — STATIC COMPATIBILITY REGISTRY
+// Runtime commercial authority is Supabase. This file is NOT a source of truth
+// for customer-facing status, pricing, fulfillment, geography, or Stripe launch.
+// The legacy definitions below are retained only so existing consumers do not
+// lose service metadata while they are migrated to runtime resolution.
 
 export const CHANNELS = Object.freeze({
   CH01_RESIDENT_CONCIERGE: 'CH01',
@@ -16,13 +17,7 @@ export const CH01_SUBCHANNELS = Object.freeze({
   CH01_B_APARTMENT_RESIDENT: 'CH01-B',
 });
 
-export const CHANNEL_TYPES = Object.freeze({
-  B2C_RETAIL: 'B2C_RETAIL',
-  B2B_VOLUME: 'B2B_VOLUME',
-  B2B2C_RESIDENT_PERK: 'B2B2C_RESIDENT_PERK',
-  B2G_PROCUREMENT: 'B2G_PROCUREMENT',
-});
-
+export const CHANNEL_TYPES = Object.freeze({ B2C_RETAIL:'B2C_RETAIL', B2B_VOLUME:'B2B_VOLUME', B2B2C_RESIDENT_PERK:'B2B2C_RESIDENT_PERK', B2G_PROCUREMENT:'B2G_PROCUREMENT' });
 export const COMMERCIAL_RELATIONSHIP_MODELS = Object.freeze({ B2C:'B2C', B2B:'B2B', B2B2C:'B2B2C', B2G:'B2G' });
 export const RELATIONSHIP_TYPES = Object.freeze({ CUSTOMER:'CUSTOMER', BUSINESS_BUILD_CLIENT:'BUSINESS_BUILD_CLIENT', PROVIDER:'PROVIDER', SPECIALIST:'SPECIALIST', PARTNER:'PARTNER', SUBCONTRACTOR:'SUBCONTRACTOR', VENDOR:'VENDOR', REFERRAL_SOURCE:'REFERRAL_SOURCE', EMPLOYEE:'EMPLOYEE' });
 export const NETWORK_ACCESS_LEVELS = Object.freeze({ NONE:'NONE', APPLICANT:'APPLICANT', VERIFIED:'VERIFIED', AUTHORIZED:'AUTHORIZED', PREFERRED:'PREFERRED', STRATEGIC:'STRATEGIC' });
@@ -31,10 +26,14 @@ export const STRIPE_MODES = Object.freeze({ DIRECT_LINK_MATCH:'DIRECT_LINK_MATCH
 export const PROVIDER_LANES = Object.freeze({ STAFF_DIRECT:'STAFF_DIRECT', SPECIALIST_NETWORK:'SPECIALIST_NETWORK', UNASSIGNED:'UNASSIGNED' });
 export const COMMERCIAL_STATUS = Object.freeze({ CANONICAL_ACTIVE:'CANONICAL_ACTIVE', DEPRECATED_HISTORICAL:'DEPRECATED_HISTORICAL', PENDING_RECONCILIATION:'PENDING_RECONCILIATION', FULFILLMENT_GATED:'FULFILLMENT_GATED', INTAKE_ONLY:'INTAKE_ONLY' });
 
-// IMPORTANT: do not hard-code launch offers here. Supabase is the runtime
-// commercial authority. These compatibility aliases intentionally fail closed
-// until a caller supplies/loads a runtime governed record.
-export const D01_LAUNCH_OFFERS = Object.freeze({});
+// Legacy compatibility metadata only. Do not use these records to authorize
+// checkout. The authoritative runtime gate is Supabase governed-service data.
+const D01_LAUNCH_OFFERS = Object.freeze({
+  'DNI-01A-009': { serviceId:'DNI-01A-009', name:'Bin Sanitation', division:'01', market:'GA', ownerExecutableLive:false, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:59, pricingLabel:'$59', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'FULFILLMENT_GATED' },
+  'DNI-01A-010': { serviceId:'DNI-01A-010', name:'Odor Neutralization', division:'01', market:'GA', ownerExecutableLive:false, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:99, pricingLabel:'$99', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'FULFILLMENT_GATED' },
+  'DNI-01D-002': { serviceId:'DNI-01D-002', name:'Home Watch / Household Absence Check', division:'01', market:'GA', ownerExecutableLive:false, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:65, pricingLabel:'$65/visit', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'FULFILLMENT_GATED', recurringOffer:{ amount:149, interval:'month', label:'Basic recurring Home Watch — $149/month' } },
+  'DNI-01D-004': { serviceId:'DNI-01D-004', name:'Event / Party Home Preparation & Reset', division:'01', market:'GA', ownerExecutableLive:false, channel:'B2C_RETAIL', model:'FIXED_FLAT', baseCustomerPrice:175, pricingLabel:'$175', residentDiscountEligible:false, allowedModifiers:[], stripeExecutionMode:'DYNAMIC_CHECKOUT', providerIsolationLane:'STAFF_DIRECT', status:'INTAKE_ONLY' },
+});
 
 export const masterCommercialRegistry = Object.freeze({
   architectureVersion:'2026-09-13-runtime-commercial-authority',
@@ -48,18 +47,10 @@ export const masterCommercialRegistry = Object.freeze({
   launchOffers:D01_LAUNCH_OFFERS,
 });
 
-export const providerCommercialGovernance = Object.freeze({
-  commercialAuthority:'DANI_DECLARES',
-  pricingAuthority:'OWNER_DELEGATED_MARKET_RESEARCH',
-  marketingAuthority:'DANI_DECLARES',
-  customerRelationshipAuthority:'DANI_DECLARES',
-  skuAuthorizationRequired:true,
-  credentialVerificationRequired:true,
-  insuranceVerificationRequiredWhenApplicable:true,
-});
+export const providerCommercialGovernance = Object.freeze({ commercialAuthority:'DANI_DECLARES', pricingAuthority:'OWNER_DELEGATED_MARKET_RESEARCH', marketingAuthority:'DANI_DECLARES', customerRelationshipAuthority:'DANI_DECLARES', skuAuthorizationRequired:true, credentialVerificationRequired:true, insuranceVerificationRequiredWhenApplicable:true });
 
-export function getCommercialRecord() { return null; }
-export function isCanonicalActive() { return false; }
-export function getCustomerBasePrice() { return null; }
-export function listCanonicalOffers() { return []; }
+export function getCommercialRecord(serviceId) { return D01_LAUNCH_OFFERS[String(serviceId || '').trim()] || null; }
+export function isCanonicalActive(recordOrServiceId) { const record = typeof recordOrServiceId === 'string' ? getCommercialRecord(recordOrServiceId) : recordOrServiceId; return record?.status === COMMERCIAL_STATUS.CANONICAL_ACTIVE; }
+export function getCustomerBasePrice(serviceId) { return getCommercialRecord(serviceId)?.baseCustomerPrice ?? null; }
+export function listCanonicalOffers() { return Object.values(D01_LAUNCH_OFFERS).filter((record) => record.status === COMMERCIAL_STATUS.CANONICAL_ACTIVE); }
 export default D01_LAUNCH_OFFERS;
