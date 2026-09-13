@@ -78,11 +78,21 @@ const FAMILY_VISUALS = {
   'Recurring Services': unsplash('photo-1551836022-d5d88e9218df', 'Ongoing service planning and coordination')
 };
 
+const DIVISION_DEFAULT_FAMILY = {
+  '01': 'Home & Cleaning', '02': 'Property, Facilities & Field Operations', '03': 'Real Estate & Closing Support',
+  '04': 'Administrative & Business Operations', '05': 'Administrative & Business Operations',
+  '06': 'Business Formation & Digital Infrastructure', '07': 'Marketing, Content & Media Production',
+  '08': 'Business Development & Growth', '09': 'Classes, Workshops & Training', '10': 'Events & Experiences',
+  '11': 'Creative Design & Production', '12': 'Logistics, Courier & Asset Sourcing',
+  '13': 'Government & Institutional Procurement'
+};
+
 export const getServiceVisuals = (division, serviceName = '', serviceId = '') => {
   const text = `${serviceName} ${serviceId}`.toLowerCase();
   const match = SERVICE_VISUAL_RULES.find(rule => rule.keys.some(key => text.includes(key)));
   if (match?.visual) return [match.visual];
-  return SERVICE_VISUALS_2026[division] || SERVICE_VISUALS_2026.business;
+  const fallback = FAMILY_VISUALS[DIVISION_DEFAULT_FAMILY[String(division).padStart(2, '0')]] || FAMILY_VISUALS['Administrative & Business Operations'];
+  return fallback ? [fallback] : [];
 };
 
 export const getFamilyVisuals = (family) => {
