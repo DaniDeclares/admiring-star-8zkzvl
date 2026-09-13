@@ -1,23 +1,62 @@
 import prisma from '../lib/prisma.js';
-import { getCommercialRecord } from '../src/config/commercialRegistry';
 import { resolveCommercialPrice } from '../src/lib/operations/masterCommercialResolver';
+
 const CHANNELS_BY_DIVISION=Object.freeze({'01':['B2C','B2B_APT'],'02':['B2B_APT','B2B_RE','B2B','B2G'],'03':['B2B_RE','B2B_APT','B2B'],'04':['B2B','B2B_RE','B2B_APT','B2G'],'05':['B2C','B2B_APT','B2B_RE','B2G'],'06':['B2B','B2B_RE','B2G'],'07':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'08':['B2B_RE','B2B','B2G'],'09':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'10':['B2C','B2B_APT','B2B_RE','B2B'],'11':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'12':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'13':['B2B_APT','B2B_RE','B2B','B2G']});
 const json=(res,status,payload)=>res.status(status).json(payload);
-const specials=async()=>prisma.$queryRawUnsafe(`SELECT service_id AS "serviceId",family,service_name AS name,unit,price,commercial_status AS "commercialStatus" FROM public.danis_specials_offers WHERE active=true AND market='GA' ORDER BY service_id`);
-function durationMinutes(name,unit,price){const n=String(name||'');const u=String(unit||'').toLowerCase();if(/4[-–]5\s*hour/i.test(n))return 300;if(/5[-–]\s*hour/i.test(n))return 300;const exact=n.match(/(30|60)\s*min/i);if(exact)return Number(exact[1]);const block=n.match(/(2|3|4|5)\s*[-–]?\s*(?:hour|hr)/i);if(block)return Number(block[1])*60;if(u==='hour')return 60;if(u==='2-hour block')return 120;if(u==='3-hour block')return 180;if(u==='4-hour block')return 240;if(u==='5-hour block')return 300;if(u==='basket'||u==='bed'||u==='walk')return 60;if(u==='window')return 60;if(u==='document')return 60;if(u==='dispatch'||u==='run'||u==='delivery'||u==='coordination')return 90;if(u==='visit')return Number(price)>=200?180:120;if(u==='project'||u==='package'||u==='cycle')return Number(price)>=550?300:Number(price)>=300?240:Number(price)>=200?180:120;if(u==='minimum'||u==='flat'||u==='service'||u==='treatment'||u==='job'||u==='load'||u==='area'||u==='tree'||u==='wreath'||u==='section'||u==='mantel'||u==='rug'||u==='chair'||u==='sofa'||u==='mattress'||u==='mirror'||u==='bath'||u==='event'||u==='audit log')return Number(price)>=300?180:Number(price)>=150?120:60;return Number(price)>=300?180:Number(price)>=150?120:60;}
-const specialShape=r=>{const d=['REAL ESTATE'].includes(r.family)?'03':['BUSINESS ADMIN','BUSINESS FIELD','OFFICE'].includes(r.family)?'04':r.family==='EVENT'?'10':'01';const p=Number(r.price);const bare=['visit','project','service','flat','treatment','job','load','cycle','package','area','tree','wreath','section','mantel','rug','chair','sofa','mattress','mirror','bath','event','dispatch','audit log','delivery','run','walk','coordination','document','plan','minimum'];return {...r,division:d,market:'GA',baseCustomerPrice:p,pricingLabel:bare.includes(r.unit)?`$${p.toLocaleString('en-US')}`:`$${p.toLocaleString('en-US')}/${r.unit}`,residentDiscountEligible:false,defaultDurationMinutes:durationMinutes(r.name,r.unit,p)};};
+
+const governedCatalog=async()=>prisma.$queryRawUnsafe(`
+ SELECT o.canonical_sku AS "serviceId", o.service_name AS name,
+        LPAD(o.division::text,2,'0') AS division,
+        o.commercial_offer_status AS "commercialOfferStatus",
+        o.fulfillment_gate_status AS "fulfillmentGateStatus",
+        o.pricing_rule_count AS "pricingRuleCount",
+        o.market_rule_count AS "marketRuleCount",
+        o.channel_availability_count AS "channelAvailabilityCount",
+        o.authorized_provider_capability_count AS "authorizedProviderCapabilityCount",
+        o.priced_channel_count AS "pricedChannelCount",
+        o.ch01_a_priced AS "ch01APriced", o.ch01_b_priced AS "ch01BPriced",
+        s.service_family AS family, s.description, s.starting_price AS "baseCustomerPrice",
+        s.public_price_low AS "publicPriceLow", s.public_price_high AS "publicPriceHigh",
+        s.public_price_display AS "publicPriceDisplay", s.pricing_type AS model,
+        s.billing_cycle AS "billingCycle", s.resident_discount_eligible AS "residentDiscountEligible",
+        s.commercial_status AS status, s.id AS "runtimeServiceId"
+ FROM public.dd_governed_service_offers o
+ LEFT JOIN public.services s ON s.id=o.runtime_service_id
+ WHERE o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY')
+ ORDER BY o.division, o.service_name`);
+
+const governedService=async(serviceId)=>prisma.$queryRawUnsafe(`
+ SELECT o.canonical_sku AS "serviceId", o.service_name AS name,
+        LPAD(o.division::text,2,'0') AS division,
+        o.commercial_offer_status AS "commercialOfferStatus",
+        o.fulfillment_gate_status AS "fulfillmentGateStatus",
+        s.starting_price AS "baseCustomerPrice", s.pricing_type AS model,
+        s.billing_cycle AS "billingCycle", s.resident_discount_eligible AS "residentDiscountEligible",
+        s.commercial_status AS status, s.id AS "runtimeServiceId"
+ FROM public.dd_governed_service_offers o
+ LEFT JOIN public.services s ON s.id=o.runtime_service_id
+ WHERE o.canonical_sku=$1
+   AND o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY')
+ LIMIT 1`,serviceId);
+
 export default async function handler(req,res){try{
- if(req.method==='GET'&&req.query?.catalog==='1'){const rows=await specials();const services=rows.map(s=>({...specialShape(s),checkoutEligible:s.commercialStatus==='PASS_1',intakeAvailable:s.commercialStatus!=='GATED'}));return json(res,200,{success:true,count:services.length,services});}
+ if(req.method==='GET'&&req.query?.catalog==='1'){
+   const rows=await governedCatalog();
+   const services=rows.map(s=>({...s,market:'GA',checkoutEligible:s.commercialOfferStatus==='SELL_NOW'&&s.fulfillmentGateStatus==='READY',intakeAvailable:true}));
+   return json(res,200,{success:true,count:services.length,services});
+ }
  if(req.method!=='POST')return json(res,405,{error:'This action is not available.'});
- const body=req.body||{},serviceId=String(body.serviceId||'').trim();if(!serviceId)return json(res,400,{error:'Please choose a service first.'});
- const specialRows=await prisma.$queryRawUnsafe(`SELECT service_id AS "serviceId",family,service_name AS name,unit,price,commercial_status AS "commercialStatus" FROM public.danis_specials_offers WHERE service_id=$1 AND active=true AND market='GA' LIMIT 1`,serviceId);
- if(specialRows.length){const s=specialShape(specialRows[0]);const allowed=CHANNELS_BY_DIVISION[s.division]||[];const channelType=String(body.channelType||'').trim();if(channelType&&!allowed.includes(channelType))return json(res,400,{error:'This service is not currently offered for the selected customer type.'});const checkoutEligible=s.commercialStatus==='PASS_1';return json(res,200,{success:true,serviceId:s.serviceId,serviceName:s.name,frozenPriceSnapshot:s.baseCustomerPrice,checkoutEligible,intakeAvailable:s.commercialStatus!=='GATED',defaultDurationMinutes:s.defaultDurationMinutes,commercialStatus:s.commercialStatus,message:checkoutEligible?'Price confirmed for this request.':'We can take the request now. Final payment eligibility depends on the service approval status.'});}
- const offerRows=await prisma.$queryRawUnsafe(`SELECT o.canonical_sku AS "serviceId",o.service_name AS name,LPAD(o.division::text,2,'0') AS division,o.commercial_offer_status AS "commercialOfferStatus",o.fulfillment_gate_status AS "fulfillmentGateStatus",s.starting_price AS "baseCustomerPrice",s.pricing_type AS "model",s.billing_cycle AS "billingCycle",s.resident_discount_eligible AS "residentDiscountEligible",s.commercial_status AS status,s.id AS "runtimeServiceId" FROM public.dd_governed_service_offers o LEFT JOIN public.services s ON s.id=o.runtime_service_id WHERE o.canonical_sku=$1 ORDER BY CASE WHEN o.commercial_offer_status='SELL_NOW' THEN 0 WHEN o.commercial_offer_status='INTAKE_ONLY' THEN 1 ELSE 2 END LIMIT 1`);
- const db=offerRows?.[0],registryRecord=getCommercialRecord(serviceId);if(!db&&!registryRecord)return json(res,404,{error:'We could not find that service in the current catalog.'});
- const record=registryRecord||{serviceId:db.serviceId,name:db.name,division:db.division,model:String(db.model||'').toUpperCase(),baseCustomerPrice:db.baseCustomerPrice==null?null:Number(db.baseCustomerPrice),billingCycle:db.billingCycle,residentDiscountEligible:Boolean(db.residentDiscountEligible),status:db.status};
- const channelType=String(body.channelType||'').trim(),allowed=CHANNELS_BY_DIVISION[record.division]||[];if(channelType&&!allowed.includes(channelType))return json(res,400,{error:'This service is not currently offered for the selected customer type.'});
- const isVerifiedResident=Boolean(body.isVerifiedCommunityResident===true&&body.communityId);let expectedPrice=registryRecord?resolveCommercialPrice({baseServiceId:serviceId,isVerifiedResident,hasHeavySoilTier2:Boolean(body.hasHeavySoil),bedrooms:body.bedrooms==null?undefined:Number(body.bedrooms),bathrooms:body.bathrooms==null?undefined:Number(body.bathrooms),totalSquareFootage:body.totalSquareFootage==null?undefined:Number(body.totalSquareFootage)}):record.baseCustomerPrice;if(!registryRecord&&isVerifiedResident&&record.residentDiscountEligible&&expectedPrice!=null)expectedPrice=Math.round(Number(expectedPrice)*.85*100)/100;
- const quoteRequired=['BESPOKE_SOW','SOW','SOW_PROCUREMENT','QUOTE','STARTING_AT','CONFIGURED','VARIABLE_QUOTE'].includes(String(record.model||'').toUpperCase())||expectedPrice==null;const orderableNow=db?.commercialOfferStatus==='SELL_NOW'&&db?.fulfillmentGateStatus==='READY';
- if(quoteRequired||!orderableNow)return json(res,200,{success:true,serviceId,serviceName:record.name,frozenPriceSnapshot:quoteRequired?null:Number(expectedPrice),checkoutEligible:false,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.'});
- return json(res,200,{success:true,serviceId,serviceName:record.name,frozenPriceSnapshot:Number(expectedPrice),checkoutEligible:true,message:'Price confirmed for this request.'});
+ const body=req.body||{},serviceId=String(body.serviceId||'').trim();
+ if(!serviceId)return json(res,400,{error:'Please choose a service first.'});
+ const [db]=await governedService(serviceId);
+ if(!db)return json(res,404,{error:'That service is not available in the governed commercial catalog.'});
+ const channelType=String(body.channelType||'').trim(),allowed=CHANNELS_BY_DIVISION[db.division]||[];
+ if(channelType&&!allowed.includes(channelType))return json(res,400,{error:'This service is not currently offered for the selected customer type.'});
+ const isVerifiedResident=Boolean(body.isVerifiedCommunityResident===true&&body.communityId);
+ let expectedPrice=db.baseCustomerPrice==null?null:Number(db.baseCustomerPrice);
+ if(isVerifiedResident&&db.residentDiscountEligible&&expectedPrice!=null)expectedPrice=Math.round(expectedPrice*.85*100)/100;
+ const quoteRequired=['BESPOKE_SOW','SOW','SOW_PROCUREMENT','QUOTE','STARTING_AT','CONFIGURED','VARIABLE_QUOTE'].includes(String(db.model||'').toUpperCase())||expectedPrice==null;
+ const orderableNow=db.commercialOfferStatus==='SELL_NOW'&&db.fulfillmentGateStatus==='READY';
+ if(quoteRequired||!orderableNow)return json(res,200,{success:true,serviceId,serviceName:db.name,frozenPriceSnapshot:quoteRequired?null:Number(expectedPrice),checkoutEligible:false,intakeAvailable:true,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.'});
+ return json(res,200,{success:true,serviceId,serviceName:db.name,frozenPriceSnapshot:Number(expectedPrice),checkoutEligible:true,intakeAvailable:true,message:'Price confirmed for this request.'});
  }catch(error){console.error('Service verification failed:',error);return json(res,400,{error:'We could not confirm this service right now. Please try again or contact DANI DECLARES.'});}}
