@@ -50,14 +50,19 @@ export default async function handler(req,res){
     }
     const reconciliation=await reconcileStripePayment(event,tx);
     await tx.serviceRequest.update({where:{id:request.id},data:{status:'job_created'}});
+    // Queued on the same transaction as the reconciliation it describes: either both commit
+    // together, or a failure here rolls back the job/status/reconciliation too, so a Stripe
+    // retry starts clean instead of silently losing the notification behind an idempotent replay.
+    await publishPaymentReconciled(reconciliation,tx);
     return {status:'RECONCILED',job,reconciliation};
    });
    if(result.status==='IDEMPOTENT_REPLAY')return res.status(200).json({received:true,idempotent:true});
-   await publishPaymentReconciled(result.reconciliation);
    console.log(`B2C payment accepted; request ${requestId} -> job ${result.job.public_reference}.`);
   }catch(error){console.error('Failed to transition/reconcile paid B2C request:',error.message);return res.status(500).json({error:'Payment received but operational/accounting transition failed'});}
  }else if(changeOrderId){
-  try{const reconciliation=await reconcileStripePayment(event);await publishPaymentReconciled(reconciliation);}catch(dbErr){console.error('Failed to reconcile change-order payment:',dbErr.message);return res.status(500).json({error:'Payment received but change-order reconciliation failed'});}
+  try{
+   await prisma.$transaction(async tx=>{const reconciliation=await reconcileStripePayment(event,tx);await publishPaymentReconciled(reconciliation,tx);});
+  }catch(dbErr){console.error('Failed to reconcile change-order payment:',dbErr.message);return res.status(500).json({error:'Payment received but change-order reconciliation failed'});}
  }
  return res.status(200).json({received:true});
 }
