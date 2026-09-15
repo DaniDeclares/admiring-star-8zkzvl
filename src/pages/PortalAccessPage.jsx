@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
+import { savePendingOnboarding } from '../lib/pendingOnboarding.js';
 import './PortalAccessPage.css';
 
 const OPTIONS = [
@@ -91,12 +92,32 @@ export default function PortalAccessPage() {
     const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     if(authError){setBusy(false);return setError(authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
 
-    const identityPayload={auth_user_id:data.user.id,portal_role:portalRole,is_active:true};
+    const identityPayload={portal_role:portalRole,is_active:true};
     if(selected.key==='apartment_resident') {
       identityPayload.organization_id=propertyInvite.client_organization_id;
       identityPayload.entity_id=propertyInvite.property_id;
     }
-    const {data:identity,error:identityError}=await supabase.from('dd_portal_identities').insert(identityPayload).select('id').single();
+    const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:form.organization?'BUSINESS':'INDIVIDUAL',legal_name:form.organization||`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString()}:null;
+    const intakePayload=selected.key!=='provider'?{portal_role:portalRole,relationship_type:selected.relationship,channel_code:selected.channel,organization_name:selected.key==='apartment_resident'?(propertyInvite.client_display_name||form.organization||null):(form.organization||null),first_name:form.firstName,last_name:form.lastName,email:form.email,phone:form.phone,address:form.address||propertyInvite?.property_address||null,city:form.city||propertyInvite?.city||null,state_code:form.state||propertyInvite?.state_code||null,zip_code:form.zip||propertyInvite?.zip_code||null,service_area:form.city&&form.state?`${form.city}, ${form.state}`:null,requested_services:form.services.split(',').map(s=>s.trim()).filter(Boolean),client_organization_id:selected.key==='apartment_resident'?propertyInvite.client_organization_id:null,client_property_id:selected.key==='apartment_resident'?propertyInvite.property_id:null,property_resident_invite_id:selected.key==='apartment_resident'?propertyInvite.invite_id:null,intake_data:{entry_type:selected.key,portal_label:selected.portal,access_model:selected.key==='apartment_resident'?'CLIENT_PROPERTY_INVITATION':'PUBLIC_SELF_SERVICE',client_property:selected.key==='apartment_resident'?{id:propertyInvite.property_id,name:propertyInvite.property_name}:null},status:'SUBMITTED'}:null;
+
+    if(!data.session){
+      // No session yet -- email confirmation is required, so any insert right now would be
+      // sent unauthenticated and RLS would correctly reject it. Defer the writes until the
+      // user actually confirms their email and logs in (see completePendingOnboarding).
+      savePendingOnboarding({
+        kind: selected.key==='provider'?'provider':selected.key,
+        email: form.email.trim(),
+        identityPayload,
+        providerPayload,
+        intakePayload,
+        inviteTokenHash: selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
+      });
+      setBusy(false);setDone('Your account is created. Check your email to confirm it, then sign in — the rest of your onboarding will finish automatically.');setMode('done');
+      return;
+    }
+
+    // Session already exists (email confirmation disabled) -- complete the writes now, same as before.
+    const {data:identity,error:identityError}=await supabase.from('dd_portal_identities').insert({...identityPayload,auth_user_id:data.user.id}).select('id').single();
     if(identityError){setBusy(false);return setError(`Account created, but portal setup needs attention: ${identityError.message}`);}
 
     if(selected.key==='apartment_resident') {
@@ -106,13 +127,13 @@ export default function PortalAccessPage() {
     }
 
     if(selected.key==='provider'){
-      const {error:providerError}=await supabase.from('dd_provider_applications').insert({applicant_user_id:data.user.id,application_status:'SUBMITTED',applicant_type:form.organization?'BUSINESS':'INDIVIDUAL',legal_name:form.organization||`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString()});
+      const {error:providerError}=await supabase.from('dd_provider_applications').insert({...providerPayload,applicant_user_id:data.user.id});
       if(providerError){setBusy(false);return setError(`Account created, but provider application needs attention: ${providerError.message}`);}
     } else {
-      const {error:intakeError}=await supabase.from('dd_portal_onboarding_intakes').insert({auth_user_id:data.user.id,portal_role:portalRole,relationship_type:selected.relationship,channel_code:selected.channel,organization_name:selected.key==='apartment_resident'?(propertyInvite.client_display_name||form.organization||null):(form.organization||null),first_name:form.firstName,last_name:form.lastName,email:form.email,phone:form.phone,address:form.address||propertyInvite?.property_address||null,city:form.city||propertyInvite?.city||null,state_code:form.state||propertyInvite?.state_code||null,zip_code:form.zip||propertyInvite?.zip_code||null,service_area:form.city&&form.state?`${form.city}, ${form.state}`:null,requested_services:form.services.split(',').map(s=>s.trim()).filter(Boolean),client_organization_id:selected.key==='apartment_resident'?propertyInvite.client_organization_id:null,client_property_id:selected.key==='apartment_resident'?propertyInvite.property_id:null,property_resident_invite_id:selected.key==='apartment_resident'?propertyInvite.invite_id:null,intake_data:{entry_type:selected.key,portal_label:selected.portal,access_model:selected.key==='apartment_resident'?'CLIENT_PROPERTY_INVITATION':'PUBLIC_SELF_SERVICE',client_property:selected.key==='apartment_resident'?{id:propertyInvite.property_id,name:propertyInvite.property_name}:null},status:'SUBMITTED'});
+      const {error:intakeError}=await supabase.from('dd_portal_onboarding_intakes').insert({...intakePayload,auth_user_id:data.user.id});
       if(intakeError){setBusy(false);return setError(`Account created, but onboarding data needs attention: ${intakeError.message}`);}
     }
-    setBusy(false);setDone(data.session?'Your account is ready.':'Your account is created. Check your email to confirm it, then sign in.');setMode('done');
+    setBusy(false);setDone('Your account is ready.');setMode('done');
   };
 
   if(inviteChecking)return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">VERIFYING RESIDENT ACCESS</p><h1>Connecting you to your property</h1><p>Please wait while we verify the invitation from your property management team.</p></div></main>;
