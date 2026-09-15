@@ -20,10 +20,10 @@ export async function publishOperationalEvent({
   payload = {},
   eventKey,
   channel = EVENT_CHANNELS[eventType] || 'INTERNAL',
-}) {
+}, db = prisma) {
   if (!eventType || !eventKey) throw new Error('Event broker requires eventType and eventKey.');
 
-  const rows = await prisma.$queryRaw`
+  const rows = await db.$queryRaw`
     insert into public.dd_event_outbox
       (event_key, event_type, channel, aggregate_type, aggregate_id, payload)
     values
@@ -33,7 +33,7 @@ export async function publishOperationalEvent({
   `;
 
   if (!rows.length) {
-    const existing = await prisma.$queryRaw`
+    const existing = await db.$queryRaw`
       select id, event_key, status
       from public.dd_event_outbox
       where event_key = ${eventKey}
@@ -45,7 +45,12 @@ export async function publishOperationalEvent({
   return { status: 'QUEUED', ...rows[0] };
 }
 
-export async function publishPaymentReconciled(result) {
+// Accepts an optional transaction client so a caller (e.g. the Stripe webhook) can queue
+// this event as part of the same atomic transaction as the reconciliation it describes.
+// Without this, reconciliation could commit successfully while the outbox insert fails or
+// is skipped on a later idempotent-replay, permanently losing the notification with no
+// retry path.
+export async function publishPaymentReconciled(result, db = prisma) {
   return publishOperationalEvent({
     eventType: 'PAYMENT_RECONCILED',
     aggregateType: 'INVOICE',
@@ -57,5 +62,5 @@ export async function publishPaymentReconciled(result) {
       captured: result.captured,
       balanceDue: result.balanceDue,
     },
-  });
+  }, db);
 }

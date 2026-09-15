@@ -55,7 +55,7 @@ export default function NotaryPage() {
         >
           Become a Partner
         </a>
-        <a href="/dashboard" className="btn btn--secondary">
+        <a href="/portal" className="btn btn--secondary">
           Notary Dashboard
         </a>
       </section>

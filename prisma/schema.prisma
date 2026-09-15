@@ -281,6 +281,9 @@ model dd_jobs {
   internal_notes     String?
   created_at         DateTime            @default(now()) @db.Timestamptz(6)
   updated_at         DateTime            @default(now()) @db.Timestamptz(6)
+  organization_id    String?             @db.Uuid
+  work_order_id      String?             @db.Uuid
+  contract_id        String?             @db.Uuid
   dd_followup_tasks  dd_followup_tasks[]
   dd_invoices        dd_invoices[]
   dd_job_tasks       dd_job_tasks[]
