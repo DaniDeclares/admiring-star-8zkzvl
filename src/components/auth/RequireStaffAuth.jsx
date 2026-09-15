@@ -14,8 +14,9 @@ export default function RequireStaffAuth({ children }) {
     const check = async () => {
       const { data, error } = await supabase.auth.getSession();
       if (!mounted) return;
-      const role = data.session?.user?.app_metadata?.role;
-      setState({ loading: false, authorized: !error && !!data.session && STAFF_ROLES.has(role) });
+      const user = data.session?.user;
+      const role = user?.app_metadata?.portal_role || user?.app_metadata?.role;
+      setState({ loading: false, authorized: !error && !!user && STAFF_ROLES.has(role) });
     };
 
     check();
