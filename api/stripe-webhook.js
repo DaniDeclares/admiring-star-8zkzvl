@@ -42,11 +42,42 @@ export default async function handler(req,res){
     const currentState=String(request.status||'new').toUpperCase();
     assertTransition('B2C',currentState,'PAID');
     assertTransition('B2C','PAID',nextStateAfterPayment('B2C'));
-    let job=await tx.dd_jobs.findFirst({where:{service_request_id:request.id},select:{id:true,public_reference:true}});
+    let job=await tx.dd_jobs.findFirst({where:{service_request_id:request.id},select:{id:true,public_reference:true,work_order_id:true}});
     if(!job){
      const estimate=await tx.dd_estimates.findFirst({where:{service_request_id:request.id},orderBy:{created_at:'desc'},select:{id:true,division_slug:true}});
      if(!estimate)throw new Error(`No frozen estimate found for paid request ${request.id}`);
-     job=await tx.dd_jobs.create({data:{estimate_id:estimate.id,lead_id:request.leadId||null,service_request_id:request.id,division_slug:estimate.division_slug||'concierge',job_title:request.service_needed||request.service_category||'Dani Declares Service',job_status:'new',location_address:request.location_address||null,scope_summary:request.request_details||null},select:{id:true,public_reference:true}});
+     job=await tx.dd_jobs.create({data:{estimate_id:estimate.id,lead_id:request.leadId||null,service_request_id:request.id,division_slug:estimate.division_slug||'concierge',job_title:request.service_needed||request.service_category||'Dani Declares Service',job_status:'new',location_address:request.location_address||null,scope_summary:request.request_details||null},select:{id:true,public_reference:true,work_order_id:true}});
+    }
+    if(!job.work_order_id){
+     const workOrderNumber=`DDWO-${job.public_reference}`;
+     // Owner-first default: only auto-assign when exactly one active org holds a real
+     // authorized capability for this service. Ambiguous or zero matches are left
+     // unassigned rather than guessed at, and no provider_pay_amount is ever invented here.
+     const capabilityHolders=await tx.$queryRaw`
+      select distinct pc.provider_org_id
+      from public.dd_provider_capabilities pc
+      join public.dd_provider_organizations po on po.id=pc.provider_org_id
+      where pc.service_id=${offer.runtimeServiceId}::uuid and pc.is_authorized=true and po.is_active=true
+     `;
+     let primaryProviderId=null;
+     if(capabilityHolders.length===1){
+      const providerRow=await tx.$queryRaw`select id from public.dd_providers where org_id=${capabilityHolders[0].provider_org_id}::uuid limit 1`;
+      if(providerRow.length)primaryProviderId=providerRow[0].id;
+     }
+     const inserted=await tx.$queryRaw`
+      insert into public.dd_work_orders (
+       work_order_number,service_request_id,lead_id,service_id,offer_sku,canonical_sku,
+       service_name,service_address,scope_notes,customer_price,status,target_channel,primary_provider_id
+      ) values (
+       ${workOrderNumber},${request.id}::uuid,${request.leadId||null},${offer.runtimeServiceId}::uuid,
+       ${offer.serviceId},${offer.serviceId},${offer.name},${request.location_address||null},
+       ${request.request_details||null},${frozenSnapshot},'INSTANTIATED','CH01',${primaryProviderId}::uuid
+      )
+      on conflict (work_order_number) do nothing
+      returning id
+     `;
+     const workOrderId=inserted[0]?.id||(await tx.$queryRaw`select id from public.dd_work_orders where work_order_number=${workOrderNumber} limit 1`)[0].id;
+     job=await tx.dd_jobs.update({where:{id:job.id},data:{work_order_id:workOrderId},select:{id:true,public_reference:true,work_order_id:true}});
     }
     const reconciliation=await reconcileStripePayment(event,tx);
     await tx.serviceRequest.update({where:{id:request.id},data:{status:'job_created'}});
