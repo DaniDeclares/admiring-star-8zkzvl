@@ -50,17 +50,38 @@ export async function completePendingOnboarding(supabase, session) {
 
   const userId = session.user.id;
   const identityPayload = { ...pending.identityPayload, auth_user_id: userId };
+  let identityId;
   const { data: identity, error: identityError } = await supabase
     .from('dd_portal_identities')
     .insert(identityPayload)
     .select('id')
     .single();
-  if (identityError) return { attempted: true, success: false, error: `Portal setup needs attention: ${identityError.message}` };
+  if (identityError) {
+    // A prior attempt can have created the identity and then failed on a
+    // later step (e.g. the provider-application insert), leaving nothing
+    // cleared. Retrying then re-attempts this insert and hits the unique
+    // constraint on auth_user_id -- that's a sign of partial completion,
+    // not a real failure, so look up the existing row and carry on instead
+    // of leaving the user permanently stuck on this step.
+    if (identityError.code === '23505') {
+      const { data: existing, error: lookupError } = await supabase
+        .from('dd_portal_identities')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .maybeSingle();
+      if (lookupError || !existing) return { attempted: true, success: false, error: `Portal setup needs attention: ${identityError.message}` };
+      identityId = existing.id;
+    } else {
+      return { attempted: true, success: false, error: `Portal setup needs attention: ${identityError.message}` };
+    }
+  } else {
+    identityId = identity.id;
+  }
 
   if (pending.kind === 'apartment_resident' && pending.inviteTokenHash) {
     const { data: consumed, error: consumeError } = await supabase.rpc('dd_consume_apartment_resident_invite', {
       p_token_hash: pending.inviteTokenHash,
-      p_portal_identity_id: identity.id,
+      p_portal_identity_id: identityId,
       p_auth_user_id: userId,
     });
     if (consumeError || !consumed) {
