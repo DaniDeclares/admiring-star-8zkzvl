@@ -1,8 +1,25 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from 'lucide-react';
 
+const CATEGORY_CHANNEL_MAP = {
+  business: 'B2B',
+  property: 'B2B_APT',
+  notary: 'B2C',
+  creative: 'B2B',
+  events: 'B2C',
+};
+const CATEGORY_LABELS = {
+  business: 'Business Infrastructure & PMO',
+  property: 'Property Turnover & Field Resets',
+  notary: 'Mobile Notary & Legal Couriers',
+  creative: 'Custom Printing, Apparel & NFC',
+  events: 'Weddings & Event Logistics',
+};
+
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -11,9 +28,32 @@ export default function ContactPage() {
     message: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch('/api/intake-webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          channelType: CATEGORY_CHANNEL_MAP[formData.category] || 'B2B',
+          category: formData.category,
+          serviceType: CATEGORY_LABELS[formData.category] || 'Contact form inquiry',
+          details: formData.message,
+        }),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) throw new Error(body.error || 'We could not submit your request.');
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || 'We could not submit your request. Please try again or call us directly.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,6 +78,7 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{error}</div>}
                 <div>
                   <label className="block text-xs font-mono text-slate-400 uppercase mb-1">Your Name</label>
                   <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none" />
@@ -66,8 +107,8 @@ export default function ContactPage() {
                   <label className="block text-xs font-mono text-slate-400 uppercase mb-1">Project Details / Scope</label>
                   <textarea rows="4" required value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})} placeholder="Describe timeline, location, and specific deliverables..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none"></textarea>
                 </div>
-                <button type="submit" className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition-all flex items-center justify-center gap-2">
-                  Submit Execution Specifications <Send className="w-4 h-4" />
+                <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-slate-950 font-bold text-sm transition-all flex items-center justify-center gap-2">
+                  {loading ? 'Submitting…' : 'Submit Execution Specifications'} <Send className="w-4 h-4" />
                 </button>
               </form>
             )}

@@ -33,7 +33,7 @@ export default function PropertyPage() {
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", color: "#211417", background: "#fbf8f4", minHeight: "100vh" }}>
       <section style={{ background: "linear-gradient(135deg,#250b12,#5b1424)", color: "white", padding: "5rem 1.5rem 4rem" }}>
         <div style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gap: 24 }}>
-          <div style={{ color: "#d7b980", textTransform: "uppercase", letterSpacing: 3, fontSize: 12, fontWeight: 800 }}>CH02 - Property Management & Apartments</div>
+          <div style={{ color: "#d7b980", textTransform: "uppercase", letterSpacing: 3, fontSize: 12, fontWeight: 800 }}>Property Management & Apartments</div>
           <h1 style={{ margin: 0, fontFamily: "Georgia, serif", fontSize: "clamp(2.4rem,6vw,4.6rem)", lineHeight: 1.02 }}>Start small. Prove the work. Expand the account.</h1>
           <p style={{ maxWidth: 790, fontSize: 19, lineHeight: 1.65, color: "#eadfe0", margin: 0 }}>
             DANI DECLARES gives apartment communities one operating partner for the recurring work that keeps units, common areas, resident experience and property documentation moving.
@@ -66,7 +66,7 @@ export default function PropertyPage() {
             <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 2, color: "#d7b980", fontWeight: 800 }}>Account expansion</div>
             <h2 style={{ fontFamily: "Georgia, serif", margin: "8px 0 18px" }}>Recurring property relationships</h2>
             {retainers.map(([label, price]) => <div key={label} style={{ padding: "15px 0", borderBottom: "1px solid #60323c" }}><div style={{ fontWeight: 800, fontSize: 18 }}>{label}</div><div style={{ color: "#d7b980", marginTop: 4 }}>{price}</div></div>)}
-            <p style={{ color: "#dbcdd0", lineHeight: 1.6, marginTop: 18 }}>Retainers are separate CH02 commercial relationships. Scope is defined by property need, service mix, capacity and fulfillment readiness.</p>
+            <p style={{ color: "#dbcdd0", lineHeight: 1.6, marginTop: 18 }}>Retainers are a separate commercial relationship from one-off requests. Scope is defined by property need, service mix, capacity and fulfillment readiness.</p>
           </div>
         </section>
 

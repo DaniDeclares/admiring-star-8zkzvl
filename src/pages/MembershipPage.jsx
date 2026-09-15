@@ -9,13 +9,13 @@ export default function MembershipPage() {
           <span className="text-amber-400 font-mono text-sm uppercase tracking-wider">Membership & Retainers</span>
           <h1 className="text-4xl sm:text-5xl font-extrabold text-white mt-2 mb-5">Recurring Programs</h1>
           <p className="text-slate-300 text-lg">
-            Memberships and retainers are separate commercial objects from individual services. Historical numeric plans are quarantined while the Company-Wide Catalog Master is reconciled.
+            Memberships and retainers are separate commercial objects from individual services, each with its own defined scope and pricing.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           {[
-            ['Memberships', 'Resident-facing recurring benefits and service combinations will be activated only after package and recurring-plan reconciliation.'],
+            ['Memberships', 'The Household Membership & Maintenance Program is live today — see current pricing and inclusions in the catalog. Additional resident-facing plans are being added over time.'],
             ['Retainers', 'B2B and enterprise reserved-capacity arrangements require a defined scope, SLA, channel, buyer type, commercial owner and agreement.'],
             ['Recurring services', 'Weekly, bi-weekly and monthly delivery models are distinct from pricing and are not automatically memberships.'],
             ['Contract programs', 'Government and institutional recurring work is contract/SOW driven and does not inherit consumer pricing.'],
