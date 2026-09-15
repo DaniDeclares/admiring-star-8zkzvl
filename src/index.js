@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { CartProvider } from './context/CartContext.jsx';
+import AnalyticsTracker from './components/analytics/AnalyticsTracker.jsx';
 import App from './App.js';
 import './index.css';
 
@@ -60,6 +61,7 @@ if (rootElement) {
       <HelmetProvider>
         <CartProvider>
           <BrowserRouter>
+            <AnalyticsTracker />
             <ErrorBoundary>
               <App />
             </ErrorBoundary>
