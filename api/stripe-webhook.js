@@ -50,6 +50,11 @@ export default async function handler(req,res){
     }
     if(!job.work_order_id){
      const workOrderNumber=`DDWO-${job.public_reference}`;
+     // NOTE (2026-09-15): dd_work_orders is forward-looking FOS infrastructure, not the
+     // production dispatch authority -- dd_jobs is. Nothing reads primary_provider_id back
+     // out of this table today (dd_route_work_order and every portal ignore it). Don't build
+     // new dispatch/portal features against this table piecemeal; see the COMMENT ON TABLE
+     // for dd_jobs/dd_work_orders for the full boundary decision.
      // Owner-first default: only auto-assign when exactly one active org holds a real
      // authorized capability for this service. Ambiguous or zero matches are left
      // unassigned rather than guessed at, and no provider_pay_amount is ever invented here.
