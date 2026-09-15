@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useState} from 'react';
-import {ArrowRight,BriefcaseBusiness,CheckCircle2,Clock3,FileText,Home,Image as ImageIcon,KeyRound,Mail,MapPinned,Package,Send,UsersRound} from 'lucide-react';
+import {ArrowRight,Briefcase,Clock3,FileText,Home,Image as ImageIcon,KeyRound,Mail,MapPinned,Package,Send,UsersRound} from 'lucide-react';
 import {Link} from 'react-router-dom';
 
 const money=value=>Number.isFinite(Number(value))&&Number(value)>0?`$${Number(value).toLocaleString('en-US',{maximumFractionDigits:2})}`:null;
@@ -15,11 +15,9 @@ const serviceGroups=[
   {label:'Listing & property readiness',icon:Home,skus:['DNI-03A-008','DNI-03A-015','DNI-03A-018','DNI-03A-006','DNI-03A-016']},
   {label:'Media & presentation',icon:ImageIcon,skus:['DNI-03A-004','DNI-03A-005','DNI-03A-007','DNI-03A-017','DNI-03A-020']},
   {label:'Access, documents & transaction support',icon:FileText,skus:['DNI-03A-002','DNI-03A-003','DNI-03A-009','DNI-03A-010','DNI-03A-019']},
-  {label:'Agent & brokerage support',icon:BriefcaseBusiness,skus:['DNI-03A-001','DNI-03A-011']},
+  {label:'Agent & brokerage support',icon:Briefcase,skus:['DNI-03A-001','DNI-03A-011']},
   {label:'Open house support',icon:UsersRound,skus:['DNI-03A-012','DNI-03A-013','DNI-03A-014']},
 ];
-
-const groupMap=Object.fromEntries(serviceGroups.flatMap(group=>group.skus.map(sku=>[sku,group.label])));
 
 export default function RealEstatePage(){
   const [services,setServices]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState('');
