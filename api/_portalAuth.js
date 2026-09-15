@@ -18,7 +18,7 @@ export async function authenticatePortalRequest(req) {
   const { data: { user }, error } = await supabase.auth.getUser(token);
   if (error || !user) return { error: 'Invalid or expired session', status: 401 };
 
-  const role = user.app_metadata?.role;
+  const role = user.app_metadata?.portal_role || user.app_metadata?.role;
   if (STAFF_ROLES.has(role)) return { supabase, user, role, isStaff: true };
 
   const { data: identity, error: identityError } = await supabase
