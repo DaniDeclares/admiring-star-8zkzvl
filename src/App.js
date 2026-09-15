@@ -20,7 +20,6 @@ import PackagesPage from "./pages/PackagesPage.jsx";
 import PartnerNetwork from "./pages/PartnerNetwork.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import NetworkHubPage from "./pages/NetworkHubPage.jsx";
-import VendorPortal from "./pages/VendorPortal.jsx";
 import RequestServicePage from "./pages/RequestServicePage.jsx";
 import ResidentWelcomePage from "./pages/ResidentWelcomePage.jsx";
 import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx";
@@ -99,7 +98,7 @@ export default function App() {
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/partner-network" element={<PartnerNetwork />} />
         <Route path="/network" element={<NetworkHubPage />} />
-        <Route path="/portal/vendors" element={<VendorPortal />} />
+        <Route path="/portal/vendors" element={<Navigate to="/portal/vendor-onboarding" replace />} />
         <Route path="/industries/government" element={<FederalPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
