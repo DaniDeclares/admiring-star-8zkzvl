@@ -16,7 +16,7 @@ export default function EventsPage() {
       <section style={{ backgroundColor: "#0F050A", color: "#F8F5F1", padding: "4.5rem 1.5rem", textAlign: "center" }}>
         <div style={{ maxWidth: "850px", margin: "0 auto" }}>
           <div style={{ color: "#C8B273", fontWeight: 700, fontSize: "0.85rem", textTransform: "uppercase", marginBottom: "0.75rem" }}>
-            Division 10 • Experiences & Resident Programming
+            Experiences & Resident Programming
           </div>
           <h1 style={{ fontSize: "2.75rem", fontWeight: 800, marginBottom: "1.25rem", color: "#F8F5F1" }}>
             Events, Experiences & Production

@@ -3,8 +3,18 @@ import { Link } from "react-router-dom";
 import { OPPORTUNITY_BOARD } from "../data/partnerData.js";
 import styles from "./PartnerNetwork.module.css";
 
+const SERVICE_LABELS = {
+  "field-services": "Field Services",
+  property: "Property Operations",
+  events: "Events & Hospitality",
+  creative: "Creative & Print",
+  government: "Government / B2G",
+};
+
 export default function PartnerNetwork() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", email: "", phone: "", service: "", message: "" });
   const opportunities = useMemo(() => OPPORTUNITY_BOARD || [], []);
 
@@ -13,9 +23,32 @@ export default function PartnerNetwork() {
     setForm((current) => ({ ...current, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/intake-webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          channelType: "B2B",
+          category: "PARTNER_INQUIRY",
+          serviceType: `Partner inquiry: ${SERVICE_LABELS[form.service] || "General"}`,
+          details: `PARTNER/VENDOR NETWORK INQUIRY (not a customer service request).\nInterest area: ${SERVICE_LABELS[form.service] || "Not specified"}\n\n${form.message}`,
+        }),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) throw new Error(body.error || "We could not submit your inquiry.");
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "We could not submit your inquiry. Please try again or email vendors@danideclares.com directly.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,6 +86,7 @@ export default function PartnerNetwork() {
           </div>
         ) : (
           <form className={styles.form} onSubmit={handleSubmit}>
+            {error && <div style={{ padding: "12px", borderRadius: "8px", background: "#fdecea", color: "#8B1E2E", fontSize: "13px" }}>{error}</div>}
             <input name="name" value={form.name} onChange={handleChange} placeholder="Name / Company" required />
             <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" required />
             <input name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="Phone" />
@@ -65,7 +99,7 @@ export default function PartnerNetwork() {
               <option value="government">Government / B2G</option>
             </select>
             <textarea name="message" value={form.message} onChange={handleChange} placeholder="Tell us what you need or what you can provide." />
-            <button type="submit">Submit Partner Inquiry</button>
+            <button type="submit" disabled={loading}>{loading ? "Submitting…" : "Submit Partner Inquiry"}</button>
           </form>
         )}
       </section>
