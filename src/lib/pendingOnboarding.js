@@ -37,6 +37,16 @@ async function hashInviteToken(token) {
   return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// PortalLoginPage calls this from two places on the same page load: its own
+// getSession() check, and the onAuthStateChange listener (which Supabase
+// fires immediately with the current session on subscribe). Without a guard,
+// both run concurrently -- both pass the identity step below (idempotent by
+// design) and both then insert the provider application / onboarding intake
+// a second time. That's a real duplicate submission, not just a benign race,
+// so only one completion can be in flight at a time; a concurrent call joins
+// the one already running instead of starting its own.
+let inFlightCompletion = null;
+
 // Runs once a real authenticated session exists. Safe to call on every
 // login/session event -- it's a no-op when there is nothing pending, and
 // it clears the pending record on success so it never runs twice.
@@ -48,6 +58,14 @@ export async function completePendingOnboarding(supabase, session) {
     return { attempted: false };
   }
 
+  if (inFlightCompletion) return inFlightCompletion;
+  inFlightCompletion = runCompletion(supabase, session, pending).finally(() => {
+    inFlightCompletion = null;
+  });
+  return inFlightCompletion;
+}
+
+async function runCompletion(supabase, session, pending) {
   const userId = session.user.id;
   const identityPayload = { ...pending.identityPayload, auth_user_id: userId };
   let identityId;
