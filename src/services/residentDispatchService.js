@@ -72,5 +72,6 @@ export async function updateResidentDispatch(id, changes) {
 }
 
 export function hasStaffRole(user) {
-  return STAFF_ROLES.has(user?.app_metadata?.role);
+  const role = user?.app_metadata?.portal_role || user?.app_metadata?.role;
+  return STAFF_ROLES.has(role);
 }
