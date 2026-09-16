@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import { savePendingOnboarding } from '../lib/pendingOnboarding.js';
@@ -75,8 +75,18 @@ export default function PortalAccessPage() {
     return () => { cancelled = true; };
   }, [inviteToken, visibleOptions, selected]);
 
+  const catalogFetchStarted = useRef(false);
   useEffect(() => {
-    if (selected?.key !== 'provider' || catalogServices.length || catalogLoading) return;
+    // catalogFetchStarted is a ref, not state, deliberately: the effect
+    // itself calls setCatalogLoading(true) below, and if that state were in
+    // this effect's dependency array, the resulting re-render would re-run
+    // this effect, tearing down (via the cleanup's `cancelled = true`) the
+    // very fetch it just started before it could ever resolve -- catalog
+    // load would then get stuck on "Loading service catalog..." forever,
+    // because the in-flight request always finds cancelled=true by the time
+    // it completes.
+    if (selected?.key !== 'provider' || catalogFetchStarted.current) return;
+    catalogFetchStarted.current = true;
     let cancelled = false;
     const loadCatalog = async () => {
       setCatalogLoading(true);
@@ -91,7 +101,7 @@ export default function PortalAccessPage() {
     };
     loadCatalog();
     return () => { cancelled = true; };
-  }, [selected, catalogServices.length, catalogLoading]);
+  }, [selected]);
 
   const groupedCapabilities = useMemo(() => {
     const query = capabilityQuery.trim().toLowerCase();
