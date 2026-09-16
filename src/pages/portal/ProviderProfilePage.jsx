@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ProviderNav from './ProviderNav.jsx';
-import { Card, Empty, statusLabel, formatDate, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
+import { Card, Empty, LockedCard, statusLabel, formatDate, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
 import './PortalWorkspacePage.css';
 
 export default function ProviderProfilePage() {
@@ -12,10 +12,12 @@ export default function ProviderProfilePage() {
   const application = snapshot.application || null;
   const documents = snapshot.documents || [];
   const isApproved = application?.application_status === 'APPROVED';
+  const isSigned = application?.agreement_status === 'EXECUTED';
   return <main className="portal-shell">
     <header className="portal-hero"><div><p className="portal-eyebrow">DANI DECLARES PROVIDER</p><h1>Profile</h1><p>Your application and contact details on file with DANI DECLARES.</p></div><div className="portal-hero-actions"><AccountBadge session={session} /><button className="portal-refresh" onClick={load}>Refresh</button></div></header>
-    <ProviderNav isApprovedProvider={isApproved} />
+    <ProviderNav isApprovedProvider={isApproved} agreementSigned={isSigned} />
     {error && <div className="portal-alert" role="alert">{error}</div>}{message && <div className="portal-success" role="status">{message}</div>}
+    {!isSigned ? <LockedCard title="Profile">Your profile unlocks once you <Link to="/portal/provider-agreement">sign the Provider Agreement</Link>.</LockedCard> : <>
     <Card title="Contact & Business Details">
       <div className="portal-row"><div><strong>{application?.legal_name || 'Not provided'}</strong><small>{statusLabel(application?.applicant_type)}</small></div></div>
       <div className="portal-row"><div><strong>{[application?.contact_first_name, application?.contact_last_name].filter(Boolean).join(' ') || 'Not provided'}</strong><small>{application?.contact_email || 'No email on file'} · {application?.contact_phone || 'No phone on file'}</small></div></div>
@@ -25,5 +27,6 @@ export default function ProviderProfilePage() {
     </Card>
     <Card title="Application Status"><div className="portal-row"><div><strong>{statusLabel(application?.application_status)}</strong><small>Submitted {formatDate(application?.submitted_at)}{application?.reviewed_at ? ` · Reviewed ${formatDate(application.reviewed_at)}` : ''}</small></div></div></Card>
     <Card title="Documents on File">{documents.length ? documents.map(item => <div className="portal-row" key={item.id}><div><strong>{item.document_type.replaceAll('_', ' ')}</strong><small>{statusLabel(item.verification_status)} · Uploaded {formatDate(item.uploaded_at)}{item.expires_at ? ` · Expires ${formatDate(item.expires_at)}` : ''}</small></div></div>) : <Empty>No documents uploaded yet.</Empty>}<div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/vendor-onboarding">Manage documents</Link></div></Card>
+    </>}
   </main>;
 }

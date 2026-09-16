@@ -29,6 +29,7 @@ import PortalWorkspacePage from "./pages/portal/PortalWorkspacePage.jsx";
 import ProviderAssignmentsPage from "./pages/portal/ProviderAssignmentsPage.jsx";
 import ProviderSchedulePage from "./pages/portal/ProviderSchedulePage.jsx";
 import ProviderChecklistPage from "./pages/portal/ProviderChecklistPage.jsx";
+import ProviderAgreementPage from "./pages/portal/ProviderAgreementPage.jsx";
 import ProviderEvidencePage from "./pages/portal/ProviderEvidencePage.jsx";
 import ProviderPayoutsPage from "./pages/portal/ProviderPayoutsPage.jsx";
 import ProviderProfilePage from "./pages/portal/ProviderProfilePage.jsx";
@@ -87,6 +88,7 @@ export default function App() {
         <Route path="/portal/forgot-password" element={<PortalForgotPasswordPage />} />
         <Route path="/portal/reset-password" element={<PortalResetPasswordPage />} />
         <Route path="/portal/change-password" element={<ChangePasswordPage />} />
+        <Route path="/portal/provider-agreement" element={<ProviderAgreementPage />} />
         <Route path="/portal/vendor-onboarding" element={<VendorOnboardingUploadPage />} />
         <Route path="/portal/assignments" element={<ProviderAssignmentsPage />} />
         <Route path="/portal/schedule" element={<ProviderSchedulePage />} />

@@ -40,7 +40,7 @@ export default function PortalResetPasswordPage() {
     if (password.length < 8) return setError('Use a password with at least 8 characters.');
     if (password !== confirm) return setError('Passwords do not match.');
     setBusy(true);
-    const { error: updateError } = await supabase.auth.updateUser({ password });
+    const { error: updateError } = await supabase.auth.updateUser({ password, data: { password_changed_at: new Date().toISOString() } });
     setBusy(false);
     if (updateError) return setError(updateError.message);
     setDone(true);

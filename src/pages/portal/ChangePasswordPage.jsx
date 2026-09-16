@@ -10,8 +10,14 @@ export default function ChangePasswordPage(){
   const submit=async e=>{e.preventDefault();setError('');
     if(password.length<12)return setError('Use a password with at least 12 characters.');
     if(password!==confirm)return setError('Passwords do not match.');
-    setBusy(true); const {error}=await supabase.auth.updateUser({password});
+    setBusy(true);
+    // Previously this page had no way to remember it had already run, so
+    // PortalLoginPage.jsx force-routed this account here on every single
+    // login forever instead of just the first time. Recording this flag is
+    // what lets the login redirect actually turn itself off.
+    const {error}=await supabase.auth.updateUser({password, data:{password_changed_at:new Date().toISOString()}});
     if(error){setError(error.message);setBusy(false);return;} setDone(true);setBusy(false);
+    navigate('/portal',{replace:true});
   };
   if(!session)return <main className="portal-access"><div className="portal-form-card portal-login-card"><p className="portal-kicker">DANI DECLARES</p><h1>Preparing your account</h1><p>Please wait.</p></div></main>;
   if(done)return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">PASSWORD UPDATED</p><h1>Your password has been changed.</h1><p>Your DANI DECLARES account is ready to use.</p><div className="portal-success-actions"><Link className="portal-primary" to="/portal">Continue to your portal</Link></div></div></main>;

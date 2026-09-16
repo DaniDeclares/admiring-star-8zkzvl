@@ -87,6 +87,25 @@ function ProviderApproval() {
           <button disabled={busy} onClick={()=>act('set_review_status',{status:'REJECTED',notes:'Rejected during staff review.'})}>Reject</button>
         </div>
 
+        <section style={{marginBottom:28,padding:18,borderRadius:12,border:'1px solid #eee'}}>
+          <h3 style={{marginTop:0}}>Background check</h3>
+          <p style={{color:'#666',marginTop:0}}>Current: <strong>{selected.background_check_status}</strong></p>
+          <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+            <button disabled={busy} onClick={()=>act('set_background_check_status',{status:'CLEARED'})}>Mark cleared</button>
+            <button disabled={busy} onClick={()=>act('set_background_check_status',{status:'NOT_REQUIRED'})}>Not required for these services</button>
+            <button disabled={busy} onClick={()=>act('set_background_check_status',{status:'FAILED',notes:'Background check did not clear.'})}>Mark failed</button>
+          </div>
+        </section>
+
+        <section style={{marginBottom:28,padding:18,borderRadius:12,border:'1px solid #eee'}}>
+          <h3 style={{marginTop:0}}>Compliance sign-off</h3>
+          <p style={{color:'#666',marginTop:0}}>Current: <strong>{selected.compliance_status}</strong>. Check the "Suggested requirement" hints on each selected service below, then confirm the provider has sent in everything legally required for those services, or that nothing extra is needed.</p>
+          <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+            <button disabled={busy} onClick={()=>act('set_compliance_status',{decision:'VERIFIED'})}>Verified — compliant for selected services</button>
+            <button disabled={busy} onClick={()=>{const notes=window.prompt('What is missing or non-compliant? (required)'); if(notes&&notes.trim())act('set_compliance_status',{decision:'REJECTED',notes:notes.trim()});}}>Not compliant — needs something</button>
+          </div>
+        </section>
+
         <section style={{marginBottom:28}}><h3>Application details</h3><div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10,color:'#444'}}><div><strong>Type:</strong> {selected.applicant_type}</div><div><strong>Phone:</strong> {selected.contact_phone || '—'}</div><div><strong>Service area:</strong> {selected.service_area || '—'}</div><div><strong>Website:</strong> {selected.website || '—'}</div><div><strong>Experience:</strong> {selected.years_experience || '—'}</div><div><strong>Availability:</strong> {selected.availability || '—'}</div></div><p style={{whiteSpace:'pre-wrap'}}><strong>Service notes:</strong><br/>{selected.service_notes || '—'}</p></section>
 
         <section style={{marginBottom:28}}><h3>Canonical service capabilities</h3>{!(selected.capabilities||[]).length && <p>No canonical services selected.</p>}{(selected.capabilities||[]).map(cap=>{const reqs=requirementsBySku.get(cap.canonical_sku)||[];return <div key={cap.id} style={{display:'flex',justifyContent:'space-between',gap:20,alignItems:'center',padding:14,border:'1px solid #eee',borderRadius:10,marginBottom:8}}><div><strong>{cap.canonical_sku || 'Unmapped'} · {cap.capability_description || cap.capability_key}</strong><div style={{fontSize:12,color:'#666',marginTop:5}}>Authorization: {cap.authorization_status} · Evidence: {cap.evidence_status} · Requirement: {cap.requirement_status}</div>{reqs.length>0 && <div style={{fontSize:12,color:'#8a4b00',marginTop:5}}>Suggested requirement{reqs.length>1?'s':''}: {reqs.map(r=>requirementDefs.get(r.requirement_code)||r.requirement_code).join(', ')}</div>}</div><div>{cap.authorization_status!=='AUTHORIZED' ? <button disabled={busy} onClick={()=>act('verify_capability',{capabilityId:cap.id,decision:'AUTHORIZED'})}>Authorize</button> : <button disabled={busy} onClick={()=>act('verify_capability',{capabilityId:cap.id,decision:'REJECTED'})}>Revoke</button>}</div></div>;})}</section>
