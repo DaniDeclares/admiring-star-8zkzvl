@@ -27,12 +27,31 @@ async function getStaffSnapshot(supabase) {
   if (errors.length) throw errors[0].error;
   return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: evidence.data || [], payments: payments.data || [] };
 }
-async function getProviderSnapshot(supabase, providerId) {
-  if (!providerId) return { assignments: [], tasks: [], evidence: [], appointments: [], payouts: [] };
+async function getProviderApplicationSnapshot(supabase, userId) {
+  const { data: application, error: applicationError } = await supabase
+    .from('dd_provider_applications')
+    .select('id, application_status, tax_form_status, insurance_status, identity_status, agreement_status, background_check_status, compliance_status, legal_name, submitted_at, reviewed_at')
+    .eq('applicant_user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (applicationError) throw applicationError;
+  if (!application) return { application: null, capabilities: [], documents: [] };
+  const [capabilitiesResult, documentsResult] = await Promise.all([
+    supabase.from('dd_provider_application_capabilities').select('id, canonical_sku, capability_description, authorization_status, evidence_status, requirement_status').eq('application_id', application.id),
+    supabase.from('dd_provider_application_documents').select('id, document_type, verification_status, uploaded_at').eq('application_id', application.id).order('uploaded_at', { ascending: false }),
+  ]);
+  if (capabilitiesResult.error) throw capabilitiesResult.error;
+  if (documentsResult.error) throw documentsResult.error;
+  return { application, capabilities: capabilitiesResult.data || [], documents: documentsResult.data || [] };
+}
+async function getProviderSnapshot(supabase, providerId, userId) {
+  const applicationSnapshot = await getProviderApplicationSnapshot(supabase, userId);
+  if (!providerId) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [] };
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
   const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
-  if (!jobIds.length) return { assignments: [], tasks: [], evidence: [], appointments: [], payouts: [] };
+  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [] };
   const [jobsResult, tasks, evidence, appointments, payouts] = await Promise.all([
     supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
@@ -47,7 +66,7 @@ async function getProviderSnapshot(supabase, providerId) {
   if (payouts.error) throw payouts.error;
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
-  return { assignments: safeAssignments, tasks: tasks.data || [], evidence: evidence.data || [], appointments: appointments.data || [], payouts: payouts.data || [] };
+  return { ...applicationSnapshot, assignments: safeAssignments, tasks: tasks.data || [], evidence: evidence.data || [], appointments: appointments.data || [], payouts: payouts.data || [] };
 }
 async function getCustomerSnapshot(supabase, identity, role) {
   const isOrgScoped = ['property_manager', 'procurement'].includes(role);
@@ -91,7 +110,7 @@ export default async function handler(req, res) {
     if (context.error) return fail(res, context.error, context.status);
     if (req.method === 'GET') {
       if (!context.isStaff) {
-        if (context.role === 'provider') return ok(res, { role: context.role, ...await getProviderSnapshot(context.supabase, context.identity.entity_id) });
+        if (context.role === 'provider') return ok(res, { role: context.role, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id) });
         return ok(res, { role: context.role, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
