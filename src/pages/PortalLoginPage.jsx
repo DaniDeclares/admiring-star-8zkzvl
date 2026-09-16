@@ -15,7 +15,8 @@ export default function PortalLoginPage(){
      const result = await completePendingOnboarding(supabase, session);
      if (result.attempted && !result.success) { if (mounted) { setError(result.error); setBusy(false); } return; }
      const normalized = (session.user.email || '').trim().toLowerCase();
-     navigate(normalized === OWNER_EMAIL ? '/portal/change-password' : '/portal', {replace:true});
+     const needsPasswordChange = normalized === OWNER_EMAIL && !session.user.user_metadata?.password_changed_at;
+     navigate(needsPasswordChange ? '/portal/change-password' : '/portal', {replace:true});
    };
    const finishAuth = async () => {
      try {
