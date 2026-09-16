@@ -143,7 +143,7 @@ export default function PortalAccessPage() {
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
     if(selected?.key==='provider' && !selectedCapabilityIds.size)return setError('Select at least one service you can fulfill.');
     setBusy(true);
-    const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
+    const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{emailRedirectTo:`${window.location.origin}/portal/login`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     if(authError){setBusy(false);return setError(authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
 
     const identityPayload={portal_role:portalRole,is_active:true};
