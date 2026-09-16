@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
+import ProviderNav from './portal/ProviderNav.jsx';
+import './portal/PortalWorkspacePage.css';
 
 const ACCEPT = '.pdf,.doc,.docx,.png,.jpg,.jpeg';
 const MAX = 10 * 1024 * 1024;
@@ -161,6 +163,7 @@ export default function VendorOnboardingUploadPage() {
       <p style={{letterSpacing:'.12em',fontSize:12,fontWeight:700}}>DANI DECLARES PROVIDER</p>
       <h1>Complete your provider onboarding.</h1>
       <p style={{fontSize:18,lineHeight:1.6}}>Upload the evidence requested for your provider application. DANI DECLARES reviews these documents before any qualification or authorization decision.</p>
+      <ProviderNav isApprovedProvider={application?.application_status === 'APPROVED'} />
       {application && <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,margin:'24px 0'}}>
         <strong>{application.legal_name || 'Provider application'}</strong>
         <p style={{margin:'8px 0 0'}}>Application status: <strong>{application.application_status}</strong></p>
