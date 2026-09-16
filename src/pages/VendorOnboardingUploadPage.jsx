@@ -8,13 +8,14 @@ const ACCEPT = '.pdf,.doc,.docx,.png,.jpg,.jpeg';
 const MAX = 10 * 1024 * 1024;
 const PROVIDER_DOCS = [
   { key: 'W9', label: 'W-9 / tax document', help: 'Used to document tax-form receipt.' },
-  { key: 'GOVERNMENT_ID', label: 'Government-issued ID', help: 'Upload the identity document requested for qualification.' },
-  { key: 'COI', label: 'Certificate of Insurance (COI)', help: 'Upload your current certificate of insurance.' },
-  { key: 'AUTO_INSURANCE', label: 'Auto insurance', help: 'Required when the capability/work requires vehicle coverage.' },
+  { key: 'GOVERNMENT_ID', label: 'Government-issued ID', help: 'Upload the identity document requested for qualification.', hasNumber: true },
+  { key: 'COI', label: 'Certificate of Insurance (COI)', help: 'Upload your current certificate of insurance.', hasNumber: true },
+  { key: 'AUTO_INSURANCE', label: 'Auto insurance', help: 'Required when the capability/work requires vehicle coverage.', hasNumber: true },
   { key: 'AGREEMENT', label: 'Master Provider Agreement', help: 'Upload the executed agreement, if already signed.' },
-  { key: 'BUSINESS_REGISTRATION', label: 'Business registration', help: 'Optional supporting business document.' },
-  { key: 'PROFESSIONAL_LICENSE', label: 'Professional license', help: 'Upload only if applicable to your claimed capability.' },
-  { key: 'CERTIFICATION', label: 'Certification', help: 'Upload supporting certification evidence when applicable.' },
+  { key: 'BUSINESS_REGISTRATION', label: 'Business registration', help: 'Optional supporting business document.', hasNumber: true },
+  { key: 'PROFESSIONAL_LICENSE', label: 'Professional license', help: 'Upload only if applicable to your claimed capability.', hasNumber: true },
+  { key: 'CERTIFICATION', label: 'Certification', help: 'Upload supporting certification evidence when applicable.', hasNumber: true },
+  { key: 'MOTOR_CARRIER_AUTHORITY', label: 'Motor carrier / DOT authority', help: 'Upload your DOT/MC operating authority documentation if your capability involves commercial vehicle transport.', hasNumber: true },
   { key: 'BACKGROUND_CONSENT', label: 'Background-check consent', help: 'Upload the requested signed consent form when applicable.' },
   { key: 'PORTFOLIO', label: 'Portfolio', help: 'Supporting work examples.' },
   { key: 'WORK_SAMPLE', label: 'Work sample', help: 'Supporting evidence of capability.' },
@@ -28,6 +29,7 @@ export default function VendorOnboardingUploadPage() {
   const [userEmail, setUserEmail] = useState('');
   const [application, setApplication] = useState(null);
   const [providerFiles, setProviderFiles] = useState({});
+  const [documentNumbers, setDocumentNumbers] = useState({});
   const [companyFiles, setCompanyFiles] = useState([]);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -105,11 +107,13 @@ export default function VendorOnboardingUploadPage() {
           p_application_id: application.id,
           p_document_type: documentType,
           p_storage_path: path,
+          p_document_number: documentNumbers[documentType]?.trim() || null,
         });
         if (recordError) throw recordError;
       }
 
       setProviderFiles({});
+      setDocumentNumbers({});
       setMessage('Your provider documents were submitted. They remain pending verification; uploading documents does not authorize dispatch or work.');
       const { data: refreshed } = await supabase
         .from('dd_provider_applications')
@@ -181,6 +185,7 @@ export default function VendorOnboardingUploadPage() {
             <strong>{doc.label}</strong><span style={{fontSize:14}}>{doc.help}</span>
             <input type="file" accept={ACCEPT} onChange={e=>setProviderFile(doc.key,e.target.files?.[0] || null)} />
             {providerFiles[doc.key] && <span style={{fontSize:14}}>Selected: {providerFiles[doc.key].name}</span>}
+            {doc.hasNumber && <input type="text" placeholder="Reference / ID number (optional)" value={documentNumbers[doc.key] || ''} onChange={e=>setDocumentNumbers(prev=>({...prev,[doc.key]:e.target.value}))} style={{padding:8,border:'1px solid #ccc',borderRadius:6}} />}
           </label>)}
         </div>
         {error && <div role="alert" style={{padding:12,marginTop:16,border:'1px solid #b91c1c',borderRadius:8}}>{error}</div>}
