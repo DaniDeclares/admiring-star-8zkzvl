@@ -42,16 +42,18 @@ The global CSS tokens live in `src/index.css`. Components should consume those t
 
 ## Current image registry
 
-The application already has a centralized `IMAGE_ASSETS_2026` registry and a `serviceVisuals2026.js` presentation bridge. Continue using those rather than adding ad-hoc image URLs to page components.
+*Updated 2026-09-16: this section originally referenced an `IMAGE_ASSETS_2026` registry from an earlier draft of the codebase. That name no longer exists — continue using those rather than adding ad-hoc image URLs to page components has become, concretely: the centralized manifest is `src/data/mediaData.js` (`MASTER_MEDIA_MANIFEST_V7`, keyed by division/category), consumed through the presentation bridge `src/data/serviceVisuals2026.js` (`getServiceVisuals`, `getFamilyVisuals`, and their `getPrimary*Image` helpers). Page components should call those helpers with a real division code (`'01'`–`'13'`) or a real service-family name from `FAMILY_VISUALS` — not an arbitrary string — since anything that doesn't match falls through to a single generic default image. (`HomePage.jsx` shipped exactly this bug for an unknown period: every hero/card image silently collapsed to the same stock photo because it called the lookup with made-up division names; fixed 2026-09-16.)
 
 Current categories include:
 
-- `public`
-- `weddings`
-- `stock`
-- `products`
+- `OPERATIONS`
+- `PROPERTY`
+- `EVENTS`
+- `CREATIVE`
+- `SMART`
+- `BUSINESS` / `MARKET`
 
-The existing registry includes operational stock imagery for notary, government paperwork, offices, courts, hospitals and similar contexts, plus a large wedding/event library and product photography.
+The existing registry includes operational stock imagery for notary, government paperwork, offices, courts, hospitals and similar contexts, plus event, creative-production, and market/combo-box photography.
 
 ## Division image mapping
 
