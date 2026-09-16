@@ -32,10 +32,20 @@ Deno.serve(async(req)=>{
    const ids=(applications||[]).map((x:any)=>x.id); if(!ids.length)return response({success:true,applications:[]});
    const [{data:capabilities,error:capError},{data:documents,error:docError}]=await Promise.all([
     admin.from("dd_provider_application_capabilities").select("*").in("application_id",ids).order("created_at",{ascending:true}),
-    admin.from("dd_provider_application_documents").select("id, application_id, capability_id, document_type, verification_status, issuing_authority, document_number, jurisdiction, issue_date, expiration_date, reviewer_notes, uploaded_at, verified_at, verified_by").in("application_id",ids).order("uploaded_at",{ascending:true})
+    admin.from("dd_provider_application_documents").select("id, application_id, capability_id, document_type, storage_path, verification_status, issuing_authority, document_number, jurisdiction, issue_date, expiration_date, reviewer_notes, uploaded_at, verified_at, verified_by").in("application_id",ids).order("uploaded_at",{ascending:true})
    ]); if(capError)throw capError; if(docError)throw docError;
+   // dd-vendor-onboarding is a private bucket -- storage_path is only the
+   // object path, so staff could never actually view the ID/COI/W9 file
+   // they were being asked to verify. Batch-sign once for the whole list.
+   const docPaths=(documents||[]).map((doc:any)=>doc.storage_path).filter(Boolean);
+   let signedByPath=new Map<string,string>();
+   if(docPaths.length){
+    const {data:signedUrls}=await admin.storage.from("dd-vendor-onboarding").createSignedUrls(docPaths,3600);
+    signedByPath=new Map((signedUrls||[]).filter((entry:any)=>!entry.error).map((entry:any)=>[entry.path,entry.signedUrl]));
+   }
+   const documentsSigned=(documents||[]).map((doc:any)=>({...doc,signed_url:doc.storage_path?signedByPath.get(doc.storage_path)||null:null}));
    const capsByApp=new Map<string,any[]>(); for(const cap of capabilities||[])capsByApp.set(cap.application_id,[...(capsByApp.get(cap.application_id)||[]),cap]);
-   const docsByApp=new Map<string,any[]>(); for(const doc of documents||[])docsByApp.set(doc.application_id,[...(docsByApp.get(doc.application_id)||[]),doc]);
+   const docsByApp=new Map<string,any[]>(); for(const doc of documentsSigned)docsByApp.set(doc.application_id,[...(docsByApp.get(doc.application_id)||[]),doc]);
    return response({success:true,applications:(applications||[]).map((app:any)=>({...app,capabilities:capsByApp.get(app.id)||[],documents:docsByApp.get(app.id)||[]}))});
   }
   const applicationId=body?.applicationId; if(!applicationId)return response({success:false,error:"applicationId is required"},400);

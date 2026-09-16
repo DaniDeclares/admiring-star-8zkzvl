@@ -20,6 +20,21 @@ async function signEvidenceUrls(supabase, evidenceRows) {
   const urlByPath = new Map((data || []).map(entry => [entry.path, entry.signedUrl]));
   return rows.map(row => ({ ...row, signed_url: row.storage_url ? urlByPath.get(row.storage_url) || null : null }));
 }
+
+// dd-vendor-onboarding is also private -- provider application documents
+// (W9, government ID, COI, etc.) store only the object path in
+// storage_path, so neither the provider's own document list nor staff
+// review could ever show the actual uploaded file. Same batch-sign pattern
+// as dd-job-evidence above.
+async function signDocumentUrls(supabase, documentRows) {
+  const rows = documentRows || [];
+  const paths = rows.map(row => row.storage_path).filter(Boolean);
+  if (!paths.length) return rows;
+  const { data, error } = await supabase.storage.from('dd-vendor-onboarding').createSignedUrls(paths, 3600);
+  if (error) return rows.map(row => ({ ...row, signed_url: null }));
+  const urlByPath = new Map((data || []).map(entry => [entry.path, entry.signedUrl]));
+  return rows.map(row => ({ ...row, signed_url: row.storage_path ? urlByPath.get(row.storage_path) || null : null }));
+}
 function sanitizeProviderJob(job) {
   if (!job) return null;
   return { id: job.id, public_reference: job.public_reference, division_slug: job.division_slug, job_title: job.job_title, job_status: job.job_status, scheduled_start: job.scheduled_start, scheduled_end: job.scheduled_end, location_address: job.location_address, assigned_to: job.assigned_to, scope_summary: job.scope_summary, sla_due_at: job.sla_due_at, created_at: job.created_at, updated_at: job.updated_at };
@@ -60,11 +75,11 @@ async function getProviderApplicationSnapshot(supabase, userId) {
   if (!application) return { application: null, capabilities: [], documents: [] };
   const [capabilitiesResult, documentsResult] = await Promise.all([
     supabase.from('dd_provider_application_capabilities').select('id, canonical_sku, capability_description, authorization_status, evidence_status, requirement_status').eq('application_id', application.id),
-    supabase.from('dd_provider_application_documents').select('id, document_type, verification_status, uploaded_at, expires_at').eq('application_id', application.id).order('uploaded_at', { ascending: false }),
+    supabase.from('dd_provider_application_documents').select('id, document_type, storage_path, verification_status, uploaded_at, expires_at').eq('application_id', application.id).order('uploaded_at', { ascending: false }),
   ]);
   if (capabilitiesResult.error) throw capabilitiesResult.error;
   if (documentsResult.error) throw documentsResult.error;
-  return { application, capabilities: capabilitiesResult.data || [], documents: documentsResult.data || [] };
+  return { application, capabilities: capabilitiesResult.data || [], documents: await signDocumentUrls(supabase, documentsResult.data) };
 }
 async function getProviderSnapshot(supabase, providerId, userId) {
   const applicationSnapshot = await getProviderApplicationSnapshot(supabase, userId);
