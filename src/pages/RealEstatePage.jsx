@@ -37,7 +37,7 @@ export default function RealEstatePage(){
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 md:py-24">
         <div className="max-w-4xl">
           <p className="text-[#efce72] font-black uppercase tracking-[.2em] text-xs">DANI DECLARES • REAL ESTATE OFFICES & BROKERAGES</p>
-          <h1 className="mt-5 text-4xl sm:text-5xl md:text-6xl font-black leading-[1.04]">Keep the transaction moving. Keep the client experience polished.</h1>
+          <h1 className="mt-5 text-4xl sm:text-5xl md:text-6xl font-black leading-[1.04] text-white">Keep the transaction moving. Keep the client experience polished.</h1>
           <p className="mt-6 max-w-3xl text-lg md:text-xl text-[#eadcdf] leading-relaxed">Operational support for real estate professionals and brokerages — from listing readiness and property access to closing-day support, media coordination, open houses and transaction logistics.</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/request-service?category=REAL_ESTATE&channelType=B2B_RE" className="inline-flex items-center gap-2 rounded-xl bg-[#d7b980] px-5 py-3.5 font-black text-[#2b0c15]">Request real-estate support <ArrowRight className="w-5 h-5"/></Link>
