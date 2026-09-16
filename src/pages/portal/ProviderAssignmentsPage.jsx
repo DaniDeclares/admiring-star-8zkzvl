@@ -1,6 +1,6 @@
 import React from 'react';
 import ProviderNav from './ProviderNav.jsx';
-import { Card, Empty, LockedCard, useProviderWorkspace } from './providerWorkspaceShared.jsx';
+import { Card, Empty, LockedCard, formatDate, useProviderWorkspace } from './providerWorkspaceShared.jsx';
 import './PortalWorkspacePage.css';
 
 export default function ProviderAssignmentsPage() {
@@ -14,6 +14,6 @@ export default function ProviderAssignmentsPage() {
     <ProviderNav isApprovedProvider={isApproved} />
     {error && <div className="portal-alert" role="alert">{error}</div>}{message && <div className="portal-success" role="status">{message}</div>}
     {!isApproved ? <LockedCard title="Assignments">Assignments unlock once your application is approved.</LockedCard> :
-      <Card title="Assignment Queue">{snapshot.assignments?.length ? snapshot.assignments.map(item => <div className="portal-row" key={item.id}><div><strong>{item.job?.job_title || 'Assigned Job'}</strong><small>{item.assignment_status} · {item.job?.location_address || 'Location on file'}</small></div>{item.assignment_status === 'OFFERED' && <div className="portal-actions"><button onClick={() => act('assignment_response', { assignmentId: item.id, decision: 'ACCEPT' })}>Accept</button><button className="secondary" onClick={() => act('assignment_response', { assignmentId: item.id, decision: 'REJECT', reason: 'Provider declined assignment.' })}>Reject</button></div>}</div>) : <Empty />}</Card>}
+      <Card title="Assignment Queue">{snapshot.assignments?.length ? snapshot.assignments.map(item => <div className="portal-row" key={item.id}><div><strong>{item.job?.job_title || 'Assigned Job'}</strong><small>{item.assignment_status} · {item.job?.location_address || 'Location on file'}{item.job?.sla_due_at ? ` · SLA due ${formatDate(item.job.sla_due_at)}` : ''}</small></div>{item.assignment_status === 'OFFERED' && <div className="portal-actions"><button onClick={() => act('assignment_response', { assignmentId: item.id, decision: 'ACCEPT' })}>Accept</button><button className="secondary" onClick={() => act('assignment_response', { assignmentId: item.id, decision: 'REJECT', reason: 'Provider declined assignment.' })}>Reject</button></div>}</div>) : <Empty />}</Card>}
   </main>;
 }

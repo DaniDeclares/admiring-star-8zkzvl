@@ -7,7 +7,13 @@ function fail(res, error, status = 400) { return res.status(status).json({ succe
 
 function sanitizeProviderJob(job) {
   if (!job) return null;
-  return { id: job.id, public_reference: job.public_reference, division_slug: job.division_slug, job_title: job.job_title, job_status: job.job_status, scheduled_start: job.scheduled_start, scheduled_end: job.scheduled_end, location_address: job.location_address, assigned_to: job.assigned_to, scope_summary: job.scope_summary, created_at: job.created_at, updated_at: job.updated_at };
+  return { id: job.id, public_reference: job.public_reference, division_slug: job.division_slug, job_title: job.job_title, job_status: job.job_status, scheduled_start: job.scheduled_start, scheduled_end: job.scheduled_end, location_address: job.location_address, assigned_to: job.assigned_to, scope_summary: job.scope_summary, sla_due_at: job.sla_due_at, created_at: job.created_at, updated_at: job.updated_at };
+}
+async function getMessagesForJobs(supabase, jobIds) {
+  if (!jobIds?.length) return [];
+  const { data, error } = await supabase.from('dd_messages').select('id, job_id, sender_auth_user_id, sender_role, body, created_at').in('job_id', jobIds).order('created_at', { ascending: true }).limit(200);
+  if (error) throw error;
+  return data || [];
 }
 function sanitizeProviderAssignment(assignment) {
   if (!assignment) return null;
@@ -39,7 +45,7 @@ async function getProviderApplicationSnapshot(supabase, userId) {
   if (!application) return { application: null, capabilities: [], documents: [] };
   const [capabilitiesResult, documentsResult] = await Promise.all([
     supabase.from('dd_provider_application_capabilities').select('id, canonical_sku, capability_description, authorization_status, evidence_status, requirement_status').eq('application_id', application.id),
-    supabase.from('dd_provider_application_documents').select('id, document_type, verification_status, uploaded_at').eq('application_id', application.id).order('uploaded_at', { ascending: false }),
+    supabase.from('dd_provider_application_documents').select('id, document_type, verification_status, uploaded_at, expires_at').eq('application_id', application.id).order('uploaded_at', { ascending: false }),
   ]);
   if (capabilitiesResult.error) throw capabilitiesResult.error;
   if (documentsResult.error) throw documentsResult.error;
@@ -47,17 +53,18 @@ async function getProviderApplicationSnapshot(supabase, userId) {
 }
 async function getProviderSnapshot(supabase, providerId, userId) {
   const applicationSnapshot = await getProviderApplicationSnapshot(supabase, userId);
-  if (!providerId) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [] };
+  if (!providerId) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
   const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
-  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [] };
-  const [jobsResult, tasks, evidence, appointments, payouts] = await Promise.all([
-    supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, created_at, updated_at').in('id', jobIds),
+  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
+  const [jobsResult, tasks, evidence, appointments, payouts, messages] = await Promise.all([
+    supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, sla_due_at, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
     supabase.from('dd_job_evidence').select('id, job_id, task_id, provider_id, evidence_type, storage_url, file_metadata, verification_status, verified_at, created_at').in('job_id', jobIds).order('created_at', { ascending: false }),
     supabase.from('dd_job_appointments').select('id, job_id, provider_id, starts_at, ends_at, timezone, appointment_status, customer_notes, created_at, updated_at').eq('provider_id', providerId).order('starts_at', { ascending: true }).limit(50),
     supabase.from('dd_provider_payouts').select('id, provider_id, provider_org_id, payable_id, amount, currency, payout_method, payout_status, processor, processor_reference, initiated_at, completed_at, failure_reason, created_at').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(100),
+    getMessagesForJobs(supabase, jobIds),
   ]);
   if (jobsResult.error) throw jobsResult.error;
   if (tasks.error) throw tasks.error;
@@ -66,28 +73,29 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   if (payouts.error) throw payouts.error;
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
-  return { ...applicationSnapshot, assignments: safeAssignments, tasks: tasks.data || [], evidence: evidence.data || [], appointments: appointments.data || [], payouts: payouts.data || [] };
+  return { ...applicationSnapshot, assignments: safeAssignments, tasks: tasks.data || [], evidence: evidence.data || [], appointments: appointments.data || [], payouts: payouts.data || [], messages };
 }
 async function getCustomerSnapshot(supabase, identity, role) {
   const isOrgScoped = ['property_manager', 'procurement'].includes(role);
   const scopeId = isOrgScoped ? identity.organization_id : identity.entity_id;
-  if (!scopeId) return { requests: [], jobs: [], invoices: [], changes: [] };
+  if (!scopeId) return { requests: [], jobs: [], invoices: [], changes: [], messages: [] };
   let requestQuery = supabase.from('service_requests').select('*');
   requestQuery = isOrgScoped ? requestQuery.eq('organization_id', scopeId) : requestQuery.eq('lead_id', scopeId);
   const { data: requests, error: requestError } = await requestQuery.order('created_at', { ascending: false }).limit(100);
   if (requestError) throw requestError;
   const requestIds = (requests || []).map(row => row.id);
-  if (!requestIds.length) return { requests: requests || [], jobs: [], invoices: [], changes: [] };
+  if (!requestIds.length) return { requests: requests || [], jobs: [], invoices: [], changes: [], messages: [] };
   const { data: jobs, error: jobsError } = await supabase.from('dd_jobs').select('*').in('service_request_id', requestIds).order('created_at', { ascending: false });
   if (jobsError) throw jobsError;
   const jobIds = (jobs || []).map(row => row.id);
-  const [invoices, changes] = await Promise.all([
+  const [invoices, changes, messages] = await Promise.all([
     jobIds.length ? supabase.from('dd_invoices').select('*').in('job_id', jobIds).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
     jobIds.length ? supabase.from('dd_change_orders').select('*').in('job_id', jobIds).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
+    getMessagesForJobs(supabase, jobIds),
   ]);
   if (invoices.error) throw invoices.error;
   if (changes.error) throw changes.error;
-  return { requests: requests || [], jobs: jobs || [], invoices: invoices.data || [], changes: changes.data || [] };
+  return { requests: requests || [], jobs: jobs || [], invoices: invoices.data || [], changes: changes.data || [], messages };
 }
 async function createDispatchOffer(supabase, actorId, payload) {
   const { jobId, providerId, adminNotes, providerNotes } = payload;
@@ -199,6 +207,25 @@ export default async function handler(req, res) {
       if (!context.isStaff) { const { data: job } = await context.supabase.from('dd_jobs').select('assigned_to').eq('id', jobId).single(); if (!job || String(job.assigned_to || '') !== String(providerId)) return fail(res, 'Job is not assigned to this provider.', 403); }
       const { data: evidence, error } = await context.supabase.from('dd_job_evidence').insert({ job_id: jobId, task_id: taskId || null, provider_id: providerId, evidence_type: evidenceType, storage_url: storageUrl, file_metadata: fileMetadata }).select().single(); if (error) throw error;
       return ok(res, { evidence });
+    }
+    if (action === 'send_message') {
+      const { jobId, body } = payload;
+      if (!jobId || !String(body || '').trim()) return fail(res, 'jobId and a non-empty message body are required.');
+      const { data: job, error: jobError } = await context.supabase.from('dd_jobs').select('id, assigned_to, service_request_id').eq('id', jobId).single();
+      if (jobError || !job) return fail(res, 'Job not found.', 404);
+      let authorized = context.isStaff;
+      if (!authorized && context.role === 'provider') authorized = Boolean(context.identity?.entity_id) && String(job.assigned_to || '') === String(context.identity.entity_id);
+      if (!authorized && ['customer', 'resident', 'property_manager', 'procurement'].includes(context.role) && job.service_request_id) {
+        const { data: request } = await context.supabase.from('service_requests').select('lead_id, organization_id').eq('id', job.service_request_id).single();
+        if (request) {
+          if (['customer', 'resident'].includes(context.role)) authorized = Boolean(context.identity?.entity_id && request.lead_id && String(request.lead_id) === String(context.identity.entity_id));
+          else authorized = Boolean(context.identity?.organization_id && request.organization_id && String(request.organization_id) === String(context.identity.organization_id));
+        }
+      }
+      if (!authorized) return fail(res, 'This job is outside the current portal account scope.', 403);
+      const { data: sentMessage, error } = await context.supabase.from('dd_messages').insert({ job_id: jobId, sender_auth_user_id: context.user.id, sender_role: context.role, body: String(body).trim() }).select().single();
+      if (error) throw error;
+      return ok(res, { message: sentMessage });
     }
     return fail(res, `Unknown portal action: ${action}`);
   } catch (error) { console.error('Portal operations error:', error); return fail(res, 'Operational request failed.', 500); }

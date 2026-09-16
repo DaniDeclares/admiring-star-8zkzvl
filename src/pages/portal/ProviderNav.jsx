@@ -8,6 +8,7 @@ const TABS = [
   { to: '/portal/checklist', label: 'Field Checklist', locked: true },
   { to: '/portal/evidence', label: 'Evidence', locked: true },
   { to: '/portal/payouts', label: 'Payouts', locked: true },
+  { to: '/portal/messages', label: 'Messages', locked: true },
   { to: '/portal/vendor-onboarding', label: 'Documents', locked: false },
   { to: '/portal/profile', label: 'Profile', locked: false },
 ];
