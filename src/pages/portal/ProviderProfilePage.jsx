@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ProviderNav from './ProviderNav.jsx';
-import { Card, Empty, statusLabel, formatDate, useProviderWorkspace } from './providerWorkspaceShared.jsx';
+import { Card, Empty, statusLabel, formatDate, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
 import './PortalWorkspacePage.css';
 
 export default function ProviderProfilePage() {
-  const { snapshot, loading, error, message, load } = useProviderWorkspace();
+  const { session, snapshot, loading, error, message, load } = useProviderWorkspace();
   if (loading) return <main className="portal-shell"><p>Loading your DANI DECLARES workspace…</p></main>;
   if (error && !snapshot) return <main className="portal-shell"><div className="portal-alert">{error}</div></main>;
   if (snapshot?.role !== 'provider') return <main className="portal-shell"><div className="portal-alert">This page is only available to provider accounts.</div></main>;
@@ -13,7 +13,7 @@ export default function ProviderProfilePage() {
   const documents = snapshot.documents || [];
   const isApproved = application?.application_status === 'APPROVED';
   return <main className="portal-shell">
-    <header className="portal-hero"><div><p className="portal-eyebrow">DANI DECLARES PROVIDER</p><h1>Profile</h1><p>Your application and contact details on file with DANI DECLARES.</p></div><button className="portal-refresh" onClick={load}>Refresh</button></header>
+    <header className="portal-hero"><div><p className="portal-eyebrow">DANI DECLARES PROVIDER</p><h1>Profile</h1><p>Your application and contact details on file with DANI DECLARES.</p></div><div className="portal-hero-actions"><AccountBadge session={session} /><button className="portal-refresh" onClick={load}>Refresh</button></div></header>
     <ProviderNav isApprovedProvider={isApproved} />
     {error && <div className="portal-alert" role="alert">{error}</div>}{message && <div className="portal-success" role="status">{message}</div>}
     <Card title="Contact & Business Details">

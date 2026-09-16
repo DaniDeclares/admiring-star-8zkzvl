@@ -25,6 +25,7 @@ const COMPANY_ACCEPT = '.pdf,.doc,.docx,.png,.jpg,.jpeg';
 
 export default function VendorOnboardingUploadPage() {
   const [providerMode, setProviderMode] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
   const [application, setApplication] = useState(null);
   const [providerFiles, setProviderFiles] = useState({});
   const [companyFiles, setCompanyFiles] = useState([]);
@@ -39,6 +40,7 @@ export default function VendorOnboardingUploadPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
+        if (!cancelled) setUserEmail(user.email || '');
         const { data: identity } = await supabase
           .from('dd_portal_identities')
           .select('portal_role')
@@ -65,6 +67,8 @@ export default function VendorOnboardingUploadPage() {
     load();
     return () => { cancelled = true; };
   }, []);
+
+  const signOut = async () => { await supabase.auth.signOut(); window.location.href = '/portal/login'; };
 
   const validateFile = (file) => {
     if (!file) return '';
@@ -163,6 +167,7 @@ export default function VendorOnboardingUploadPage() {
       <p style={{letterSpacing:'.12em',fontSize:12,fontWeight:700}}>DANI DECLARES PROVIDER</p>
       <h1>Complete your provider onboarding.</h1>
       <p style={{fontSize:18,lineHeight:1.6}}>Upload the evidence requested for your provider application. DANI DECLARES reviews these documents before any qualification or authorization decision.</p>
+      {userEmail && <p className="portal-account-badge">Signed in as <strong>{userEmail}</strong><button type="button" onClick={signOut}>Sign out</button></p>}
       <ProviderNav isApprovedProvider={application?.application_status === 'APPROVED'} />
       {application && <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,margin:'24px 0'}}>
         <strong>{application.legal_name || 'Provider application'}</strong>
@@ -194,6 +199,7 @@ export default function VendorOnboardingUploadPage() {
     <p style={{letterSpacing:'.12em',fontSize:12,fontWeight:700}}>VENDOR ONBOARDING</p>
     <h1>Send us your company’s vendor packet.</h1>
     <p style={{fontSize:18,lineHeight:1.6}}>If your apartment company, property manager, brokerage, or organization gave you a vendor application, supplier agreement, COI requirements, W-9/ACH instructions, supplier-portal instructions, or an extra company-specific page, upload it here. DANI DECLARES will work from your actual requirements instead of making you explain them by phone.</p>
+    {userEmail && <p className="portal-account-badge">Signed in as <strong>{userEmail}</strong><button type="button" onClick={signOut}>Sign out</button></p>}
     <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,margin:'24px 0'}}>
       <strong>Accepted:</strong> PDF, Word documents, JPG/PNG • <strong>10 MB maximum per file</strong>
       <p style={{marginBottom:0}}>Do not upload passwords, banking credentials, Social Security numbers, or other information that is not required for vendor onboarding.</p>
