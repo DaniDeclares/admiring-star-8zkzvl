@@ -160,6 +160,13 @@ export default function PortalAccessPage() {
     setBusy(true);
     const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{emailRedirectTo:`${window.location.origin}/portal/login`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     if(authError){setBusy(false);return setError(authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
+    // Supabase deliberately returns a fake success with no error and no new
+    // identity when signUp() is called with an email that already belongs to
+    // a confirmed account, to prevent account enumeration. data.user.identities
+    // is the documented way to detect that case -- without this check, someone
+    // who already has an account gets told "check your email to confirm" for an
+    // account that was never actually created, which is actively misleading.
+    if(data.user.identities && data.user.identities.length===0){setBusy(false);return setError('An account with this email already exists. Sign in at the login page, or use "Forgot password" there if you don’t remember your password.');}
 
     const identityPayload={portal_role:portalRole,is_active:true};
     if(selected.key==='apartment_resident') {
