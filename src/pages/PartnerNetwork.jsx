@@ -1,6 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { OPPORTUNITY_BOARD } from "../data/partnerData.js";
 import styles from "./PartnerNetwork.module.css";
 
 const SERVICE_LABELS = {
@@ -16,7 +15,6 @@ export default function PartnerNetwork() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", email: "", phone: "", service: "", message: "" });
-  const opportunities = useMemo(() => OPPORTUNITY_BOARD || [], []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -58,25 +56,6 @@ export default function PartnerNetwork() {
         <p className={styles.subtitle}>
           Connect with Dani Declares for partner opportunities, field support, and coordinated project execution.
         </p>
-
-        {opportunities.length > 0 && (
-          <div style={{ marginBottom: "28px" }}>
-            <h2 style={{ color: "#8B1E2E", marginBottom: "12px" }}>Current Opportunities</h2>
-            <div style={{ display: "grid", gap: "12px" }}>
-              {opportunities.map((opportunity) => (
-                <article key={opportunity.projectId} style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "14px" }}>
-                  <strong>{opportunity.title}</strong>
-                  <div style={{ fontSize: "13px", marginTop: "5px", color: "#555" }}>
-                    {opportunity.location} · {opportunity.scope}
-                  </div>
-                  <div style={{ fontSize: "12px", marginTop: "6px", color: "#777" }}>
-                    Status: {opportunity.status.replaceAll("_", " ")}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        )}
 
         {submitted ? (
           <div style={{ padding: "18px", borderRadius: "8px", background: "#F3ECE7" }}>
