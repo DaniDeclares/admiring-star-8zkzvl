@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient.js';
 import './Navbar.css';
 
 const groups = [
@@ -12,9 +13,16 @@ const groups = [
 
 export default function Navbar() {
   const [openMenu,setOpenMenu]=useState(null); const [mobileOpen,setMobileOpen]=useState(false); const closeAll=()=>{setOpenMenu(null);setMobileOpen(false)};
+  const [session,setSession]=useState(null);
+  useEffect(()=>{
+    supabase.auth.getSession().then(({data})=>setSession(data.session));
+    const {data:listener}=supabase.auth.onAuthStateChange((_event,newSession)=>setSession(newSession));
+    return ()=>{listener?.subscription?.unsubscribe();};
+  },[]);
+  const signOut=async()=>{closeAll();await supabase.auth.signOut();window.location.href='/';};
   return <header className="dd-navbar-header"><div className="dd-navbar-container">
     <Link to="/" className="dd-navbar-brand-logo" onClick={closeAll} aria-label="DANI DECLARES home"><img src="/dani-declares-logo.svg" alt="DANI DECLARES LLC" className="dd-primary-logo" /></Link>
     <nav className="dd-navbar-nav desktop-only" aria-label="Primary navigation"><NavLink className="dd-top-link" to="/">Home</NavLink><NavLink className="dd-top-link" to="/catalog">Services</NavLink>{groups.map(group=><div className="dd-nav-group" key={group.key}><button type="button" className={`dd-top-link dd-nav-trigger ${openMenu===group.key?'is-open':''}`} onClick={()=>setOpenMenu(openMenu===group.key?null:group.key)} aria-expanded={openMenu===group.key}>{group.label} <span>▾</span></button>{openMenu===group.key&&<div className="dd-mega-menu single-column">{group.links.map(([label,path])=><Link key={label} to={path} onClick={closeAll} className="dd-mega-link">{label}</Link>)}</div>}</div>)}<NavLink className="dd-top-link" to="/about">About</NavLink><NavLink className="dd-top-link" to="/contact">Contact</NavLink></nav>
-    <div className="dd-navbar-actions"><Link to="/portal/login" className="dd-top-link" onClick={closeAll}>Sign In</Link><Link to="/request-service" className="dd-project-cta" onClick={closeAll}>Book / Request</Link><button type="button" className="dd-mobile-toggle" onClick={()=>setMobileOpen(!mobileOpen)} aria-label="Toggle menu">{mobileOpen?'✕':'☰'}</button></div>
-  </div>{mobileOpen&&<div className="dd-mobile-menu"><Link to="/" onClick={closeAll} className="dd-mobile-home">Home</Link><Link to="/catalog" onClick={closeAll} className="dd-mobile-home">Services</Link>{groups.map(group=><div className="dd-mobile-group" key={group.key}><div className="dd-mobile-group-title">{group.label}</div>{group.links.map(([label,path])=><Link key={label} to={path} onClick={closeAll}>{label}</Link>)}</div>)}<Link to="/about" onClick={closeAll} className="dd-mobile-home">About</Link><Link to="/contact" onClick={closeAll} className="dd-mobile-home">Contact</Link><Link to="/portal/login" onClick={closeAll} className="dd-mobile-home">Sign In</Link><Link to="/portal/access" onClick={closeAll} className="dd-mobile-home">Create Portal Account</Link><Link to="/request-service" onClick={closeAll} className="dd-mobile-project-cta">Book / Request Service</Link></div>}</header>;
+    <div className="dd-navbar-actions">{session?<><Link to="/portal" className="dd-top-link" onClick={closeAll}>My Portal</Link><button type="button" className="dd-top-link" onClick={signOut}>Sign Out</button></>:<><Link to="/portal/login" className="dd-top-link" onClick={closeAll}>Sign In</Link><Link to="/portal/access" className="dd-top-link" onClick={closeAll}>Sign Up</Link></>}<Link to="/request-service" className="dd-project-cta" onClick={closeAll}>Book / Request</Link><button type="button" className="dd-mobile-toggle" onClick={()=>setMobileOpen(!mobileOpen)} aria-label="Toggle menu">{mobileOpen?'✕':'☰'}</button></div>
+  </div>{mobileOpen&&<div className="dd-mobile-menu"><Link to="/" onClick={closeAll} className="dd-mobile-home">Home</Link><Link to="/catalog" onClick={closeAll} className="dd-mobile-home">Services</Link>{groups.map(group=><div className="dd-mobile-group" key={group.key}><div className="dd-mobile-group-title">{group.label}</div>{group.links.map(([label,path])=><Link key={label} to={path} onClick={closeAll}>{label}</Link>)}</div>)}<Link to="/about" onClick={closeAll} className="dd-mobile-home">About</Link><Link to="/contact" onClick={closeAll} className="dd-mobile-home">Contact</Link>{session?<><Link to="/portal" onClick={closeAll} className="dd-mobile-home">My Portal</Link><button type="button" onClick={signOut} className="dd-mobile-home">Sign Out</button></>:<><Link to="/portal/login" onClick={closeAll} className="dd-mobile-home">Sign In</Link><Link to="/portal/access" onClick={closeAll} className="dd-mobile-home">Sign Up</Link></>}<Link to="/request-service" onClick={closeAll} className="dd-mobile-project-cta">Book / Request Service</Link></div>}</header>;
 }
