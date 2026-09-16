@@ -38,6 +38,8 @@ import ContractAcquisitionPage from "./pages/portal/ContractAcquisitionPage.jsx"
 import ContractingPeriodPage from "./pages/portal/ContractingPeriodPage.jsx";
 import PortalAccessPage from "./pages/PortalAccessPage.jsx";
 import PortalLoginPage from "./pages/PortalLoginPage.jsx";
+import PortalForgotPasswordPage from "./pages/PortalForgotPasswordPage.jsx";
+import PortalResetPasswordPage from "./pages/PortalResetPasswordPage.jsx";
 import ChangePasswordPage from "./pages/portal/ChangePasswordPage.jsx";
 import VendorOnboardingUploadPage from "./pages/VendorOnboardingUploadPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
@@ -82,6 +84,8 @@ export default function App() {
         <Route path="/portal/providers" element={<PortalAccessPage />} />
         <Route path="/portal/partners" element={<PortalAccessPage />} />
         <Route path="/portal/login" element={<PortalLoginPage />} />
+        <Route path="/portal/forgot-password" element={<PortalForgotPasswordPage />} />
+        <Route path="/portal/reset-password" element={<PortalResetPasswordPage />} />
         <Route path="/portal/change-password" element={<ChangePasswordPage />} />
         <Route path="/portal/vendor-onboarding" element={<VendorOnboardingUploadPage />} />
         <Route path="/portal/assignments" element={<ProviderAssignmentsPage />} />
