@@ -189,7 +189,25 @@ export default async function handler(req, res) {
       const { error } = await context.supabase.from('dd_change_orders').update(update).eq('id', changeOrderId).eq('status', 'PENDING_APPROVAL'); if (error) throw error;
       return ok(res, { changeOrderStatus: decision });
     }
-    if (action === 'completion_review') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); const { jobId, decision, notes } = payload; if (!jobId || !['APPROVED', 'REJECTED'].includes(decision)) return fail(res, 'jobId and APPROVED/REJECTED are required.'); const { error } = await context.supabase.from('dd_completion_reviews').insert({ job_id: jobId, reviewer_id: context.user.id, review_type: 'SUPERVISOR', status: decision, notes: notes || null, reviewed_at: new Date().toISOString() }); if (error) throw error; if (decision === 'APPROVED') await context.supabase.from('dd_jobs').update({ job_status: 'COMPLETED' }).eq('id', jobId); return ok(res, { reviewStatus: decision }); }
+    if (action === 'completion_review') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const { jobId, decision, notes } = payload;
+      if (!jobId || !['APPROVED', 'REJECTED'].includes(decision)) return fail(res, 'jobId and APPROVED/REJECTED are required.');
+      const { error } = await context.supabase.from('dd_completion_reviews').insert({ job_id: jobId, reviewer_id: context.user.id, review_type: 'SUPERVISOR', status: decision, notes: notes || null, reviewed_at: new Date().toISOString() });
+      if (error) throw error;
+      if (decision === 'APPROVED') {
+        await context.supabase.from('dd_jobs').update({ job_status: 'COMPLETED' }).eq('id', jobId);
+      } else {
+        // A rejected completion review previously just sat in dd_completion_reviews
+        // with no signal back to the provider and no change to job_status -- the
+        // job looked identical to a still-open job with no indication rework was
+        // required. Route it back through the same job-messaging channel used
+        // everywhere else so the provider actually sees why it bounced.
+        await context.supabase.from('dd_jobs').update({ job_status: 'REWORK_REQUESTED' }).eq('id', jobId);
+        await context.supabase.from('dd_messages').insert({ job_id: jobId, sender_auth_user_id: context.user.id, sender_role: 'staff', body: notes ? `Completion review sent back for rework: ${notes}` : 'Completion review sent back for rework.' });
+      }
+      return ok(res, { reviewStatus: decision });
+    }
     if (action === 'evidence_verify') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); const { evidenceId, decision } = payload; if (!evidenceId || !['VERIFIED', 'REJECTED'].includes(decision)) return fail(res, 'evidenceId and VERIFIED/REJECTED are required.'); const { error } = await context.supabase.from('dd_job_evidence').update({ verification_status: decision, verified_by: context.user.id, verified_at: new Date().toISOString() }).eq('id', evidenceId); if (error) throw error; return ok(res, { evidenceStatus: decision }); }
     if (action === 'create_evidence_upload') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
