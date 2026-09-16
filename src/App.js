@@ -32,6 +32,7 @@ import ProviderChecklistPage from "./pages/portal/ProviderChecklistPage.jsx";
 import ProviderEvidencePage from "./pages/portal/ProviderEvidencePage.jsx";
 import ProviderPayoutsPage from "./pages/portal/ProviderPayoutsPage.jsx";
 import ProviderProfilePage from "./pages/portal/ProviderProfilePage.jsx";
+import ProviderMessagesPage from "./pages/portal/ProviderMessagesPage.jsx";
 import QuoteBuilderPage from "./pages/portal/QuoteBuilderPage.jsx";
 import ContractAcquisitionPage from "./pages/portal/ContractAcquisitionPage.jsx";
 import ContractingPeriodPage from "./pages/portal/ContractingPeriodPage.jsx";
@@ -89,6 +90,7 @@ export default function App() {
         <Route path="/portal/evidence" element={<ProviderEvidencePage />} />
         <Route path="/portal/payouts" element={<ProviderPayoutsPage />} />
         <Route path="/portal/profile" element={<ProviderProfilePage />} />
+        <Route path="/portal/messages" element={<ProviderMessagesPage />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
         <Route path="/portal/provider-approval" element={<ProviderApprovalPage />} />

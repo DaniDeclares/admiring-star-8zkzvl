@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProviderNav from './ProviderNav.jsx';
 import { Card, Empty, Requirement, buildProviderRequirements, statusLabel, formatDate, useProviderWorkspace } from './providerWorkspaceShared.jsx';
@@ -8,6 +8,13 @@ const ROLE_LABELS = { provider: 'DANI DECLARES Provider', resident: 'DANI DECLAR
 
 export default function PortalWorkspacePage() {
   const { snapshot, loading, error, message, load, act } = useProviderWorkspace();
+  const [messageDrafts, setMessageDrafts] = useState({});
+  const sendJobMessage = async (jobId) => {
+    const body = (messageDrafts[jobId] || '').trim();
+    if (!body) return;
+    await act('send_message', { jobId, body });
+    setMessageDrafts(prev => ({ ...prev, [jobId]: '' }));
+  };
   if (loading) return <main className="portal-shell"><p>Loading your DANI DECLARES workspace…</p></main>;
   if (error && !snapshot) return <main className="portal-shell"><div className="portal-alert">{error}</div></main>;
   const role = snapshot?.role || 'customer';
@@ -23,6 +30,7 @@ export default function PortalWorkspacePage() {
   const openTasks = snapshot?.tasks?.filter(t => t.status !== 'COMPLETED').length || 0;
   const pendingEvidence = snapshot?.evidence?.filter(e => e.verification_status === 'PENDING').length || 0;
   const lastPayout = snapshot?.payouts?.[0];
+  const messageCount = snapshot?.messages?.length || 0;
   return <main className="portal-shell">
     <header className="portal-hero"><div><p className="portal-eyebrow">{isProvider ? 'DANI DECLARES PROVIDER' : 'DANI DECLARES'}</p><h1>{ROLE_LABELS[role] || 'DANI DECLARES'}</h1><p>{isProvider ? 'Assignments, dispatch instructions, field checklists, evidence and completion records — connected to the DANI DECLARES fulfillment system.' : 'Requests, services, projects, approvals, documents and financial records — connected to the same DANI DECLARES operating system.'}</p></div><button className="portal-refresh" onClick={load}>Refresh</button></header>
     {isProvider && <ProviderNav isApprovedProvider={isApprovedProvider} />}
@@ -34,6 +42,7 @@ export default function PortalWorkspacePage() {
         <Link className="portal-summary-tile" to="/portal/checklist"><strong>{openTasks}</strong><span>Open checklist item{openTasks === 1 ? '' : 's'}</span></Link>
         <Link className="portal-summary-tile" to="/portal/evidence"><strong>{pendingEvidence}</strong><span>Evidence pending verification</span></Link>
         <Link className="portal-summary-tile" to="/portal/payouts"><strong>{lastPayout ? `$${Number(lastPayout.amount || 0).toFixed(2)}` : 'None yet'}</strong><span>Most recent payout</span></Link>
+        <Link className="portal-summary-tile" to="/portal/messages"><strong>{messageCount}</strong><span>Message{messageCount === 1 ? '' : 's'} on your jobs</span></Link>
         <Link className="portal-summary-tile" to="/portal/profile"><strong>View profile</strong><span>Contact details & documents</span></Link>
       </div>
     </> : <>
@@ -45,6 +54,17 @@ export default function PortalWorkspacePage() {
       <Card title={isCommercial ? 'Commercial Requests & Jobs' : 'My Requests & Jobs'}>{snapshot.requests?.length ? snapshot.requests.map(item => <div className="portal-row" key={item.id}><div><strong>{item.service_needed || item.service_category || 'Service request'}</strong><small>{item.status} · {item.location_address || 'Location on file'}</small></div></div>) : <Empty>No requests are currently attached to this account.</Empty>}{snapshot.jobs?.map(item => <div className="portal-row" key={item.id}><div><strong>{item.job_title}</strong><small>{item.job_status} · {item.location_address || 'Location on file'}</small></div></div>)}</Card>
       <Card title="Invoices & Financial Records"><p className="portal-note">Invoices display finalized financial records. Customer payment remains processed through the configured payment processor; the portal does not collect raw card data.</p>{snapshot.invoices?.length ? snapshot.invoices.map(item => <div className="portal-row" key={item.id}><div><strong>{item.public_reference}</strong><small>{item.invoice_status} · Balance: ${Number(item.balance_due || 0).toFixed(2)}</small></div>{item.stripe_payment_link && item.invoice_status !== 'paid' && <a className="portal-primary" href={item.stripe_payment_link} target="_blank" rel="noreferrer">Pay invoice</a>}</div>) : <Empty>No invoices are currently attached to this workspace.</Empty>}</Card>
       <Card title="Change Orders & Approvals">{snapshot.changes?.length ? snapshot.changes.map(item => <div className="portal-row" key={item.id}><div><strong>{item.reason}</strong><small>{item.status} · {item.resolved_channel || 'Channel controlled'}</small></div>{item.status === 'PENDING_APPROVAL' && <div className="portal-actions"><button onClick={() => act('change_order_decision', { changeOrderId: item.id, decision: 'APPROVED' })}>Approve</button><button className="secondary" onClick={() => act('change_order_decision', { changeOrderId: item.id, decision: 'REJECTED', reason: 'Declined in portal.' })}>Reject</button></div>}</div>) : <Empty>No pending change orders.</Empty>}</Card>
+      <Card title="Messages">{(() => {
+        const messagesByJob = new Map();
+        (snapshot.messages || []).forEach(m => { if (!messagesByJob.has(m.job_id)) messagesByJob.set(m.job_id, []); messagesByJob.get(m.job_id).push(m); });
+        const jobs = snapshot.jobs || [];
+        const jobsWithMessages = jobs.filter(job => messagesByJob.has(job.id) || jobs.length <= 5);
+        return jobsWithMessages.length ? jobsWithMessages.map(job => <div key={job.id} style={{ marginBottom: 20 }}>
+          <strong>{job.job_title || 'Job'}</strong>
+          <div className="portal-message-list" style={{ marginTop: 8 }}>{(messagesByJob.get(job.id) || []).length ? messagesByJob.get(job.id).map(m => <div key={m.id} className="portal-message"><small>{m.sender_role} · {formatDate(m.created_at)}</small><p>{m.body}</p></div>) : <Empty>No messages on this job yet.</Empty>}</div>
+          <div className="portal-message-compose"><textarea rows="2" value={messageDrafts[job.id] || ''} onChange={e => setMessageDrafts(prev => ({ ...prev, [job.id]: e.target.value }))} placeholder="Write a message about this job…" /><button onClick={() => sendJobMessage(job.id)}>Send</button></div>
+        </div>) : <Empty>Messages will appear here once you have an active job.</Empty>;
+      })()}</Card>
       <Card title="Self-Service & Support"><p>Start a new service request, request a quote, or contact DANI DECLARES support without leaving your account.</p><div className="portal-actions"><Link className="portal-primary" to="/request-service">Request service</Link><Link className="portal-primary" to="/contact">Contact support</Link></div></Card>
     </>}
     <footer className="portal-footer"><strong>Commercial boundary:</strong> DANI DECLARES pricing is resolved upstream and frozen before operational execution. Portals coordinate work; they do not invent or rewrite rates.</footer>
