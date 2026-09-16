@@ -10,6 +10,7 @@ export default function ProviderMessagesPage() {
   if (error && !snapshot) return <main className="portal-shell"><div className="portal-alert">{error}</div></main>;
   if (snapshot?.role !== 'provider') return <main className="portal-shell"><div className="portal-alert">This page is only available to provider accounts.</div></main>;
   const isApproved = snapshot.application?.application_status === 'APPROVED';
+  const isSigned = snapshot.application?.agreement_status === 'EXECUTED';
   const jobs = Array.from(new Map((snapshot.assignments || []).map(a => a.job).filter(Boolean).map(job => [job.id, job])).values());
   const messagesByJob = new Map();
   (snapshot.messages || []).forEach(m => { if (!messagesByJob.has(m.job_id)) messagesByJob.set(m.job_id, []); messagesByJob.get(m.job_id).push(m); });
@@ -21,7 +22,7 @@ export default function ProviderMessagesPage() {
   };
   return <main className="portal-shell">
     <header className="portal-hero"><div><p className="portal-eyebrow">DANI DECLARES PROVIDER</p><h1>Messages</h1><p>Conversation with DANI DECLARES staff and customers, tied to each job you're assigned.</p></div><div className="portal-hero-actions"><AccountBadge session={session} /><button className="portal-refresh" onClick={load}>Refresh</button></div></header>
-    <ProviderNav isApprovedProvider={isApproved} />
+    <ProviderNav isApprovedProvider={isApproved} agreementSigned={isSigned} />
     {error && <div className="portal-alert" role="alert">{error}</div>}{message && <div className="portal-success" role="status">{message}</div>}
     {!isApproved ? <LockedCard title="Messages">Messaging unlocks once your application is approved.</LockedCard> :
       jobs.length ? jobs.map(job => <Card key={job.id} title={job.job_title || 'Job'}>

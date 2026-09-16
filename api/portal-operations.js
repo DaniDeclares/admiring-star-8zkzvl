@@ -1,5 +1,6 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
+import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 
 const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
@@ -139,6 +140,22 @@ export default async function handler(req, res) {
       if (error) throw error;
       await context.supabase.from('dd_jobs').update({ job_status: 'SCHEDULED', scheduled_start: startsAt, scheduled_end: endsAt, assigned_to: providerId }).eq('id', jobId);
       return ok(res, { appointment });
+    }
+    if (action === 'sign_provider_agreement') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const fullLegalName = String(payload.fullLegalName || '').trim();
+      if (!fullLegalName) return fail(res, 'Type your full legal name to sign.');
+      if (!payload.agreed) return fail(res, 'You must confirm you have read and agree to the Provider Agreement.');
+      const { data: application, error: applicationError } = await context.supabase.from('dd_provider_applications').select('id, agreement_status').eq('applicant_user_id', context.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (applicationError) throw applicationError;
+      if (!application) return fail(res, 'No provider application was found for this account.', 404);
+      if (application.agreement_status === 'EXECUTED') return fail(res, 'This agreement has already been signed and cannot be re-signed.', 409);
+      const forwardedFor = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+      const { error: signatureError } = await context.supabase.from('dd_provider_agreement_signatures').insert({ application_id: application.id, signer_user_id: context.user.id, signer_full_name: fullLegalName, agreement_version: PROVIDER_AGREEMENT_VERSION, ip_address: forwardedFor || req.socket?.remoteAddress || null, user_agent: req.headers['user-agent'] || null });
+      if (signatureError) throw signatureError;
+      const { error: updateError } = await context.supabase.from('dd_provider_applications').update({ agreement_status: 'EXECUTED' }).eq('id', application.id);
+      if (updateError) throw updateError;
+      return ok(res, { agreementStatus: 'EXECUTED' });
     }
     if (action === 'assignment_response') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);

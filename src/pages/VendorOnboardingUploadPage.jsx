@@ -11,7 +11,7 @@ const PROVIDER_DOCS = [
   { key: 'GOVERNMENT_ID', label: 'Government-issued ID', help: 'Upload the identity document requested for qualification.', hasNumber: true },
   { key: 'COI', label: 'Certificate of Insurance (COI)', help: 'Upload your current certificate of insurance.', hasNumber: true },
   { key: 'AUTO_INSURANCE', label: 'Auto insurance', help: 'Required when the capability/work requires vehicle coverage.', hasNumber: true },
-  { key: 'AGREEMENT', label: 'Master Provider Agreement', help: 'Upload the executed agreement, if already signed.' },
+  { key: 'AGREEMENT', label: 'Additional signed agreement (optional)', help: 'Your Provider Agreement is signed electronically in the portal, not uploaded here. Only use this if DANI DECLARES asked for an additional, separately negotiated written agreement.' },
   { key: 'BUSINESS_REGISTRATION', label: 'Business registration', help: 'Optional supporting business document.', hasNumber: true },
   { key: 'PROFESSIONAL_LICENSE', label: 'Professional license', help: 'Upload only if applicable to your claimed capability.', hasNumber: true },
   { key: 'CERTIFICATION', label: 'Certification', help: 'Upload supporting certification evidence when applicable.', hasNumber: true },
@@ -172,14 +172,18 @@ export default function VendorOnboardingUploadPage() {
       <h1>Complete your provider onboarding.</h1>
       <p style={{fontSize:18,lineHeight:1.6}}>Upload the evidence requested for your provider application. DANI DECLARES reviews these documents before any qualification or authorization decision.</p>
       {userEmail && <p className="portal-account-badge">Signed in as <strong>{userEmail}</strong><button type="button" onClick={signOut}>Sign out</button></p>}
-      <ProviderNav isApprovedProvider={application?.application_status === 'APPROVED'} />
+      <ProviderNav isApprovedProvider={application?.application_status === 'APPROVED'} agreementSigned={application?.agreement_status === 'EXECUTED'} />
       {application && <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,margin:'24px 0'}}>
         <strong>{application.legal_name || 'Provider application'}</strong>
         <p style={{margin:'8px 0 0'}}>Application status: <strong>{application.application_status}</strong></p>
         <p style={{margin:'8px 0 0'}}>Compliance: <strong>{application.compliance_status}</strong></p>
         <p style={{margin:'8px 0 0'}}>Document statuses — W-9: {application.tax_form_status} · Insurance: {application.insurance_status} · ID: {application.identity_status} · Agreement: {application.agreement_status}</p>
       </div>}
-      <form onSubmit={submitProvider}>
+      {application?.agreement_status !== 'EXECUTED' ? <div style={{padding:20,border:'1px solid #b45309',borderRadius:12,background:'#fffbeb'}}>
+        <strong>Sign your Provider Agreement first</strong>
+        <p style={{marginBottom:12}}>DANI DECLARES requires a signed Provider Agreement before reviewing any documents you submit. This takes about a minute.</p>
+        <Link to="/portal/provider-agreement" style={{fontWeight:700}}>Sign the Provider Agreement →</Link>
+      </div> : <form onSubmit={submitProvider}>
         <div style={{display:'grid',gap:16}}>
           {PROVIDER_DOCS.map(doc => <label key={doc.key} style={{display:'grid',gap:6,padding:16,border:'1px solid #ddd',borderRadius:10}}>
             <strong>{doc.label}</strong><span style={{fontSize:14}}>{doc.help}</span>
@@ -191,7 +195,7 @@ export default function VendorOnboardingUploadPage() {
         {error && <div role="alert" style={{padding:12,marginTop:16,border:'1px solid #b91c1c',borderRadius:8}}>{error}</div>}
         {message && <div role="status" style={{padding:12,marginTop:16,border:'1px solid #15803d',borderRadius:8}}>{message}</div>}
         <button type="submit" disabled={busy} style={{marginTop:20,padding:'12px 18px',fontWeight:700}}>{busy ? 'Submitting…' : 'Submit provider documents'}</button>
-      </form>
+      </form>}
       <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,marginTop:24}}>
         <strong>Important</strong>
         <p style={{marginBottom:0}}>Document receipt is not approval. Provider qualification, verification, authorization, and dispatch eligibility remain separate decisions. Do not upload passwords, banking credentials, or unnecessary sensitive information.</p>
