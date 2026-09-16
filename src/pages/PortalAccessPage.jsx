@@ -32,6 +32,11 @@ export default function PortalAccessPage() {
   const [inviteChecking,setInviteChecking]=useState(false);
   const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',address:'',city:'',state:'GA',zip:'',services:'',password:'',confirm:''});
   const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [done,setDone]=useState('');
+  const [catalogServices,setCatalogServices]=useState([]);
+  const [divisionNames,setDivisionNames]=useState({});
+  const [catalogLoading,setCatalogLoading]=useState(false);
+  const [capabilityQuery,setCapabilityQuery]=useState('');
+  const [selectedCapabilityIds,setSelectedCapabilityIds]=useState(() => new Set());
 
   const visibleOptions = useMemo(() => {
     if (audience === 'provider') return OPTIONS.filter(o => o.key === 'provider');
@@ -70,6 +75,44 @@ export default function PortalAccessPage() {
     return () => { cancelled = true; };
   }, [inviteToken, visibleOptions, selected]);
 
+  useEffect(() => {
+    if (selected?.key !== 'provider' || catalogServices.length || catalogLoading) return;
+    let cancelled = false;
+    const loadCatalog = async () => {
+      setCatalogLoading(true);
+      const [servicesResult, divisionsResult] = await Promise.all([
+        supabase.from('services').select('id, name, sku, division_id').order('name'),
+        supabase.from('divisions').select('id, name'),
+      ]);
+      if (cancelled) return;
+      if (!servicesResult.error) setCatalogServices(servicesResult.data || []);
+      if (!divisionsResult.error) setDivisionNames(Object.fromEntries((divisionsResult.data || []).map(d => [d.id, d.name])));
+      setCatalogLoading(false);
+    };
+    loadCatalog();
+    return () => { cancelled = true; };
+  }, [selected, catalogServices.length, catalogLoading]);
+
+  const groupedCapabilities = useMemo(() => {
+    const query = capabilityQuery.trim().toLowerCase();
+    const filtered = query ? catalogServices.filter(s => s.name.toLowerCase().includes(query)) : catalogServices;
+    const groups = new Map();
+    for (const service of filtered) {
+      const label = divisionNames[service.division_id] || 'Other services';
+      if (!groups.has(label)) groups.set(label, []);
+      groups.get(label).push(service);
+    }
+    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [catalogServices, divisionNames, capabilityQuery]);
+
+  const toggleCapability = (serviceId) => {
+    setSelectedCapabilityIds(prev => {
+      const next = new Set(prev);
+      if (next.has(serviceId)) next.delete(serviceId); else next.add(serviceId);
+      return next;
+    });
+  };
+
   const update=(e)=>setForm({...form,[e.target.name]:e.target.value});
   const choose=(option)=>{
     setError('');
@@ -88,6 +131,7 @@ export default function PortalAccessPage() {
     if(form.password.length<8)return setError('Use a password with at least 8 characters.');
     if(form.password!==form.confirm)return setError('Passwords do not match.');
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
+    if(selected?.key==='provider' && !selectedCapabilityIds.size)return setError('Select at least one service you can fulfill.');
     setBusy(true);
     const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     if(authError){setBusy(false);return setError(authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
@@ -98,6 +142,7 @@ export default function PortalAccessPage() {
       identityPayload.entity_id=propertyInvite.property_id;
     }
     const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:form.organization?'BUSINESS':'INDIVIDUAL',legal_name:form.organization||`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString()}:null;
+    const capabilityPayloads=selected.key==='provider'?catalogServices.filter(s=>selectedCapabilityIds.has(s.id)).map(s=>({canonical_service_id:s.id,canonical_sku:s.sku,capability_key:s.sku||s.id,capability_description:s.name})):[];
     const intakePayload=selected.key!=='provider'?{portal_role:portalRole,relationship_type:selected.relationship,channel_code:selected.channel,organization_name:selected.key==='apartment_resident'?(propertyInvite.client_display_name||form.organization||null):(form.organization||null),first_name:form.firstName,last_name:form.lastName,email:form.email,phone:form.phone,address:form.address||propertyInvite?.property_address||null,city:form.city||propertyInvite?.city||null,state_code:form.state||propertyInvite?.state_code||null,zip_code:form.zip||propertyInvite?.zip_code||null,service_area:form.city&&form.state?`${form.city}, ${form.state}`:null,requested_services:form.services.split(',').map(s=>s.trim()).filter(Boolean),client_organization_id:selected.key==='apartment_resident'?propertyInvite.client_organization_id:null,client_property_id:selected.key==='apartment_resident'?propertyInvite.property_id:null,property_resident_invite_id:selected.key==='apartment_resident'?propertyInvite.invite_id:null,intake_data:{entry_type:selected.key,portal_label:selected.portal,access_model:selected.key==='apartment_resident'?'CLIENT_PROPERTY_INVITATION':'PUBLIC_SELF_SERVICE',client_property:selected.key==='apartment_resident'?{id:propertyInvite.property_id,name:propertyInvite.property_name}:null},status:'SUBMITTED'}:null;
 
     if(!data.session){
@@ -109,6 +154,7 @@ export default function PortalAccessPage() {
         email: form.email.trim(),
         identityPayload,
         providerPayload,
+        capabilityPayloads,
         intakePayload,
         inviteTokenHash: selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
       });
@@ -127,8 +173,10 @@ export default function PortalAccessPage() {
     }
 
     if(selected.key==='provider'){
-      const {error:providerError}=await supabase.from('dd_provider_applications').insert({...providerPayload,applicant_user_id:data.user.id});
+      const {data:application,error:providerError}=await supabase.from('dd_provider_applications').insert({...providerPayload,applicant_user_id:data.user.id}).select('id').single();
       if(providerError){setBusy(false);return setError(`Account created, but provider application needs attention: ${providerError.message}`);}
+      const {error:capabilityError}=await supabase.from('dd_provider_application_capabilities').insert(capabilityPayloads.map(cap=>({...cap,application_id:application.id})));
+      if(capabilityError){setBusy(false);return setError(`Account created, but provider capabilities need attention: ${capabilityError.message}`);}
     } else {
       const {error:intakeError}=await supabase.from('dd_portal_onboarding_intakes').insert({...intakePayload,auth_user_id:data.user.id});
       if(intakeError){setBusy(false);return setError(`Account created, but onboarding data needs attention: ${intakeError.message}`);}
@@ -142,5 +190,5 @@ export default function PortalAccessPage() {
 
   if(mode==='done')return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">WELCOME TO DANI DECLARES</p><h1>{selected.portal}</h1>{selected.key==='apartment_resident'&&propertyInvite&&<p><strong>{propertyInvite.property_name}</strong><br/>{propertyInvite.client_display_name}</p>}<p>{done}</p>{isCompanyRelationship&&<p>Have company-specific vendor onboarding paperwork? You can submit the packet, supplier agreement, insurance requirements, W-9/ACH instructions and other required pages now.</p>}<div className="portal-success-actions"><Link className="portal-primary" to="/portal/login">Sign in</Link>{isCompanyRelationship&&<Link className="portal-secondary" to="/portal/vendor-onboarding">Upload vendor paperwork</Link>}<Link className="portal-secondary" to="/">Return to website</Link></div></div></main>;
 
-  return <main className="portal-access"><div className="portal-form-card"><button className="portal-back" onClick={()=>setMode('choose')}>← Choose a different relationship</button><p className="portal-kicker">DANI DECLARES ACCOUNT SETUP</p><h1>{selected.title}</h1><p>{selected.desc}</p>{selected.key==='apartment_resident'&&propertyInvite&&<div className="portal-success-card" style={{margin:'20px 0',padding:'20px'}}><strong>Property verified</strong><br/>{propertyInvite.property_name}<br/>{propertyInvite.client_display_name}</div>}<form onSubmit={submit}><div className="portal-form-grid"><label>First name<input name="firstName" required value={form.firstName} onChange={update}/></label><label>Last name<input name="lastName" required value={form.lastName} onChange={update}/></label><label>Email<input type="email" name="email" required value={form.email} onChange={update}/></label><label>Phone<input name="phone" value={form.phone} onChange={update}/></label>{selected.key!=='apartment_resident'&&<><label className="portal-wide">Organization / Company<input name="organization" value={form.organization} onChange={update}/></label><label className="portal-wide">Address<input name="address" value={form.address} onChange={update}/></label><label>City<input name="city" value={form.city} onChange={update}/></label><label>State<input name="state" maxLength="2" value={form.state} onChange={update}/></label><label>ZIP<input name="zip" value={form.zip} onChange={update}/></label></>}<label className="portal-wide">Services / capabilities / what you need<textarea name="services" rows="4" value={form.services} onChange={update} placeholder="Separate multiple items with commas."/></label><label>Password<input type="password" name="password" minLength="8" required value={form.password} onChange={update}/></label><label>Confirm password<input type="password" name="confirm" minLength="8" required value={form.confirm} onChange={update} autoComplete="new-password"/></label></div>{error&&<div className="portal-error">{error}</div>}<button className="portal-primary portal-submit" disabled={busy}>{busy?'Creating account…':'Create account'}</button></form>{isCompanyRelationship&&<p className="portal-privacy">After creating your account, you can upload your company's vendor packet and any company-specific supplier requirements from the vendor onboarding page.</p>}<p className="portal-privacy">Your information is used to establish the correct customer/provider relationship and route your requests into the DANI DECLARES operating system. Apartment Resident access is tied to the verified DANI DECLARES client property invitation.</p></div></main>;
+  return <main className="portal-access"><div className="portal-form-card"><button className="portal-back" onClick={()=>setMode('choose')}>← Choose a different relationship</button><p className="portal-kicker">DANI DECLARES ACCOUNT SETUP</p><h1>{selected.title}</h1><p>{selected.desc}</p>{selected.key==='apartment_resident'&&propertyInvite&&<div className="portal-success-card" style={{margin:'20px 0',padding:'20px'}}><strong>Property verified</strong><br/>{propertyInvite.property_name}<br/>{propertyInvite.client_display_name}</div>}<form onSubmit={submit}><div className="portal-form-grid"><label>First name<input name="firstName" required value={form.firstName} onChange={update}/></label><label>Last name<input name="lastName" required value={form.lastName} onChange={update}/></label><label>Email<input type="email" name="email" required value={form.email} onChange={update}/></label><label>Phone<input name="phone" value={form.phone} onChange={update}/></label>{selected.key!=='apartment_resident'&&<><label className="portal-wide">Organization / Company<input name="organization" value={form.organization} onChange={update}/></label><label className="portal-wide">Address<input name="address" value={form.address} onChange={update}/></label><label>City<input name="city" value={form.city} onChange={update}/></label><label>State<input name="state" maxLength="2" value={form.state} onChange={update}/></label><label>ZIP<input name="zip" value={form.zip} onChange={update}/></label></>}{selected.key==='provider'&&<div className="portal-wide portal-capability-picker"><label>Search services you can fulfill<input type="text" value={capabilityQuery} onChange={e=>setCapabilityQuery(e.target.value)} placeholder="Search the DANI DECLARES service catalog…"/></label><span className="portal-capability-count">{selectedCapabilityIds.size} selected</span>{catalogLoading?<p>Loading service catalog…</p>:<div className="portal-capability-groups">{groupedCapabilities.length?groupedCapabilities.map(([division,items])=><div key={division} className="portal-capability-group"><strong>{division}</strong>{items.map(item=><label key={item.id} className="portal-capability-item"><input type="checkbox" checked={selectedCapabilityIds.has(item.id)} onChange={()=>toggleCapability(item.id)}/>{item.name}</label>)}</div>):<p>No services match your search.</p>}</div>}</div>}<label className="portal-wide">{selected.key==='provider'?'Additional notes about your experience (optional)':'Services / capabilities / what you need'}<textarea name="services" rows="4" value={form.services} onChange={update} placeholder={selected.key==='provider'?'Certifications, equipment, years of experience, anything else worth knowing.':'Separate multiple items with commas.'}/></label><label>Password<input type="password" name="password" minLength="8" required value={form.password} onChange={update}/></label><label>Confirm password<input type="password" name="confirm" minLength="8" required value={form.confirm} onChange={update} autoComplete="new-password"/></label></div>{error&&<div className="portal-error">{error}</div>}<button className="portal-primary portal-submit" disabled={busy}>{busy?'Creating account…':'Create account'}</button></form>{isCompanyRelationship&&<p className="portal-privacy">After creating your account, you can upload your company's vendor packet and any company-specific supplier requirements from the vendor onboarding page.</p>}<p className="portal-privacy">Your information is used to establish the correct customer/provider relationship and route your requests into the DANI DECLARES operating system. Apartment Resident access is tied to the verified DANI DECLARES client property invitation.</p></div></main>;
 }
