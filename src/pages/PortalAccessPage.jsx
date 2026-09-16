@@ -98,8 +98,25 @@ export default function PortalAccessPage() {
         supabase.from('divisions').select('id, name'),
       ]);
       if (cancelled) return;
-      if (!servicesResult.error) setCatalogServices(servicesResult.data || []);
       if (!divisionsResult.error) setDivisionNames(Object.fromEntries((divisionsResult.data || []).map(d => [d.id, d.name])));
+      if (!servicesResult.error) {
+        // The public catalog query has no way to distinguish field/dispatch
+        // work from DANI-direct admin or creative-design work -- every
+        // SELL_NOW service across every division would otherwise show up
+        // here as something a provider can get "authorized" for, including
+        // ~68 purely administrative/creative SKUs whose own master-record
+        // fulfillment_lane says "DANI DIRECT -- owner fulfillment", not
+        // provider-dispatched. Restrict this picker to Division 12
+        // (Logistics, Courier & Asset Sourcing), the only division this
+        // system's dispatch/assignment/evidence/payout pipeline actually
+        // serves today. Carrier Back-Office Support (DNI-12A-028) is
+        // excluded even though it's in that division -- it's the same kind
+        // of DANI-direct admin work as its sibling DNI-04A-015, just placed
+        // in Division 12 for commercial grouping, not a field capability.
+        const logisticsDivisionId = (divisionsResult.data || []).find(d => d.name === 'Logistics, Courier & Asset Sourcing')?.id;
+        const fulfillable = (servicesResult.data || []).filter(s => s.division_id === logisticsDivisionId && s.sku !== 'DNI-12A-028');
+        setCatalogServices(fulfillable);
+      }
       setCatalogLoading(false);
     };
     loadCatalog();
