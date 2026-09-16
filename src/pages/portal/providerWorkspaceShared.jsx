@@ -8,6 +8,11 @@ export function formatDate(value) { if (!value) return 'Not scheduled'; return n
 export function statusLabel(value) { return value ? value.replaceAll('_', ' ') : 'Not started'; }
 export function Requirement({ label, ok, detail }) { return <div className="portal-requirement"><span className={`portal-requirement-dot ${ok ? 'ok' : 'pending'}`} />{label}<small>{detail}</small></div>; }
 export function LockedCard({ title, children }) { return <Card title={title}><p className="portal-note">{children} <Link to="/portal">Check your application status</Link>.</p></Card>; }
+export function AccountBadge({ session }) {
+  if (!session?.user) return null;
+  const signOut = async () => { await supabase.auth.signOut(); window.location.href = '/portal/login'; };
+  return <div className="portal-account-badge">Signed in as <strong>{session.user.email}</strong><button type="button" onClick={signOut}>Sign out</button></div>;
+}
 
 // Mirrors the exact gates staff review at /portal/provider-approval (and that
 // dd_approve_provider_application enforces server-side) so this never becomes
