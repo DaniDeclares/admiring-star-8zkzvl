@@ -14,6 +14,8 @@ const OPTIONS = [
   { key:'provider', title:'Service Provider', desc:'I want to qualify to fulfill DANI DECLARES work.', portal:'DANI DECLARES Provider', relationship:'PROVIDER', channel:null },
 ];
 
+const PROVIDER_STEPS = ['Account', 'Business Details', 'Services', 'Review & Submit'];
+
 async function hashInviteToken(token) {
   const bytes = new TextEncoder().encode(token);
   const digest = await crypto.subtle.digest('SHA-256', bytes);
@@ -37,6 +39,7 @@ export default function PortalAccessPage() {
   const [catalogLoading,setCatalogLoading]=useState(false);
   const [capabilityQuery,setCapabilityQuery]=useState('');
   const [selectedCapabilityIds,setSelectedCapabilityIds]=useState(() => new Set());
+  const [providerStep,setProviderStep]=useState(1);
 
   const visibleOptions = useMemo(() => {
     if (audience === 'provider') return OPTIONS.filter(o => o.key === 'provider');
@@ -130,8 +133,20 @@ export default function PortalAccessPage() {
       setError('Apartment Resident access is invitation-only. Your property must be an active DANI DECLARES property-management client. Use the resident invitation or QR code provided by your property.');
       return;
     }
-    setSelected(option);setMode('form');
+    setSelected(option);setMode('form');setProviderStep(1);
   };
+
+  const providerStepValid=()=>{
+    if(providerStep===1){
+      if(!form.firstName.trim()||!form.lastName.trim()||!form.email.trim()){setError('Fill in your name and email to continue.');return false;}
+      if(form.password.length<8){setError('Use a password with at least 8 characters.');return false;}
+      if(form.password!==form.confirm){setError('Passwords do not match.');return false;}
+    }
+    if(providerStep===3&&!selectedCapabilityIds.size){setError('Select at least one service you can fulfill.');return false;}
+    setError('');return true;
+  };
+  const nextProviderStep=()=>{if(providerStepValid())setProviderStep(s=>Math.min(s+1,4));};
+  const backProviderStep=()=>{setError('');setProviderStep(s=>Math.max(s-1,1));};
 
   const portalRole=useMemo(()=>selected?.key==='provider'?'provider':selected?.key==='property_manager'?'property_manager':selected?.key==='government'?'procurement':selected?.key==='resident'||selected?.key==='apartment_resident'?'resident':'customer',[selected]);
   const isCompanyRelationship = selected?.key === 'property_manager' || selected?.key === 'real_estate' || selected?.key === 'business' || selected?.key === 'government';
@@ -200,5 +215,36 @@ export default function PortalAccessPage() {
 
   if(mode==='done')return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">WELCOME TO DANI DECLARES</p><h1>{selected.portal}</h1>{selected.key==='apartment_resident'&&propertyInvite&&<p><strong>{propertyInvite.property_name}</strong><br/>{propertyInvite.client_display_name}</p>}<p>{done}</p>{isCompanyRelationship&&<p>Have company-specific vendor onboarding paperwork? You can submit the packet, supplier agreement, insurance requirements, W-9/ACH instructions and other required pages now.</p>}{selected.key==='provider'&&<p>Your application enters the qualification pipeline once you sign in. Upload your tax form, insurance, ID and any other requested documents — DANI DECLARES reviews everything before your account becomes dispatch-eligible.</p>}<div className="portal-success-actions"><Link className="portal-primary" to="/portal/login">Sign in</Link>{isCompanyRelationship&&<Link className="portal-secondary" to="/portal/vendor-onboarding">Upload vendor paperwork</Link>}{selected.key==='provider'&&<Link className="portal-secondary" to="/portal/vendor-onboarding">Upload provider documents</Link>}<Link className="portal-secondary" to="/">Return to website</Link></div></div></main>;
 
-  return <main className="portal-access"><div className="portal-form-card"><button className="portal-back" onClick={()=>setMode('choose')}>← Choose a different relationship</button><p className="portal-kicker">DANI DECLARES ACCOUNT SETUP</p><h1>{selected.title}</h1><p>{selected.desc}</p>{selected.key==='apartment_resident'&&propertyInvite&&<div className="portal-success-card" style={{margin:'20px 0',padding:'20px'}}><strong>Property verified</strong><br/>{propertyInvite.property_name}<br/>{propertyInvite.client_display_name}</div>}<form onSubmit={submit}><div className="portal-form-grid"><label>First name<input name="firstName" required value={form.firstName} onChange={update}/></label><label>Last name<input name="lastName" required value={form.lastName} onChange={update}/></label><label>Email<input type="email" name="email" required value={form.email} onChange={update}/></label><label>Phone<input name="phone" value={form.phone} onChange={update}/></label>{selected.key!=='apartment_resident'&&<><label className="portal-wide">Organization / Company<input name="organization" value={form.organization} onChange={update}/></label><label className="portal-wide">Address<input name="address" value={form.address} onChange={update}/></label><label>City<input name="city" value={form.city} onChange={update}/></label><label>State<input name="state" maxLength="2" value={form.state} onChange={update}/></label><label>ZIP<input name="zip" value={form.zip} onChange={update}/></label></>}{selected.key==='provider'&&<div className="portal-wide portal-capability-picker"><label>Search services you can fulfill<input type="text" value={capabilityQuery} onChange={e=>setCapabilityQuery(e.target.value)} placeholder="Search the DANI DECLARES service catalog…"/></label><span className="portal-capability-count">{selectedCapabilityIds.size} selected</span>{catalogLoading?<p>Loading service catalog…</p>:<div className="portal-capability-groups">{groupedCapabilities.length?groupedCapabilities.map(([division,items])=><div key={division} className="portal-capability-group"><strong>{division}</strong>{items.map(item=><label key={item.id} className="portal-capability-item"><input type="checkbox" checked={selectedCapabilityIds.has(item.id)} onChange={()=>toggleCapability(item.id)}/>{item.name}</label>)}</div>):<p>No services match your search.</p>}</div>}</div>}<label className="portal-wide">{selected.key==='provider'?'Additional notes about your experience (optional)':'Services / capabilities / what you need'}<textarea name="services" rows="4" value={form.services} onChange={update} placeholder={selected.key==='provider'?'Certifications, equipment, years of experience, anything else worth knowing.':'Separate multiple items with commas.'}/></label><label>Password<input type="password" name="password" minLength="8" required value={form.password} onChange={update}/></label><label>Confirm password<input type="password" name="confirm" minLength="8" required value={form.confirm} onChange={update} autoComplete="new-password"/></label></div>{error&&<div className="portal-error">{error}</div>}<button className="portal-primary portal-submit" disabled={busy}>{busy?'Creating account…':'Create account'}</button></form>{isCompanyRelationship&&<p className="portal-privacy">After creating your account, you can upload your company's vendor packet and any company-specific supplier requirements from the vendor onboarding page.</p>}<p className="portal-privacy">Your information is used to establish the correct customer/provider relationship and route your requests into the DANI DECLARES operating system. Apartment Resident access is tied to the verified DANI DECLARES client property invitation.</p></div></main>;
+  const providerForm = <form onSubmit={submit} onKeyDown={e=>{if(providerStep<4&&e.key==='Enter'){e.preventDefault();nextProviderStep();}}}>
+    <div className="portal-wizard-steps">{PROVIDER_STEPS.map((label,index)=>{const stepNumber=index+1;return <div key={label} className={`portal-wizard-step${providerStep===stepNumber?' active':''}${providerStep>stepNumber?' done':''}`}><span>{stepNumber}</span>{label}</div>;})}</div>
+    {providerStep===1&&<div className="portal-form-grid">
+      <label>First name<input name="firstName" required value={form.firstName} onChange={update}/></label>
+      <label>Last name<input name="lastName" required value={form.lastName} onChange={update}/></label>
+      <label>Email<input type="email" name="email" required value={form.email} onChange={update}/></label>
+      <label>Phone<input name="phone" value={form.phone} onChange={update}/></label>
+      <label>Password<input type="password" name="password" minLength="8" required value={form.password} onChange={update}/></label>
+      <label>Confirm password<input type="password" name="confirm" minLength="8" required value={form.confirm} onChange={update} autoComplete="new-password"/></label>
+    </div>}
+    {providerStep===2&&<div className="portal-form-grid">
+      <label className="portal-wide">Business / organization name (optional)<input name="organization" value={form.organization} onChange={update}/></label>
+      <label className="portal-wide">Address<input name="address" value={form.address} onChange={update}/></label>
+      <label>City<input name="city" value={form.city} onChange={update}/></label>
+      <label>State<input name="state" maxLength="2" value={form.state} onChange={update}/></label>
+      <label>ZIP<input name="zip" value={form.zip} onChange={update}/></label>
+    </div>}
+    {providerStep===3&&<div className="portal-wide portal-capability-picker"><label>Search services you can fulfill<input type="text" value={capabilityQuery} onChange={e=>setCapabilityQuery(e.target.value)} placeholder="Search the DANI DECLARES service catalog…"/></label><span className="portal-capability-count">{selectedCapabilityIds.size} selected</span>{catalogLoading?<p>Loading service catalog…</p>:<div className="portal-capability-groups">{groupedCapabilities.length?groupedCapabilities.map(([division,items])=><div key={division} className="portal-capability-group"><strong>{division}</strong>{items.map(item=><label key={item.id} className="portal-capability-item"><input type="checkbox" checked={selectedCapabilityIds.has(item.id)} onChange={()=>toggleCapability(item.id)}/>{item.name}</label>)}</div>):<p>No services match your search.</p>}</div>}</div>}
+    {providerStep===4&&<div className="portal-review">
+      <h2 className="portal-review-title">Review your application</h2>
+      <div className="portal-row"><div><strong>{form.firstName} {form.lastName}</strong><small>{form.email} · {form.phone||'No phone provided'}</small></div></div>
+      {form.organization&&<div className="portal-row"><div><strong>{form.organization}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')||'No address provided'}</small></div></div>}
+      <div className="portal-row"><div><strong>{selectedCapabilityIds.size} service{selectedCapabilityIds.size===1?'':'s'} selected</strong><small>{catalogServices.filter(s=>selectedCapabilityIds.has(s.id)).map(s=>s.name).join(', ')||'None'}</small></div></div>
+      <label className="portal-wide">Additional notes about your experience (optional)<textarea name="services" rows="4" value={form.services} onChange={update} placeholder="Certifications, equipment, years of experience, anything else worth knowing."/></label>
+    </div>}
+    {error&&<div className="portal-error">{error}</div>}
+    <div className="portal-wizard-nav">{providerStep>1&&<button type="button" className="portal-secondary" onClick={backProviderStep}>Back</button>}{providerStep<4?<button type="button" className="portal-primary" onClick={nextProviderStep}>Next</button>:<button className="portal-primary portal-submit" disabled={busy}>{busy?'Creating account…':'Create account'}</button>}</div>
+  </form>;
+
+  const standardForm = <form onSubmit={submit}><div className="portal-form-grid"><label>First name<input name="firstName" required value={form.firstName} onChange={update}/></label><label>Last name<input name="lastName" required value={form.lastName} onChange={update}/></label><label>Email<input type="email" name="email" required value={form.email} onChange={update}/></label><label>Phone<input name="phone" value={form.phone} onChange={update}/></label>{selected.key!=='apartment_resident'&&<><label className="portal-wide">Organization / Company<input name="organization" value={form.organization} onChange={update}/></label><label className="portal-wide">Address<input name="address" value={form.address} onChange={update}/></label><label>City<input name="city" value={form.city} onChange={update}/></label><label>State<input name="state" maxLength="2" value={form.state} onChange={update}/></label><label>ZIP<input name="zip" value={form.zip} onChange={update}/></label></>}</div><label className="portal-wide">Services / capabilities / what you need<textarea name="services" rows="4" value={form.services} onChange={update} placeholder="Separate multiple items with commas."/></label><label>Password<input type="password" name="password" minLength="8" required value={form.password} onChange={update}/></label><label>Confirm password<input type="password" name="confirm" minLength="8" required value={form.confirm} onChange={update} autoComplete="new-password"/></label>{error&&<div className="portal-error">{error}</div>}<button className="portal-primary portal-submit" disabled={busy}>{busy?'Creating account…':'Create account'}</button></form>;
+
+  return <main className="portal-access"><div className="portal-form-card"><button className="portal-back" onClick={()=>setMode('choose')}>← Choose a different relationship</button><p className="portal-kicker">DANI DECLARES ACCOUNT SETUP</p><h1>{selected.title}</h1><p>{selected.desc}</p>{selected.key==='apartment_resident'&&propertyInvite&&<div className="portal-success-card" style={{margin:'20px 0',padding:'20px'}}><strong>Property verified</strong><br/>{propertyInvite.property_name}<br/>{propertyInvite.client_display_name}</div>}{selected.key==='provider'?providerForm:standardForm}{isCompanyRelationship&&<p className="portal-privacy">After creating your account, you can upload your company's vendor packet and any company-specific supplier requirements from the vendor onboarding page.</p>}<p className="portal-privacy">Your information is used to establish the correct customer/provider relationship and route your requests into the DANI DECLARES operating system. Apartment Resident access is tied to the verified DANI DECLARES client property invitation.</p></div></main>;
 }
