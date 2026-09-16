@@ -6,6 +6,20 @@ const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
 function fail(res, error, status = 400) { return res.status(status).json({ success: false, error }); }
 
+// dd-job-evidence is a private bucket -- storage_url as stored is just the
+// object path, not a fetchable URL, so nothing that lists evidence (staff
+// QA queue, provider's own evidence page) could ever actually show the
+// photo. Batch-sign every row's path once per snapshot load instead of
+// requiring a second round trip per thumbnail.
+async function signEvidenceUrls(supabase, evidenceRows) {
+  const rows = evidenceRows || [];
+  const paths = rows.map(row => row.storage_url).filter(Boolean);
+  if (!paths.length) return rows;
+  const { data, error } = await supabase.storage.from('dd-job-evidence').createSignedUrls(paths, 3600);
+  if (error) return rows.map(row => ({ ...row, signed_url: null }));
+  const urlByPath = new Map((data || []).map(entry => [entry.path, entry.signedUrl]));
+  return rows.map(row => ({ ...row, signed_url: row.storage_url ? urlByPath.get(row.storage_url) || null : null }));
+}
 function sanitizeProviderJob(job) {
   if (!job) return null;
   return { id: job.id, public_reference: job.public_reference, division_slug: job.division_slug, job_title: job.job_title, job_status: job.job_status, scheduled_start: job.scheduled_start, scheduled_end: job.scheduled_end, location_address: job.location_address, assigned_to: job.assigned_to, scope_summary: job.scope_summary, sla_due_at: job.sla_due_at, created_at: job.created_at, updated_at: job.updated_at };
@@ -32,7 +46,7 @@ async function getStaffSnapshot(supabase) {
   ]);
   const errors = [requests, jobs, appointments, providers, changes, evidence, payments].filter(item => item.error);
   if (errors.length) throw errors[0].error;
-  return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: evidence.data || [], payments: payments.data || [] };
+  return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [] };
 }
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
@@ -74,7 +88,7 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   if (payouts.error) throw payouts.error;
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
-  return { ...applicationSnapshot, assignments: safeAssignments, tasks: tasks.data || [], evidence: evidence.data || [], appointments: appointments.data || [], payouts: payouts.data || [], messages };
+  return { ...applicationSnapshot, assignments: safeAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], payouts: payouts.data || [], messages };
 }
 async function getCustomerSnapshot(supabase, identity, role) {
   const isOrgScoped = ['property_manager', 'procurement'].includes(role);
