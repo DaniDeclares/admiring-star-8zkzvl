@@ -108,10 +108,42 @@ async function runCompletion(supabase, session, pending) {
   }
 
   if (pending.kind === 'provider' && pending.providerPayload) {
-    const { error: providerError } = await supabase
+    // No unique constraint on applicant_user_id here (unlike the identity
+    // table above), so a sequential retry after a real failure -- e.g. the
+    // capability insert below failing -- would otherwise create a second
+    // application row instead of erroring. Reuse an existing application
+    // for this user rather than blindly inserting another one.
+    let applicationId;
+    const { data: existingApplication } = await supabase
       .from('dd_provider_applications')
-      .insert({ ...pending.providerPayload, applicant_user_id: userId });
-    if (providerError) return { attempted: true, success: false, error: `Provider application needs attention: ${providerError.message}` };
+      .select('id')
+      .eq('applicant_user_id', userId)
+      .maybeSingle();
+    if (existingApplication) {
+      applicationId = existingApplication.id;
+    } else {
+      const { data: application, error: providerError } = await supabase
+        .from('dd_provider_applications')
+        .insert({ ...pending.providerPayload, applicant_user_id: userId })
+        .select('id')
+        .single();
+      if (providerError) return { attempted: true, success: false, error: `Provider application needs attention: ${providerError.message}` };
+      applicationId = application.id;
+    }
+
+    if (pending.capabilityPayloads?.length) {
+      const { data: existingCapabilities } = await supabase
+        .from('dd_provider_application_capabilities')
+        .select('id')
+        .eq('application_id', applicationId)
+        .limit(1);
+      if (!existingCapabilities?.length) {
+        const { error: capabilityError } = await supabase
+          .from('dd_provider_application_capabilities')
+          .insert(pending.capabilityPayloads.map(capability => ({ ...capability, application_id: applicationId })));
+        if (capabilityError) return { attempted: true, success: false, error: `Provider capabilities need attention: ${capabilityError.message}` };
+      }
+    }
   } else if (pending.intakePayload) {
     const { error: intakeError } = await supabase
       .from('dd_portal_onboarding_intakes')
