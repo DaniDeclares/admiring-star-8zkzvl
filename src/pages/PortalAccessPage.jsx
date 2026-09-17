@@ -205,7 +205,7 @@ export default function PortalAccessPage() {
         return {
           canonical_service_id:s.id,
           canonical_sku:s.sku,
-          capability_key:category.category_key,
+          capability_key:category.capability_key,
           capability_description:s.name,
           applicant_experience:answer||null,
           requires_license:isGated,
