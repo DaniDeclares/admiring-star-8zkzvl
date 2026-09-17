@@ -238,6 +238,17 @@ export default async function handler(req, res) {
       if (updateError) throw updateError;
       await context.supabase.from('dd_dispatch_events').insert({ job_id: assignment.job_id, actor_id: providerId, event_type: `PROVIDER_${decision === 'ACCEPT' ? 'ACCEPTED' : 'REJECTED'}`, description: `Provider ${decision === 'ACCEPT' ? 'accepted' : 'rejected'} assignment ${assignmentId}.`, metadata: { reason: reason || null } });
       await context.supabase.from('dd_jobs').update({ job_status: decision === 'ACCEPT' ? 'SCHEDULED' : 'DISPATCH_REVIEW', assigned_to: decision === 'ACCEPT' ? providerId : null }).eq('id', assignment.job_id);
+      if (decision === 'REJECT') {
+        // A decline is not the end of dispatch -- automatically re-run the routing resolver
+        // for the same job so it offers to the next eligible provider (the rejecting org is
+        // excluded by dd_route_work_order itself). If nobody else is eligible, the job stays
+        // in DISPATCH_REVIEW above for staff to handle manually.
+        const { data: routed, error: routeError } = await context.supabase.rpc('dd_route_work_order', { p_job_id: assignment.job_id });
+        const routeResult = routed?.[0];
+        if (!routeError && routeResult?.offer_status === 'OFFERED') {
+          await context.supabase.from('dd_jobs').update({ job_status: 'ASSIGNMENT_OFFERED' }).eq('id', assignment.job_id);
+        }
+      }
       return ok(res, { assignmentStatus: next.assignment_status });
     }
     if (action === 'task_update') {
