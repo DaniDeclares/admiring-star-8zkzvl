@@ -35,8 +35,7 @@ function calculate(service, rule, answers) {
   const a = answers || {};
   const pricingType = String(rule?.pricing_type || service.pricing_type || '').toUpperCase();
   const ruleBase = rule?.base_price_cents != null ? Number(rule.base_price_cents)/100 : Number(service.starting_price || service.public_price_low || 0);
-  const canOverrideBase = !rule || String(rule.lock_status || '').toUpperCase() !== 'LOCKED';
-  let base = canOverrideBase && Number(a.manual_base_price || 0) > 0 ? Number(a.manual_base_price) : ruleBase;
+  let base = ruleBase;
   const quantity = Math.max(1, Number(a.quantity || 1));
   const hours = Math.max(0, Number(a.hours || 0));
   if (pricingType.includes('HOURLY')) base *= Math.max(1,hours || 1);
@@ -60,6 +59,7 @@ function calculate(service, rule, answers) {
   if (materials>0) reviewFlags.push('MATERIALS_CONFIRMATION');
   if (passThrough>0) reviewFlags.push('PASS_THROUGH_CONFIRMATION');
   if (taxRate===0) reviewFlags.push('TAX_REVIEW');
+  if (Number(a.manual_base_price||0)>0) reviewFlags.push('MANUAL_BASE_IGNORED_GOVERNED_PRICING');
   return { baseSubtotal:money(base), residentDiscount:money(discount), travelFee:money(travelFee), rushFee:money(rushFee), materials:money(materials), sourcingFee:money(sourcingFee), passThrough:money(passThrough), tax:money(tax), taxRate, estimatedTotal:money(total), depositDue:money(deposit), reviewFlags, needsReview:reviewFlags.length>0 };
 }
 
