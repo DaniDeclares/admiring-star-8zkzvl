@@ -9,7 +9,6 @@ export async function getQuoteCatalog(supabase) {
     .neq('commercial_offer_status', 'DO_NOT_SELL').order('division').order('canonical_sku');
   if (error) throw error;
   const ids = (offers || []).map(o => o.runtime_service_id).filter(Boolean);
-  const skus = (offers || []).map(o => o.canonical_sku).filter(Boolean);
   const { data: servicesById, error: serviceIdError } = ids.length ? await supabase.from('services').select('id,sku,name,service_family,pricing_type,billing_cycle,starting_price,base_price_cents,price_note,public_price_low,public_price_high,public_price_display,quote_input_schema,commercial_status,commercial_intent_status,resident_discount_eligible,is_active').in('id', ids) : { data: [], error: null };
   if (serviceIdError) throw serviceIdError;
   const resolvedIds = new Set((servicesById || []).map(s => s.id));
@@ -31,14 +30,21 @@ async function loadRules(supabase, serviceId, channelCode) {
   return data || [];
 }
 
-function calculate(service, rule, answers) {
+export function isHourlyBilled(service, rule) {
+  const pricingType = String(rule?.pricing_type || service?.pricing_type || '').toUpperCase();
+  const billingCycle = String(rule?.billing_cycle || service?.billing_cycle || '').toUpperCase();
+  return billingCycle === 'HOURLY' || pricingType === 'PER_HOUR' || pricingType.includes('HOURLY');
+}
+
+export function calculate(service, rule, answers) {
   const a = answers || {};
   const pricingType = String(rule?.pricing_type || service.pricing_type || '').toUpperCase();
   const ruleBase = rule?.base_price_cents != null ? Number(rule.base_price_cents)/100 : Number(service.starting_price || service.public_price_low || 0);
   let base = ruleBase;
   const quantity = Math.max(1, Number(a.quantity || 1));
   const hours = Math.max(0, Number(a.hours || 0));
-  if (pricingType.includes('HOURLY')) base *= Math.max(1,hours || 1);
+  const hourly = isHourlyBilled(service, rule);
+  if (hourly) base *= Math.max(1,hours || 1);
   else if (pricingType.includes('PER_UNIT') || pricingType.includes('PER_BASKET') || pricingType.includes('PER_ITEM')) base *= quantity;
   else if (service.sourceType === 'DANI_SPECIALS' && ['basket','bed','window','chair','tree','room','bath','hour','document'].includes(String(service.specialUnit||'').toLowerCase())) base *= quantity;
   const travelFee = Boolean(a.apply_standard_travel) ? Math.max(0,Number(a.miles_one_way||0)-15)*2.5 : 0;
@@ -60,7 +66,7 @@ function calculate(service, rule, answers) {
   if (passThrough>0) reviewFlags.push('PASS_THROUGH_CONFIRMATION');
   if (taxRate===0) reviewFlags.push('TAX_REVIEW');
   if (Number(a.manual_base_price||0)>0) reviewFlags.push('MANUAL_BASE_IGNORED_GOVERNED_PRICING');
-  return { baseSubtotal:money(base), residentDiscount:money(discount), travelFee:money(travelFee), rushFee:money(rushFee), materials:money(materials), sourcingFee:money(sourcingFee), passThrough:money(passThrough), tax:money(tax), taxRate, estimatedTotal:money(total), depositDue:money(deposit), reviewFlags, needsReview:reviewFlags.length>0 };
+  return { baseSubtotal:money(base), residentDiscount:money(discount), travelFee:money(travelFee), rushFee:money(rushFee), materials:money(materials), sourcingFee:money(sourcingFee), passThrough:money(passThrough), tax:money(tax), taxRate, estimatedTotal:money(total), depositDue:money(deposit), reviewFlags, needsReview:reviewFlags.length>0, isHourly:hourly, ratePerUnit:money(ruleBase) };
 }
 
 export async function createEstimate(supabase, body) {
