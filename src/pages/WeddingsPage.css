@@ -48,6 +48,7 @@
   max-width: 620px;
 }
 .packages-grid {
+  display: grid;
   gap: var(--grid-gap);
   grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
 }
@@ -93,6 +94,7 @@
   font-family: var(--font-secondary);
 }
 .gallery-grid {
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
   gap: var(--grid-gap);
 }

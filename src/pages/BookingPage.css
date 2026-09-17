@@ -82,6 +82,7 @@
 }
 
 .booking-options {
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
   gap: var(--grid-gap);
   margin-bottom: var(--section-gap);

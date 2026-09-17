@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
@@ -48,6 +48,16 @@ import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
+import WeddingsPage from "./pages/WeddingsPage.jsx";
+
+// ServiceCta and several service detail pages build "/book?service=X" links
+// expecting RequestServicePage's ?service= param to pre-select that service.
+// A plain <Navigate to="/request-service"> drops the query string entirely,
+// silently losing the service selection. Preserve it on redirect.
+function BookRedirect() {
+  const location = useLocation();
+  return <Navigate to={`/request-service${location.search}`} replace />;
+}
 
 export default function App() {
   return (
@@ -108,11 +118,11 @@ export default function App() {
         <Route path="/portal/resident" element={<PortalWorkspacePage />} />
         <Route path="/portal/property-manager" element={<PortalWorkspacePage />} />
         <Route path="/portal/procurement" element={<PortalWorkspacePage />} />
-        <Route path="/weddings" element={<Navigate to="/request-service" replace />} />
-        <Route path="/events/weddings" element={<Navigate to="/request-service" replace />} />
+        <Route path="/weddings" element={<WeddingsPage />} />
+        <Route path="/events/weddings" element={<WeddingsPage />} />
         <Route path="/events/festivals" element={<Navigate to="/request-service" replace />} />
         <Route path="/festival" element={<Navigate to="/request-service" replace />} />
-        <Route path="/book" element={<Navigate to="/request-service" replace />} />
+        <Route path="/book" element={<BookRedirect />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/travel-quote" element={<Navigate to="/request-service" replace />} />
         <Route path="/real-estate" element={<RealEstatePage />} />

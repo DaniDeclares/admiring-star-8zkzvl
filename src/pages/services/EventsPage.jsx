@@ -10,6 +10,7 @@ export default function EventsPage() {
     "Wedding and private-event logistics",
     "Seasonal and holiday experiences",
   ];
+  const weddingIndex = capabilities.indexOf("Wedding and private-event logistics");
 
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", color: "#1B0A0E", backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
@@ -29,12 +30,17 @@ export default function EventsPage() {
 
       <section style={{ padding: "4.5rem 1.5rem", maxWidth: "1100px", margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
-          {capabilities.map((name) => (
+          {capabilities.map((name, i) => (
             <div key={name} style={{ backgroundColor: "#F8F5F1", border: "1px solid #E2D9D0", padding: "1.75rem", borderRadius: 8 }}>
               <h2 style={{ fontSize: "1.15rem", fontWeight: 700, color: "#1B0A0E" }}>{name}</h2>
               <p style={{ fontSize: "0.9rem", color: "#5A4A52", lineHeight: 1.5, marginTop: "0.75rem" }}>
                 Scope, delivery model and commercial treatment are determined through the canonical catalog and event intake. Historical package prices are not used.
               </p>
+              {i === weddingIndex && (
+                <Link to="/weddings" style={{ display: "inline-block", marginTop: "0.9rem", color: "#8B1E2E", fontWeight: 800, textDecoration: "none" }}>
+                  See officiant packages &amp; gallery &rarr;
+                </Link>
+              )}
             </div>
           ))}
         </div>
