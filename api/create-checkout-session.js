@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import prisma from '../lib/prisma.js';
-import { checkoutEligibility, getGovernedCommercialOffer, getChannelFromRequest } from '../src/lib/operations/governedCommercialGate2026.js';
+import { checkoutEligibility, getGovernedCommercialOffer, getChannelFromRequest, resolveVerifiedCommunity } from '../src/lib/operations/governedCommercialGate2026.js';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const json = (res,status,payload)=>res.status(status).json(payload);
@@ -24,9 +24,10 @@ export default async function handler(req,res){
   if(requestedServiceId!==serviceId)return json(res,422,{error:'Payment service does not match the submitted service request.'});
   const subchannel=String(intent.subchannelCode||request.property_details?.operationsRouting?.subchannelCode||body.subchannelCode||'').trim();
   if(!VALID_CH01_SUBCHANNELS.has(subchannel))return json(res,400,{error:'Please select a valid resident subchannel before payment.'});
-  if(subchannel==='CH01-B')return json(res,400,{error:'Apartment-resident pricing requires verified community eligibility. Please submit your request and we will confirm your resident benefit before payment.'});
+  const { verified: isVerifiedCommunityResident } = await resolveVerifiedCommunity(req);
+  if(subchannel==='CH01-B' && !isVerifiedCommunityResident)return json(res,400,{error:'Apartment-resident pricing requires verified community eligibility. Please sign in with your property-invited account before payment.'});
   const offer=await getGovernedCommercialOffer(serviceId);
-  const gate=checkoutEligibility(offer,{channel,subchannel});
+  const gate=checkoutEligibility(offer,{channel,subchannel,isVerifiedCommunityResident});
   if(!gate.eligible)return json(res,409,{error:'This service is not currently eligible for direct online payment.',reason:gate.reason});
   const estimate=await prisma.dd_estimates.findFirst({where:{service_request_id:request.id},orderBy:{created_at:'desc'},select:{id:true,estimated_total:true,deposit_due:true,estimate_status:true}});
   if(!estimate)return json(res,422,{error:'No frozen estimate was found for this payment request.'});

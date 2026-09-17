@@ -6,6 +6,44 @@ import './PortalWorkspacePage.css';
 
 const ROLE_LABELS = { provider: 'DANI DECLARES Provider', resident: 'DANI DECLARES', customer: 'DANI DECLARES', property_manager: 'DANI DECLARES', procurement: 'DANI DECLARES', staff_admin: 'My Portal' };
 
+function ResidentInvitesCard({ session, properties }) {
+  const [propertyId, setPropertyId] = useState(properties?.[0]?.id || '');
+  const [maxUses, setMaxUses] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState('');
+  const [invites, setInvites] = useState([]);
+  const [error, setError] = useState('');
+  const selectedProperty = properties.find(p => p.id === propertyId);
+  const call = async (action, payload) => {
+    const r = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action, ...payload }) });
+    const body = await r.json(); if (!r.ok || !body.success) throw new Error(body.error || 'Action failed.'); return body;
+  };
+  const loadInvites = async (id) => { if (!id) return; try { const body = await call('list_resident_invites', { propertyId: id }); setInvites(body.invites || []); } catch (e) { setError(e.message); } };
+  const generate = async () => {
+    if (!propertyId) return; setBusy(true); setError(''); setInviteUrl('');
+    try { const body = await call('create_resident_invite', { propertyId, maxUses: Number(maxUses) || 1 }); setInviteUrl(body.inviteUrl); await loadInvites(propertyId); }
+    catch (e) { setError(e.message); } finally { setBusy(false); }
+  };
+  React.useEffect(() => { if (propertyId) loadInvites(propertyId); }, [propertyId]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!properties.length) return <Card title="Resident Invites"><Empty>No properties with resident access are on file yet. Contact DANI DECLARES to add your properties.</Empty></Card>;
+  return <Card title="Resident Invites">
+    <p className="portal-note">Generate a link for {selectedProperty?.property_name || 'a property'} and send it to your residents — everyone who signs up through it is automatically tracked back to your account and gets the verified apartment-resident rate. This is the only way residents unlock that discount.</p>
+    <div className="portal-actions" style={{ marginTop: 12, flexWrap: 'wrap' }}>
+      <select value={propertyId} onChange={e => { setPropertyId(e.target.value); setInviteUrl(''); }} style={{ padding: '10px 12px', borderRadius: 8 }}>
+        {properties.map(p => <option key={p.id} value={p.id} disabled={!p.resident_access_enabled}>{p.property_name}{p.resident_access_enabled ? '' : ' (resident access not enabled)'}</option>)}
+      </select>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Uses <input type="number" min="1" value={maxUses} onChange={e => setMaxUses(e.target.value)} style={{ width: 64, padding: '8px 10px', borderRadius: 8 }} /></label>
+      <button className="portal-primary" disabled={busy || !selectedProperty?.resident_access_enabled} onClick={generate}>{busy ? 'Generating…' : 'Generate invite link'}</button>
+    </div>
+    {error && <div className="portal-alert" role="alert" style={{ marginTop: 10 }}>{error}</div>}
+    {inviteUrl && <div className="portal-success" style={{ marginTop: 10, wordBreak: 'break-all' }}>{inviteUrl}</div>}
+    {invites.length > 0 && <div style={{ marginTop: 16 }}>
+      <p className="portal-eyebrow">Existing invites for this property</p>
+      {invites.map(inv => <div className="portal-row" key={inv.id}><div><strong>{inv.invited_email || 'Shared link'}</strong><small>{inv.status} · {inv.uses}/{inv.max_uses} used · Created {formatDate(inv.created_at)}</small></div></div>)}
+    </div>}
+  </Card>;
+}
+
 export default function PortalWorkspacePage() {
   const { session, snapshot, loading, error, message, load, act } = useProviderWorkspace();
   const [messageDrafts, setMessageDrafts] = useState({});
@@ -53,6 +91,7 @@ export default function PortalWorkspacePage() {
       <Card title="Selected Services">{capabilities.length ? capabilities.map(item => <div className="portal-row" key={item.id}><div><strong>{item.capability_description || item.canonical_sku}</strong><small>{statusLabel(item.authorization_status)}</small></div></div>) : <Empty>No services selected.</Empty>}</Card>
       <Card title="Submitted Documents">{(snapshot?.documents || []).length ? snapshot.documents.map(item => <div className="portal-row" key={item.id}><div><strong>{item.document_type.replaceAll('_', ' ')}</strong><small>{statusLabel(item.verification_status)} · Uploaded {formatDate(item.uploaded_at)}</small></div></div>) : <Empty>No documents uploaded yet.</Empty>}<div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/vendor-onboarding">Upload documents</Link></div></Card>
     </>) : <>
+      {role === 'property_manager' && <ResidentInvitesCard session={session} properties={snapshot?.properties || []} />}
       <Card title={isCommercial ? 'Commercial Requests & Jobs' : 'My Requests & Jobs'}>{snapshot.requests?.length ? snapshot.requests.map(item => <div className="portal-row" key={item.id}><div><strong>{item.service_needed || item.service_category || 'Service request'}</strong><small>{item.status} · {item.location_address || 'Location on file'}</small></div></div>) : <Empty>No requests are currently attached to this account.</Empty>}{snapshot.jobs?.map(item => <div className="portal-row" key={item.id}><div><strong>{item.job_title}</strong><small>{item.job_status} · {item.location_address || 'Location on file'}</small></div></div>)}</Card>
       <Card title="Invoices & Financial Records"><p className="portal-note">Invoices display finalized financial records. Customer payment remains processed through the configured payment processor; the portal does not collect raw card data.</p>{snapshot.invoices?.length ? snapshot.invoices.map(item => <div className="portal-row" key={item.id}><div><strong>{item.public_reference}</strong><small>{item.invoice_status} · Balance: ${Number(item.balance_due || 0).toFixed(2)}</small></div>{item.stripe_payment_link && item.invoice_status !== 'paid' && <a className="portal-primary" href={item.stripe_payment_link} target="_blank" rel="noreferrer">Pay invoice</a>}</div>) : <Empty>No invoices are currently attached to this workspace.</Empty>}</Card>
       <Card title="Change Orders & Approvals">{snapshot.changes?.length ? snapshot.changes.map(item => <div className="portal-row" key={item.id}><div><strong>{item.reason}</strong><small>{item.status} · {item.resolved_channel || 'Channel controlled'}</small></div>{item.status === 'PENDING_APPROVAL' && <div className="portal-actions"><button onClick={() => act('change_order_decision', { changeOrderId: item.id, decision: 'APPROVED' })}>Approve</button><button className="secondary" onClick={() => act('change_order_decision', { changeOrderId: item.id, decision: 'REJECTED', reason: 'Declined in portal.' })}>Reject</button></div>}</div>) : <Empty>No pending change orders.</Empty>}</Card>
