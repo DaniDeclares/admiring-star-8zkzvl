@@ -21,6 +21,7 @@ import PartnerNetwork from "./pages/PartnerNetwork.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
 import NetworkHubPage from "./pages/NetworkHubPage.jsx";
 import RequestServicePage from "./pages/RequestServicePage.jsx";
+import PayPage from "./pages/PayPage.jsx";
 import ResidentWelcomePage from "./pages/ResidentWelcomePage.jsx";
 import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx";
 import OperationsConsolePage from "./pages/portal/OperationsConsolePage.jsx";
@@ -71,6 +72,7 @@ export default function App() {
         <Route path="/resident-welcome" element={<ResidentWelcomePage />} />
         <Route path="/resident-dispatch" element={<Navigate to="/request-service" replace />} />
         <Route path="/request-service" element={<RequestServicePage />} />
+        <Route path="/pay" element={<PayPage />} />
 
         {/* One platform, three role-based experiences. */}
         <Route path="/portal" element={<PortalWorkspacePage />} />
