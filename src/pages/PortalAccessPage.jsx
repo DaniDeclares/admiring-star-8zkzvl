@@ -35,10 +35,15 @@ export default function PortalAccessPage() {
   const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',address:'',city:'',state:'GA',zip:'',services:'',password:'',confirm:''});
   const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [done,setDone]=useState('');
   const [catalogServices,setCatalogServices]=useState([]);
-  const [divisionNames,setDivisionNames]=useState({});
+  const [licenseGatedSkus,setLicenseGatedSkus]=useState(() => new Set());
+  const [categories,setCategories]=useState([]);
   const [catalogLoading,setCatalogLoading]=useState(false);
-  const [capabilityQuery,setCapabilityQuery]=useState('');
-  const [selectedCapabilityIds,setSelectedCapabilityIds]=useState(() => new Set());
+  // Keyed by category_key -> { checked, equipmentAnswer }. Applicants pick a parent
+  // skill category (Cleaning, Notary, Courier, etc.) instead of hand-picking from the
+  // full 300+ item service catalog -- each category expands into its real underlying
+  // services at submit time, scoped by division_id (and canonical_sku_prefix for the
+  // Division-1 sub-families that genuinely need different equipment questions).
+  const [selectedCategories,setSelectedCategories]=useState(() => ({}));
   const [providerStep,setProviderStep]=useState(1);
 
   const visibleOptions = useMemo(() => {
@@ -93,55 +98,46 @@ export default function PortalAccessPage() {
     let cancelled = false;
     const loadCatalog = async () => {
       setCatalogLoading(true);
-      const [servicesResult, divisionsResult] = await Promise.all([
-        supabase.from('services').select('id, name, sku, division_id').order('name'),
-        supabase.from('divisions').select('id, name'),
+      // Carrier Back-Office Support (DNI-12A-028) is DANI-direct admin work
+      // that happens to be filed under Division 12 for commercial grouping,
+      // not a field capability -- excluded from expansion the same way it
+      // always has been.
+      const [servicesResult, categoriesResult, requirementsResult] = await Promise.all([
+        supabase.from('services').select('id, name, sku, division_id').neq('sku', 'DNI-12A-028').order('name'),
+        supabase.from('dd_provider_capability_categories').select('*').order('display_order'),
+        supabase.from('dd_service_capability_requirements').select('canonical_sku, requirement_code').in('requirement_code', ['LICENSE_SERVICE', 'CERT_SERVICE', 'AUTO_MOBILE']).eq('required', true),
       ]);
       if (cancelled) return;
-      if (!divisionsResult.error) setDivisionNames(Object.fromEntries((divisionsResult.data || []).map(d => [d.id, d.name])));
-      if (!servicesResult.error) {
-        // The public catalog query has no way to distinguish field/dispatch
-        // work from DANI-direct admin or creative-design work -- every
-        // SELL_NOW service across every division would otherwise show up
-        // here as something a provider can get "authorized" for, including
-        // ~68 purely administrative/creative SKUs whose own master-record
-        // fulfillment_lane says "DANI DIRECT -- owner fulfillment", not
-        // provider-dispatched. Restrict this picker to Division 12
-        // (Logistics, Courier & Asset Sourcing), the only division this
-        // system's dispatch/assignment/evidence/payout pipeline actually
-        // serves today. Carrier Back-Office Support (DNI-12A-028) is
-        // excluded even though it's in that division -- it's the same kind
-        // of DANI-direct admin work as its sibling DNI-04A-015, just placed
-        // in Division 12 for commercial grouping, not a field capability.
-        const logisticsDivisionId = (divisionsResult.data || []).find(d => d.name === 'Logistics, Courier & Asset Sourcing')?.id;
-        const fulfillable = (servicesResult.data || []).filter(s => s.division_id === logisticsDivisionId && s.sku !== 'DNI-12A-028');
-        setCatalogServices(fulfillable);
-      }
+      if (!servicesResult.error) setCatalogServices(servicesResult.data || []);
+      if (!categoriesResult.error) setCategories(categoriesResult.data || []);
+      if (!requirementsResult.error) setLicenseGatedSkus(new Set((requirementsResult.data || []).map(r => r.canonical_sku)));
       setCatalogLoading(false);
     };
     loadCatalog();
     return () => { cancelled = true; };
   }, [selected]);
 
-  const groupedCapabilities = useMemo(() => {
-    const query = capabilityQuery.trim().toLowerCase();
-    const filtered = query ? catalogServices.filter(s => s.name.toLowerCase().includes(query)) : catalogServices;
-    const groups = new Map();
-    for (const service of filtered) {
-      const label = divisionNames[service.division_id] || 'Other services';
-      if (!groups.has(label)) groups.set(label, []);
-      groups.get(label).push(service);
-    }
-    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [catalogServices, divisionNames, capabilityQuery]);
+  // A category maps to every canonical service in its division (optionally
+  // narrowed to a canonical_sku_prefix for the Division-1 sub-families).
+  const servicesForCategory = (category) => catalogServices.filter(s => s.division_id === category.division_id && (!category.canonical_sku_prefix || (s.sku || '').startsWith(`DNI-${category.canonical_sku_prefix}-`)));
 
-  const toggleCapability = (serviceId) => {
-    setSelectedCapabilityIds(prev => {
-      const next = new Set(prev);
-      if (next.has(serviceId)) next.delete(serviceId); else next.add(serviceId);
+  const toggleCategory = (categoryKey) => {
+    setSelectedCategories(prev => {
+      const next = { ...prev };
+      if (next[categoryKey]?.checked) delete next[categoryKey];
+      else next[categoryKey] = { checked: true, equipmentAnswer: '' };
       return next;
     });
   };
+  const setCategoryAnswer = (categoryKey, value) => {
+    setSelectedCategories(prev => ({ ...prev, [categoryKey]: { ...prev[categoryKey], equipmentAnswer: value } }));
+  };
+
+  const selectedCategoryCount = Object.values(selectedCategories).filter(c => c?.checked).length;
+  const selectedServicesPreview = useMemo(() => {
+    const active = categories.filter(c => selectedCategories[c.category_key]?.checked);
+    return active.flatMap(c => servicesForCategory(c));
+  }, [categories, selectedCategories, catalogServices]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update=(e)=>setForm({...form,[e.target.name]:e.target.value});
   const choose=(option)=>{
@@ -159,7 +155,7 @@ export default function PortalAccessPage() {
       if(form.password.length<8){setError('Use a password with at least 8 characters.');return false;}
       if(form.password!==form.confirm){setError('Passwords do not match.');return false;}
     }
-    if(providerStep===3&&!selectedCapabilityIds.size){setError('Select at least one service you can fulfill.');return false;}
+    if(providerStep===3&&!selectedCategoryCount){setError('Select at least one category of work you can fulfill.');return false;}
     setError('');return true;
   };
   const nextProviderStep=()=>{if(providerStepValid())setProviderStep(s=>Math.min(s+1,4));};
@@ -173,7 +169,7 @@ export default function PortalAccessPage() {
     if(form.password.length<8)return setError('Use a password with at least 8 characters.');
     if(form.password!==form.confirm)return setError('Passwords do not match.');
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
-    if(selected?.key==='provider' && !selectedCapabilityIds.size)return setError('Select at least one service you can fulfill.');
+    if(selected?.key==='provider' && !selectedCategoryCount)return setError('Select at least one category of work you can fulfill.');
     setBusy(true);
     const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{emailRedirectTo:`${window.location.origin}/portal/login`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     if(authError){setBusy(false);return setError(authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
@@ -191,7 +187,32 @@ export default function PortalAccessPage() {
       identityPayload.entity_id=propertyInvite.property_id;
     }
     const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:form.organization?'BUSINESS':'INDIVIDUAL',legal_name:form.organization||`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString()}:null;
-    const capabilityPayloads=selected.key==='provider'?catalogServices.filter(s=>selectedCapabilityIds.has(s.id)).map(s=>({canonical_service_id:s.id,canonical_sku:s.sku,capability_key:s.sku||s.id,capability_description:s.name})):[];
+    // Expand each selected category into its real underlying services. A service
+    // whose SKU carries a real LICENSE_SERVICE/CERT_SERVICE/AUTO_MOBILE requirement
+    // (from dd_service_capability_requirements -- notary, wedding officiant, and every
+    // Division-12 courier/logistics service today) is left GATED/PENDING exactly like
+    // any staff-reviewed capability always has been: it still needs a real uploaded
+    // credential verified by staff. Anything else is marked AUTHORIZED/VERIFIED/
+    // NOT_REQUIRED right here, since there is nothing left to review -- staff's
+    // existing "Approve & Activate" action (dd_approve_provider_application) already
+    // refuses to approve the application at all until ID, tax form, agreement and
+    // background check are cleared, so this never skips those baseline checks.
+    const activeCategories=selected.key==='provider'?categories.filter(c=>selectedCategories[c.category_key]?.checked):[];
+    const capabilityPayloads=activeCategories.flatMap(category=>{
+      const answer=selectedCategories[category.category_key]?.equipmentAnswer||'';
+      return servicesForCategory(category).map(s=>{
+        const isGated=licenseGatedSkus.has(s.sku);
+        return {
+          canonical_service_id:s.id,
+          canonical_sku:s.sku,
+          capability_key:category.category_key,
+          capability_description:s.name,
+          applicant_experience:answer||null,
+          requires_license:isGated,
+          ...(isGated?{}:{authorization_status:'AUTHORIZED',evidence_status:'VERIFIED',requirement_status:'NOT_REQUIRED'}),
+        };
+      });
+    });
     const intakePayload=selected.key!=='provider'?{portal_role:portalRole,relationship_type:selected.relationship,channel_code:selected.channel,organization_name:selected.key==='apartment_resident'?(propertyInvite.client_display_name||form.organization||null):(form.organization||null),first_name:form.firstName,last_name:form.lastName,email:form.email,phone:form.phone,address:form.address||propertyInvite?.property_address||null,city:form.city||propertyInvite?.city||null,state_code:form.state||propertyInvite?.state_code||null,zip_code:form.zip||propertyInvite?.zip_code||null,service_area:form.city&&form.state?`${form.city}, ${form.state}`:null,requested_services:form.services.split(',').map(s=>s.trim()).filter(Boolean),client_organization_id:selected.key==='apartment_resident'?propertyInvite.client_organization_id:null,client_property_id:selected.key==='apartment_resident'?propertyInvite.property_id:null,property_resident_invite_id:selected.key==='apartment_resident'?propertyInvite.invite_id:null,intake_data:{entry_type:selected.key,portal_label:selected.portal,access_model:selected.key==='apartment_resident'?'CLIENT_PROPERTY_INVITATION':'PUBLIC_SELF_SERVICE',client_property:selected.key==='apartment_resident'?{id:propertyInvite.property_id,name:propertyInvite.property_name}:null},status:'SUBMITTED'}:null;
 
     if(!data.session){
@@ -256,12 +277,27 @@ export default function PortalAccessPage() {
       <label>State<input name="state" maxLength="2" value={form.state} onChange={update}/></label>
       <label>ZIP<input name="zip" value={form.zip} onChange={update}/></label>
     </div>}
-    {providerStep===3&&<div className="portal-wide portal-capability-picker"><label>Search services you can fulfill<input type="text" value={capabilityQuery} onChange={e=>setCapabilityQuery(e.target.value)} placeholder="Search the DANI DECLARES service catalog…"/></label><span className="portal-capability-count">{selectedCapabilityIds.size} selected</span>{catalogLoading?<p>Loading service catalog…</p>:<div className="portal-capability-groups">{groupedCapabilities.length?groupedCapabilities.map(([division,items])=><div key={division} className="portal-capability-group"><strong>{division}</strong>{items.map(item=><label key={item.id} className="portal-capability-item"><input type="checkbox" checked={selectedCapabilityIds.has(item.id)} onChange={()=>toggleCapability(item.id)}/>{item.name}</label>)}</div>):<p>No services match your search.</p>}</div>}</div>}
+    {providerStep===3&&<div className="portal-wide portal-capability-picker">
+      <p>Pick every category of work you can do. For each one, you'll answer a quick question about your equipment or credentials — by the end, we'll know exactly which specific jobs you're eligible for.</p>
+      <span className="portal-capability-count">{selectedCategoryCount} categor{selectedCategoryCount===1?'y':'ies'} selected · {selectedServicesPreview.length} service{selectedServicesPreview.length===1?'':'s'} covered</span>
+      {catalogLoading?<p>Loading service categories…</p>:<div className="portal-capability-groups">{categories.map(category=>{
+        const isChecked=Boolean(selectedCategories[category.category_key]?.checked);
+        const serviceCount=servicesForCategory(category).length;
+        return <div key={category.category_key} className="portal-capability-group">
+          <label className="portal-capability-item"><input type="checkbox" checked={isChecked} onChange={()=>toggleCategory(category.category_key)}/><strong>{category.label}</strong><small> — {serviceCount} service{serviceCount===1?'':'s'}</small></label>
+          {category.description&&<small className="portal-capability-desc">{category.description}</small>}
+          {isChecked&&<div className="portal-capability-followup">
+            {category.requires_credential&&<div className="portal-capability-credential-note">⚠ {category.credential_prompt}</div>}
+            <label>{category.equipment_prompt}<input type="text" value={selectedCategories[category.category_key]?.equipmentAnswer||''} onChange={e=>setCategoryAnswer(category.category_key,e.target.value)} placeholder="Describe briefly…"/></label>
+          </div>}
+        </div>;
+      })}</div>}
+    </div>}
     {providerStep===4&&<div className="portal-review">
       <h2 className="portal-review-title">Review your application</h2>
       <div className="portal-row"><div><strong>{form.firstName} {form.lastName}</strong><small>{form.email} · {form.phone||'No phone provided'}</small></div></div>
       {form.organization&&<div className="portal-row"><div><strong>{form.organization}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')||'No address provided'}</small></div></div>}
-      <div className="portal-row"><div><strong>{selectedCapabilityIds.size} service{selectedCapabilityIds.size===1?'':'s'} selected</strong><small>{catalogServices.filter(s=>selectedCapabilityIds.has(s.id)).map(s=>s.name).join(', ')||'None'}</small></div></div>
+      <div className="portal-row"><div><strong>{selectedCategoryCount} categor{selectedCategoryCount===1?'y':'ies'} selected · {selectedServicesPreview.length} service{selectedServicesPreview.length===1?'':'s'} covered</strong><small>{categories.filter(c=>selectedCategories[c.category_key]?.checked).map(c=>c.label).join(', ')||'None'}</small></div></div>
       <label className="portal-wide">Additional notes about your experience (optional)<textarea name="services" rows="4" value={form.services} onChange={update} placeholder="Certifications, equipment, years of experience, anything else worth knowing."/></label>
     </div>}
     {error&&<div className="portal-error">{error}</div>}
