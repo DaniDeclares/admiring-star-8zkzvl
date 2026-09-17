@@ -59,7 +59,7 @@ export default async function handler(req,res){
    if(process.env.NOTIFICATION_EMAIL)await publishOperationalEvent({eventType:'LEAD_CREATED',aggregateType:'SERVICE_REQUEST',aggregateId:request.id,eventKey:`lead-created-email:${request.id}`,channel:'EMAIL',payload:{to:process.env.NOTIFICATION_EMAIL,subject:`New DANI DECLARES service request — ${serviceType||category||'New lead'}`,text:notificationText}});
    if(process.env.NOTIFICATION_PHONE)await publishOperationalEvent({eventType:'LEAD_CREATED',aggregateType:'SERVICE_REQUEST',aggregateId:request.id,eventKey:`lead-created-sms:${request.id}`,channel:'SMS',payload:{to:process.env.NOTIFICATION_PHONE,text:`New DANI DECLARES request: ${name}; ${serviceType||category||'service'}; ${phone||email||''}; Request ${request.id}`}});
   }catch(notificationError){console.error('Lead notification queue error:',notificationError)}
-  return res.status(200).json({success:true,message:'We received your request.',requestId:request.id,booking:booking?{id:booking.id,startsAt:booking.requested_start_at,endsAt:booking.requested_end_at,holdExpiresAt:booking.hold_expires_at,durationMinutes:booking.duration_minutes}:null});
+  return res.status(200).json({success:true,message:'We received your request.',requestId:request.id,paymentPending:paymentEligible,status:requestState,booking:booking?{id:booking.id,startsAt:booking.requested_start_at,endsAt:booking.requested_end_at,holdExpiresAt:booking.hold_expires_at,durationMinutes:booking.duration_minutes}:null});
  }catch(error){
   console.error('Intake persistence error:',error);
   if(String(error?.message||'').includes('REQUESTED_TIME_UNAVAILABLE'))return res.status(409).json({error:'That requested time is no longer available. Please choose another date or time.'});

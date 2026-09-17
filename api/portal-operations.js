@@ -105,16 +105,36 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
   return { ...applicationSnapshot, assignments: safeAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], payouts: payouts.data || [], messages };
 }
+// A resident's own dd_portal_identities.organization_id is only ever set by
+// dd_consume_apartment_resident_invite_impl (see the property-invite RPCs),
+// so its presence IS the durable proof of "signed up through their property's
+// invite link" -- the resident never gets to just claim the CH01-B discount
+// by picking an option in a dropdown.
+async function getResidentCommunityStatus(supabase, identity) {
+  if (identity.portal_role !== 'resident' || !identity.organization_id) {
+    return { verified: false, communityId: null, communityName: null };
+  }
+  const { data: org } = await supabase.from('dd_client_organizations').select('display_name').eq('id', identity.organization_id).maybeSingle();
+  return { verified: true, communityId: identity.organization_id, communityName: org?.display_name || null };
+}
+async function getPropertyManagerProperties(supabase, identity) {
+  if (identity.portal_role !== 'property_manager' || !identity.organization_id) return [];
+  const { data, error } = await supabase.from('dd_client_properties').select('id, property_name, property_address, city, state_code, status, resident_access_enabled').eq('organization_id', identity.organization_id).order('property_name', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
 async function getCustomerSnapshot(supabase, identity, role) {
   const isOrgScoped = ['property_manager', 'procurement'].includes(role);
   const scopeId = isOrgScoped ? identity.organization_id : identity.entity_id;
-  if (!scopeId) return { requests: [], jobs: [], invoices: [], changes: [], messages: [] };
+  const residentCommunity = await getResidentCommunityStatus(supabase, identity);
+  const properties = await getPropertyManagerProperties(supabase, identity);
+  if (!scopeId) return { requests: [], jobs: [], invoices: [], changes: [], messages: [], residentCommunity, properties };
   let requestQuery = supabase.from('service_requests').select('*');
   requestQuery = isOrgScoped ? requestQuery.eq('organization_id', scopeId) : requestQuery.eq('lead_id', scopeId);
   const { data: requests, error: requestError } = await requestQuery.order('created_at', { ascending: false }).limit(100);
   if (requestError) throw requestError;
   const requestIds = (requests || []).map(row => row.id);
-  if (!requestIds.length) return { requests: requests || [], jobs: [], invoices: [], changes: [], messages: [] };
+  if (!requestIds.length) return { requests: requests || [], jobs: [], invoices: [], changes: [], messages: [], residentCommunity, properties };
   const { data: jobs, error: jobsError } = await supabase.from('dd_jobs').select('*').in('service_request_id', requestIds).order('created_at', { ascending: false });
   if (jobsError) throw jobsError;
   const jobIds = (jobs || []).map(row => row.id);
@@ -125,7 +145,7 @@ async function getCustomerSnapshot(supabase, identity, role) {
   ]);
   if (invoices.error) throw invoices.error;
   if (changes.error) throw changes.error;
-  return { requests: requests || [], jobs: jobs || [], invoices: invoices.data || [], changes: changes.data || [], messages };
+  return { requests: requests || [], jobs: jobs || [], invoices: invoices.data || [], changes: changes.data || [], messages, residentCommunity, properties };
 }
 async function createDispatchOffer(supabase, actorId, payload) {
   const { jobId, providerId, adminNotes, providerNotes } = payload;
@@ -186,6 +206,25 @@ export default async function handler(req, res) {
       if (updateError) throw updateError;
       return ok(res, { agreementStatus: 'EXECUTED' });
     }
+    if (action === 'create_resident_invite') {
+      const guard = requireRole(context, ['property_manager']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const { propertyId, maxUses, expiresAt, invitedEmail } = payload;
+      if (!propertyId) return fail(res, 'propertyId is required.');
+      const { data, error } = await context.supabase.rpc('dd_create_apartment_resident_invite', { p_property_id: propertyId, p_max_uses: maxUses || 1, p_expires_at: expiresAt || null, p_invited_email: invitedEmail || null });
+      if (error) return fail(res, error.message || 'Could not create the resident invitation.', 400);
+      const row = data?.[0];
+      if (!row) return fail(res, 'Could not create the resident invitation.', 400);
+      const inviteUrl = `${(process.env.SITE_URL || `https://${req.headers.host}`)}/portal/access?property_invite=${row.raw_token}`;
+      return ok(res, { inviteId: row.invite_id, inviteUrl });
+    }
+    if (action === 'list_resident_invites') {
+      const guard = requireRole(context, ['property_manager']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const { propertyId } = payload;
+      if (!propertyId) return fail(res, 'propertyId is required.');
+      const { data, error } = await context.supabase.rpc('dd_list_property_resident_invites', { p_property_id: propertyId });
+      if (error) return fail(res, error.message || 'Could not load resident invitations.', 400);
+      return ok(res, { invites: data || [] });
+    }
     if (action === 'assignment_response') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const providerId = context.isStaff ? payload.providerId : context.identity.entity_id;
@@ -199,6 +238,17 @@ export default async function handler(req, res) {
       if (updateError) throw updateError;
       await context.supabase.from('dd_dispatch_events').insert({ job_id: assignment.job_id, actor_id: providerId, event_type: `PROVIDER_${decision === 'ACCEPT' ? 'ACCEPTED' : 'REJECTED'}`, description: `Provider ${decision === 'ACCEPT' ? 'accepted' : 'rejected'} assignment ${assignmentId}.`, metadata: { reason: reason || null } });
       await context.supabase.from('dd_jobs').update({ job_status: decision === 'ACCEPT' ? 'SCHEDULED' : 'DISPATCH_REVIEW', assigned_to: decision === 'ACCEPT' ? providerId : null }).eq('id', assignment.job_id);
+      if (decision === 'REJECT') {
+        // A decline is not the end of dispatch -- automatically re-run the routing resolver
+        // for the same job so it offers to the next eligible provider (the rejecting org is
+        // excluded by dd_route_work_order itself). If nobody else is eligible, the job stays
+        // in DISPATCH_REVIEW above for staff to handle manually.
+        const { data: routed, error: routeError } = await context.supabase.rpc('dd_route_work_order', { p_job_id: assignment.job_id });
+        const routeResult = routed?.[0];
+        if (!routeError && routeResult?.offer_status === 'OFFERED') {
+          await context.supabase.from('dd_jobs').update({ job_status: 'ASSIGNMENT_OFFERED' }).eq('id', assignment.job_id);
+        }
+      }
       return ok(res, { assignmentStatus: next.assignment_status });
     }
     if (action === 'task_update') {
