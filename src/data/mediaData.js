@@ -12,6 +12,10 @@ const banner = (id, title, department) => brandBanner({ label: title, kicker: de
 // the abstract brand banner above rather than showing a photo of unrelated work.
 const photo = (path) => `/images/stock/${path}`;
 const weddingPhoto = (path) => `/weddings/${path}`;
+// Photos Danielle sourced and uploaded herself (via Drive) for the categories
+// that had no real photo at all -- cleaning, property, pet care, moving/courier,
+// laundry/organizing, real estate, and tumbler product shots.
+const daniPhoto = (path) => `/images/dani-batch/${path}`;
 
 export const MASTER_MEDIA_MANIFEST_V7 = [
   // ==========================================
@@ -137,9 +141,9 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES PROPERTY",
     pillar: "02 PREPARE",
     serviceId: "prop-unit-turnover",
-    imageUrl: banner("prop-unit-turnover", "Multi-Family Unit Turnover Reset", "DANI DECLARES PROPERTY"),
+    imageUrl: daniPhoto("pexels-muharrem-alper-428087426-36110470.jpg"),
     altText: "Professional apartment turnover cleaning crew resetting modern kitchen for new resident move-in",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
@@ -167,9 +171,103 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES PROPERTY",
     pillar: "02 PREPARE",
     serviceId: "prop-b2c-deep-clean",
-    imageUrl: banner("prop-b2c-deep-clean", "Residential Deep Cleaning & Home Reset", "DANI DECLARES PROPERTY"),
+    imageUrl: daniPhoto("pexels-tima-miroshnichenko-6197121.jpg"),
     altText: "Spotless residential home living room and kitchen deep clean performed by DANI DECLARES LLC",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
+    usage: "CARD",
+    aspectRatio: "16:9",
+    focalPoint: "center",
+    fallbackUrl: MEDIA_FALLBACK
+  },
+
+  // ==========================================
+  // 01 — HANDLE (HOUSEHOLD / FIELD SUPPORT PHOTOS)
+  // ==========================================
+  {
+    id: "pet-care-walking",
+    title: "Pet Sitting & Routine Care",
+    category: "OPERATIONS",
+    department: "DANI DECLARES OPERATIONS",
+    pillar: "01 HANDLE",
+    serviceId: "pet-care-walking",
+    imageUrl: daniPhoto("pexels-vovaflame-4317149.jpg"),
+    altText: "Two dogs on leashes being walked as part of a professional pet sitting and dog walking service",
+    sourceType: "STOCK",
+    usage: "CARD",
+    aspectRatio: "16:9",
+    focalPoint: "center",
+    fallbackUrl: MEDIA_FALLBACK
+  },
+  {
+    id: "laundry-organize",
+    title: "Laundry, Wash & Fold",
+    category: "OPERATIONS",
+    department: "DANI DECLARES OPERATIONS",
+    pillar: "01 HANDLE",
+    serviceId: "laundry-organize",
+    imageUrl: daniPhoto("pexels-leticia-alvares-1805702-35009501.jpg"),
+    altText: "Freshly laundered clothing folded and organized on a bed as part of a laundry and household service",
+    sourceType: "STOCK",
+    usage: "CARD",
+    aspectRatio: "16:9",
+    focalPoint: "center",
+    fallbackUrl: MEDIA_FALLBACK
+  },
+  {
+    id: "household-organize",
+    title: "Household Concierge & Organization",
+    category: "OPERATIONS",
+    department: "DANI DECLARES OPERATIONS",
+    pillar: "01 HANDLE",
+    serviceId: "household-organize",
+    imageUrl: daniPhoto("pexels-rdne-5591641.jpg"),
+    altText: "Household concierge organizing kitchen cabinet dishware and storage as part of a home organization service",
+    sourceType: "STOCK",
+    usage: "CARD",
+    aspectRatio: "16:9",
+    focalPoint: "center",
+    fallbackUrl: MEDIA_FALLBACK
+  },
+  {
+    id: "move-transition",
+    title: "Move & Household Transition Support",
+    category: "PROPERTY",
+    department: "DANI DECLARES PROPERTY",
+    pillar: "02 PREPARE",
+    serviceId: "move-transition",
+    imageUrl: daniPhoto("pexels-artempodrez-5025498.jpg"),
+    altText: "Mover unloading boxes from a delivery van at a residential home during a household move",
+    sourceType: "STOCK",
+    usage: "CARD",
+    aspectRatio: "16:9",
+    focalPoint: "center",
+    fallbackUrl: MEDIA_FALLBACK
+  },
+  {
+    id: "courier-logistics",
+    title: "Logistics, Courier & Asset Sourcing",
+    category: "OPERATIONS",
+    department: "DANI DECLARES OPERATIONS",
+    pillar: "01 HANDLE",
+    serviceId: "courier-logistics",
+    imageUrl: daniPhoto("pexels-artempodrez-5025483.jpg"),
+    altText: "Courier holding a package with a delivery clipboard in front of a logistics van",
+    sourceType: "STOCK",
+    usage: "CARD",
+    aspectRatio: "16:9",
+    focalPoint: "center",
+    fallbackUrl: MEDIA_FALLBACK
+  },
+  {
+    id: "real-estate-support",
+    title: "Real Estate & Closing Support",
+    category: "PROPERTY",
+    department: "DANI DECLARES PROPERTY",
+    pillar: "02 PREPARE",
+    serviceId: "real-estate-support",
+    imageUrl: daniPhoto("pexels-pavel-danilyuk-7937330.jpg"),
+    altText: "Real estate agent showing an unfinished property interior to two prospective clients",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
@@ -235,9 +333,9 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES CREATIVE",
     pillar: "03 CREATE",
     serviceId: "crt-tumblers",
-    imageUrl: banner("crt-tumblers", "Sublimated 20 oz Custom Tumbler", "DANI DECLARES CREATIVE"),
+    imageUrl: daniPhoto("pexels-rdne-8455835.jpg"),
     altText: "Insulated stainless steel 20 oz tumblers with full-wrap custom sublimated graphic designs",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
