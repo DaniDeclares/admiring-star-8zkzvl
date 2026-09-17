@@ -48,7 +48,7 @@ const SERVICE_VISUAL_RULES = [
   { keys: ['seasonal', 'holiday', 'decorating'], visual: banner('Seasonal Home Decorating', 'Styled seasonal home preparation and decorating') },
   { keys: ['logistics', 'courier', 'delivery', 'asset sourcing', 'procurement'], visual: banner('Logistics & Courier Support', 'Professional logistics, sourcing, and delivery operation') },
   { keys: ['roadside', 'tire', 'automotive', 'vehicle detailing', 'mobile vehicle'], visual: banner('Mobile Vehicle Care', 'Professional mobile automotive and vehicle care') },
-  { keys: ['government', 'institutional', 'procurement'], visual: banner('Government Procurement Support', 'Professional government procurement and document administration') },
+  { keys: ['government', 'institutional', 'procurement'], visual: media('gov-institutional-support') },
   { keys: ['yard sale', 'liquidation', 'estate sale'], visual: banner('Estate Sale & Liquidation', 'Organized sale and liquidation event setup') },
   { keys: ['snack', 'gamer', 'movie night', 'combo box', 'gift box'], visual: media('mkt-movie-night-15') }
 ];
@@ -71,7 +71,7 @@ const FAMILY_VISUALS = {
   'Events & Experiences': media('evt-elopement'),
   'Seasonal & Holiday Home Services': banner('Seasonal & Holiday Home Services', 'Styled seasonal residential interior'),
   'Logistics, Courier & Asset Sourcing': banner('Logistics, Courier & Asset Sourcing', 'Professional logistics and package handling operation'),
-  'Government & Institutional Procurement': banner('Government & Institutional Procurement', 'Professional procurement and document administration'),
+  'Government & Institutional Procurement': media('gov-institutional-support'),
   'Mobile Automotive & Vehicle Care': banner('Mobile Automotive & Vehicle Care', 'Professional mobile automotive and vehicle care'),
   'Yard Sale / Liquidation': banner('Yard Sale / Liquidation', 'Organized community sale and event setup'),
   'Packages & Bundles': media('mkt-movie-night-15'),

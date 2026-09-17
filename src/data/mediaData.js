@@ -6,6 +6,13 @@ export const MEDIA_FALLBACK = brandBanner({ label: 'DANI DECLARES Execution Serv
 
 const banner = (id, title, department) => brandBanner({ label: title, kicker: department, seed: id });
 
+// Real photography that actually exists in /public and matches the service it's
+// attached to (legal/notary/government stock set in /images/stock, and the
+// licensed wedding gallery in /weddings). Everything else still falls back to
+// the abstract brand banner above rather than showing a photo of unrelated work.
+const photo = (path) => `/images/stock/${path}`;
+const weddingPhoto = (path) => `/weddings/${path}`;
+
 export const MASTER_MEDIA_MANIFEST_V7 = [
   // ==========================================
   // 01 — HANDLE (DANI DECLARES OPERATIONS)
@@ -17,9 +24,9 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES OPERATIONS",
     pillar: "01 HANDLE",
     serviceId: "op-admin-support",
-    imageUrl: banner("op-admin-support", "Administrative & Executive Execution Support", "DANI DECLARES OPERATIONS"),
+    imageUrl: photo("office-hallways.jpg"),
     altText: "Executive administrative coordinator managing business schedules, documents, and project workflows for DANI DECLARES LLC",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
@@ -32,9 +39,9 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES OPERATIONS",
     pillar: "01 HANDLE",
     serviceId: "op-doc-prep",
-    imageUrl: banner("op-doc-prep", "Non-Attorney Document Preparation", "DANI DECLARES OPERATIONS"),
+    imageUrl: photo("paperwork-image.jpg"),
     altText: "Compliance packet and non-attorney document preparation paperwork organized on desk",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
@@ -47,9 +54,9 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES OPERATIONS",
     pillar: "01 HANDLE",
     serviceId: "op-notary-visit",
-    imageUrl: banner("op-notary-visit", "Mobile Notary Public Visit", "DANI DECLARES OPERATIONS"),
+    imageUrl: photo("mobile-notary-public.jpg"),
     altText: "Mobile notary public placing official notary stamp and signature on legal client paperwork during home visit",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
@@ -62,9 +69,9 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES OPERATIONS",
     pillar: "01 HANDLE",
     serviceId: "op-loan-signing",
-    imageUrl: banner("op-loan-signing", "Loan Signing Agent Package", "DANI DECLARES OPERATIONS"),
+    imageUrl: photo("document-execution-office.jpg"),
     altText: "Real estate buyer signing loan mortgage documents with certified loan signing agent",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
@@ -77,9 +84,9 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES OPERATIONS",
     pillar: "01 HANDLE",
     serviceId: "op-i9-verify",
-    imageUrl: banner("op-i9-verify", "Authorized Remote I-9 Verification", "DANI DECLARES OPERATIONS"),
+    imageUrl: photo("personal-data-confidential-folder.jpg"),
     altText: "Remote employee Section 2 I-9 identity verification document inspection by authorized representative",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
@@ -92,9 +99,28 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES OPERATIONS",
     pillar: "01 HANDLE",
     serviceId: "op-apostille",
-    imageUrl: banner("op-apostille", "Expedited Apostille Facilitation", "DANI DECLARES OPERATIONS"),
+    imageUrl: photo("file-cabinet.jpg"),
     altText: "International document authentication and Secretary of State apostille seal process",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
+    usage: "CARD",
+    aspectRatio: "16:9",
+    focalPoint: "center",
+    fallbackUrl: MEDIA_FALLBACK
+  },
+
+  // ==========================================
+  // 13 — GOVERNMENT & INSTITUTIONAL PROCUREMENT
+  // ==========================================
+  {
+    id: "gov-institutional-support",
+    title: "Government & Institutional Procurement Support",
+    category: "GOVERNMENT",
+    department: "DANI DECLARES OPERATIONS",
+    pillar: "01 HANDLE",
+    serviceId: "gov-institutional-support",
+    imageUrl: photo("court-building-exterior.jpg"),
+    altText: "Government and institutional facility exterior representing procurement and administrative support services",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
@@ -160,9 +186,9 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES EVENTS",
     pillar: "02 PREPARE",
     serviceId: "evt-elopement",
-    imageUrl: banner("evt-elopement", "Same-Day / Pop-Up Elopement Officiant", "DANI DECLARES EVENTS"),
+    imageUrl: weddingPhoto("MountainBride_CircleArch_Bouquet.jpg"),
     altText: "Intimate pop-up elopement wedding ceremony outdoors with bride, groom, and officiant",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
@@ -175,9 +201,9 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
     department: "DANI DECLARES EVENTS",
     pillar: "02 PREPARE",
     serviceId: "evt-wedding-officiant",
-    imageUrl: banner("evt-wedding-officiant", "Personalized Full Wedding Ceremony Officiant", "DANI DECLARES EVENTS"),
+    imageUrl: weddingPhoto("MansionWedding_Bride_Portrait.jpg"),
     altText: "Full personalized wedding ceremony with floral arch setup and officiant ceremony delivery",
-    sourceType: "BRANDED",
+    sourceType: "STOCK",
     usage: "CARD",
     aspectRatio: "16:9",
     focalPoint: "center",
