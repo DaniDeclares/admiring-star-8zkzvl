@@ -133,5 +133,13 @@ export async function resolveVerifiedCommunity(req) {
 
 export function getChannelFromRequest(request) {
   const routing = request?.property_details?.operationsRouting || {};
-  return normalizeChannel(routing.channelType, routing.channel);
+  // buildIntakeRoutingContext() stores the OPERATIONS_CHANNELS-style value
+  // (e.g. 'B2C') under `channel`, not `channelType` -- there is no
+  // `channelType` key on this object. normalizeChannel's first argument is
+  // the one it looks up in INTAKE_TO_CHANNEL, so it must be `routing.channel`
+  // here, not a nonexistent `routing.channelType`. Passing them the old way
+  // meant this always fell through to the raw unmapped value (e.g. 'B2C'
+  // instead of 'CH01'), so create-checkout-session's `channel !== 'CH01'`
+  // check rejected every single request unconditionally.
+  return normalizeChannel(routing.channel, routing.channel);
 }

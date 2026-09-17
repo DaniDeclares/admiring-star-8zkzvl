@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowRight,CheckCircle2,ShieldCheck} from 'lucide-react';
+import {supabase} from '../lib/supabaseClient.js';
 
 export default function PayPage(){
  const params=useMemo(()=>typeof window==='undefined'?new URLSearchParams():new URLSearchParams(window.location.search),[]);
@@ -8,10 +9,16 @@ export default function PayPage(){
  const [email,setEmail]=useState(params.get('email')||'');
  const [status,setStatus]=useState(requestId&&serviceId&&email?'ready':'need-email');
  const [error,setError]=useState('');
+ // A verified apartment-community resident's discount can only be honored if
+ // their session is forwarded here -- without it, resolveVerifiedCommunity()
+ // on the server has no way to tell them apart from an anonymous guest, and
+ // a real CH01-B customer would be incorrectly rejected as unverified.
  const pay=async e=>{e?.preventDefault();if(!requestId||!serviceId||!email){setError('Missing request details. Please use the payment link from your confirmation email, or contact DANI DECLARES.');return;}
   setStatus('loading');setError('');
   try{
-   const r=await fetch('/api/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId,serviceId,email})});
+   const {data:sessionData}=await supabase.auth.getSession();
+   const token=sessionData?.session?.access_token||null;
+   const r=await fetch('/api/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({requestId,serviceId,email})});
    const d=await r.json();
    if(!r.ok||!d.success||!d.url)throw new Error(d.error||'We could not open secure checkout right now.');
    window.location.href=d.url;
