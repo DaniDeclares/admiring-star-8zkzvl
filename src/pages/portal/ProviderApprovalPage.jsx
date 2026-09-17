@@ -54,6 +54,33 @@ function ProviderApproval() {
     setBusy(false);
   };
 
+  // A category picked at sign-up (e.g. Notary & Document Services) can expand to
+  // 20 individual capability rows -- clicking "Authorize" 20 times for one real
+  // credential is exactly the one-at-a-time tedium the category picker was built
+  // to get away from. This authorizes every currently-pending capability on the
+  // application in one pass, using the same verify_capability action staff would
+  // otherwise click per row -- for a genuinely mixed application (say, half
+  // authorized already, half still missing a document), staff should still
+  // authorize the ready ones individually and leave the rest, but for the common
+  // "one credential covers a whole category" case this replaces 20 clicks with 1.
+  const bulkAuthorizePending = async () => {
+    if (!selected) return;
+    const pending = (selected.capabilities || []).filter(c => c.authorization_status !== 'AUTHORIZED');
+    if (!pending.length) return;
+    setBusy(true); setError(''); setMessage('');
+    const { data: auth } = await supabase.auth.getSession();
+    if (!auth.session) { setBusy(false); setError('Staff session required.'); return; }
+    let failures = 0;
+    for (const cap of pending) {
+      const { data: body, error: invokeError } = await supabase.functions.invoke('provider-application-review', { body: { action: 'verify_capability', applicationId: selected.id, capabilityId: cap.id, decision: 'AUTHORIZED' } });
+      if (invokeError || !body?.success) failures += 1;
+    }
+    setMessage(failures ? `Authorized ${pending.length - failures} of ${pending.length} capabilities (${failures} failed).` : `Authorized all ${pending.length} pending capabilities.`);
+    if (failures) setError('Some capabilities could not be authorized -- check them individually below.');
+    await load();
+    setBusy(false);
+  };
+
   if (loading) return <main style={{maxWidth:1200,margin:'0 auto',padding:'48px 24px'}}><h1>Provider Approval</h1><p>Loading applications…</p></main>;
 
   return <main style={{maxWidth:1400,margin:'0 auto',padding:'40px 24px',fontFamily:'inherit'}}>
@@ -108,7 +135,7 @@ function ProviderApproval() {
 
         <section style={{marginBottom:28}}><h3>Application details</h3><div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10,color:'#444'}}><div><strong>Type:</strong> {selected.applicant_type}</div><div><strong>Phone:</strong> {selected.contact_phone || '—'}</div><div><strong>Service area:</strong> {selected.service_area || '—'}</div><div><strong>Website:</strong> {selected.website || '—'}</div><div><strong>Experience:</strong> {selected.years_experience || '—'}</div><div><strong>Availability:</strong> {selected.availability || '—'}</div></div><p style={{whiteSpace:'pre-wrap'}}><strong>Service notes:</strong><br/>{selected.service_notes || '—'}</p></section>
 
-        <section style={{marginBottom:28}}><h3>Canonical service capabilities</h3>{!(selected.capabilities||[]).length && <p>No canonical services selected.</p>}{(selected.capabilities||[]).map(cap=>{const reqs=requirementsBySku.get(cap.canonical_sku)||[];return <div key={cap.id} style={{display:'flex',justifyContent:'space-between',gap:20,alignItems:'center',padding:14,border:'1px solid #eee',borderRadius:10,marginBottom:8}}><div><strong>{cap.canonical_sku || 'Unmapped'} · {cap.capability_description || cap.capability_key}</strong><div style={{fontSize:12,color:'#666',marginTop:5}}>Authorization: {cap.authorization_status} · Evidence: {cap.evidence_status} · Requirement: {cap.requirement_status}</div>{reqs.length>0 && <div style={{fontSize:12,color:'#8a4b00',marginTop:5}}>Suggested requirement{reqs.length>1?'s':''}: {reqs.map(r=>requirementDefs.get(r.requirement_code)||r.requirement_code).join(', ')}</div>}</div><div>{cap.authorization_status!=='AUTHORIZED' ? <button disabled={busy} onClick={()=>act('verify_capability',{capabilityId:cap.id,decision:'AUTHORIZED'})}>Authorize</button> : <button disabled={busy} onClick={()=>act('verify_capability',{capabilityId:cap.id,decision:'REJECTED'})}>Revoke</button>}</div></div>;})}</section>
+        <section style={{marginBottom:28}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:10}}><h3 style={{margin:0}}>Canonical service capabilities</h3>{(selected.capabilities||[]).some(c=>c.authorization_status!=='AUTHORIZED') && <button disabled={busy} onClick={bulkAuthorizePending}>Authorize all pending ({(selected.capabilities||[]).filter(c=>c.authorization_status!=='AUTHORIZED').length})</button>}</div>{!(selected.capabilities||[]).length && <p>No canonical services selected.</p>}{(selected.capabilities||[]).map(cap=>{const reqs=requirementsBySku.get(cap.canonical_sku)||[];return <div key={cap.id} style={{display:'flex',justifyContent:'space-between',gap:20,alignItems:'center',padding:14,border:'1px solid #eee',borderRadius:10,marginBottom:8}}><div><strong>{cap.canonical_sku || 'Unmapped'} · {cap.capability_description || cap.capability_key}</strong><div style={{fontSize:12,color:'#666',marginTop:5}}>Authorization: {cap.authorization_status} · Evidence: {cap.evidence_status} · Requirement: {cap.requirement_status}</div>{reqs.length>0 && <div style={{fontSize:12,color:'#8a4b00',marginTop:5}}>Suggested requirement{reqs.length>1?'s':''}: {reqs.map(r=>requirementDefs.get(r.requirement_code)||r.requirement_code).join(', ')}</div>}</div><div>{cap.authorization_status!=='AUTHORIZED' ? <button disabled={busy} onClick={()=>act('verify_capability',{capabilityId:cap.id,decision:'AUTHORIZED'})}>Authorize</button> : <button disabled={busy} onClick={()=>act('verify_capability',{capabilityId:cap.id,decision:'REJECTED'})}>Revoke</button>}</div></div>;})}</section>
 
         <section style={{marginBottom:28}}><h3>Application documents</h3>{!(selected.documents||[]).length && <p>No application documents submitted.</p>}{(selected.documents||[]).map(doc=><div key={doc.id} style={{display:'flex',justifyContent:'space-between',gap:20,alignItems:'center',padding:14,border:'1px solid #eee',borderRadius:10,marginBottom:8}}><div><strong>{doc.document_type}{doc.document_number ? ` — ${doc.document_number}` : ''}</strong><div style={{fontSize:12,color:'#666',marginTop:5}}>{doc.verification_status}{doc.issuing_authority ? ` · issued by ${doc.issuing_authority}` : ''}{doc.expiration_date ? ` · expires ${doc.expiration_date}` : ''}</div>{doc.signed_url ? <a href={doc.signed_url} target="_blank" rel="noreferrer" style={{fontSize:12,fontWeight:700}}>View uploaded file →</a> : <span style={{fontSize:12,color:'#a00'}}>No file on record</span>}</div><div>{doc.verification_status==='VERIFIED' ? <button disabled={busy} onClick={()=>act('verify_document',{documentId:doc.id,decision:'REJECTED',notes:'Rejected during staff review.'})}>Reject</button> : <button disabled={busy} onClick={()=>act('verify_document',{documentId:doc.id,decision:'VERIFIED'})}>Verify</button>}</div></div>)}</section>
 
