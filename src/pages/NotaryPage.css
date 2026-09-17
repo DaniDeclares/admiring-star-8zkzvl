@@ -58,6 +58,7 @@
 }
 
 .services-grid {
+  display: grid;
   gap: var(--grid-gap);
   grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
   margin-top: var(--section-gap);

@@ -132,6 +132,25 @@ export const MASTER_MEDIA_MANIFEST_V7 = [
   },
 
   // ==========================================
+  // HOMEPAGE HERO
+  // ==========================================
+  {
+    id: "home-hero",
+    title: "One Call. More Gets Handled.",
+    category: "PROPERTY",
+    department: "DANI DECLARES PROPERTY",
+    pillar: "02 PREPARE",
+    serviceId: "home-hero",
+    imageUrl: daniPhoto("pexels-tobiasbjorkli-2119714.jpg"),
+    altText: "Modern multi-family apartment building exterior representing property, resident and field support",
+    sourceType: "STOCK",
+    usage: "HERO",
+    aspectRatio: "16:9",
+    focalPoint: "center",
+    fallbackUrl: MEDIA_FALLBACK
+  },
+
+  // ==========================================
   // 02 — PREPARE (DANI DECLARES PROPERTY)
   // ==========================================
   {

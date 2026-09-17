@@ -32,6 +32,15 @@
   --brand-burgundy-royal: var(--dd-burgundy);
   --brand-gold-champagne: var(--dd-gold);
   --brand-text-wine: var(--dd-ink);
+  /* Referenced by grid/card rules across many page stylesheets (Blog,
+     Membership, Packages, Weddings, Notary, Booking, Legal, Festival) but
+     never defined anywhere -- an unresolved var() inside grid-template-columns
+     invalidates the whole declaration, so every one of those grids was
+     silently collapsing to a single stacked column. */
+  --grid-min: 260px;
+  --grid-gap: 1.5rem;
+  --card-radius: var(--dd-radius-md);
+  --card-shadow: var(--dd-shadow-sm);
 }
 
 * { box-sizing: border-box; }

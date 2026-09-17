@@ -6,7 +6,8 @@ import TravelFeesBlock from "../components/TravelFeesBlock.jsx";
 import ServiceCta from "../components/ServiceCta.jsx";
 import "./WeddingsPage.css";
 
-// These filenames must live under public/images/weddings/
+// These filenames live under public/weddings/ (not public/images/weddings/,
+// which doesn't exist -- every one of these was 404ing before this fix).
 const GALLERY_IMAGES = [
   "barn-ceiling-drapery.jpg",
   "barn-hanging-glass-orbs.jpg",
@@ -17,6 +18,11 @@ const GALLERY_IMAGES = [
   "Bride_Mom_Veil_Prep.jpg",
   "VintageCar_BrideGroom_BouquetKiss.jpg",
   "wooden-coffee-table.jpg",
+  "MansionWedding_Bride_Portrait.jpg",
+  "MansionWedding_CoupleOnStairs.jpg",
+  "MountainBride_CircleArch_Bouquet.jpg",
+  "GoldenWedding_CoupleCloseUp.jpg",
+  "MilitaryWedding_AisleWalk.jpg",
 ];
 
 export default function WeddingsPage() {
@@ -61,7 +67,7 @@ export default function WeddingsPage() {
           {GALLERY_IMAGES.map((filename) => (
             <div className="gallery-img-wrapper" key={filename}>
               <img onError={(e) => { e.target.onerror = null; e.target.src = process.env.PUBLIC_URL + "/images/festival/festival-crowd-01.jpg"; }}
-                src={`${process.env.PUBLIC_URL}/images/weddings/${filename}`}
+                src={`${process.env.PUBLIC_URL}/weddings/${filename}`}
                 alt={`Wedding inspiration ${filename}`}
                 className="gallery-img"
                 loading="lazy"
@@ -82,9 +88,15 @@ export default function WeddingsPage() {
         </ul>
       </section>
 
+      {/* ServiceCta's default serviceId->URL resolution only understands the
+          legacy capability-id catalog and falls back silently to "notary"
+          when it can't find a match -- "officiant" was never a real id there,
+          so this button was quietly sending wedding customers into a notary
+          booking. Pass the real canonical_sku directly instead. */}
       <ServiceCta
         serviceId="officiant"
         bookingLabel="Book Officiant Consultation"
+        link="/request-service?service=DNI-10A-022"
       />
     </main>
   );
