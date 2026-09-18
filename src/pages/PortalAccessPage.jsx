@@ -33,7 +33,7 @@ export default function PortalAccessPage() {
   const [selected,setSelected]=useState(null);
   const [propertyInvite,setPropertyInvite]=useState(null);
   const [inviteChecking,setInviteChecking]=useState(false);
-  const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',address:'',city:'',state:'GA',zip:'',services:'',password:'',confirm:''});
+  const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',rateExpectation:'',address:'',city:'',state:'GA',zip:'',services:'',password:'',confirm:''});
   const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [done,setDone]=useState('');
   const [catalogServices,setCatalogServices]=useState([]);
   const [licenseGatedSkus,setLicenseGatedSkus]=useState(() => new Set());
@@ -46,6 +46,7 @@ export default function PortalAccessPage() {
   // Division-1 sub-families that genuinely need different equipment questions).
   const [selectedCategories,setSelectedCategories]=useState(() => ({}));
   const [providerStep,setProviderStep]=useState(1);
+  const [providerApplicantType,setProviderApplicantType]=useState('INDIVIDUAL');
 
   const visibleOptions = useMemo(() => {
     if (audience === 'provider') return OPTIONS.filter(o => o.key === 'provider');
@@ -157,6 +158,7 @@ export default function PortalAccessPage() {
       if(form.password.length<8){setError('Use a password with at least 8 characters.');return false;}
       if(form.password!==form.confirm){setError('Passwords do not match.');return false;}
     }
+    if(providerStep===2&&providerApplicantType==='BUSINESS'&&!form.organization.trim()){setError('Enter the business or organization name for a business provider application.');return false;}
     if(providerStep===3&&!selectedCategoryCount){setError('Select at least one category of work you can fulfill.');return false;}
     setError('');return true;
   };
@@ -189,7 +191,7 @@ export default function PortalAccessPage() {
       identityPayload.organization_id=propertyInvite.client_organization_id;
       identityPayload.entity_id=propertyInvite.property_id;
     }
-    const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:form.organization?'BUSINESS':'INDIVIDUAL',legal_name:form.organization||`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString()}:null;
+    const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:providerApplicantType,legal_name:providerApplicantType==='BUSINESS'?(form.organization||`${form.firstName} ${form.lastName}`):`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString(),rate_expectation:form.rateExpectation||null}:null;
     // Expand each selected category into its real underlying services. A service
     // whose SKU carries a real LICENSE_SERVICE/CERT_SERVICE/AUTO_MOBILE requirement
     // (from dd_service_capability_requirements -- notary, wedding officiant, and every
@@ -275,7 +277,15 @@ export default function PortalAccessPage() {
       <label>Confirm password<input type="password" name="confirm" minLength="8" required value={form.confirm} onChange={update} autoComplete="new-password"/></label>
     </div>}
     {providerStep===2&&<div className="portal-form-grid">
-      <label className="portal-wide">Business / organization name (optional)<input name="organization" value={form.organization} onChange={update}/></label>
+      <div className="portal-wide">
+        <strong>How are you signing up?</strong>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:12,marginTop:10}}>
+          <label className="portal-capability-item"><input type="radio" name="providerApplicantType" value="INDIVIDUAL" checked={providerApplicantType==='INDIVIDUAL'} onChange={e=>setProviderApplicantType(e.target.value)}/> Individual provider</label>
+          <label className="portal-capability-item"><input type="radio" name="providerApplicantType" value="BUSINESS" checked={providerApplicantType==='BUSINESS'} onChange={e=>setProviderApplicantType(e.target.value)}/> Business / company provider</label>
+        </div>
+        <small>{providerApplicantType==='BUSINESS'?'Business providers must submit their own current price sheet before the application can be approved.':'Individual providers may submit their own price sheet if they want DANI DECLARES to consider their preferred rates; it is optional.'}</small>
+      </div>
+      <label className="portal-wide">Business / organization name {providerApplicantType==='BUSINESS'?'(required)':'(optional)'}<input name="organization" required={providerApplicantType==='BUSINESS'} value={form.organization} onChange={update}/></label>
       <label className="portal-wide">Address<input name="address" value={form.address} onChange={update}/></label>
       <label>City<input name="city" value={form.city} onChange={update}/></label>
       <label>State<input name="state" maxLength="2" value={form.state} onChange={update}/></label>
@@ -302,6 +312,7 @@ export default function PortalAccessPage() {
       <div className="portal-row"><div><strong>{form.firstName} {form.lastName}</strong><small>{form.email} · {form.phone||'No phone provided'}</small></div></div>
       {form.organization&&<div className="portal-row"><div><strong>{form.organization}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')||'No address provided'}</small></div></div>}
       <div className="portal-row"><div><strong>{selectedCategoryCount} categor{selectedCategoryCount===1?'y':'ies'} selected · {selectedServicesPreview.length} service{selectedServicesPreview.length===1?'':'s'} covered</strong><small>{categories.filter(c=>selectedCategories[c.category_key]?.checked).map(c=>c.label).join(', ')||'None'}</small></div></div>
+      <label className="portal-wide">Rate expectations (optional)<input name="rateExpectation" value={form.rateExpectation} onChange={update} placeholder="Example: $35/hr, $125 minimum, or 'see attached price sheet'."/><small>These are provider-submitted expectations, not DANI DECLARES customer pricing.</small></label>
       <label className="portal-wide">Additional notes about your experience (optional)<textarea name="services" rows="4" value={form.services} onChange={update} placeholder="Certifications, equipment, years of experience, anything else worth knowing."/></label>
     </div>}
     {error&&<div className="portal-error">{error}</div>}
