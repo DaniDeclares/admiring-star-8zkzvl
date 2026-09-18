@@ -528,3 +528,22 @@ Danielle: "i want everything tackled." Working through the open backlog systemat
     accurate picture of current state. Nothing was changed based on unverified claims.
 - Two background passes launched to continue the Division 08-style scope+draft-cost-model build
   for Divisions 04, 06, 07, and 13, using the same $60/$75/$90-hr tier methodology -- in progress.
+- **Division 06/07, done**: real scope/exclusions written and a draft cost model built for all
+  41 non-locked canonical SKUs across both divisions (Christopher Walker's 4 locked DTF/computer
+  SKUs correctly skipped and verified unchanged). Draft negative-margin outliers found (not
+  audited, nothing pulled from sale): Social Media Management, Property Photography, Video
+  Editing, and Short-Form Content, all -8% to -13%. Also flagged for a real decision (not
+  guessed): "Newsletter Production" (DNI-07A-009) is tagged ONETIME despite its own description
+  describing recurring work -- genuinely ambiguous whether $350 means per-issue or monthly,
+  unlike the unambiguous D08 "Retainer" bug.
+- **Christopher's DTF, done**: real cost model for the single-item tier ($25 setup + $18/item)
+  using sourced 2026 DTF consumable costs. The batch-deposit tiers were deliberately left
+  unmodeled -- their "100% materials + 50% labor deposit" structure can't be honestly reduced to
+  a per-item margin without Christopher's real remaining-labor billing figures.
+- **PRICING_SHEET intake, done**: real document type + DB constraint + a distinct staff-review
+  treatment (not a compliance verify/reject flow) guiding staff to reconcile real pricing sheets
+  into the catalog the same way every other one has been handled this session.
+- **Notification settings, done**: see above -- shipped, portal-wide, real gap in end-to-end
+  channel wiring documented.
+- Three more background passes launched: Divisions 04+13, Division 01 (largest, ~180 SKUs), and
+  Divisions 03/05/09(+13 if not already claimed) -- in progress.
