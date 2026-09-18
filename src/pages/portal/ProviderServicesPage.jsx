@@ -49,7 +49,7 @@ export default function ProviderServicesPage() {
     return catalogServices.filter(s => s.division_id === category.division_id && (!category.canonical_sku_prefix || (s.sku || '').startsWith(`DNI-${category.canonical_sku_prefix}-`)));
   };
 
-  const capabilities = snapshot?.capabilities || [];
+  const capabilities = useMemo(() => snapshot?.capabilities || [], [snapshot]);
   const application = snapshot?.application || null;
   const isApprovedProvider = application?.application_status === 'APPROVED';
   const isSignedProvider = application?.agreement_status === 'EXECUTED';
