@@ -433,3 +433,56 @@ benchmark. This file was not found in the connected Google Drive -- Danielle cla
 in a different chat's own document library/project knowledge store, not a connected Drive. If she
 uploads it here, it should replace the Tier 3 $90/hr market-benchmark estimate with DANI's actual
 real spend data for the ongoing Division 04/06/07/08/13 cost-modeling work.
+
+## Drive upload processed: cost data, DSS backlog corrected, crosswalk bugs (2026-09-18)
+
+Danielle uploaded ~45 real files to Google Drive (meant for a "chat dump" subfolder, landed in
+the parent "DANI DECLARES LLC" folder instead -- left in place, not moved, since she didn't ask
+for that). Two research passes read the highest-priority files. Findings:
+
+**Cost data conclusion**: the $90/hr Tier 3 placeholder stays -- confirmed no real consulting/
+admin/strategy hourly rate exists anywhere in these files either. Importantly, this isn't a gap
+I'm inventing a fix for: `DANI_DECLARES_FULL_COMPANY_COST_AUDIT.xlsx`'s own Execution_Plan has
+"Apply owner-time standards: set service-specific time assumptions and economic owner-rate
+benchmarks" listed as step 6, status **Required (not done)**, and "Recalculate 251 services" as
+step 7, status **Next (not started)**. The $90/hr estimate is doing exactly the next step this
+company's own audit process already defined but hadn't reached yet.
+**Real, usable data found instead**: actual Amazon spend evidence -- $4,071.04 in durable
+equipment (steam cleaners, carpet equipment, printer, laptop, monitors; asset, not consumable,
+per the file's own methodology) and $484-636 in real cleaning/pet consumables across ~34-37 line
+items (Feb-Jun 2026). This could replace the flat "~$10-20 supplies" guesses already used in the
+D01/D02 cost models -- but only once a real job-count denominator for that window is known (a
+question posed to Danielle; not guessed). The "302_COST_CAPTURE_LOG.csv" that sounds like it
+should hold per-SKU cost data is, in practice, a 299-row empty template: 0 rows have any real
+captured cost value, matching the "0 of 302 PASS 1" finding from earlier in this session exactly.
+
+**DSS legacy-offer backlog, corrected**: earlier session notes cited "~107 legacy danis_specials_
+offers" needing reconciliation -- that number was wrong. The real master comparison file states
+`danis_specials_offers` totals **480** records, with **211** unmatched to any active canonical
+service (not 107). Only 135 of those 211 (single-service + seasonal items) have been analyzed so
+far, and that analysis is itself draft/proposal data never applied to Supabase -- of those 135,
+roughly 60-65 resolve cleanly, ~11 are genuine dead ends, ~7 are bundles, ~7 are gated new-service
+candidates, ~5 look like duplicates, and ~39 are still unresolved. The other 70 (add-ons/packages/
+recurring) haven't been touched at all. This is a bigger, still-open backlog than previously
+tracked -- not urgent to close today, but the "107" figure should not be used again.
+
+**Real Airtable/Supabase crosswalk bugs found** (feeds task #38, not urgent/safety-critical --
+metadata drift, not live pricing/checkout risk): some records marked "UNMAPPED" in Airtable
+actually match a real Supabase SKU exactly (a stale-status bug, not a real gap); a few are
+genuinely wrong mappings (e.g. "Lockbox Installation" mapped to the unrelated "Open House
+Staffing"; "Courier/Transaction Runs" mapped to unrelated "Real Estate Photography"); a
+force-mapping bug routes 5 unrelated services to the same two generic SKUs (Wall/Vertical Surface
+Detail, Window/Glass/Mirror Detail) with no real relationship; 2 claimed Supabase SKUs don't exist
+in the active catalog at all; Airtable's own legacy-SKU field has duplicate values reused across
+unrelated records. None of this is live/customer-facing -- it's Airtable-side reference data --
+so no Supabase action taken.
+
+**Compliance re-check, clean**: the two "CORRECTED" documents (Capability Statement, Funding
+Application Packet) contain no new red flags -- the Capability Statement already explicitly
+disclaims licensed-professional services and states I-9 is not offered, consistent with today's
+fix. **But the Funding Packet uses "Danielle Williams" as owner throughout, matching the W-9 --
+not Danielle Fong, her actual current legal name** (confirmed directly: she's divorced, reverting
+to Williams, but hasn't yet been to the DMV, let alone updated SSA/IRS). That packet anticipated a
+legal change that hasn't happened -- flagged directly to her as a real risk for the Sept 22 Fund
+Her Future deadline. Also noted: both DSS/readiness export files still show the two I-9 services
+as CANONICAL_ACTIVE -- these are stale pre-fix snapshots, not a sign today's pull didn't take.
