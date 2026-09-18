@@ -486,3 +486,19 @@ to Williams, but hasn't yet been to the DMV, let alone updated SSA/IRS). That pa
 legal change that hasn't happened -- flagged directly to her as a real risk for the Sept 22 Fund
 Her Future deadline. Also noted: both DSS/readiness export files still show the two I-9 services
 as CANONICAL_ACTIVE -- these are stale pre-fix snapshots, not a sign today's pull didn't take.
+
+## "Everything tackled" pass (2026-09-18)
+
+Danielle: "i want everything tackled." Working through the open backlog systematically.
+
+- **NawfSide roadside/tire, resolved twice today, final state is active**: first, real evidence
+  (the dated 2026-09-13 governance note) showed the morning's reactivation was wrong, so it was
+  reverted. Then Danielle provided new information -- "nawfside said i can create all the pricing
+  and do all the marketing" -- which resolves the exact commercial-authority question that
+  governance note was almost certainly gatekeeping. Reactivated the same 5 SKU identities as a
+  proper Dani-priced/sold Model A line this time, updating all three governance layers together
+  (`20260918115112_reactivate_nawfside_roadside_tire_pricing_authority.sql`). Real gap still open:
+  the actual payout/margin split with NawfSide is not yet formally agreed -- tracked, not
+  fabricated, doesn't block sale.
+- New task opened: notification-channel (text/SMS) preferences in the portal settings --
+  investigating the existing portal codebase (`src/pages/portal/`) before building.

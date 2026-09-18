@@ -12,6 +12,7 @@ const TABS = [
   { to: '/portal/evidence', label: 'Evidence', locked: true, needsAgreement: true },
   { to: '/portal/payouts', label: 'Payouts', locked: true, needsAgreement: true },
   { to: '/portal/messages', label: 'Messages', locked: true, needsAgreement: true },
+  { to: '/portal/settings', label: 'Notifications', locked: false, needsAgreement: true },
 ];
 
 export default function ProviderNav({ isApprovedProvider, agreementSigned }) {
