@@ -323,3 +323,29 @@ economics gap found in the audit** (zero cost data anywhere despite a live $1,50
   `margin_economics` instead. **This same gap blocks real cost-underwriting for Divisions 04, 06,
   07, and 13 too** (all consulting/strategy-flavored, none with an hourly rate on file) --
   asked Danielle directly for her real rate rather than guessing.
+
+**Danielle's answer ("whjats the best way?") -- she asked for the recommendation rather than
+picking an option herself.** Recommended and applied: set a real rate now, sourced from actual
+2026 market research (WebSearch: ZipRecruiter/Glassdoor/industry consulting-rate guides), rather
+than an arbitrary guess or leaving it unpriced indefinitely -- independent consultants doing
+general small-business work run $75-150/hr at the entry tier (fractional-executive/specialized
+consulting runs $150-300+/hr and doesn't match DANI's current positioning; salaried "small
+business consultant" benchmarks run $42-54/hr and are too low). Set a new **Tier 3
+Strategic/Consulting rate at $90/hr** -- one step above the existing Tier 2 ($75/hr), sourced and
+cited, not stored as a formal `dd_provider_rate_cards` row (that table requires a
+provider_org_id for negotiated subcontractor rates; Tier 1/2 were never stored there either, only
+cited in `margin_economics` text -- Tier 3 follows the same precedent)
+(`20260918111013_division_08_draft_cost_model_tier3_consulting_rate.sql`).
+
+**Result, and why it's marked DRAFT not audited fact**: applying $90/hr against a reasonable
+hours-per-deliverable estimate for each of the 20 D08 SKUs shows **every single one at 10% margin
+or worse, and 12 of 20 are outright negative** (Lead List Building, Lead Research, Sales Process
+Design, Outreach Campaign Setup, Follow-Up System, Referral Program Design, Partnership Outreach
+Support, Vendor Network Development, Strategic Partnership Research, Growth Strategy Session,
+Market Research, Competitive Research -- roughly -$6 to -$20 per job at current prices). Unlike
+the Division 02 losses (pulled immediately because both the $60/hr rate AND the hours-per-task
+were an independently audited company record), the $90/hr rate here is real and sourced but the
+hours-per-deliverable are this pass's own planning estimate, not a verified fact -- so **nothing
+was pulled from SELL_NOW**. This needs Danielle's read: either the whole division needs a price
+increase, the hour estimates are too high for how she actually works, or a different rate applies.
+Logged in each SKU's `margin_economics` field, explicitly labeled DRAFT.
