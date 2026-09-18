@@ -1,6 +1,16 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
+import { encryptTin, decryptTin } from './_w9Crypto.js';
+
+// Verbatim from Form W-9 (Rev. March 2024), Part II Certification -- the IRS's
+// electronic-submission spec requires the perjury statement to carry this exact
+// paper-form language, not a paraphrase.
+const W9_CERTIFICATION_TEXT = `Under penalties of perjury, I certify that:
+1. The number shown on this form is my correct taxpayer identification number (or I am waiting for a number to be issued to me); and
+2. I am not subject to backup withholding because (a) I am exempt from backup withholding, or (b) I have not been notified by the Internal Revenue Service (IRS) that I am subject to backup withholding as a result of a failure to report all interest or dividends, or (c) the IRS has notified me that I am no longer subject to backup withholding; and
+3. I am a U.S. citizen or other U.S. person (defined below); and
+4. The FATCA code(s) entered on this form (if any) indicating that I am exempt from FATCA reporting is correct.`;
 
 const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
@@ -50,7 +60,7 @@ function sanitizeProviderAssignment(assignment) {
   return { id: assignment.id, job_id: assignment.job_id, provider_id: assignment.provider_id, assignment_status: assignment.assignment_status, provider_notes: assignment.provider_notes, offered_at: assignment.offered_at, accepted_at: assignment.accepted_at, rejected_at: assignment.rejected_at, cancelled_at: assignment.cancelled_at, offer_expires_at: assignment.offer_expires_at, response_at: assignment.response_at, offer_sequence: assignment.offer_sequence, job: sanitizeProviderJob(assignment.job) };
 }
 async function getStaffSnapshot(supabase) {
-  const [requests, jobs, appointments, providers, changes, evidence, payments, pendingCapabilities] = await Promise.all([
+  const [requests, jobs, appointments, providers, changes, evidence, payments, pendingCapabilities, w9Submissions] = await Promise.all([
     supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_jobs').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_job_appointments').select('*').order('starts_at', { ascending: true }).limit(100),
@@ -62,10 +72,14 @@ async function getStaffSnapshot(supabase) {
     // source) sit here as is_authorized:false until staff reviews them -- same as every
     // other capability, no self-service action ever sets is_authorized:true.
     supabase.from('dd_provider_capabilities').select('id, provider_id, service_line, capability_key, created_at, dd_providers(first_name, last_name, dd_provider_organizations(name)), services(sku, name)').eq('is_authorized', false).order('created_at', { ascending: false }).limit(100),
+    // Ciphertext/iv/authTag are deliberately excluded here -- staff review this
+    // list to verify/reject, and only reach for decrypt_provider_w9_tin (which
+    // is separately logged) when a real number is actually needed.
+    supabase.from('dd_provider_w9_submissions').select('id, provider_application_id, provider_org_id, line1_name, classification, tin_type, tin_last_four, status, created_at, dd_provider_organizations(name)').eq('status', 'SUBMITTED').order('created_at', { ascending: false }).limit(100),
   ]);
-  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, pendingCapabilities].filter(item => item.error);
+  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, pendingCapabilities, w9Submissions].filter(item => item.error);
   if (errors.length) throw errors[0].error;
-  return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], pendingCapabilities: pendingCapabilities.data || [] };
+  return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [] };
 }
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
@@ -142,12 +156,21 @@ async function getDirectProviderAuthorizationSnapshot(supabase, providerId) {
     documents: [],
   };
 }
+// Never selects the ciphertext columns -- the provider-facing "have I
+// submitted my W-9" status only needs to know that it exists and its state.
+async function getW9Status(supabase, userId) {
+  const { data, error } = await supabase.from('dd_provider_w9_submissions').select('id, status, tin_type, tin_last_four, created_at, verified_at').eq('auth_user_id', userId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+  if (error) throw error;
+  return data || null;
+}
 async function getProviderSnapshot(supabase, providerId, userId) {
   let applicationSnapshot = await getProviderApplicationSnapshot(supabase, userId);
   if (!applicationSnapshot.application && providerId) {
     const directSnapshot = await getDirectProviderAuthorizationSnapshot(supabase, providerId);
     if (directSnapshot) applicationSnapshot = directSnapshot;
   }
+  const w9 = await getW9Status(supabase, userId);
+  applicationSnapshot = { ...applicationSnapshot, w9 };
   if (!providerId) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
@@ -346,6 +369,98 @@ export default async function handler(req, res) {
       const { error } = await context.supabase.from('dd_provider_capabilities').delete().eq('id', capabilityId);
       if (error) throw error;
       return ok(res, { removed: capabilityId });
+    }
+    // In-app W-9 collection, built to the IRS's electronic-submission spec
+    // (Instructions for the Requester of Form W-9, Rev. March 2024, "Electronic
+    // Submission of Forms W-9"). Gating this behind the provider's authenticated
+    // session is what satisfies the spec's "reasonably certain the person
+    // accessing the system... is the person identified on Form W-9" requirement.
+    if (action === 'submit_provider_w9') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const p = payload || {};
+      const required = ['line1Name', 'classification', 'address', 'city', 'stateCode', 'zipCode', 'tinType', 'tin', 'signatureFullName'];
+      for (const field of required) {
+        if (!String(p[field] || '').trim()) return fail(res, `${field} is required.`);
+      }
+      if (!p.certificationAgreed) return fail(res, 'You must agree to the certification to submit your W-9.');
+      const classifications = ['INDIVIDUAL_SOLE_PROP', 'C_CORPORATION', 'S_CORPORATION', 'PARTNERSHIP', 'TRUST_ESTATE', 'LLC', 'OTHER'];
+      if (!classifications.includes(p.classification)) return fail(res, 'Invalid tax classification.');
+      if (p.classification === 'LLC' && !['C', 'S', 'P'].includes(p.llcTaxClassification)) return fail(res, 'Select the LLC tax classification (C, S, or P).');
+      const tinDigits = String(p.tin).replace(/[^0-9]/g, '');
+      if (p.tinType === 'SSN' && tinDigits.length !== 9) return fail(res, 'Enter a valid 9-digit SSN.');
+      if (p.tinType === 'EIN' && tinDigits.length !== 9) return fail(res, 'Enter a valid 9-digit EIN.');
+
+      let providerApplicationId = null;
+      let providerOrgId = null;
+      const { data: application } = await context.supabase.from('dd_provider_applications').select('id').eq('applicant_user_id', context.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (application) providerApplicationId = application.id;
+      if (context.identity?.entity_id) {
+        const { data: provider } = await context.supabase.from('dd_providers').select('org_id').eq('id', context.identity.entity_id).maybeSingle();
+        if (provider) providerOrgId = provider.org_id;
+      }
+      if (!providerApplicationId && !providerOrgId) return fail(res, 'No provider application or organization is linked to this account.', 404);
+
+      const { ciphertext, iv, authTag } = encryptTin(tinDigits);
+      const forwardedFor = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+      const { data: submission, error } = await context.supabase.from('dd_provider_w9_submissions').insert({
+        provider_application_id: providerApplicationId,
+        provider_org_id: providerOrgId,
+        auth_user_id: context.user.id,
+        line1_name: String(p.line1Name).trim(),
+        line2_business_name: p.line2BusinessName ? String(p.line2BusinessName).trim() : null,
+        classification: p.classification,
+        llc_tax_classification: p.classification === 'LLC' ? p.llcTaxClassification : null,
+        other_classification_description: p.classification === 'OTHER' ? String(p.otherClassificationDescription || '').trim() : null,
+        has_foreign_partners: Boolean(p.hasForeignPartners),
+        exempt_payee_code: p.exemptPayeeCode ? String(p.exemptPayeeCode).trim() : null,
+        fatca_exemption_code: p.fatcaExemptionCode ? String(p.fatcaExemptionCode).trim() : null,
+        address: String(p.address).trim(),
+        city: String(p.city).trim(),
+        state_code: String(p.stateCode).trim(),
+        zip_code: String(p.zipCode).trim(),
+        tin_type: p.tinType,
+        tin_last_four: tinDigits.slice(-4),
+        tin_ciphertext: ciphertext,
+        tin_iv: iv,
+        tin_auth_tag: authTag,
+        certification_text: W9_CERTIFICATION_TEXT,
+        certification_agreed: true,
+        signature_full_name: String(p.signatureFullName).trim(),
+        submission_ip: forwardedFor || req.socket?.remoteAddress || null,
+        submission_user_agent: req.headers['user-agent'] || null,
+      }).select('id, created_at').single();
+      if (error) throw error;
+
+      if (providerApplicationId) {
+        await context.supabase.from('dd_provider_applications').update({ tax_form_status: 'RECEIVED', updated_at: new Date().toISOString() }).eq('id', providerApplicationId);
+      }
+      return ok(res, { submissionId: submission.id, submittedAt: submission.created_at });
+    }
+    // Staff-only TIN reveal, for the rare case a real 1099 or verification need
+    // requires the actual number rather than the last-four already visible in
+    // the review queue. Every call is logged to dd_provider_w9_tin_access_log.
+    if (action === 'decrypt_provider_w9_tin') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const submissionId = String(payload.submissionId || '').trim();
+      if (!submissionId) return fail(res, 'submissionId is required.');
+      const { data: submission, error } = await context.supabase.from('dd_provider_w9_submissions').select('tin_ciphertext, tin_iv, tin_auth_tag').eq('id', submissionId).maybeSingle();
+      if (error) throw error;
+      if (!submission) return fail(res, 'W-9 submission not found.', 404);
+      const tin = decryptTin({ ciphertext: submission.tin_ciphertext, iv: submission.tin_iv, authTag: submission.tin_auth_tag });
+      await context.supabase.from('dd_provider_w9_tin_access_log').insert({ w9_submission_id: submissionId, accessed_by: context.user.id, reason: payload.reason || null });
+      return ok(res, { tin });
+    }
+    if (action === 'verify_provider_w9' || action === 'reject_provider_w9') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const submissionId = String(payload.submissionId || '').trim();
+      if (!submissionId) return fail(res, 'submissionId is required.');
+      const status = action === 'verify_provider_w9' ? 'VERIFIED' : 'REJECTED';
+      const { data: updated, error } = await context.supabase.from('dd_provider_w9_submissions').update({ status, verified_by: context.user.id, verified_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', submissionId).select('provider_application_id').single();
+      if (error) throw error;
+      if (updated.provider_application_id) {
+        await context.supabase.from('dd_provider_applications').update({ tax_form_status: status === 'VERIFIED' ? 'VERIFIED' : 'REJECTED', updated_at: new Date().toISOString() }).eq('id', updated.provider_application_id);
+      }
+      return ok(res, { submissionId, status });
     }
     if (action === 'create_estimate') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, await createEstimate(context.supabase, payload)); }
     if (action === 'dispatch_offer') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) }); }

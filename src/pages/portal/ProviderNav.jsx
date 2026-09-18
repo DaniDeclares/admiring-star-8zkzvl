@@ -5,6 +5,7 @@ const TABS = [
   { to: '/portal', label: 'Overview', locked: false, needsAgreement: false },
   { to: '/portal/provider-agreement', label: 'Provider Agreement', locked: false, needsAgreement: false },
   { to: '/portal/vendor-onboarding', label: 'Documents', locked: false, needsAgreement: true },
+  { to: '/portal/w9', label: 'Tax Form (W-9)', locked: false, needsAgreement: true },
   { to: '/portal/profile', label: 'Profile', locked: false, needsAgreement: true },
   { to: '/portal/services', label: 'My Services', locked: false, needsAgreement: true },
   { to: '/portal/assignments', label: 'Assignments', locked: true, needsAgreement: true },

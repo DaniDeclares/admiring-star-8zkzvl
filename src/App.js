@@ -35,6 +35,7 @@ import ProviderEvidencePage from "./pages/portal/ProviderEvidencePage.jsx";
 import ProviderPayoutsPage from "./pages/portal/ProviderPayoutsPage.jsx";
 import ProviderProfilePage from "./pages/portal/ProviderProfilePage.jsx";
 import ProviderServicesPage from "./pages/portal/ProviderServicesPage.jsx";
+import ProviderW9Page from "./pages/portal/ProviderW9Page.jsx";
 import ProviderMessagesPage from "./pages/portal/ProviderMessagesPage.jsx";
 import QuoteBuilderPage from "./pages/portal/QuoteBuilderPage.jsx";
 import ContractAcquisitionPage from "./pages/portal/ContractAcquisitionPage.jsx";
@@ -112,6 +113,7 @@ export default function App() {
         <Route path="/portal/payouts" element={<ProviderPayoutsPage />} />
         <Route path="/portal/profile" element={<ProviderProfilePage />} />
         <Route path="/portal/services" element={<ProviderServicesPage />} />
+        <Route path="/portal/w9" element={<ProviderW9Page />} />
         <Route path="/portal/messages" element={<ProviderMessagesPage />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
