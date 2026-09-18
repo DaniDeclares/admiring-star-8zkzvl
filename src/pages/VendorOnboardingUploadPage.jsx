@@ -19,6 +19,7 @@ const PROVIDER_DOCS = [
   { key: 'BACKGROUND_CONSENT', label: 'Background-check consent', help: 'Upload the requested signed consent form when applicable.' },
   { key: 'PORTFOLIO', label: 'Portfolio', help: 'Supporting work examples.' },
   { key: 'WORK_SAMPLE', label: 'Work sample', help: 'Supporting evidence of capability.' },
+  { key: 'PRICING_SHEET', label: 'Your pricing sheet or rate card', help: 'Upload your own price list or rate card if you have one — DANI DECLARES staff will review it when deciding what to offer and at what price, rather than asking you to re-key it by phone.' },
   { key: 'OTHER', label: 'Other supporting document', help: 'Use for evidence that does not fit another category.' },
 ];
 
