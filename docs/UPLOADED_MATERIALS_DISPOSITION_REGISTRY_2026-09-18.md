@@ -607,3 +607,30 @@ Danielle: "i want everything tackled." Working through the open backlog systemat
     separate, unverified pasted "HubSpot" content earlier this session were used here -- real
     contact info for Cass, NawfSide, and Cayla needs to come from Danielle directly before any
     signup email can be sent to them.
+
+- **2026-09-18, follow-up: chat's HubSpot/Stripe claims independently re-checked, this time
+  against the live systems using this session's own HubSpot/Stripe access** (Danielle correctly
+  pushed back that "chat" is a real second operational tool for this business, used while this
+  session is rate-limited, and that its work should be verified rather than reflexively
+  discounted as untrusted). Result: mostly accurate, one real discrepancy found --
+  - **HubSpot contacts, all 5 confirmed real**, created 2026-09-18 ~15:02 UTC: Cassandra Rosser
+    (404-630-5668 / cprosser1@gmail.com), Joseph Sink (470-891-6391 /
+    nre@nawfsideroadside.com), Cayla Wanzer (678-632-8667 / caylawanzer@gmail.com), Christopher
+    Walker (470-687-6061 / chriswalkerjobs@gmail.com -- matches exactly what Danielle gave
+    directly in this session earlier, cross-confirming this is real, not fabricated), and Angel
+    Rice (678-600-7123 / xtra.angel@gmail.com).
+  - **Stripe payment links, partially accurate**: "Deep Structural Reset" (DNI-01A-002) is
+    genuinely active (https://buy.stripe.com/cNidR80Tv5qKbi72CJ6kg1p). "Culinary Pantry &
+    Kitchen Cabinet Organization" (DNI-01A-007) has a real payment link but it is **not**
+    active -- Stripe has it explicitly flagged `active: false` with an inactive_message:
+    "temporarily unavailable for online checkout while DANI DECLARES completes fulfillment and
+    pricing verification." Chat's claim that this one was activated does not hold up; flagging
+    for Danielle rather than treating it as done.
+  - Added `contact_email`/`contact_phone` columns to `dd_provider_organizations` (migration
+    `20260918154335`) -- the schema previously had nowhere to store this at all -- and populated
+    them for Cass, NawfSide, Christopher Walker, and Cayla Wanzer with the now-verified HubSpot
+    contact info, plus Danielle's own provider-login email, as a single source of truth. Angel
+    Rice's verified HubSpot contact was deliberately NOT written into a new provider-org record
+    for her, since she still has zero DANI capability/authorization on file and creating one
+    would silently imply an authorization decision nobody has made -- she can still be sent a
+    signup-link email without one.
