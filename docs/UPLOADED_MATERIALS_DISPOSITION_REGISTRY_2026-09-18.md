@@ -297,3 +297,29 @@ marks "Commercialization Readiness = Pending" on nearly every tracked record in 
 07, 08, and 09 even though Supabase shows the same SKUs live SELL_NOW -- the two systems' notion
 of "is this actually approved to sell" have drifted apart across most of the catalog, not just the
 Division 12 case that got reverted. Worth a dedicated reconciliation pass, separate from pricing.
+
+## "C-team" mandate (2026-09-18) and Division 08 pilot
+
+Danielle: "I want you to handle everything that needs to be handled the best way you see fit for
+the company. you are officially my c team." Standing boundaries restated and still in force: no
+fabricated data/pricing/legal terms/authorizations, no signing anything binding, no moving real
+money without flagging it first. Proceeding autonomously on everything else.
+
+**First build under this mandate — Division 08 (Business Development & Growth), the single worst
+economics gap found in the audit** (zero cost data anywhere despite a live $1,500 line item):
+- Replaced generic boilerplate description text on all 20 canonical SKUs with real, specific
+  scope/exclusion definitions (what's included vs. what's a separate add-on), so a customer
+  quoting e.g. "Lead List Building" or "Business Expansion Plan" knows exactly what they're
+  paying for (`20260918110547_division_08_scope_definitions_and_retainer_fix.sql`).
+- Fixed a real bug found while doing this: "Business Development Retainer" (DNI-08A-020, $1,500)
+  was tagged `billing_cycle = ONETIME` -- a retainer that bills once isn't a retainer. Corrected
+  to RECURRING/MONTHLY, matching the pattern already used for R.E.A.C.H.'s and Division 04's real
+  monthly retainers.
+- Did NOT fabricate cost/margin data for this division. Reason: the only labor rates documented
+  anywhere in this system are Tier 1 ($60/hr field-routine) and Tier 2 ($75/hr coordination/QA),
+  both for hands-on field work -- neither fits strategy/consulting work, and inventing a
+  consulting hourly rate to force a margin number would be exactly the kind of financial
+  fabrication this project doesn't do. Recorded honestly as PENDING in `internal_cost` and
+  `margin_economics` instead. **This same gap blocks real cost-underwriting for Divisions 04, 06,
+  07, and 13 too** (all consulting/strategy-flavored, none with an hourly rate on file) --
+  asked Danielle directly for her real rate rather than guessing.
