@@ -731,3 +731,30 @@ Danielle: "i want everything tackled." Working through the open backlog systemat
   work. No category was mapped or created for it; per instruction, this stays a researched
   lead, not an authorized capability, until a specific person/business with real identifying
   details (name, DOT/MC number, insurance) is actually named.
+
+- **2026-09-18, built `dd_sales_queue` (migration `20260918182419`) + Sales Queue tab in the
+  Operations Console.** Real, persistent tracker for the Monday acquisition board, replacing
+  ad hoc chat lists. Follows the exact RLS convention already used on `service_requests` (one
+  `ALL` policy via `private.dd_is_staff_admin()`) rather than inventing new access rules.
+  Columns: contact/company/role/phone/email, lane (INBOUND/WARM/REVISIT_CALLABLE/
+  REVISIT_ROUTING/REVISIT_NOT_CALLABLE/EMAIL_ONLY/PARTNER/SCREEN_ONLY), source +
+  source_confidence (VERIFIED/SINGLE_SOURCE/LOW_CONFIDENCE, so a HubSpot-native contact is
+  never conflated with a single web citation), disposition (the full call-disposition set
+  established earlier this session), next_action/next_action_date, suggested_sku,
+  quoted_amount, amount_collected, and an optional job_id FK to dd_jobs.
+  Seeded with exactly the 30 contacts/accounts actually verified this session -- the 6 Sapir
+  Realty HubSpot contacts, Mia Fairly (double-verified HubSpot + web), 5 more web-sourced
+  property-management contacts (3 callable, 2 office-routing-only), 3 named-but-not-yet-
+  callable revisit accounts, RPM Living's generic vendor inbox, 7 real LinkedIn warm
+  conversations, 2 LinkedIn Marketplace inbound requests that match real D04/D10 inventory, 2
+  inbound requests flagged unclear-fit (no matching SKU), 1 partner (Flynt Waters/roofing),
+  and 2 screen-only new connections. Nothing manufactured to pad the count -- the noise
+  filtered out earlier (Suman Singh, Travis Fisher's ad, Janiza Padlan's recruiting InMail)
+  was deliberately left out.
+  Added a "Sales Queue" tab to `OperationsConsolePage.jsx` (grouped by lane, inline
+  disposition/next-action/quoted/collected editing per row via direct `supabase.from(...)`
+  calls, same pattern as the existing `updateBooking` handler) and a "Collected / weekly
+  target" stat tile so the $1,200 target has a real, live number instead of living only in
+  chat. Verified: table + RLS policy confirmed live, all 30 rows landed in correct lanes,
+  production build compiles clean, no new Supabase security advisories (same 3 pre-existing,
+  unrelated warnings).
