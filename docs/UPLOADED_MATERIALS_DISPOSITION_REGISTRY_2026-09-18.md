@@ -109,19 +109,49 @@ disposition summary only.
   here: incoming PayPal payments routinely move straight back out to Cash App/Apple Cash within a
   day, consistent with the "no cash reserve" diagnosis from that earlier reconciliation.
 
-## HAS PROMISE — queued for a dedicated follow-up pass, not yet implemented in full
+## Decisions closed out (2026-09-18, "It is too low. Fix it..." instruction)
 
-- **R.E.A.C.H. & Outside Company Buildouts** (from the Master Pricebook) — a real, coherent
-  consulting line (auditing/launching other people's businesses) not previously modeled anywhere
-  in the catalog. Needs its own division/SKU buildout pass.
-- **Full Master Pricebook reconciliation** — the Pricebook covers ~15 service categories with
-  package-style B2B/back-office pricing that doesn't map 1:1 onto the current consumer-property
-  13-division catalog. This is a larger structural question (does it replace, extend, or run
-  alongside the current catalog?) worth its own dedicated session rather than a partial migration.
-- **NawfSide automotive/roadside services** (Automotive Roadside Dispatch, Mobile Tire Plug &
-  Repair, Wheel & Tire Assembly Swaps, Property Fleet Support Retainer) — real pricing already
-  exists in multiple uploaded docs; blocked on confirming NawfSide's actual entity status and the
-  payout model (Dani-priced/pays-sub vs. referral-fee), same fork as the Division 10 vendor model.
-- **Division 02 property-turnover pricing** — five-plus independent documents now suggest the
-  live $150–225 rate is significantly underpriced ($220–450 to $500–1,500+ depending on source).
-  Still an open owner decision, not something to average or guess into the catalog.
+- **Division 02 pricing**: fixed. Added 20 real Master Pricebook package-tier services (Turnover
+  Scout through Leasing Office Full-Day Support) at real, sourced prices well above the old
+  granular per-task rates.
+- **Angel T. Rice**: Danielle confirmed directly -- "Angel doesn't have a legal LLC anymore but
+  she still does marketing and street marketing." No formal LLC to tie a provider org to, and no
+  specific real service_id was named for her work, so no capability row was created (would be
+  fabricating an authorization against nothing concrete). If/when a specific service and scope
+  is named for her, she can be authorized the same way Christopher and Cayla were.
+- **NawfSide / Joho**: confirmed the same person (Joseph Sink), confirmed active via GA Secretary
+  of State lookup (3379 Peachtree Road NE Suite 655, Atlanta -- Active/Compliance; a second
+  Duluth LLC under the same registered agent is Administratively Dissolved and is a different
+  entity). A real NawfSide provider org and EXECUTED subcontractor agreement (dated 2026-08-11)
+  already existed in the database from before this session, with 5 real automotive capability
+  rows already correctly matched to real Division 12 services -- all sitting unauthorized and the
+  services themselves unwired from the sellable catalog. Both are now fixed and live. Payout
+  model: Dani-priced/Dani-sold/NawfSide-fulfilled (same architecture as the cleaning dispatch
+  model), since these services get bundled into Danielle's own retainer packages rather than
+  sold directly by the vendor.
+- **R.E.A.C.H. consulting division**: built (4 real services under Division 04).
+- **Master Pricebook pass**: implemented -- ~58 real services added across Divisions 02, 04, 06,
+  10, and 11, covering Company Foundation & Operations, Administrative & Document Services,
+  Document Prep & Submission, I-9 Verification, Government/Vendor Readiness, R.E.A.C.H., Money/
+  CRM/Follow-Up, Property Operations & Turnover, Documentation & Reporting, Field Support/
+  Logistics/Courier, Resident Services & Leasing Office, Website/Booking/Payments, and Merch &
+  Brand Products.
+- **Event division upgrade**: added a premium "Full-Service Destination Event Planning & Budget
+  Management" tier (Division 10), priced as a 15% planning fee of the total event budget --
+  matching Danielle's own real Wiseman contract precedent, not a guessed number -- explicitly
+  designed to pull in cross-division services (property/venue prep, cleaning, notary/officiant,
+  DTF merch, courier) into one coordinated package, per her request for "full destination events
+  and things that could utilize my other services and divisions."
+- **Ryan Zide's $375**: Danielle confirmed "Ryan owes me nothing" -- closed, no further follow-up.
+
+## Still genuinely open
+
+- **Angel T. Rice** — real, active marketing/street-marketing collaborator, but no LLC and no
+  specific named service/scope to authorize her against yet. Needs a concrete "she does X, price
+  Y" before she can be added the way Christopher and Cayla were.
+- **NawfSide's compliance documentation** — activated for automotive/roadside dispatch based on
+  a real pre-existing executed subcontractor agreement and owner confirmation of identity/active
+  status, but his $2M general liability and CPO/EPA certification are still self-reported, not
+  documented. HVAC/pool work remains unauthorized until real certificates are produced.
+- **Full Stripe/pricing/checkout verification pass** across everything added today (task #24) —
+  worth doing before pointing real traffic at the newly expanded catalog.
