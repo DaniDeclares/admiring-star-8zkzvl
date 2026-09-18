@@ -426,6 +426,9 @@ export default async function handler(req, res) {
         certification_text: W9_CERTIFICATION_TEXT,
         certification_agreed: true,
         signature_full_name: String(p.signatureFullName).trim(),
+        requester_name: 'DANI DECLARES LLC',
+        requester_address: null,
+        account_number: providerApplicationId || providerOrgId,
         submission_ip: forwardedFor || req.socket?.remoteAddress || null,
         submission_user_agent: req.headers['user-agent'] || null,
       }).select('id, created_at').single();
@@ -449,6 +452,23 @@ export default async function handler(req, res) {
       const tin = decryptTin({ ciphertext: submission.tin_ciphertext, iv: submission.tin_iv, authTag: submission.tin_auth_tag });
       await context.supabase.from('dd_provider_w9_tin_access_log').insert({ w9_submission_id: submissionId, accessed_by: context.user.id, reason: payload.reason || null });
       return ok(res, { tin });
+    }
+    // Satisfies the IRS electronic-system requirement to "be able to supply a
+    // hard copy of the electronic Form W-9 if the IRS requests it." Returns
+    // every field except the TIN (which stays behind the separately logged
+    // decrypt_provider_w9_tin action) so staff can render/print a complete
+    // record without a second round trip for the non-sensitive fields.
+    if (action === 'get_provider_w9_full') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const submissionId = String(payload.submissionId || '').trim();
+      if (!submissionId) return fail(res, 'submissionId is required.');
+      const { data: submission, error } = await context.supabase
+        .from('dd_provider_w9_submissions')
+        .select('id, line1_name, line2_business_name, classification, llc_tax_classification, other_classification_description, has_foreign_partners, exempt_payee_code, fatca_exemption_code, address, city, state_code, zip_code, tin_type, tin_last_four, certification_text, signature_full_name, signed_at, requester_name, requester_address, account_number, status, created_at, verified_at, dd_provider_organizations(name)')
+        .eq('id', submissionId).maybeSingle();
+      if (error) throw error;
+      if (!submission) return fail(res, 'W-9 submission not found.', 404);
+      return ok(res, { submission });
     }
     if (action === 'verify_provider_w9' || action === 'reject_provider_w9') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
