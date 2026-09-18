@@ -502,3 +502,29 @@ Danielle: "i want everything tackled." Working through the open backlog systemat
   fabricated, doesn't block sale.
 - New task opened: notification-channel (text/SMS) preferences in the portal settings --
   investigating the existing portal codebase (`src/pages/portal/`) before building.
+- **Notification settings, shipped**: new `/portal/settings` page (all roles), `dd_notification_
+  preferences` table, `update_notification_preferences` portal-operations action. Verified with a
+  full production build before committing. Honest gap noted: the event broker still assigns
+  delivery channel per event type via a static map, not per saved preference -- full wiring is
+  follow-up work.
+- **Airtable crosswalk bugs, verified before fixing**: checked each of the specific bugs the
+  earlier research report claimed, directly against the live Airtable table (not just the Drive
+  CSV snapshot it was read from) before touching anything. Result was mixed, exactly why
+  verification matters:
+  - "Lockbox Installation -> wrong SKU" claim: **false**. It's already correctly mapped to
+    DNI-03A-010 "Lockbox/Access Coordination," a real match -- left untouched.
+  - "Courier / Transaction Runs -> wrong SKU" claim: **confirmed real**. It pointed at DNI-03A-017
+    ("Real Estate Photography," unrelated); the real match is DNI-03A-019 "Transaction Courier."
+    Fixed, and promoted its status to VERIFIED_MATCH.
+  - "D12-213 Courier Services" was sitting at UNMAPPED despite already having a plausible correct
+    candidate (DNI-12A-001 "Local Courier") -- promoted to VERIFIED_MATCH.
+  - The "5-service force-mapping bug" (Errand Running, Gift Wrapping, etc. routed to generic
+    surface/window-cleaning SKUs) and one of the two "dangling SKU" claims (DNI-01A-042) were
+    **not reproducible** in the live Airtable table -- those 5 records actually carry no Supabase
+    SKU value at all (status PARENT_MATCH, no bug), and DNI-01A-042 exists fine in Supabase. The
+    other dangling reference (DNI-02A-022) is real -- it doesn't exist in Supabase -- but no live
+    Airtable record currently references it either, so there's nothing left to fix. Likely
+    explanation: the Drive CSV this was read from is an older snapshot than live Airtable, not an
+    accurate picture of current state. Nothing was changed based on unverified claims.
+- Two background passes launched to continue the Division 08-style scope+draft-cost-model build
+  for Divisions 04, 06, 07, and 13, using the same $60/$75/$90-hr tier methodology -- in progress.
