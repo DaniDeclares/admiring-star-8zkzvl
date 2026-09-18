@@ -3,7 +3,7 @@ import {ArrowRight,CalendarClock,CheckCircle2,MapPin,Phone,ShieldCheck} from 'lu
 import {OPERATIONS_CHANNELS} from '../lib/operations/intakeRouting2026';
 import {getServiceVisuals} from '../data/serviceVisuals2026.js';
 import {supabase} from '../lib/supabaseClient.js';
-import {capture,captureServiceLifecycle} from '../lib/posthogAnalytics.js';
+import {captureServiceLifecycle} from '../lib/posthogAnalytics.js';
 const CHANNEL_OPTIONS=[{value:OPERATIONS_CHANNELS.B2C,label:'Resident / Household'},{value:OPERATIONS_CHANNELS.B2B_APT,label:'Property Management / Apartment Community'},{value:OPERATIONS_CHANNELS.B2B_RE,label:'Real Estate Professional / Brokerage'},{value:OPERATIONS_CHANNELS.B2B,label:'Business / Commercial'},{value:OPERATIONS_CHANNELS.B2G,label:'Government / Institution'}];
 const today=new Date().toISOString().slice(0,10);
 const baseServiceName=(name='')=>name.replace(/\s+(1BR|2BR|3BR|4BR)$/i,'').replace(/\s+—\s+(30|60)\s*min$/i,'').replace(/\s+—\s+(7|14|30)\s*Days$/i,'');
