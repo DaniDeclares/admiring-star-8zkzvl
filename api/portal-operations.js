@@ -185,6 +185,42 @@ export default async function handler(req, res) {
     }
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
     const { action, ...payload } = req.body || {};
+    if (action === 'update_provider_application') {
+      const guard = requireRole(context, STAFF_ROLES);
+      if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const applicationId = String(payload.applicationId || '').trim();
+      if (!applicationId) return fail(res, 'applicationId is required.');
+      const allowed = ['legal_name','contact_first_name','contact_last_name','contact_email','contact_phone','physical_address','service_area'];
+      const updates = {};
+      for (const field of allowed) {
+        if (Object.prototype.hasOwnProperty.call(payload, field)) {
+          const value = payload[field];
+          updates[field] = value === null ? null : String(value).trim();
+        }
+      }
+      if (!Object.keys(updates).length) return fail(res, 'At least one editable application field is required.');
+      const { data: existing, error: fetchError } = await context.supabase
+        .from('dd_provider_applications')
+        .select('id, legal_name, contact_first_name, contact_last_name, contact_email, contact_phone, physical_address, service_area')
+        .eq('id', applicationId)
+        .single();
+      if (fetchError || !existing) return fail(res, 'Provider application not found.', 404);
+      if (updates.contact_email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(updates.contact_email)) return fail(res, 'Enter a valid contact email address.');
+      const { data: updated, error: updateError } = await context.supabase
+        .from('dd_provider_applications')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', applicationId)
+        .select('id, legal_name, contact_first_name, contact_last_name, contact_email, contact_phone, physical_address, service_area')
+        .single();
+      if (updateError) throw updateError;
+      await context.supabase.from('dd_provider_application_events').insert({
+        application_id: applicationId,
+        event_type: 'APPLICATION_CONTACT_UPDATED',
+        actor_id: context.user.id,
+        notes: JSON.stringify({ before: existing, after: updated }),
+      });
+      return ok(res, { application: updated });
+    }
     if (action === 'create_estimate') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, await createEstimate(context.supabase, payload)); }
     if (action === 'dispatch_offer') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) }); }
     if (action === 'schedule_appointment') {
