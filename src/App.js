@@ -43,6 +43,7 @@ import PortalLoginPage from "./pages/PortalLoginPage.jsx";
 import PortalForgotPasswordPage from "./pages/PortalForgotPasswordPage.jsx";
 import PortalResetPasswordPage from "./pages/PortalResetPasswordPage.jsx";
 import ChangePasswordPage from "./pages/portal/ChangePasswordPage.jsx";
+import NotificationSettingsPage from "./pages/portal/NotificationSettingsPage.jsx";
 import VendorOnboardingUploadPage from "./pages/VendorOnboardingUploadPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
@@ -100,6 +101,7 @@ export default function App() {
         <Route path="/portal/forgot-password" element={<PortalForgotPasswordPage />} />
         <Route path="/portal/reset-password" element={<PortalResetPasswordPage />} />
         <Route path="/portal/change-password" element={<ChangePasswordPage />} />
+        <Route path="/portal/settings" element={<NotificationSettingsPage />} />
         <Route path="/portal/provider-agreement" element={<ProviderAgreementPage />} />
         <Route path="/portal/vendor-onboarding" element={<VendorOnboardingUploadPage />} />
         <Route path="/portal/assignments" element={<ProviderAssignmentsPage />} />

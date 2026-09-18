@@ -120,8 +120,16 @@ export default function PortalAccessPage() {
   }, [selected]);
 
   // A category maps to every canonical service in its division (optionally
-  // narrowed to a canonical_sku_prefix for the Division-1 sub-families).
-  const servicesForCategory = (category) => catalogServices.filter(s => s.division_id === category.division_id && (!category.canonical_sku_prefix || (s.sku || '').startsWith(`DNI-${category.canonical_sku_prefix}-`)));
+  // narrowed to a canonical_sku_prefix for the Division-1 sub-families). When a category
+  // carries an explicit canonical_skus list instead (divisions with no sub-prefix scheme,
+  // where only a subset of the division's services belong in this category), that list is
+  // used verbatim rather than the division/prefix match.
+  const servicesForCategory = (category) => {
+    if (Array.isArray(category.canonical_skus) && category.canonical_skus.length > 0) {
+      return catalogServices.filter(s => category.canonical_skus.includes(s.sku));
+    }
+    return catalogServices.filter(s => s.division_id === category.division_id && (!category.canonical_sku_prefix || (s.sku || '').startsWith(`DNI-${category.canonical_sku_prefix}-`)));
+  };
 
   const toggleCategory = (categoryKey) => {
     setSelectedCategories(prev => {

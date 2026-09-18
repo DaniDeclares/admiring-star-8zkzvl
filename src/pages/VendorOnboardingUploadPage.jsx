@@ -21,6 +21,7 @@ const PROVIDER_DOCS = [
   { key: 'PORTFOLIO', label: 'Portfolio', help: 'Supporting work examples.' },
   { key: 'PROVIDER_PRICE_SHEET', label: 'Your price sheet (optional for individuals; required for business providers)', help: 'Upload the prices/rates your business charges for the services you want DANI DECLARES to consider. DANI DECLARES retains customer pricing authority; this is provider commercial input, not customer-facing pricing.' },
   { key: 'WORK_SAMPLE', label: 'Work sample', help: 'Supporting evidence of capability.' },
+  { key: 'PRICING_SHEET', label: 'Your pricing sheet or rate card', help: 'Upload your own price list or rate card if you have one — DANI DECLARES staff will review it when deciding what to offer and at what price, rather than asking you to re-key it by phone.' },
   { key: 'OTHER', label: 'Other supporting document', help: 'Use for evidence that does not fit another category.' },
 ];
 

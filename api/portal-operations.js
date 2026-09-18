@@ -162,17 +162,26 @@ async function createDispatchOffer(supabase, actorId, payload) {
   return assignment;
 }
 
+// One row per auth user, self-managed from /portal/settings -- available to every role since
+// notification delivery (email/SMS via the outbox worker) is account-level, not role-specific.
+async function getNotificationPreferences(supabase, authUserId) {
+  const { data, error } = await supabase.from('dd_notification_preferences').select('email_enabled, sms_enabled, sms_phone_number').eq('auth_user_id', authUserId).maybeSingle();
+  if (error) throw error;
+  return data || { email_enabled: true, sms_enabled: false, sms_phone_number: null };
+}
+
 export default async function handler(req, res) {
   try {
     const context = await authenticatePortalRequest(req);
     if (context.error) return fail(res, context.error, context.status);
     if (req.method === 'GET') {
+      const notificationPreferences = await getNotificationPreferences(context.supabase, context.user.id);
       if (!context.isStaff) {
-        if (context.role === 'provider') return ok(res, { role: context.role, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id) });
-        return ok(res, { role: context.role, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
+        if (context.role === 'provider') return ok(res, { role: context.role, notificationPreferences, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id) });
+        return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
-      return ok(res, { role: context.role, ...await getStaffSnapshot(context.supabase) });
+      return ok(res, { role: context.role, notificationPreferences, ...await getStaffSnapshot(context.supabase) });
     }
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
     const { action, ...payload } = req.body || {};
@@ -340,6 +349,20 @@ export default async function handler(req, res) {
       const { data: sentMessage, error } = await context.supabase.from('dd_messages').insert({ job_id: jobId, sender_auth_user_id: context.user.id, sender_role: context.role, body: String(body).trim() }).select().single();
       if (error) throw error;
       return ok(res, { message: sentMessage });
+    }
+    if (action === 'update_notification_preferences') {
+      const { emailEnabled = true, smsEnabled = false, smsPhoneNumber = null } = payload;
+      const phone = smsPhoneNumber ? String(smsPhoneNumber).trim() : null;
+      if (smsEnabled && !phone) return fail(res, 'A phone number is required to enable text message notifications.');
+      const { data, error } = await context.supabase.from('dd_notification_preferences').upsert({
+        auth_user_id: context.user.id,
+        email_enabled: Boolean(emailEnabled),
+        sms_enabled: Boolean(smsEnabled),
+        sms_phone_number: phone,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'auth_user_id' }).select('email_enabled, sms_enabled, sms_phone_number').single();
+      if (error) throw error;
+      return ok(res, { notificationPreferences: data });
     }
     return fail(res, `Unknown portal action: ${action}`);
   } catch (error) { console.error('Portal operations error:', error); return fail(res, 'Operational request failed.', 500); }
