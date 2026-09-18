@@ -155,3 +155,49 @@ disposition summary only.
   documented. HVAC/pool work remains unauthorized until real certificates are produced.
 - **Full Stripe/pricing/checkout verification pass** across everything added today (task #24) —
   worth doing before pointing real traffic at the newly expanded catalog.
+
+## Audit & reconciliation principle (locked 2026-09-18, Danielle's own words)
+
+A large paste arrived (a prior AI chat's "Chris capability inventory," a full "Events &
+Hospitality universe" reconstruction, and a "13 DANI divisions" no-money-left-on-the-table
+framework) proposing pricing and a division taxonomy that conflict with what's actually live.
+Danielle's ruling, verbatim in substance: **the pasted material is non-authoritative input, not
+an implementation source.** She locked this as the standing audit principle:
+
+> "Supabase canonical service/commercialization data + reconciled Airtable controls + governed
+> Notion operating rules + live production/payment systems = source of truth. Any pasted
+> inventory or alternate catalog must reconcile against those systems before it can change
+> anything." A pasted inventory "cannot legitimately promote anything to live merely by
+> supplying prices." Every service needs "one canonical identity, one governed commercial
+> definition, one pricing source, one fulfillment rule, one compliance state, and one production
+> representation."
+
+Applied here:
+- **Division taxonomy**: the paste's "13 DANI divisions" (D01 Home/Residential ... D13
+  Programs/Memberships) is a different numbering/content scheme than the live database's real
+  Division 01–13 structure used all session (Division 04 = Admin/Ops, Division 05 = Notary,
+  Division 10 = Events, Division 12 = Courier/Vehicle, etc.). **Rejected as a taxonomy source.**
+  The live structure stays canonical.
+- **Christopher Walker's DTF pricing**: the paste's per-shirt table ($25/$22/$20/$18/$16 by
+  volume, +$8 front+back, +$5 sleeve) conflicts with the live Master Pricebook tiered structure
+  on DNI-11A-017/018 (Single $25+$18/item, Batch-12 $300, Batch-24 $540, Batch-50 $1050).
+  Danielle's call: "I set the price but let's go with what makes the most sense" — resolved as
+  keeping the Master Pricebook numbers canonical (real, dated, already governed) and rejecting
+  the paste's table. Logged in each SKU's `conflict_register`
+  (`20260918030622_reconcile_christopher_walker_pricing_conflict_register.sql`).
+- **Christopher Walker's computer-service pricing**: the paste's broader price table (PC Assembly
+  $225, Custom PC Build $300, Workstation Setup $175, Tune-Up $125, Printer/Peripheral/Network
+  Setup, Data Transfer, Software Config, Troubleshooting $85/hr) doesn't collide dollar-for-dollar
+  with the two live SKUs (Computer Setup $125, Workstation Deployment $299) but is likewise not
+  adopted — same migration, same reasoning.
+- **Events division expansion**: the paste's "no money left on the table" structural idea (turn
+  every event touchpoint into a billable line item) had promise per Danielle's "if it has promise,
+  expand on it" instruction, so 3 genuinely new Division 10 add-ons were built from the concept —
+  Guest Travel & Lodging Coordination, Event Vendor Fund Disbursement & Reconciliation, Event
+  Permit & Insurance Coordination (DNI-10A-035/036/037). None of the paste's specific dollar
+  figures were used since none are sourced; all three are priced VARIABLE_QUOTE/INTAKE_ONLY, same
+  pattern as the real destination-event tier
+  (`20260918030615_expand_division_10_destination_event_addons.sql`).
+- The rest of the pasted material (the full Chris inventory narrative, the full Events universe
+  list, the full 13-division writeup) is kept only as reference in chat history — not transcribed
+  into this registry's STORED section since it duplicates the reconciliation above.
