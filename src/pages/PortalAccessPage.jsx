@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import { savePendingOnboarding } from '../lib/pendingOnboarding.js';
+import { capture, captureServiceLifecycle } from '../lib/posthogAnalytics.js';
 import './PortalAccessPage.css';
 
 const OPTIONS = [
@@ -125,7 +126,7 @@ export default function PortalAccessPage() {
     setSelectedCategories(prev => {
       const next = { ...prev };
       if (next[categoryKey]?.checked) delete next[categoryKey];
-      else next[categoryKey] = { checked: true, equipmentAnswer: '' };
+      else { next[categoryKey] = { checked: true, equipmentAnswer: '' }; captureServiceLifecycle('provider_capability_selected',{capability_key:categoryKey,route:'/portal/access'}); }
       return next;
     });
   };
@@ -147,6 +148,7 @@ export default function PortalAccessPage() {
       return;
     }
     setSelected(option);setMode('form');setProviderStep(1);
+    if(option.key==='provider') capture('provider_application_started',{route:'/portal/access'});
   };
 
   const providerStepValid=()=>{
@@ -171,6 +173,7 @@ export default function PortalAccessPage() {
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
     if(selected?.key==='provider' && !selectedCategoryCount)return setError('Select at least one category of work you can fulfill.');
     setBusy(true);
+    capture('provider_application_submitted',{route:'/portal/access'});
     const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{emailRedirectTo:`${window.location.origin}/portal/login`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     if(authError){setBusy(false);return setError(authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
     // Supabase deliberately returns a fake success with no error and no new
@@ -228,6 +231,7 @@ export default function PortalAccessPage() {
         intakePayload,
         inviteTokenHash: selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
       });
+      capture('provider_application_submitted',{route:'/portal/access'});
       setBusy(false);setDone('Your account is created. Check your email to confirm it, then sign in — the rest of your onboarding will finish automatically.');setMode('done');
       return;
     }
