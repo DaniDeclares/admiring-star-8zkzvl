@@ -695,3 +695,39 @@ Danielle: "i want everything tackled." Working through the open backlog systemat
   pre-existing, unrelated warnings); production build compiles clean.
   Chris's onboarding email is intentionally still NOT sent -- holding until the wizard was
   actually tested against his real capability set, which is now done.
+
+- **2026-09-18, Division 12 + Division 1 category audit (migration `20260918163634`).**
+  Extended the same scoping fix to Division 12 (36 services, single "12A" prefix): found 7
+  categories -- `COURIER_LOGISTICS`, `VEHICLE_DETAILING`, `ROADSIDE_ASSISTANCE`,
+  `MOBILE_TIRE_INSTALLATION`, `PUNCTURE_REPAIR`, `TIRE_MOUNTING_BALANCING`,
+  `TIRE_SALES_INSTALLATION` -- all resolving to the same unscoped 36-service list.
+  `VEHICLE_DETAILING` is real: Danielle AND Cayla are both authorized for DNI-12A-021 "Mobile
+  Vehicle Detailing" -- narrowed, not deleted. The five roadside/tire categories match
+  NawfSide's real, currently-authorized 5 capabilities exactly -- narrowed each to its single
+  real SKU (DNI-12A-022 through 026). `COURIER_LOGISTICS` is a genuine broad cluster (local
+  courier/delivery/sourcing work) -- scoped to its real 21 matching SKUs (DNI-12A-001 through
+  020 + DNI-12A-027 Medical Courier), explicitly excluding the detailing/roadside/tire
+  specialty SKUs it was wrongly also matching.
+  Also found and resolved two Division 1 near-duplicates: `HOME_WATCH` and `LAUNDRY_VALET`
+  both have real backing (Danielle, DNI-01D-002 and DNI-01A-004) but were unscoped against all
+  66 Division 1 services -- narrowed to their single real SKU each, kept as their own
+  checkboxes even though both SKUs are also reachable via the already-correctly-scoped
+  `HOUSEHOLD_CONCIERGE`/`CLEANING` categories.
+  Deleted four confirmed true orphans: `JUMP_START`, `FLAT_TIRE_CHANGE`, `FUEL_DELIVERY`,
+  `LOCKOUT_KEY_SERVICE` -- no canonical SKU exists anywhere in the catalog for any of these as
+  a standalone billable service. Their identically-named capability_key does appear on four of
+  NawfSide's own dd_provider_capabilities rows, but those are separate, already-correct
+  discovery-evidence records (is_authorized=false, service_id=null, "qualification_required")
+  from earlier public-directory research -- honest "candidate, not yet a real DANI service"
+  markers, left untouched.
+  Full re-verification: all touched/kept categories resolve to exactly their intended SKUs
+  (COURIER_LOGISTICS: 21; the rest: 1 each); `dd_provider_capabilities` unchanged at 282;
+  NawfSide's 4 discovery-evidence rows confirmed untouched; the four deleted categories
+  confirmed gone; security advisories unchanged; production build compiles clean.
+  Separately searched the full canonical catalog for anything resembling long-haul freight,
+  trucking, load-hauling, or dispatch/broker work (raised because Danielle has been
+  researching this as a possible side lane, per her own Facebook activity in
+  owner-operator/load-board groups) and found nothing -- DANI has no existing SKU for that
+  work. No category was mapped or created for it; per instruction, this stays a researched
+  lead, not an authorized capability, until a specific person/business with real identifying
+  details (name, DOT/MC number, insurance) is actually named.
