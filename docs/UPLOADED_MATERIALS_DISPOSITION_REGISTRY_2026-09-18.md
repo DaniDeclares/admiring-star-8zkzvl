@@ -237,3 +237,63 @@ This was not taken at face value -- verified directly against live Supabase data
 - Everything else in the report (grant deadlines, financing programs, GA certification program)
   is funding/compliance research, not a Supabase catalog change -- no action needed here; it's
   Danielle's and/or the Airtable-side process's to act on directly.
+
+## Full 13-division Airtable-vs-Supabase economics audit (2026-09-18)
+
+Danielle asked to check every division and Airtable directly, not just take a summary report at
+face value. Ran 4 parallel research passes (Divisions 01-03, 04-06, 07-09, 10-13) cross-checking
+Airtable's `04 Service Economics` / `Company Pricing Evidence` / `DANI DECLARES MASTER COMMERCIAL
+UNIVERSE` tables against live Supabase pricing and offer status. Findings, verified before acting:
+
+**New confirmed losses (fixed, same pattern as Apartment Turn / Commercial Space Reset):**
+- Common Area Detail (DNI-02A-005): $125 price vs $135.00 documented cost = -$10.00 (-8.0%).
+- Office Cleaning (DNI-02A-012): $125 price vs $135.00 documented cost = -$10.00 (-8.0%).
+Both were SELL_NOW/READY; pulled to DO_NOT_SELL
+(`20260918105646_pull_more_d02_losses_and_revert_nawfside_supersession.sql`). 5 more D02 services
+flagged THIN (10-16% margin, not a loss) for a later look: Amenity Reset, Field Data Collection,
+Make-Ready Cleaning, Property Transition Support, Punch List.
+
+**A real mistake this session made and reverted**: this morning's NawfSide automotive activation
+(5 SKUs, DNI-12A-022 through 026) turned out to directly contradict a real, dated governance
+decision already on record in Airtable -- a 2026-09-13 entry (5 days before this session started)
+stating "Governance supersession confirmed 2026-09-13. Existing canonical SKU is preserved for
+audit/history but is not authorized as a DANI sellable service," recommended status DO NOT SELL.
+This session's migration flipped `dd_master_service_universe`/`dd_governed_service_offers` to
+CANONICAL_ACTIVE/SELL_NOW without knowing about that record -- meanwhile `public.services.
+commercial_status` (never touched by that migration) had stayed correctly SUPERSEDED the whole
+time, so Supabase's own tables were contradicting each other and Airtable simultaneously for 5
+services live for checkout since this morning. Reverted all 5 back to DO_NOT_SELL/SUPERSEDED.
+NawfSide's org-level activation (identity, executed agreement, accepts_new_work) stands --
+only these 5 specific service records were reverted. The real successor appears to be DNI-12A-021
+"Mobile Vehicle Detailing," which Airtable shows as owner-confirmed SELL NOW as of 2026-09-14 --
+**open question for Danielle**: should NawfSide be authorized under the Detailing package-tier
+model instead of the old granular roadside/tire SKUs?
+
+**Structural finding, worse than any single bad SKU**: across the whole catalog, real cost/margin
+engineering barely exists outside Division 02. Rough tally from all 4 passes:
+- Division 01: ~2 of ~78 SKUs have a real computed margin (both healthy).
+- Division 02: the only division with meaningful coverage (20/48 SKUs priced; this is exactly why
+  it's the only division a loss was even detectable in).
+- Division 03: 0 of 28 live SKUs have any cost data in either system.
+- Division 04: 26/57 have partial data but 0 have a real computed margin.
+- Divisions 05 and 06: 0 of 27 and 0 of 29 live SKUs have ANY cost/margin record in Airtable.
+- Divisions 07-09: ~5 of 89 combined SKUs have real margin data (all in Division 09, all healthy).
+- Division 10: 1 of ~49 SKUs priced.
+- Division 11: 0 of 32 SKUs priced -- includes Christopher Walker's DTF/Heat-Press services,
+  which have been live since this morning with no materials/press-time/payout cost basis anywhere.
+- Division 12: only the 6 automotive SKUs above have any staged cost data, and it's a placeholder
+  assumption (55-65% of customer price), not NawfSide's real contracted rate.
+- Division 13: 0 of ~25 SKUs have any cost or market-pricing data in either system.
+
+**Bottom line**: outside Division 02, the catalog cannot currently distinguish a healthy-margin
+service from a hidden loss, because the underlying cost engineering was never built for ~90% of
+the 302-service catalog. This is the same gap the earlier "0 of 302 PASS 1" recheck reported --
+now confirmed division-by-division rather than as a single aggregate number. Task #24 (full
+Stripe/pricing/checkout verification pass) and a new economics-engineering build-out are the
+direct next steps; see chat for the phased plan discussed with Danielle.
+
+**Governance/crosswalk sync gap (separate from pricing)**: Airtable's Master Commercial Universe
+marks "Commercialization Readiness = Pending" on nearly every tracked record in Divisions 04, 06,
+07, 08, and 09 even though Supabase shows the same SKUs live SELL_NOW -- the two systems' notion
+of "is this actually approved to sell" have drifted apart across most of the catalog, not just the
+Division 12 case that got reverted. Worth a dedicated reconciliation pass, separate from pricing.
