@@ -19,6 +19,7 @@ const PROVIDER_DOCS = [
   { key: 'MOTOR_CARRIER_AUTHORITY', label: 'Motor carrier / DOT authority', help: 'Upload your DOT/MC operating authority documentation if your capability involves commercial vehicle transport.', hasNumber: true },
   { key: 'BACKGROUND_CONSENT', label: 'Background-check consent', help: 'Upload the requested signed consent form when applicable.' },
   { key: 'PORTFOLIO', label: 'Portfolio', help: 'Supporting work examples.' },
+  { key: 'PROVIDER_PRICE_SHEET', label: 'Your price sheet (optional for individuals; required for business providers)', help: 'Upload the prices/rates your business charges for the services you want DANI DECLARES to consider. DANI DECLARES retains customer pricing authority; this is provider commercial input, not customer-facing pricing.' },
   { key: 'WORK_SAMPLE', label: 'Work sample', help: 'Supporting evidence of capability.' },
   { key: 'OTHER', label: 'Other supporting document', help: 'Use for evidence that does not fit another category.' },
 ];
@@ -29,6 +30,7 @@ export default function VendorOnboardingUploadPage() {
   const [providerMode, setProviderMode] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const [application, setApplication] = useState(null);
+  const [applicantType, setApplicantType] = useState(null);
   const [capabilities, setCapabilities] = useState([]);
   const [selectedCapabilities, setSelectedCapabilities] = useState({});
   const [providerFiles, setProviderFiles] = useState({});
@@ -54,7 +56,7 @@ export default function VendorOnboardingUploadPage() {
         if (identity?.portal_role !== 'provider') return;
         const { data: apps, error: appError } = await supabase
           .from('dd_provider_applications')
-          .select('id,application_status,legal_name,tax_form_status,insurance_status,identity_status,agreement_status,compliance_status')
+          .select('id,application_status,applicant_type,legal_name,tax_form_status,insurance_status,identity_status,agreement_status,compliance_status')
           .eq('applicant_user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1);
@@ -63,6 +65,7 @@ export default function VendorOnboardingUploadPage() {
           setProviderMode(true);
           const currentApplication = apps?.[0] || null;
           setApplication(currentApplication);
+          setApplicantType(currentApplication?.applicant_type || null);
           if (currentApplication?.id) {
             const { data: capabilityRows, error: capabilityError } = await supabase
               .from('dd_provider_application_capabilities')
@@ -107,6 +110,7 @@ export default function VendorOnboardingUploadPage() {
       if (!user) throw new Error('Please sign in before uploading provider documents.');
       const selected = Object.entries(providerFiles).filter(([, file]) => file);
       if (!selected.length) throw new Error('Choose at least one provider document.');
+      if (applicantType === 'BUSINESS' && !providerFiles.PROVIDER_PRICE_SHEET) throw new Error('Business providers must upload their own price sheet before submitting provider documents.');
 
       for (const [documentType, file] of selected) {
         const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -192,6 +196,7 @@ export default function VendorOnboardingUploadPage() {
       {application && <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,margin:'24px 0'}}>
         <strong>{application.legal_name || 'Provider application'}</strong>
         <p style={{margin:'8px 0 0'}}>Application status: <strong>{application.application_status}</strong></p>
+        <p style={{margin:'8px 0 0'}}>Provider type: <strong>{application.applicant_type || applicantType || 'INDIVIDUAL'}</strong> · Price sheet: <strong>{applicantType === 'BUSINESS' ? 'Required' : 'Optional'}</strong></p>
         <p style={{margin:'8px 0 0'}}>Compliance: <strong>{application.compliance_status}</strong></p>
         <p style={{margin:'8px 0 0'}}>Document statuses — W-9: {application.tax_form_status} · Insurance: {application.insurance_status} · ID: {application.identity_status} · Agreement: {application.agreement_status}</p>
       </div>}
@@ -225,6 +230,8 @@ export default function VendorOnboardingUploadPage() {
         <button type="submit" disabled={busy} style={{marginTop:20,padding:'12px 18px',fontWeight:700}}>{busy ? 'Submitting…' : 'Submit provider documents'}</button>
       </form>}
       <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,marginTop:24}}>
+        <strong>Pricing note</strong>
+        <p style={{marginBottom:8}}>You may submit your own rates. Individual providers are not required to provide a price sheet. Business providers must provide one for commercial review. DANI DECLARES still sets and publishes customer pricing; provider-submitted rates are used for economics, negotiation, and fulfillment planning.</p>
         <strong>Important</strong>
         <p style={{marginBottom:0}}>Document receipt is not approval. Provider qualification, verification, authorization, and dispatch eligibility remain separate decisions. Do not upload passwords, banking credentials, or unnecessary sensitive information.</p>
       </div>
