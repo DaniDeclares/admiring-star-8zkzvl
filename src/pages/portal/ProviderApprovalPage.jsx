@@ -65,7 +65,9 @@ function ProviderApproval() {
     setBusy(true); setError(''); setMessage('');
     const { data: auth } = await supabase.auth.getSession();
     if (!auth.session) { setBusy(false); setError('Staff session required.'); return; }
-    const { data: body, error: invokeError } = await supabase.functions.invoke('provider-application-review', { body: { action: 'update_application_contact', applicationId: selected.id, ...contactForm } });
+    const response = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.session.access_token}` }, body: JSON.stringify({ action: 'update_provider_application', applicationId: selected.id, ...contactForm }) });
+    const body = await response.json();
+    const invokeError = !response.ok ? new Error(body?.error || 'Provider contact details could not be updated.') : null;
     if (invokeError || !body?.success) {
       setError(body?.error || invokeError?.message || 'Provider contact details could not be updated.');
       setBusy(false); return;
