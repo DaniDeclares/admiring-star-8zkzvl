@@ -671,3 +671,27 @@ Danielle: "i want everything tackled." Working through the open backlog systemat
     reconciling his existing 4/4 DTF/computer authorization against real onboarding documents
     (W-9, agreement, ID, compliance) -- both remain gated behind his actual onboarding, per
     Danielle's explicit instruction not to authorize anything yet.
+
+- **2026-09-18, pre-existing category-scoping bug found and fixed for Chris's two existing
+  categories specifically (migration `20260918162358`).** While checking readiness for Chris's
+  onboarding reconciliation, found that `COMPUTER_TECHNICAL_SUPPORT`/`COMPUTER_SETUP`/
+  `BUSINESS_FORMATION_DIGITAL` (Division 6, 31 services) and `CREATIVE_DESIGN`/
+  `DTF_APPAREL_PRODUCTION`/`DTF_PRINTING`/`HEAT_PRESS_APPAREL`/`LASER_ENGRAVING` (Division 11,
+  33 services) all shared the same unscoped division-wide match -- a pre-existing bug, not
+  introduced today, since neither division has a sub-prefix scheme (single "06A"/"11A" prefix
+  each). Selecting any one of those categories in the live onboarding wizard would have
+  generated capability rows for the entire division, not the intended narrow skill.
+  Narrowed only the two categories whose capability_key exactly matches Chris's real,
+  existing dd_provider_capabilities rows: `COMPUTER_TECHNICAL_SUPPORT` -> `DNI-06A-016`,
+  `DNI-06A-017`; `DTF_APPAREL_PRODUCTION` -> `DNI-11A-017`, `DNI-11A-018`. Verified selecting
+  both together now resolves to exactly his real 4/4, zero unrelated services -- no additional
+  scoping was needed. The other six overlapping categories were deliberately left untouched;
+  this was scoped tightly to what actually blocks Chris's reconciliation, not general
+  Division 6/11 cleanup (that remains real backlog under task #23/#38).
+  Full re-verification after the change: `dd_provider_capabilities` count unchanged at 282;
+  retired Chris Beta Cohort placeholder unchanged (6 rows, 0 authorized); Chris's real org
+  unchanged (4 rows, 4 authorized); the six-SKU `CONTENT_MARKETING_PRODUCTION` category from
+  the prior migration unaffected; Supabase security advisories show no new findings (same 3
+  pre-existing, unrelated warnings); production build compiles clean.
+  Chris's onboarding email is intentionally still NOT sent -- holding until the wizard was
+  actually tested against his real capability set, which is now done.
