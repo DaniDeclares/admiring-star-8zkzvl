@@ -71,7 +71,7 @@ async function getStaffSnapshot(supabase) {
     // Self-requested additions from the provider "My Services" page (add_service_request
     // source) sit here as is_authorized:false until staff reviews them -- same as every
     // other capability, no self-service action ever sets is_authorized:true.
-    supabase.from('dd_provider_capabilities').select('id, provider_id, service_line, capability_key, created_at, dd_providers(first_name, last_name, dd_provider_organizations(name)), services(sku, name)').eq('is_authorized', false).order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_provider_capabilities').select('id, provider_id, provider_org_id, service_line, capability_key, created_at, dd_provider_organizations(name), dd_providers(first_name, last_name), services(sku, name)').eq('is_authorized', false).order('created_at', { ascending: false }).limit(100),
     // Ciphertext/iv/authTag are deliberately excluded here -- staff review this
     // list to verify/reject, and only reach for decrypt_provider_w9_tin (which
     // is separately logged) when a real number is actually needed.
