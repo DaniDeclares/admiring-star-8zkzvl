@@ -758,3 +758,34 @@ Danielle: "i want everything tackled." Working through the open backlog systemat
   chat. Verified: table + RLS policy confirmed live, all 30 rows landed in correct lanes,
   production build compiles clean, no new Supabase security advisories (same 3 pre-existing,
   unrelated warnings).
+
+- **2026-09-18, GitHub PR #217 merged into `main` and confirmed live in production
+  (deployment `dpl_FeQCaZBb6HuDXkGxoWX5kcLLaUSX`, commit `42cac1b1`, aliased to
+  `danideclares.com`/`www.danideclares.com`).** Verified directly via `git fetch`+`git log`
+  (merge commit real) and Vercel's deployment record (alias list confirmed) rather than
+  accepting the relayed report at face value -- it was accurate, with production promotion
+  landing a few minutes after the initial check.
+
+- **2026-09-18, real bug found via Danielle's own live test signup** (danideclaresns@gmail.com,
+  application `53647953-3372-4582-84c3-64e037129f06`, created by actually going through
+  `/portal/access` as instructed) **and fixed (migration `20260918185127`).** The application
+  generated 200 capability rows; `OFFICIANT_ORDAINED` alone contributed 21 wrong rows because
+  its selection category was scoped to `canonical_sku_prefix = '10A'` -- which is actually
+  Division 10's general event-planning family (Event Consultation, Wedding Day Coordination,
+  Corporate Event Coordination, etc., 29 real SKUs), not officiant work. Confirmed Danielle's
+  own real, already-authorized `OFFICIANT_ORDAINED` capability
+  (`dd_provider_capabilities`) was correct and unaffected the whole time: exactly 2 real
+  services, "Wedding Officiant Services" and "Vow Renewal Ceremonies" -- both real, priced
+  service rows that were simply never assigned a canonical `DNI-` SKU code, so the
+  `canonical_skus` text-array mechanism used for every other fix tonight couldn't reference
+  them. Added a parallel `canonical_service_ids uuid[]` column and matching branch in
+  `servicesForCategory` (`PortalAccessPage.jsx`) so the category can point at real
+  `services.id` values directly. Verified: resolves to exactly those 2 real services now,
+  matching Danielle's actual authorization precisely; build compiles clean.
+  The other 7 broad categories the same test surfaced (ADMIN_BUSINESS_OPS, EXPERIENCES_EVENTS,
+  REAL_ESTATE_SUPPORT, BUSINESS_FORMATION_DIGITAL, BUSINESS_DEVELOPMENT, PROPERTY_FIELD_OPS,
+  MARKETING_CONTENT) are the same already-logged Division 4/7/10 legacy-category backlog from
+  earlier this session -- deliberately deferred, not newly discovered, and not touched by this
+  fix.
+  The 200 test capability rows themselves were deliberately left in place as real evidence of
+  what the signup flow produced, per instruction not to destroy debugging evidence.
