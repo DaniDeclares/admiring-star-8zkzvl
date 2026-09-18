@@ -201,3 +201,39 @@ Applied here:
 - The rest of the pasted material (the full Chris inventory narrative, the full Events universe
   list, the full 13-division writeup) is kept only as reference in chat history — not transcribed
   into this registry's STORED section since it duplicates the reconciliation above.
+
+## Airtable financial/cost-underwriting audit cross-check (2026-09-18)
+
+A separate daily-check report arrived describing work done directly in the Airtable base (not
+Supabase): a new **Business Finance & Capital Ledger** table, a funding-opportunity sweep (H&R
+Block Fund Her Future, Her Agenda, Credibly, Hey Helen, High Five for Moms, Amber Grant, Georgia
+CDFI/SBCG, SBA Microloan/7(a)), and a cost-underwriting recheck concluding **0 of 302 catalog
+services currently pass a full labor+materials+margin audit ("PASS 1")**.
+
+This was not taken at face value -- verified directly against live Supabase data before acting:
+
+- **"Business Finance & Capital Ledger" table** — confirmed real; it exists in the Airtable base
+  (`appJjOPWnFsZe11zM`) alongside `08 Manual Work Orders`, `Capital Opportunity Matrix`, and
+  dozens of other governance tables already built out there this quarter. This Airtable layer has
+  been running in parallel to the Supabase catalog work done in this chat all session -- the two
+  hadn't been cross-checked against each other until now.
+- **The "0 PASS 1" finding** — checked directly against `dd_master_service_universe`. Confirmed
+  accurate: the ~150+ services added this session via the Master Pricebook pass, R.E.A.C.H., and
+  the events expansion all have a customer-facing `starting_price` but no `internal_cost`/
+  `provider_payout`/`margin_economics` populated -- exactly the "commercially cataloged, not
+  cost-underwritten" gap the audit describes. This isn't a new problem, just a now-quantified one;
+  it's the same gap task #24 (full pricing/checkout verification pass) already exists to close.
+- **Two services caught actually selling at a loss** — confirmed real, not a modeling artifact:
+  - Apartment Turn (DNI-02A-002): posted price $150 vs. the row's own documented cost model
+    (2.5 hrs @ $60/hr + $20 supplies = $170.00) — a real -$20.00 loss per job.
+  - Commercial Space Reset (DNI-02A-004): posted price $75 vs. documented cost (1.5 hrs @ $60/hr
+    + $10 supplies = $100.00) — a real -$25.00 loss per job.
+  Both were live at `commercial_offer_status = SELL_NOW` / `fulfillment_gate_status = READY` --
+  a real customer could book either at a guaranteed loss. **Pulled from sale** (set to
+  `DO_NOT_SELL`) pending a price increase or scope revision, rather than guessing a new price
+  (`20260918103522_pull_loss_making_d02_services_from_sell_now.sql`). Two sibling D02 services
+  (Amenity Reset at 10.5% margin, thin but not a loss) were left alone -- not pulled, just worth
+  a second look later.
+- Everything else in the report (grant deadlines, financing programs, GA certification program)
+  is funding/compliance research, not a Supabase catalog change -- no action needed here; it's
+  Danielle's and/or the Airtable-side process's to act on directly.
