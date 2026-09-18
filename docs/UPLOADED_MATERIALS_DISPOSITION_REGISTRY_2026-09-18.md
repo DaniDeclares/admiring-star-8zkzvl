@@ -383,3 +383,53 @@ record count comes down. Per standing boundaries, no billing/credit action was t
 Danielle's explicit go-ahead. Two real paths exist: pay for more capacity, or clean up genuine
 dead data (starting with the confirmed 77-record Master Commercial Universe duplication) --
 her call which one (or both).
+
+## Reconciling a parallel report against verified ground truth (2026-09-18)
+
+A "chat says" report arrived describing independent Supabase/Airtable audit work (D02/D08
+economics recheck, an Airtable cleanup deleting 7 `ABSORBED_REDIRECTED` Master Commercial
+Universe records). Per this project's standing rule, nothing in it was accepted without direct
+verification against live systems first.
+
+**Confirmed true:**
+- D02: exactly 48 services / 42 priced / 6 unpriced, as reported.
+- D08's "Business Development Retainer" billing-cycle fix (RECURRING/MONTHLY) is confirmed live.
+- Airtable Master Commercial Universe: confirmed now at 372 records (was 379) -- the claimed
+  7-record deletion of `ABSORBED_REDIRECTED` rows genuinely happened.
+- My earlier Danielle+Cayla Mobile Vehicle Detailing authorization is confirmed fully intact and
+  correct (`is_authorized=true` for both) -- the report's own uncertainty about it ("did not
+  reproduce the authorization count") was their query missing it, not a real problem on my end.
+- **A genuinely new, real finding the report surfaced**: D02/D03 channel-pricing rows can exist
+  with `base_price_cents = NULL` even when the service has an approved price -- "row coverage
+  != price coverage." Verified directly: 98 NULL rows in Division 02, 100 in Division 03, all for
+  services that DO have an approved `starting_price` -- meaning up to 20 real D02 services and
+  their D03 equivalents could have been showing broken/blank pricing on some channels. **Fixed**:
+  backfilled `base_price_cents` from each service's own already-approved price (not a new number,
+  just propagating the existing one) for all 198 safely-fixable rows
+  (`20260918112221_backfill_null_channel_pricing_d02_d03.sql`). A separate 15 NULL rows in
+  Division 10 were left alone -- those services genuinely have no price at the service level, so
+  there's nothing real to propagate.
+
+**Corrected -- not accurate as stated:**
+- The report frames `dd_governed_commercial_offers`, `dd_market_provider_economics`, and
+  `dd_company_cost_evidence` as an existing, populated economics architecture that just needs
+  "populating and connecting" instead of building something new. Checked directly: these tables
+  are effectively empty. `dd_governed_commercial_offers` has exactly **1 row total**, for an
+  unrelated Division 05 SKU, explicitly labeled "candidate registry entry only" and dated
+  2026-08-30 -- it has no row for D08 at all, so the report's specific claim that D08's
+  `economics_gate` shows `PENDING_ECONOMICS` there isn't something that table can actually show.
+  `dd_market_provider_economics` and `dd_company_cost_evidence` both have **0 rows**. These are
+  unused stub tables, the same category as `dd_provider_rate_cards` (also empty) found earlier --
+  not active infrastructure. The real, active, populated governance table remains
+  `dd_governed_service_offers` (450+ real live rows), which this session has used throughout.
+
+**Real discovery worth acting on**: `dd_company_cost_summary` has exactly one row, but it's
+genuine -- a real company-wide cost audit dated 2026-09-10/11 (before this session started),
+referencing a file `DANI_DECLARES_FULL_COMPANY_COST_AUDIT.xlsx` with real captured spend: bank
+total $6,632.93, Amazon total $5,179.30, exclusion-review total $156.86, status
+`EVIDENCE_CAPTURED`, with a real methodology note distinguishing durable equipment from service
+material cost, owner draws from fulfillment expenses, and owner labor as a tracked economic
+benchmark. This file was not found in the connected Google Drive -- Danielle clarified it lives
+in a different chat's own document library/project knowledge store, not a connected Drive. If she
+uploads it here, it should replace the Tier 3 $90/hr market-benchmark estimate with DANI's actual
+real spend data for the ongoing Division 04/06/07/08/13 cost-modeling work.
