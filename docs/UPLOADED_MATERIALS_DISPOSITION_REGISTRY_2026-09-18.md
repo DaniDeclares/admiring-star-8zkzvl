@@ -349,3 +349,37 @@ hours-per-deliverable are this pass's own planning estimate, not a verified fact
 was pulled from SELL_NOW**. This needs Danielle's read: either the whole division needs a price
 increase, the hour estimates are too high for how she actually works, or a different rate applies.
 Logged in each SKU's `margin_economics` field, explicitly labeled DRAFT.
+
+## Vehicle detailing fulfillment gap + Airtable base/workspace check (2026-09-18)
+
+Danielle: "i handle the car washing and detailing. me and cayla." This clarified (and reopened)
+the NawfSide question -- if Danielle+Cayla do detailing/car washing themselves, NawfSide's real
+scope is something else (the roadside/tire work), not a straightforward "successor service" via
+Mobile Vehicle Detailing as guessed earlier. Task #37 updated to reflect this; still needs a
+direct answer from Danielle on what NawfSide is actually authorized for now.
+
+While checking this, found Mobile Vehicle Detailing (DNI-12A-021) was live at SELL_NOW/READY with
+**zero** authorized provider capability rows in Supabase -- same "live but unwired" pattern found
+with NawfSide's services this morning. Authorized both real fulfillers (Danielle and Cayla)
+(`20260918111540_authorize_danielle_cayla_mobile_vehicle_detailing.sql`).
+
+**Airtable workspace/base check** (Danielle: "check across all the workspaces on airtable? one
+has waaaaayyyy too many records"): confirmed there are 2 bases across 3 accessible workspaces --
+"Dani declares" (appJjOPWnFsZe11zM, ~50 tables, the real business one used all session) and a
+second, completely separate base called **"Shadow & Sol"** (app8I18E7yBz7pp6P, ~30 tables) that
+is NOT part of DANI DECLARES at all -- a distinct concept involving a mystical/seasonal
+"Field School," land acquisition (80-160 acre property search), village-economy architecture, and
+a "Book of Shadows" reflection system. Not touched or acted on -- flagged for Danielle to confirm
+what it is / whether it's intentional, since it's substantial, previously-unreferenced content.
+
+The real bloat is in "Dani declares," confirming the earlier audit's data-integrity flag: the
+"DANI DECLARES MASTER COMMERCIAL UNIVERSE" table has **379 records for what should be a
+302-service canonical catalog** (~77 excess/duplicate/legacy rows), and "04 Service Economics"
+runs 272 rows, most blank. Danielle then shared a real Airtable billing screen showing
+**Workspace 3 at 2,061 records against a 1,000-records-per-base plan limit**, workspace at $0
+credit with $2 in personal credit available to transfer. This is a real capacity/billing issue,
+not just clutter -- new record creation may be blocked until either the plan is upgraded or the
+record count comes down. Per standing boundaries, no billing/credit action was taken without
+Danielle's explicit go-ahead. Two real paths exist: pay for more capacity, or clean up genuine
+dead data (starting with the confirmed 77-record Master Commercial Universe duplication) --
+her call which one (or both).
