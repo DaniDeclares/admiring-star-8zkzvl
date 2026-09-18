@@ -50,7 +50,7 @@ function sanitizeProviderAssignment(assignment) {
   return { id: assignment.id, job_id: assignment.job_id, provider_id: assignment.provider_id, assignment_status: assignment.assignment_status, provider_notes: assignment.provider_notes, offered_at: assignment.offered_at, accepted_at: assignment.accepted_at, rejected_at: assignment.rejected_at, cancelled_at: assignment.cancelled_at, offer_expires_at: assignment.offer_expires_at, response_at: assignment.response_at, offer_sequence: assignment.offer_sequence, job: sanitizeProviderJob(assignment.job) };
 }
 async function getStaffSnapshot(supabase) {
-  const [requests, jobs, appointments, providers, changes, evidence, payments] = await Promise.all([
+  const [requests, jobs, appointments, providers, changes, evidence, payments, pendingCapabilities] = await Promise.all([
     supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_jobs').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_job_appointments').select('*').order('starts_at', { ascending: true }).limit(100),
@@ -58,10 +58,14 @@ async function getStaffSnapshot(supabase) {
     supabase.from('dd_change_orders').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_job_evidence').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_payment_events').select('*').order('created_at', { ascending: false }).limit(100),
+    // Self-requested additions from the provider "My Services" page (add_service_request
+    // source) sit here as is_authorized:false until staff reviews them -- same as every
+    // other capability, no self-service action ever sets is_authorized:true.
+    supabase.from('dd_provider_capabilities').select('id, provider_id, service_line, capability_key, created_at, dd_providers(first_name, last_name, dd_provider_organizations(name)), services(sku, name)').eq('is_authorized', false).order('created_at', { ascending: false }).limit(100),
   ]);
-  const errors = [requests, jobs, appointments, providers, changes, evidence, payments].filter(item => item.error);
+  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, pendingCapabilities].filter(item => item.error);
   if (errors.length) throw errors[0].error;
-  return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [] };
+  return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], pendingCapabilities: pendingCapabilities.data || [] };
 }
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
@@ -81,8 +85,69 @@ async function getProviderApplicationSnapshot(supabase, userId) {
   if (documentsResult.error) throw documentsResult.error;
   return { application, capabilities: capabilitiesResult.data || [], documents: await signDocumentUrls(supabase, documentsResult.data) };
 }
+// Some providers (e.g. Christopher Walker, authorized directly by staff via
+// migration rather than the self-serve application wizard) have no
+// dd_provider_applications row at all, so getProviderApplicationSnapshot
+// above returns application: null and the workspace can't show them
+// anything. When that happens but the portal identity is linked to a real,
+// active dd_providers row, surface their REAL dd_provider_capabilities
+// instead of leaving the workspace empty. Statuses come straight from the
+// org record -- never invented -- so an org with agreement_status
+// NOT_ON_FILE still shows that honestly rather than claiming EXECUTED.
+async function getDirectProviderAuthorizationSnapshot(supabase, providerId) {
+  if (!providerId) return null;
+  const { data: provider, error: providerError } = await supabase
+    .from('dd_providers')
+    .select('id, first_name, last_name, is_active, dd_provider_organizations(name, legal_name, contact_email, contact_phone, compliance_status, agreement_status, permission_status, accepts_new_work, is_active)')
+    .eq('id', providerId)
+    .maybeSingle();
+  if (providerError) throw providerError;
+  const org = provider?.dd_provider_organizations;
+  if (!provider?.is_active || !org?.is_active) return null;
+  const { data: capabilities, error: capError } = await supabase
+    .from('dd_provider_capabilities')
+    .select('id, is_authorized, service_line, capability_key, services(sku)')
+    .eq('provider_id', providerId);
+  if (capError) throw capError;
+  return {
+    application: {
+      id: null,
+      application_status: ['APPROVED', 'AUTHORIZED'].includes(org.permission_status) && org.accepts_new_work ? 'APPROVED' : org.permission_status,
+      tax_form_status: null,
+      insurance_status: null,
+      identity_status: null,
+      agreement_status: org.agreement_status,
+      background_check_status: null,
+      compliance_status: org.compliance_status,
+      legal_name: org.legal_name || org.name,
+      applicant_type: null,
+      contact_first_name: provider.first_name,
+      contact_last_name: provider.last_name,
+      contact_email: org.contact_email,
+      contact_phone: org.contact_phone,
+      physical_address: null,
+      service_area: null,
+      service_notes: null,
+      submitted_at: null,
+      reviewed_at: null,
+    },
+    capabilities: (capabilities || []).map(c => ({
+      id: c.id,
+      canonical_sku: c.services?.sku || null,
+      capability_description: c.service_line || c.capability_key,
+      authorization_status: c.is_authorized ? 'AUTHORIZED' : 'PENDING',
+      evidence_status: c.is_authorized ? 'VERIFIED' : 'PENDING',
+      requirement_status: 'NOT_REQUIRED',
+    })),
+    documents: [],
+  };
+}
 async function getProviderSnapshot(supabase, providerId, userId) {
-  const applicationSnapshot = await getProviderApplicationSnapshot(supabase, userId);
+  let applicationSnapshot = await getProviderApplicationSnapshot(supabase, userId);
+  if (!applicationSnapshot.application && providerId) {
+    const directSnapshot = await getDirectProviderAuthorizationSnapshot(supabase, providerId);
+    if (directSnapshot) applicationSnapshot = directSnapshot;
+  }
   if (!providerId) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
@@ -220,6 +285,67 @@ export default async function handler(req, res) {
         notes: JSON.stringify({ before: existing, after: updated }),
       });
       return ok(res, { application: updated });
+    }
+    // Self-service "add a service" for an already-active provider (Thumbtack-style:
+    // pick one at signup, add more later). Never sets is_authorized -- new rows land
+    // exactly like every other unverified capability and wait for staff review in
+    // the Operations Console's Provider Network queue.
+    if (action === 'request_provider_capabilities') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const providerId = context.identity?.entity_id;
+      if (!providerId) return fail(res, 'No provider profile is linked to this account yet.', 404);
+      const { data: provider, error: providerError } = await context.supabase.from('dd_providers').select('id, org_id').eq('id', providerId).single();
+      if (providerError || !provider) return fail(res, 'Provider profile not found.', 404);
+      const serviceIds = Array.isArray(payload.serviceIds) ? [...new Set(payload.serviceIds.filter(Boolean))] : [];
+      if (!serviceIds.length) return fail(res, 'Select at least one service to request.');
+      const { data: services, error: servicesError } = await context.supabase.from('services').select('id, sku, name').in('id', serviceIds);
+      if (servicesError) throw servicesError;
+      const { data: existing } = await context.supabase.from('dd_provider_capabilities').select('service_id').eq('provider_id', providerId).in('service_id', serviceIds);
+      const existingIds = new Set((existing || []).map(r => r.service_id));
+      const toInsert = (services || []).filter(s => !existingIds.has(s.id)).map(s => ({
+        provider_id: providerId,
+        provider_org_id: provider.org_id,
+        service_id: s.id,
+        service_line: s.name,
+        capability_key: payload.capabilityKey || null,
+        is_authorized: false,
+        tier_availability: { source: 'PROVIDER_SELF_REQUEST', requested_at: new Date().toISOString(), requested_by: context.user.id },
+      }));
+      if (!toInsert.length) return fail(res, 'All selected services are already on file for this provider.', 409);
+      const { data: inserted, error: insertError } = await context.supabase.from('dd_provider_capabilities').insert(toInsert).select();
+      if (insertError) throw insertError;
+      return ok(res, { requested: inserted });
+    }
+    // Self-service removal is unrestricted by authorization_status on purpose --
+    // a provider opting out of a service they're already authorized for (the
+    // Thumbtack "delete a service" case) is their call, not staff's.
+    if (action === 'remove_provider_capability') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const capabilityId = String(payload.capabilityId || '').trim();
+      if (!capabilityId) return fail(res, 'capabilityId is required.');
+      const { data: capability, error: capError } = await context.supabase.from('dd_provider_capabilities').select('id, provider_id').eq('id', capabilityId).maybeSingle();
+      if (capError) throw capError;
+      if (!capability) return fail(res, 'Capability not found.', 404);
+      if (String(capability.provider_id) !== String(context.identity?.entity_id)) return fail(res, 'This capability does not belong to your account.', 403);
+      const { error: deleteError } = await context.supabase.from('dd_provider_capabilities').delete().eq('id', capabilityId);
+      if (deleteError) throw deleteError;
+      return ok(res, { removed: capabilityId });
+    }
+    if (action === 'authorize_provider_capability') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const capabilityId = String(payload.capabilityId || '').trim();
+      if (!capabilityId) return fail(res, 'capabilityId is required.');
+      const { data: updated, error } = await context.supabase.from('dd_provider_capabilities').update({ is_authorized: true }).eq('id', capabilityId).select().single();
+      if (error) throw error;
+      return ok(res, { capability: updated });
+    }
+    if (action === 'reject_provider_capability') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const capabilityId = String(payload.capabilityId || '').trim();
+      if (!capabilityId) return fail(res, 'capabilityId is required.');
+      const { error } = await context.supabase.from('dd_provider_capabilities').delete().eq('id', capabilityId);
+      if (error) throw error;
+      return ok(res, { removed: capabilityId });
     }
     if (action === 'create_estimate') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, await createEstimate(context.supabase, payload)); }
     if (action === 'dispatch_offer') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) }); }
