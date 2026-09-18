@@ -634,3 +634,40 @@ Danielle: "i want everything tackled." Working through the open backlog systemat
     for her, since she still has zero DANI capability/authorization on file and creating one
     would silently imply an authorization decision nobody has made -- she can still be sent a
     signup-link email without one.
+
+- **2026-09-18, Chris/Angel marketing-content capability audit + selection-layer build.**
+  Danielle relayed a claim from a parallel chat conversation that Chris (IRL streaming, YouTube
+  channel management, video editing, social-media growth work) and Angel (property/apartment
+  walkthrough and promotional video work) both have real content/marketing capability profiles
+  beyond what's on file. Verified the checkable part directly: six real, live, SELL_NOW
+  Division 07 SKUs match this description -- Social Media Management (DNI-07A-005, $650),
+  Short-Form Content (DNI-07A-007, $250), Video Editing (DNI-07A-020, $199), Property
+  Photography (DNI-07A-018, $199), Content Calendar (DNI-07A-004, $250), Website Content
+  (DNI-07A-016, $400) -- and confirmed **zero providers network-wide have any capability
+  record, let alone authorization, against any of the six**. The only capability rows that
+  exist at all belong to the retired "Chris - Provider Beta Cohort" placeholder (already
+  inactive, is_authorized=false, agreement NOT_ON_FILE) -- not copied forward. Angel still has
+  no provider-org record at all. The specific "apartment/property promotional walkthrough
+  video" product described for Angel has no matching canonical SKU -- flagged as a real catalog
+  gap, not silently mapped onto an adjacent service.
+  - Could not verify the claim itself (that Danielle previously decided this in an earlier
+    chat conversation on a specific date) -- unlike HubSpot/Stripe, a prior conversation has no
+    system of record either of us can query, so that part rests on Danielle's own confirmation,
+    not independent verification.
+  - Built the **selection layer only, no authorization granted**: added a `canonical_skus`
+    array column to `dd_provider_capability_categories` (migration `20260918161624`) and
+    registered a new "Content & Social Media Production" category covering exactly those 6
+    SKUs. Division 07 has no sub-prefix scheme (all 20 of its SKUs share prefix "07A"), so the
+    existing division+prefix matching couldn't isolate these 6 without also pulling in
+    unrelated SEO/blog/email-marketing SKUs -- the explicit SKU list is additive and backward
+    compatible with every other category. Updated `servicesForCategory` in
+    `src/pages/PortalAccessPage.jsx` to check the explicit list first, falling back to the
+    existing division/prefix logic unchanged for every other category. Build verified clean;
+    `dd_provider_capabilities` row count unchanged (282) confirming no authorization was
+    touched; Supabase security advisories re-checked post-migration, no new findings. This
+    category is global, so it will also surface for Angel (or anyone else) the next time they
+    go through the same self-serve onboarding wizard -- no Angel-specific wiring was needed.
+  - Not yet done, deliberately: authorizing Chris (or anyone) for these capabilities, and
+    reconciling his existing 4/4 DTF/computer authorization against real onboarding documents
+    (W-9, agreement, ID, compliance) -- both remain gated behind his actual onboarding, per
+    Danielle's explicit instruction not to authorize anything yet.
