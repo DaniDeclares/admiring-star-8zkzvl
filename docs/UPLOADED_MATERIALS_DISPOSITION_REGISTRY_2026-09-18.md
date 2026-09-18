@@ -78,6 +78,37 @@ re-derive "did we already deal with this file" from chat scrollback.
   operation from business licensing); the "avoid code enforcement" framing and informal
   cash-ledger system are not incorporated into official records.
 
+## Stripe/PayPal revenue reconciliation (2026-09-18, same day, direct API access)
+
+Connected directly to the real, live Stripe account ("Dani Declares," acct_1RSlaPChHm1uJK9x) and
+reviewed real PayPal transaction screenshots at Danielle's request. Individual client/customer
+names are intentionally not repeated here (chat history has the specifics); this is the
+disposition summary only.
+
+- Real Stripe revenue ever collected: **$655.00** total across two payments to a Division 05
+  notary client, both tied to real signed-agreement line items (Loan Signing, Witness, Gas/travel
+  fees matching the real notary agreement rate card).
+- A separate $375 open Stripe invoice to a contact at that same client organization is genuinely
+  still unpaid -- a matching PayPal payment attempt was fully refunded shortly after, so the
+  collection attempt fell through. Still owed; needs direct follow-up.
+- Found one additional real payment (~$218) via PayPal from that same contact, the same day a
+  real notary agreement addendum was signed -- real revenue that never touched Stripe.
+- A second, separate $450 open Stripe invoice to the same client organization -- Danielle
+  believes it was settled another way (the two contacts there work together, so a payment could
+  have landed under the other person's name); left as-is given the small amount rather than
+  pursued further.
+- A separate contact's recurring PayPal payments (three visible: ~$330, ~$427, ~$883) are real
+  DTF/apparel customer orders, typically passed through to Christopher Walker as fulfiller --
+  corroborates real, live order volume for the DTF service line.
+- The $80,000 "Reception Deposit" invoice tied to the real wedding-planning contract discussed
+  earlier this session was a dead receivable: **the event never happened, and Danielle never
+  received any money toward it** (not the deposit, not any other amount). **Voided in Stripe**
+  (invoice id in chat history) so it no longer misstates real receivables -- relevant now that
+  Cass is handling real bookkeeping.
+- Same immediate in-and-out cash pattern seen in the earlier bank-statement forensic work repeats
+  here: incoming PayPal payments routinely move straight back out to Cash App/Apple Cash within a
+  day, consistent with the "no cash reserve" diagnosis from that earlier reconciliation.
+
 ## HAS PROMISE — queued for a dedicated follow-up pass, not yet implemented in full
 
 - **R.E.A.C.H. & Outside Company Buildouts** (from the Master Pricebook) — a real, coherent
