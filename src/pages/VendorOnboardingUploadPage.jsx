@@ -28,6 +28,8 @@ export default function VendorOnboardingUploadPage() {
   const [providerMode, setProviderMode] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const [application, setApplication] = useState(null);
+  const [capabilities, setCapabilities] = useState([]);
+  const [selectedCapabilities, setSelectedCapabilities] = useState({});
   const [providerFiles, setProviderFiles] = useState({});
   const [documentNumbers, setDocumentNumbers] = useState({});
   const [companyFiles, setCompanyFiles] = useState([]);
@@ -58,7 +60,17 @@ export default function VendorOnboardingUploadPage() {
         if (appError) throw appError;
         if (!cancelled) {
           setProviderMode(true);
-          setApplication(apps?.[0] || null);
+          const currentApplication = apps?.[0] || null;
+          setApplication(currentApplication);
+          if (currentApplication?.id) {
+            const { data: capabilityRows, error: capabilityError } = await supabase
+              .from('dd_provider_application_capabilities')
+              .select('id, canonical_sku, capability_description, capability_key, authorization_status, evidence_status, requirement_status')
+              .eq('application_id', currentApplication.id)
+              .order('canonical_sku');
+            if (capabilityError) throw capabilityError;
+            if (!cancelled) setCapabilities(capabilityRows || []);
+          }
         }
       } catch (e) {
         if (!cancelled) setError(e?.message || 'We could not load your onboarding application.');
@@ -108,12 +120,14 @@ export default function VendorOnboardingUploadPage() {
           p_document_type: documentType,
           p_storage_path: path,
           p_document_number: documentNumbers[documentType]?.trim() || null,
+          p_capability_id: selectedCapabilities[documentType] || null,
         });
         if (recordError) throw recordError;
       }
 
       setProviderFiles({});
       setDocumentNumbers({});
+      setSelectedCapabilities({});
       setMessage('Your provider documents were submitted. They remain pending verification; uploading documents does not authorize dispatch or work.');
       const { data: refreshed } = await supabase
         .from('dd_provider_applications')
@@ -189,6 +203,18 @@ export default function VendorOnboardingUploadPage() {
             <strong>{doc.label}</strong><span style={{fontSize:14}}>{doc.help}</span>
             <input type="file" accept={ACCEPT} onChange={e=>setProviderFile(doc.key,e.target.files?.[0] || null)} />
             {providerFiles[doc.key] && <span style={{fontSize:14}}>Selected: {providerFiles[doc.key].name}</span>}
+            {capabilities.length > 0 && <div style={{display:'grid',gap:6}}>
+              <span style={{fontSize:14,fontWeight:600}}>Capability this document supports (optional)</span>
+              <select
+                value={selectedCapabilities[doc.key] || ''}
+                onChange={e=>setSelectedCapabilities(prev=>({...prev,[doc.key]:e.target.value || null}))}
+                style={{padding:8,border:'1px solid #ccc',borderRadius:6}}
+              >
+                <option value="">General application document</option>
+                {capabilities.map(cap => <option key={cap.id} value={cap.id}>{cap.canonical_sku} — {cap.capability_description}</option>)}
+              </select>
+              <span style={{fontSize:12,color:'#555'}}>Use this for a license, certification, auto-insurance, or other evidence tied to a specific capability. General documents can be left unlinked.</span>
+            </div>}
             {doc.hasNumber && <input type="text" placeholder="Reference / ID number (optional)" value={documentNumbers[doc.key] || ''} onChange={e=>setDocumentNumbers(prev=>({...prev,[doc.key]:e.target.value}))} style={{padding:8,border:'1px solid #ccc',borderRadius:6}} />}
           </label>)}
         </div>
