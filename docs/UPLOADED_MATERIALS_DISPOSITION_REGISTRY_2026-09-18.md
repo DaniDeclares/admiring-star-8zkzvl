@@ -546,4 +546,64 @@ Danielle: "i want everything tackled." Working through the open backlog systemat
 - **Notification settings, done**: see above -- shipped, portal-wide, real gap in end-to-end
   channel wiring documented.
 - Three more background passes launched: Divisions 04+13, Division 01 (largest, ~180 SKUs), and
-  Divisions 03/05/09(+13 if not already claimed) -- in progress.
+  Divisions 03/05/09(+13 if not already claimed) -- in progress. The Division 01 pass and the
+  Division 03/05/09/13 pass both hit this session's API rate limit before completing real work
+  (Division 01: nothing done; Division 03/05/09/13: only confirmed D13 was already finished by
+  the concurrent D04+13 pass, then died starting D05). Divisions 01, 03, 05, 09 remain open
+  (task #34) and need to be relaunched.
+- Division 04's owner-approved 2026-09-02 pricing lock (Airtable, dated, owner-approved) was
+  found never synced to live Supabase: 20 SKUs (DNI-04A-001..020) were underpriced 1.5x-5x
+  against the real locked price (e.g. Virtual Assistant locked $149 vs live $45; Vendor
+  Administration locked $275 vs live $85). Corrected `services.starting_price` and propagated to
+  all 5 channels in `dd_service_pricing_rules`, then recomputed internal_cost/margin_economics
+  against the corrected price. Verified live. Likely the single highest-value fix this segment.
+
+- **2026-09-18, provider-authorization/contact-info verification pass** (real request from
+  Danielle: "find where that is and make sure its true across the board" for herself, Cass,
+  NawfSide, Angel, Chris, and Cayla, so she can email them a portal signup link). Queried
+  `dd_provider_organizations`, `dd_providers`, `dd_provider_capabilities`, `dd_portal_identities`,
+  `dd_provider_applications`, and `dd_provider_source_evidence` directly. Findings:
+  - **Danielle**: fully consistent -- org APPROVED/QUALIFIED/VERIFIED/EXECUTED, 146/146
+    capabilities authorized. Has both a real staff_admin portal login (vendors@danideclares.com)
+    and a real provider portal login (danijfong20@gmail.com, via her own self-submitted public
+    application, service area Stone Mountain GA / "cleaning"). Minor cosmetic note: that
+    application record itself is still sitting at application_status SUBMITTED / agreement_status
+    PENDING even though the org and capability layers are fully approved -- not a blocker, just
+    never formally closed out.
+  - **Cass (Cassandra Rosser)**: found and fixed a real inconsistency -- agreement_status
+    EXECUTED, compliance_status VERIFIED, and all 6 of her real capabilities (AP/AR admin,
+    financial readiness, cash flow/budgeting, financial reporting, monthly bookkeeping,
+    bookkeeping setup) already `is_authorized = true`, but `permission_status`/
+    `qualification_status` on the org record were still stuck at PENDING. Fixed via migration
+    `20260918153740` to APPROVED/QUALIFIED to match reality already recorded one layer down.
+  - **NawfSide (Joseph Sink)**: consistent -- org APPROVED/QUALIFIED, exactly 5/17 capabilities
+    authorized, matching the Model A reactivation done earlier this segment.
+  - **Chris / Christopher Walker**: found and retired a stale duplicate. An old "Chris - Provider
+    Beta Cohort" placeholder org existed with 0/6 capabilities authorized, no contact record, and
+    PENDING status across the board -- fully superseded by the real "Christopher Walker - DTF &
+    Technical Support" org created today (4/4 capabilities authorized, APPROVED/QUALIFIED). Same
+    migration deactivated the placeholder so it stops appearing as a live, unresolved record.
+  - **Cayla / Cayla Wanzer**: similar old "Cayla - Provider Beta Cohort" placeholder (1/8
+    capabilities, stale) already correctly marked `is_active = false` from earlier -- left as is,
+    no action needed. The real "Cayla Wanzer - Cleaning & Plant Care" org is fully authorized
+    (46/46 capabilities, APPROVED/QUALIFIED).
+  - **Angel (Angel T. Rice)**: **zero records anywhere** -- no organization, no provider contact
+    row, no capabilities, no source evidence, no application. There is nothing to "make true" for
+    Angel because nothing was ever created for her in this system. Flagging honestly rather than
+    fabricating a status.
+  - **Structural finding on contact info**: neither `dd_provider_organizations` nor `dd_providers`
+    has an email or phone column at all. The only place the schema captures `contact_email`/
+    `contact_phone` is the public-facing `dd_provider_applications` intake form, and only one real
+    application has ever been submitted -- Danielle's own. Cass, NawfSide, Christopher, and Cayla
+    never went through that public application flow (their authorization records were created
+    directly, from Danielle's own confirmations, not from a submitted form), so **the system does
+    not actually have stored emails or phone numbers for any of them** -- contrary to the
+    assumption that this was already on file. The only exception: Christopher's email
+    (chriswalkerjobs@gmail.com) was given directly by Danielle in chat earlier this session, but
+    was never a structured field anywhere to store it in. Cayla's email was only ever
+    "believed but unconfirmed." NawfSide's only known phone number is the public one listed on
+    their own business website (source evidence, not a verified direct contact). Per this
+    project's standing no-fabrication rule, none of the phone/email figures that appeared in the
+    separate, unverified pasted "HubSpot" content earlier this session were used here -- real
+    contact info for Cass, NawfSide, and Cayla needs to come from Danielle directly before any
+    signup email can be sent to them.
