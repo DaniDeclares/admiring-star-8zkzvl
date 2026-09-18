@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import ProviderNav from './portal/ProviderNav.jsx';
 import './portal/PortalWorkspacePage.css';
+import { captureServiceLifecycle } from '../lib/posthogAnalytics.js';
 
 const ACCEPT = '.pdf,.doc,.docx,.png,.jpg,.jpeg';
 const MAX = 10 * 1024 * 1024;
@@ -123,6 +124,7 @@ export default function VendorOnboardingUploadPage() {
           p_capability_id: selectedCapabilities[documentType] || null,
         });
         if (recordError) throw recordError;
+        captureServiceLifecycle('provider_document_uploaded',{capability_key:selectedCapabilities[documentType] ? 'linked_capability' : undefined,route:'/portal/vendor-onboarding'});
       }
 
       setProviderFiles({});
