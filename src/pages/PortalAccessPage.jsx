@@ -123,8 +123,13 @@ export default function PortalAccessPage() {
   // narrowed to a canonical_sku_prefix for the Division-1 sub-families). When a category
   // carries an explicit canonical_skus list instead (divisions with no sub-prefix scheme,
   // where only a subset of the division's services belong in this category), that list is
-  // used verbatim rather than the division/prefix match.
+  // used verbatim rather than the division/prefix match. canonical_service_ids is the same
+  // idea for real, priced services that were never assigned a canonical DNI- SKU code (so
+  // there's no sku string to put in canonical_skus) -- matched by real services.id instead.
   const servicesForCategory = (category) => {
+    if (Array.isArray(category.canonical_service_ids) && category.canonical_service_ids.length > 0) {
+      return catalogServices.filter(s => category.canonical_service_ids.includes(s.id));
+    }
     if (Array.isArray(category.canonical_skus) && category.canonical_skus.length > 0) {
       return catalogServices.filter(s => category.canonical_skus.includes(s.sku));
     }
