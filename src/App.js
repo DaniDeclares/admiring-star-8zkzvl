@@ -26,6 +26,7 @@ import PayPage from "./pages/PayPage.jsx";
 import ResidentWelcomePage from "./pages/ResidentWelcomePage.jsx";
 import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx";
 import OperationsConsolePage from "./pages/portal/OperationsConsolePage.jsx";
+import DispatchCalendarPage from "./pages/portal/DispatchCalendarPage.jsx";
 import ProviderApprovalPage from "./pages/portal/ProviderApprovalPage.jsx";
 import PortalWorkspacePage from "./pages/portal/PortalWorkspacePage.jsx";
 import ProviderAssignmentsPage from "./pages/portal/ProviderAssignmentsPage.jsx";
@@ -121,6 +122,7 @@ export default function App() {
         <Route path="/portal/messages" element={<ProviderMessagesPage />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
+        <Route path="/portal/dispatch" element={<DispatchCalendarPage />} />
         <Route path="/portal/provider-approval" element={<ProviderApprovalPage />} />
         <Route path="/portal/acquisition" element={<ContractAcquisitionPage />} />
         <Route path="/portal/contracting" element={<ContractingPeriodPage />} />
