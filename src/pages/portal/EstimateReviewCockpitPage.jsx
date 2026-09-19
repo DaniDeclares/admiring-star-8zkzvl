@@ -105,13 +105,13 @@ function ReviewCockpit(){
       <Card title="Estimate">
         <div style={ref}>{estimate.public_reference}</div><h2 style={title}>{estimate.client_name||'Unnamed customer'}</h2>
         <div style={muted}>{estimate.client_phone||'No phone'} · {estimate.client_email||'No email'}</div>
-        <div style={muted}>{estimate.location_address||'No location captured'} · {estimate.timeline||'No timeline captured'}</div>
-        <div style={total}>$${Number(estimate.estimated_total||0).toFixed(2)}</div>
+        <div style={muted}>{estimate.location_address||'No location captured'}</div><div style={muted}>Timeline: {estimate.timeline||'No timeline captured'}</div>
+        <div style={total}>${Number(estimate.estimated_total||0).toFixed(2)}</div>
         <div style={status(estimate.estimate_status)}>{String(estimate.estimate_status||'').replaceAll('_',' ').toUpperCase()}</div>
       </Card>
       <Card title="Pricing scratchpad">
         <Line label="Base" value={estimate.base_subtotal}/><Line label="Add-ons" value={estimate.addon_subtotal}/><Line label="Travel" value={estimate.travel_fee}/><Line label="Rush" value={estimate.rush_fee}/><Line label="Materials + sourcing" value={estimate.supplies_fee}/><Line label="Pass-through" value={estimate.pass_through_fee}/><Line label="Tax" value={estimate.tax_amount}/>
-        <div style={{borderTop:'1px solid #eadfc9',marginTop:10,paddingTop:10,fontWeight:900}}>Total <span style={{float:'right'}}>$${Number(estimate.estimated_total||0).toFixed(2)}</span></div>
+        <div style={{borderTop:'1px solid #eadfc9',marginTop:10,paddingTop:10,fontWeight:900}}>Total <span style={{float:'right'}}>${Number(estimate.estimated_total||0).toFixed(2)}</span></div>
       </Card>
     </section>
 
@@ -140,7 +140,7 @@ function ReviewCockpit(){
     </Card>
 
     <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'flex-end',marginTop:16}}>
-      <button onClick={()=>navigate(`/portal/quotes?estimateId=${id}`)} style={btn('#fff','#5a1624')}>Edit Quote Inputs</button>
+      <button onClick={()=>navigate(`/portal/quote-builder?estimateId=${id}`)} style={btn('#fff','#5a1624')}>Edit Quote Inputs</button>
       <button disabled={saving} onClick={save} style={btn('#5a1624','#fff')}>{saving?'Saving review…':estimate.estimate_status==='ready_to_send'?'Save Review':'Save & Reconcile Review'}</button>
     </div>
 
@@ -153,7 +153,7 @@ function ReviewCockpit(){
 }
 
 function Card({title:cardTitle,children}){return <section style={CardStyle}><h2 style={cardTitleStyle}>{cardTitle}</h2>{children}</section>}
-function Line({label,value}){return <div style={{display:'flex',justifyContent:'space-between',padding:'5px 0',fontSize:14}}><span>{label}</span><strong>$${Number(value||0).toFixed(2)}</strong></div>}
+function Line({label,value}){return <div style={{display:'flex',justifyContent:'space-between',padding:'5px 0',fontSize:14}}><span>{label}</span><strong>${Number(value||0).toFixed(2)}</strong></div>}
 function Field({label,value,onChange,prefix,suffix}){return <label style={{display:'grid',gap:6,fontWeight:800}}><span>{label}</span><div style={{display:'flex',alignItems:'center',border:'1px solid #decfae',borderRadius:10,background:'#fff'}}>{prefix&&<span style={{paddingLeft:11}}>{prefix}</span>}<input type="number" min="0" step="0.01" value={value??''} onChange={e=>onChange(e.target.value)} style={{width:'100%',padding:'11px',border:0,outline:0,borderRadius:10}}/>{suffix&&<span style={{paddingRight:11}}>{suffix}</span>}</div></label>}
 const page={minHeight:'100vh',background:'#fffaf1',color:'#302226',padding:'28px 18px 60px'};
 const wrap={maxWidth:1100,margin:'0 auto'};
