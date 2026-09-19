@@ -55,6 +55,28 @@ export function groupServicesByBucket(services){
 
 export const bucketByKey=key=>BUCKET_BY_KEY.get(key)||(key===OTHER_BUCKET.key?OTHER_BUCKET:null);
 
+// Division 01 (the Home & Resident Concierge bucket) spans 7 real
+// service_family values covering very different jobs, so its category page
+// splits it further into 5 human-centric "ecosystems". This is a display
+// grouping only, over the same families used above -- the underlying
+// service_family column is never touched.
+export const HOME_ECOSYSTEMS=[
+ {key:'deep-cleaning-surface-care',label:'Deep Cleaning & Surface Care',families:['01A Home & Cleaning']},
+ {key:'pet-plant-care',label:'Pet & Plant Care',families:['01B Pet Care & Household Pet Support','01C Indoor Plant Care']},
+ {key:'concierge-organization-errands',label:'Household Concierge, Organization & Errands',families:['01D Household Concierge']},
+ {key:'moves-transitions',label:'Moves & Household Transitions',families:['01E Move & Household Transition']},
+ {key:'seasonal-recurring-care',label:'Seasonal & Recurring Home Care',families:['01F Seasonal & Holiday Home Services','Recurring Services']},
+];
+const FAMILY_TO_ECOSYSTEM=(()=>{const map=new Map();HOME_ECOSYSTEMS.forEach(e=>e.families.forEach(f=>map.set(f,e.key)));return map;})();
+const ECOSYSTEM_BY_KEY=new Map(HOME_ECOSYSTEMS.map(e=>[e.key,e]));
+const OTHER_ECOSYSTEM={key:'other-home-services',label:'Other Home Services'};
+
+export function groupServicesByEcosystem(items){
+ const map=new Map();
+ items.forEach(s=>{const key=FAMILY_TO_ECOSYSTEM.get(s.family)||OTHER_ECOSYSTEM.key;if(!map.has(key))map.set(key,{ecosystem:ECOSYSTEM_BY_KEY.get(key)||OTHER_ECOSYSTEM,items:[]});map.get(key).items.push(s);});
+ return [...HOME_ECOSYSTEMS,OTHER_ECOSYSTEM].map(e=>map.get(e.key)).filter(Boolean);
+}
+
 // Which doors are relevant when someone arrives via a "Who We Serve" link
 // (?audience=residents|property|real-estate|business|government). A
 // curatorial judgment call, not a database fact -- revisit if it stops
