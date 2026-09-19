@@ -38,6 +38,8 @@ function ReviewCockpit(){
     }catch(e){setError(e.message||'Could not load estimate.')}
     finally{setLoading(false);}
   };
+  // load is intentionally recreated with the current auth/session context; id is the lifecycle key.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(()=>{load()},[id]);
 
   const flags=useMemo(()=>estimate?.intake_answers?.pricingSnapshot?.reviewFlags||[],[estimate]);
