@@ -504,16 +504,36 @@ export default async function handler(req, res) {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const estimateId = String(payload.estimateId || '').trim();
       if (!estimateId) return fail(res, 'estimateId is required.');
-      const { data: estimate, error } = await context.supabase.from('dd_estimates').select('id,estimate_status,intake_answers,internal_notes').eq('id', estimateId).maybeSingle();
+      const { data: estimate, error } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
       if (error) throw error;
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
-      if (estimate.estimate_status !== 'needs_review') return fail(res, 'This estimate does not currently require review.', 409);
-      const intakeAnswers = { ...(estimate.intake_answers || {}), review: { confirmed: true, confirmedAt: new Date().toISOString(), confirmedBy: context.user.id } };
-      const note = 'Commercial review confirmed by staff before customer delivery.';
-      const internalNotes = [estimate.internal_notes, note].filter(Boolean).join('\\n');
-      const { data: updated, error: updateError } = await context.supabase.from('dd_estimates').update({ estimate_status: 'estimated', intake_answers: intakeAnswers, internal_notes: internalNotes, updated_at: new Date().toISOString() }).eq('id', estimateId).select('id,public_reference,estimate_status,estimated_total').single();
+      if (!['needs_review','estimated'].includes(estimate.estimate_status)) return fail(res, 'This estimate is not open for commercial review.', 409);
+      const currentAnswers = estimate.intake_answers?.answers || {};
+      const review = estimate.intake_answers?.review || {};
+      const incoming = payload.review || {};
+      const mergedAnswers = { ...currentAnswers, ...(incoming.materialsCost !== undefined ? { materials_cost: Math.max(0, Number(incoming.materialsCost || 0)) } : {}), ...(incoming.passThroughCost !== undefined ? { pass_through_cost: Math.max(0, Number(incoming.passThroughCost || 0)) } : {}), ...(incoming.taxRatePercent !== undefined ? { tax_rate_percent: Math.max(0, Number(incoming.taxRatePercent || 0)) } : {}), ...(incoming.milesOneWay !== undefined ? { miles_one_way: Math.max(0, Number(incoming.milesOneWay || 0)) } : {}) };
+      const resolutions = { ...(review.resolutions || {}), ...(incoming.scopeConfirmed !== undefined ? { SCOPE_REVIEW: Boolean(incoming.scopeConfirmed) } : {}), ...(incoming.materialsConfirmed !== undefined ? { MATERIALS_CONFIRMATION: Boolean(incoming.materialsConfirmed) } : {}), ...(incoming.passThroughConfirmed !== undefined ? { PASS_THROUGH_CONFIRMATION: Boolean(incoming.passThroughConfirmed) } : {}), ...(incoming.travelConfirmed !== undefined ? { TRAVEL_CONFIRMATION: Boolean(incoming.travelConfirmed) } : {}), ...(incoming.taxReviewed !== undefined ? { TAX_REVIEW: Boolean(incoming.taxReviewed) } : {}), ...(incoming.fulfillmentConfirmed !== undefined ? { FULFILLMENT_OR_COMMERCIAL_GATE: Boolean(incoming.fulfillmentConfirmed) } : {}), ...(incoming.manualPricingAcknowledged !== undefined ? { MANUAL_BASE_IGNORED_GOVERNED_PRICING: Boolean(incoming.manualPricingAcknowledged) } : {}) };
+      const rebuilt = await createEstimate(context.supabase, { updateEstimateId: estimateId, serviceSku: currentAnswers.serviceSku, clientType: currentAnswers.originalClientType || 'business', answers: mergedAnswers, requestId: estimate.service_request_id || undefined, clientName: estimate.client_name, clientPhone: estimate.client_phone, clientEmail: estimate.client_email, organizationName: estimate.organization_name, locationAddress: estimate.location_address, city: estimate.city, state: estimate.state, zipCode: estimate.zip_code, timeline: estimate.timeline, requestedDate: estimate.requested_date, clientNotes: estimate.client_notes, internalNotes: estimate.internal_notes, priority: estimate.priority });
+      const flags = rebuilt.calculation.reviewFlags || [];
+      const resolved = flags.filter(flag => resolutions[flag] === true);
+      const unresolved = flags.filter(flag => resolutions[flag] !== true);
+      const nextReview = { ...(review || {}), resolutions, lastReviewedAt: new Date().toISOString(), lastReviewedBy: context.user.id, unresolvedFlags: unresolved, resolvedFlags: resolved };
+      const nextStatus = unresolved.length === 0 ? 'ready_to_send' : 'needs_review';
+      const note = unresolved.length === 0 ? 'Commercial review completed; estimate is READY_TO_SEND.' : 'Commercial review updated; unresolved gates: ' + (unresolved.join(', ') || 'none') + '.';
+      const internalNotes = [estimate.internal_notes, note].filter(Boolean).join('\n');
+      const { data: updated, error: updateError } = await context.supabase.from('dd_estimates').update({ estimate_status: nextStatus, intake_answers: { ...(estimate.intake_answers || {}), answers: mergedAnswers, review: nextReview }, internal_notes: internalNotes, updated_at: new Date().toISOString() }).eq('id', estimateId).eq('estimate_status', estimate.estimate_status).select('id,public_reference,estimate_status,estimated_total,deposit_due,intake_answers').maybeSingle();
       if (updateError) throw updateError;
-      return ok(res, { estimate: updated });
+      if (!updated) return fail(res, 'Estimate changed while being reviewed. Reload and retry.', 409);
+      return ok(res, { estimate: updated, unresolvedFlags: unresolved, resolvedFlags: resolved, readyToSend: nextStatus === 'ready_to_send' });
+    }
+    if (action === 'get_estimate') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const estimateId = String(payload.estimateId || '').trim();
+      if (!estimateId) return fail(res, 'estimateId is required.');
+      const { data: estimate, error } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
+      if (error) throw error;
+      if (!estimate) return fail(res, 'Saved estimate not found.', 404);
+      return ok(res, { estimate });
     }
     if (action === 'dispatch_offer') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) }); }
     if (action === 'schedule_appointment') {
