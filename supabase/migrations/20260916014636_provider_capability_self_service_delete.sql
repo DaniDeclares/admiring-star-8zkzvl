@@ -1,0 +1,1 @@
+create policy "provider_capabilities_self_delete" on public.dd_provider_application_capabilities for delete to authenticated using (exists (select 1 from public.dd_provider_applications a where a.id = dd_provider_application_capabilities.application_id and a.applicant_user_id = auth.uid() and a.application_status in ('DRAFT','SUBMITTED')));

@@ -1,0 +1,3 @@
+create index idx_dd_master_service_universe_reconciliation_existing_service
+on private.dd_master_service_universe_reconciliation(existing_service_id)
+where existing_service_id is not null;

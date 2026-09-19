@@ -1,0 +1,29 @@
+-- Scope portal operational policies to signed-in portal users.
+-- The policy predicates remain unchanged; this removes accidental public/anon evaluation.
+alter policy dd_provider_org_staff_all on public.dd_provider_organizations to authenticated;
+alter policy dd_provider_org_member_read on public.dd_provider_organizations to authenticated;
+alter policy dd_providers_staff_all on public.dd_providers to authenticated;
+alter policy dd_providers_member_read on public.dd_providers to authenticated;
+alter policy dd_provider_caps_staff_all on public.dd_provider_capabilities to authenticated;
+alter policy dd_provider_caps_member_read on public.dd_provider_capabilities to authenticated;
+alter policy dd_provider_coverage_staff_all on public.dd_provider_coverage to authenticated;
+alter policy dd_provider_coverage_member_read on public.dd_provider_coverage to authenticated;
+alter policy dd_provider_availability_staff_all on public.dd_provider_availability to authenticated;
+alter policy dd_provider_availability_provider_all on public.dd_provider_availability to authenticated;
+alter policy dd_assignments_staff_all on public.dd_job_assignments to authenticated;
+alter policy dd_assignments_provider_select on public.dd_job_assignments to authenticated;
+alter policy dd_appointments_staff_all on public.dd_job_appointments to authenticated;
+alter policy dd_appointments_provider_select on public.dd_job_appointments to authenticated;
+alter policy dd_dispatch_events_staff_all on public.dd_dispatch_events to authenticated;
+alter policy dd_dispatch_events_provider_read on public.dd_dispatch_events to authenticated;
+alter policy dd_task_events_staff_all on public.dd_task_events to authenticated;
+alter policy dd_task_events_provider_read on public.dd_task_events to authenticated;
+alter policy dd_task_templates_staff_all on public.dd_task_templates to authenticated;
+alter policy dd_task_templates_authenticated_read on public.dd_task_templates to authenticated;
+alter policy dd_change_orders_staff_all on public.dd_change_orders to authenticated;
+alter policy dd_change_orders_provider_insert on public.dd_change_orders to authenticated;
+alter policy dd_change_orders_provider_read on public.dd_change_orders to authenticated;
+alter policy dd_completion_reviews_staff_all on public.dd_completion_reviews to authenticated;
+alter policy dd_completion_reviews_provider_read on public.dd_completion_reviews to authenticated;
+alter policy dd_event_outbox_staff_all on public.dd_event_outbox to authenticated;
+alter policy dd_payment_events_staff_all on public.dd_payment_events to authenticated;

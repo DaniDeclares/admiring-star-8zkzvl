@@ -1,0 +1,16 @@
+ALTER TABLE public.dd_commercial_channels ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.dd_relationship_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.dd_network_access_levels ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.dd_provider_assets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.dd_business_build_relationships ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS dd_commercial_channels_public_read ON public.dd_commercial_channels;
+CREATE POLICY dd_commercial_channels_public_read ON public.dd_commercial_channels FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS dd_relationship_types_authenticated_read ON public.dd_relationship_types;
+CREATE POLICY dd_relationship_types_authenticated_read ON public.dd_relationship_types FOR SELECT TO authenticated USING (is_active = true);
+DROP POLICY IF EXISTS dd_network_access_levels_authenticated_read ON public.dd_network_access_levels;
+CREATE POLICY dd_network_access_levels_authenticated_read ON public.dd_network_access_levels FOR SELECT TO authenticated USING (is_active = true);
+REVOKE INSERT, UPDATE, DELETE ON public.dd_commercial_channels FROM anon, authenticated;
+REVOKE INSERT, UPDATE, DELETE ON public.dd_relationship_types FROM anon, authenticated;
+REVOKE INSERT, UPDATE, DELETE ON public.dd_network_access_levels FROM anon, authenticated;
+REVOKE ALL ON public.dd_provider_assets FROM anon, authenticated;
+REVOKE ALL ON public.dd_business_build_relationships FROM anon, authenticated;

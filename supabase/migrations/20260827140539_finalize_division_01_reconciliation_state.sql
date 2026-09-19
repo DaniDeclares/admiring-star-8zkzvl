@@ -1,0 +1,9 @@
+UPDATE public.services SET is_active=false, updated_at=now() WHERE division_id=1;
+UPDATE public.services SET is_active=true, commercial_status='CANONICAL_LOCKED', source_status='LOCKED', updated_at=now() WHERE sku IN ('DNI-01A-001','DNI-01A-002','DNI-01A-003','DNI-01A-004','DNI-01A-005','DNI-01A-006','DNI-01A-007','DNI-01A-008');
+UPDATE public.services SET commercial_status='PENDING_RECONCILIATION', source_status='PROPOSED', updated_at=now() WHERE division_id=1 AND sku NOT IN ('DNI-01A-001','DNI-01A-002','DNI-01A-003','DNI-01A-004','DNI-01A-005','DNI-01A-006','DNI-01A-007','DNI-01A-008');
+INSERT INTO public.dd_service_channel_availability(service_id,channel_code,eligibility_status,notes)
+SELECT s.id,c.code,'PENDING','Source supports channel fit; service remains non-public pending final pricing/reconciliation.' FROM public.services s CROSS JOIN public.dd_commercial_channels c WHERE s.division_id=1 AND s.is_active=false AND c.code IN ('CH01','CH02','CH03','CH04','CH05') AND NOT EXISTS (SELECT 1 FROM public.dd_service_channel_availability a WHERE a.service_id=s.id AND a.channel_code=c.code)
+ON CONFLICT DO NOTHING;
+INSERT INTO public.dd_service_channel_availability(service_id,channel_code,eligibility_status,notes)
+SELECT s.id,c.code,'ACTIVE','Locked resident offering.' FROM public.services s CROSS JOIN public.dd_commercial_channels c WHERE s.sku IN ('DNI-01A-001','DNI-01A-002','DNI-01A-003','DNI-01A-004','DNI-01A-005','DNI-01A-006','DNI-01A-007','DNI-01A-008') AND c.code IN ('CH01','CH02') ON CONFLICT DO NOTHING;
+UPDATE public.dd_service_channel_availability a SET eligibility_status='ACTIVE',notes='Locked resident offering.' FROM public.services s WHERE a.service_id=s.id AND s.division_id=1 AND s.is_active=true AND a.channel_code IN ('CH01','CH02');
