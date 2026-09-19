@@ -2,24 +2,24 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {useParams,Link} from 'react-router-dom';
 import {ArrowRight,ChevronLeft} from 'lucide-react';
 import {getFamilyVisuals} from '../data/serviceVisuals2026.js';
-import {groupServicesByFamily,groupedServices,priceValue,priceLabelFor,money,familySlug} from '../data/serviceCatalogFamilies.js';
+import {groupServicesByBucket,groupedServices,priceValue,priceLabelFor,money} from '../data/serviceCatalogFamilies.js';
 
 export default function ServiceCategoryPage(){
  const {slug}=useParams();
  const [services,setServices]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState('');
  useEffect(()=>{fetch('/api/verify-commercial-intent?catalog=1').then(async r=>{const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not load services right now.');setServices(d.services||[])}).catch(e=>setError(e.message)).finally(()=>setLoading(false));},[]);
- const families=useMemo(()=>groupServicesByFamily(services),[services]);
- const match=useMemo(()=>families.find(([family])=>familySlug(family)===slug),[families,slug]);
- const visual=match&&getFamilyVisuals(match[0])[0];
- const groups=match?groupedServices(match[1]):[];
+ const bucketGroups=useMemo(()=>groupServicesByBucket(services),[services]);
+ const match=useMemo(()=>bucketGroups.find(({bucket})=>bucket.key===slug),[bucketGroups,slug]);
+ const visual=match&&getFamilyVisuals(match.bucket.visualFamily)[0];
+ const groups=match?groupedServices(match.items):[];
  return <div className="min-h-screen bg-[#fffaf1] text-[#302226]">
   <section className="relative bg-[#5a1422] text-white overflow-hidden">
    {visual&&<><img src={visual.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30"/><div className="absolute inset-0 bg-gradient-to-t from-[#5a1422] via-[#5a1422]/85 to-[#5a1422]/60"/></>}
    <div className="relative max-w-6xl mx-auto px-5 sm:px-8 py-14 md:py-20">
     <Link to="/services" className="inline-flex items-center gap-1 text-sm font-black uppercase tracking-wide text-[#f0cf78] hover:text-white"><ChevronLeft className="w-4 h-4"/>All service areas</Link>
     <p className="mt-6 text-[#efce72] font-black uppercase tracking-[.2em] text-xs">DANI DECLARES • SERVICES</p>
-    <h1 className="mt-3 text-4xl sm:text-5xl font-black leading-[1.05] text-white">{match?match[0]:loading?'Loading…':'Service area not found'}</h1>
-    {match&&<p className="max-w-2xl mt-5 text-lg text-[#f0e2e4] leading-relaxed">{groups.length} service{groups.length===1?'':'s'} in this area. Open one to see options and request it.</p>}
+    <h1 className="mt-3 text-4xl sm:text-5xl font-black leading-[1.05] text-white">{match?match.bucket.label:loading?'Loading…':'Service area not found'}</h1>
+    {match&&<p className="max-w-2xl mt-5 text-lg text-[#f0e2e4] leading-relaxed">{match.bucket.tagline} {groups.length} service{groups.length===1?'':'s'} in this area.</p>}
    </div>
   </section>
   <main className="max-w-5xl mx-auto px-5 sm:px-8 py-10 md:py-14">
