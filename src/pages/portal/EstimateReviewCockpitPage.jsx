@@ -48,6 +48,21 @@ function ReviewCockpit(){
   const setField=(key,value)=>setAnswers(a=>({...a,[key]:value}));
   const setResolution=(flag,value)=>setReview(r=>({...r,resolutions:{...(r.resolutions||{}),[flag]:Boolean(value)}}));
 
+  const createStripeInvoice=async()=>{
+    setSaving(true);setError('');setMessage('');
+    try{
+      const {data:s}=await supabase.auth.getSession();
+      if(!s.session) throw new Error('Staff session required.');
+      const r=await fetch('/api/create-estimate-stripe-invoice',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${s.session.access_token}`},body:JSON.stringify({estimateId:id})});
+      const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Could not create Stripe invoice.');
+      const url=d.invoice?.hosted_invoice_url;
+      if(!url) throw new Error('Stripe invoice was created without a hosted payment URL.');
+      setMessage(d.invoice.alreadyExists?'Existing Stripe invoice recovered.':'Stripe invoice created and finalized. The customer has not been marked as sent.');
+      window.open(url,'_blank','noopener,noreferrer');
+    }catch(e){setError(e.message||'Could not create Stripe invoice.')}
+    finally{setSaving(false);}
+  };
+
   const save=async()=>{
     setSaving(true);setError('');setMessage('');
     try{
@@ -132,7 +147,7 @@ function ReviewCockpit(){
     {estimate.estimate_status==='ready_to_send'&&<section style={{...CardStyle,marginTop:18,border:'2px solid #8b6b1f'}}>
       <div style={eyebrow}>DELIVERY GATE OPEN</div><h2 style={{margin:'5px 0',color:'#5a1624'}}>READY TO SEND</h2>
       <p style={muted}>The estimate has passed its configured review gates. Customer delivery is deliberately separate from approval so a payment link or SMS is never represented as sent unless an actual provider action succeeds.</p>
-      <div style={{display:'flex',gap:9,flexWrap:'wrap'}}><button disabled style={btn('#f5f2ed','#6d5b60')}>Send via SMS — delivery provider not connected</button><button disabled style={btn('#f5f2ed','#6d5b60')}>Open Stripe Invoice — invoice action not wired</button></div>
+      <div style={{display:'flex',gap:9,flexWrap:'wrap'}}><button disabled style={btn('#f5f2ed','#6d5b60')}>Send via SMS — delivery provider not connected</button><button disabled={saving} onClick={createStripeInvoice} style={btn('#5a1624','#fff')}>{saving?'Creating Stripe invoice…':'Create / Open Stripe Invoice'}</button></div>
     </section>}
   </div></main></RequireStaffAuth>;
 }
