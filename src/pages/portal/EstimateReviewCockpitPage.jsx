@@ -119,9 +119,9 @@ function ReviewCockpit(){
       <div style={{padding:14,border:'2px solid #8b6b1f',borderRadius:10,background:'#fffaf0'}}>
         <div style={{fontWeight:900,color:'#5a1624',marginBottom:8}}>Confirm this is the person or organization who will receive and pay the invoice.</div>
         <div style={formGrid}>
-          <Field label="Bill-to name" value={estimate.client_name||''} readOnly />
-          <Field label="Bill-to email" value={estimate.client_email||''} readOnly />
-          <Field label="Bill-to phone" value={estimate.client_phone||''} readOnly />
+          <div><strong>Bill-to name</strong><div style={{marginTop:6,padding:11,border:'1px solid #decfae',borderRadius:10,background:'#fff'}}>{estimate.client_name||'NOT PROVIDED'}</div></div>
+          <div><strong>Bill-to email</strong><div style={{marginTop:6,padding:11,border:'1px solid #decfae',borderRadius:10,background:'#fff'}}>{estimate.client_email||'NOT PROVIDED'}</div></div>
+          <div><strong>Bill-to phone</strong><div style={{marginTop:6,padding:11,border:'1px solid #decfae',borderRadius:10,background:'#fff'}}>{estimate.client_phone||'NOT PROVIDED'}</div></div>
         </div>
         <div style={{marginTop:10,fontSize:13,color:'#6d5b60'}}>Staff/operator contact information is never the bill-to identity. Stripe invoice creation is server-blocked if these fields are blank, suspicious, or resolve back to DANI DECLARES operating contact information.</div>
       </div>
