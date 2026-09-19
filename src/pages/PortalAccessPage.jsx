@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
-import { savePendingOnboarding } from '../lib/pendingOnboarding.js';
+import { createProviderIntakeStaging } from '../lib/pendingOnboarding.js';
 import { capture, captureServiceLifecycle } from '../lib/posthogAnalytics.js';
 import { SITE_URL } from '../data/siteConfig.js';
 import './PortalAccessPage.css';
@@ -207,15 +207,7 @@ export default function PortalAccessPage() {
   const isRateLimitError=(message)=>/rate limit|too many requests|429/i.test(String(message||''));
   const submitInner=async()=>{
     capture('provider_application_submitted',{route:'/portal/access'});
-    const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{emailRedirectTo:`${SITE_URL}/portal/login`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
-    if(authError){setBusy(false);return setError(isRateLimitError(authError.message)?'Too many signup attempts in a short time. Please wait about a minute before trying again -- clicking repeatedly makes this take longer, not shorter.':authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
-    // Supabase deliberately returns a fake success with no error and no new
-    // identity when signUp() is called with an email that already belongs to
-    // a confirmed account, to prevent account enumeration. data.user.identities
-    // is the documented way to detect that case -- without this check, someone
-    // who already has an account gets told "check your email to confirm" for an
-    // account that was never actually created, which is actively misleading.
-    if(data.user.identities && data.user.identities.length===0){setBusy(false);return setError('An account with this email already exists. Sign in at the login page, or use "Forgot password" there if you don’t remember your password.');}
+    const normalizedEmail=form.email.trim().toLowerCase();
 
     const identityPayload={portal_role:portalRole,is_active:true};
     if(selected.key==='apartment_resident') {
@@ -251,43 +243,56 @@ export default function PortalAccessPage() {
     });
     const intakePayload=selected.key!=='provider'?{portal_role:portalRole,relationship_type:selected.relationship,channel_code:selected.channel,organization_name:selected.key==='apartment_resident'?(propertyInvite.client_display_name||form.organization||null):(form.organization||null),first_name:form.firstName,last_name:form.lastName,email:form.email,phone:form.phone,address:form.address||propertyInvite?.property_address||null,city:form.city||propertyInvite?.city||null,state_code:form.state||propertyInvite?.state_code||null,zip_code:form.zip||propertyInvite?.zip_code||null,service_area:form.city&&form.state?`${form.city}, ${form.state}`:null,requested_services:form.services.split(',').map(s=>s.trim()).filter(Boolean),client_organization_id:selected.key==='apartment_resident'?propertyInvite.client_organization_id:null,client_property_id:selected.key==='apartment_resident'?propertyInvite.property_id:null,property_resident_invite_id:selected.key==='apartment_resident'?propertyInvite.invite_id:null,intake_data:{entry_type:selected.key,portal_label:selected.portal,access_model:selected.key==='apartment_resident'?'CLIENT_PROPERTY_INVITATION':'PUBLIC_SELF_SERVICE',client_property:selected.key==='apartment_resident'?{id:propertyInvite.property_id,name:propertyInvite.property_name}:null},status:'SUBMITTED'}:null;
 
-    if(!data.session){
-      // No session yet -- email confirmation is required, so any insert right now would be
-      // sent unauthenticated and RLS would correctly reject it. Defer the writes until the
-      // user actually confirms their email and logs in (see completePendingOnboarding).
-      savePendingOnboarding({
-        kind: selected.key==='provider'?'provider':selected.key,
-        email: form.email.trim(),
+    // Durable intake boundary is now BEFORE auth.signUp(), not after email
+    // confirmation: this row exists in public.dd_provider_intake_staging the
+    // moment the applicant submits, regardless of whether they ever confirm
+    // their email in the same browser. See dd_create_provider_intake_staging
+    // in the accompanying migration.
+    const {stagingId,error:stagingError}=await createProviderIntakeStaging(supabase,{
+      email:normalizedEmail,
+      kind:selected.key==='provider'?'provider':selected.key,
+      payload:{
         identityPayload,
         providerPayload,
         capabilityPayloads,
         intakePayload,
-        inviteTokenHash: selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
-      });
+        inviteTokenHash:selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
+      },
+    });
+    if(stagingError){setBusy(false);return setError(`Something interrupted account creation: ${stagingError}`);}
+
+    const {data,error:authError}=await supabase.auth.signUp({email:normalizedEmail,password:form.password,options:{emailRedirectTo:`${SITE_URL}/portal/login?intake=${encodeURIComponent(stagingId)}`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
+    // A staging row can be left behind here (signup failed, or the email
+    // already belongs to a confirmed account below) -- it simply expires
+    // unconsumed per its retention window; nothing reads it without a valid
+    // session for that same email, so it's inert, not a leak. Resubmitting
+    // the form reuses/refreshes the same pending row (see the partial unique
+    // index in the migration) rather than piling up duplicates.
+    if(authError){setBusy(false);return setError(isRateLimitError(authError.message)?'Too many signup attempts in a short time. Please wait about a minute before trying again -- clicking repeatedly makes this take longer, not shorter.':authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
+    // Supabase deliberately returns a fake success with no error and no new
+    // identity when signUp() is called with an email that already belongs to
+    // a confirmed account, to prevent account enumeration. data.user.identities
+    // is the documented way to detect that case -- without this check, someone
+    // who already has an account gets told "check your email to confirm" for an
+    // account that was never actually created, which is actively misleading.
+    if(data.user.identities && data.user.identities.length===0){setBusy(false);return setError('An account with this email already exists. Sign in at the login page, or use "Forgot password" there if you don’t remember your password.');}
+
+    if(!data.session){
+      // No session yet -- email confirmation is required. The intake payload
+      // is already durable server-side; dd_consume_provider_intake_staging
+      // finishes the writes once the applicant confirms and a real session
+      // exists, in whichever browser that happens to be (see
+      // PortalLoginPage.jsx reading the ?intake= query param).
       capture('provider_application_submitted',{route:'/portal/access'});
       setBusy(false);setDone('Your account is created. Check your email to confirm it, then sign in — the rest of your onboarding will finish automatically.');setMode('done');
       return;
     }
 
-    // Session already exists (email confirmation disabled) -- complete the writes now, same as before.
-    const {data:identity,error:identityError}=await supabase.from('dd_portal_identities').insert({...identityPayload,auth_user_id:data.user.id}).select('id').single();
-    if(identityError){setBusy(false);return setError(`Account created, but portal setup needs attention: ${identityError.message}`);}
-
-    if(selected.key==='apartment_resident') {
-      const tokenHash=await hashInviteToken(inviteToken);
-      const {data:consumed,error:consumeError}=await supabase.rpc('dd_consume_apartment_resident_invite',{p_token_hash:tokenHash,p_portal_identity_id:identity.id,p_auth_user_id:data.user.id});
-      if(consumeError || !consumed){setBusy(false);return setError('Your account was created, but the property invitation could not be attached. Please contact your property management team for a new resident invitation.');}
-    }
-
-    if(selected.key==='provider'){
-      const {data:application,error:providerError}=await supabase.from('dd_provider_applications').insert({...providerPayload,applicant_user_id:data.user.id}).select('id').single();
-      if(providerError){setBusy(false);return setError(`Account created, but provider application needs attention: ${providerError.message}`);}
-      const {error:capabilityError}=await supabase.from('dd_provider_application_capabilities').insert(capabilityPayloads.map(cap=>({...cap,application_id:application.id})));
-      if(capabilityError){setBusy(false);return setError(`Account created, but provider capabilities need attention: ${capabilityError.message}`);}
-    } else {
-      const {error:intakeError}=await supabase.from('dd_portal_onboarding_intakes').insert({...intakePayload,auth_user_id:data.user.id});
-      if(intakeError){setBusy(false);return setError(`Account created, but onboarding data needs attention: ${intakeError.message}`);}
-    }
+    // Session already exists (email confirmation disabled) -- finish the
+    // staged writes immediately, through the same RPC PortalLoginPage uses,
+    // instead of duplicating the insert logic here.
+    const {data:result,error:completeError}=await supabase.rpc('dd_consume_provider_intake_staging',{p_staging_id:stagingId});
+    if(completeError || !result?.success){setBusy(false);return setError(`Account created, but ${(completeError?.message||result?.error||'portal setup needs attention.').replace(/^Account created, but /i,'')}`);}
     setBusy(false);setDone('Your account is ready.');setMode('done');
   };
 
