@@ -1,27 +1,30 @@
 // Customer-facing service taxonomy for /services and its category pages.
 //
-// The catalog's real `service_family` values (19 distinct, verified live
-// 2026-09-19) are internal/catalog taxonomy -- several are near-duplicates
-// from a customer's point of view (e.g. Business Development & Growth vs.
-// Business Formation & Digital Infrastructure both read as "help with my
-// business"). BUCKETS groups the real families into a small set of doors a
-// customer can actually choose between; the underlying families/SKUs are
-// untouched and still drive pricing, fulfillment, and the request flow.
+// IMPORTANT: the live site's eligibility comes from
+// dd_governed_service_offers.commercial_offer_status, NOT
+// services.commercial_intent_status -- the two can and do drift apart. An
+// earlier version of this file was built against the wrong field and only
+// covered 19 families; the real live-eligible catalog (commercial_offer_status
+// IN ('SELL_NOW','INTAKE_ONLY'), verified 2026-09-19) has 32 distinct
+// service_family values, several divisions split across 2-7 near-duplicate
+// family labels for genuinely distinct (not duplicate) services -- e.g.
+// Division 04 alone spans 7 family values for 56 real services. BUCKETS maps
+// all 32 into a small set of doors a customer can actually choose between;
+// the underlying families/SKUs are untouched and still drive pricing,
+// fulfillment, and the request flow. If dd_governed_service_offers gains a
+// new family value later, it lands in OTHER_BUCKET below instead of
+// silently vanishing -- that's the signal this list needs updating again.
 export const BUCKETS = [
  {key:'home-resident-concierge',label:'Home & Resident Concierge',tagline:'Practical support for your home and everyday life.',visualFamily:'Home & Cleaning',families:['01A Home & Cleaning','01B Pet Care & Household Pet Support','01C Indoor Plant Care','01D Household Concierge','01E Move & Household Transition','01F Seasonal & Holiday Home Services','Recurring Services']},
- {key:'business-admin-support',label:'Business & Administrative Support',tagline:'Keep the work behind the work moving.',visualFamily:'Administrative & Business Operations',families:['Administrative & Business Operations']},
- {key:'business-setup-growth-digital',label:'Business Setup, Growth & Digital',tagline:'Build, launch, organize, and grow your business.',visualFamily:'Business Formation & Digital Infrastructure',families:['Business Development & Growth','Business Formation & Digital Infrastructure']},
- {key:'marketing-creative-brand',label:'Marketing, Creative & Brand Production',tagline:'Turn your ideas into polished business materials.',visualFamily:'Creative Design & Production',families:['Creative Design & Production','Marketing, Content & Media Production']},
- {key:'events-experiences',label:'Events & Experiences',tagline:'Plan, coordinate, and execute memorable experiences.',visualFamily:'Events & Experiences',families:['Experiences & Resident Programming']},
- {key:'property-facilities',label:'Property & Facilities Operations',tagline:'Keep properties, units, and facilities moving.',visualFamily:'Property, Facilities & Field Operations',families:['Property, Facilities & Field Operations']},
+ {key:'business-admin-support',label:'Business & Administrative Support',tagline:'Keep the work behind the work moving.',visualFamily:'Administrative & Business Operations',families:['Administrative & Business Operations','04A Administrative & Document Services','04A Business Operations Support','04A Document Preparation & Submission Support','04A Money, CRM & Follow-Up']},
+ {key:'business-setup-growth-digital',label:'Business Setup, Growth & Digital',tagline:'Build, launch, organize, and grow your business.',visualFamily:'Business Formation & Digital Infrastructure',families:['Business Development & Growth','Business Formation & Digital Infrastructure','06A Website, Booking & Payments','04A R.E.A.C.H. Outside Company Buildouts']},
+ {key:'marketing-creative-brand',label:'Marketing, Creative & Brand Production',tagline:'Turn your ideas into polished business materials.',visualFamily:'Creative Design & Production',families:['Creative Design & Production','Marketing, Content & Media Production','11A Merch & Brand Products']},
+ {key:'events-experiences',label:'Events & Experiences',tagline:'Plan, coordinate, and execute memorable experiences.',visualFamily:'Events & Experiences',families:['Experiences & Resident Programming','Events & Experiences','10A Events & Community Support']},
+ {key:'property-facilities',label:'Property & Facilities Operations',tagline:'Keep properties, units, and facilities moving.',visualFamily:'Property, Facilities & Field Operations',families:['Property, Facilities & Field Operations','02A Property Operations & Turnover Packages']},
  {key:'real-estate-closing',label:'Real Estate & Closing Support',tagline:'Administrative and field support for real estate professionals.',visualFamily:'Real Estate & Closing Support',families:['Real Estate & Closing Support']},
  {key:'logistics-mobile-field',label:'Logistics & Mobile Field Services',tagline:'When something needs to be picked up, delivered, sourced, or handled.',visualFamily:'Logistics, Courier & Asset Sourcing',families:['Logistics, Courier & Asset Sourcing','Mobile Automotive & Vehicle Care']},
- {key:'government-procurement',label:'Government, Procurement & Readiness',tagline:'Support for institutional purchasing and vendor readiness.',visualFamily:'Government & Institutional Procurement',families:['Government & Institutional Procurement']},
+ {key:'government-procurement',label:'Government, Procurement & Readiness',tagline:'Support for institutional purchasing and vendor readiness.',visualFamily:'Government & Institutional Procurement',families:['Government & Institutional Procurement','04A Government & Vendor Readiness']},
  {key:'classes-training',label:'Classes & Training',tagline:'Workshops and sessions to build real skills.',visualFamily:'Classes, Workshops & Training',families:['Classes, Workshops & Training']},
- // Not SELL_NOW yet (still FULFILLMENT_GATED as of 2026-09-19) -- included so
- // this becomes its own door automatically the moment it's activated,
- // without anyone having to remember to add it later. Since no service in
- // this bucket is in the live catalog feed yet, it simply won't render.
  {key:'notary-signing',label:'Notary & Signing Services',tagline:'Professional document signing and notary support.',visualFamily:'Real Estate & Closing Support',families:['05A Notary & Signing Services','Notary & Document Services']},
 ];
 
