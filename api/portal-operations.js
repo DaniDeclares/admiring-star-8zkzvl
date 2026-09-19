@@ -2,6 +2,7 @@ import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin } from './_w9Crypto.js';
+import Stripe from 'stripe';
 
 // Verbatim from Form W-9 (Rev. March 2024), Part II Certification -- the IRS's
 // electronic-submission spec requires the perjury statement to carry this exact
@@ -13,6 +14,7 @@ const W9_CERTIFICATION_TEXT = `Under penalties of perjury, I certify that:
 4. The FATCA code(s) entered on this form (if any) indicating that I am exempt from FATCA reporting is correct.`;
 
 const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
 function fail(res, error, status = 400) { return res.status(status).json({ success: false, error }); }
 
@@ -529,6 +531,93 @@ export default async function handler(req, res) {
       if (updateError) throw updateError;
       if (!updated) return fail(res, 'Estimate changed while being reviewed. Reload and retry.', 409);
       return ok(res, { estimate: updated, unresolvedFlags: unresolved, resolvedFlags: resolved, readyToSend: nextStatus === 'ready_to_send' });
+    }
+    if (action === 'create_stripe_invoice') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      if (!stripe) return fail(res, 'Stripe invoice execution is not configured.', 503);
+      const estimateId = String(payload.estimateId || '').trim();
+      if (!estimateId) return fail(res, 'estimateId is required.');
+      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
+      if (estimateError) throw estimateError;
+      if (!estimate) return fail(res, 'Saved estimate not found.', 404);
+      if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'Only READY_TO_SEND estimates can create a Stripe invoice.', 409);
+      if (!estimate.estimated_total || Number(estimate.estimated_total) <= 0) return fail(res, 'Estimate total must be greater than zero.', 422);
+      if (!estimate.client_email && !estimate.client_phone) return fail(res, 'Customer needs an email or phone before Stripe invoice creation.', 422);
+
+      const { data: existingInvoice, error: existingError } = await context.supabase.from('dd_invoices').select('*').eq('estimate_id', estimate.id).not('stripe_invoice_id', 'is', null).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (existingError) throw existingError;
+      if (existingInvoice?.stripe_invoice_id) {
+        const existingStripeInvoice = await stripe.invoices.retrieve(existingInvoice.stripe_invoice_id);
+        return ok(res, { invoice: { id: existingInvoice.id, public_reference: existingInvoice.public_reference, stripe_invoice_id: existingStripeInvoice.id, hosted_invoice_url: existingStripeInvoice.hosted_invoice_url || existingInvoice.hosted_invoice_url || null, status: existingStripeInvoice.status, amount_due: Number(Number((existingStripeInvoice.amount_remaining || 0) / 100).toFixed(2)), alreadyExists: true } });
+      }
+
+      const customerQuery = estimate.client_email ? await stripe.customers.list({ email: estimate.client_email, limit: 10 }) : { data: [] };
+      let customer = customerQuery.data.find(c => !c.deleted) || null;
+      if (!customer) {
+        customer = await stripe.customers.create({
+          name: estimate.client_name || undefined,
+          email: estimate.client_email || undefined,
+          phone: estimate.client_phone || undefined,
+          metadata: { dani_source: 'DANI_ESTIMATE', estimate_id: estimate.id, public_reference: estimate.public_reference }
+        }, { idempotencyKey: `dani-customer-${estimate.id}` });
+      }
+
+      const totalCents = Math.round(Number(estimate.estimated_total) * 100);
+      const depositCents = Math.round(Number(estimate.deposit_due || 0) * 100);
+      const invoice = await stripe.invoices.create({
+        customer: customer.id,
+        collection_method: 'send_invoice',
+        days_until_due: 7,
+        auto_advance: false,
+        description: `DANI DECLARES estimate ${estimate.public_reference}`,
+        metadata: {
+          dani_estimate_id: estimate.id,
+          dani_public_reference: estimate.public_reference,
+          dani_service_request_id: estimate.service_request_id || '',
+          dani_lead_id: estimate.lead_id || '',
+          dani_amount: String(estimate.estimated_total)
+        }
+      }, { idempotencyKey: `dani-invoice-${estimate.id}` });
+
+      const item = await stripe.invoiceItems.create({
+        customer: customer.id,
+        invoice: invoice.id,
+        amount: totalCents,
+        currency: 'usd',
+        description: `DANI DECLARES — ${estimate.public_reference}`,
+        metadata: { dani_estimate_id: estimate.id, dani_public_reference: estimate.public_reference, dani_approved_total: String(estimate.estimated_total), dani_deposit_due: String(estimate.deposit_due || 0) }
+      }, { idempotencyKey: `dani-invoice-item-${estimate.id}` });
+
+      const finalized = invoice.status === 'draft' ? await stripe.invoices.finalizeInvoice(invoice.id, { auto_advance: false }) : await stripe.invoices.retrieve(invoice.id);
+      const invoiceData = {
+        estimate_id: estimate.id,
+        lead_id: estimate.lead_id || null,
+        stripe_invoice_id: finalized.id,
+        stripe_payment_link: finalized.hosted_invoice_url || null,
+        stripe_customer_id: customer.id,
+        hosted_invoice_url: finalized.hosted_invoice_url || null,
+        stripe_invoice_status: finalized.status || 'open',
+        stripe_invoice_created_at: new Date((invoice.created || Math.floor(Date.now() / 1000)) * 1000).toISOString(),
+        stripe_invoice_finalized_at: finalized.status_transitions?.finalized_at ? new Date(finalized.status_transitions.finalized_at * 1000).toISOString() : new Date().toISOString(),
+        invoice_status: finalized.status || 'open',
+        subtotal: Number(Number((finalized.subtotal || totalCents) / 100).toFixed(2)),
+        tax_amount: Number(Number((finalized.tax || 0) / 100).toFixed(2)),
+        total_amount: Number(Number((finalized.total || totalCents) / 100).toFixed(2)),
+        deposit_due: Number(estimate.deposit_due || 0),
+        balance_due: Number(Number((finalized.amount_remaining ?? finalized.amount_due ?? totalCents) / 100).toFixed(2)),
+        notes: `Generated from ${estimate.public_reference}; governed estimate total.`,
+        updated_at: new Date().toISOString()
+      };
+      let invoiceRowId = existingInvoice?.id;
+      if (invoiceRowId) {
+        const { error: updateError } = await context.supabase.from('dd_invoices').update(invoiceData).eq('id', invoiceRowId);
+        if (updateError) throw updateError;
+      } else {
+        const { data: inserted, error: insertError } = await context.supabase.from('dd_invoices').insert(invoiceData).select('id,public_reference').single();
+        if (insertError) throw insertError;
+        invoiceRowId = inserted.id;
+      }
+      return ok(res, { invoice: { id: invoiceRowId, public_reference: existingInvoice?.public_reference || null, stripe_invoice_id: finalized.id, stripe_customer_id: customer.id, hosted_invoice_url: finalized.hosted_invoice_url || null, status: finalized.status, amount_due: Number(Number((finalized.amount_remaining ?? finalized.amount_due ?? totalCents) / 100).toFixed(2)), deposit_due: depositCents / 100, line_item_id: item.id, alreadyExists: false } });
     }
     if (action === 'get_estimate') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
