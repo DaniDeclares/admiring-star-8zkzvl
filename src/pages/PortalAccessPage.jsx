@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import { savePendingOnboarding } from '../lib/pendingOnboarding.js';
 import { capture, captureServiceLifecycle } from '../lib/posthogAnalytics.js';
+import { SITE_URL } from '../data/siteConfig.js';
 import './PortalAccessPage.css';
 
 const OPTIONS = [
@@ -188,9 +189,26 @@ export default function PortalAccessPage() {
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
     if(selected?.key==='provider' && !selectedCategoryCount)return setError('Select at least one category of work you can fulfill.');
     setBusy(true);
+    try{
+    await submitInner();
+    }catch(e){
+    // Guarantees the button never gets stuck on "Creating account..." forever.
+    // Without this, any unexpected exception below (a network drop, a
+    // malformed response, anything not already returned as a normal
+    // Supabase {error} object) would leave busy=true with no visible error --
+    // exactly the "it's not letting me create account" symptom a real
+    // provider hit signing up, traced back to repeated attempts colliding
+    // with Supabase Auth's own signup rate limit (confirmed in project logs:
+    // consecutive 429s on /auth/v1/signup within seconds of each other).
+    setBusy(false);
+    setError('Something interrupted account creation. Please wait a minute (repeated attempts in a row can trigger a temporary limit) and try again. If this keeps happening, contact DANI DECLARES directly.');
+    }
+  };
+  const isRateLimitError=(message)=>/rate limit|too many requests|429/i.test(String(message||''));
+  const submitInner=async()=>{
     capture('provider_application_submitted',{route:'/portal/access'});
-    const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{emailRedirectTo:`${window.location.origin}/portal/login`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
-    if(authError){setBusy(false);return setError(authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
+    const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{emailRedirectTo:`${SITE_URL}/portal/login`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
+    if(authError){setBusy(false);return setError(isRateLimitError(authError.message)?'Too many signup attempts in a short time. Please wait about a minute before trying again -- clicking repeatedly makes this take longer, not shorter.':authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
     // Supabase deliberately returns a fake success with no error and no new
     // identity when signUp() is called with an email that already belongs to
     // a confirmed account, to prevent account enumeration. data.user.identities

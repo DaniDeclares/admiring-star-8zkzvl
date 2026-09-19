@@ -1,0 +1,1 @@
+alter table public.dd_providers add column if not exists source_system text; alter table public.dd_providers add column if not exists source_channel text; alter table public.dd_providers add column if not exists source_record_id text; create index if not exists idx_dd_providers_source_record_id on public.dd_providers(source_record_id);

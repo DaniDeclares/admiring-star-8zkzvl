@@ -36,6 +36,13 @@ export function isHourlyBilled(service, rule) {
   return billingCycle === 'HOURLY' || pricingType === 'PER_HOUR' || pricingType.includes('HOURLY');
 }
 
+// DESIGN INVARIANT (Engine E -- Quote/Underwritten, locked 2026-09-19): `condition` and
+// `scope_summary`, where a service's quote_input_schema collects them, are informational by
+// design and must never independently modify the calculated price below. They exist to support
+// staff scope review (see the SCOPE_REVIEW flag), not to drive an unapproved condition-based
+// multiplier. Introducing condition-based pricing automation is a deliberate future commercial-
+// policy decision requiring documented tiers/formulas/testing/re-audit -- do not add it here as
+// an implicit fix.
 export function calculate(service, rule, answers) {
   const a = answers || {};
   const pricingType = String(rule?.pricing_type || service.pricing_type || '').toUpperCase();

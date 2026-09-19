@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS idx_dd_geographic_service_compliance_service ON public.dd_geographic_service_compliance (service_id);
+CREATE INDEX IF NOT EXISTS idx_dd_service_pricing_rules_channel ON public.dd_service_pricing_rules (channel_code);

@@ -1,0 +1,1 @@
+alter table public.dd_provider_applications add column if not exists service_area text; alter table public.dd_provider_applications add column if not exists website text;

@@ -1,0 +1,12 @@
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS sku text;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS service_family text;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS pricing_type text;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS billing_cycle text;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS base_price_cents integer;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS resident_discount_eligible boolean NOT NULL DEFAULT false;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS commercial_status text NOT NULL DEFAULT 'PENDING_RECONCILIATION';
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS source_sku text;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS source_status text;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS canonical_notes text;
+CREATE UNIQUE INDEX IF NOT EXISTS services_sku_unique ON public.services(sku) WHERE sku IS NOT NULL;
+CREATE INDEX IF NOT EXISTS services_division_family_idx ON public.services(division_id,service_family);
