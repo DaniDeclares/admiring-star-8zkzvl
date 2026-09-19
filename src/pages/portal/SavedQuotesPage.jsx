@@ -12,8 +12,6 @@ function QuoteDesk(){
   const [search,setSearch]=useState('');
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState('');
-  const [busy,setBusy]=useState('');
-  const [message,setMessage]=useState('');
 
   const load=async()=>{
     setLoading(true);setError('');
@@ -34,16 +32,6 @@ function QuoteDesk(){
     return quotes.filter(x=>(status==='ALL'||x.estimate_status===status)&&(!q||[`${x.public_reference}`,`${x.client_name||''}`,`${x.client_phone||''}`,`${x.client_email||''}`].join(' ').toLowerCase().includes(q)));
   },[quotes,status,search]);
 
-  const review=async(id)=>{
-    setBusy(id);setError('');setMessage('');
-    try{
-      const {data:s}=await supabase.auth.getSession();
-      const r=await fetch('/api/portal-operations',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${s.session.access_token}`},body:JSON.stringify({action:'review_estimate',estimateId:id})});
-      const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'Could not mark quote reviewed.');
-      setMessage('Quote reviewed and moved to Ready / estimated.');await load();
-    }catch(e){setError(e.message||'Could not review quote.')}finally{setBusy('')}
-  };
-
   return <RequireStaffAuth><main style={{minHeight:'100vh',background:'#fffaf1',color:'#302226',padding:'28px 18px 60px'}}>
     <div style={{maxWidth:1220,margin:'0 auto'}}>
       <header style={{display:'flex',justifyContent:'space-between',gap:18,alignItems:'flex-start',flexWrap:'wrap',marginBottom:22}}>
@@ -51,7 +39,6 @@ function QuoteDesk(){
         <div style={{display:'flex',gap:9,flexWrap:'wrap'}}><Link to="/portal" style={buttonStyle('#fff','#5a1624')}>← My Portal</Link><Link to="/portal/quotes" style={buttonStyle('#efce72','#35161d')}>+ New Quote</Link></div>
       </header>
       {error&&<div style={alertStyle('#fff0f0','#8a1d2d')}>{error}</div>}
-      {message&&<div style={alertStyle('#edf8ef','#245b34')}>{message}</div>}
       <section style={{background:'#fff',border:'1px solid #e2d6bf',borderRadius:16,padding:16,marginBottom:16}}>
         <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name, phone, email, or estimate number…" style={{flex:'1 1 320px',padding:'11px 12px',borderRadius:10,border:'1px solid #decfae'}}/>
