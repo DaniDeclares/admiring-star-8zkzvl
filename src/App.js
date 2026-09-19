@@ -40,6 +40,7 @@ import ProviderW9Page from "./pages/portal/ProviderW9Page.jsx";
 import ProviderMessagesPage from "./pages/portal/ProviderMessagesPage.jsx";
 import QuoteBuilderPage from "./pages/portal/QuoteBuilderPage.jsx";
 import SavedQuotesPage from "./pages/portal/SavedQuotesPage.jsx";
+import EstimateReviewCockpitPage from "./pages/portal/EstimateReviewCockpitPage.jsx";
 import ContractAcquisitionPage from "./pages/portal/ContractAcquisitionPage.jsx";
 import ContractingPeriodPage from "./pages/portal/ContractingPeriodPage.jsx";
 import PortalAccessPage from "./pages/PortalAccessPage.jsx";
@@ -125,6 +126,7 @@ export default function App() {
         <Route path="/portal/contracting" element={<ContractingPeriodPage />} />
         <Route path="/portal/quotes" element={<QuoteBuilderPage />} />
         <Route path="/portal/saved-quotes" element={<SavedQuotesPage />} />
+        <Route path="/portal/estimates/:id/review" element={<EstimateReviewCockpitPage />} />
         <Route path="/portal/resident" element={<PortalWorkspacePage />} />
         <Route path="/portal/property-manager" element={<PortalWorkspacePage />} />
         <Route path="/portal/procurement" element={<PortalWorkspacePage />} />
