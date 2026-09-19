@@ -10,7 +10,7 @@ function parseEconomicMarginPercent(value) {
   return last ? Number(last[1]) : null;
 }
 
-function economicGateFromOffer(offer) {
+export function economicGateFromOffer(offer) {
   const cost = String(offer?.internalCost || '').trim();
   const economics = String(offer?.marginEconomics || '').trim();
   if (!cost || !economics) return { cleared: false, reason: 'ECONOMICS_NOT_RECONCILED', marginPercent: null };
