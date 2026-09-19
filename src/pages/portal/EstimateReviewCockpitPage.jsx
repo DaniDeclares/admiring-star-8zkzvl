@@ -115,6 +115,18 @@ function ReviewCockpit(){
       </Card>
     </section>
 
+    <Card title="BILL-TO CUSTOMER IDENTITY VERIFICATION">
+      <div style={{padding:14,border:'2px solid #8b6b1f',borderRadius:10,background:'#fffaf0'}}>
+        <div style={{fontWeight:900,color:'#5a1624',marginBottom:8}}>Confirm this is the person or organization who will receive and pay the invoice.</div>
+        <div style={formGrid}>
+          <Field label="Bill-to name" value={estimate.client_name||''} readOnly />
+          <Field label="Bill-to email" value={estimate.client_email||''} readOnly />
+          <Field label="Bill-to phone" value={estimate.client_phone||''} readOnly />
+        </div>
+        <div style={{marginTop:10,fontSize:13,color:'#6d5b60'}}>Staff/operator contact information is never the bill-to identity. Stripe invoice creation is server-blocked if these fields are blank, suspicious, or resolve back to DANI DECLARES operating contact information.</div>
+      </div>
+    </Card>
+
     <Card title="Evidence adjudication">
       <p style={muted}>Enter the confirmed field facts. These values are fed back through the existing governed quote engine; this cockpit does not create a second pricing formula.</p>
       <div style={formGrid}>
