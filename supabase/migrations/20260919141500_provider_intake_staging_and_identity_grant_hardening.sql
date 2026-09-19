@@ -191,10 +191,32 @@ BEGIN
 END;
 $$;
 
+-- NOTE (fixing a break introduced by the two grant-tightening commits pushed
+-- directly to this branch after the draft above): both public.* wrappers are
+-- SECURITY INVOKER, so they execute as whichever role called them -- anon or
+-- authenticated -- all the way through, including their internal call into
+-- the private.*_impl function. Revoking the impl's EXECUTE grant from that
+-- same role without re-granting it makes the internal call fail with
+-- "permission denied for function ..." for every real signup; the impl being
+-- SECURITY DEFINER only governs what it's allowed to touch once entered, not
+-- whether the calling role is allowed to enter it at all. This exact
+-- invoker-wrapper-calls-definer-impl shape already exists in this codebase
+-- (private.dd_resolve_apartment_resident_invite_impl /
+-- dd_consume_apartment_resident_invite_impl, added 2026-09-06), and it
+-- explicitly grants EXECUTE on the impl to the calling role for the same
+-- reason. Keeping the revoke-the-implicit-PUBLIC-default hardening those
+-- commits added (a real gap in the original draft -- Postgres grants EXECUTE
+-- to PUBLIC on every new function unless revoked), but restoring the
+-- necessary grant to the specific roles that actually call each impl.
 REVOKE ALL ON FUNCTION private.dd_create_provider_intake_staging_impl(text, text, jsonb) FROM PUBLIC, anon, authenticated, service_role;
-REVOKE ALL ON FUNCTION private.dd_consume_provider_intake_staging_impl(uuid) FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION private.dd_create_provider_intake_staging_impl(text, text, jsonb) TO anon, authenticated;
 REVOKE ALL ON FUNCTION public.dd_create_provider_intake_staging(text, text, jsonb) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.dd_create_provider_intake_staging(text, text, jsonb) TO anon, authenticated;
+-- (the matching REVOKE/GRANT pair for private.dd_consume_provider_intake_staging_impl
+-- is below, right after that function is actually created in section 2b -- it was
+-- originally placed here by the pushed commit, before the function existed, which
+-- would fail the migration outright with "function ... does not exist" if run as a
+-- single script.)
 
 -- -------------------------------------------------------------------------
 -- 2b. Consume a staging row after a real session exists. Mirrors
@@ -362,6 +384,9 @@ BEGIN
   RETURN jsonb_build_object('attempted', true, 'success', true, 'portal_identity_id', v_identity_id, 'provider_application_id', v_application_id);
 END;
 $$;
+
+REVOKE ALL ON FUNCTION private.dd_consume_provider_intake_staging_impl(uuid) FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION private.dd_consume_provider_intake_staging_impl(uuid) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.dd_consume_provider_intake_staging(p_staging_id uuid DEFAULT NULL)
 RETURNS jsonb
