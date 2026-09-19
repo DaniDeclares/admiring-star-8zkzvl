@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import RequireStaffAuth from '../../components/auth/RequireStaffAuth.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 
-const STATUS_LABELS={needs_review:'Needs review',estimated:'Ready / estimated',sent:'Sent',approved:'Customer approved',declined:'Declined',converted:'Converted',closed:'Closed',new:'New'};
+const STATUS_LABELS={needs_review:'Needs review',estimated:'Reviewable',ready_to_send:'Ready to send',sent:'Sent',approved:'Customer approved',declined:'Declined',converted:'Converted',closed:'Closed',new:'New'};
 
 function QuoteDesk(){
   const navigate=useNavigate();
@@ -66,9 +66,8 @@ function QuoteDesk(){
             <div style={{textAlign:'right'}}><div style={{fontSize:24,fontWeight:900,color:'#5a1624'}}>$${Number(q.estimated_total||0).toFixed(2)}</div><span style={{display:'inline-block',marginTop:6,padding:'6px 9px',borderRadius:999,background:q.estimate_status==='needs_review'?'#f7edd4':'#edf8ef',color:q.estimate_status==='needs_review'?'#6f4d18':'#245b34',fontSize:12,fontWeight:900}}>{STATUS_LABELS[q.estimate_status]||q.estimate_status}</span></div>
           </div>
           <div style={{display:'flex',gap:9,flexWrap:'wrap',marginTop:15,paddingTop:14,borderTop:'1px solid #eee3d0'}}>
-            <button onClick={()=>navigate(`/portal/quotes?estimateId=${q.id}`)} style={buttonStyle('#5a1624','#fff')}>Open / Continue</button>
-            {q.estimate_status==='needs_review'&&<button disabled={busy===q.id} onClick={()=>review(q.id)} style={buttonStyle('#efce72','#35161d')}>{busy===q.id?'Reviewing…':'Confirm Review → Ready'}</button>}
-            {q.client_phone&&<button disabled style={buttonStyle('#f5f2ed','#6d5b60')} title="SMS sending requires a connected SMS provider">Send by text — provider not connected</button>}
+            <button onClick={()=>navigate(`/portal/estimates/${q.id}/review`)} style={buttonStyle('#5a1624','#fff')}>Open Review Cockpit</button>
+            <button onClick={()=>navigate(`/portal/quotes?estimateId=${q.id}`)} style={buttonStyle('#fff','#5a1624')}>Edit Inputs</button>
           </div>
         </article>)}
       </section>
