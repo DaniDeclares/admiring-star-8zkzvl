@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProviderNav from './ProviderNav.jsx';
 import { Card, Empty, Requirement, buildProviderRequirements, statusLabel, formatDate, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
@@ -44,6 +44,30 @@ function ResidentInvitesCard({ session, properties }) {
   </Card>;
 }
 
+function PendingEstimatesQueue({ session }) {
+  const [estimates,setEstimates]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState('');
+  const load=async()=>{
+    setLoading(true);setError('');
+    try{
+      const r=await fetch('/api/portal-operations?estimates=1',{headers:{Authorization:`Bearer ${session.access_token}`}});
+      const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Could not load pending estimates.');
+      setEstimates((d.estimates||[]).filter(x=>['needs_review','ready_to_send'].includes(x.estimate_status)));
+    }catch(e){setError(e.message||'Could not load pending estimates.')}finally{setLoading(false);}
+  };
+  useEffect(()=>{load()},[]);
+  return <Card title="Pending Estimates Queue">
+    <p>Quotes that still need commercial review, plus estimates that have cleared review and are waiting for delivery.</p>
+    {error&&<div className="portal-alert">{error}</div>}
+    {loading?<p>Loading queue…</p>:estimates.length===0?<Empty>No pending estimates.</Empty>:estimates.slice(0,12).map(x=><div className="portal-row" key={x.id}>
+      <div><strong>{x.public_reference} · {x.client_name||'Unnamed customer'}</strong><small>{x.source_slug||'Quote Builder'} · {x.estimate_status.replaceAll('_',' ')} · {x.created_at?formatDate(x.created_at):''}</small></div>
+      <div style={{display:'flex',alignItems:'center',gap:10}}><strong>${Number(x.estimated_total||0).toFixed(2)}</strong><Link className="portal-primary" to={`/portal/estimates/${x.id}/review`}>Open Review</Link></div>
+    </div>)}
+    {estimates.length>12&&<p style={{marginTop:12,color:'#6d6263'}}>Showing the 12 most recent. Open Saved Quotes for the full queue.</p>}
+  </Card>;
+}
+
 export default function PortalWorkspacePage() {
   const { session, snapshot, loading, error, message, load, act } = useProviderWorkspace();
   const [messageDrafts, setMessageDrafts] = useState({});
@@ -56,7 +80,7 @@ export default function PortalWorkspacePage() {
   if (loading) return <main className="portal-shell"><p>Loading your DANI DECLARES workspace…</p></main>;
   if (error && !snapshot) return <main className="portal-shell"><div className="portal-alert">{error}</div></main>;
   const role = snapshot?.role || 'customer';
-  if (role === 'staff_admin') return <main className="portal-shell"><header className="portal-hero"><div><p className="portal-eyebrow">MY PORTAL</p><h1>My Portal</h1><p>Your authenticated owner and operations control center for sales, quoting, contract acquisition, fulfillment, dispatch, QA, customers, providers and business operations.</p></div><div className="portal-hero-actions"><AccountBadge session={session} /><button className="portal-refresh" onClick={load}>Refresh</button></div></header><Card title="Contract Acquisition"><p>Move verified opportunities through qualification, pursuit, proposal, award and contract activation.</p><Link className="portal-primary" to="/portal/acquisition">Open Contract Acquisition</Link></Card><Card title="Operations Console"><p>Open the full operating console to manage work orders, quotes and fulfillment.</p><div className="portal-actions"><a className="portal-primary" href="/portal/operations">Open Operations Console</a><a className="portal-primary" href="/portal/provider-approval">Review Provider Applications</a></div></Card><Card title="Quote Desk"><p>Create, retrieve, review and continue governed quotes without changing catalog authority.</p><div className="portal-actions"><Link className="portal-primary" to="/portal/quotes">New Quote</Link><Link className="portal-primary" to="/portal/saved-quotes">Saved Quotes</Link></div></Card><Card title="Business Control Principle"><p>My Portal is the daily owner/operator control layer. Customer and provider experiences feed work into it; approved commercial and pricing systems remain authoritative upstream.</p></Card><Card title="Account"><Link className="portal-primary" to="/portal/settings">Notification settings</Link></Card></main>;
+  if (role === 'staff_admin') return <main className="portal-shell"><header className="portal-hero"><div><p className="portal-eyebrow">MY PORTAL</p><h1>My Portal</h1><p>Your authenticated owner and operations control center for sales, quoting, contract acquisition, fulfillment, dispatch, QA, customers, providers and business operations.</p></div><div className="portal-hero-actions"><AccountBadge session={session} /><button className="portal-refresh" onClick={load}>Refresh</button></div></header><Card title="Contract Acquisition"><p>Move verified opportunities through qualification, pursuit, proposal, award and contract activation.</p><Link className="portal-primary" to="/portal/acquisition">Open Contract Acquisition</Link></Card><Card title="Operations Console"><p>Open the full operating console to manage work orders, quotes and fulfillment.</p><div className="portal-actions"><a className="portal-primary" href="/portal/operations">Open Operations Console</a><a className="portal-primary" href="/portal/provider-approval">Review Provider Applications</a></div></Card><Card title="Quote Desk"><p>Create, retrieve, review and continue governed quotes without changing catalog authority.</p><div className="portal-actions"><Link className="portal-primary" to="/portal/quotes">New Quote</Link><Link className="portal-primary" to="/portal/saved-quotes">Saved Quotes</Link></div></Card><PendingEstimatesQueue session={session}/><Card title="Business Control Principle"><p>My Portal is the daily owner/operator control layer. Customer and provider experiences feed work into it; approved commercial and pricing systems remain authoritative upstream.</p></Card><Card title="Account"><Link className="portal-primary" to="/portal/settings">Notification settings</Link></Card></main>;
   const isProvider = role === 'provider'; const isCommercial = ['property_manager', 'procurement'].includes(role);
   const application = snapshot?.application || null;
   const capabilities = snapshot?.capabilities || [];
