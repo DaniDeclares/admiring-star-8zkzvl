@@ -76,7 +76,14 @@ export async function getGovernedCommercialOffer(serviceId) {
       s.resident_discount_eligible AS "residentDiscountEligible"
     FROM public.dd_governed_service_offers o
     JOIN public.services s ON s.id = o.runtime_service_id
-    LEFT JOIN public.dd_master_service_universe m ON m.canonical_sku = o.canonical_sku AND m.lifecycle_status = 'CANONICAL_ACTIVE'
+    LEFT JOIN LATERAL (
+      SELECT m.internal_cost, m.margin_economics
+      FROM public.dd_master_service_universe m
+      WHERE m.canonical_sku = o.canonical_sku
+        AND m.lifecycle_status = 'CANONICAL_ACTIVE'
+      ORDER BY m.updated_at DESC
+      LIMIT 1
+    ) m ON true
     WHERE o.canonical_sku = ${serviceId}
     LIMIT 1
   `;
