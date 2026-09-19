@@ -269,6 +269,13 @@ export default async function handler(req, res) {
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
+      if (req.query?.estimates === '1') {
+        const { data: estimates, error } = await context.supabase.from('dd_estimates')
+          .select('id,public_reference,estimate_status,client_name,client_phone,client_email,source_slug,service_request_id,lead_id,estimated_total,deposit_due,created_at,updated_at')
+          .order('created_at', { ascending: false }).limit(250);
+        if (error) throw error;
+        return ok(res, { role: context.role, estimates: estimates || [] });
+      }
       return ok(res, { role: context.role, notificationPreferences, ...await getStaffSnapshot(context.supabase) });
     }
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
@@ -483,6 +490,33 @@ export default async function handler(req, res) {
       return ok(res, { submissionId, status });
     }
     if (action === 'create_estimate') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, await createEstimate(context.supabase, payload)); }
+    if (action === 'update_estimate') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const estimateId = String(payload.estimateId || '').trim();
+      if (!estimateId) return fail(res, 'estimateId is required.');
+      const existing = await context.supabase.from('dd_estimates').select('id,public_reference,estimate_status').eq('id', estimateId).maybeSingle();
+      if (existing.error) throw existing.error;
+      if (!existing.data) return fail(res, 'Saved estimate not found.', 404);
+      const rebuilt = await createEstimate(context.supabase, payload);
+      const { data: replacement, error: deleteError } = await context.supabase.from('dd_estimates').delete().eq('id', estimateId).select('id').maybeSingle();
+      if (deleteError) throw deleteError;
+      return ok(res, { ...rebuilt, replacedEstimateId: replacement?.id || estimateId, notice: 'Estimate rebuilt from the saved quote inputs.' });
+    }
+    if (action === 'review_estimate') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const estimateId = String(payload.estimateId || '').trim();
+      if (!estimateId) return fail(res, 'estimateId is required.');
+      const { data: estimate, error } = await context.supabase.from('dd_estimates').select('id,estimate_status,intake_answers,internal_notes').eq('id', estimateId).maybeSingle();
+      if (error) throw error;
+      if (!estimate) return fail(res, 'Saved estimate not found.', 404);
+      if (estimate.estimate_status !== 'needs_review') return fail(res, 'This estimate does not currently require review.', 409);
+      const intakeAnswers = { ...(estimate.intake_answers || {}), review: { confirmed: true, confirmedAt: new Date().toISOString(), confirmedBy: context.user.id } };
+      const note = 'Commercial review confirmed by staff before customer delivery.';
+      const internalNotes = [estimate.internal_notes, note].filter(Boolean).join('\\n');
+      const { data: updated, error: updateError } = await context.supabase.from('dd_estimates').update({ estimate_status: 'estimated', intake_answers: intakeAnswers, internal_notes: internalNotes, updated_at: new Date().toISOString() }).eq('id', estimateId).select('id,public_reference,estimate_status,estimated_total').single();
+      if (updateError) throw updateError;
+      return ok(res, { estimate: updated });
+    }
     if (action === 'dispatch_offer') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) }); }
     if (action === 'schedule_appointment') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
