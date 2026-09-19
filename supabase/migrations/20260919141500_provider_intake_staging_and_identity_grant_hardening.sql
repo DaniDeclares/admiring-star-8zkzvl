@@ -191,7 +191,9 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION private.dd_create_provider_intake_staging_impl(text, text, jsonb) TO anon, authenticated;
+REVOKE ALL ON FUNCTION private.dd_create_provider_intake_staging_impl(text, text, jsonb) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION private.dd_consume_provider_intake_staging_impl(uuid) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.dd_create_provider_intake_staging(text, text, jsonb) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.dd_create_provider_intake_staging(text, text, jsonb) TO anon, authenticated;
 
 -- -------------------------------------------------------------------------
@@ -372,7 +374,7 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION private.dd_consume_provider_intake_staging_impl(uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.dd_consume_provider_intake_staging(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.dd_consume_provider_intake_staging(uuid) TO authenticated;
 
 -- -------------------------------------------------------------------------
