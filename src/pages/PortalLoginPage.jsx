@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
-import { completePendingOnboarding } from '../lib/pendingOnboarding.js';
+import { completeStagedOnboarding } from '../lib/pendingOnboarding.js';
 import './PortalAccessPage.css';
 
 const OWNER_EMAIL = 'vendors@danideclares.com';
@@ -10,9 +10,17 @@ export default function PortalLoginPage(){
  const [email,setEmail]=useState(''); const [password,setPassword]=useState(''); const [error,setError]=useState(''); const [busy,setBusy]=useState(false); const navigate=useNavigate();
  useEffect(()=>{
    let mounted = true;
+   // The staging id travels in the confirmation redirect's query string (see
+   // PortalAccessPage.jsx), so it survives the email confirmation link being
+   // opened in a completely different browser/device than the one the
+   // applicant filled the form out on -- unlike the old
+   // dd_pending_onboarding_v1 localStorage payload, which only ever existed
+   // on the original browser. Read it once up front, before
+   // window.history.replaceState below strips the query string.
+   const intakeStagingId = new URLSearchParams(window.location.search).get('intake');
    const routeAuthenticatedUser = async (session) => {
      if (!session?.user) return;
-     const result = await completePendingOnboarding(supabase, session);
+     const result = await completeStagedOnboarding(supabase, session, intakeStagingId);
      if (result.attempted && !result.success) { if (mounted) { setError(result.error); setBusy(false); } return; }
      const normalized = (session.user.email || '').trim().toLowerCase();
      const needsPasswordChange = normalized === OWNER_EMAIL && !session.user.user_metadata?.password_changed_at;
