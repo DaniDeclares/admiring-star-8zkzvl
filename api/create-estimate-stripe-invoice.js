@@ -106,7 +106,7 @@ export default async function handler(req, res) {
       }
     }, { idempotencyKey: `dani-invoice-item-${estimate.id}` });
 
-    const finalized = await stripe.invoices.finalizeInvoice(invoice.id, { auto_advance: false });
+    const finalized = invoice.status === 'draft' ? await stripe.invoices.finalizeInvoice(invoice.id, { auto_advance: false }) : await stripe.invoices.retrieve(invoice.id);
 
     const invoiceRow = existingInvoice?.id
       ? { id: existingInvoice.id }
