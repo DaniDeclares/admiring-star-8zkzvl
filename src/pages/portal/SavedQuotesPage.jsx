@@ -25,6 +25,8 @@ function QuoteDesk(){
     }catch(e){setError(e.message||'Could not load saved quotes.');}
     finally{setLoading(false);}
   };
+  // Refresh once for the authenticated quote desk session.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(()=>{load()},[]);
 
   const filtered=useMemo(()=>{
