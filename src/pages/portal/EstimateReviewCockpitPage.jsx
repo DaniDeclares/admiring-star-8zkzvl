@@ -53,7 +53,7 @@ function ReviewCockpit(){
     try{
       const {data:s}=await supabase.auth.getSession();
       if(!s.session) throw new Error('Staff session required.');
-      const r=await fetch('/api/create-estimate-stripe-invoice',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${s.session.access_token}`},body:JSON.stringify({estimateId:id})});
+      const r=await fetch('/api/portal-operations',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${s.session.access_token}`},body:JSON.stringify({action:'create_stripe_invoice',estimateId:id})});
       const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Could not create Stripe invoice.');
       const url=d.invoice?.hosted_invoice_url;
       if(!url) throw new Error('Stripe invoice was created without a hosted payment URL.');
