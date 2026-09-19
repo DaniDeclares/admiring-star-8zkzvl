@@ -69,6 +69,7 @@ export function calculate(service, rule, answers) {
   const reviewFlags=[];
   if (service.sourceType !== 'DANI_SPECIALS' && service.commercial_intent_status && service.commercial_intent_status !== 'SELL_NOW') reviewFlags.push('FULFILLMENT_OR_COMMERCIAL_GATE');
   if (service.sourceType !== 'DANI_SPECIALS' && ['VARIABLE_QUOTE','BESPOKE_SOW','SOW','SOW_PROCUREMENT','QUOTE','STARTING_AT','CONFIGURED'].some(t=>pricingType.includes(t))) reviewFlags.push('SCOPE_REVIEW');
+  if (travelFee>0) reviewFlags.push('TRAVEL_CONFIRMATION');
   if (materials>0) reviewFlags.push('MATERIALS_CONFIRMATION');
   if (passThrough>0) reviewFlags.push('PASS_THROUGH_CONFIRMATION');
   if (taxRate===0) reviewFlags.push('TAX_REVIEW');
