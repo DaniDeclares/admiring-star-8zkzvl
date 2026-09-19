@@ -46,7 +46,20 @@ export async function getGovernedCommercialOffer(serviceId) {
       s.starting_price AS "baseCustomerPrice",
       s.public_price_low AS "publicPriceLow",
       s.public_price_high AS "publicPriceHigh",
-      s.resident_discount_eligible AS "residentDiscountEligible"
+      s.resident_discount_eligible AS "residentDiscountEligible",
+      EXISTS (
+        SELECT 1
+        FROM public.dd_master_service_universe m
+        WHERE m.canonical_sku = o.canonical_sku
+          AND m.lifecycle_status = 'CANONICAL_ACTIVE'
+          AND lower(coalesce(m.fulfillment_lane, '')) LIKE 'dani direct%'
+          AND NOT EXISTS (
+            SELECT 1
+            FROM public.dd_service_capability_requirements r
+            WHERE r.canonical_sku = o.canonical_sku
+              AND r.required = true
+          )
+      ) AS "ownerFulfillmentEligible"
     FROM public.dd_governed_service_offers o
     JOIN public.services s ON s.id = o.runtime_service_id
     WHERE o.canonical_sku = ${serviceId}
@@ -64,11 +77,6 @@ export function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCom
   if (!offer || isQuoteRequired(offer)) return null;
   let price = offer.baseCustomerPrice == null ? null : Number(offer.baseCustomerPrice);
   if (!Number.isFinite(price) || price <= 0) return null;
-  // CH01-B is the apartment/complex-resident subchannel gated behind a real
-  // property invitation (see checkoutEligibility above) -- the discount
-  // belongs to that verified tier, not the unverified general-public CH01-A
-  // tier. This previously checked CH01-A, which handed every unverified
-  // shopper the discount while verified community residents got none.
   if (channel === 'CH01' && subchannel === 'CH01-B' && isVerifiedCommunityResident && offer.residentDiscountEligible) {
     price = Math.round(price * 0.85 * 100) / 100;
   }
@@ -84,12 +92,6 @@ export function checkoutEligibility(offer, { channel, subchannel, isVerifiedComm
   if (channel === 'CH01' && !['CH01-A', 'CH01-B'].includes(subchannel)) {
     return { eligible: false, reason: 'RESIDENT_SUBCHANNEL_REQUIRED', price: null };
   }
-  // CH01-B (apartment/complex resident discount) is only ever eligible for
-  // direct checkout once the caller has proven community membership -- i.e.
-  // dd_portal_identities.organization_id was set by consuming a real property
-  // invite (see dd_consume_apartment_resident_invite_impl), never by a client
-  // simply claiming it. isVerifiedCommunityResident must be derived server-side
-  // from that identity, not trusted from an unauthenticated request body.
   if (channel === 'CH01' && subchannel === 'CH01-B' && !isVerifiedCommunityResident) {
     return { eligible: false, reason: 'COMMUNITY_RESIDENT_VERIFICATION_REQUIRED', price: null };
   }
@@ -102,20 +104,17 @@ export function checkoutEligibility(offer, { channel, subchannel, isVerifiedComm
   if (channel !== 'CH01' && Number(offer.pricedChannelCount || 0) <= 0) {
     return { eligible: false, reason: 'NO_PRICED_CHANNEL', price: null };
   }
-  if (Number(offer.authorizedProviderCapabilityCount || 0) <= 0) {
+  const ownerFulfillmentEligible = Boolean(offer.ownerFulfillmentEligible);
+  if (!ownerFulfillmentEligible && Number(offer.authorizedProviderCapabilityCount || 0) <= 0) {
     return { eligible: false, reason: 'NO_AUTHORIZED_PROVIDER_CAPABILITY', price: null };
   }
-  return { eligible: true, reason: 'READY_FOR_DIRECT_CHECKOUT', price: resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident }) };
+  return {
+    eligible: true,
+    reason: ownerFulfillmentEligible ? 'READY_FOR_OWNER_FULFILLMENT' : 'READY_FOR_DIRECT_CHECKOUT',
+    price: resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident }),
+  };
 }
 
-// Shared by every endpoint that needs to know if the caller is a verified
-// CH01-B (apartment/complex resident) shopper. These endpoints are reachable
-// without an account (a shopper can price-check before signing up), so the
-// discount can never be taken on the client's word -- it must be re-derived
-// from a real session and dd_portal_identities.organization_id, which is only
-// ever set by consuming a real property invite. No bearer token, an invalid
-// one, or no matching verified identity all mean "not verified", never an
-// error thrown back to the caller.
 export async function resolveVerifiedCommunity(req) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -133,13 +132,5 @@ export async function resolveVerifiedCommunity(req) {
 
 export function getChannelFromRequest(request) {
   const routing = request?.property_details?.operationsRouting || {};
-  // buildIntakeRoutingContext() stores the OPERATIONS_CHANNELS-style value
-  // (e.g. 'B2C') under `channel`, not `channelType` -- there is no
-  // `channelType` key on this object. normalizeChannel's first argument is
-  // the one it looks up in INTAKE_TO_CHANNEL, so it must be `routing.channel`
-  // here, not a nonexistent `routing.channelType`. Passing them the old way
-  // meant this always fell through to the raw unmapped value (e.g. 'B2C'
-  // instead of 'CH01'), so create-checkout-session's `channel !== 'CH01'`
-  // check rejected every single request unconditionally.
   return normalizeChannel(routing.channel, routing.channel);
 }
