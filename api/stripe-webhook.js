@@ -18,6 +18,60 @@ export default async function handler(req,res){
  if(!stripe||!webhookSecret){console.error('Stripe webhooks unconfigured: Missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET.');return res.status(500).json({error:'Stripe webhook configuration missing'});}
  let event;
  try{const rawBody=await getRawBody(req);event=stripe.webhooks.constructEvent(rawBody,req.headers['stripe-signature'],webhookSecret);}catch(err){console.error('Stripe Webhook Signature Verification Failed:',err.message);return res.status(400).send('Webhook Signature Error');}
+ const invoiceEventTypes=new Set(['invoice.finalized','invoice.sent','invoice.paid','invoice.payment_failed','invoice.voided','invoice.marked_uncollectible']);
+ if(invoiceEventTypes.has(event.type)){
+  const invoice=event.data.object;
+  try{
+   const {data:localInvoice,error:localError}=await prisma.$queryRaw`
+    select id,estimate_id,invoice_status,total_amount,balance_due
+    from public.dd_invoices
+    where stripe_invoice_id=${invoice.id}
+    limit 1
+   `;
+   if(localError) throw localError;
+   const row=localInvoice?.[0];
+   if(!row)return res.status(200).json({received:true,unmappedInvoice:true});
+   const statusMap={
+    'invoice.paid':'paid',
+    'invoice.voided':'void',
+    'invoice.marked_uncollectible':'uncollectible',
+    'invoice.finalized':'open',
+    'invoice.sent':'open',
+    'invoice.payment_failed':'open'
+   };
+   const nextStatus=statusMap[event.type]||row.invoice_status;
+   const paidAt=event.type==='invoice.paid'?(invoice.status_transitions?.paid_at?new Date(invoice.status_transitions.paid_at*1000).toISOString():new Date().toISOString()):null;
+   await prisma.$transaction(async tx=>{
+    const prior=await tx.$queryRaw`select id from public.dd_payment_events where provider_event_id=${event.id} limit 1`;
+    if(prior.length)return;
+    await tx.$executeRaw`
+      update public.dd_invoices
+      set invoice_status=${nextStatus},
+          stripe_invoice_status=${invoice.status||nextStatus},
+          hosted_invoice_url=${invoice.hosted_invoice_url||null},
+          stripe_payment_link=${invoice.hosted_invoice_url||null},
+          balance_due=${Number(invoice.amount_remaining||0)/100},
+          stripe_invoice_paid_at=${paidAt},
+          stripe_invoice_last_event_at=now(),
+          updated_at=now()
+      where id=${row.id}::uuid
+    `;
+    if(event.type==='invoice.paid'){
+      await tx.$executeRaw`
+        insert into public.dd_payment_events
+          (provider_event_id,provider_payment_id,invoice_id,event_type,payment_status,amount_received,currency,raw_metadata)
+        values
+          (${event.id},${invoice.payment_intent||invoice.id},${row.id}::uuid,${event.type},'SUCCEEDED',
+           ${Number(invoice.amount_paid||0)/100},${invoice.currency||'usd'},${JSON.stringify(invoice.metadata||{})}::jsonb)
+      `;
+    }
+   });
+   return res.status(200).json({received:true,reconciled:true,invoiceId:row.id,status:nextStatus});
+  }catch(error){
+   console.error('Failed to reconcile Stripe invoice event:',error.message);
+   return res.status(500).json({error:'Stripe invoice event received but reconciliation failed'});
+  }
+ }
  if(event.type!=='checkout.session.completed')return res.status(200).json({received:true});
  const session=event.data.object,requestId=session.metadata?.request_id,changeOrderId=session.metadata?.change_order_id;
  if(requestId){
