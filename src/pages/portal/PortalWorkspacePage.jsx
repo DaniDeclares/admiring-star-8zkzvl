@@ -56,6 +56,8 @@ function PendingEstimatesQueue({ session }) {
       setEstimates((d.estimates||[]).filter(x=>['needs_review','ready_to_send'].includes(x.estimate_status)));
     }catch(e){setError(e.message||'Could not load pending estimates.')}finally{setLoading(false);}
   };
+  // Queue refresh is intentionally scoped to the authenticated staff session.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(()=>{load()},[]);
   return <Card title="Pending Estimates Queue">
     <p>Quotes that still need commercial review, plus estimates that have cleared review and are waiting for delivery.</p>
