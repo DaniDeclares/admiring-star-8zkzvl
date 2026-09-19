@@ -17,6 +17,38 @@ const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
 function fail(res, error, status = 400) { return res.status(status).json({ success: false, error }); }
+function normalizePhone(value) { return String(value || '').replace(/\\D/g, ''); }
+const DANI_BILLING_EMAILS = new Set([
+  'vendors@danideclares.com',
+  'admin@danideclares.com',
+  'events@danideclares.com',
+  'danideclaresllc@gmail.com',
+  'danideclaresns@gmail.com'
+]);
+const DANI_BILLING_PHONES = new Set(['4706829348']);
+
+function customerIdentityGate(estimate, operatorEmail) {
+  const name = String(estimate?.client_name || '').trim();
+  const email = String(estimate?.client_email || '').trim().toLowerCase();
+  const phone = normalizePhone(estimate?.client_phone);
+  const errors = [];
+  if (!name) errors.push('CUSTOMER_NAME_REQUIRED');
+  if (name.length === 1 || /^(test|customer|client|q)$/i.test(name)) errors.push('ERR_SUSPICIOUS_IDENTITY');
+  if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) errors.push('CUSTOMER_EMAIL_INVALID');
+  if (email && DANI_BILLING_EMAILS.has(email)) errors.push('ERR_CUSTOMER_IDENTITY_LOOPBACK');
+  if (operatorEmail && email === String(operatorEmail).trim().toLowerCase()) errors.push('ERR_CUSTOMER_IDENTITY_LOOPBACK');
+  if (phone && DANI_BILLING_PHONES.has(phone)) errors.push('ERR_CUSTOMER_IDENTITY_LOOPBACK');
+  return { ok: errors.length === 0, errors };
+}
+
+function identityFailure(res, gate) {
+  return res.status(422).json({
+    success: false,
+    errorCode: gate.errors.includes('ERR_CUSTOMER_IDENTITY_LOOPBACK') ? 'ERR_CUSTOMER_IDENTITY_LOOPBACK' : (gate.errors.includes('ERR_SUSPICIOUS_IDENTITY') ? 'ERR_SUSPICIOUS_IDENTITY' : 'ERR_CUSTOMER_IDENTITY_REQUIRED'),
+    error: 'Customer identity verification is required before this estimate can be graduated or invoiced.',
+    identityErrors: gate.errors
+  });
+}
 
 // dd-job-evidence is a private bucket -- storage_url as stored is just the
 // object path, not a fetchable URL, so nothing that lists evidence (staff
@@ -524,13 +556,16 @@ export default async function handler(req, res) {
       const resolved = flags.filter(flag => resolutions[flag] === true);
       const unresolved = flags.filter(flag => resolutions[flag] !== true);
       const nextReview = { ...(review || {}), resolutions, lastReviewedAt: new Date().toISOString(), lastReviewedBy: context.user.id, unresolvedFlags: unresolved, resolvedFlags: resolved };
-      const nextStatus = unresolved.length === 0 ? 'ready_to_send' : 'needs_review';
-      const note = unresolved.length === 0 ? 'Commercial review completed; estimate is READY_TO_SEND.' : 'Commercial review updated; unresolved gates: ' + (unresolved.join(', ') || 'none') + '.';
+      const identityGate = customerIdentityGate(estimate, context.user?.email);
+      const identityUnresolved = identityGate.ok ? [] : ['CUSTOMER_IDENTITY_VERIFICATION'];
+      const allUnresolved = [...unresolved, ...identityUnresolved];
+      const nextStatus = allUnresolved.length === 0 ? 'ready_to_send' : 'needs_review';
+      const note = allUnresolved.length === 0 ? 'Commercial review completed; estimate is READY_TO_SEND.' : 'Commercial review updated; unresolved gates: ' + (allUnresolved.join(', ') || 'none') + '.';
       const internalNotes = [estimate.internal_notes, note].filter(Boolean).join('\n');
       const { data: updated, error: updateError } = await context.supabase.from('dd_estimates').update({ estimate_status: nextStatus, intake_answers: { ...(estimate.intake_answers || {}), answers: mergedAnswers, review: nextReview }, internal_notes: internalNotes, updated_at: new Date().toISOString() }).eq('id', estimateId).eq('estimate_status', estimate.estimate_status).select('id,public_reference,estimate_status,estimated_total,deposit_due,intake_answers').maybeSingle();
       if (updateError) throw updateError;
       if (!updated) return fail(res, 'Estimate changed while being reviewed. Reload and retry.', 409);
-      return ok(res, { estimate: updated, unresolvedFlags: unresolved, resolvedFlags: resolved, readyToSend: nextStatus === 'ready_to_send' });
+      return ok(res, { estimate: updated, unresolvedFlags: allUnresolved, resolvedFlags: resolved, readyToSend: nextStatus === 'ready_to_send', identityGate: identityGate.ok ? { status: 'verified' } : { status: 'blocked', errors: identityGate.errors } });
     }
     if (action === 'create_stripe_invoice') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
@@ -543,6 +578,8 @@ export default async function handler(req, res) {
       if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'Only READY_TO_SEND estimates can create a Stripe invoice.', 409);
       if (!estimate.estimated_total || Number(estimate.estimated_total) <= 0) return fail(res, 'Estimate total must be greater than zero.', 422);
       if (!estimate.client_email && !estimate.client_phone) return fail(res, 'Customer needs an email or phone before Stripe invoice creation.', 422);
+      const identityGate = customerIdentityGate(estimate, context.user?.email);
+      if (!identityGate.ok) return identityFailure(res, identityGate);
 
       const { data: existingInvoice, error: existingError } = await context.supabase.from('dd_invoices').select('*').eq('estimate_id', estimate.id).not('stripe_invoice_id', 'is', null).order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (existingError) throw existingError;
