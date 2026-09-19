@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
+import { SITE_URL } from '../data/siteConfig.js';
 import './PortalAccessPage.css';
 
 export default function PortalForgotPasswordPage() {
@@ -13,7 +14,7 @@ export default function PortalForgotPasswordPage() {
     e.preventDefault();
     setBusy(true); setError('');
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/portal/reset-password`,
+      redirectTo: `${SITE_URL}/portal/reset-password`,
     });
     setBusy(false);
     // Show the same outcome regardless of whether the email has an account --
