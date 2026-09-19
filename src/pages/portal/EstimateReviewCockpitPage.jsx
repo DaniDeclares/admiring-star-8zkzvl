@@ -140,7 +140,7 @@ function ReviewCockpit(){
     </Card>
 
     <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'flex-end',marginTop:16}}>
-      <button onClick={()=>navigate(`/portal/quote-builder?estimateId=${id}`)} style={btn('#fff','#5a1624')}>Edit Quote Inputs</button>
+      <button onClick={()=>navigate(`/portal/quotes?estimateId=${id}`)} style={btn('#fff','#5a1624')}>Edit Quote Inputs</button>
       <button disabled={saving} onClick={save} style={btn('#5a1624','#fff')}>{saving?'Saving review…':estimate.estimate_status==='ready_to_send'?'Save Review':'Save & Reconcile Review'}</button>
     </div>
 
