@@ -1,7 +1,10 @@
--- DRAFT FOR REVIEW -- NOT APPLIED. Schema writes are frozen until Dani
--- explicitly green-lights the apply (confirmed 2026-09-19). This file is
--- committed to the working branch only so the exact SQL can be reviewed
--- before anyone runs it against the live project (ajxezpczaemunlcmqlgl).
+-- DRAFT -- NOT YET APPLIED to the live project (ajxezpczaemunlcmqlgl).
+-- Dani gave an explicit go-ahead in the project thread on 2026-09-19, but the
+-- actual apply was blocked by Claude Code's own auto-mode safety classifier
+-- ("Production Deploy"), which in-chat approval cannot override. This SQL is
+-- self-contained and transactional (see the pre-flight assertions in section
+-- 0 below) and can be run directly via the Supabase SQL editor/CLI, or by a
+-- session with permission for that action.
 --
 -- Two independent changes, each safe to apply on its own:
 --   1. Least-privilege grants on public.dd_portal_identities (anon has never
@@ -29,6 +32,43 @@
 --     into dd_portal_identities only after supabase.auth.signUp() /
 --     onAuthStateChange has produced a session, i.e. as the `authenticated`
 --     role, never as `anon`.
+
+-- =========================================================================
+-- 0. Pre-flight assertions. Re-checks, at apply time, the exact facts this
+--    migration's safety argument depends on (not just what a read-only audit
+--    saw a few minutes earlier). Runs inside this migration's own
+--    transaction, so any failure here rolls the whole migration back --
+--    nothing below it partially applies.
+-- =========================================================================
+DO $guard$
+DECLARE
+  v_policy_count int;
+  v_anon_policy_count int;
+BEGIN
+  IF to_regclass('public.dd_portal_identities') IS NULL THEN
+    RAISE EXCEPTION 'PRECONDITION_FAILED: public.dd_portal_identities does not exist';
+  END IF;
+  IF to_regclass('public.dd_provider_intake_staging') IS NOT NULL THEN
+    RAISE EXCEPTION 'PRECONDITION_FAILED: public.dd_provider_intake_staging already exists';
+  END IF;
+  IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.dd_portal_identities'::regclass) THEN
+    RAISE EXCEPTION 'PRECONDITION_FAILED: RLS is not enabled on public.dd_portal_identities -- revoking anon grants would leave it with no access path at all instead of narrowing one';
+  END IF;
+
+  SELECT count(*) INTO v_policy_count FROM pg_policies
+    WHERE schemaname='public' AND tablename='dd_portal_identities'
+      AND policyname IN ('portal_identity_self_read','portal_identity_self_insert','portal_identity_staff_all');
+  IF v_policy_count <> 3 THEN
+    RAISE EXCEPTION 'PRECONDITION_FAILED: expected the 3 known dd_portal_identities policies, found %; grant revoke aborted so a since-changed policy set is not silently narrowed further', v_policy_count;
+  END IF;
+
+  SELECT count(*) INTO v_anon_policy_count FROM pg_policies
+    WHERE schemaname='public' AND tablename='dd_portal_identities' AND 'anon' = ANY(roles);
+  IF v_anon_policy_count <> 0 THEN
+    RAISE EXCEPTION 'PRECONDITION_FAILED: a policy now grants anon a real row-level path on dd_portal_identities (found %); revoking anon''s table grant would break a live path, not just remove dead weight -- stopping per the dependency-analysis condition', v_anon_policy_count;
+  END IF;
+END;
+$guard$;
 
 -- =========================================================================
 -- 1. dd_portal_identities: remove the unused anon/PUBLIC grants, and trim
