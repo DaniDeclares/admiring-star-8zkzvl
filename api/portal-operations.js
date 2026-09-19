@@ -557,6 +557,22 @@ export default async function handler(req, res) {
       }
       return ok(res, { assignmentStatus: next.assignment_status });
     }
+    if (action === 'start_job') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const { jobId } = payload;
+      if (!jobId) return fail(res, 'jobId is required.');
+      const { data, error } = await context.supabase.rpc('dd_start_job', { p_job_id: jobId });
+      if (error) return fail(res, error.message || 'Job could not be started.', 409);
+      return ok(res, { job: data });
+    }
+    if (action === 'complete_job') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const { jobId } = payload;
+      if (!jobId) return fail(res, 'jobId is required.');
+      const { data, error } = await context.supabase.rpc('dd_complete_job', { p_job_id: jobId });
+      if (error) return fail(res, error.message || 'Job could not be completed.', 409);
+      return ok(res, { job: data });
+    }
     if (action === 'task_update') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const { taskId, status, note, evidenceRef } = payload;

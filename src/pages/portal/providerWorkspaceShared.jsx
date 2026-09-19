@@ -48,7 +48,7 @@ export function useProviderWorkspace() {
   }, []);
   useEffect(() => { load(); }, [load]);
   useEffect(() => { if (!session) return undefined; const timer = window.setInterval(load, 30000); const refreshOnFocus = () => { if (document.visibilityState === 'visible') load(); }; document.addEventListener('visibilitychange', refreshOnFocus); return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', refreshOnFocus); }; }, [session, load]);
-  const actionEventName = (action) => ({ assignment_response: 'job_assigned', task_update: 'job_started', change_order_decision: 'estimate_accepted', completion_review: 'job_completed' }[action] || null);
+  const actionEventName = (action) => ({ assignment_response: 'job_assigned', start_job: 'job_started', task_update: 'task_updated', complete_job: 'job_execution_completed', change_order_decision: 'estimate_accepted', completion_review: 'job_completed' }[action] || null);
   const act = async (action, payload) => {
     setMessage(''); setError(''); if (!session) return; const response = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action, ...payload }) }); const body = await response.json();
     if (!response.ok || !body.success) { captureServiceLifecycle('fulfillment_blocked',{route:window.location.pathname,gate_state:'portal_action_failed'}); setError(body.error || 'Action failed.'); } else { captureServiceLifecycle(actionEventName(action),{route:window.location.pathname}); setMessage('Updated successfully.'); await load(); }
