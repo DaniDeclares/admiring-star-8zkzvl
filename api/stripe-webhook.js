@@ -22,13 +22,12 @@ export default async function handler(req,res){
  if(invoiceEventTypes.has(event.type)){
   const invoice=event.data.object;
   try{
-   const {data:localInvoice,error:localError}=await prisma.$queryRaw`
+   const localInvoice=await prisma.$queryRaw`
     select id,estimate_id,invoice_status,total_amount,balance_due
     from public.dd_invoices
     where stripe_invoice_id=${invoice.id}
     limit 1
    `;
-   if(localError) throw localError;
    const row=localInvoice?.[0];
    if(!row)return res.status(200).json({received:true,unmappedInvoice:true});
    const statusMap={
