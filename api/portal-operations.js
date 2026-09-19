@@ -497,10 +497,8 @@ export default async function handler(req, res) {
       const existing = await context.supabase.from('dd_estimates').select('id,public_reference,estimate_status').eq('id', estimateId).maybeSingle();
       if (existing.error) throw existing.error;
       if (!existing.data) return fail(res, 'Saved estimate not found.', 404);
-      const rebuilt = await createEstimate(context.supabase, payload);
-      const { data: replacement, error: deleteError } = await context.supabase.from('dd_estimates').delete().eq('id', estimateId).select('id').maybeSingle();
-      if (deleteError) throw deleteError;
-      return ok(res, { ...rebuilt, replacedEstimateId: replacement?.id || estimateId, notice: 'Estimate rebuilt from the saved quote inputs.' });
+      const rebuilt = await createEstimate(context.supabase, { ...payload, updateEstimateId: estimateId });
+      return ok(res, { ...rebuilt, notice: 'Saved estimate updated in place.' });
     }
     if (action === 'review_estimate') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
