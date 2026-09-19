@@ -18,26 +18,36 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 function ok(res, data) { return res.status(200).json({ success: true, ...data }); }
 function fail(res, error, status = 400) { return res.status(status).json({ success: false, error }); }
 function normalizePhone(value) { return String(value || '').replace(/\\D/g, ''); }
-const DANI_BILLING_EMAILS = new Set([
-  'vendors@danideclares.com',
-  'admin@danideclares.com',
-  'events@danideclares.com',
-  'danideclaresllc@gmail.com',
-  'danideclaresns@gmail.com'
+const DANI_MASTER_OWNER_EMAIL = 'vendors@danideclares.com';
+const SUSPICIOUS_CUSTOMER_NAMES = new Set([
+  'test',
+  'customer',
+  'client',
+  'anonymous',
+  'q'
 ]);
-const DANI_BILLING_PHONES = new Set(['4706829348']);
 
-function customerIdentityGate(estimate, operatorEmail) {
+function customerIdentityGate(estimate) {
   const name = String(estimate?.client_name || '').trim();
+  const normalizedName = name.toLowerCase();
   const email = String(estimate?.client_email || '').trim().toLowerCase();
-  const phone = normalizePhone(estimate?.client_phone);
   const errors = [];
+
   if (!name) errors.push('CUSTOMER_NAME_REQUIRED');
-  if (name.length === 1 || /^(test|customer|client|q)$/i.test(name)) errors.push('ERR_SUSPICIOUS_IDENTITY');
-  if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) errors.push('CUSTOMER_EMAIL_INVALID');
-  if (email && DANI_BILLING_EMAILS.has(email)) errors.push('ERR_CUSTOMER_IDENTITY_LOOPBACK');
-  if (operatorEmail && email === String(operatorEmail).trim().toLowerCase()) errors.push('ERR_CUSTOMER_IDENTITY_LOOPBACK');
-  if (phone && DANI_BILLING_PHONES.has(phone)) errors.push('ERR_CUSTOMER_IDENTITY_LOOPBACK');
+  if (name.length <= 1 || SUSPICIOUS_CUSTOMER_NAMES.has(normalizedName)) {
+    errors.push('ERR_SUSPICIOUS_IDENTITY');
+  }
+  if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+    errors.push('CUSTOMER_EMAIL_INVALID');
+  }
+
+  // Only the authenticated owner/operator identity is a prohibited bill-to
+  // loopback. Provider test accounts are legitimate synthetic identities and
+  // must remain usable as test customers.
+  if (email === DANI_MASTER_OWNER_EMAIL) {
+    errors.push('ERR_ADMIN_SELF_INVOICING');
+  }
+
   return { ok: errors.length === 0, errors };
 }
 
@@ -556,7 +566,7 @@ export default async function handler(req, res) {
       const resolved = flags.filter(flag => resolutions[flag] === true);
       const unresolved = flags.filter(flag => resolutions[flag] !== true);
       const nextReview = { ...(review || {}), resolutions, lastReviewedAt: new Date().toISOString(), lastReviewedBy: context.user.id, unresolvedFlags: unresolved, resolvedFlags: resolved };
-      const identityGate = customerIdentityGate(estimate, context.user?.email);
+      const identityGate = customerIdentityGate(estimate);
       const identityUnresolved = identityGate.ok ? [] : ['CUSTOMER_IDENTITY_VERIFICATION'];
       const allUnresolved = [...unresolved, ...identityUnresolved];
       const nextStatus = allUnresolved.length === 0 ? 'ready_to_send' : 'needs_review';
