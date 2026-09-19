@@ -125,6 +125,9 @@ CREATE INDEX dd_provider_intake_staging_expires_at_idx
   WHERE status = 'pending';
 
 ALTER TABLE public.dd_provider_intake_staging ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.dd_provider_intake_staging FROM anon;
+REVOKE ALL ON TABLE public.dd_provider_intake_staging FROM authenticated;
+REVOKE ALL ON TABLE public.dd_provider_intake_staging FROM PUBLIC;
 -- Deliberately zero policies and zero table grants beyond the two
 -- SECURITY DEFINER functions below (granted EXECUTE, not table access).
 -- Staff/admin support tooling can still reach this table directly via the
