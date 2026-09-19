@@ -1,6 +1,31 @@
 import { createClient } from '@supabase/supabase-js';
 import prisma from '../../../lib/prisma.js';
 
+const ECONOMIC_MARGIN_FLOOR_PERCENT = 50;
+
+function parseEconomicMarginPercent(value) {
+  const matches = String(value || '').match(/(?:\(|=|margin\s*)\s*(-?\d+(?:\.\d+)?)\s*%/gi) || [];
+  if (!matches.length) return null;
+  const last = matches[matches.length - 1].match(/(-?\d+(?:\.\d+)?)\s*%/);
+  return last ? Number(last[1]) : null;
+}
+
+export function economicGateFromOffer(offer) {
+  const cost = String(offer?.internalCost || '').trim();
+  const economics = String(offer?.marginEconomics || '').trim();
+  if (!cost || !economics) return { cleared: false, reason: 'ECONOMICS_NOT_RECONCILED', marginPercent: null };
+  const unresolved = /PENDING_RECONCILIATION|DRAFT|NOT AN AUDITED|NEEDS DANIELLE|PRICE MISMATCH|FLAGGED, NOT RESOLVED|PROVISIONAL|PLANNING ASSUMPTION/i;
+  if (unresolved.test(cost) || unresolved.test(economics)) {
+    return { cleared: false, reason: 'ECONOMICS_NOT_RECONCILED', marginPercent: parseEconomicMarginPercent(economics) };
+  }
+  const marginPercent = parseEconomicMarginPercent(economics);
+  if (marginPercent == null) return { cleared: false, reason: 'ECONOMICS_MARGIN_UNVERIFIABLE', marginPercent: null };
+  if (marginPercent < ECONOMIC_MARGIN_FLOOR_PERCENT) {
+    return { cleared: false, reason: 'ECONOMICS_BELOW_50_MARGIN_FLOOR', marginPercent };
+  }
+  return { cleared: true, reason: 'ECONOMICS_CLEARED', marginPercent };
+}
+
 const QUOTE_REQUIRED_MODELS = new Set([
   'BESPOKE_SOW',
   'SOW',
@@ -40,6 +65,8 @@ export async function getGovernedCommercialOffer(serviceId) {
       o.priced_channel_count AS "pricedChannelCount",
       o.ch01_a_priced AS "ch01APriced",
       o.ch01_b_priced AS "ch01BPriced",
+      m.internal_cost AS "internalCost",
+      m.margin_economics AS "marginEconomics",
       s.id AS "runtimeServiceId",
       s.pricing_type AS "pricingType",
       s.billing_cycle AS "billingCycle",
@@ -49,6 +76,14 @@ export async function getGovernedCommercialOffer(serviceId) {
       s.resident_discount_eligible AS "residentDiscountEligible"
     FROM public.dd_governed_service_offers o
     JOIN public.services s ON s.id = o.runtime_service_id
+    LEFT JOIN LATERAL (
+      SELECT m.internal_cost, m.margin_economics
+      FROM public.dd_master_service_universe m
+      WHERE m.canonical_sku = o.canonical_sku
+        AND m.lifecycle_status = 'CANONICAL_ACTIVE'
+      ORDER BY m.updated_at DESC
+      LIMIT 1
+    ) m ON true
     WHERE o.canonical_sku = ${serviceId}
     LIMIT 1
   `;
@@ -80,6 +115,8 @@ export function checkoutEligibility(offer, { channel, subchannel, isVerifiedComm
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
   if (offer.fulfillmentGateStatus !== 'READY') return { eligible: false, reason: 'FULFILLMENT_NOT_READY', price: null };
   if (isQuoteRequired(offer)) return { eligible: false, reason: 'QUOTE_REQUIRED', price: null };
+  const economics = economicGateFromOffer(offer);
+  if (!economics.cleared) return { eligible: false, reason: economics.reason, price: null, marginPercent: economics.marginPercent };
   if (!channel) return { eligible: false, reason: 'CHANNEL_REQUIRED', price: null };
   if (channel === 'CH01' && !['CH01-A', 'CH01-B'].includes(subchannel)) {
     return { eligible: false, reason: 'RESIDENT_SUBCHANNEL_REQUIRED', price: null };
@@ -105,7 +142,7 @@ export function checkoutEligibility(offer, { channel, subchannel, isVerifiedComm
   if (Number(offer.authorizedProviderCapabilityCount || 0) <= 0) {
     return { eligible: false, reason: 'NO_AUTHORIZED_PROVIDER_CAPABILITY', price: null };
   }
-  return { eligible: true, reason: 'READY_FOR_DIRECT_CHECKOUT', price: resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident }) };
+  return { eligible: true, reason: 'READY_FOR_DIRECT_CHECKOUT', price: resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident }), marginPercent: economics.marginPercent };
 }
 
 // Shared by every endpoint that needs to know if the caller is a verified
