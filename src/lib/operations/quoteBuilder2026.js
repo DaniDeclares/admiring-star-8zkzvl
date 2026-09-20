@@ -207,6 +207,57 @@ export function calculate(service, rule, answers) {
   return { baseSubtotal:money(base), residentDiscount:money(discount), travelFee:money(travelFee), rushFee:money(rushFee), materials:money(materials), sourcingFee:money(sourcingFee), passThrough:money(passThrough), tax:money(tax), taxRate, estimatedTotal:money(total), depositDue:money(deposit), reviewFlags, needsReview:reviewFlags.length>0, isHourly:hourly, ratePerUnit:money(ruleBase) };
 }
 
+async function resolveQuoteLine(supabase, serviceSku, channelCode) {
+  const sku = String(serviceSku || '').trim();
+  if (!sku) throw new Error('Choose a service.');
+  if (sku.startsWith('DSS-')) {
+    const { data: special, error: specialError } = await supabase
+      .from('danis_specials_offers')
+      .select('service_id,family,service_name,unit,price,active,market')
+      .eq('service_id', sku).eq('active', true).eq('market', 'GA').maybeSingle();
+    if (specialError) throw specialError;
+    if (!special) throw new Error('That DANI SPECIALS service could not be resolved.');
+    return {
+      offer: { canonical_sku: special.service_id, service_name: special.service_name, division: specialDivision(special.family), commercial_offer_status:'SELL_NOW', fulfillment_gate_status:'READY' },
+      service: { sku:special.service_id, name:special.service_name, service_family:special.family, pricing_type:'SPECIALS_OWNER_EXECUTABLE', billing_cycle:'ONETIME', starting_price:Number(special.price), public_price_display:`${Number(special.price).toFixed(2)}`, commercial_intent_status:'SELL_NOW', sourceType:'DANI_SPECIALS', specialUnit:special.unit, specialPrice:Number(special.price) },
+      rule: null
+    };
+  }
+  const { data: governedOffer, error: offerError } = await supabase
+    .from('dd_governed_service_offers')
+    .select('canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,runtime_service_id')
+    .eq('canonical_sku', sku).neq('commercial_offer_status','DO_NOT_SELL')
+    .order('commercial_offer_status',{ascending:true}).limit(1).maybeSingle();
+  if (offerError) throw offerError;
+  if (!governedOffer?.runtime_service_id) throw new Error(`Service ${sku} is not currently quoteable.`);
+  const { data: governedService, error: serviceError } = await supabase
+    .from('services').select('*').eq('id', governedOffer.runtime_service_id).maybeSingle();
+  if (serviceError) throw serviceError;
+  if (!governedService) throw new Error(`The service record ${sku} could not be resolved.`);
+  const rules = await loadRules(supabase, governedService.id, channelCode);
+  return { offer:governedOffer, service:governedService, rule:rules.find(r=>r.base_price_cents!=null)||rules[0]||null };
+}
+
+function aggregateQuoteCalculations(lineItems) {
+  const totals = lineItems.reduce((acc, item) => {
+    const c=item.calculation;
+    acc.baseSubtotal+=Number(c.baseSubtotal||0);
+    acc.residentDiscount+=Number(c.residentDiscount||0);
+    acc.travelFee+=Number(c.travelFee||0);
+    acc.rushFee+=Number(c.rushFee||0);
+    acc.materials+=Number(c.materials||0);
+    acc.sourcingFee+=Number(c.sourcingFee||0);
+    acc.passThrough+=Number(c.passThrough||0);
+    acc.tax+=Number(c.tax||0);
+    acc.estimatedTotal+=Number(c.estimatedTotal||0);
+    acc.depositDue+=Number(c.depositDue||0);
+    acc.reviewFlags.push(...(c.reviewFlags||[]).map(flag=>item.sku+':'+flag));
+    if(c.needsReview) acc.needsReview=true;
+    return acc;
+  },{baseSubtotal:0,residentDiscount:0,travelFee:0,rushFee:0,materials:0,sourcingFee:0,passThrough:0,tax:0,estimatedTotal:0,depositDue:0,reviewFlags:[],needsReview:false});
+  return Object.fromEntries(Object.entries(totals).map(([k,v])=>Array.isArray(v)||typeof v==='boolean'?[k:v]:[k:money(v)]));
+}
+
 export async function createEstimate(supabase, body) {
   const updateEstimateId=String(body.updateEstimateId||'').trim()||null;
   let existingEstimate=null;
@@ -230,74 +281,39 @@ export async function createEstimate(supabase, body) {
   if(!serviceSku) throw new Error('Choose a service.');
   const clientType=String(body.clientType||'business');
   const channelCode=CHANNELS[clientType]||'CH04';
-  let offer=null, service=null, rule=null;
-  if(serviceSku.startsWith('DSS-')){
-    const canonicalSku=normalizeSpecialCanonicalSku(serviceSku);
-    if(!canonicalSku) throw new Error('That DANI SPECIALS identifier is not a canonical quote SKU.');
-
-    const {data:special,error:specialError}=await supabase
-      .from('danis_specials_offers')
-      .select('service_id,family,service_name,unit,price,active,market')
-      .eq('service_id',serviceSku)
-      .eq('active',true)
-      .eq('market','GA')
-      .maybeSingle();
-    if(specialError) throw specialError;
-    if(!special) throw new Error('That DANI SPECIALS service could not be resolved.');
-
-    const {data:governanceRows,error:governanceError}=await supabase
-      .from('dd_governed_service_offers')
-      .select('canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,runtime_service_id')
-      .eq('canonical_sku',canonicalSku);
-    if(governanceError) throw governanceError;
-
-    const sellNowOffer=(governanceRows||[]).find(row=>row.commercial_offer_status==='SELL_NOW');
-    if((governanceRows||[]).length && !sellNowOffer){
-      throw new Error('That DANI SPECIALS offer is blocked by canonical commercial governance.');
-    }
-    if(!sellNowOffer?.runtime_service_id){
-      throw new Error('That DANI SPECIALS offer has no governed quoteable counterpart.');
-    }
-
-    const {data:governedService,error:serviceError}=await supabase
-      .from('services')
-      .select('*')
-      .eq('id',sellNowOffer.runtime_service_id)
-      .maybeSingle();
-    if(serviceError) throw serviceError;
-    if(!governedService) throw new Error('The canonical service record could not be resolved.');
-
-    const namesMatch=String(governedService.name||sellNowOffer.service_name||'').trim().toLowerCase()===String(special.service_name||'').trim().toLowerCase();
-    const priceMatches=Number(governedService.base_price_cents||0)===Math.round(Number(special.price)*100);
-    if(!namesMatch || !priceMatches){
-      throw new Error('DANI SPECIALS price conflict requires commercial adjudication before quoting.');
-    }
-
-    offer=sellNowOffer;
-    service=governedService;
-    const rules=await loadRules(supabase,service.id,channelCode);
-    rule=rules.find(r=>r.base_price_cents!=null)||rules[0]||null;
-  } else {
-    const { data: governedOffers, error: offerError } = await supabase
-      .from('dd_governed_service_offers')
-      .select('canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,runtime_service_id')
-      .eq('canonical_sku',serviceSku)
-      .neq('commercial_offer_status','DO_NOT_SELL')
-      .order('commercial_offer_status',{ascending:true});
-    if(offerError) throw offerError;
-    const governedOffer=(governedOffers||[]).find(row=>row.commercial_offer_status==='SELL_NOW') || governedOffers?.[0];
-    if(!governedOffer?.runtime_service_id) throw new Error('That service is not currently quoteable.');
-    const { data: governedService, error: serviceError } = await supabase.from('services').select('*').eq('id',governedOffer.runtime_service_id).maybeSingle();
-    if(serviceError) throw serviceError;
-    if(!governedService) throw new Error('The service record could not be resolved.');
-    offer=governedOffer; service=governedService;
-    const rules=await loadRules(supabase,service.id,channelCode); rule=rules.find(r=>r.base_price_cents!=null)||rules[0]||null;
+  const requestedLineItems = Array.isArray(body.lineItems) && body.lineItems.length
+    ? body.lineItems
+    : [{ serviceSku: body.serviceSku, answers: body.answers || {} }];
+  if (requestedLineItems.length > 25) throw new Error('An estimate can contain at most 25 service components.');
+  const resolvedLineItems = [];
+  for (const item of requestedLineItems) {
+    const itemSku = String(item?.serviceSku || '').trim();
+    if (!itemSku) throw new Error('Every package component must have a service.');
+    const itemAnswers = { ...(item.answers || {}), apply_resident_discount:false, apartment_resident:clientType==='apartment_resident' };
+    const resolved = await resolveQuoteLine(supabase, itemSku, channelCode);
+    const calcService = {
+      ...resolved.service,
+      commercial_intent_status: resolved.offer.fulfillment_gate_status==='READY'
+        ? (resolved.offer.commercial_offer_status==='SELL_NOW'?'SELL_NOW':resolved.offer.commercial_offer_status)
+        : resolved.offer.fulfillment_gate_status
+    };
+    const calculation = calculate(calcService, resolved.rule, itemAnswers);
+    resolvedLineItems.push({
+      serviceSku:itemSku,
+      canonicalSku:resolved.offer.canonical_sku,
+      serviceName:resolved.offer.service_name,
+      sourceType:resolved.service.sourceType||'GOVERNED',
+      answers:itemAnswers,
+      calculation
+    });
   }
-  const answers={...(body.answers||{}),apply_resident_discount:false,apartment_resident:clientType==='apartment_resident'};
-  const calcService={...service,commercial_intent_status:offer.fulfillment_gate_status==='READY'?(offer.commercial_offer_status==='SELL_NOW'?'SELL_NOW':offer.commercial_offer_status):offer.fulfillment_gate_status};
-  const calculation=calculate(calcService,rule,answers);
+  const primary = resolvedLineItems[0];
+  const calculation = aggregateQuoteCalculations(resolvedLineItems);
+  calculation.reviewFlags=[...new Set(calculation.reviewFlags)];
+  const service = (await resolveQuoteLine(supabase, primary.serviceSku, channelCode)).service;
+  const offer = (await resolveQuoteLine(supabase, primary.serviceSku, channelCode)).offer;
   const publicReference=existingEstimate?.public_reference||`EST-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
-  const payload={public_reference:publicReference,division_slug:String(service.division_id||offer.division||'01').padStart(2,'0'),source_slug:service.sourceType==='DANI_SPECIALS'?'danis_specials_owner_quote':'admin_quote_builder',lead_id:sourceLeadId,service_request_id:sourceRequest?.id||null,client_name:String(body.clientName||'').trim()||null,client_phone:String(body.clientPhone||'').trim()||null,client_email:String(body.clientEmail||'').trim()||null,client_type:ESTIMATE_CLIENT_TYPES[clientType]||'other',organization_name:String(body.organizationName||'').trim()||null,location_address:String(body.locationAddress||'').trim()||null,city:String(body.city||'').trim()||null,state:String(body.state||'GA').trim().toUpperCase()||null,zip_code:String(body.zipCode||'').trim()||null,timeline:String(body.timeline||'').trim()||null,rush_requested:Boolean(answers.rush),requested_date:body.requestedDate||null,intake_answers:{serviceSku,serviceName:offer.service_name,originalClientType:clientType,channelCode,sourceType:service.sourceType||'GOVERNED',answers,pricingSnapshot:{capturedAt:new Date().toISOString(),pricingRuleId:rule?.id||null,lockStatus:rule?.lock_status||null,...calculation}},client_notes:String(body.clientNotes||'').trim()||null,internal_notes:String(body.internalNotes||'').trim()||null,estimate_status:body.preserveEstimateStatus && existingEstimate ? existingEstimate.estimate_status : (calculation.needsReview?'needs_review':'estimated'),priority:String(body.priority||'normal'),base_subtotal:calculation.baseSubtotal,addon_subtotal:0,travel_fee:calculation.travelFee,rush_fee:calculation.rushFee,supplies_fee:calculation.sourcingFee+calculation.materials,pass_through_fee:calculation.passThrough,tax_amount:calculation.tax,estimated_total:calculation.estimatedTotal,deposit_due:calculation.depositDue,quote_disclaimer:'Estimate generated from the current DANI DECLARES commercial catalog. Final price remains subject to scope, location, materials/pass-throughs, fulfillment authorization, tax review and applicable service-specific gates.'};
+  const payload={public_reference:publicReference,division_slug:String(service.division_id||offer.division||'01').padStart(2,'0'),source_slug:resolvedLineItems.length>1?'package_quote':(service.sourceType==='DANI_SPECIALS'?'danis_specials_owner_quote':'admin_quote_builder'),lead_id:sourceLeadId,service_request_id:sourceRequest?.id||null,client_name:String(body.clientName||'').trim()||null,client_phone:String(body.clientPhone||'').trim()||null,client_email:String(body.clientEmail||'').trim()||null,client_type:ESTIMATE_CLIENT_TYPES[clientType]||'other',organization_name:String(body.organizationName||'').trim()||null,location_address:String(body.locationAddress||'').trim()||null,city:String(body.city||'').trim()||null,state:String(body.state||'GA').trim().toUpperCase()||null,zip_code:String(body.zipCode||'').trim()||null,timeline:String(body.timeline||'').trim()||null,rush_requested:Boolean(primary.answers.rush),requested_date:body.requestedDate||null,intake_answers:{serviceSku:primary.serviceSku,serviceName:primary.serviceName,originalClientType:clientType,channelCode,sourceType:primary.sourceType,answers:primary.answers,lineItems:resolvedLineItems,pricingSnapshot:{capturedAt:new Date().toISOString(),package:true,lineItems:resolvedLineItems,reviewFlags:calculation.reviewFlags,...calculation}},client_notes:String(body.clientNotes||'').trim()||null,internal_notes:String(body.internalNotes||'').trim()||null,estimate_status:body.preserveEstimateStatus && existingEstimate ? existingEstimate.estimate_status : (calculation.needsReview?'needs_review':'estimated'),priority:String(body.priority||'normal'),base_subtotal:calculation.baseSubtotal,addon_subtotal:Math.max(0,calculation.baseSubtotal-(resolvedLineItems[0]?.calculation.baseSubtotal||0)),travel_fee:calculation.travelFee,rush_fee:calculation.rushFee,supplies_fee:calculation.sourcingFee+calculation.materials,pass_through_fee:calculation.passThrough,tax_amount:calculation.tax,estimated_total:calculation.estimatedTotal,deposit_due:calculation.depositDue,quote_disclaimer:'Estimate generated from the current DANI DECLARES commercial catalog. Package components retain their individual quote inputs and governed pricing snapshots. Final price remains subject to scope, location, materials/pass-throughs, fulfillment authorization, tax review and applicable service-specific gates.'};
   let estimate, estimateError;
   if(updateEstimateId){
     const result=await supabase.from('dd_estimates').update(payload).eq('id',updateEstimateId).select('id,public_reference,estimate_status,estimated_total,deposit_due,quote_disclaimer').single();
