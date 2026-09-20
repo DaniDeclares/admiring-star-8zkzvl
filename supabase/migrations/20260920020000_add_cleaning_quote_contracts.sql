@@ -6,17 +6,26 @@ update public.services
 set quote_input_schema=jsonb_build_object(
  'version','2026-09-20-cleaning-package-v1','ui_mode','SPECIALIZED_CLEANING','pricing_model','FIXED_SCOPE',
  'fields',jsonb_build_array(
-  jsonb_build_object('key','bedroom_count','type','select','label','Bedrooms','options',jsonb_build_array('studio','1','2','3','4+')),
-  jsonb_build_object('key','bathroom_count','type','select','label','Bathrooms','options',jsonb_build_array('1','2','3','4+')),
-  jsonb_build_object('key','layout_type','type','select','label','Layout environment','options',jsonb_build_array('apartment','townhome','single_family_home','commercial_unit')),
-  jsonb_build_object('key','occupancy','type','select','label','Occupancy','options',jsonb_build_array('vacant','occupied')),
-  jsonb_build_object('key','mess_degree','type','select','label','Degree of mess','options',jsonb_build_array('standard','moderate','heavy','severe')),
-  jsonb_build_object('key','odor_level','type','select','label','Odor level','options',jsonb_build_array('none','light','heavy','severe')),
-  jsonb_build_object('key','pet_condition','type','select','label','Pet condition','options',jsonb_build_array('none','routine','heavy','severe')),
-  jsonb_build_object('key','severe_pet_mess','type','boolean','label','Severe pet mess / heavy soil'),
-  jsonb_build_object('key','severe_odor_smoke','type','boolean','label','Severe odor / smoke neutralization required'),
-  jsonb_build_object('key','square_footage','type','number','label','Approximate square footage'),
-  jsonb_build_object('key','scope_summary','type','text','label','Scope summary')
+  jsonb_build_object('key','bedroom_count','type','select','label','Bedrooms','options',jsonb_build_array('studio','1','2','3','4+'),'classification','SCOPE'),
+  jsonb_build_object('key','bathroom_count','type','select','label','Bathrooms','options',jsonb_build_array('1','2','3','4+'),'classification','SCOPE'),
+  jsonb_build_object('key','layout_type','type','select','label','Layout environment','options',jsonb_build_array('apartment','townhome','single_family_home','commercial_unit'),'classification','SCOPE'),
+  jsonb_build_object('key','occupancy','type','select','label','Occupancy','options',jsonb_build_array('vacant','occupied'),'classification','SCOPE'),
+  jsonb_build_object('key','mess_degree','type','select','label','Degree of mess','options',jsonb_build_array('standard','moderate','heavy','severe'),'classification','UNDERWRITING'),
+  jsonb_build_object('key','odor_level','type','select','label','Odor level','options',jsonb_build_array('none','light','heavy','severe'),'classification','UNDERWRITING'),
+  jsonb_build_object('key','pet_condition','type','select','label','Pet condition','options',jsonb_build_array('none','routine','heavy','severe'),'classification','SCOPE'),
+  jsonb_build_object('key','severe_pet_mess','type','boolean','label','Severe pet mess / heavy soil','classification','PRICING_MODIFIER'),
+  jsonb_build_object('key','severe_odor_smoke','type','boolean','label','Severe odor / smoke neutralization required','classification','UNDERWRITING'),
+  jsonb_build_object('key','square_footage','type','number','label','Approximate square footage','classification','SCOPE'),
+  jsonb_build_object('key','scope_summary','type','text','label','Scope summary','classification','SCOPE')
+ ),
+ 'commercial_inputs',jsonb_build_array(
+  jsonb_build_object('key','miles_one_way','type','number','label','Miles one way','classification','COMMERCIAL'),
+  jsonb_build_object('key','apply_standard_travel','type','boolean','label','Standard travel rule','classification','COMMERCIAL'),
+  jsonb_build_object('key','rush','type','boolean','label','24-hour / rush (+25%)','classification','COMMERCIAL'),
+  jsonb_build_object('key','materials_cost','type','number','label','Materials cost','classification','COMMERCIAL'),
+  jsonb_build_object('key','pass_through_cost','type','number','label','Pass-through cost','classification','COMMERCIAL'),
+  jsonb_build_object('key','tax_rate_percent','type','number','label','Tax rate %','classification','COMMERCIAL'),
+  jsonb_build_object('key','deposit_percent','type','number','label','Deposit %','classification','COMMERCIAL')
  ),
  'companion_lines',jsonb_build_array(
   jsonb_build_object('sku','DNI-01A-036','label','Specialized Carpet Fiber Extraction Add-on','component_role','COMPANION'),
