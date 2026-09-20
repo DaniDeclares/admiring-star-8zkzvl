@@ -19,8 +19,8 @@ No additional official customer channels are created for specialists, products, 
 
 CH01 is internally segmented into **two resident customer subchannels**. These are not additional official commercial channels; they distinguish how the resident relationship enters DANI DECLARES:
 
-- **CH01-A — Apartment / Property Residents**: residents connected to a participating apartment community, property, or property-management relationship. May receive applicable resident benefits, property-specific offers, portal access, and resident pricing.
-- **CH01-B — Regular / Direct Residents**: residents/customers who purchase directly from DANI DECLARES without a participating apartment/property relationship. They receive applicable direct Resident Concierge offerings and standard eligibility rules.
+- **CH01-A — Regular / Direct Residents**: residents/customers who purchase directly from DANI DECLARES without a participating apartment/property relationship.
+- **CH01-B — Apartment / Property Residents**: residents connected to a participating apartment community, property, or property-management relationship. May receive applicable resident benefits, property-specific offers, portal access, and resident pricing.
 
 A resident request may touch multiple DANI divisions. The subchannel identifies the customer relationship; it does not restrict which DANI service/division can fulfill the request.
 
@@ -118,7 +118,7 @@ The canonical provider transaction is:
 ## 10. Current Production State — 2026-08-27
 
 - Canonical five-channel database migration applied successfully.
-- Duplicate resident channel was consolidated into CH01 Resident Concierge with CH01-A Apartment / Property Residents and CH01-B Regular / Direct Residents.
+- Duplicate resident channel was consolidated into CH01 Resident Concierge with CH01-A Regular / Direct Residents and CH01-B Apartment / Property Residents.
 - Supabase currently contains five active commercial channels after reconciliation.
 - Supabase Vault contains the `dd_cron_secret` secret name; the secret value is never stored in source control.
 - Production Auth currently has zero users; intentional staff/provider/customer identities remain an activation gate.
