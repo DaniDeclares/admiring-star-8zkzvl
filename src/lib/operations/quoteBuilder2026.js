@@ -106,7 +106,9 @@ export function resolveCanonicalOffers(governed, specials, governedStatusBySku =
   return resolved;
 }
 
-export async function getQuoteCatalog(supabase) {
+export async function getQuoteCatalog(supabase, channelCode = 'CH04') {
+  const allowedChannels = new Set(['CH01','CH02','CH03','CH04','CH05']);
+  if (!allowedChannels.has(channelCode)) throw new Error(`Unsupported pricing channel: ${channelCode}.`);
   const { data: releaseRows, error: releaseError } = await supabase
     .from('dd_service_release_contract_v1')
     .select('canonical_sku,release_state,blocking_gate')
@@ -132,10 +134,42 @@ export async function getQuoteCatalog(supabase) {
   if (skuError) throw skuError;
   const byId = new Map((servicesById || []).map(s => [s.id, s]));
   const bySku = new Map((servicesBySku || []).map(s => [s.sku, s]));
-  const governed = (offers || []).map(o => {
-    const s = byId.get(o.runtime_service_id) || bySku.get(o.canonical_sku) || {};
-    return { ...s, sku:o.canonical_sku, canonicalSku:o.canonical_sku, name:o.service_name, division_id:Number(o.division), service_family:s.service_family || null, governedOfferStatus:o.commercial_offer_status, fulfillmentGateStatus:o.fulfillment_gate_status, commercial_status:s.commercial_status || o.commercial_offer_status, commercial_intent_status:s.commercial_intent_status || o.fulfillment_gate_status, publicPrice:s.public_price_display || (s.starting_price != null ? `Starting at ${Number(s.starting_price).toFixed(2)}` : 'Quote required'), quoteQuestions:s.quote_input_schema?.fields || [], sourceType:'GOVERNED', releaseState:'LIVE_READY' };
-  });
+  const serviceIds = [...new Set((offers || []).map(o => o.runtime_service_id).filter(Boolean))];
+  const { data: channelAvailability, error: availabilityError } = serviceIds.length
+    ? await supabase.from('dd_service_channel_availability')
+      .select('service_id,channel_code,eligibility_status')
+      .in('service_id', serviceIds)
+      .eq('channel_code', channelCode)
+    : { data: [], error: null };
+  if (availabilityError) throw availabilityError;
+  const authorizedServiceIds = new Set(
+    (channelAvailability || [])
+      .filter(row => ['ACTIVE','ELIGIBLE','QUOTE_REQUIRED'].includes(String(row.eligibility_status || '').toUpperCase()))
+      .map(row => row.service_id)
+  );
+
+  const { data: channelRules, error: channelRuleError } = serviceIds.length
+    ? await supabase.from('dd_service_pricing_rules')
+      .select('id,service_id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status,effective_date')
+      .in('service_id', serviceIds)
+      .eq('channel_code', channelCode)
+      .eq('status', 'ACTIVE')
+      .eq('lock_status', 'LOCKED')
+      .order('effective_date', { ascending:false })
+    : { data: [], error: null };
+  if (channelRuleError) throw channelRuleError;
+  const pricingRuleByServiceId = new Map();
+  for (const rule of channelRules || []) {
+    if (!pricingRuleByServiceId.has(rule.service_id)) pricingRuleByServiceId.set(rule.service_id, rule);
+  }
+
+  const governed = (offers || [])
+    .map(o => {
+      const s = byId.get(o.runtime_service_id) || bySku.get(o.canonical_sku) || {};
+      const pricingRule = pricingRuleByServiceId.get(o.runtime_service_id);
+      return { ...s, sku:o.canonical_sku, canonicalSku:o.canonical_sku, name:o.service_name, division_id:Number(o.division), service_family:s.service_family || null, governedOfferStatus:o.commercial_offer_status, fulfillmentGateStatus:o.fulfillment_gate_status, commercial_status:s.commercial_status || o.commercial_offer_status, commercial_intent_status:s.commercial_intent_status || o.fulfillment_gate_status, publicPrice:s.public_price_display || (s.starting_price != null ? `Starting at ${Number(s.starting_price).toFixed(2)}` : 'Quote required'), quoteQuestions:s.quote_input_schema?.fields || [], sourceType:'GOVERNED', releaseState:'LIVE_READY', channelCode, pricingRule };
+    })
+    .filter(row => authorizedServiceIds.has(row.id) && row.pricingRule);
 
   // DANI SPECIALS can only enter the operator graph when their canonical governed
   // counterpart is independently LIVE_READY. A special can never bypass release gates.
@@ -146,7 +180,8 @@ export async function getQuoteCatalog(supabase) {
   const specialRows = (specials || []).map(buildSpecialRow)
     .filter(s => s.canonicalSku && liveSkus.has(s.canonicalSku));
 
-  return resolveCanonicalOffers(governed, specialRows, new Map());
+  const channelSpecials = channelCode === 'CH01' ? specialRows : [];
+  return resolveCanonicalOffers(governed, channelSpecials, new Map());
 }
 async function loadRules(supabase, serviceId, channelCode) {
   const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').order('effective_date',{ascending:false});
