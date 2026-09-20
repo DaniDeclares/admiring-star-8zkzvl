@@ -1,6 +1,6 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
-import { provisionCustomerPortalAccount } from './customer-provisioning.js';
+import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin } from './_w9Crypto.js';
 import Stripe from 'stripe';
