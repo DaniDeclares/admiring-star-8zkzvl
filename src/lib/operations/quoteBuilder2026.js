@@ -48,7 +48,6 @@ export function resolveCanonicalOffers(governed, specials, governedStatusBySku =
     const canonicalSku = special.canonicalSku;
     if (!canonicalSku) {
       resolved.push(special);
-      consumedSpecialSkus.add(special.sku);
       continue;
     }
 
@@ -60,13 +59,11 @@ export function resolveCanonicalOffers(governed, specials, governedStatusBySku =
     // A special cannot resurrect a canonical service that governance has locked
     // away. If there is no governed row at all, it remains a special-only offer.
     if (hasAnyGoverned && !hasSellNowGoverned) {
-      consumedSpecialSkus.add(special.sku);
       continue;
     }
 
     if (!base) {
       resolved.push({ ...special, canonicalOnlySpecial:true });
-      consumedSpecialSkus.add(special.sku);
       continue;
     }
 
