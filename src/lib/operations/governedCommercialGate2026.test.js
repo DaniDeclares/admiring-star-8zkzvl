@@ -67,9 +67,80 @@ describe('LIVE_READY checkout release gate', () => {
   test('allows a fully released service through the legacy checkout gates', () => {
     expect(checkoutEligibility(
       readyOffer,
-      { channel: 'CH01', subchannel: 'CH01-A' }
+      {
+        channel: 'CH01',
+        subchannel: 'CH01-A',
+        hasLockedActivePricing: true,
+        hasLockedActiveSubchannelPricing: false,
+      }
     ).eligible).toBe(true);
   });
 });
 
 // CI release-contract verification pass.
+
+
+describe('CH01 channel pricing governance', () => {
+  test('blocks CH01-A when exact channel pricing is not locked', () => {
+    expect(checkoutEligibility(
+      readyOffer,
+      {
+        channel: 'CH01',
+        subchannel: 'CH01-A',
+        hasLockedActivePricing: false,
+        hasLockedActiveSubchannelPricing: false,
+      }
+    ).reason).toBe('CH01_CHANNEL_PRICING_NOT_LOCKED');
+  });
+
+  test('requires verification before CH01-B pricing can be used', () => {
+    expect(checkoutEligibility(
+      readyOffer,
+      {
+        channel: 'CH01',
+        subchannel: 'CH01-B',
+        isVerifiedCommunityResident: false,
+        hasLockedActivePricing: true,
+        hasLockedActiveSubchannelPricing: true,
+      }
+    ).reason).toBe('COMMUNITY_RESIDENT_VERIFICATION_REQUIRED');
+  });
+
+  test('blocks verified CH01-B when no explicit subchannel price is governed', () => {
+    expect(checkoutEligibility(
+      readyOffer,
+      {
+        channel: 'CH01',
+        subchannel: 'CH01-B',
+        isVerifiedCommunityResident: true,
+        hasLockedActivePricing: true,
+        hasLockedActiveSubchannelPricing: false,
+      }
+    ).reason).toBe('CH01_B_PRICING_NOT_GOVERNED');
+  });
+
+  test('allows verified CH01-B only with explicit subchannel pricing', () => {
+    expect(checkoutEligibility(
+      readyOffer,
+      {
+        channel: 'CH01',
+        subchannel: 'CH01-B',
+        isVerifiedCommunityResident: true,
+        hasLockedActivePricing: true,
+        hasLockedActiveSubchannelPricing: true,
+      }
+    ).eligible).toBe(true);
+  });
+
+  test('keeps variable-quote CH01 work on intake rather than direct checkout', () => {
+    expect(checkoutEligibility(
+      { ...readyOffer, pricingType: 'VARIABLE_QUOTE' },
+      {
+        channel: 'CH01',
+        subchannel: 'CH01-A',
+        hasLockedActivePricing: false,
+        hasLockedActiveSubchannelPricing: false,
+      }
+    ).reason).toBe('QUOTE_REQUIRED');
+  });
+});
