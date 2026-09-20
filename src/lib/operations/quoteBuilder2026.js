@@ -313,6 +313,9 @@ export async function createEstimate(supabase, body) {
       sourceType:resolved.service.sourceType||'GOVERNED',
       divisionId:resolved.service.division_id||resolved.offer.division||'01',
       publicPrice:resolved.service.public_price_display||resolved.service.price_note||(resolved.service.starting_price!=null?`Starting at ${Number(resolved.service.starting_price).toFixed(2)}`:'Quote required'),
+      parentLineId:item?.parentLineId||null,
+      parentServiceSku:item?.parentServiceSku||null,
+      componentRole:item?.componentRole||'PRIMARY',
       answers:itemAnswers,
       calculation
     });
