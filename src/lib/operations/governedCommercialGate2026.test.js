@@ -1,3 +1,5 @@
+jest.mock('../../../lib/prisma.js', () => ({ __esModule: true, default: {} }));
+
 import { economicGateFromOffer } from './governedCommercialGate2026';
 
 describe('economic checkout gate', () => {
