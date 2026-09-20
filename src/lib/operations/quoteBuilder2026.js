@@ -21,7 +21,7 @@ function buildSpecialRow(s) {
     billing_cycle:'ONETIME',
     starting_price:Number(s.price),
     base_price_cents:Math.round(Number(s.price)*100),
-    public_price_display:'
+    public_price_display:String.fromCharCode(36)+Number(s.price).toFixed(2)+(s.unit && !['visit','project','service','flat','treatment','job','load','cycle','package','area','tree','wreath','section','mantel','rug','chair','sofa','mattress','mirror','bath','event','dispatch','audit log','delivery','run','walk','coordination','document','plan','minimum'].includes(s.unit) ? '/'+s.unit : '')
     commercial_status:'CANONICAL_ACTIVE',
     commercial_intent_status:'SELL_NOW',
     governedOfferStatus:'SELL_NOW',
