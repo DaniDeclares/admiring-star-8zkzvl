@@ -73,6 +73,7 @@ function PendingEstimatesQueue({ session }) {
 export default function PortalWorkspacePage() {
   const { session, snapshot, loading, error, message, load, act } = useProviderWorkspace();
   const [messageDrafts, setMessageDrafts] = useState({});
+  const [paymentError, setPaymentError] = useState('');
   const sendJobMessage = async (jobId) => {
     const body = (messageDrafts[jobId] || '').trim();
     if (!body) return;
@@ -128,7 +129,7 @@ export default function PortalWorkspacePage() {
           return <div className="portal-row" key={item.id}>
             <div><strong>{item.public_reference}</strong><small>{item.estimate_status.replaceAll('_',' ')} · ${Number(item.estimated_total || 0).toFixed(2)} · {item.created_at ? formatDate(item.created_at) : ''}</small><small>{lines.map(line => line.serviceName || line.serviceSku).join(' + ') || 'Quote package'}</small></div>
             {awaiting && <div className="portal-actions"><button onClick={() => act('estimate_decision',{estimateId:item.id,decision:'APPROVED'})}>Approve quote</button><button className="secondary" onClick={() => act('estimate_decision',{estimateId:item.id,decision:'DECLINED'})}>Decline</button></div>}
-            {approved && <div className="portal-actions"><button onClick={async () => { try { const r=await fetch('/api/portal-operations',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'create_stripe_invoice',estimateId:item.id})}); const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Could not open payment.'); if(d.invoice?.hosted_invoice_url) window.location.href=d.invoice.hosted_invoice_url; else throw new Error('Payment link was not returned.'); } catch(e) { setError(e.message||'Could not open payment.'); } }}>Continue to Payment</button></div>}
+            {approved && <div className="portal-actions"><button onClick={async () => { try { const r=await fetch('/api/portal-operations',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'create_stripe_invoice',estimateId:item.id})}); const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Could not open payment.'); if(d.invoice?.hosted_invoice_url) window.location.href=d.invoice.hosted_invoice_url; else throw new Error('Payment link was not returned.'); } catch(e) { setPaymentError(e.message||'Could not open payment.'); } }}>Continue to Payment</button></div>}
           </div>;
         }) : <Empty>No quotes are currently attached to this account.</Empty>}
       </Card>
