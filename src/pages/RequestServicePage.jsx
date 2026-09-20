@@ -17,7 +17,7 @@ export default function RequestServicePage(){
  const [form,setForm]=useState({name:'',email:'',phone:'',channelType:validInitialChannel,organizationName:'',locationAddress:'',requestedDate:'',requestedTime:'',budgetRange:'',details:'',serviceId:initialServiceId});
  const [accessToken,setAccessToken]=useState(null);
  const [verifiedCommunity,setVerifiedCommunity]=useState(null);
- useEffect(()=>{fetch('/api/verify-commercial-intent?catalog=1').then(async r=>{const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not load the service catalog.');setServices(d.services||[]);if(initialServiceId)setSelected((d.services||[]).find(s=>s.serviceId===initialServiceId)||null);}).catch(e=>setError(e.message||'We could not load the service catalog.')).finally(()=>setLoadingCatalog(false));},[initialServiceId]);
+ useEffect(()=>{fetch('/api/verify-commercial-intent?catalog=1&channelType='+encodeURIComponent(validInitialChannel)).then(async r=>{const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not load the service catalog.');setServices(d.services||[]);if(initialServiceId)setSelected((d.services||[]).find(s=>s.serviceId===initialServiceId)||null);}).catch(e=>setError(e.message||'We could not load the service catalog.')).finally(()=>setLoadingCatalog(false));},[initialServiceId,validInitialChannel]);
  // A resident may already be signed in (e.g. arriving from their portal to
  // request a service) -- if so, check whether their account was verified via
  // a real property invite so the CH01-B discount can actually be applied,
