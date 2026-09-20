@@ -1,4 +1,5 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
+import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
@@ -998,5 +999,5 @@ export default async function handler(req, res) {
       return ok(res, { notificationPreferences: data });
     }
     return fail(res, `Unknown portal action: ${action}`);
-  } catch (error) { console.error('Portal operations error:', error); return fail(res, 'Operational request failed.', 500); }
+  } catch (error) { captureServerException(error,{route:'/api/portal-operations',stage:'portal_operation'}); await flushServerSentry(); console.error('Portal operations error:', error); return fail(res, 'Operational request failed.', 500); }
 }
