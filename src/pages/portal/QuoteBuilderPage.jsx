@@ -11,6 +11,7 @@ const inputStyle={width:'100%',padding:'11px 12px',borderRadius:10,border:'1px s
 const baseAnswers={quantity:1,hours:1,miles_one_way:0,materials_cost:0,pass_through_cost:0,tax_rate_percent:0,deposit_percent:0,apply_standard_travel:false,rush:false};
 const uid=()=>`line-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
 const freshLine=(sku,answers={})=>({id:uid(),serviceSku:sku,answers:{...baseAnswers,...answers}});
+const channelForClientType=(type)=>({regular_resident:'CH01',apartment_resident:'CH01',property_manager:'CH02',realtor:'CH03',business:'CH04',government:'CH05'}[type]||'CH04');
 function Field({label,value,onChange,type='text',placeholder=''}){return <label style={{display:'grid',gap:6,fontWeight:700,color:'#3d2b30'}}><span style={{fontSize:13}}>{label}</span><input type={type} value={value??''} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={inputStyle}/></label>}
 function SelectField({label,value,onChange,options}){return <label style={{display:'grid',gap:6,fontWeight:700,color:'#3d2b30'}}><span style={{fontSize:13}}>{label}</span><select value={value??''} onChange={e=>onChange(e.target.value)} style={inputStyle}><option value="">Select…</option>{options.map(o=><option key={String(o.value??o)} value={String(o.value??o)}>{String(o.label??o).replace(/_/g,' ')}</option>)}</select></label>}
 function DynamicQuestion({q,value,onChange}){if(q.type==='boolean')return <label style={{display:'flex',alignItems:'center',gap:8,fontWeight:700,color:'#3d2b30'}}><input type="checkbox" checked={Boolean(value)} onChange={e=>onChange(e.target.checked)}/>{q.label}</label>;if(q.options?.length){const options=q.options.map(o=>typeof o==='object'?o:{value:o,label:o});return <SelectField label={q.label} value={value} onChange={onChange} options={options}/>;}return <Field label={q.label} value={value??''} onChange={onChange} type={q.type==='number'?'number':'text'}/>}
@@ -44,8 +45,7 @@ function QuoteBuilder(){
  const [clientName,setClientName]=useState(''),[clientPhone,setClientPhone]=useState(''),[clientEmail,setClientEmail]=useState(''),[organizationName,setOrganizationName]=useState(''),[locationAddress,setLocationAddress]=useState(''),[city,setCity]=useState(''),[zipCode,setZipCode]=useState(''),[timeline,setTimeline]=useState(''),[requestedDate,setRequestedDate]=useState(''),[clientNotes,setClientNotes]=useState(''),[internalNotes,setInternalNotes]=useState('');
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[result,setResult]=useState(null),[requestLoaded,setRequestLoaded]=useState(false),[editingEstimate,setEditingEstimate]=useState(false),[sourceRequestId,setSourceRequestId]=useState(requestId);
 
- const channelForClientType=(type)=>({regular_resident:'CH01',apartment_resident:'CH01',property_manager:'CH02',realtor:'CH03',business:'CH04',government:'CH05'}[type]||'CH04');
- useEffect(()=>{(async()=>{const {data:s}=await supabase.auth.getSession();if(!s.session){setError('Staff session required.');setLoading(false);return}try{
+  useEffect(()=>{(async()=>{const {data:s}=await supabase.auth.getSession();if(!s.session){setError('Staff session required.');setLoading(false);return}try{
    let resolvedClientType='business';
    if(estimateId){
      const {data:est,error:estError}=await supabase.from('dd_estimates').select('*').eq('id',estimateId).single();if(estError)throw estError;if(est){
