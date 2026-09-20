@@ -121,7 +121,7 @@ export default function PortalWorkspacePage() {
       <Card title="Submitted Documents">{(snapshot?.documents || []).length ? snapshot.documents.map(item => <div className="portal-row" key={item.id}><div><strong>{item.document_type.replaceAll('_', ' ')}</strong><small>{statusLabel(item.verification_status)} · Uploaded {formatDate(item.uploaded_at)}</small></div></div>) : <Empty>No documents uploaded yet.</Empty>}<div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/vendor-onboarding">Upload documents</Link></div></Card>
     </>) : <>
       {role === 'property_manager' && <ResidentInvitesCard session={session} properties={snapshot?.properties || []} />}
-      <Card title="Quotes & Proposals">
+      <Card title="Quotes & Proposals">{paymentError && <div className="portal-alert" role="alert" style={{ marginBottom: 12 }}>{paymentError}</div>}
         {(snapshot?.estimates || []).length ? snapshot.estimates.map(item => {
           const lines = Array.isArray(item.intake_answers?.lineItems) ? item.intake_answers.lineItems : [];
           const awaiting = item.estimate_status === 'sent';
