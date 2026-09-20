@@ -56,11 +56,15 @@ const INITIAL_STATE_BY_WORKFLOW = Object.freeze({
 });
 
 const VALID_CHANNELS = new Set(Object.values(OPERATIONS_CHANNELS));
+const VALID_COMMERCIAL_MODELS = new Set(Object.values(COMMERCIAL_RELATIONSHIP_MODELS));
 
 /**
  * Resolve an intake channel without guessing from free-form request details.
  * Explicit channel wins. Category is only a controlled fallback for legacy
  * callers that have not yet been upgraded to send channelType.
+ *
+ * B2B2C is a commercial relationship model, not a channel. It must never
+ * silently fall through to category fallback and become CH02/B2B_APT.
  */
 export function resolveIntakeChannel({ channelType, category } = {}) {
   if (channelType && VALID_CHANNELS.has(channelType)) {
@@ -68,6 +72,14 @@ export function resolveIntakeChannel({ channelType, category } = {}) {
       channel: channelType,
       source: 'explicit',
       reason: null,
+    };
+  }
+
+  if (channelType && VALID_COMMERCIAL_MODELS.has(channelType)) {
+    return {
+      channel: null,
+      source: 'invalid_commercial_model_as_channel',
+      reason: 'COMMERCIAL_MODEL_IS_NOT_CHANNEL',
     };
   }
 
@@ -88,13 +100,18 @@ export function resolveIntakeChannel({ channelType, category } = {}) {
 
 /**
  * Map a validated channel to its operational state machine.
+ * The commercial model is carried separately from channel routing.
  */
-export function routeIntake({ channelType, category } = {}) {
+export function routeIntake({ channelType, category, commercialModel } = {}) {
   const resolved = resolveIntakeChannel({ channelType, category });
+  const resolvedCommercialModel = commercialModel && VALID_COMMERCIAL_MODELS.has(commercialModel)
+    ? commercialModel
+    : null;
 
   if (!resolved.channel) {
     return {
       ...resolved,
+      commercialModel: resolvedCommercialModel,
       workflow: INTAKE_WORKFLOWS.MANUAL_REVIEW,
       initialState: REQUEST_STATES.NEW,
       requiresPricingResolution: false,
@@ -107,6 +124,7 @@ export function routeIntake({ channelType, category } = {}) {
 
   return {
     ...resolved,
+    commercialModel: resolvedCommercialModel,
     workflow,
     initialState: INITIAL_STATE_BY_WORKFLOW[workflow],
     requiresPricingResolution: workflow !== INTAKE_WORKFLOWS.MANUAL_REVIEW,
@@ -117,7 +135,6 @@ export function routeIntake({ channelType, category } = {}) {
 
 export function buildIntakeRoutingContext(payload = {}) {
   const route = routeIntake(payload);
-  const commercialModel = COMMERCIAL_RELATIONSHIP_MODELS[payload.commercialModel] || null;
 
   return {
     channel: route.channel,
@@ -128,7 +145,8 @@ export function buildIntakeRoutingContext(payload = {}) {
     requiresPricingResolution: route.requiresPricingResolution,
     requiresProposal: route.requiresProposal,
     requiresSowReview: route.requiresSowReview,
-    commercialModel,
+    commercialModel: route.commercialModel,
+    subchannel: payload.subchannel || payload.subchannelCode || null,
   };
 }
 
