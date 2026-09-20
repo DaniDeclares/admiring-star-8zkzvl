@@ -303,6 +303,8 @@ export async function createEstimate(supabase, body) {
       canonicalSku:resolved.offer.canonical_sku,
       serviceName:resolved.offer.service_name,
       sourceType:resolved.service.sourceType||'GOVERNED',
+      divisionId:resolved.service.division_id||resolved.offer.division||'01',
+      publicPrice:resolved.service.public_price_display||resolved.service.price_note||(resolved.service.starting_price!=null?`Starting at ${Number(resolved.service.starting_price).toFixed(2)}`:'Quote required'),
       answers:itemAnswers,
       calculation
     });
@@ -310,8 +312,12 @@ export async function createEstimate(supabase, body) {
   const primary = resolvedLineItems[0];
   const calculation = aggregateQuoteCalculations(resolvedLineItems);
   calculation.reviewFlags=[...new Set(calculation.reviewFlags)];
-  const service = (await resolveQuoteLine(supabase, primary.serviceSku, channelCode)).service;
-  const offer = (await resolveQuoteLine(supabase, primary.serviceSku, channelCode)).offer;
+  const service = {
+    division_id:primary.divisionId,
+    sourceType:primary.sourceType,
+    public_price_display:primary.publicPrice
+  };
+  const offer = { canonical_sku:primary.canonicalSku, service_name:primary.serviceName, division:primary.divisionId };
   const publicReference=existingEstimate?.public_reference||`EST-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
   const payload={public_reference:publicReference,division_slug:String(service.division_id||offer.division||'01').padStart(2,'0'),source_slug:resolvedLineItems.length>1?'package_quote':(service.sourceType==='DANI_SPECIALS'?'danis_specials_owner_quote':'admin_quote_builder'),lead_id:sourceLeadId,service_request_id:sourceRequest?.id||null,client_name:String(body.clientName||'').trim()||null,client_phone:String(body.clientPhone||'').trim()||null,client_email:String(body.clientEmail||'').trim()||null,client_type:ESTIMATE_CLIENT_TYPES[clientType]||'other',organization_name:String(body.organizationName||'').trim()||null,location_address:String(body.locationAddress||'').trim()||null,city:String(body.city||'').trim()||null,state:String(body.state||'GA').trim().toUpperCase()||null,zip_code:String(body.zipCode||'').trim()||null,timeline:String(body.timeline||'').trim()||null,rush_requested:Boolean(primary.answers.rush),requested_date:body.requestedDate||null,intake_answers:{serviceSku:primary.serviceSku,serviceName:primary.serviceName,originalClientType:clientType,channelCode,sourceType:primary.sourceType,answers:primary.answers,lineItems:resolvedLineItems,pricingSnapshot:{capturedAt:new Date().toISOString(),package:true,lineItems:resolvedLineItems,reviewFlags:calculation.reviewFlags,...calculation}},client_notes:String(body.clientNotes||'').trim()||null,internal_notes:String(body.internalNotes||'').trim()||null,estimate_status:body.preserveEstimateStatus && existingEstimate ? existingEstimate.estimate_status : (calculation.needsReview?'needs_review':'estimated'),priority:String(body.priority||'normal'),base_subtotal:calculation.baseSubtotal,addon_subtotal:Math.max(0,calculation.baseSubtotal-(resolvedLineItems[0]?.calculation.baseSubtotal||0)),travel_fee:calculation.travelFee,rush_fee:calculation.rushFee,supplies_fee:calculation.sourcingFee+calculation.materials,pass_through_fee:calculation.passThrough,tax_amount:calculation.tax,estimated_total:calculation.estimatedTotal,deposit_due:calculation.depositDue,quote_disclaimer:'Estimate generated from the current DANI DECLARES commercial catalog. Package components retain their individual quote inputs and governed pricing snapshots. Final price remains subject to scope, location, materials/pass-throughs, fulfillment authorization, tax review and applicable service-specific gates.'};
   let estimate, estimateError;
