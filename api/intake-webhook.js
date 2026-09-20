@@ -1,6 +1,7 @@
 import prisma from '../lib/prisma.js';
 import { createClient } from '@supabase/supabase-js';
 import { buildIntakeRoutingContext, routeIntake } from '../src/lib/operations/intakeRouting2026.js';
+import { getChannelGovernanceDecision } from '../src/lib/operations/governedCommercialGate2026.js';
 import { publishOperationalEvent } from '../src/lib/operations/eventBroker2026.js';
 
 function specialDuration(name, unit, price) {
@@ -43,6 +44,10 @@ export default async function handler(req,res){
   const serviceRef=pricingServiceId||serviceId||commercialIntent?.serviceId||null;
   const frozenPrice=commercialIntent?.frozenPriceSnapshot==null?null:Number(commercialIntent.frozenPriceSnapshot);
   if(commercialIntent&&frozenPrice!==null&&!Number.isFinite(frozenPrice))return res.status(400).json({error:'The selected commercial offer could not be securely frozen. Please start the request again.'});
+  if(channelType==='B2B_APT'&&serviceRef){
+   const channelGovernance=await getChannelGovernanceDecision(serviceRef,'CH02');
+   if(!channelGovernance.allowed)return res.status(409).json({success:false,error:'This property-management service is not currently available through the selected service path.',gateReason:channelGovernance.reason});
+  }
   const paymentEligible=channelType==='B2C'&&frozenPrice!=null;
   const requestState=paymentEligible?'payment_pending':routing.initialState.toLowerCase();
   let booking=null;
