@@ -180,7 +180,44 @@ The runtime behavior is:
 
 The resident-facing UI was also corrected so verified community access is not described as receiving a discount until executable CH01-B pricing is actually governed.
 
-## 10. Remaining controlled holds
+
+## 11. External ecosystem research
+
+External platforms are classified by function, not treated as interchangeable integrations.
+
+| Rail | Platforms researched | Role |
+|---|---|---|
+| Demand | Thumbtack | Lead/referral and marketplace discovery |
+| Execution | Taskrabbit, Jobber, Housecall Pro | External fulfillment or provider-system adapters |
+| Logistics | DoorDash Drive, Uber Direct | Goods/package courier capacity |
+| Procurement | Instacart | Grocery/restocking transaction rail |
+
+Current evidence:
+- Thumbtack supports marketplace integrations that can find pros and submit requests, plus pro integrations for leads/messages and webhooks; current V4 integrations use OAuth and developer onboarding. citeturn229966search0turn229966search9
+- Taskrabbit's current Home Services API documents estimate, availability, bid, booking and task-management flows; partnership credentials are required. citeturn539969search0turn539969search14
+- DoorDash Drive remains limited-access for production. citeturn229966search8turn229966search17
+- Uber Direct documents delivery estimates, creation, status and webhooks; some API access may require written approval. citeturn229966search1turn229966search14
+- Instacart's Developer Platform requires API access and currently reports roughly 30–40 days from access request to demo approval and production key access. citeturn229966search2
+- Jobber exposes GraphQL and webhooks through OAuth, including signed webhook delivery and at-least-once semantics that require idempotent handling. citeturn539969search2turn539969search10
+- Housecall Pro's public API is currently limited to MAX Pros. citeturn539969search1turn539969search7
+
+### DANI authority rule
+
+External platforms may provide demand, availability, execution, delivery, scheduling, status or external data.
+
+They do **not** become the authority for:
+- DANI service identity
+- DANI pricing
+- DANI commercial eligibility
+- DANI contracts
+- DANI provider authorization
+- DANI payment policy
+- DANI customer relationship
+- DANI release decisions
+
+The external ecosystem record is persisted in `dd_ch01_external_ecosystem` and currently marks seven platforms `APPROVED_FOR_DISCOVERY`; this does not mean production integrations are enabled.
+
+## 12. Remaining controlled holds
 
 1. Reconcile customer-facing CH01 price-book content with the canonical runtime CH01 price rules.
 2. Populate explicit CH01-B pricing/subchannel rules only after community pricing is intentionally defined.
