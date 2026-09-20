@@ -57,6 +57,18 @@ describe('DNI-01A-003 governed bedroom-tier pricing', () => {
     expect(result.needsReview).toBe(true);
   });
 
+  test('underwriting inputs freeze the quote for review', () => {
+    const result = calculate(service, rule, {
+      bedroom_count: '2',
+      mess_degree: 'severe',
+      severe_odor_smoke: true,
+      tax_rate_percent: 0
+    });
+    expect(result.reviewFlags).toContain('UNDERWRITING_REVIEW');
+    expect(result.needsReview).toBe(true);
+    expect(result.baseSubtotal).toBe(380);
+  });
+
   test('carpet and abandoned-property flags route to separate scope review', () => {
     const result = calculate(service, rule, {
       bedroom_count: '2',
