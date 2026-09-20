@@ -20,17 +20,18 @@ const specialRows=async()=>prisma.$queryRawUnsafe(`
  ) m ON true
  WHERE s.active=true ORDER BY s.service_id`);
 
-const governedCatalog=async()=>prisma.$queryRawUnsafe(`
+const governedCatalog=async(channelType='B2C')=>prisma.$queryRawUnsafe(`
  SELECT o.canonical_sku AS "serviceId", o.service_name AS name, LPAD(o.division::text,2,'0') AS division,
         o.commercial_offer_status AS "commercialOfferStatus", o.fulfillment_gate_status AS "fulfillmentGateStatus",
         o.pricing_rule_count AS "pricingRuleCount", o.market_rule_count AS "marketRuleCount",
         o.channel_availability_count AS "channelAvailabilityCount", o.authorized_provider_capability_count AS "authorizedProviderCapabilityCount",
         o.priced_channel_count AS "pricedChannelCount", o.ch01_a_priced AS "ch01APriced", o.ch01_b_priced AS "ch01BPriced",
         s.service_family AS family, s.description, s.starting_price AS "baseCustomerPrice", s.public_price_low AS "publicPriceLow",
-        s.public_price_high AS "publicPriceHigh", s.public_price_display AS "publicPriceDisplay", s.pricing_type AS model,
+        s.public_price_high AS "publicPriceHigh", s.public_price_display AS "publicPriceDisplay", pr.base_price_cents AS "pricingRuleBasePriceCents", s.pricing_type AS model,
         s.billing_cycle AS "billingCycle", s.resident_discount_eligible AS "residentDiscountEligible", s.commercial_status AS status,
         s.id AS "runtimeServiceId"
  FROM public.dd_governed_service_offers o JOIN public.services s ON s.id=o.runtime_service_id
+ LEFT JOIN LATERAL (SELECT r.base_price_cents FROM public.dd_service_pricing_rules r WHERE r.service_id=s.id AND r.channel_code=normalize_channel($1) AND r.status='ACTIVE' AND r.lock_status='LOCKED' ORDER BY r.effective_date DESC NULLS LAST, r.updated_at DESC NULLS LAST LIMIT 1) pr ON true
  WHERE o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY') ORDER BY o.division, o.service_name`);
 
 const governedService=async(serviceId)=>getGovernedCommercialOffer(serviceId);
@@ -51,10 +52,10 @@ const legacySpecial=async(serviceId)=>{
 
 export default async function handler(req,res){try{
  if(req.method==='GET'&&req.query?.catalog==='1'){
-   const [rows,specials]=await Promise.all([governedCatalog(),specialRows()]);
+   const channelType=String(req.query?.channelType||'B2C').trim(); const [rows,specials]=await Promise.all([governedCatalog(channelType),specialRows()]);
    const byCanonical=new Map(),unmapped=[];
    for(const s of specials){if(s.canonicalSku){if(!byCanonical.has(s.canonicalSku))byCanonical.set(s.canonicalSku,[]);byCanonical.get(s.canonicalSku).push(s);}else unmapped.push(s);}
-   const services=rows.map(s=>{const gate=checkoutEligibility(s,{channel:'CH01',subchannel:'CH01-A'});return {...s,market:'GA',checkoutEligible:gate.eligible,intakeAvailable:true,approvedSpecialOfferCount:(byCanonical.get(s.serviceId)||[]).length,approvedSpecialOffers:(byCanonical.get(s.serviceId)||[])};});
+   const requestedChannel=normalizeChannel(channelType); const services=rows.map(s=>{const gate=checkoutEligibility(s,{channel:requestedChannel,subchannel:requestedChannel==='CH01'?'CH01-A':undefined}); const channelPrice=s.pricingRuleBasePriceCents==null?null:Number(s.pricingRuleBasePriceCents)/100; return {...s,market:'GA',channelCode:requestedChannel,baseCustomerPrice:channelPrice??s.baseCustomerPrice,publicPriceDisplay:channelPrice!=null?Number(channelPrice).toFixed(2):(s.publicPriceDisplay||null),checkoutEligible:gate.eligible,intakeAvailable:true,approvedSpecialOfferCount:(byCanonical.get(s.serviceId)||[]).length,approvedSpecialOffers:(byCanonical.get(s.serviceId)||[])};});
    return json(res,200,{success:true,count:services.length,services,approvedLegacyOfferCount:unmapped.length,approvedLegacyOffers:unmapped});
  }
  if(req.method!=='POST')return json(res,405,{error:'This action is not available.'});
