@@ -23,7 +23,8 @@ export default function RequestServicePage(){
  // a real property invite so the CH01-B discount can actually be applied,
  // instead of every resident silently defaulting to full CH01-A price.
  useEffect(()=>{let cancelled=false;(async()=>{const {data}=await supabase.auth.getSession();const token=data?.session?.access_token||null;if(cancelled)return;setAccessToken(token);if(!token)return;try{const r=await fetch('/api/portal-operations',{headers:{Authorization:`Bearer ${token}`}});const d=await r.json();if(!cancelled&&d?.success&&d.role==='resident')setVerifiedCommunity(d.residentCommunity||null);}catch{/* not signed in as a resident; default to standard pricing */}})();return()=>{cancelled=true};},[]);
- const isGovernmentChannel=form.channelType===OPERATIONS_CHANNELS.B2G;\n const variants=useMemo(()=>{if(!selected)return [];const base=baseServiceName(selected.name);return services.filter(s=>baseServiceName(s.name)===base).sort((a,b)=>priceValue(a)-priceValue(b));},[services,selected]);
+ const isGovernmentChannel=form.channelType===OPERATIONS_CHANNELS.B2G;
+ const variants=useMemo(()=>{if(!selected)return [];const base=baseServiceName(selected.name);return services.filter(s=>baseServiceName(s.name)===base).sort((a,b)=>priceValue(a)-priceValue(b));},[services,selected]);
  const selectedVisual=useMemo(()=>selected?pickVisual(getServiceVisuals(selected.division,selected.name,selected.serviceId),selected.serviceId):null,[selected]);
  const change=e=>setForm(f=>({...f,[e.target.name]:e.target.value}));
  useEffect(()=>{if(selected)captureServiceLifecycle('service_viewed',{service_id:selected.serviceId,canonical_sku:selected.sku,channel:form.channelType,pricing_model:selected.pricingModel||undefined,commercialization_status:selected.commercializationStatus||undefined,gate_state:selected.offerStatus||undefined,route:typeof window!=='undefined'?window.location.pathname:'/request-service'});},[selected,form.channelType]);
