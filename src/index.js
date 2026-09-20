@@ -19,6 +19,19 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('Uncaught React Error:', error, errorInfo);
+    if (typeof window !== 'undefined' && window.Sentry?.captureException) {
+      window.Sentry.captureException(error, {
+        contexts: {
+          react: {
+            componentStack: errorInfo?.componentStack || '',
+          },
+        },
+        tags: {
+          surface: 'react-error-boundary',
+          route: window.location.pathname,
+        },
+      });
+    }
     this.setState({ errorInfo });
   }
 
