@@ -9,8 +9,8 @@ The Company-Wide Catalog Master is the structural capability authority. Historic
 ## Customer Architecture
 Five official commercial channels remain:
 - CH01 Resident Concierge
-  - CH01-A Apartment / Property Residents
-  - CH01-B Regular / Direct Residents
+  - CH01-A Regular / Direct Residents
+  - CH01-B Apartment / Property Residents
 - CH02 Property Management & Apartments
 - CH03 Real Estate Offices & Brokerages
 - CH04 Businesses
