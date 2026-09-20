@@ -255,7 +255,7 @@ function aggregateQuoteCalculations(lineItems) {
     if(c.needsReview) acc.needsReview=true;
     return acc;
   },{baseSubtotal:0,residentDiscount:0,travelFee:0,rushFee:0,materials:0,sourcingFee:0,passThrough:0,tax:0,estimatedTotal:0,depositDue:0,reviewFlags:[],needsReview:false});
-  return Object.fromEntries(Object.entries(totals).map(([k,v])=>Array.isArray(v)||typeof v==='boolean'?[k:v]:[k:money(v)]));
+  return Object.fromEntries(Object.entries(totals).map(([k,v])=>Array.isArray(v)||typeof v==='boolean'?[k,v]:[k,money(v)]));
 }
 
 export async function createEstimate(supabase, body) {
