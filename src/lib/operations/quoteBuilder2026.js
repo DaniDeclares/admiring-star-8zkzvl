@@ -261,6 +261,20 @@ export function calculate(service, rule, answers) {
 async function resolveQuoteLine(supabase, serviceSku, channelCode) {
   const sku = String(serviceSku || '').trim();
   if (!sku) throw new Error('Choose a service.');
+
+  const canonicalSku = sku.startsWith('DSS-') ? normalizeSpecialCanonicalSku(sku) : sku;
+  if (!canonicalSku) throw new Error(`Service ${sku} has no governed canonical identity.`);
+
+  const { data: release, error: releaseError } = await supabase
+    .from('dd_service_release_contract_v1')
+    .select('canonical_sku,release_state,blocking_gate')
+    .eq('canonical_sku', canonicalSku)
+    .maybeSingle();
+  if (releaseError) throw releaseError;
+  if (!release || release.release_state !== 'LIVE_READY') {
+    throw new Error(`Service ${canonicalSku} is not LIVE_READY. Blocking gate: ${release?.blocking_gate || 'CANONICAL_IDENTITY'}.`);
+  }
+
   if (sku.startsWith('DSS-')) {
     const { data: special, error: specialError } = await supabase
       .from('danis_specials_offers')
@@ -269,26 +283,28 @@ async function resolveQuoteLine(supabase, serviceSku, channelCode) {
     if (specialError) throw specialError;
     if (!special) throw new Error('That DANI SPECIALS service could not be resolved.');
     return {
-      offer: { canonical_sku: special.service_id, service_name: special.service_name, division: specialDivision(special.family), commercial_offer_status:'SELL_NOW', fulfillment_gate_status:'READY' },
-      service: { sku:special.service_id, name:special.service_name, service_family:special.family, pricing_type:'SPECIALS_OWNER_EXECUTABLE', billing_cycle:'ONETIME', starting_price:Number(special.price), public_price_display:`${Number(special.price).toFixed(2)}`, commercial_intent_status:'SELL_NOW', sourceType:'DANI_SPECIALS', specialUnit:special.unit, specialPrice:Number(special.price) },
+      offer: { canonical_sku: canonicalSku, service_name: special.service_name, division: specialDivision(special.family), commercial_offer_status:'SELL_NOW', fulfillment_gate_status:'READY' },
+      service: { sku:canonicalSku, name:special.service_name, service_family:special.family, pricing_type:'SPECIALS_OWNER_EXECUTABLE', billing_cycle:'ONETIME', starting_price:Number(special.price), public_price_display:`${Number(special.price).toFixed(2)}`, commercial_intent_status:'SELL_NOW', sourceType:'DANI_SPECIALS', specialUnit:special.unit, specialPrice:Number(special.price) },
       rule: null
     };
   }
+
   const { data: governedOffer, error: offerError } = await supabase
     .from('dd_governed_service_offers')
     .select('canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,runtime_service_id')
-    .eq('canonical_sku', sku).neq('commercial_offer_status','DO_NOT_SELL')
-    .order('commercial_offer_status',{ascending:true}).limit(1).maybeSingle();
+    .eq('canonical_sku', canonicalSku).eq('commercial_offer_status','SELL_NOW')
+    .maybeSingle();
   if (offerError) throw offerError;
-  if (!governedOffer?.runtime_service_id) throw new Error(`Service ${sku} is not currently quoteable.`);
+  if (!governedOffer?.runtime_service_id) throw new Error(`Service ${canonicalSku} is not currently quoteable.`);
+
   const { data: governedService, error: serviceError } = await supabase
     .from('services').select('*').eq('id', governedOffer.runtime_service_id).maybeSingle();
   if (serviceError) throw serviceError;
-  if (!governedService) throw new Error(`The service record ${sku} could not be resolved.`);
+  if (!governedService) throw new Error(`The service record ${canonicalSku} could not be resolved.`);
+
   const rules = await loadRules(supabase, governedService.id, channelCode);
   return { offer:governedOffer, service:governedService, rule:rules.find(r=>r.base_price_cents!=null)||rules[0]||null };
 }
-
 export function aggregateQuoteCalculations(lineItems) {
   const totals = lineItems.reduce((acc, item) => {
     const c=item.calculation;
