@@ -105,7 +105,7 @@ export default function ProviderFieldPage() {
           </div>
           <div className="portal-actions" style={{ flexWrap: 'wrap', marginTop: 12 }}>
             {assignment.assignment_status === 'OFFERED' ? <>
-              <button onClick={() => act('assignment_response',{assignmentId:assignment.id,decision:'ACCEPT')}>Accept assignment</button>
+              <button onClick={() => act('assignment_response',{assignmentId:assignment.id,decision:'ACCEPT'})}>Accept assignment</button>
               <button className="secondary" onClick={() => act('assignment_response',{assignmentId:assignment.id,decision:'REJECT',reason:'Provider declined assignment.'})}>Decline</button>
             </> : actions.map(action => {
               const key = assignment.id + action.event;
