@@ -80,10 +80,25 @@ describe('LIVE_READY checkout release gate', () => {
 // CI release-contract verification pass.
 
 
+const ch01ReadyOffer = {
+  releaseState: 'LIVE_READY',
+  blockingGate: 'NONE',
+  commercialOfferStatus: 'SELL_NOW',
+  fulfillmentGateStatus: 'READY',
+  pricingType: 'FIXED',
+  baseCustomerPrice: 140,
+  internalCost: 'AUDITED: $50.00',
+  marginEconomics: 'AUDITED: price $140 - cost $50 = $90 (64.3%)',
+  ch01APriced: true,
+  channelAvailabilityCount: 1,
+  pricedChannelCount: 1,
+  authorizedProviderCapabilityCount: 1,
+};
+
 describe('CH01 channel pricing governance', () => {
   test('blocks CH01-A when exact channel pricing is not locked', () => {
     expect(checkoutEligibility(
-      readyOffer,
+      ch01ReadyOffer,
       {
         channel: 'CH01',
         subchannel: 'CH01-A',
@@ -95,7 +110,7 @@ describe('CH01 channel pricing governance', () => {
 
   test('requires verification before CH01-B pricing can be used', () => {
     expect(checkoutEligibility(
-      readyOffer,
+      ch01ReadyOffer,
       {
         channel: 'CH01',
         subchannel: 'CH01-B',
@@ -108,7 +123,7 @@ describe('CH01 channel pricing governance', () => {
 
   test('blocks verified CH01-B when no explicit subchannel price is governed', () => {
     expect(checkoutEligibility(
-      readyOffer,
+      ch01ReadyOffer,
       {
         channel: 'CH01',
         subchannel: 'CH01-B',
@@ -121,7 +136,7 @@ describe('CH01 channel pricing governance', () => {
 
   test('allows verified CH01-B only with explicit subchannel pricing', () => {
     expect(checkoutEligibility(
-      readyOffer,
+      ch01ReadyOffer,
       {
         channel: 'CH01',
         subchannel: 'CH01-B',
@@ -134,7 +149,7 @@ describe('CH01 channel pricing governance', () => {
 
   test('keeps variable-quote CH01 work on intake rather than direct checkout', () => {
     expect(checkoutEligibility(
-      { ...readyOffer, pricingType: 'VARIABLE_QUOTE' },
+      { ...ch01ReadyOffer, pricingType: 'VARIABLE_QUOTE' },
       {
         channel: 'CH01',
         subchannel: 'CH01-A',
