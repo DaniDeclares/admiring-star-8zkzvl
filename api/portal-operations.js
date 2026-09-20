@@ -313,6 +313,12 @@ export default async function handler(req, res) {
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
+      if (req.query?.clientOrganizations === '1') {
+        const { data: organizations, error } = await context.supabase.from('dd_client_organizations')
+          .select('id,display_name,legal_name,channel_code,status').order('display_name', { ascending: true }).limit(500);
+        if (error) throw error;
+        return ok(res, { role: context.role, organizations: organizations || [] });
+      }
       if (req.query?.estimates === '1') {
         const { data: estimates, error } = await context.supabase.from('dd_estimates')
           .select('id,public_reference,estimate_status,client_name,client_phone,client_email,source_slug,service_request_id,lead_id,estimated_total,deposit_due,created_at,updated_at')
