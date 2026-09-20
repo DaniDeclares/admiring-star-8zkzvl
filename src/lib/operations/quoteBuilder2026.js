@@ -173,6 +173,32 @@ function configuredBasePrice(service, rule, answers) {
   return { base: Number(tier.price || 0), flags: [] };
 }
 
+function validateQuoteLineContract(service, answers, lineItem, requestedLineItems) {
+  const schema=service?.quote_input_schema;
+  if(!schema?.ui_mode?.startsWith('SPECIALIZED_')) return;
+  const fields=[...(schema.fields||[]),...(schema.commercial_inputs||[])];
+  const fieldMap=new Map(fields.map(f=>[f.key,f]));
+  for(const field of fields){
+    if(field.required && (answers?.[field.key]===undefined || answers?.[field.key]===null || String(answers[field.key]).trim()==='')){
+      throw new Error(`Missing required quote input: ${field.label || field.key}.`);
+    }
+  }
+  if(lineItem?.componentRole==='COMPANION'){
+    const parent=requestedLineItems.find(x=>String(x?.parentLineId||'')===String(lineItem?.parentLineId||''));
+    if(!parent) throw new Error(`Companion ${lineItem.serviceSku} is missing its parent component.`);
+    const parentResolvedSchema=parent.__resolvedService?.quote_input_schema;
+    const allowed=(parentResolvedSchema?.companion_lines||[]).some(c=>String(c.sku)===String(lineItem.serviceSku));
+    if(!allowed) throw new Error(`Companion ${lineItem.serviceSku} is not authorized by the parent service contract.`);
+  }
+  const declared=new Set(fields.map(f=>f.key));
+  const enginePrimitives=new Set(['apply_resident_discount','apartment_resident']);
+  for(const key of Object.keys(answers||{})){
+    if(!declared.has(key) && !enginePrimitives.has(key) && ['quantity','hours','miles_one_way','materials_cost','pass_through_cost','tax_rate_percent','deposit_percent','apply_standard_travel','rush'].includes(key)){
+      throw new Error(`Undeclared quote input for ${service.sku}: ${key}.`);
+    }
+  }
+}
+
 export function calculate(service, rule, answers) {
   const a = answers || {};
   const pricingType = String(rule?.pricing_type || service.pricing_type || '').toUpperCase();
@@ -299,12 +325,14 @@ export async function createEstimate(supabase, body) {
     if (!itemSku) throw new Error('Every package component must have a service.');
     const itemAnswers = { ...(item.answers || {}), apply_resident_discount:false, apartment_resident:clientType==='apartment_resident' };
     const resolved = await resolveQuoteLine(supabase, itemSku, channelCode);
+    item.__resolvedService=resolved.service;
     const calcService = {
       ...resolved.service,
       commercial_intent_status: resolved.offer.fulfillment_gate_status==='READY'
         ? (resolved.offer.commercial_offer_status==='SELL_NOW'?'SELL_NOW':resolved.offer.commercial_offer_status)
         : resolved.offer.fulfillment_gate_status
     };
+    validateQuoteLineContract(calcService, itemAnswers, item, requestedLineItems);
     const calculation = calculate(calcService, resolved.rule, itemAnswers);
     resolvedLineItems.push({
       serviceSku:itemSku,
