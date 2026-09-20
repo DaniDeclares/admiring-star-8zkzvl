@@ -26,7 +26,10 @@ const governedCatalog=async()=>prisma.$queryRawUnsafe(`
         o.pricing_rule_count AS "pricingRuleCount", o.market_rule_count AS "marketRuleCount",
         o.channel_availability_count AS "channelAvailabilityCount", o.authorized_provider_capability_count AS "authorizedProviderCapabilityCount",
         o.priced_channel_count AS "pricedChannelCount", o.ch01_a_priced AS "ch01APriced", o.ch01_b_priced AS "ch01BPriced",
-        s.service_family AS family, s.description, s.starting_price AS "baseCustomerPrice", s.public_price_low AS "publicPriceLow",
+        c1p.base_price_cents AS "ch01LockedPricingCents",
+        (c1p.base_price_cents IS NOT NULL) AS "ch01LockedActivePricing",
+        s.service_family AS family, s.description,
+        COALESCE(c1p.base_price_cents / 100.0, s.starting_price) AS "baseCustomerPrice", s.public_price_low AS "publicPriceLow",
         s.public_price_high AS "publicPriceHigh", s.public_price_display AS "publicPriceDisplay", s.pricing_type AS model,
         s.billing_cycle AS "billingCycle", s.resident_discount_eligible AS "residentDiscountEligible", s.commercial_status AS status,
         s.id AS "runtimeServiceId"
@@ -35,6 +38,16 @@ const governedCatalog=async()=>prisma.$queryRawUnsafe(`
  JOIN public.dd_ch01_service_adjudication c1
    ON c1.channel_code='CH01'
   AND c1.sku=o.canonical_sku
+ LEFT JOIN LATERAL (
+   SELECT p.base_price_cents
+   FROM public.dd_service_pricing_rules p
+   WHERE p.service_id=o.runtime_service_id
+     AND p.channel_code='CH01'
+     AND p.status='ACTIVE'
+     AND p.lock_status='LOCKED'
+   ORDER BY p.effective_date DESC NULLS LAST, p.updated_at DESC
+   LIMIT 1
+ ) c1p ON true
  WHERE o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY')
    AND c1.disposition <> 'CROSS_CHANNEL_REVIEW'
  ORDER BY o.division, o.service_name`);
@@ -60,7 +73,15 @@ export default async function handler(req,res){try{
    const [rows,specials]=await Promise.all([governedCatalog(),specialRows()]);
    const byCanonical=new Map(),unmapped=[];
    for(const s of specials){if(s.canonicalSku){if(!byCanonical.has(s.canonicalSku))byCanonical.set(s.canonicalSku,[]);byCanonical.get(s.canonicalSku).push(s);}else unmapped.push(s);}
-   const services=rows.map(s=>{const gate=checkoutEligibility(s,{channel:'CH01',subchannel:'CH01-A'});return {...s,market:'GA',checkoutEligible:gate.eligible,intakeAvailable:true,approvedSpecialOfferCount:(byCanonical.get(s.serviceId)||[]).length,approvedSpecialOffers:(byCanonical.get(s.serviceId)||[])};});
+   const services=rows.map(s=>{
+     const gate=checkoutEligibility(s,{
+       channel:'CH01',
+       subchannel:'CH01-A',
+       hasLockedActivePricing:Boolean(s.ch01LockedActivePricing),
+       hasLockedActiveSubchannelPricing:false,
+     });
+     return {...s,market:'GA',checkoutEligible:gate.eligible,intakeAvailable:true,approvedSpecialOfferCount:(byCanonical.get(s.serviceId)||[]).length,approvedSpecialOffers:(byCanonical.get(s.serviceId)||[])};
+   });
    return json(res,200,{success:true,count:services.length,services,approvedLegacyOfferCount:unmapped.length,approvedLegacyOffers:unmapped});
  }
  if(req.method!=='POST')return json(res,405,{error:'This action is not available.'});
