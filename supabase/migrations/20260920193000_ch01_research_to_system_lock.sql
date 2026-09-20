@@ -413,3 +413,44 @@ VALUES
 '2026-09-20')
 ON CONFLICT (channel_code,contract_version) DO UPDATE SET
 status=excluded.status,primary_role=excluded.primary_role,front_door_offers=excluded.front_door_offers,supporting_layers=excluded.supporting_layers,buyer_architecture=excluded.buyer_architecture,icp=excluded.icp,compliance_gates=excluded.compliance_gates,service_family_architecture=excluded.service_family_architecture,emergency_framework=excluded.emergency_framework,commercial_rules=excluded.commercial_rules,sales_funnel=excluded.sales_funnel,release_checklist=excluded.release_checklist,deferred_items=excluded.deferred_items,engagement_architecture=excluded.engagement_architecture,source_basis=excluded.source_basis,effective_date=excluded.effective_date,updated_at=now();
+
+
+CREATE TABLE IF NOT EXISTS public.dd_ch01_external_ecosystem (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  channel_code text NOT NULL DEFAULT 'CH01' CHECK (channel_code='CH01'),
+  platform_code text NOT NULL,
+  platform_name text NOT NULL,
+  rail_type text NOT NULL CHECK (rail_type IN ('DEMAND','EXECUTION','LOGISTICS','PROCUREMENT')),
+  capabilities jsonb NOT NULL DEFAULT '[]'::jsonb,
+  access_model text NOT NULL,
+  d_interaction text NOT NULL,
+  authority_boundary text NOT NULL DEFAULT 'DANI remains system of record and commercial authority.',
+  source_url text NOT NULL,
+  source_note text NOT NULL,
+  status text NOT NULL DEFAULT 'RESEARCHED' CHECK (status IN ('RESEARCHED','APPROVED_FOR_DISCOVERY','INTEGRATION_BUILD','LIVE','DEFERRED')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(channel_code,platform_code)
+);
+
+ALTER TABLE public.dd_ch01_external_ecosystem ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS dd_ch01_external_ecosystem_deny_anon ON public.dd_ch01_external_ecosystem;
+DROP POLICY IF EXISTS dd_ch01_external_ecosystem_deny_authenticated ON public.dd_ch01_external_ecosystem;
+CREATE POLICY dd_ch01_external_ecosystem_deny_anon ON public.dd_ch01_external_ecosystem AS RESTRICTIVE FOR ALL TO anon USING (false) WITH CHECK (false);
+CREATE POLICY dd_ch01_external_ecosystem_deny_authenticated ON public.dd_ch01_external_ecosystem AS RESTRICTIVE FOR ALL TO authenticated USING (false) WITH CHECK (false);
+
+INSERT INTO public.dd_ch01_external_ecosystem
+(platform_code,platform_name,rail_type,capabilities,access_model,d_interaction,source_url,source_note,status)
+VALUES
+('THUMBTACK','Thumbtack','DEMAND','["find pros","categories","keywords","submit requests","reviews","lead/message webhooks"]','Partner Platform / OAuth; marketplace and pro integrations; developer onboarding required.','Demand discovery and lead/referral rail; DANI remains commercial authority.','https://developers.thumbtack.com/docs/overview','Current Thumbtack Partner Platform supports marketplace/pro integrations with requests, leads, messages and webhooks; current V4 integrations require OAuth and developer onboarding.','APPROVED_FOR_DISCOVERY'),
+('TASKRABBIT','Taskrabbit','EXECUTION','["estimate","eligibility","availability","bid","booking","status","cancel","service catalog"]','Partner API / partnership manager; brand onboarding required.','Potential external fulfillment rail for selected home-service tasks when DANI provider capacity is constrained.','https://developer.taskrabbit.com/docs/overview-taskrabbit-home-services-api','Current Taskrabbit Home Services API documents estimate, availability, bid, booking and task management; credentials require partner access.','APPROVED_FOR_DISCOVERY'),
+('DOORDASH_DRIVE','DoorDash Drive','LOGISTICS','["on-demand delivery","overflow fulfillment","delivery status"]','Limited production access; partner application/certification.','Potential courier rail for goods/package errands; DANI controls service scope and customer charge.','https://developer.doordash.com/en-US/docs/drive/overview/about_drive/','DoorDash states Drive APIs are not generally available; prospective partners must apply and production access is restricted.','APPROVED_FOR_DISCOVERY'),
+('UBER_DIRECT','Uber Direct','LOGISTICS','["delivery estimates","create delivery","delivery status","webhooks"]','OAuth/client credentials; some API access may require written approval.','Potential courier rail for goods/package logistics; DANI remains customer-facing orchestrator.','https://developer.uber.com/docs/deliveries/direct/guides/overview','Uber documents Direct API delivery estimates, creation, status and webhook support; some access may require written approval.','APPROVED_FOR_DISCOVERY'),
+('INSTACART','Instacart Developer Platform','PROCUREMENT','["shopping integration","cart/order workflows","developer API"]','Application/API access; current documentation reports ~30–40 days from access request to demo approval and production key access.','Potential grocery/restocking procurement rail subject to commercial/legal review.','https://docs.instacart.com/developer_platform_api/get_started/overview/','Instacart requires API access and reports an average integration time of about 30–40 days from access request to demo approval and production key access.','APPROVED_FOR_DISCOVERY'),
+('JOBBER','Jobber','EXECUTION','["GraphQL","clients","jobs","webhooks"]','OAuth 2.0; developer app plus connected Jobber account; marketplace app review where applicable.','Provider-system adapter for authorized DANI providers already operating in Jobber.','https://developer.getjobber.com/docs/using_jobbers_api/setting_up_webhooks/','Jobber documents GraphQL, OAuth, real-time webhooks, signature verification and at-least-once delivery; integrations should be idempotent.','APPROVED_FOR_DISCOVERY'),
+('HOUSECALL_PRO','Housecall Pro','EXECUTION','["custom integrations","API","webhooks"]','Public API available only to Pros on MAX; admin-generated API key; limited access.','Provider-system adapter for authorized DANI providers on qualifying Housecall Pro plans.','https://help.housecallpro.com/en/articles/8505035-api-overview','Housecall Pro states public API access is restricted to MAX Pros and API keys can expose account data.','APPROVED_FOR_DISCOVERY')
+ON CONFLICT (channel_code,platform_code) DO UPDATE SET
+ platform_name=excluded.platform_name,rail_type=excluded.rail_type,capabilities=excluded.capabilities,access_model=excluded.access_model,
+ d_interaction=excluded.d_interaction,authority_boundary=excluded.authority_boundary,source_url=excluded.source_url,source_note=excluded.source_note,
+ status=excluded.status,updated_at=now();
+
