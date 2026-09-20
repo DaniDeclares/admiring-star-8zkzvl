@@ -46,7 +46,7 @@ function QuoteBuilder(){
 
  const channelForClientType=(type)=>({regular_resident:'CH01',apartment_resident:'CH01',property_manager:'CH02',realtor:'CH03',business:'CH04',government:'CH05'}[type]||'CH04');
  useEffect(()=>{(async()=>{const {data:s}=await supabase.auth.getSession();if(!s.session){setError('Staff session required.');setLoading(false);return}try{
-   let resolvedClientType=clientType;
+   let resolvedClientType='business';
    if(estimateId){
      const {data:est,error:estError}=await supabase.from('dd_estimates').select('*').eq('id',estimateId).single();if(estError)throw estError;if(est){
        const resolved=Object.entries(ESTIMATE_CLIENT_TYPES).find(([,v])=>v===est.client_type)?.[0]||est.intake_answers?.originalClientType||'business';
