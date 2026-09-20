@@ -199,6 +199,17 @@ function validateQuoteLineContract(service, answers, lineItem, requestedLineItem
   }
 }
 
+function underwritingTriggered(schema, answers) {
+  return (schema?.fields || [])
+    .filter(field => field.classification === 'UNDERWRITING')
+    .some(field => {
+      const value = answers?.[field.key];
+      if (value === true) return true;
+      const normalized = String(value ?? '').trim().toLowerCase();
+      return ['heavy','severe','substantial','biohazard','smoke','high','restricted'].includes(normalized);
+    });
+}
+
 export function calculate(service, rule, answers) {
   const a = answers || {};
   const pricingType = String(rule?.pricing_type || service.pricing_type || '').toUpperCase();
@@ -231,6 +242,7 @@ export function calculate(service, rule, answers) {
   const deposit = total*Math.min(100,Math.max(0,Number(a.deposit_percent||0)))/100;
   if (model === 'BEDROOM_TIER' && Boolean(a.specialized_carpet_extraction)) reviewFlags.push('SPECIALTY_CARPET_SCOPE');
   if (model === 'BEDROOM_TIER' && Boolean(a.abandoned_property_or_furniture)) reviewFlags.push('DEBRIS_FURNITURE_SCOPE');
+  if (underwritingTriggered(service?.quote_input_schema, a)) reviewFlags.push('UNDERWRITING_REVIEW');
   if (service.sourceType !== 'DANI_SPECIALS' && service.commercial_intent_status && service.commercial_intent_status !== 'SELL_NOW') reviewFlags.push('FULFILLMENT_OR_COMMERCIAL_GATE');
   if (service.sourceType !== 'DANI_SPECIALS' && ['VARIABLE_QUOTE','BESPOKE_SOW','SOW','SOW_PROCUREMENT','QUOTE','STARTING_AT','CONFIGURED'].some(t=>pricingType.includes(t))) reviewFlags.push('SCOPE_REVIEW');
   if (travelFee>0) reviewFlags.push('TRAVEL_CONFIRMATION');
