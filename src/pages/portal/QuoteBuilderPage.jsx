@@ -61,7 +61,7 @@ function QuoteBuilder(){
  const offerRows=useMemo(()=>services.flatMap(s=>[s,...(s.offerVariants||[])]),[services]);
  const serviceBySku=useMemo(()=>new Map(offerRows.map(s=>[s.sku,s])),[offerRows]);
  const primary=lineItems[0]||null;
- const packagePreviews=useMemo(()=>lineItems.map(li=>{const s=serviceBySku.get(li.serviceSku);return s?{line:li,service:s,calculation:calculate(s,s.pricingRule||null,{...li.answers,apply_resident_discount:clientType==='regular_resident'})}:null}).filter(Boolean),[lineItems,serviceBySku]);
+ const packagePreviews=useMemo(()=>lineItems.map(li=>{const s=serviceBySku.get(li.serviceSku);return s?{line:li,service:s,calculation:calculate(s,s.pricingRule||null,{...li.answers,apply_resident_discount:clientType==='regular_resident'})}:null}).filter(Boolean),[lineItems,serviceBySku,clientType]);
  const packageCalculation=useMemo(()=>packagePreviews.reduce((acc,row)=>{for(const k of ['baseSubtotal','residentDiscount','travelFee','rushFee','materials','sourcingFee','passThrough','tax','estimatedTotal','depositDue'])acc[k]+=Number(row.calculation[k]||0);acc.reviewFlags.push(...(row.calculation.reviewFlags||[]).map(f=>row.service.sku+':'+f));if(row.calculation.needsReview)acc.needsReview=true;return acc},{baseSubtotal:0,residentDiscount:0,travelFee:0,rushFee:0,materials:0,sourcingFee:0,passThrough:0,tax:0,estimatedTotal:0,depositDue:0,reviewFlags:[],needsReview:false}),[packagePreviews]);
  const filtered=useMemo(()=>{const q=search.trim().toLowerCase();return q?services.filter(s=>`${s.name} ${s.sku} ${s.service_family||''} ${(s.offerVariants||[]).map(v=>`${v.name} ${v.sku} ${v.displayLabel||''}`).join(' ')}`.toLowerCase().includes(q)):services},[services,search]);
  const setLineAnswer=(id,key,value)=>setLineItems(items=>{
