@@ -11,15 +11,14 @@ const entryServices = [
 ];
 
 const starterRates = [
-  ["Standard 1-2BR Unit Turn", "$350 / unit"],
-  ["Deep Move-In / Reset", "$450 / unit"],
-  ["Minimum Maintenance Dispatch", "$85 / call"],
-  ["Commercial Handyman", "$55 / hour"],
-  ["Half-Day Punch List", "$200 / 4 hours"],
-  ["Full-Day Facility Blitz", "$375 / 8 hours"],
-  ["Property Inspection / Photo Log", "$125 / visit"],
-  ["Resident Welcome Packet", "$8.50 / packet"],
-  ["Custom Resident Welcome Kit", "$75 / package"],
+  ["Turnover Scout", "$125 / visit"],
+  ["Turnover Ready Basic", "$375 / unit starting"],
+  ["Turnover Ready Standard", "$650 / unit starting"],
+  ["Turnover Ready Premium", "$950 / unit starting"],
+  ["Property Condition Report", "$275 / visit"],
+  ["Move-In / Move-Out Photo Report", "$150 / report"],
+  ["Quick Admin Rescue", "$125 / sprint"],
+  ["Records Cleanup Sprint", "$350 / sprint"],
 ];
 
 const retainers = [
