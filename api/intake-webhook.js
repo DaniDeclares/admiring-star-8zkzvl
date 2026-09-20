@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma.js';
+import { createClient } from '@supabase/supabase-js';
 import { buildIntakeRoutingContext, routeIntake } from '../src/lib/operations/intakeRouting2026.js';
 import { publishOperationalEvent } from '../src/lib/operations/eventBroker2026.js';
 
@@ -16,12 +17,27 @@ function specialDuration(name, unit, price) {
  return Number(price)>=300?180:Number(price)>=150?120:60;
 }
 
+async function resolvePortalOrganization(req) {
+  const authorization = req.headers.authorization || '';
+  const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : null;
+  if (!token) return null;
+  const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data: { user } } = await client.auth.getUser(token);
+  if (!user) return null;
+  const { data: identity } = await client.from('dd_portal_identities').select('organization_id,entity_id,portal_role').eq('auth_user_id', user.id).eq('is_active', true).maybeSingle();
+  return identity?.organization_id || null;
+}
+
 export default async function handler(req,res){
  if(req.method!=='POST')return res.status(405).json({error:'This action is not available.'});
  try{
   const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,organizationName,locationAddress,timeline,budgetRange,requestedStartAt,requestedTimezone='America/New_York'}=req.body||{};
   if(!name||(!email&&!phone))return res.status(400).json({error:'Please provide your name and at least one way to contact you.'});
   const routing=routeIntake({channelType,category});
+  const portalOrganizationId = await resolvePortalOrganization(req);
   if(!routing.channel)return res.status(400).json({error:'Please select the customer type that best fits your request.'});
   const routingContext=buildIntakeRoutingContext({channelType,category});
   const serviceRef=pricingServiceId||serviceId||commercialIntent?.serviceId||null;
@@ -32,7 +48,7 @@ export default async function handler(req,res){
   let booking=null;
   const result=await prisma.$transaction(async tx=>{
    const lead=await tx.lead.create({data:{full_name:name,email:email||null,phone:phone||null,organization_name:organizationName||null,status:'new',notes:null}});
-   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:routingContext,pricingServiceId:serviceRef,commercialIntent:commercialIntent||null,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED'},status:requestState,priority:'normal'}});
+   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:routingContext,pricingServiceId:serviceRef,commercialIntent:commercialIntent||null,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED'},organization_id:portalOrganizationId||null,status:requestState,priority:'normal'}});
    if(paymentEligible){await tx.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:locationAddress||null,timeline:timeline||null,intake_answers:{serviceId:serviceRef,commercialIntent},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});}
    if(requestedStartAt){
     const start=new Date(requestedStartAt); if(Number.isNaN(start.valueOf())) throw new Error('INVALID_REQUESTED_DATE_TIME');
