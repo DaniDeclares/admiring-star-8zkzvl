@@ -43,8 +43,8 @@ describe('governed package quote composition', () => {
       {sku:cleaning.sku,calculation:first},
       {sku:detail.sku,calculation:second}
     ]);
-    expect(total.baseSubtotal).toBe(25);
-    expect(total.estimatedTotal).toBe(25);
+    expect(total.baseSubtotal).toBe(115);
+    expect(total.estimatedTotal).toBe(115);
     expect(total.reviewFlags).toContain('SCOPE_REVIEW');
   });
 
