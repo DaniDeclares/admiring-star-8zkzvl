@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS public.dd_ch01_offer_crosswalk (
   front_door_code text REFERENCES public.dd_ch01_front_doors(front_door_code),
   buying_modes jsonb NOT NULL DEFAULT '[]'::jsonb,
   default_entry_model text NOT NULL,
-  expansion_models jsonb NOT NULL DEFAULT '[]'jsonb,
+  expansion_models jsonb NOT NULL DEFAULT '[]'::jsonb,
   contract_artifact_code text NOT NULL,
   sales_question text NOT NULL,
   next_step text NOT NULL,
