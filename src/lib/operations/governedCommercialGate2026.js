@@ -124,6 +124,7 @@ export async function getChannelGovernanceDecision(serviceId, channel) {
       a.proposed_front_door AS "proposedFrontDoor",
       a.cross_channel_review AS "crossChannelReview",
       ca.eligibility_status AS "availabilityStatus",
+      pr.pricing_type AS "channelPricingType",
       EXISTS (
         SELECT 1
         FROM public.dd_service_pricing_rules pr
@@ -138,6 +139,16 @@ export async function getChannelGovernanceDecision(serviceId, channel) {
     LEFT JOIN public.dd_service_channel_availability ca
       ON ca.service_id = o.runtime_service_id
      AND ca.channel_code = a.channel_code
+    LEFT JOIN LATERAL (
+      SELECT pricing_type
+      FROM public.dd_service_pricing_rules
+      WHERE service_id = o.runtime_service_id
+        AND channel_code = ${channel}
+        AND status = 'ACTIVE'
+        AND lock_status = 'LOCKED'
+      ORDER BY effective_date DESC NULLS LAST, updated_at DESC
+      LIMIT 1
+    ) pr ON true
     WHERE a.channel_code = ${channel}
       AND a.sku = ${serviceId}
     LIMIT 1
@@ -164,6 +175,7 @@ export async function getChannelGovernanceDecision(serviceId, channel) {
     allowed: true,
     reason: 'CH02_GOVERNANCE_CLEARED',
     frontDoor: row.proposedFrontDoor,
+    pricingType: row.channelPricingType || null,
   };
 }
 
@@ -189,12 +201,15 @@ export async function resolveGovernedChannelPrice(offer, { channel, subchannel, 
   return money(cents / 100);
 }
 
-export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
+export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType } = {}) {
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
   if (offer.fulfillmentGateStatus !== 'READY') return { eligible: false, reason: 'FULFILLMENT_NOT_READY', price: null };
   if (isQuoteRequired(offer)) return { eligible: false, reason: 'QUOTE_REQUIRED', price: null };
+  if (channel === 'CH02' && QUOTE_REQUIRED_MODELS.has(String(channelPricingType || '').toUpperCase())) {
+    return { eligible: false, reason: 'CH02_CHANNEL_QUOTE_REQUIRED', price: null };
+  }
   const economics = economicGateFromOffer(offer);
   if (!economics.cleared) return { eligible: false, reason: economics.reason, price: null, marginPercent: economics.marginPercent };
   if (!channel) return { eligible: false, reason: 'CHANNEL_REQUIRED', price: null };
