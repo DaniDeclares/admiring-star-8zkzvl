@@ -11,7 +11,7 @@ const SALES_LANE_ORDER=['INBOUND','WARM','REVISIT_CALLABLE','REVISIT_ROUTING','P
 const SALES_LANE_LABELS={INBOUND:'🔥 Inbound',WARM:'🟠 Warm',REVISIT_CALLABLE:'🟡 Revisit — Callable',REVISIT_ROUTING:'🟡 Revisit — Company Routing',PARTNER:'🟢 Partner',EMAIL_ONLY:'📧 Email Only',REVISIT_NOT_CALLABLE:'⚪ Revisit — Not Yet Callable',SCREEN_ONLY:'⚪ Screen Only'};
 const SALES_DISPOSITIONS=['NOT_CONTACTED','NO_ANSWER','VOICEMAIL','RECEPTIONIST','WRONG_PERSON','DECISION_MAKER_REACHED','INTERESTED','NEEDS_INFO','QUOTE_REQUESTED','READY_TO_BUY','PAYMENT_SENT','PAYMENT_SUCCEEDED','CALL_BACK_LATER','NOT_INTERESTED','EXISTING_VENDOR_REVISIT','DO_NOT_CONTACT'];
 const WEEKLY_TARGET=1200;
-const CHANNELS=['B2C','B2B-APT','B2B-RE','B2B','B2B2C','B2G'];
+const CHANNELS=['B2C','B2B-APT','B2B-RE','B2B','B2G'];
 function Stat({label,value,detail}){return <div className="ops-stat"><span>{label}</span><strong>{value}</strong><small>{detail}</small></div>}
 function SalesRow({row,onSave}){
  const [disposition,setDisposition]=useState(row.disposition);

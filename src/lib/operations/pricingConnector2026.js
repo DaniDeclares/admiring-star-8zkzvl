@@ -5,7 +5,6 @@ const RESOLVER_CHANNEL_BY_OPERATIONS_CHANNEL = Object.freeze({
   B2B_APT: PRICING_CHANNELS.B2B,
   B2B_RE: PRICING_CHANNELS.B2B,
   B2B: PRICING_CHANNELS.B2B,
-  B2B2C: PRICING_CHANNELS.B2B2C,
   B2G: PRICING_CHANNELS.B2G,
 });
 
@@ -17,6 +16,8 @@ const SNAPSHOT_VERSION = '2026.1';
  * The operations channel is preserved exactly for the quote ledger. The
  * pricing resolver receives its supported canonical channel (for example,
  * B2B_APT and B2B_RE both resolve through the shared B2B commercial boundary).
+ * B2B2C is a commercial relationship model, not an operations/pricing channel,
+ * so it is intentionally not accepted here as a channel value.
  * No channel is guessed and no pricing is invented here.
  */
 export function connectRequestToPricing({
