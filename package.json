@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "@sentry/node": "^10.75.0",
     "@stripe/stripe-js": "^2.4.0",
     "@supabase/supabase-js": "^2.39.0",
     "lucide-react": "^0.300.0",
@@ -39,5 +40,9 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "/"
+  "homepage": "/",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "checkly": "^9.5.0"
+  }
 }
