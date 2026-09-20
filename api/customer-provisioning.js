@@ -62,6 +62,17 @@ export async function provisionCustomerPortalAccount({ req, supabase, estimate }
   if (leadError) throw leadError;
   if (!existingLead) throw new Error('The invoice customer lead could not be resolved.');
 
+  let requestOrganizationId = null;
+  if (estimate.service_request_id) {
+    const { data: sourceRequest, error: requestError } = await supabase
+      .from('service_requests')
+      .select('organization_id')
+      .eq('id', estimate.service_request_id)
+      .maybeSingle();
+    if (requestError) throw requestError;
+    requestOrganizationId = sourceRequest?.organization_id || null;
+  }
+
   const admin = getAdminClient();
   let user = await findAuthUserByEmail(admin, email);
   let createdUser = false;
@@ -120,7 +131,7 @@ export async function provisionCustomerPortalAccount({ req, supabase, estimate }
       auth_user_id: user.id,
       portal_role: 'customer',
       entity_id: leadId,
-      organization_id: estimate.organization_id || null,
+      organization_id: estimate.organization_id || requestOrganizationId || null,
       is_active: true,
     })
     .select('id,auth_user_id,portal_role,entity_id,organization_id,is_active')
