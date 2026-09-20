@@ -213,14 +213,60 @@ export async function createEstimate(supabase, body) {
   const channelCode=CHANNELS[clientType]||'CH04';
   let offer=null, service=null, rule=null;
   if(serviceSku.startsWith('DSS-')){
-    const {data:special,error:specialError}=await supabase.from('danis_specials_offers').select('service_id,family,service_name,unit,price,active,market').eq('service_id',serviceSku).eq('active',true).eq('market','GA').maybeSingle();
+    const canonicalSku=normalizeSpecialCanonicalSku(serviceSku);
+    if(!canonicalSku) throw new Error('That DANI SPECIALS identifier is not a canonical quote SKU.');
+
+    const {data:special,error:specialError}=await supabase
+      .from('danis_specials_offers')
+      .select('service_id,family,service_name,unit,price,active,market')
+      .eq('service_id',serviceSku)
+      .eq('active',true)
+      .eq('market','GA')
+      .maybeSingle();
     if(specialError) throw specialError;
     if(!special) throw new Error('That DANI SPECIALS service could not be resolved.');
-    offer={canonical_sku:special.service_id,service_name:special.service_name,division:specialDivision(special.family),commercial_offer_status:'SELL_NOW',fulfillment_gate_status:'READY'};
-    service={sku:special.service_id,name:special.service_name,service_family:special.family,pricing_type:'SPECIALS_OWNER_EXECUTABLE',billing_cycle:'ONETIME',starting_price:Number(special.price),public_price_display:`$${Number(special.price).toFixed(2)}`,commercial_intent_status:'SELL_NOW',sourceType:'DANI_SPECIALS',specialUnit:special.unit,specialPrice:Number(special.price)};
+
+    const {data:governanceRows,error:governanceError}=await supabase
+      .from('dd_governed_service_offers')
+      .select('canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,runtime_service_id')
+      .eq('canonical_sku',canonicalSku);
+    if(governanceError) throw governanceError;
+
+    const sellNowOffer=(governanceRows||[]).find(row=>row.commercial_offer_status==='SELL_NOW');
+    if((governanceRows||[]).length && !sellNowOffer){
+      throw new Error('That DANI SPECIALS offer is blocked by canonical commercial governance.');
+    }
+    if(!sellNowOffer?.runtime_service_id){
+      throw new Error('That DANI SPECIALS offer has no governed quoteable counterpart.');
+    }
+
+    const {data:governedService,error:serviceError}=await supabase
+      .from('services')
+      .select('*')
+      .eq('id',sellNowOffer.runtime_service_id)
+      .maybeSingle();
+    if(serviceError) throw serviceError;
+    if(!governedService) throw new Error('The canonical service record could not be resolved.');
+
+    const namesMatch=String(governedService.name||sellNowOffer.service_name||'').trim().toLowerCase()===String(special.service_name||'').trim().toLowerCase();
+    const priceMatches=Number(governedService.base_price_cents||0)===Math.round(Number(special.price)*100);
+    if(!namesMatch || !priceMatches){
+      throw new Error('DANI SPECIALS price conflict requires commercial adjudication before quoting.');
+    }
+
+    offer=sellNowOffer;
+    service=governedService;
+    const rules=await loadRules(supabase,service.id,channelCode);
+    rule=rules.find(r=>r.base_price_cents!=null)||rules[0]||null;
   } else {
-    const { data: governedOffer, error: offerError } = await supabase.from('dd_governed_service_offers').select('canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,runtime_service_id').eq('canonical_sku',serviceSku).neq('commercial_offer_status','DO_NOT_SELL').order('commercial_offer_status',{ascending:true}).limit(1).maybeSingle();
+    const { data: governedOffers, error: offerError } = await supabase
+      .from('dd_governed_service_offers')
+      .select('canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,runtime_service_id')
+      .eq('canonical_sku',serviceSku)
+      .neq('commercial_offer_status','DO_NOT_SELL')
+      .order('commercial_offer_status',{ascending:true});
     if(offerError) throw offerError;
+    const governedOffer=(governedOffers||[]).find(row=>row.commercial_offer_status==='SELL_NOW') || governedOffers?.[0];
     if(!governedOffer?.runtime_service_id) throw new Error('That service is not currently quoteable.');
     const { data: governedService, error: serviceError } = await supabase.from('services').select('*').eq('id',governedOffer.runtime_service_id).maybeSingle();
     if(serviceError) throw serviceError;
