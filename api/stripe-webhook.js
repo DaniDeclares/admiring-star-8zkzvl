@@ -4,6 +4,7 @@ import { nextStateAfterPayment, assertTransition } from '../src/lib/operations/w
 import { reconcileStripePayment } from '../src/lib/operations/accountingReconciliation2026.js';
 import { publishPaymentReconciled } from '../src/lib/operations/eventBroker2026.js';
 import { getGovernedCommercialOffer } from '../src/lib/operations/governedCommercialGate2026.js';
+import { captureServer } from '../src/lib/posthogAnalyticsServer.js';
 
 const secretKey=process.env.STRIPE_SECRET_KEY;
 const webhookSecret=process.env.STRIPE_WEBHOOK_SECRET;
@@ -146,8 +147,9 @@ export default async function handler(req,res){
     return {status:'RECONCILED',job,reconciliation};
    });
    if(result.status==='IDEMPOTENT_REPLAY')return res.status(200).json({received:true,idempotent:true});
+   await captureServer('payment_completed',{request_id:requestId,service_id:serviceId,payment_state:'completed',transaction_status:result.status,job_reference:result.job?.public_reference||undefined,route:'/api/stripe-webhook'});
    console.log(`B2C payment accepted; request ${requestId} -> job ${result.job.public_reference}.`);
-  }catch(error){console.error('Failed to transition/reconcile paid B2C request:',error.message);return res.status(500).json({error:'Payment received but operational/accounting transition failed'});}
+  }catch(error){await captureServer('payment_reconciliation_failed',{request_id:requestId,service_id:String(session.metadata?.service_id||'').trim()||undefined,error_type:'operational_transition',route:'/api/stripe-webhook'});console.error('Failed to transition/reconcile paid B2C request:',error.message);return res.status(500).json({error:'Payment received but operational/accounting transition failed'});}
  }else if(changeOrderId){
   try{
    await prisma.$transaction(async tx=>{const reconciliation=await reconcileStripePayment(event,tx);await publishPaymentReconciled(reconciliation,tx);});

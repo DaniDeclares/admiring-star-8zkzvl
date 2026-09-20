@@ -22,6 +22,7 @@ export default function PayPage(){
    const r=await fetch('/api/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({requestId,serviceId,email})});
    const d=await r.json();
    if(!r.ok||!d.success||!d.url)throw new Error(d.error||'We could not open secure checkout right now.');
+   captureServiceLifecycle('payment_checkout_opened',{service_id:serviceId,request_id:requestId,payment_state:'checkout_opened',route:'/pay'});
    window.location.href=d.url;
   }catch(err){captureServiceLifecycle('payment_failed',{service_id:serviceId,request_id:requestId,payment_state:'failed',route:'/pay'});setError(err.message||'We could not open secure checkout right now.');setStatus('error');}
  };

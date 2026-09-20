@@ -32,7 +32,8 @@ export default function ServiceCategoryPage(){
  // covering very different jobs, so its page splits into 5 sub-sections
  // ("ecosystems") instead of one flat list. Every other bucket keeps the
  // single flat list it always had.
- const hidePublicPrice=slug==='government-procurement';\n const sections=useMemo(()=>{
+ const hidePublicPrice=slug==='government-procurement';
+ const sections=useMemo(()=>{
   if(!match)return [];
   if(match.bucket.key==='home-resident-concierge'){
    return groupServicesByEcosystem(match.items).map(({ecosystem,items})=>({label:ecosystem.label,groups:groupedServices(items)}));
