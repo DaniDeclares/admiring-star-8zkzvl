@@ -69,8 +69,8 @@ BEGIN
         jsonb_build_object('sku','DNI-01A-025','label','High-Reach Dust & Cobweb Detail Add-on','component_role','COMPANION')
       ),
       'routing_flags', jsonb_build_array(
-        jsonb_build_object('key','specialized_carpet_extraction','resolution','SPECIALTY_CARPET_SCOPE'),
-        jsonb_build_object('key','abandoned_property_or_furniture','resolution','DEBRIS_FURNITURE_SCOPE')
+        jsonb_build_object('key','specialized_carpet_extraction','resolution','SPECIALTY_CARPET_SCOPE','target_sku','DNI-01A-036'),
+        jsonb_build_object('key','abandoned_property_or_furniture','resolution','DEBRIS_FURNITURE_SCOPE','target_sku','DNI-01A-041')
       )
     )
   WHERE id = v_service_id;
