@@ -167,6 +167,28 @@ export async function getChannelGovernanceDecision(serviceId, channel) {
   };
 }
 
+export async function resolveGovernedChannelPrice(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
+  if (!offer) return null;
+  if (channel !== 'CH02') {
+    return resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident });
+  }
+
+  const rows = await prisma.$queryRaw`
+    SELECT base_price_cents
+    FROM public.dd_service_pricing_rules
+    WHERE service_id = ${offer.runtimeServiceId}
+      AND channel_code = ${channel}
+      AND status = 'ACTIVE'
+      AND lock_status = 'LOCKED'
+    ORDER BY effective_date DESC NULLS LAST, updated_at DESC
+    LIMIT 1
+  `;
+
+  const cents = rows[0]?.base_price_cents == null ? null : Number(rows[0].base_price_cents);
+  if (!Number.isFinite(cents) || cents <= 0) return null;
+  return money(cents / 100);
+}
+
 export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
