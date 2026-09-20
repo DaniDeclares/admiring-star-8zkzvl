@@ -71,3 +71,5 @@ describe('LIVE_READY checkout release gate', () => {
     ).eligible).toBe(true);
   });
 });
+
+// CI release-contract verification pass.
