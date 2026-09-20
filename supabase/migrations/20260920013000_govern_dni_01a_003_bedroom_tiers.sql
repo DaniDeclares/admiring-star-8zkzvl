@@ -29,11 +29,17 @@ BEGIN
     quote_engine_version = '2026-09-20-bedroom-tier-v1',
     quote_input_schema = jsonb_build_object(
       'version','2026-09-20-bedroom-tier-v1',
+      'ui_mode','SPECIALIZED_CLEANING',
       'pricing_model','BEDROOM_TIER',
       'fields', jsonb_build_array(
         jsonb_build_object('key','bedroom_count','type','select','label','Bedroom count','options',jsonb_build_array('1','2','3','4')),
-        jsonb_build_object('key','layout_type','type','select','label','Layout type','options',jsonb_build_array('apartment','townhome','house','other')),
+        jsonb_build_object('key','bathroom_count','type','select','label','Bathroom count','options',jsonb_build_array('1','2','3','4+')),
+        jsonb_build_object('key','layout_type','type','select','label','Layout environment','options',jsonb_build_array('apartment','townhome','single_family_home','commercial_unit')),
+        jsonb_build_object('key','occupancy','type','select','label','Occupancy','options',jsonb_build_array('vacant','occupied')),
+        jsonb_build_object('key','mess_degree','type','select','label','Degree of mess','options',jsonb_build_array('standard','moderate','heavy','severe')),
+        jsonb_build_object('key','odor_level','type','select','label','Odor level','options',jsonb_build_array('none','light','heavy','severe')),
         jsonb_build_object('key','severe_pet_mess','type','boolean','label','Severe pet mess / heavy soil (+$150)'),
+        jsonb_build_object('key','severe_odor_smoke','type','boolean','label','Severe odor / smoke neutralization required'),
         jsonb_build_object('key','specialized_carpet_extraction','type','boolean','label','Specialized carpet extraction required'),
         jsonb_build_object('key','abandoned_property_or_furniture','type','boolean','label','Abandoned property / furniture removal required'),
         jsonb_build_object('key','scope_summary','type','text','label','Scope summary')
@@ -46,6 +52,12 @@ BEGIN
       ),
       'modifiers', jsonb_build_array(
         jsonb_build_object('key','severe_pet_mess','label','Severe pet mess / heavy soil','amount',150,'apply_before_resident_discount',true)
+      ),
+      'companion_lines', jsonb_build_array(
+        jsonb_build_object('sku','DNI-01A-036','label','Specialized Carpet Fiber Extraction Add-on','component_role','COMPANION'),
+        jsonb_build_object('sku','DNI-01A-041','label','Abandoned Property & Furniture / Debris Support','component_role','COMPANION'),
+        jsonb_build_object('sku','DNI-01A-020','label','Interior Appliance Deep-Detail Add-on','component_role','COMPANION'),
+        jsonb_build_object('sku','DNI-01A-025','label','High-Reach Dust & Cobweb Detail Add-on','component_role','COMPANION')
       ),
       'routing_flags', jsonb_build_array(
         jsonb_build_object('key','specialized_carpet_extraction','resolution','SPECIALTY_CARPET_SCOPE'),
