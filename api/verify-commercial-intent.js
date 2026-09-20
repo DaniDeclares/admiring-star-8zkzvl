@@ -1,5 +1,5 @@
 import prisma from '../lib/prisma.js';
-import { checkoutEligibility, getGovernedCommercialOffer, normalizeChannel, resolveGovernedPrice, resolveVerifiedCommunity } from '../src/lib/operations/governedCommercialGate2026.js';
+import { checkoutEligibility, getChannelGovernanceDecision, getGovernedCommercialOffer, normalizeChannel, resolveGovernedPrice, resolveVerifiedCommunity } from '../src/lib/operations/governedCommercialGate2026.js';
 
 const CHANNELS_BY_DIVISION=Object.freeze({'01':['B2C','B2B_APT'],'02':['B2B_APT','B2B_RE','B2B','B2G'],'03':['B2B_RE','B2B_APT','B2B'],'04':['B2B','B2B_RE','B2B_APT','B2G'],'05':['B2C','B2B_APT','B2B_RE','B2G'],'06':['B2B','B2B_RE','B2G'],'07':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'08':['B2B_RE','B2B','B2G'],'09':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'10':['B2C','B2B_APT','B2B_RE','B2B'],'11':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'12':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'13':['B2B_APT','B2B_RE','B2B','B2G']});
 const json=(res,status,payload)=>res.status(status).json(payload);
@@ -69,6 +69,12 @@ export default async function handler(req,res){try{
  const channel=normalizeChannel(channelType,body.channel);
  const subchannel=String(body.subchannelCode||'').trim();
  const { verified: isVerifiedResident } = await resolveVerifiedCommunity(req);
+ const channelGovernance = channel === 'CH02'
+   ? await getChannelGovernanceDecision(db.serviceId, channel)
+   : { allowed: true, reason: 'LEGACY_CHANNEL_GATE' };
+ if (!channelGovernance.allowed) {
+   return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,checkoutEligible:false,intakeAvailable:true,frozenPriceSnapshot:null,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.',gateReason:channelGovernance.reason});
+ }
  const gate=checkoutEligibility(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident});
  const expectedPrice=resolveGovernedPrice(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident});
  if(!gate.eligible)return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frozenPriceSnapshot:gate.reason==='QUOTE_REQUIRED'?null:expectedPrice,checkoutEligible:false,intakeAvailable:true,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.',gateReason:gate.reason});
