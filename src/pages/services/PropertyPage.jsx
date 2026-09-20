@@ -18,9 +18,14 @@ const priceLabel = (service) => {
   if (service.publicPriceDisplay) return service.publicPriceDisplay;
   if (service.baseCustomerPrice != null) {
     const value = Number(service.baseCustomerPrice);
-    return service.model === "RECURRING"
-      ? `Starting at $${value.toLocaleString("en-US", { maximumFractionDigits: 2 })} / month`
-      : `Starting at $${value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+    const formatted = value.toLocaleString("en-US", { maximumFractionDigits: 2 });
+    if (service.model === "FIXED") return `${formatted}`;
+    if (service.model === "STARTING_AT") return `Starting at ${formatted}`;
+    if (service.model === "RECURRING") {
+      return service.billingCycle === "MONTHLY"
+        ? `Starting at ${formatted} / month`
+        : `Starting at ${formatted}`;
+    }
   }
   return "Request a quote";
 };
