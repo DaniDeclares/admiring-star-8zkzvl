@@ -15,6 +15,25 @@ function Field({label,value,onChange,type='text',placeholder=''}){return <label 
 function SelectField({label,value,onChange,options}){return <label style={{display:'grid',gap:6,fontWeight:700,color:'#3d2b30'}}><span style={{fontSize:13}}>{label}</span><select value={value??''} onChange={e=>onChange(e.target.value)} style={inputStyle}><option value="">Select…</option>{options.map(o=><option key={String(o.value??o)} value={String(o.value??o)}>{String(o.label??o).replace(/_/g,' ')}</option>)}</select></label>}
 function DynamicQuestion({q,value,onChange}){if(q.type==='boolean')return <label style={{display:'flex',alignItems:'center',gap:8,fontWeight:700,color:'#3d2b30'}}><input type="checkbox" checked={Boolean(value)} onChange={e=>onChange(e.target.checked)}/>{q.label}</label>;if(q.options?.length){const options=q.options.map(o=>typeof o==='object'?o:{value:o,label:o});return <SelectField label={q.label} value={value} onChange={onChange} options={options}/>;}return <Field label={q.label} value={value??''} onChange={onChange} type={q.type==='number'?'number':'text'}/>}
 
+function SchemaCommercialInputs({schema,answers,onChange}) {
+ const inputs=schema?.commercial_inputs||[];
+ if(!inputs.length)return null;
+ return <div style={{marginTop:14,padding:13,borderRadius:12,background:'#fff',border:'1px solid #eadfc9'}}>
+   <div style={{fontWeight:900,color:'#5a1624',marginBottom:8}}>Commercial controls</div>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))',gap:12}}>
+    {inputs.map(q=>q.type==='boolean'
+      ? <label key={q.key} style={check}><input type="checkbox" checked={Boolean(answers[q.key])} onChange={e=>onChange(q.key,e.target.checked)}/>{q.label}</label>
+      : <Field key={q.key} label={q.label} value={answers[q.key]} onChange={v=>onChange(q.key,v)} type={q.type==='number'?'number':'text'} placeholder={q.placeholder||''}/>)}
+   </div>
+ </div>;
+}
+function SchemaContractNotice({schema}) {
+ if(schema?.fields?.length || schema?.commercial_inputs?.length)return null;
+ return <div style={{marginTop:14,padding:12,borderRadius:10,background:'#fff7e6',border:'1px solid #e2c27b',color:'#6b4d16',fontSize:12}}>
+   This service does not currently declare a quote-input contract. It can be captured for scope, but quote generation remains subject to review until its service schema is governed.
+ </div>;
+}
+
 function QuoteBuilder(){
  const params=useMemo(()=>new URLSearchParams(window.location.search),[]);
  const requestId=params.get('requestId')||'', estimateId=params.get('estimateId')||'', initialServiceSku=params.get('service')||'';
@@ -70,8 +89,7 @@ function QuoteBuilder(){
       {schema.ui_mode&&<div style={{marginTop:14,marginBottom:8,fontWeight:900,color:'#8b6b1f',letterSpacing:.4}}>{schema.ui_mode==='SPECIALIZED_CLEANING'?'CUSTOM CLEANING INTAKE':schema.ui_mode==='SPECIALIZED_HOLIDAY'?'CUSTOM HOLIDAY / SEASONAL INTAKE':'SERVICE-SPECIFIC INTAKE'}</div>}
       {questions.length>0&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:12,marginTop:14}}>{questions.map(q=><DynamicQuestion key={q.key} q={q} value={li.answers[q.key]} onChange={v=>setLineAnswer(li.id,q.key,v)}/>)}</div>}
       {schema.ui_mode==='SPECIALIZED_CLEANING'&&<div style={{marginTop:14,padding:13,borderRadius:12,background:'#fff',border:'1px solid #eadfc9'}}><div style={{fontWeight:900,color:'#5a1624',marginBottom:8}}>Cleaning companion lines</div><div style={{display:'grid',gap:8}}>{(schema.companion_lines||[]).map(companion=>{const checked=lineItems.some(x=>x.parentLineId===li.id&&x.serviceSku===companion.sku);const target=serviceBySku.get(companion.sku);return <label key={companion.sku} style={{display:'flex',gap:9,alignItems:'center',padding:9,borderRadius:9,border:'1px solid #e3d6bd',background:checked?'#f7edd4':'#fff',cursor:'pointer'}}><input type="checkbox" checked={checked} disabled={!target} onChange={e=>e.target.checked?addCompanion(li,companion):setLineItems(items=>items.filter(x=>!(x.parentLineId===li.id&&x.serviceSku===companion.sku)))} /> <span><strong>{companion.label}</strong>{target&&<span style={{display:'block',fontSize:11,color:'#6d5b60'}}>{target.sku} · {target.publicPrice||'quote required'}</span>}</span></label>})}</div></div>}
-      {!schema.ui_mode?.startsWith('SPECIALIZED_')&&<><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))',gap:12,marginTop:14}}><Field label="Quantity / units" value={li.answers.quantity} onChange={v=>setLineAnswer(li.id,'quantity',v)} type="number"/><Field label={hourly?'Hours (drives price)':'Hours / labor estimate'} value={li.answers.hours} onChange={v=>setLineAnswer(li.id,'hours',v)} type="number"/><Field label="Miles one way" value={li.answers.miles_one_way} onChange={v=>setLineAnswer(li.id,'miles_one_way',v)} type="number"/><Field label="Materials cost" value={li.answers.materials_cost} onChange={v=>setLineAnswer(li.id,'materials_cost',v)} type="number"/><Field label="Pass-through cost" value={li.answers.pass_through_cost} onChange={v=>setLineAnswer(li.id,'pass_through_cost',v)} type="number"/><Field label="Tax rate %" value={li.answers.tax_rate_percent} onChange={v=>setLineAnswer(li.id,'tax_rate_percent',v)} type="number"/><Field label="Deposit %" value={li.answers.deposit_percent} onChange={v=>setLineAnswer(li.id,'deposit_percent',v)} type="number"/></div>
-      <div style={{display:'flex',gap:16,flexWrap:'wrap',marginTop:12}}><label style={check}><input type="checkbox" checked={Boolean(li.answers.apply_standard_travel)} onChange={e=>setLineAnswer(li.id,'apply_standard_travel',e.target.checked)}/> Standard travel rule</label><label style={check}><input type="checkbox" checked={Boolean(li.answers.rush)} onChange={e=>setLineAnswer(li.id,'rush',e.target.checked)}/> 24-hour / rush (+25%)</label></div></>}
+      <SchemaContractNotice schema={schema}/><SchemaCommercialInputs schema={schema} answers={li.answers} onChange={(key,value)=>setLineAnswer(li.id,key,value)}/>
       {calc&&<div style={{marginTop:12,padding:12,borderRadius:10,background:'#fffaf0',border:'1px solid #eadfc9',display:'flex',justifyContent:'space-between',gap:10,flexWrap:'wrap'}}><span><strong>Live component estimate</strong>{calc.reviewFlags?.length>0&&<span style={{display:'block',fontSize:12,color:'#8a1d2d',marginTop:3}}>{calc.reviewFlags.map(f=>REVIEW_FLAG_LABELS[f]||f).join(' · ')}</span>}</span><strong style={{fontSize:18,color:'#5a1624'}}>${Number(calc.estimatedTotal||0).toFixed(2)}</strong></div>}
     </div>})}</div>}
    </section>
