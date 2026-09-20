@@ -212,6 +212,7 @@ export default function PortalAccessPage() {
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
     if(selected?.key==='provider' && !selectedServiceCount)return setError('Select at least one specific service you can fulfill.');
     setBusy(true);
+    capture('signup_started',{route:'/portal/access',account_type:selected?.key||'unknown',channel:selected?.channel||undefined});
     try{
     await submitInner();
     }catch(e){
@@ -224,6 +225,7 @@ export default function PortalAccessPage() {
     // with Supabase Auth's own signup rate limit (confirmed in project logs:
     // consecutive 429s on /auth/v1/signup within seconds of each other).
     setBusy(false);
+    capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',channel:selected?.channel||undefined,error_type:'unexpected'});
     const message = e?.message ? String(e.message) : '';\n    setError(message || 'We could not complete account creation. Please try again once; if the problem persists, contact DANI DECLARES with the exact message shown here.');
     }
   };
@@ -281,7 +283,7 @@ export default function PortalAccessPage() {
         inviteTokenHash:selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
       },
     });
-    if(stagingError){setBusy(false);return setError(`Something interrupted account creation: ${stagingError}`);}
+    if(stagingError){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'staging'});return setError(`Something interrupted account creation: ${stagingError}`);}
 
     const {data,error:authError}=await supabase.auth.signUp({email:normalizedEmail,password:form.password,options:{emailRedirectTo:`${SITE_URL}/portal/login?intake=${encodeURIComponent(stagingId)}`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     // A staging row can be left behind here (signup failed, or the email
@@ -290,14 +292,14 @@ export default function PortalAccessPage() {
     // session for that same email, so it's inert, not a leak. Resubmitting
     // the form reuses/refreshes the same pending row (see the partial unique
     // index in the migration) rather than piling up duplicates.
-    if(authError){setBusy(false);return setError(isRateLimitError(authError.message)?'Too many signup attempts in a short time. Please wait about a minute before trying again -- clicking repeatedly makes this take longer, not shorter.':authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
+    if(authError){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'auth',error_code:isRateLimitError(authError.message)?'RATE_LIMIT':'AUTH_ERROR'});return setError(isRateLimitError(authError.message)?'Too many signup attempts in a short time. Please wait about a minute before trying again -- clicking repeatedly makes this take longer, not shorter.':authError.message);} if(!data.user){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'no_user'});return setError('Account could not be created.');}
     // Supabase deliberately returns a fake success with no error and no new
     // identity when signUp() is called with an email that already belongs to
     // a confirmed account, to prevent account enumeration. data.user.identities
     // is the documented way to detect that case -- without this check, someone
     // who already has an account gets told "check your email to confirm" for an
     // account that was never actually created, which is actively misleading.
-    if(data.user.identities && data.user.identities.length===0){setBusy(false);return setError('An account with this email already exists. Sign in at the login page, or use "Forgot password" there if you don’t remember your password.');}
+    if(data.user.identities && data.user.identities.length===0){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'existing_account'});return setError('An account with this email already exists. Sign in at the login page, or use "Forgot password" there if you don’t remember your password.');}
 
     if(!data.session){
       // No session yet -- email confirmation is required. The intake payload
@@ -305,6 +307,7 @@ export default function PortalAccessPage() {
       // finishes the writes once the applicant confirms and a real session
       // exists, in whichever browser that happens to be (see
       // PortalLoginPage.jsx reading the ?intake= query param).
+      capture('signup_completed',{route:'/portal/access',account_type:selected?.key||'unknown',signup_mode:'email_confirmation'});
       capture('provider_application_submitted',{route:'/portal/access'});
       setBusy(false);setDone('Your account is created. Check your email to confirm it, then sign in — the rest of your onboarding will finish automatically.');setMode('done');
       return;
@@ -314,8 +317,8 @@ export default function PortalAccessPage() {
     // staged writes immediately, through the same RPC PortalLoginPage uses,
     // instead of duplicating the insert logic here.
     const {data:result,error:completeError}=await supabase.rpc('dd_consume_provider_intake_staging',{p_staging_id:stagingId});
-    if(completeError || !result?.success){setBusy(false);return setError(`Account created, but ${(completeError?.message||result?.error||'portal setup needs attention.').replace(/^Account created, but /i,'')}`);}
-    setBusy(false);setDone('Your account is ready.');setMode('done');
+    if(completeError || !result?.success){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'portal_setup'});return setError(`Account created, but ${(completeError?.message||result?.error||'portal setup needs attention.').replace(/^Account created, but /i,'')}`);}
+    capture('signup_completed',{route:'/portal/access',account_type:selected?.key||'unknown',signup_mode:'immediate_session'});setBusy(false);setDone('Your account is ready.');setMode('done');
   };
 
   if(inviteChecking)return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">VERIFYING RESIDENT ACCESS</p><h1>Connecting you to your property</h1><p>Please wait while we verify the invitation from your property management team.</p></div></main>;
