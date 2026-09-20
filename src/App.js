@@ -39,6 +39,7 @@ import ProviderProfilePage from "./pages/portal/ProviderProfilePage.jsx";
 import ProviderServicesPage from "./pages/portal/ProviderServicesPage.jsx";
 import ProviderW9Page from "./pages/portal/ProviderW9Page.jsx";
 import ProviderMessagesPage from "./pages/portal/ProviderMessagesPage.jsx";
+import ProviderFieldPage from "./pages/portal/ProviderFieldPage.jsx";
 import QuoteBuilderPage from "./pages/portal/QuoteBuilderPage.jsx";
 import SavedQuotesPage from "./pages/portal/SavedQuotesPage.jsx";
 import EstimateReviewCockpitPage from "./pages/portal/EstimateReviewCockpitPage.jsx";
@@ -111,6 +112,7 @@ export default function App() {
         <Route path="/portal/settings" element={<NotificationSettingsPage />} />
         <Route path="/portal/provider-agreement" element={<ProviderAgreementPage />} />
         <Route path="/portal/vendor-onboarding" element={<VendorOnboardingUploadPage />} />
+        <Route path="/portal/field" element={<ProviderFieldPage />} />
         <Route path="/portal/assignments" element={<ProviderAssignmentsPage />} />
         <Route path="/portal/schedule" element={<ProviderSchedulePage />} />
         <Route path="/portal/checklist" element={<ProviderChecklistPage />} />

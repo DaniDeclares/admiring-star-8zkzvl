@@ -823,6 +823,50 @@ export default async function handler(req, res) {
       if (error) return fail(res, error.message || 'Could not load resident invitations.', 400);
       return ok(res, { invites: data || [] });
     }
+    if (action === 'field_event') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const providerId = context.isStaff ? payload.providerId : context.identity.entity_id;
+      const { jobId, assignmentId, eventType, latitude, longitude, accuracyMeters, metadata = {} } = payload;
+      const allowed = new Set(['ASSIGNMENT_VIEWED','EN_ROUTE','ARRIVED','DEPARTED','WORK_STARTED','WORK_PAUSED','WORK_RESUMED','WORK_COMPLETED','CHECKLIST_STARTED','CHECKLIST_COMPLETED','EVIDENCE_ATTACHED','BLOCKED','REWORK_REQUESTED','CLOSEOUT_SUBMITTED','LOCATION_PING']);
+      if (!jobId || !eventType || !allowed.has(eventType)) return fail(res, 'jobId and a supported field event are required.');
+      const { data: job, error: jobError } = await context.supabase.from('dd_jobs').select('id,assigned_to,job_status').eq('id', jobId).single();
+      if (jobError || !job) return fail(res, 'Job not found.', 404);
+      if (!context.isStaff && String(job.assigned_to || '') !== String(providerId)) return fail(res, 'Job is not assigned to this provider.', 403);
+      const { data: event, error: eventError } = await context.supabase.from('dd_provider_field_events').insert({
+        provider_id: providerId, job_id: jobId, assignment_id: assignmentId || null, event_type: eventType,
+        latitude: latitude == null ? null : Number(latitude), longitude: longitude == null ? null : Number(longitude),
+        accuracy_meters: accuracyMeters == null ? null : Number(accuracyMeters), source: 'DANI_FIELD', metadata
+      }).select().single();
+      if (eventError) throw eventError;
+
+      const now = new Date().toISOString();
+      if (eventType === 'WORK_STARTED') {
+        const { data: openEntry } = await context.supabase.from('dd_provider_time_entries').select('id').eq('provider_id', providerId).eq('job_id', jobId).in('entry_status',['OPEN','PAUSED']).limit(1).maybeSingle();
+        if (!openEntry) {
+          await context.supabase.from('dd_provider_time_entries').insert({
+            provider_id: providerId, job_id: jobId, assignment_id: assignmentId || null, time_type: 'ON_SITE',
+            entry_status: 'OPEN', started_at: now,
+            start_latitude: latitude == null ? null : Number(latitude), start_longitude: longitude == null ? null : Number(longitude),
+            start_accuracy_meters: accuracyMeters == null ? null : Number(accuracyMeters), source: 'DANI_FIELD'
+          });
+        }
+        await context.supabase.from('dd_jobs').update({ job_status: 'in_progress' }).eq('id', jobId);
+      } else if (eventType === 'WORK_PAUSED') {
+        const { data: entry } = await context.supabase.from('dd_provider_time_entries').select('id').eq('provider_id', providerId).eq('job_id', jobId).eq('entry_status','OPEN').order('started_at',{ascending:false}).limit(1).maybeSingle();
+        if (entry) await context.supabase.from('dd_provider_time_entries').update({ entry_status:'PAUSED', updated_at:now }).eq('id', entry.id);
+      } else if (eventType === 'WORK_RESUMED') {
+        const { data: entry } = await context.supabase.from('dd_provider_time_entries').select('id').eq('provider_id', providerId).eq('job_id', jobId).eq('entry_status','PAUSED').order('started_at',{ascending:false}).limit(1).maybeSingle();
+        if (entry) await context.supabase.from('dd_provider_time_entries').update({ entry_status:'OPEN', updated_at:now }).eq('id', entry.id);
+      } else if (eventType === 'WORK_COMPLETED') {
+        const { data: entries } = await context.supabase.from('dd_provider_time_entries').select('id,entry_status').eq('provider_id', providerId).eq('job_id', jobId).in('entry_status',['OPEN','PAUSED']);
+        for (const entry of entries || []) await context.supabase.from('dd_provider_time_entries').update({
+          entry_status:'CLOSED', ended_at:now, end_latitude: latitude == null ? null : Number(latitude),
+          end_longitude: longitude == null ? null : Number(longitude), end_accuracy_meters: accuracyMeters == null ? null : Number(accuracyMeters),
+          updated_at:now
+        }).eq('id', entry.id);
+      }
+      return ok(res, { fieldEvent: event });
+    }
     if (action === 'assignment_response') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const providerId = context.isStaff ? payload.providerId : context.identity.entity_id;

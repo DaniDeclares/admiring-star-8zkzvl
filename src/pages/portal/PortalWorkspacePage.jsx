@@ -102,6 +102,7 @@ export default function PortalWorkspacePage() {
     {error && <div className="portal-alert" role="alert">{error}</div>}{message && <div className="portal-success" role="status">{message}</div>}
     {isProvider ? (isApprovedProvider ? <>
       <div className="portal-summary-grid">
+        <Link className="portal-summary-tile" to="/portal/field"><strong>Open DANI FIELD</strong><span>Today’s field workspace</span></Link>
         <Link className="portal-summary-tile" to="/portal/assignments"><strong>{openAssignments}</strong><span>Assignment{openAssignments === 1 ? '' : 's'} awaiting response</span></Link>
         <Link className="portal-summary-tile" to="/portal/schedule"><strong>{nextAppointment ? formatDate(nextAppointment.starts_at) : 'None scheduled'}</strong><span>Next appointment</span></Link>
         <Link className="portal-summary-tile" to="/portal/checklist"><strong>{openTasks}</strong><span>Open checklist item{openTasks === 1 ? '' : 's'}</span></Link>
