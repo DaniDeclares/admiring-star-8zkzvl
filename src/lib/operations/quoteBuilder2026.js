@@ -43,7 +43,6 @@ function buildSpecialRow(s) {
 export function resolveCanonicalOffers(governed, specials, governedStatusBySku = new Map()) {
   const governedBySku = new Map(governed.map(row => [row.sku, row]));
   const resolved = [];
-  const consumedSpecialSkus = new Set();
 
   for (const special of specials) {
     const canonicalSku = special.canonicalSku;
