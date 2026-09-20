@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import RequireStaffAuth from '../../components/auth/RequireStaffAuth.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
-import { calculate, isHourlyBilled } from '../../lib/operations/quoteBuilder2026.js';
+import { calculate } from '../../lib/operations/quoteBuilder2026.js';
 
 const ESTIMATE_CLIENT_TYPES={regular_resident:'other',apartment_resident:'renter',property_manager:'property_manager',realtor:'realtor',business:'business',government:'other'};
 const CLIENT_TYPES=[['regular_resident','Regular Resident'],['apartment_resident','Apartment Resident'],['property_manager','Property Management / Apartment'],['realtor','Real Estate Office / Brokerage'],['business','Business / Commercial'],['government','Government / Institutional']];
