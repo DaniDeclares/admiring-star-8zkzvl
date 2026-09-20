@@ -256,7 +256,7 @@ async function getPropertyManagerProperties(supabase, identity) {
   return data || [];
 }
 async function getCustomerSnapshot(supabase, identity, role) {
-  const isOrgScoped = ['property_manager', 'procurement'].includes(role);
+  const isOrgScoped = Boolean(identity?.organization_id);
   const scopeId = isOrgScoped ? identity.organization_id : identity.entity_id;
   const residentCommunity = await getResidentCommunityStatus(supabase, identity);
   const properties = await getPropertyManagerProperties(supabase, identity);
@@ -266,18 +266,27 @@ async function getCustomerSnapshot(supabase, identity, role) {
   const { data: requests, error: requestError } = await requestQuery.order('created_at', { ascending: false }).limit(100);
   if (requestError) throw requestError;
   const requestIds = (requests || []).map(row => row.id);
-  if (!requestIds.length) return { requests: requests || [], jobs: [], invoices: [], changes: [], messages: [], residentCommunity, properties };
+  if (!requestIds.length) return { requests: requests || [], jobs: [], invoices: [], estimates: [], changes: [], messages: [], residentCommunity, properties };
+  const { data: estimates, error: estimateError } = await supabase.from('dd_estimates')
+    .select('id,public_reference,estimate_status,client_name,client_email,organization_name,location_address,city,state,zip_code,timeline,requested_date,base_subtotal,addon_subtotal,travel_fee,rush_fee,supplies_fee,pass_through_fee,tax_amount,estimated_total,deposit_due,quote_disclaimer,intake_answers,created_at,updated_at')
+    .in('service_request_id', requestIds).order('created_at', { ascending: false });
+  if (estimateError) throw estimateError;
   const { data: jobs, error: jobsError } = await supabase.from('dd_jobs').select('*').in('service_request_id', requestIds).order('created_at', { ascending: false });
   if (jobsError) throw jobsError;
   const jobIds = (jobs || []).map(row => row.id);
-  const [invoices, changes, messages] = await Promise.all([
+  const estimateIds = (estimates || []).map(row => row.id);
+  const [jobInvoices, estimateInvoices, changes, messages] = await Promise.all([
     jobIds.length ? supabase.from('dd_invoices').select('*').in('job_id', jobIds).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
+    estimateIds.length ? supabase.from('dd_invoices').select('*').in('estimate_id', estimateIds).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
     jobIds.length ? supabase.from('dd_change_orders').select('*').in('job_id', jobIds).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
     getMessagesForJobs(supabase, jobIds),
   ]);
-  if (invoices.error) throw invoices.error;
+  if (jobInvoices.error) throw jobInvoices.error;
+  if (estimateInvoices.error) throw estimateInvoices.error;
   if (changes.error) throw changes.error;
-  return { requests: requests || [], jobs: jobs || [], invoices: invoices.data || [], changes: changes.data || [], messages, residentCommunity, properties };
+  const invoiceMap = new Map();
+  [...(jobInvoices.data || []), ...(estimateInvoices.data || [])].forEach(row => invoiceMap.set(row.id, row));
+  return { requests: requests || [], jobs: jobs || [], invoices: [...invoiceMap.values()], estimates: estimates || [], changes: changes.data || [], messages, residentCommunity, properties };
 }
 async function createDispatchOffer(supabase, actorId, payload) {
   const { jobId, providerId, adminNotes, providerNotes } = payload;
@@ -330,6 +339,32 @@ export default async function handler(req, res) {
     }
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
     const { action, ...payload } = req.body || {};
+    if (action === 'estimate_decision') {
+      if (context.isStaff || !context.identity) return fail(res, 'Customer portal action required.', 403);
+      const estimateId = String(payload.estimateId || '').trim();
+      const decision = String(payload.decision || '').toUpperCase();
+      if (!estimateId || !['APPROVED','DECLINED'].includes(decision)) return fail(res, 'estimateId and APPROVED/DECLINED decision are required.');
+      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('id,estimate_status,service_request_id,client_name').eq('id', estimateId).maybeSingle();
+      if (estimateError) throw estimateError;
+      if (!estimate) return fail(res, 'Quote not found.', 404);
+      if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'This quote is not awaiting customer decision.', 409);
+      if (!estimate.service_request_id) return fail(res, 'This quote is not linked to a customer request.', 409);
+      const { data: request, error: requestError } = await context.supabase.from('service_requests').select('id,lead_id,organization_id').eq('id', estimate.service_request_id).maybeSingle();
+      if (requestError) throw requestError;
+      if (!request) return fail(res, 'The originating customer request could not be found.', 404);
+      const authorized = context.identity.organization_id
+        ? String(request.organization_id || '') === String(context.identity.organization_id)
+        : String(request.lead_id || '') === String(context.identity.entity_id || '');
+      if (!authorized) return fail(res, 'This quote is outside the current portal account scope.', 403);
+      const nextStatus = decision === 'APPROVED' ? 'approved' : 'declined';
+      const { data: updated, error: updateError } = await context.supabase.from('dd_estimates')
+        .update({ estimate_status: nextStatus, internal_notes: `Customer decision: ${nextStatus} via portal.`, updated_at: new Date().toISOString() })
+        .eq('id', estimate.id).eq('estimate_status', 'ready_to_send')
+        .select('id,public_reference,estimate_status,estimated_total,deposit_due').maybeSingle();
+      if (updateError) throw updateError;
+      if (!updated) return fail(res, 'Quote changed while you were deciding. Refresh and try again.', 409);
+      return ok(res, { estimate: updated, decision: nextStatus });
+    }
     if (action === 'update_provider_application') {
       const guard = requireRole(context, STAFF_ROLES);
       if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
