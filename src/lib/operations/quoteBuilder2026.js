@@ -107,9 +107,20 @@ export function resolveCanonicalOffers(governed, specials, governedStatusBySku =
 }
 
 export async function getQuoteCatalog(supabase) {
+  const { data: releaseRows, error: releaseError } = await supabase
+    .from('dd_service_release_contract_v1')
+    .select('canonical_sku,release_state,blocking_gate')
+    .eq('release_state', 'LIVE_READY');
+  if (releaseError) throw releaseError;
+
+  const liveSkus = new Set((releaseRows || []).map(r => r.canonical_sku).filter(Boolean));
+  if (!liveSkus.size) return [];
+
   const { data: offers, error } = await supabase.from('dd_governed_service_offers')
     .select('id,canonical_sku,service_name,division,commercial_object_type,commercial_offer_status,fulfillment_gate_status,runtime_service_id,pricing_rule_count,market_rule_count,channel_availability_count,priced_channel_count,ch01_a_priced,ch01_b_priced')
-    .neq('commercial_offer_status', 'DO_NOT_SELL').order('division').order('canonical_sku');
+    .in('canonical_sku', [...liveSkus])
+    .eq('commercial_offer_status', 'SELL_NOW')
+    .order('division').order('canonical_sku');
   if (error) throw error;
 
   const ids = (offers || []).map(o => o.runtime_service_id).filter(Boolean);
@@ -121,28 +132,22 @@ export async function getQuoteCatalog(supabase) {
   if (skuError) throw skuError;
   const byId = new Map((servicesById || []).map(s => [s.id, s]));
   const bySku = new Map((servicesBySku || []).map(s => [s.sku, s]));
-  const governed = (offers || []).map(o => { const s = byId.get(o.runtime_service_id) || bySku.get(o.canonical_sku) || {}; return { ...s, sku:o.canonical_sku, canonicalSku:o.canonical_sku, name:o.service_name, division_id:Number(o.division), service_family:s.service_family || null, governedOfferStatus:o.commercial_offer_status, fulfillmentGateStatus:o.fulfillment_gate_status, commercial_status:s.commercial_status || o.commercial_offer_status, commercial_intent_status:s.commercial_intent_status || o.fulfillment_gate_status, publicPrice:s.public_price_display || (s.starting_price != null ? `Starting at ${Number(s.starting_price).toFixed(2)}` : 'Quote required'), quoteQuestions:s.quote_input_schema?.fields || [], sourceType:'GOVERNED' }; });
+  const governed = (offers || []).map(o => {
+    const s = byId.get(o.runtime_service_id) || bySku.get(o.canonical_sku) || {};
+    return { ...s, sku:o.canonical_sku, canonicalSku:o.canonical_sku, name:o.service_name, division_id:Number(o.division), service_family:s.service_family || null, governedOfferStatus:o.commercial_offer_status, fulfillmentGateStatus:o.fulfillment_gate_status, commercial_status:s.commercial_status || o.commercial_offer_status, commercial_intent_status:s.commercial_intent_status || o.fulfillment_gate_status, publicPrice:s.public_price_display || (s.starting_price != null ? `Starting at ${Number(s.starting_price).toFixed(2)}` : 'Quote required'), quoteQuestions:s.quote_input_schema?.fields || [], sourceType:'GOVERNED', releaseState:'LIVE_READY' };
+  });
 
-  // Load all active specials, but separately load governance state for their
-  // canonical counterparts so a special cannot bypass a DO_NOT_SELL lock.
-  const { data: specials, error: specialsError } = await supabase.from('danis_specials_offers').select('service_id,family,service_name,unit,price,active,market').eq('active', true).eq('market','GA').order('service_id');
+  // DANI SPECIALS can only enter the operator graph when their canonical governed
+  // counterpart is independently LIVE_READY. A special can never bypass release gates.
+  const { data: specials, error: specialsError } = await supabase.from('danis_specials_offers')
+    .select('service_id,family,service_name,unit,price,active,market')
+    .eq('active', true).eq('market','GA').order('service_id');
   if (specialsError) throw specialsError;
-  const specialRows = (specials || []).map(buildSpecialRow);
-  const canonicalSkus = [...new Set(specialRows.map(s => s.canonicalSku).filter(Boolean))];
-  const { data: governanceRows, error: governanceError } = canonicalSkus.length
-    ? await supabase.from('dd_governed_service_offers').select('canonical_sku,commercial_offer_status,fulfillment_gate_status').in('canonical_sku', canonicalSkus)
-    : { data: [], error: null };
-  if (governanceError) throw governanceError;
-  const governedStatusBySku = new Map();
-  for (const row of governanceRows || []) {
-    const list = governedStatusBySku.get(row.canonical_sku) || [];
-    list.push(row);
-    governedStatusBySku.set(row.canonical_sku, list);
-  }
+  const specialRows = (specials || []).map(buildSpecialRow)
+    .filter(s => s.canonicalSku && liveSkus.has(s.canonicalSku));
 
-  return resolveCanonicalOffers(governed, specialRows, governedStatusBySku);
+  return resolveCanonicalOffers(governed, specialRows, new Map());
 }
-
 async function loadRules(supabase, serviceId, channelCode) {
   const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').order('effective_date',{ascending:false});
   if (error) throw error;
