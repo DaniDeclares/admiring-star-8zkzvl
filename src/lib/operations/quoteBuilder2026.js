@@ -331,18 +331,6 @@ export async function createEstimate(supabase, body) {
   if(estimateError) throw estimateError;
   return {estimate,service:{sku:offer.canonical_sku,name:offer.service_name,publicPrice:service.public_price_display||service.price_note||(service.starting_price!=null?`Starting at ${Number(service.starting_price).toFixed(2)}`:'Quote required')},calculation};
 }
-    commercial_status:'CANONICAL_ACTIVE',
-    commercial_intent_status:'SELL_NOW',
-    governedOfferStatus:'SELL_NOW',
-    fulfillmentGateStatus:'READY',
-    quoteQuestions:[],
-    sourceType:'DANI_SPECIALS',
-    specialUnit:s.unit,
-    specialPrice:Number(s.price),
-    specialFamily:s.family
-  };
-}
-
 /**
  * Resolve the two catalog populations into one operator-facing offer graph.
  * Exact canonical overlaps collapse; price conflicts remain attached as explicit
