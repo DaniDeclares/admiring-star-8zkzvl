@@ -57,13 +57,60 @@ export default async function handler(req,res){
       where id=${row.id}::uuid
     `;
     if(event.type==='invoice.paid'){
-      await tx.$executeRaw`
+      let paymentJob = null;
+      let paymentEstimate = null;
+      let paymentRequest = null;
+      if(row.estimate_id){
+        paymentEstimate = await tx.dd_estimates.findUnique({where:{id:row.estimate_id}});
+        if(paymentEstimate?.service_request_id){
+          paymentRequest = await tx.serviceRequest.findUnique({where:{id:paymentEstimate.service_request_id}});
+        }
+      }
+      const channel = readChannel(paymentRequest?.property_details);
+      if(paymentEstimate && paymentRequest && channel === 'B2B_APT'){
+        const approvedTotal = Number(paymentEstimate.estimated_total || 0);
+        const paidAmount = Number(invoice.amount_paid || invoice.total || 0) / 100;
+        if(!Number.isFinite(approvedTotal) || approvedTotal <= 0) throw new Error('Paid CH02 invoice has no valid approved estimate total.');
+        if(money(approvedTotal) !== money(paidAmount)) throw new Error('CH02 invoice payment does not match the frozen approved estimate.');
+        paymentJob = await tx.dd_jobs.findFirst({where:{service_request_id:paymentRequest.id},orderBy:{created_at:'desc'}});
+        if(!paymentJob){
+          const lineItems = paymentEstimate.intake_answers?.pricingSnapshot?.lineItems || paymentEstimate.intake_answers?.lineItems || [];
+          const primaryName = lineItems[0]?.serviceName || paymentRequest.service_needed || paymentRequest.service_category || 'Property Operations';
+          paymentJob = await tx.dd_jobs.create({
+            data:{
+              estimate_id:paymentEstimate.id,
+              lead_id:paymentRequest.leadId || null,
+              service_request_id:paymentRequest.id,
+              division_slug:paymentEstimate.division_slug || 'propertyops',
+              job_title:primaryName,
+              job_status:'new',
+              location_address:paymentRequest.location_address || paymentEstimate.location_address || null,
+              scope_summary:paymentEstimate.client_notes || paymentRequest.request_details || null,
+              organization_id:paymentRequest.organization_id || null
+            }
+          });
+        }
+        await tx.dd_invoices.update({where:{id:row.id},data:{job_id:paymentJob.id,invoice_status:'paid',balance_due:0,updated_at:new Date()}});
+        await tx.serviceRequest.update({where:{id:paymentRequest.id},data:{status:'job_created'}});
+      }
+      const paymentEvent = await tx.$queryRaw`
         insert into public.dd_payment_events
-          (provider_event_id,provider_payment_id,invoice_id,event_type,payment_status,amount_received,currency,raw_metadata)
+          (provider_event_id,provider_payment_id,request_id,job_id,invoice_id,event_type,payment_status,amount_received,currency,raw_metadata)
         values
-          (${event.id},${invoice.payment_intent||invoice.id},${row.id}::uuid,${event.type},'SUCCEEDED',
+          (${event.id},${invoice.payment_intent||invoice.id},${paymentRequest?.id||null},${paymentJob?.id||null},${row.id}::uuid,${event.type},'SUCCEEDED',
            ${Number(invoice.amount_paid||0)/100},${invoice.currency||'usd'},${JSON.stringify(invoice.metadata||{})}::jsonb)
+        returning id
       `;
+      if(paymentJob){
+        await publishPaymentReconciled({
+          paymentEventId: paymentEvent[0].id,
+          invoiceId: row.id,
+          jobId: paymentJob.id,
+          finalTotal: Number(paymentEstimate.estimated_total || 0),
+          captured: Number(invoice.amount_paid || 0) / 100,
+          balanceDue: 0
+        },tx);
+      }
     }
    });
    return res.status(200).json({received:true,reconciled:true,invoiceId:row.id,status:nextStatus});

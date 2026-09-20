@@ -349,7 +349,7 @@ export default async function handler(req, res) {
       const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('id,estimate_status,service_request_id,client_name').eq('id', estimateId).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate) return fail(res, 'Quote not found.', 404);
-      if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'This quote is not awaiting customer decision.', 409);
+      if (estimate.estimate_status !== 'sent') return fail(res, 'This quote is not currently available for customer decision.', 409);
       if (!estimate.service_request_id) return fail(res, 'This quote is not linked to a customer request.', 409);
       const { data: request, error: requestError } = await context.supabase.from('service_requests').select('id,lead_id,organization_id').eq('id', estimate.service_request_id).maybeSingle();
       if (requestError) throw requestError;
@@ -361,7 +361,7 @@ export default async function handler(req, res) {
       const nextStatus = decision === 'APPROVED' ? 'approved' : 'declined';
       const { data: updated, error: updateError } = await context.supabase.from('dd_estimates')
         .update({ estimate_status: nextStatus, internal_notes: `Customer decision: ${nextStatus} via portal.`, updated_at: new Date().toISOString() })
-        .eq('id', estimate.id).eq('estimate_status', 'ready_to_send')
+        .eq('id', estimate.id).eq('estimate_status', 'sent')
         .select('id,public_reference,estimate_status,estimated_total,deposit_due').maybeSingle();
       if (updateError) throw updateError;
       if (!updated) return fail(res, 'Quote changed while you were deciding. Refresh and try again.', 409);
@@ -624,15 +624,48 @@ export default async function handler(req, res) {
       if (!updated) return fail(res, 'Estimate changed while being reviewed. Reload and retry.', 409);
       return ok(res, { estimate: updated, unresolvedFlags: allUnresolved, resolvedFlags: resolved, readyToSend: nextStatus === 'ready_to_send', identityGate: identityGate.ok ? { status: 'verified' } : { status: 'blocked', errors: identityGate.errors } });
     }
-    if (action === 'create_stripe_invoice') {
+    if (action === 'send_estimate') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const estimateId = String(payload.estimateId || '').trim();
+      if (!estimateId) return fail(res, 'estimateId is required.');
+      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
+      if (estimateError) throw estimateError;
+      if (!estimate) return fail(res, 'Saved estimate not found.', 404);
+      if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'Only READY_TO_SEND estimates can be delivered.', 409);
+      if (!estimate.client_email) return fail(res, 'A customer email is required to deliver this quote.', 422);
+      const identityGate = customerIdentityGate(estimate, context.user?.email);
+      if (!identityGate.ok) return identityFailure(res, identityGate);
+      const portalAccount = await provisionCustomerPortalAccount({ req, supabase: context.supabase, estimate });
+      if (!['PROVISIONED','EXISTING'].includes(portalAccount.status)) return fail(res, 'Customer portal access could not be established.', 422);
+      const { data: updated, error: updateError } = await context.supabase.from('dd_estimates')
+        .update({ estimate_status: 'sent', internal_notes: [estimate.internal_notes, 'Quote delivered to customer portal; customer decision required.'].filter(Boolean).join('\n'), updated_at: new Date().toISOString() })
+        .eq('id', estimate.id).eq('estimate_status', 'ready_to_send')
+        .select('id,public_reference,estimate_status,estimated_total,deposit_due').maybeSingle();
+      if (updateError) throw updateError;
+      if (!updated) return fail(res, 'Quote changed while being delivered. Reload and retry.', 409);
+      return ok(res, { estimate: updated, delivery: { channel: 'CUSTOMER_PORTAL', status: 'SENT' }, portalAccount });
+    }
+    if (action === 'create_stripe_invoice') {
+      const guard = requireRole(context, STAFF_ROLES);
+      const isStaffRequest = !guard || context.isStaff;
+      if (guard && !context.isStaff && !context.identity) return fail(res, 'Customer portal action required.', 403);
       if (!stripe) return fail(res, 'Stripe invoice execution is not configured.', 503);
       const estimateId = String(payload.estimateId || '').trim();
       if (!estimateId) return fail(res, 'estimateId is required.');
       const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
-      if (!['ready_to_send','approved'].includes(estimate.estimate_status)) return fail(res, 'Only READY_TO_SEND or customer-approved estimates can create a Stripe invoice.', 409);
+      if (!isStaffRequest) {
+        if (context.role !== 'customer') return fail(res, 'Customer portal payment action required.', 403);
+        if (!estimate.service_request_id) return fail(res, 'This quote is not linked to a customer request.', 409);
+        const { data: request, error: requestError } = await context.supabase.from('service_requests').select('id,lead_id,organization_id').eq('id', estimate.service_request_id).maybeSingle();
+        if (requestError) throw requestError;
+        const authorized = context.identity.organization_id
+          ? String(request?.organization_id || '') === String(context.identity.organization_id)
+          : String(request?.lead_id || '') === String(context.identity.entity_id || '');
+        if (!authorized) return fail(res, 'This quote is outside the current portal account scope.', 403);
+      }
+      if (isStaffRequest ? !['approved','ready_to_send'].includes(estimate.estimate_status) : estimate.estimate_status !== 'approved') return fail(res, isStaffRequest ? 'Only approved or READY_TO_SEND estimates can create a Stripe invoice.' : 'Customer payment is available only after quote approval.', 409);
       if (!estimate.estimated_total || Number(estimate.estimated_total) <= 0) return fail(res, 'Estimate total must be greater than zero.', 422);
       if (!estimate.client_email) return fail(res, 'A customer email is required so DANI can automatically provision portal access and deliver the invoice securely.', 422);
       const identityGate = customerIdentityGate(estimate, context.user?.email);

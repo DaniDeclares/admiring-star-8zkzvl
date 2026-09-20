@@ -188,3 +188,37 @@ Every prospect entered into the sales pipeline should have:
 12. Follow-up outcome
 
 The objective is not to accumulate leads. The objective is to create **qualified conversations that can become paid work**.
+
+
+## CH02 Quote-to-Payment Execution Path — LOCKED 2026-09-20
+
+The four CH02 front doors are customer-facing solution families and sales discovery paths, not fixed-price products that bypass the governed Quote Builder.
+
+### Public-originated path
+1. Property Management → Property Operations.
+2. Customer selects one of the four solution families: Turnover & Make-Ready; Property Rescue & Field Dispatch; Property Condition & Documentation; Office & Operations Rescue.
+3. Customer enters the CH02 property-management request path.
+4. Request is qualified and loaded into the staff Quote Builder.
+5. Sales/operations composes the actual scope from canonical services, quantities and governed quote inputs.
+6. Commercial review resolves required gates and produces READY_TO_SEND.
+7. Staff delivers the quote to the customer portal.
+8. Customer reviews and approves the quote in the portal.
+9. Customer selects Continue to Payment; the system creates/finalizes the governed Stripe invoice and opens the hosted payment page.
+10. Stripe invoice.paid is reconciled to the estimate/request; the authoritative DANI job is created for CH02 fulfillment.
+
+### Phone / outbound sales path
+Sales may start directly inside the Quote Builder when a property manager calls DANI or a sales representative closes the discovery conversation. The rep selects the CH02 buyer type, identifies the applicable front-door solution family, composes the actual canonical services and sends the resulting estimate through the same review → customer portal approval → payment → job path. No separate phone-sale pricing or payment mechanism is permitted.
+
+### Commercial rule
+**Front door = how the customer enters the conversation. Canonical services = what DANI is selling. Quote Builder = how the particular scope is priced. Customer approval = authorization to pay. Stripe = payment execution. dd_jobs = post-payment production authority.**
+
+### Status path
+PROPOSAL_PENDING → estimated/needs_review → ready_to_send → sent → approved → invoice/open → paid → job_created → scheduled → in_progress → completed
+
+### Required behavior
+- Do not create four giant package SKUs solely for sales convenience.
+- Do not bypass the Quote Builder for phone sales.
+- Do not treat a quote as sold until the customer approves it.
+- Do not treat Stripe as commercial pricing authority.
+- Do not create a job from an unpaid CH02 quote.
+- Payment must match the frozen approved estimate before a CH02 job is created.

@@ -73,6 +73,7 @@ function PendingEstimatesQueue({ session }) {
 export default function PortalWorkspacePage() {
   const { session, snapshot, loading, error, message, load, act } = useProviderWorkspace();
   const [messageDrafts, setMessageDrafts] = useState({});
+  const [paymentError, setPaymentError] = useState('');
   const sendJobMessage = async (jobId) => {
     const body = (messageDrafts[jobId] || '').trim();
     if (!body) return;
@@ -120,13 +121,15 @@ export default function PortalWorkspacePage() {
       <Card title="Submitted Documents">{(snapshot?.documents || []).length ? snapshot.documents.map(item => <div className="portal-row" key={item.id}><div><strong>{item.document_type.replaceAll('_', ' ')}</strong><small>{statusLabel(item.verification_status)} · Uploaded {formatDate(item.uploaded_at)}</small></div></div>) : <Empty>No documents uploaded yet.</Empty>}<div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/vendor-onboarding">Upload documents</Link></div></Card>
     </>) : <>
       {role === 'property_manager' && <ResidentInvitesCard session={session} properties={snapshot?.properties || []} />}
-      <Card title="Quotes & Proposals">
+      <Card title="Quotes & Proposals">{paymentError && <div className="portal-alert" role="alert" style={{ marginBottom: 12 }}>{paymentError}</div>}
         {(snapshot?.estimates || []).length ? snapshot.estimates.map(item => {
           const lines = Array.isArray(item.intake_answers?.lineItems) ? item.intake_answers.lineItems : [];
-          const awaiting = item.estimate_status === 'ready_to_send';
+          const awaiting = item.estimate_status === 'sent';
+          const approved = item.estimate_status === 'approved';
           return <div className="portal-row" key={item.id}>
             <div><strong>{item.public_reference}</strong><small>{item.estimate_status.replaceAll('_',' ')} · ${Number(item.estimated_total || 0).toFixed(2)} · {item.created_at ? formatDate(item.created_at) : ''}</small><small>{lines.map(line => line.serviceName || line.serviceSku).join(' + ') || 'Quote package'}</small></div>
             {awaiting && <div className="portal-actions"><button onClick={() => act('estimate_decision',{estimateId:item.id,decision:'APPROVED'})}>Approve quote</button><button className="secondary" onClick={() => act('estimate_decision',{estimateId:item.id,decision:'DECLINED'})}>Decline</button></div>}
+            {approved && <div className="portal-actions"><button onClick={async () => { try { const r=await fetch('/api/portal-operations',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'create_stripe_invoice',estimateId:item.id})}); const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Could not open payment.'); if(d.invoice?.hosted_invoice_url) window.location.href=d.invoice.hosted_invoice_url; else throw new Error('Payment link was not returned.'); } catch(e) { setPaymentError(e.message||'Could not open payment.'); } }}>Continue to Payment</button></div>}
           </div>;
         }) : <Empty>No quotes are currently attached to this account.</Empty>}
       </Card>

@@ -24,6 +24,7 @@ function ReviewCockpit(){
   const [saving,setSaving]=useState(false);
   const [error,setError]=useState('');
   const [message,setMessage]=useState('');
+  const [deliverySaving,setDeliverySaving]=useState(false);
   const [review,setReview]=useState({});
   const [answers,setAnswers]=useState({});
 
@@ -51,6 +52,16 @@ function ReviewCockpit(){
   const unresolved=flags.filter(f=>resolutions[f]!==true);
   const setField=(key,value)=>setAnswers(a=>({...a,[key]:value}));
   const setResolution=(flag,value)=>setReview(r=>({...r,resolutions:{...(r.resolutions||{}),[flag]:Boolean(value)}}));
+
+  const sendEstimate=async()=>{
+    setDeliverySaving(true);setError('');setMessage('');
+    try{
+      const {data:s}=await supabase.auth.getSession(); if(!s.session) throw new Error('Staff session required.');
+      const r=await fetch('/api/portal-operations',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${s.session.access_token}`},body:JSON.stringify({action:'send_estimate',estimateId:id})});
+      const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Could not deliver quote.');
+      setEstimate(prev=>({...prev,estimate_status:d.estimate.estimate_status})); setMessage('Quote delivered to the customer portal. The customer must approve it before payment.');
+    }catch(e){setError(e.message||'Could not deliver quote.')}finally{setDeliverySaving(false);}
+  };
 
   const createStripeInvoice=async()=>{
     setSaving(true);setError('');setMessage('');
@@ -172,8 +183,11 @@ function ReviewCockpit(){
 
     {['ready_to_send','approved'].includes(estimate.estimate_status)&&<section style={{...CardStyle,marginTop:18,border:'2px solid #8b6b1f'}}>
       <div style={eyebrow}>QUOTE DELIVERY / PAYMENT</div><h2 style={{margin:'5px 0',color:'#5a1624'}}>{estimate.estimate_status==='approved'?'CUSTOMER APPROVED':'READY TO SEND'}</h2>
-      <p style={muted}>The estimate has passed its configured review gates. Customer delivery is deliberately separate from approval so a payment link or SMS is never represented as sent unless an actual provider action succeeds.</p><div style={{marginBottom:10,fontWeight:800,color:'#8a1d2d'}}>Stripe is connected in live mode. Creating the invoice below creates a real customer-facing Stripe invoice; it does not send SMS or email.</div>
-      <div style={{display:'flex',gap:9,flexWrap:'wrap'}}><button disabled style={btn('#f5f2ed','#6d5b60')}>Send via SMS — delivery provider not connected</button><button disabled={saving} onClick={createStripeInvoice} style={btn('#5a1624','#fff')}>{saving?'Creating Stripe invoice…':'Create / Open Live Stripe Invoice'}</button></div>
+      <p style={muted}>The estimate has passed its configured review gates. Deliver the quote to the customer portal; after customer approval, payment is opened from the customer workspace.</p><div style={{marginBottom:10,fontWeight:800,color:'#8a1d2d'}}>Stripe is connected in live mode. Creating the invoice below creates a real customer-facing Stripe invoice; it does not send SMS or email.</div>
+      <div style={{display:'flex',gap:9,flexWrap:'wrap'}}>
+        {estimate.estimate_status==='ready_to_send'&&<button disabled={deliverySaving} onClick={sendEstimate} style={btn('#5a1624','#fff')}>{deliverySaving?'Delivering quote…':'Send Quote to Customer Portal'}</button>}
+        {estimate.estimate_status==='approved'&&<button disabled={saving} onClick={createStripeInvoice} style={btn('#5a1624','#fff')}>{saving?'Creating Stripe invoice…':'Create / Open Live Stripe Invoice'}</button>}
+      </div>
     </section>}
   </div></main></RequireStaffAuth>;
 }
