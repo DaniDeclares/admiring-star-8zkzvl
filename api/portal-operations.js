@@ -312,7 +312,10 @@ export default async function handler(req, res) {
         if (context.role === 'provider') return ok(res, { role: context.role, notificationPreferences, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id) });
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
-      if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
+      if (req.query?.quoteCatalog === '1') {
+        const channelCode = String(req.query?.channel || 'CH04').toUpperCase();
+        return ok(res, { role: context.role, channelCode, services: await getQuoteCatalog(context.supabase, channelCode) });
+      }
       if (req.query?.estimates === '1') {
         const { data: estimates, error } = await context.supabase.from('dd_estimates')
           .select('id,public_reference,estimate_status,client_name,client_phone,client_email,source_slug,service_request_id,lead_id,estimated_total,deposit_due,created_at,updated_at')
