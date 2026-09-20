@@ -41,6 +41,11 @@ export const captureServiceLifecycle = (event, payload = {}) => capture(event, {
   payment_state: payload.payment_state || undefined,
   capability_key: payload.capability_key || undefined,
   route: payload.route || undefined,
+  event_stage: payload.event_stage || undefined,
+  result: payload.result || undefined,
+  error_type: payload.error_type || undefined,
+  error_code: payload.error_code || undefined,
+  action: payload.action || undefined,
 });
 
 export const isAnalyticsEnabled = () => enabled;
