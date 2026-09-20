@@ -16,6 +16,10 @@ describe('DNI-01A-003 governed bedroom-tier pricing', () => {
       ],
       modifiers: [
         { key: 'severe_pet_mess', amount: 150, apply_before_resident_discount: true }
+      ],
+      fields: [
+        { key: 'mess_degree', classification: 'UNDERWRITING' },
+        { key: 'severe_odor_smoke', classification: 'UNDERWRITING' }
       ]
     }
   };
