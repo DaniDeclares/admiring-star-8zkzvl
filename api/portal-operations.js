@@ -1,5 +1,6 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
+import { provisionCustomerPortalAccount } from './customer-provisioning.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin } from './_w9Crypto.js';
 import Stripe from 'stripe';
@@ -632,7 +633,7 @@ export default async function handler(req, res) {
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
       if (!['ready_to_send','approved'].includes(estimate.estimate_status)) return fail(res, 'Only READY_TO_SEND or customer-approved estimates can create a Stripe invoice.', 409);
       if (!estimate.estimated_total || Number(estimate.estimated_total) <= 0) return fail(res, 'Estimate total must be greater than zero.', 422);
-      if (!estimate.client_email && !estimate.client_phone) return fail(res, 'Customer needs an email or phone before Stripe invoice creation.', 422);
+      if (!estimate.client_email) return fail(res, 'A customer email is required so DANI can automatically provision portal access and deliver the invoice securely.', 422);
       const identityGate = customerIdentityGate(estimate, context.user?.email);
       if (!identityGate.ok) return identityFailure(res, identityGate);
 
@@ -640,7 +641,19 @@ export default async function handler(req, res) {
       if (existingError) throw existingError;
       if (existingInvoice?.stripe_invoice_id) {
         const existingStripeInvoice = await stripe.invoices.retrieve(existingInvoice.stripe_invoice_id);
-        return ok(res, { invoice: { id: existingInvoice.id, public_reference: existingInvoice.public_reference, stripe_invoice_id: existingStripeInvoice.id, hosted_invoice_url: existingStripeInvoice.hosted_invoice_url || existingInvoice.hosted_invoice_url || null, status: existingStripeInvoice.status, amount_due: Number(Number((existingStripeInvoice.amount_remaining || 0) / 100).toFixed(2)), alreadyExists: true } });
+        const portalAccount = await provisionCustomerPortalAccount({ req, supabase: context.supabase, estimate });
+        return ok(res, {
+          invoice: {
+            id: existingInvoice.id,
+            public_reference: existingInvoice.public_reference,
+            stripe_invoice_id: existingStripeInvoice.id,
+            hosted_invoice_url: existingStripeInvoice.hosted_invoice_url || existingInvoice.hosted_invoice_url || null,
+            status: existingStripeInvoice.status,
+            amount_due: Number(Number((existingStripeInvoice.amount_remaining || 0) / 100).toFixed(2)),
+            alreadyExists: true
+          },
+          portalAccount
+        });
       }
 
       const customerQuery = estimate.client_email ? await stripe.customers.list({ email: estimate.client_email, limit: 10 }) : { data: [] };
@@ -681,6 +694,19 @@ export default async function handler(req, res) {
       }, { idempotencyKey: `dani-invoice-item-${estimate.id}` });
 
       const finalized = invoice.status === 'draft' ? await stripe.invoices.finalizeInvoice(invoice.id, { auto_advance: false }) : await stripe.invoices.retrieve(invoice.id);
+
+      // Commercial handoff: establish the customer's durable portal identity before
+      // the invoice is actually delivered. New customers receive a secure Supabase
+      // invitation and choose their own password; DANI never generates or emails a
+      // password. Existing customer accounts are reused idempotently.
+      const portalAccount = await provisionCustomerPortalAccount({
+        req,
+        supabase: context.supabase,
+        estimate
+      });
+      if (portalAccount.status === 'EMAIL_REQUIRED') {
+        return fail(res, 'A customer email is required for automatic portal provisioning.', 422);
+      }
       const invoiceData = {
         estimate_id: estimate.id,
         lead_id: estimate.lead_id || null,
@@ -709,7 +735,36 @@ export default async function handler(req, res) {
         if (insertError) throw insertError;
         invoiceRowId = inserted.id;
       }
-      return ok(res, { invoice: { id: invoiceRowId, public_reference: existingInvoice?.public_reference || null, stripe_invoice_id: finalized.id, stripe_customer_id: customer.id, hosted_invoice_url: finalized.hosted_invoice_url || null, status: finalized.status, amount_due: Number(Number((finalized.amount_remaining ?? finalized.amount_due ?? totalCents) / 100).toFixed(2)), deposit_due: depositCents / 100, line_item_id: item.id, alreadyExists: false } });
+      let invoiceSent = false;
+      if (finalized.status === 'open' && typeof stripe.invoices.sendInvoice === 'function') {
+        const sent = await stripe.invoices.sendInvoice(finalized.id);
+        invoiceSent = sent.status === 'open' || sent.status === 'paid' || Boolean(sent.hosted_invoice_url);
+        if (invoiceSent) {
+          await context.supabase.from('dd_invoices').update({
+            invoice_status: sent.status || 'open',
+            stripe_invoice_status: sent.status || 'open',
+            hosted_invoice_url: sent.hosted_invoice_url || finalized.hosted_invoice_url || null,
+            stripe_payment_link: sent.hosted_invoice_url || finalized.hosted_invoice_url || null,
+            updated_at: new Date().toISOString()
+          }).eq('id', invoiceRowId);
+        }
+      }
+      return ok(res, {
+        invoice: {
+          id: invoiceRowId,
+          public_reference: existingInvoice?.public_reference || null,
+          stripe_invoice_id: finalized.id,
+          stripe_customer_id: customer.id,
+          hosted_invoice_url: finalized.hosted_invoice_url || null,
+          status: finalized.status,
+          amount_due: Number(Number((finalized.amount_remaining ?? finalized.amount_due ?? totalCents) / 100).toFixed(2)),
+          deposit_due: depositCents / 100,
+          line_item_id: item.id,
+          alreadyExists: false,
+          sent: invoiceSent
+        },
+        portalAccount
+      });
     }
     if (action === 'get_estimate') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
