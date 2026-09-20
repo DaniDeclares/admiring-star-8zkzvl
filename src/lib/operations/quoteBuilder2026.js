@@ -6,7 +6,7 @@ const specialDivision = family => family === 'REAL ESTATE' ? '03' : ['BUSINESS A
 function normalizeSpecialCanonicalSku(serviceId) {
   const raw = String(serviceId || '').trim();
   const token = raw.replace(/^DSS-CAN-/, '');
-  const match = token.match(/^(DNI)(\\d{2})([A-Z])(\\d{3})$/);
+  const match = token.match(/^(DNI)(\d{2})([A-Z])(\d{3})$/);
   return match ? \`DNI-${match[2]}${match[3]}-${match[4]}\` : null;
 }
 
