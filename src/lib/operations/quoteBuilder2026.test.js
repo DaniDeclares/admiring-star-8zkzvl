@@ -45,3 +45,13 @@ test('does not let a special bypass a DO_NOT_SELL governance lock', () => {
   );
   expect(result.find(x=>x.sku==='DSS-CAN-DNI99A001')).toBeUndefined();
 });
+
+
+test('drops canonical specials when every governed counterpart is DO_NOT_SELL', () => {
+  const result = resolveCanonicalOffers(
+    [{ sku:'DNI-02A-002', name:'Apartment Turn', base_price_cents:15000, sourceType:'GOVERNED' }],
+    [{ sku:'DSS-CAN-DNI02A002', canonicalSku:'DNI-02A-002', name:'Apartment Turn', base_price_cents:15000, specialPrice:150 }],
+    new Map([['DNI-02A-002',[{commercial_offer_status:'DO_NOT_SELL'}]]])
+  );
+  expect(result.find(x=>x.sku==='DSS-CAN-DNI02A002')).toBeUndefined();
+});
