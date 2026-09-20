@@ -3,11 +3,112 @@ const ESTIMATE_CLIENT_TYPES = Object.freeze({ regular_resident: 'other', apartme
 const money = value => Math.round(Number(value || 0) * 100) / 100;
 const specialDivision = family => family === 'REAL ESTATE' ? '03' : ['BUSINESS ADMIN','BUSINESS FIELD','OFFICE'].includes(family) ? '04' : family === 'EVENT' ? '10' : '01';
 
+function normalizeSpecialCanonicalSku(serviceId) {
+  const raw = String(serviceId || '').trim();
+  const token = raw.replace(/^DSS-CAN-/, '');
+  const match = token.match(/^(DNI)(\\d{2})([A-Z])(\\d{3})$/);
+  return match ? \`DNI-${match[2]}${match[3]}-${match[4]}\` : null;
+}
+
+function buildSpecialRow(s) {
+  return {
+    sku:s.service_id,
+    canonicalSku:normalizeSpecialCanonicalSku(s.service_id),
+    name:s.service_name,
+    division_id:Number(specialDivision(s.family)),
+    service_family:s.family,
+    pricing_type:'SPECIALS_OWNER_EXECUTABLE',
+    billing_cycle:'ONETIME',
+    starting_price:Number(s.price),
+    base_price_cents:Math.round(Number(s.price)*100),
+    public_price_display:\`${Number(s.price).toFixed(2)}${s.unit && !['visit','project','service','flat','treatment','job','load','cycle','package','area','tree','wreath','section','mantel','rug','chair','sofa','mattress','mirror','bath','event','dispatch','audit log','delivery','run','walk','coordination','document','plan','minimum'].includes(s.unit) ? \`/${s.unit}\` : ''}\`,
+    commercial_status:'CANONICAL_ACTIVE',
+    commercial_intent_status:'SELL_NOW',
+    governedOfferStatus:'SELL_NOW',
+    fulfillmentGateStatus:'READY',
+    quoteQuestions:[],
+    sourceType:'DANI_SPECIALS',
+    specialUnit:s.unit,
+    specialPrice:Number(s.price),
+    specialFamily:s.family
+  };
+}
+
+/**
+ * Resolve the two catalog populations into one operator-facing offer graph.
+ * Exact canonical overlaps collapse; price conflicts remain attached as explicit
+ * special variants; special-only rows remain standalone. No pricing authority is
+ * silently overwritten here.
+ */
+export function resolveCanonicalOffers(governed, specials, governedStatusBySku = new Map()) {
+  const governedBySku = new Map(governed.map(row => [row.sku, row]));
+  const resolved = [];
+  const consumedSpecialSkus = new Set();
+
+  for (const special of specials) {
+    const canonicalSku = special.canonicalSku;
+    if (!canonicalSku) {
+      resolved.push(special);
+      consumedSpecialSkus.add(special.sku);
+      continue;
+    }
+
+    const statusRows = governedStatusBySku.get(canonicalSku) || [];
+    const hasSellNowGoverned = statusRows.some(row => row.commercial_offer_status === 'SELL_NOW');
+    const hasAnyGoverned = statusRows.length > 0;
+    const base = governedBySku.get(canonicalSku);
+
+    // A special cannot resurrect a canonical service that governance has locked
+    // away. If there is no governed row at all, it remains a special-only offer.
+    if (hasAnyGoverned && !hasSellNowGoverned) {
+      consumedSpecialSkus.add(special.sku);
+      continue;
+    }
+
+    if (!base) {
+      resolved.push({ ...special, canonicalOnlySpecial:true });
+      consumedSpecialSkus.add(special.sku);
+      continue;
+    }
+
+    const exactCommercialMatch = Number(base.base_price_cents || 0) === Number(special.base_price_cents || 0)
+      && String(base.name || '').trim().toLowerCase() === String(special.name || '').trim().toLowerCase();
+
+    consumedSpecialSkus.add(special.sku);
+    if (exactCommercialMatch) {
+      // Exact duplicate/alias: preserve provenance for diagnostics but do not
+      // expose a second operator selection.
+      base.aliasSources = [...(base.aliasSources || []), special.sku];
+      continue;
+    }
+
+    base.offerVariants = [
+      ...(base.offerVariants || []),
+      {
+        ...special,
+        variantType:'DANI_SPECIAL',
+        commercialResolution:'UNRESOLVED_PRICE_CONFLICT',
+        canonicalSku,
+        displayLabel:\`DANI SPECIAL CAMPAIGN — ${Number(special.specialPrice).toFixed(2)}\`
+      }
+    ];
+    base.hasCommercialConflict = true;
+  }
+
+  // Preserve governed rows that did not have a canonical special.
+  for (const base of governed) {
+    if (!resolved.includes(base)) resolved.push(base);
+  }
+
+  return resolved;
+}
+
 export async function getQuoteCatalog(supabase) {
   const { data: offers, error } = await supabase.from('dd_governed_service_offers')
     .select('id,canonical_sku,service_name,division,commercial_object_type,commercial_offer_status,fulfillment_gate_status,runtime_service_id,pricing_rule_count,market_rule_count,channel_availability_count,priced_channel_count,ch01_a_priced,ch01_b_priced')
     .neq('commercial_offer_status', 'DO_NOT_SELL').order('division').order('canonical_sku');
   if (error) throw error;
+
   const ids = (offers || []).map(o => o.runtime_service_id).filter(Boolean);
   const { data: servicesById, error: serviceIdError } = ids.length ? await supabase.from('services').select('id,sku,name,service_family,pricing_type,billing_cycle,starting_price,base_price_cents,price_note,public_price_low,public_price_high,public_price_display,quote_input_schema,commercial_status,commercial_intent_status,resident_discount_eligible,is_active').in('id', ids) : { data: [], error: null };
   if (serviceIdError) throw serviceIdError;
@@ -17,11 +118,26 @@ export async function getQuoteCatalog(supabase) {
   if (skuError) throw skuError;
   const byId = new Map((servicesById || []).map(s => [s.id, s]));
   const bySku = new Map((servicesBySku || []).map(s => [s.sku, s]));
-  const governed = (offers || []).map(o => { const s = byId.get(o.runtime_service_id) || bySku.get(o.canonical_sku) || {}; return { ...s, sku:o.canonical_sku, name:o.service_name, division_id:Number(o.division), service_family:s.service_family || null, governedOfferStatus:o.commercial_offer_status, fulfillmentGateStatus:o.fulfillment_gate_status, commercial_status:s.commercial_status || o.commercial_offer_status, commercial_intent_status:s.commercial_intent_status || o.fulfillment_gate_status, publicPrice:s.public_price_display || (s.starting_price != null ? `Starting at $${Number(s.starting_price).toFixed(2)}` : 'Quote required'), quoteQuestions:s.quote_input_schema?.fields || [], sourceType:'GOVERNED' }; });
+  const governed = (offers || []).map(o => { const s = byId.get(o.runtime_service_id) || bySku.get(o.canonical_sku) || {}; return { ...s, sku:o.canonical_sku, canonicalSku:o.canonical_sku, name:o.service_name, division_id:Number(o.division), service_family:s.service_family || null, governedOfferStatus:o.commercial_offer_status, fulfillmentGateStatus:o.fulfillment_gate_status, commercial_status:s.commercial_status || o.commercial_offer_status, commercial_intent_status:s.commercial_intent_status || o.fulfillment_gate_status, publicPrice:s.public_price_display || (s.starting_price != null ? `Starting at ${Number(s.starting_price).toFixed(2)}` : 'Quote required'), quoteQuestions:s.quote_input_schema?.fields || [], sourceType:'GOVERNED' }; });
+
+  // Load all active specials, but separately load governance state for their
+  // canonical counterparts so a special cannot bypass a DO_NOT_SELL lock.
   const { data: specials, error: specialsError } = await supabase.from('danis_specials_offers').select('service_id,family,service_name,unit,price,active,market').eq('active', true).eq('market','GA').order('service_id');
   if (specialsError) throw specialsError;
-  const specialRows = (specials || []).map(s => ({ sku:s.service_id, name:s.service_name, division_id:Number(specialDivision(s.family)), service_family:s.family, pricing_type:'SPECIALS_OWNER_EXECUTABLE', billing_cycle:'ONETIME', starting_price:Number(s.price), base_price_cents:Math.round(Number(s.price)*100), public_price_display:`$${Number(s.price).toFixed(2)}${s.unit && !['visit','project','service','flat','treatment','job','load','cycle','package','area','tree','wreath','section','mantel','rug','chair','sofa','mattress','mirror','bath','event','dispatch','audit log','delivery','run','walk','coordination','document','plan','minimum'].includes(s.unit) ? `/${s.unit}` : ''}`, commercial_status:'CANONICAL_ACTIVE', commercial_intent_status:'SELL_NOW', governedOfferStatus:'SELL_NOW', fulfillmentGateStatus:'READY', quoteQuestions:[], sourceType:'DANI_SPECIALS', specialUnit:s.unit, specialPrice:Number(s.price), specialFamily:s.family }));
-  return [...governed, ...specialRows];
+  const specialRows = (specials || []).map(buildSpecialRow);
+  const canonicalSkus = [...new Set(specialRows.map(s => s.canonicalSku).filter(Boolean))];
+  const { data: governanceRows, error: governanceError } = canonicalSkus.length
+    ? await supabase.from('dd_governed_service_offers').select('canonical_sku,commercial_offer_status,fulfillment_gate_status').in('canonical_sku', canonicalSkus)
+    : { data: [], error: null };
+  if (governanceError) throw governanceError;
+  const governedStatusBySku = new Map();
+  for (const row of governanceRows || []) {
+    const list = governedStatusBySku.get(row.canonical_sku) || [];
+    list.push(row);
+    governedStatusBySku.set(row.canonical_sku, list);
+  }
+
+  return resolveCanonicalOffers(governed, specialRows, governedStatusBySku);
 }
 
 async function loadRules(supabase, serviceId, channelCode) {
