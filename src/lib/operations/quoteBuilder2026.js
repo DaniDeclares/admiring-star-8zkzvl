@@ -336,8 +336,25 @@ async function resolveQuoteLine(supabase, serviceSku, channelCode) {
   if (serviceError) throw serviceError;
   if (!governedService) throw new Error(`The service record ${canonicalSku} could not be resolved.`);
 
+  const { data: availability, error: availabilityError } = await supabase
+    .from('dd_service_channel_availability')
+    .select('channel_code,eligibility_status')
+    .eq('service_id', governedService.id)
+    .eq('channel_code', channelCode)
+    .maybeSingle();
+  if (availabilityError) throw availabilityError;
+  const eligibility = String(availability?.eligibility_status || '').toUpperCase();
+  if (!['ACTIVE','ELIGIBLE','QUOTE_REQUIRED'].includes(eligibility)) {
+    throw new Error(`Service ${canonicalSku} is not authorized for pricing channel ${channelCode}.`);
+  }
+
   const rules = await loadRules(supabase, governedService.id, channelCode);
-  return { offer:governedOffer, service:governedService, rule:rules.find(r=>r.base_price_cents!=null)||rules[0]||null };
+  const rule = rules.find(r=>r.base_price_cents!=null) || rules[0] || null;
+  if (!rule) throw new Error(`Service ${canonicalSku} has no locked pricing rule for channel ${channelCode}.`);
+  if (channelCode !== 'CH01' && rule.resident_discount_eligible) {
+    throw new Error(`Pricing governance error: resident discount is enabled on ${canonicalSku} for ${channelCode}.`);
+  }
+  return { offer:governedOffer, service:governedService, rule };
 }
 export function aggregateQuoteCalculations(lineItems) {
   const totals = lineItems.reduce((acc, item) => {
