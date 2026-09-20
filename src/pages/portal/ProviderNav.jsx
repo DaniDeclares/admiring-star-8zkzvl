@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 const TABS = [
   { to: '/portal', label: 'Overview', locked: false, needsAgreement: false },
+  { to: '/portal/field', label: 'DANI FIELD', locked: true, needsAgreement: true },
   { to: '/portal/provider-agreement', label: 'Provider Agreement', locked: false, needsAgreement: false },
   { to: '/portal/vendor-onboarding', label: 'Documents', locked: false, needsAgreement: true },
   { to: '/portal/w9', label: 'Tax Form (W-9)', locked: false, needsAgreement: true },
