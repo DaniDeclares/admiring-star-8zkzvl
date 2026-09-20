@@ -630,7 +630,7 @@ export default async function handler(req, res) {
       const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
-      if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'Only READY_TO_SEND estimates can create a Stripe invoice.', 409);
+      if (!['ready_to_send','approved'].includes(estimate.estimate_status)) return fail(res, 'Only READY_TO_SEND or customer-approved estimates can create a Stripe invoice.', 409);
       if (!estimate.estimated_total || Number(estimate.estimated_total) <= 0) return fail(res, 'Estimate total must be greater than zero.', 422);
       if (!estimate.client_email && !estimate.client_phone) return fail(res, 'Customer needs an email or phone before Stripe invoice creation.', 422);
       const identityGate = customerIdentityGate(estimate, context.user?.email);
