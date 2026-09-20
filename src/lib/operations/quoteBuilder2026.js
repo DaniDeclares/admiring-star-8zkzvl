@@ -182,7 +182,6 @@ function validateQuoteLineContract(service, answers, lineItem, requestedLineItem
   const schema=service?.quote_input_schema;
   if(!schema?.ui_mode?.startsWith('SPECIALIZED_')) return;
   const fields=[...(schema.fields||[]),...(schema.commercial_inputs||[])];
-  const fieldMap=new Map(fields.map(f=>[f.key,f]));
   for(const field of fields){
     if(field.required && (answers?.[field.key]===undefined || answers?.[field.key]===null || String(answers[field.key]).trim()==='')){
       throw new Error(`Missing required quote input: ${field.label || field.key}.`);
