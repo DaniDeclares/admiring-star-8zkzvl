@@ -2,32 +2,50 @@
 
 ## Purpose
 
-The intake layer is the first operational discriminator for Dani Declares. A request must identify its commercial channel before pricing, workflow, proposal, checkout, or government procurement logic is selected.
+The intake layer is the first operational discriminator for DANI DECLARES. A request must resolve to an official DANI channel before pricing, workflow, proposal, checkout, or government procurement logic is selected.
 
-## Channel state machines
+## Official channel state machines
 
-| Channel | Workflow | Initial state |
-| --- | --- | --- |
-| B2C | `INSTANT_BOOKING` | `ROUTED` |
-| B2B_APT | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
-| B2B_RE | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
-| B2B | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
-| B2B2C | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
-| B2G | `B2G_SOW` | `SOW_REVIEW` |
+| Official channel | Intake type(s) | Commercial model default | Workflow | Initial state |
+| --- | --- | --- | --- | --- |
+| CH01 | B2C | B2C | `INSTANT_BOOKING` | `ROUTED` |
+| CH02 | B2B_APT | B2B | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
+| CH03 | B2B_RE | B2B | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
+| CH04 | B2B | B2B | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
+| CH05 | B2G | B2G | `B2G_SOW` | `SOW_REVIEW` |
+
+## B2B2C / resident rule
+
+B2B2C is a commercial relationship/economic model, not a channel.
+
+For apartment/community programs:
+
+- organization/property-side relationship → **CH02**
+- resident direct experience → **CH01**
+- verified community-resident subchannel → **CH01-B**
+- organization-side commercial model may be **B2B2C**
+- resident-side direct transaction remains **B2C** with CH01-B eligibility context
+
+B2B2C must never be accepted as a replacement for an official channel.
 
 ## Routing rules
 
-1. An explicit `channelType` always wins when it is one of the controlled channel values.
-2. Legacy callers may use a controlled category fallback. The fallback is recorded as `category_fallback` so it can be retired after migration.
-3. Unknown or missing channels do **not** default to B2C. They enter `MANUAL_REVIEW` and the API rejects unresolved intake until a valid channel is supplied.
-4. Channel selection does not set a price. Pricing remains the responsibility of the canonical pricing resolver.
-5. B2C discounts do not cross into B2B, B2B2C, or B2G simply because a capability is shared.
-6. B2G enters SOW/procurement review and never becomes an instant numeric checkout flow.
+1. An explicit official channel wins when supplied.
+2. Legacy intake types such as B2C/B2B_APT/B2B_RE/B2B/B2G resolve to CH01–CH05.
+3. Legacy category fallback is controlled and recorded as `category_fallback`.
+4. B2B2C supplied as `channelType` is rejected as a commercial-model/channel mismatch; it is never silently remapped.
+5. Unknown or missing channels do **not** default to CH01. They enter `MANUAL_REVIEW` and the API rejects unresolved intake until a valid channel is supplied.
+6. Channel selection does not set a price. Pricing remains the responsibility of the canonical pricing resolver.
+7. B2C resident discounts do not cross into B2B or B2G pricing.
+8. A CH02 contract price is never replaced by a CH01 resident price merely because the recipient is a resident.
+9. B2G enters SOW/procurement review and never becomes an instant numeric checkout flow.
 
 ## Persistence
 
-The migration adds `channel_type`, `intake_workflow`, `routing_source`, and `routing_reason` to `service_requests` for the durable operations model. The current application also stores the routing context in the existing `property_details.operationsRouting` JSON boundary so the intake path remains backward-compatible while the Prisma model catches up with the database migration.
+The request boundary carries official channel, commercial model, optional subchannel, workflow, routing source/reason, and related relationship context in the existing `property_details.operationsRouting` JSON boundary during schema transition.
+
+The new migration also prepares normalized `official_channel`, `commercial_model`, and `subchannel_code` fields on `service_requests`. The live database has not yet been changed by this PR.
 
 ## Next connector
 
-After this routing foundation is verified, the next step is to pass the validated `channel` + `serviceId` into `pricingResolver2026`. The resolver returns the authorized offer/status/amount (or an explicit undefined/custom result), and the resulting pricing snapshot becomes part of the quote rather than being recalculated by invoices or frontend components.
+After routing is verified, the validated official channel + canonical service identity + commercial model are passed into the governed commercial/pricing layer. The resulting pricing snapshot remains downstream of the authoritative commercial rules.
