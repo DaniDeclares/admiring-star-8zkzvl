@@ -62,6 +62,14 @@ export function resolveCanonicalOffers(governed, specials, governedStatusBySku =
       continue;
     }
 
+    // Without an explicit governed status row, do not silently promote a
+    // special into the governed offer graph. Production catalog loading
+    // supplies these status rows before resolution.
+    if (!hasAnyGoverned) {
+      resolved.push({ ...special, canonicalOnlySpecial:true });
+      continue;
+    }
+
     if (!base) {
       resolved.push({ ...special, canonicalOnlySpecial:true });
       continue;
