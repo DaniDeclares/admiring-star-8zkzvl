@@ -113,12 +113,103 @@ export function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCom
   return money(price);
 }
 
-export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
+export async function getChannelGovernanceDecision(serviceId, channel) {
+  if (!serviceId || !channel) {
+    return { allowed: false, reason: 'CHANNEL_REQUIRED' };
+  }
+
+  const rows = await prisma.$queryRaw`
+    SELECT
+      a.disposition,
+      a.proposed_front_door AS "proposedFrontDoor",
+      a.cross_channel_review AS "crossChannelReview",
+      ca.eligibility_status AS "availabilityStatus",
+      pr.pricing_type AS "channelPricingType",
+      EXISTS (
+        SELECT 1
+        FROM public.dd_service_pricing_rules pr
+        WHERE pr.service_id = o.runtime_service_id
+          AND pr.channel_code = ${channel}
+          AND pr.status = 'ACTIVE'
+          AND pr.lock_status = 'LOCKED'
+      ) AS "hasLockedActivePricing"
+    FROM public.dd_ch02_service_adjudication a
+    JOIN public.dd_governed_service_offers o
+      ON o.canonical_sku = a.sku
+    LEFT JOIN public.dd_service_channel_availability ca
+      ON ca.service_id = o.runtime_service_id
+     AND ca.channel_code = a.channel_code
+    LEFT JOIN LATERAL (
+      SELECT pricing_type
+      FROM public.dd_service_pricing_rules
+      WHERE service_id = o.runtime_service_id
+        AND channel_code = ${channel}
+        AND status = 'ACTIVE'
+        AND lock_status = 'LOCKED'
+      ORDER BY effective_date DESC NULLS LAST, updated_at DESC
+      LIMIT 1
+    ) pr ON true
+    WHERE a.channel_code = ${channel}
+      AND a.sku = ${serviceId}
+    LIMIT 1
+  `;
+
+  const row = rows[0];
+  if (!row) {
+    return { allowed: false, reason: 'CHANNEL_GOVERNANCE_NOT_FOUND' };
+  }
+  if (row.disposition !== 'FRONT_DOOR_CANDIDATE') {
+    return { allowed: false, reason: `CH02_ADJUDICATION_${row.disposition}` };
+  }
+  if (row.crossChannelReview) {
+    return { allowed: false, reason: 'CH02_CROSS_CHANNEL_REVIEW' };
+  }
+  if (!['ACTIVE', 'ELIGIBLE'].includes(String(row.availabilityStatus || '').toUpperCase())) {
+    return { allowed: false, reason: 'CH02_CHANNEL_NOT_AVAILABLE' };
+  }
+  if (!row.hasLockedActivePricing) {
+    return { allowed: false, reason: 'CH02_CHANNEL_PRICING_NOT_LOCKED' };
+  }
+
+  return {
+    allowed: true,
+    reason: 'CH02_GOVERNANCE_CLEARED',
+    frontDoor: row.proposedFrontDoor,
+    pricingType: row.channelPricingType || null,
+  };
+}
+
+export async function resolveGovernedChannelPrice(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
+  if (!offer) return null;
+  if (channel !== 'CH02') {
+    return resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident });
+  }
+
+  const rows = await prisma.$queryRaw`
+    SELECT base_price_cents
+    FROM public.dd_service_pricing_rules
+    WHERE service_id = ${offer.runtimeServiceId}
+      AND channel_code = ${channel}
+      AND status = 'ACTIVE'
+      AND lock_status = 'LOCKED'
+    ORDER BY effective_date DESC NULLS LAST, updated_at DESC
+    LIMIT 1
+  `;
+
+  const cents = rows[0]?.base_price_cents == null ? null : Number(rows[0].base_price_cents);
+  if (!Number.isFinite(cents) || cents <= 0) return null;
+  return money(cents / 100);
+}
+
+export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType } = {}) {
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
   if (offer.fulfillmentGateStatus !== 'READY') return { eligible: false, reason: 'FULFILLMENT_NOT_READY', price: null };
   if (isQuoteRequired(offer)) return { eligible: false, reason: 'QUOTE_REQUIRED', price: null };
+  if (channel === 'CH02' && QUOTE_REQUIRED_MODELS.has(String(channelPricingType || '').toUpperCase())) {
+    return { eligible: false, reason: 'CH02_CHANNEL_QUOTE_REQUIRED', price: null };
+  }
   const economics = economicGateFromOffer(offer);
   if (!economics.cleared) return { eligible: false, reason: economics.reason, price: null, marginPercent: economics.marginPercent };
   if (!channel) return { eligible: false, reason: 'CHANNEL_REQUIRED', price: null };
