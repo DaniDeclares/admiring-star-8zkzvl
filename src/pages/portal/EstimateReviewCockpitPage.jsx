@@ -170,8 +170,8 @@ function ReviewCockpit(){
       <button disabled={saving} onClick={save} style={btn('#5a1624','#fff')}>{saving?'Saving review…':estimate.estimate_status==='ready_to_send'?'Save Review':'Save & Reconcile Review'}</button>
     </div>
 
-    {estimate.estimate_status==='ready_to_send'&&<section style={{...CardStyle,marginTop:18,border:'2px solid #8b6b1f'}}>
-      <div style={eyebrow}>DELIVERY GATE OPEN</div><h2 style={{margin:'5px 0',color:'#5a1624'}}>READY TO SEND</h2>
+    {['ready_to_send','approved'].includes(estimate.estimate_status)&&<section style={{...CardStyle,marginTop:18,border:'2px solid #8b6b1f'}}>
+      <div style={eyebrow}>QUOTE DELIVERY / PAYMENT</div><h2 style={{margin:'5px 0',color:'#5a1624'}}>{estimate.estimate_status==='approved'?'CUSTOMER APPROVED':'READY TO SEND'}</h2>
       <p style={muted}>The estimate has passed its configured review gates. Customer delivery is deliberately separate from approval so a payment link or SMS is never represented as sent unless an actual provider action succeeds.</p><div style={{marginBottom:10,fontWeight:800,color:'#8a1d2d'}}>Stripe is connected in live mode. Creating the invoice below creates a real customer-facing Stripe invoice; it does not send SMS or email.</div>
       <div style={{display:'flex',gap:9,flexWrap:'wrap'}}><button disabled style={btn('#f5f2ed','#6d5b60')}>Send via SMS — delivery provider not connected</button><button disabled={saving} onClick={createStripeInvoice} style={btn('#5a1624','#fff')}>{saving?'Creating Stripe invoice…':'Create / Open Live Stripe Invoice'}</button></div>
     </section>}
