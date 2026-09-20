@@ -113,51 +113,114 @@ export function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCom
   return money(price);
 }
 
-export async function getChannelGovernanceDecision(serviceId, channel) {
+export async function getChannelGovernanceDecision(serviceId, channel, subchannel = '') {
   if (!serviceId || !channel) {
     return { allowed: false, reason: 'CHANNEL_REQUIRED' };
   }
 
-  const rows = await prisma.$queryRaw`
-    SELECT
-      a.disposition,
-      a.proposed_front_door AS "proposedFrontDoor",
-      a.cross_channel_review AS "crossChannelReview",
-      ca.eligibility_status AS "availabilityStatus",
-      pr.pricing_type AS "channelPricingType",
-      EXISTS (
-        SELECT 1
-        FROM public.dd_service_pricing_rules pr
-        WHERE pr.service_id = o.runtime_service_id
-          AND pr.channel_code = ${channel}
-          AND pr.status = 'ACTIVE'
-          AND pr.lock_status = 'LOCKED'
-      ) AS "hasLockedActivePricing"
-    FROM public.dd_ch02_service_adjudication a
-    JOIN public.dd_governed_service_offers o
-      ON o.canonical_sku = a.sku
-    LEFT JOIN public.dd_service_channel_availability ca
-      ON ca.service_id = o.runtime_service_id
-     AND ca.channel_code = a.channel_code
-    LEFT JOIN LATERAL (
-      SELECT pricing_type
-      FROM public.dd_service_pricing_rules
-      WHERE service_id = o.runtime_service_id
-        AND channel_code = ${channel}
-        AND status = 'ACTIVE'
-        AND lock_status = 'LOCKED'
-      ORDER BY effective_date DESC NULLS LAST, updated_at DESC
-      LIMIT 1
-    ) pr ON true
-    WHERE a.channel_code = ${channel}
-      AND a.sku = ${serviceId}
-    LIMIT 1
-  `;
+  const rows = channel === 'CH01'
+    ? await prisma.$queryRaw`
+        SELECT
+          a.disposition,
+          a.front_door_code AS "proposedFrontDoor",
+          ca.eligibility_status AS "availabilityStatus",
+          pr.pricing_type AS "channelPricingType",
+          EXISTS (
+            SELECT 1
+            FROM public.dd_service_pricing_rules p
+            WHERE p.service_id = s.id
+              AND p.channel_code = 'CH01'
+              AND p.status = 'ACTIVE'
+              AND p.lock_status = 'LOCKED'
+          ) AS "hasLockedActivePricing",
+          EXISTS (
+            SELECT 1
+            FROM public.dd_service_market_pricing_rules mp
+            WHERE mp.service_id = s.id
+              AND mp.channel_code = 'CH01'
+              AND mp.subchannel_code = 'CH01-B'
+              AND mp.status = 'ACTIVE'
+              AND mp.price_override_cents IS NOT NULL
+              AND mp.price_override_cents > 0
+          ) AS "hasLockedActiveSubchannelPricing"
+        FROM public.dd_ch01_service_adjudication a
+        JOIN public.services s
+          ON s.id = a.service_id
+        LEFT JOIN public.dd_service_channel_availability ca
+          ON ca.service_id = s.id
+         AND ca.channel_code = 'CH01'
+        LEFT JOIN LATERAL (
+          SELECT p.pricing_type
+          FROM public.dd_service_pricing_rules p
+          WHERE p.service_id = s.id
+            AND p.channel_code = 'CH01'
+            AND p.status = 'ACTIVE'
+            AND p.lock_status = 'LOCKED'
+          ORDER BY p.effective_date DESC NULLS LAST, p.updated_at DESC
+          LIMIT 1
+        ) pr ON true
+        WHERE a.channel_code = 'CH01'
+          AND a.sku = ${serviceId}
+        LIMIT 1
+      `
+    : await prisma.$queryRaw`
+        SELECT
+          a.disposition,
+          a.proposed_front_door AS "proposedFrontDoor",
+          a.cross_channel_review AS "crossChannelReview",
+          ca.eligibility_status AS "availabilityStatus",
+          pr.pricing_type AS "channelPricingType",
+          EXISTS (
+            SELECT 1
+            FROM public.dd_service_pricing_rules p
+            WHERE p.service_id = o.runtime_service_id
+              AND p.channel_code = ${channel}
+              AND p.status = 'ACTIVE'
+              AND p.lock_status = 'LOCKED'
+          ) AS "hasLockedActivePricing"
+        FROM public.dd_ch02_service_adjudication a
+        JOIN public.dd_governed_service_offers o
+          ON o.canonical_sku = a.sku
+        LEFT JOIN public.dd_service_channel_availability ca
+          ON ca.service_id = o.runtime_service_id
+         AND ca.channel_code = a.channel_code
+        LEFT JOIN LATERAL (
+          SELECT pricing_type
+          FROM public.dd_service_pricing_rules
+          WHERE service_id = o.runtime_service_id
+            AND channel_code = ${channel}
+            AND status = 'ACTIVE'
+            AND lock_status = 'LOCKED'
+          ORDER BY effective_date DESC NULLS LAST, updated_at DESC
+          LIMIT 1
+        ) pr ON true
+        WHERE a.channel_code = ${channel}
+          AND a.sku = ${serviceId}
+        LIMIT 1
+      `;
 
   const row = rows[0];
   if (!row) {
     return { allowed: false, reason: 'CHANNEL_GOVERNANCE_NOT_FOUND' };
   }
+
+  if (channel === 'CH01') {
+    if (!['FRONT_DOOR', 'SUPPORTING_LAYER', 'CONTROLLED_QUOTE'].includes(row.disposition)) {
+      return { allowed: false, reason: `CH01_ADJUDICATION_${row.disposition}` };
+    }
+    if (String(row.availabilityStatus || '').toUpperCase() === 'INACTIVE') {
+      return { allowed: false, reason: 'CH01_CHANNEL_NOT_AVAILABLE' };
+    }
+    return {
+      allowed: true,
+      reason: 'CH01_GOVERNANCE_CLEARED',
+      frontDoor: row.proposedFrontDoor,
+      pricingType: row.channelPricingType || null,
+      hasLockedActivePricing: Boolean(row.hasLockedActivePricing),
+      hasLockedActiveSubchannelPricing: Boolean(row.hasLockedActiveSubchannelPricing),
+    };
+  }
+
   if (row.disposition !== 'FRONT_DOOR_CANDIDATE') {
     return { allowed: false, reason: `CH02_ADJUDICATION_${row.disposition}` };
   }
@@ -176,11 +239,48 @@ export async function getChannelGovernanceDecision(serviceId, channel) {
     reason: 'CH02_GOVERNANCE_CLEARED',
     frontDoor: row.proposedFrontDoor,
     pricingType: row.channelPricingType || null,
+    hasLockedActivePricing: Boolean(row.hasLockedActivePricing),
+    hasLockedActiveSubchannelPricing: false,
   };
 }
 
 export async function resolveGovernedChannelPrice(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
   if (!offer) return null;
+
+  if (channel === 'CH01') {
+    if (subchannel === 'CH01-B') {
+      const rows = await prisma.$queryRaw`
+        SELECT price_override_cents
+        FROM public.dd_service_market_pricing_rules
+        WHERE service_id = ${offer.runtimeServiceId}
+          AND channel_code = 'CH01'
+          AND subchannel_code = 'CH01-B'
+          AND status = 'ACTIVE'
+          AND price_override_cents IS NOT NULL
+          AND price_override_cents > 0
+        ORDER BY updated_at DESC
+        LIMIT 1
+      `;
+      const cents = rows[0]?.price_override_cents == null ? null : Number(rows[0].price_override_cents);
+      if (!Number.isFinite(cents) || cents <= 0) return null;
+      return money(cents / 100);
+    }
+
+    const rows = await prisma.$queryRaw`
+      SELECT base_price_cents
+      FROM public.dd_service_pricing_rules
+      WHERE service_id = ${offer.runtimeServiceId}
+        AND channel_code = 'CH01'
+        AND status = 'ACTIVE'
+        AND lock_status = 'LOCKED'
+      ORDER BY effective_date DESC NULLS LAST, updated_at DESC
+      LIMIT 1
+    `;
+    const cents = rows[0]?.base_price_cents == null ? null : Number(rows[0].base_price_cents);
+    if (!Number.isFinite(cents) || cents <= 0) return null;
+    return money(cents / 100);
+  }
+
   if (channel !== 'CH02') {
     return resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident });
   }
@@ -201,7 +301,7 @@ export async function resolveGovernedChannelPrice(offer, { channel, subchannel, 
   return money(cents / 100);
 }
 
-export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType } = {}) {
+export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType, hasLockedActivePricing, hasLockedActiveSubchannelPricing } = {}) {
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
@@ -225,8 +325,11 @@ export function checkoutEligibility(offer, { channel, subchannel, isVerifiedComm
   if (channel === 'CH01' && subchannel === 'CH01-B' && !isVerifiedCommunityResident) {
     return { eligible: false, reason: 'COMMUNITY_RESIDENT_VERIFICATION_REQUIRED', price: null };
   }
-  if (channel === 'CH01' && !offer.ch01APriced) {
-    return { eligible: false, reason: 'CH01_A_NOT_PRICED', price: null };
+  if (channel === 'CH01' && subchannel === 'CH01-A' && hasLockedActivePricing !== true) {
+    return { eligible: false, reason: 'CH01_CHANNEL_PRICING_NOT_LOCKED', price: null };
+  }
+  if (channel === 'CH01' && subchannel === 'CH01-B' && hasLockedActiveSubchannelPricing !== true) {
+    return { eligible: false, reason: 'CH01_B_PRICING_NOT_GOVERNED', price: null };
   }
   if (channel !== 'CH01' && Number(offer.channelAvailabilityCount || 0) <= 0) {
     return { eligible: false, reason: 'NO_CHANNEL_AVAILABILITY', price: null };
