@@ -2,7 +2,7 @@ import { resolveCanonicalOffers } from './quoteBuilder2026.js';
 
 const governed = [
   { sku:'DNI-01F-001', name:'Holiday & Seasonal Home Decorating', base_price_cents:10000, sourceType:'GOVERNED' },
-  { sku:'DNI-02A-002', name:'Apartment Turn', base_price_cents:15000, sourceType:'GOVERNED' },
+  { sku:'DNI-99A-002', name:'Standalone Special', base_price_cents:15000, sourceType:'GOVERNED' },
   { sku:'DNI-99A-001', name:'Locked Service', base_price_cents:5000, sourceType:'GOVERNED' }
 ];
 
@@ -31,10 +31,10 @@ test('keeps an unresolved price conflict as a nested DANI SPECIAL variant', () =
 test('preserves a special-only canonical offer', () => {
   const result = resolveCanonicalOffers(
     governed,
-    [{ sku:'DSS-CAN-DNI02A002', canonicalSku:'DNI-02A-002', name:'Apartment Turn', base_price_cents:15000, specialPrice:150 }],
+    [{ sku:'DSS-CAN-DNI99A002', canonicalSku:'DNI-99A-002', name:'Standalone Special', base_price_cents:15000, specialPrice:150 }],
     new Map()
   );
-  expect(result.find(x=>x.sku==='DNI-02A-002').canonicalOnlySpecial).toBe(true);
+  expect(result.find(x=>x.sku==='DNI-99A-002').canonicalOnlySpecial).toBe(true);
 });
 
 test('does not let a special bypass a DO_NOT_SELL governance lock', () => {
