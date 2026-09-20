@@ -64,7 +64,21 @@ function QuoteBuilder(){
  const packagePreviews=useMemo(()=>lineItems.map(li=>{const s=serviceBySku.get(li.serviceSku);return s?{line:li,service:s,calculation:calculate(s,null,{...li.answers,apply_resident_discount:false})}:null}).filter(Boolean),[lineItems,serviceBySku]);
  const packageCalculation=useMemo(()=>packagePreviews.reduce((acc,row)=>{for(const k of ['baseSubtotal','residentDiscount','travelFee','rushFee','materials','sourcingFee','passThrough','tax','estimatedTotal','depositDue'])acc[k]+=Number(row.calculation[k]||0);acc.reviewFlags.push(...(row.calculation.reviewFlags||[]).map(f=>row.service.sku+':'+f));if(row.calculation.needsReview)acc.needsReview=true;return acc},{baseSubtotal:0,residentDiscount:0,travelFee:0,rushFee:0,materials:0,sourcingFee:0,passThrough:0,tax:0,estimatedTotal:0,depositDue:0,reviewFlags:[],needsReview:false}),[packagePreviews]);
  const filtered=useMemo(()=>{const q=search.trim().toLowerCase();return q?services.filter(s=>`${s.name} ${s.sku} ${s.service_family||''} ${(s.offerVariants||[]).map(v=>`${v.name} ${v.sku} ${v.displayLabel||''}`).join(' ')}`.toLowerCase().includes(q)):services},[services,search]);
- const setLineAnswer=(id,key,value)=>setLineItems(items=>items.map(li=>li.id===id?{...li,answers:{...li.answers,[key]:value}}:li));
+ const setLineAnswer=(id,key,value)=>setLineItems(items=>{
+   const next=items.map(li=>li.id===id?{...li,answers:{...li.answers,[key]:value}}:li);
+   const parent=next.find(li=>li.id===id);
+   const service=parent?serviceBySku.get(parent.serviceSku):null;
+   const route=service?.quote_input_schema?.routing_flags?.find(flag=>flag.key===key);
+   if(!route?.target_sku) return next;
+   const exists=next.some(li=>li.parentLineId===id&&li.serviceSku===route.target_sku);
+   if(Boolean(value) && !exists){
+     return [...next,{...freshLine(route.target_sku),parentLineId:id,parentServiceSku:parent.serviceSku,componentRole:'COMPANION'}];
+   }
+   if(!Boolean(value)){
+     return next.filter(li=>!(li.parentLineId===id&&li.serviceSku===route.target_sku));
+   }
+   return next;
+ });
  const addService=(sku,meta={})=>{if(!sku)return;setLineItems(items=>[...items,{...freshLine(sku,meta.answers||{}),parentLineId:meta.parentLineId||null,parentServiceSku:meta.parentServiceSku||null,componentRole:meta.componentRole||'PRIMARY'}]);setResult(null)};
  const addCompanion=(parentLine,companion)=>{
    const exists=lineItems.some(li=>li.parentLineId===parentLine.id&&li.serviceSku===companion.sku);
