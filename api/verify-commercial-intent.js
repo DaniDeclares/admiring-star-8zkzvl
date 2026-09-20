@@ -73,7 +73,7 @@ export default async function handler(req,res){try{
    ? await getChannelGovernanceDecision(db.serviceId, channel)
    : { allowed: true, reason: 'LEGACY_CHANNEL_GATE' };
  if (!channelGovernance.allowed) {
-   return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,checkoutEligible:false,intakeAvailable:true,frozenPriceSnapshot:null,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.',gateReason:channelGovernance.reason});
+   return json(res,409,{success:false,serviceId:db.serviceId,serviceName:db.name,checkoutEligible:false,intakeAvailable:false,frozenPriceSnapshot:null,message:'This service is not currently available through the selected property-management service path.',gateReason:channelGovernance.reason});
  }
  const gate=checkoutEligibility(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident,channelPricingType:channelGovernance.pricingType});
  const expectedPrice=await resolveGovernedChannelPrice(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident});
