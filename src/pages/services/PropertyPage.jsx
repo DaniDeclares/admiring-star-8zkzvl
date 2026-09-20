@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 const entryServices = [
@@ -25,20 +25,6 @@ const additionalServices = [
 ];
 
 export default function PropertyPage() {
-  const [catalog, setCatalog] = useState([]);
-
-  useEffect(() => {
-    fetch("/api/verify-commercial-intent?catalog=1&channelType=B2B_APT")
-      .then(r => r.json())
-      .then(d => { if (d.success) setCatalog(d.services || []); })
-      .catch(() => {});
-  }, []);
-
-  const availableSkus = useMemo(
-    () => new Set(catalog.map(s => s.serviceId)),
-    [catalog]
-  );
-
   return (
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", color: "#211417", background: "#fbf8f4", minHeight: "100vh" }}>
       <section style={{ background: "linear-gradient(135deg,#250b12,#5b1424)", color: "white", padding: "5rem 1.5rem 4rem" }}>
@@ -64,13 +50,12 @@ export default function PropertyPage() {
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16, marginTop: 22 }}>
             {featuredSolutions.map(item => {
-              const available = availableSkus.has(item.sku);
               return (
                 <article key={item.sku} style={{ background: "white", border: "2px solid #d8bd78", borderRadius: 14, padding: 24 }}>
                   <h3 style={{ margin: "0 0 8px", color: "#66192b", fontSize: 24 }}>{item.label}</h3>
                   <p style={{ margin: 0, lineHeight: 1.6, color: "#6c5c60" }}>{item.outcome}</p>
                   <Link
-                    to={available ? "/request-service?channelType=B2B_APT&service=" + encodeURIComponent(item.sku) : "/request-service?channelType=B2B_APT"}
+                    to={"/request-service?channelType=B2B_APT&service=" + encodeURIComponent(item.sku)}
                     style={{ display: "inline-flex", marginTop: 16, background: "#6b1426", color: "white", padding: "12px 18px", borderRadius: 7, textDecoration: "none", fontWeight: 900 }}
                   >
                     Request a Quote
