@@ -1,4 +1,5 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
+import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 
 const STAFF_ROLES = ['admin', 'owner', 'staff_admin', 'staff'];
 
@@ -48,6 +49,8 @@ export default async function handler(req, res) {
     if (eventError) throw eventError;
     return res.status(200).json({ success: true, fulfillment });
   } catch (error) {
+    captureServerException(error,{route:'/api/portal-fulfillment-dispatch',stage:'fulfillment_dispatch'});
+    await flushServerSentry();
     console.error('Portal fulfillment/dispatch error:', error);
     return res.status(500).json({ success: false, error: 'Fulfillment or dispatch operation failed.' });
   }

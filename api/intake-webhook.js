@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { buildIntakeRoutingContext, routeIntake } from '../src/lib/operations/intakeRouting2026.js';
 import { getChannelGovernanceDecision } from '../src/lib/operations/governedCommercialGate2026.js';
 import { publishOperationalEvent } from '../src/lib/operations/eventBroker2026.js';
+import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 
 function specialDuration(name, unit, price) {
  const n=String(name||''); const u=String(unit||'').toLowerCase();
@@ -83,6 +84,8 @@ export default async function handler(req,res){
   }catch(notificationError){console.error('Lead notification queue error:',notificationError)}
   return res.status(200).json({success:true,message:'We received your request.',requestId:request.id,paymentPending:paymentEligible,status:requestState,booking:booking?{id:booking.id,startsAt:booking.requested_start_at,endsAt:booking.requested_end_at,holdExpiresAt:booking.hold_expires_at,durationMinutes:booking.duration_minutes}:null});
  }catch(error){
+  captureServerException(error,{route:'/api/intake-webhook',stage:'request_persistence'});
+  await flushServerSentry();
   console.error('Intake persistence error:',error);
   if(String(error?.message||'').includes('REQUESTED_TIME_UNAVAILABLE'))return res.status(409).json({error:'That requested time is no longer available. Please choose another date or time.'});
   return res.status(500).json({error:'We could not save your request right now. Please try again or contact DANI DECLARES.'});
