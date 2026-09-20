@@ -42,11 +42,9 @@ function QuoteBuilder(){
  const offerRows=useMemo(()=>services.flatMap(s=>[s,...(s.offerVariants||[])]),[services]);
  const serviceBySku=useMemo(()=>new Map(offerRows.map(s=>[s.sku,s])),[offerRows]);
  const primary=lineItems[0]||null;
- const service=primary?serviceBySku.get(primary.serviceSku)||null:null;
  const packagePreviews=useMemo(()=>lineItems.map(li=>{const s=serviceBySku.get(li.serviceSku);return s?{line:li,service:s,calculation:calculate(s,null,{...li.answers,apply_resident_discount:false})}:null}).filter(Boolean),[lineItems,serviceBySku]);
  const packageCalculation=useMemo(()=>packagePreviews.reduce((acc,row)=>{for(const k of ['baseSubtotal','residentDiscount','travelFee','rushFee','materials','sourcingFee','passThrough','tax','estimatedTotal','depositDue'])acc[k]+=Number(row.calculation[k]||0);acc.reviewFlags.push(...(row.calculation.reviewFlags||[]).map(f=>row.service.sku+':'+f));if(row.calculation.needsReview)acc.needsReview=true;return acc},{baseSubtotal:0,residentDiscount:0,travelFee:0,rushFee:0,materials:0,sourcingFee:0,passThrough:0,tax:0,estimatedTotal:0,depositDue:0,reviewFlags:[],needsReview:false}),[packagePreviews]);
  const filtered=useMemo(()=>{const q=search.trim().toLowerCase();return q?services.filter(s=>`${s.name} ${s.sku} ${s.service_family||''} ${(s.offerVariants||[]).map(v=>`${v.name} ${v.sku} ${v.displayLabel||''}`).join(' ')}`.toLowerCase().includes(q)):services},[services,search]);
- const updateLine=(id,patch)=>setLineItems(items=>items.map(li=>li.id===id?{...li,...patch}:li));
  const setLineAnswer=(id,key,value)=>setLineItems(items=>items.map(li=>li.id===id?{...li,answers:{...li.answers,[key]:value}}:li));
  const addService=sku=>{if(!sku)return;setLineItems(items=>[...items,freshLine(sku)]);setResult(null)};
  const removeService=id=>setLineItems(items=>items.length<=1?items:items.filter(li=>li.id!==id));
