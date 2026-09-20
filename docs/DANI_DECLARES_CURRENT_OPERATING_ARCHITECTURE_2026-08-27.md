@@ -138,3 +138,14 @@ The canonical provider transaction is:
 - New official channels created merely for customer types, specialists, products, events, commercial models, or fulfillment resources
 
 Historical records may remain available for audit and provenance but are not active commercial authority.
+
+
+## 5A. B2B2C / CH02 → CH01-B contract
+B2B2C is a commercial relationship model, not an official channel. For apartment/community relationships, the organization-side commercial relationship is **CH02 — Property Management & Apartments** and the resident-side experience is **CH01-B — Apartment / Property Residents**. The two identities remain distinct.
+
+If the organization pays DANI, CH02 controls the organization-side transaction and the resident is recipient/beneficiary. If the resident pays DANI, the transaction follows CH01-B resident pricing/eligibility while the organization relationship remains program/eligibility context. B2B2C metadata must never replace CH01–CH05 routing, create a sixth channel, or create a new price book/SKU.
+
+## 5B. Channel-factory release contract
+Every channel/division release follows: **Channel → buyer/segment → outcome/use case → canonical offer/SKU → commercial model → pricing → availability → qualification/fulfillment → payment → application/API → evidence.**
+
+Readiness is layered: **Launchable** means the specific service/cohort passes its commercial, pricing, channel, quote, fulfillment, provider, payment, runtime and smoke-test gates; **Production System** means the required customer/sales/provider journeys work end-to-end; **Enterprise** means cross-system reconciliation is complete. Green does not require every division to be equally optimized for sales.
