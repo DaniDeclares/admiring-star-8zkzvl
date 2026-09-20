@@ -113,6 +113,60 @@ export function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCom
   return money(price);
 }
 
+export async function getChannelGovernanceDecision(serviceId, channel) {
+  if (!serviceId || !channel) {
+    return { allowed: false, reason: 'CHANNEL_REQUIRED' };
+  }
+
+  const rows = await prisma.$queryRaw`
+    SELECT
+      a.disposition,
+      a.proposed_front_door AS "proposedFrontDoor",
+      a.cross_channel_review AS "crossChannelReview",
+      ca.eligibility_status AS "availabilityStatus",
+      EXISTS (
+        SELECT 1
+        FROM public.dd_service_pricing_rules pr
+        WHERE pr.service_id = o.runtime_service_id
+          AND pr.channel_code = ${channel}
+          AND pr.status = 'ACTIVE'
+          AND pr.lock_status = 'LOCKED'
+      ) AS "hasLockedActivePricing"
+    FROM public.dd_ch02_service_adjudication a
+    JOIN public.dd_governed_service_offers o
+      ON o.canonical_sku = a.sku
+    LEFT JOIN public.dd_service_channel_availability ca
+      ON ca.service_id = o.runtime_service_id
+     AND ca.channel_code = a.channel_code
+    WHERE a.channel_code = ${channel}
+      AND a.sku = ${serviceId}
+    LIMIT 1
+  `;
+
+  const row = rows[0];
+  if (!row) {
+    return { allowed: false, reason: 'CHANNEL_GOVERNANCE_NOT_FOUND' };
+  }
+  if (row.disposition !== 'FRONT_DOOR_CANDIDATE') {
+    return { allowed: false, reason: `CH02_ADJUDICATION_${row.disposition}` };
+  }
+  if (row.crossChannelReview) {
+    return { allowed: false, reason: 'CH02_CROSS_CHANNEL_REVIEW' };
+  }
+  if (!['ACTIVE', 'ELIGIBLE'].includes(String(row.availabilityStatus || '').toUpperCase())) {
+    return { allowed: false, reason: 'CH02_CHANNEL_NOT_AVAILABLE' };
+  }
+  if (!row.hasLockedActivePricing) {
+    return { allowed: false, reason: 'CH02_CHANNEL_PRICING_NOT_LOCKED' };
+  }
+
+  return {
+    allowed: true,
+    reason: 'CH02_GOVERNANCE_CLEARED',
+    frontDoor: row.proposedFrontDoor,
+  };
+}
+
 export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
