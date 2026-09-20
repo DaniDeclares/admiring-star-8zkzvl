@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import { createProviderIntakeStaging } from '../lib/pendingOnboarding.js';
 import { capture, captureServiceLifecycle } from '../lib/posthogAnalytics.js';
+import { captureSentryEvent, captureSentryException } from '../lib/sentry.js';
 import { SITE_URL } from '../data/siteConfig.js';
 import { BUCKETS, bucketForFamily } from '../data/serviceCatalogFamilies.js';
 import './PortalAccessPage.css';
@@ -186,7 +187,7 @@ export default function PortalAccessPage() {
       return;
     }
     setSelected(option);setMode('form');setProviderStep(1);
-    if(option.key==='provider') capture('provider_application_started',{route:'/portal/access'});
+    if(option.key==='provider') { capture('provider_application_started',{route:'/portal/access'}); captureSentryEvent('account_form_started',{account_type:'provider',route:'/portal/access'}); }
   };
 
   const providerStepValid=()=>{
@@ -213,6 +214,7 @@ export default function PortalAccessPage() {
     if(selected?.key==='provider' && !selectedServiceCount)return setError('Select at least one specific service you can fulfill.');
     setBusy(true);
     capture('signup_started',{route:'/portal/access',account_type:selected?.key||'unknown',channel:selected?.channel||undefined});
+    captureSentryEvent('started',{account_type:selected?.key||'unknown',channel:selected?.channel||undefined,route:'/portal/access'});
     try{
     await submitInner();
     }catch(e){
@@ -284,7 +286,7 @@ export default function PortalAccessPage() {
         inviteTokenHash:selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
       },
     });
-    if(stagingError){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'staging'});return setError(`Something interrupted account creation: ${stagingError}`);}
+    if(stagingError){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'staging'});captureSentryEvent('staging_failed',{account_type:selected?.key||'unknown',error_type:'staging'});captureSentryException(stagingError,{stage:'staging'});return setError(`Something interrupted account creation: ${stagingError}`);}
 
     const {data,error:authError}=await supabase.auth.signUp({email:normalizedEmail,password:form.password,options:{emailRedirectTo:`${SITE_URL}/portal/login?intake=${encodeURIComponent(stagingId)}`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     // A staging row can be left behind here (signup failed, or the email
@@ -309,6 +311,7 @@ export default function PortalAccessPage() {
       // exists, in whichever browser that happens to be (see
       // PortalLoginPage.jsx reading the ?intake= query param).
       capture('signup_completed',{route:'/portal/access',account_type:selected?.key||'unknown',signup_mode:'email_confirmation'});
+      captureSentryEvent('account_created_waiting_verification',{account_type:selected?.key||'unknown',signup_mode:'email_confirmation'});
       capture('provider_application_submitted',{route:'/portal/access'});
       setBusy(false);setDone('Your account is created. Check your email to confirm it, then sign in — the rest of your onboarding will finish automatically.');setMode('done');
       return;
@@ -319,7 +322,8 @@ export default function PortalAccessPage() {
     // instead of duplicating the insert logic here.
     const {data:result,error:completeError}=await supabase.rpc('dd_consume_provider_intake_staging',{p_staging_id:stagingId});
     if(completeError || !result?.success){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'portal_setup'});return setError(`Account created, but ${(completeError?.message||result?.error||'portal setup needs attention.').replace(/^Account created, but /i,'')}`);}
-    capture('signup_completed',{route:'/portal/access',account_type:selected?.key||'unknown',signup_mode:'immediate_session'});setBusy(false);setDone('Your account is ready.');setMode('done');
+    capture('signup_completed',{route:'/portal/access',account_type:selected?.key||'unknown',signup_mode:'immediate_session'});
+    captureSentryEvent('completed',{account_type:selected?.key||'unknown',signup_mode:'immediate_session'});setBusy(false);setDone('Your account is ready.');setMode('done');
   };
 
   if(inviteChecking)return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">VERIFYING RESIDENT ACCESS</p><h1>Connecting you to your property</h1><p>Please wait while we verify the invitation from your property management team.</p></div></main>;
