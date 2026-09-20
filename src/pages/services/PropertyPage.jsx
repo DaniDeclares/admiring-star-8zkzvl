@@ -82,12 +82,13 @@ export default function PropertyPage() {
               </div>)}
             </div>
             <p style={{ fontSize: 12, color: "#7a6a6e", lineHeight: 1.5, marginTop: 16 }}>Variable, recurring, regulated, or provider-dependent scopes remain quote-controlled. Pricing shown here is resolved from the CH02 commercial catalog.</p>
-          </div>          </div>
+          </div>
           <div style={{ background: "#2a0b12", color: "white", borderRadius: 12, padding: 24 }}>
             <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 2, color: "#d7b980", fontWeight: 800 }}>Account expansion</div>
             <h2 style={{ fontFamily: "Georgia, serif", margin: "8px 0 18px" }}>Recurring property relationships</h2>
-            {retainers.map(([label, price]) => <div key={label} style={{ padding: "15px 0", borderBottom: "1px solid #60323c" }}><div style={{ fontWeight: 800, fontSize: 18 }}>{label}</div><div style={{ color: "#d7b980", marginTop: 4 }}>{price}</div></div>)}
-            <p style={{ color: "#dbcdd0", lineHeight: 1.6, marginTop: 18 }}>Retainers are a separate commercial relationship from one-off requests. Scope is defined by property need, service mix, capacity and fulfillment readiness.</p>
+            {retainers.map(([label]) => <div key={label} style={{ padding: "15px 0", borderBottom: "1px solid #60323c" }}><div style={{ fontWeight: 800, fontSize: 18 }}>{label}</div><div style={{ color: "#d7b980", marginTop: 4 }}>Request recurring quote</div></div>)}
+            <p style={{ color: "#dbcdd0", lineHeight: 1.6, marginTop: 18 }}>Recurring relationships are quoted through the CH02 commercial workflow so scope, service mix, capacity and fulfillment readiness are captured before a recurring price is committed.</p>
+            <Link to="/request-service?channelType=B2B_APT" style={{ display:"inline-flex",marginTop:14,background:"#d7b980",color:"#2a0b12",padding:"11px 16px",borderRadius:7,textDecoration:"none",fontWeight:900 }}>Request Property Support</Link>
           </div>
         </section>
 
