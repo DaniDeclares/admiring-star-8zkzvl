@@ -70,7 +70,6 @@ export function resolveCanonicalOffers(governed, specials, governedStatusBySku =
     const exactCommercialMatch = Number(base.base_price_cents || 0) === Number(special.base_price_cents || 0)
       && String(base.name || '').trim().toLowerCase() === String(special.name || '').trim().toLowerCase();
 
-    consumedSpecialSkus.add(special.sku);
     if (exactCommercialMatch) {
       // Exact duplicate/alias: preserve provenance for diagnostics but do not
       // expose a second operator selection.
