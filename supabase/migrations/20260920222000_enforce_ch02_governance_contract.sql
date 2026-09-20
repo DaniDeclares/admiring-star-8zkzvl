@@ -1,10 +1,6 @@
 -- Enforce CH02 adjudication integrity and reconcile the locked 175-record queue.
 -- This migration does not change source service, pricing, availability, or storefront state.
 
-alter table public.dd_master_service_capability_channel_matrix
-  add constraint dd_master_service_capability_channel_matrix_channel_sku_key
-  unique (channel_code, sku);
-
 alter table public.dd_ch02_service_adjudication
   add column if not exists source_matrix_id uuid;
 
