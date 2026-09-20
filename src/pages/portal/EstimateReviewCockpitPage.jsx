@@ -10,7 +10,10 @@ const FLAG_LABELS={
   MATERIALS_CONFIRMATION:'Materials cost confirmation',
   PASS_THROUGH_CONFIRMATION:'Pass-through cost confirmation',
   TAX_REVIEW:'Tax review',
-  MANUAL_BASE_IGNORED_GOVERNED_PRICING:'Governed pricing acknowledgement'
+  MANUAL_BASE_IGNORED_GOVERNED_PRICING:'Governed pricing acknowledgement',
+  LAYOUT_REVIEW:'Bedroom / layout confirmation',
+  SPECIALTY_CARPET_SCOPE:'Specialty carpet scope',
+  DEBRIS_FURNITURE_SCOPE:'Debris / furniture scope'
 };
 
 function ReviewCockpit(){
@@ -44,6 +47,7 @@ function ReviewCockpit(){
 
   const flags=useMemo(()=>estimate?.intake_answers?.pricingSnapshot?.reviewFlags||[],[estimate]);
   const resolutions=review.resolutions||{};
+  const packageItems=estimate?.intake_answers?.pricingSnapshot?.lineItems||estimate?.intake_answers?.lineItems||[];
   const unresolved=flags.filter(f=>resolutions[f]!==true);
   const setField=(key,value)=>setAnswers(a=>({...a,[key]:value}));
   const setResolution=(flag,value)=>setReview(r=>({...r,resolutions:{...(r.resolutions||{}),[flag]:Boolean(value)}}));
@@ -114,6 +118,16 @@ function ReviewCockpit(){
         <div style={{borderTop:'1px solid #eadfc9',marginTop:10,paddingTop:10,fontWeight:900}}>Total <span style={{float:'right'}}>${Number(estimate.estimated_total||0).toFixed(2)}</span></div>
       </Card>
     </section>
+
+    {packageItems.length>0&&<Card title="Package components">
+      <p style={muted}>Each component was priced from its own service contract and input snapshot. The package total below is the sum of those governed component calculations.</p>
+      <div style={{display:'grid',gap:10}}>
+        {packageItems.map((item,index)=><div key={item.serviceSku||index} style={{padding:13,border:'1px solid #eadfc9',borderRadius:11,background:'#fffaf0'}}>
+          <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong>{item.serviceName||item.serviceSku}</strong><div style={muted}>{item.serviceSku} · {item.componentRole||'PRIMARY'}{item.parentServiceSku?` · add-on to ${item.parentServiceSku}`:''} · {item.sourceType||'GOVERNED'}</div></div><strong style={{color:'#5a1624'}}>${Number(item.calculation?.estimatedTotal||0).toFixed(2)}</strong></div>
+          {item.answers&&<div style={{marginTop:8,fontSize:12,color:'#6d5b60',display:'grid',gap:3}}>{Object.entries(item.answers).filter(([k,v])=>v!==''&&v!==null&&v!==false&&['materials_cost','pass_through_cost','tax_rate_percent','deposit_percent','quantity','hours','miles_one_way'].indexOf(k)<0).map(([k,v])=><div key={k}><strong>{k.replaceAll('_',' ')}:</strong> {String(v)}</div>)}</div>}
+        </div>)}
+      </div>
+    </Card>}
 
     <Card title="BILL-TO CUSTOMER IDENTITY VERIFICATION">
       <div style={{padding:14,border:'2px solid #8b6b1f',borderRadius:10,background:'#fffaf0'}}>
