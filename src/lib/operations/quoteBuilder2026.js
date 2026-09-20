@@ -382,6 +382,34 @@ export async function createEstimate(supabase, body) {
   }
   const primary = resolvedLineItems[0];
   const calculation = aggregateQuoteCalculations(resolvedLineItems);
+  if (!requestId && !updateEstimateId) {
+    const channelType = clientType === 'property_manager' ? 'B2B_APT' : clientType === 'realtor' ? 'B2B_RE' : clientType === 'government' ? 'B2G' : clientType === 'business' ? 'B2B' : 'B2C';
+    const { data: lead, error: leadError } = await supabase.from('leads').insert({
+      full_name: String(body.clientName || '').trim() || null,
+      email: String(body.clientEmail || '').trim() || null,
+      phone: String(body.clientPhone || '').trim() || null,
+      organization_name: String(body.organizationName || '').trim() || null,
+      status: 'new',
+      notes: 'Sales-created quote during live customer call.'
+    }).select('id').single();
+    if (leadError) throw leadError;
+    const { data: createdRequest, error: requestError } = await supabase.from('service_requests').insert({
+      lead_id: lead.id,
+      organization_id: body.organizationId || null,
+      service_category: channelType === 'B2B_APT' ? 'PROPERTY_OPERATIONS' : channelType === 'B2B_RE' ? 'REAL_ESTATE' : channelType === 'B2G' ? 'GOVERNMENT' : 'BUSINESS_SOLUTIONS',
+      service_needed: primary.serviceName || primary.serviceSku,
+      location_address: String(body.locationAddress || '').trim() || null,
+      timeline: String(body.timeline || '').trim() || null,
+      request_details: String(body.clientNotes || '').trim() || 'Quote created during a live sales call.',
+      property_details: { operationsRouting: { channelType, workflow: 'B2B_PROPOSAL', source: 'SALES_CALL' }, pricingServiceId: primary.serviceSku, source: 'SALES_CALL' },
+      status: 'PROPOSAL_PENDING',
+      priority: String(body.priority || 'normal')
+    }).select('id,lead_id').single();
+    if (requestError) throw requestError;
+    sourceRequest = createdRequest;
+    sourceLeadId = lead.id;
+  }
+
   calculation.reviewFlags=[...new Set(calculation.reviewFlags)];
   const service = {
     division_id:primary.divisionId,
