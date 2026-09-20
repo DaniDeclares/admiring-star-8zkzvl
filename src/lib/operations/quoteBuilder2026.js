@@ -7,7 +7,7 @@ function normalizeSpecialCanonicalSku(serviceId) {
   const raw = String(serviceId || '').trim();
   const token = raw.replace(/^DSS-CAN-/, '');
   const match = token.match(/^(DNI)(\d{2})([A-Z])(\d{3})$/);
-  return match ? \`DNI-${match[2]}${match[3]}-${match[4]}\` : null;
+  return match ? `DNI-${match[2]}${match[3]}-${match[4]}` : null;
 }
 
 function buildSpecialRow(s) {
@@ -21,7 +21,7 @@ function buildSpecialRow(s) {
     billing_cycle:'ONETIME',
     starting_price:Number(s.price),
     base_price_cents:Math.round(Number(s.price)*100),
-    public_price_display:\`${Number(s.price).toFixed(2)}${s.unit && !['visit','project','service','flat','treatment','job','load','cycle','package','area','tree','wreath','section','mantel','rug','chair','sofa','mattress','mirror','bath','event','dispatch','audit log','delivery','run','walk','coordination','document','plan','minimum'].includes(s.unit) ? \`/${s.unit}\` : ''}\`,
+    public_price_display:`${Number(s.price).toFixed(2)}${s.unit && !['visit','project','service','flat','treatment','job','load','cycle','package','area','tree','wreath','section','mantel','rug','chair','sofa','mattress','mirror','bath','event','dispatch','audit log','delivery','run','walk','coordination','document','plan','minimum'].includes(s.unit) ? `/${s.unit}` : ''}`,
     commercial_status:'CANONICAL_ACTIVE',
     commercial_intent_status:'SELL_NOW',
     governedOfferStatus:'SELL_NOW',
@@ -89,7 +89,7 @@ export function resolveCanonicalOffers(governed, specials, governedStatusBySku =
         variantType:'DANI_SPECIAL',
         commercialResolution:'UNRESOLVED_PRICE_CONFLICT',
         canonicalSku,
-        displayLabel:\`DANI SPECIAL CAMPAIGN — ${Number(special.specialPrice).toFixed(2)}\`
+        displayLabel:`DANI SPECIAL CAMPAIGN — ${Number(special.specialPrice).toFixed(2)}`
       }
     ];
     base.hasCommercialConflict = true;
