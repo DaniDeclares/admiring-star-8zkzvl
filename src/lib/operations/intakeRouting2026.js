@@ -1,7 +1,21 @@
 export const OPERATIONS_CHANNELS = Object.freeze({
+  CH01: 'CH01',
+  CH02: 'CH02',
+  CH03: 'CH03',
+  CH04: 'CH04',
+  CH05: 'CH05',
+});
+
+export const INTAKE_CHANNEL_TYPES = Object.freeze({
   B2C: 'B2C',
   B2B_APT: 'B2B_APT',
   B2B_RE: 'B2B_RE',
+  B2B: 'B2B',
+  B2G: 'B2G',
+});
+
+export const COMMERCIAL_MODELS = Object.freeze({
+  B2C: 'B2C',
   B2B: 'B2B',
   B2B2C: 'B2B2C',
   B2G: 'B2G',
@@ -22,25 +36,32 @@ export const REQUEST_STATES = Object.freeze({
   SOW_REVIEW: 'SOW_REVIEW',
 });
 
+const INTAKE_TO_OFFICIAL_CHANNEL = Object.freeze({
+  B2C: OPERATIONS_CHANNELS.CH01,
+  B2B_APT: OPERATIONS_CHANNELS.CH02,
+  B2B_RE: OPERATIONS_CHANNELS.CH03,
+  B2B: OPERATIONS_CHANNELS.CH04,
+  B2G: OPERATIONS_CHANNELS.CH05,
+});
+
 const CATEGORY_TO_CHANNEL = Object.freeze({
-  FESTIVAL_EVENTS: OPERATIONS_CHANNELS.B2C,
-  MARKETPLACE: OPERATIONS_CHANNELS.B2C,
-  CONCIERGE_COURIER: OPERATIONS_CHANNELS.B2C,
-  PROPERTY_OPERATIONS: OPERATIONS_CHANNELS.B2B_APT,
-  BUSINESS_SOLUTIONS: OPERATIONS_CHANNELS.B2B,
-  PRINT_STUDIO: OPERATIONS_CHANNELS.B2B,
-  REAL_ESTATE: OPERATIONS_CHANNELS.B2B_RE,
-  GOVERNMENT: OPERATIONS_CHANNELS.B2G,
-  GOVERNMENT_CONTRACTING: OPERATIONS_CHANNELS.B2G,
+  FESTIVAL_EVENTS: OPERATIONS_CHANNELS.CH01,
+  MARKETPLACE: OPERATIONS_CHANNELS.CH01,
+  CONCIERGE_COURIER: OPERATIONS_CHANNELS.CH01,
+  PROPERTY_OPERATIONS: OPERATIONS_CHANNELS.CH02,
+  BUSINESS_SOLUTIONS: OPERATIONS_CHANNELS.CH04,
+  PRINT_STUDIO: OPERATIONS_CHANNELS.CH04,
+  REAL_ESTATE: OPERATIONS_CHANNELS.CH03,
+  GOVERNMENT: OPERATIONS_CHANNELS.CH05,
+  GOVERNMENT_CONTRACTING: OPERATIONS_CHANNELS.CH05,
 });
 
 const WORKFLOW_BY_CHANNEL = Object.freeze({
-  [OPERATIONS_CHANNELS.B2C]: INTAKE_WORKFLOWS.INSTANT_BOOKING,
-  [OPERATIONS_CHANNELS.B2B_APT]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
-  [OPERATIONS_CHANNELS.B2B_RE]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
-  [OPERATIONS_CHANNELS.B2B]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
-  [OPERATIONS_CHANNELS.B2B2C]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
-  [OPERATIONS_CHANNELS.B2G]: INTAKE_WORKFLOWS.B2G_SOW,
+  [OPERATIONS_CHANNELS.CH01]: INTAKE_WORKFLOWS.INSTANT_BOOKING,
+  [OPERATIONS_CHANNELS.CH02]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
+  [OPERATIONS_CHANNELS.CH03]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
+  [OPERATIONS_CHANNELS.CH04]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
+  [OPERATIONS_CHANNELS.CH05]: INTAKE_WORKFLOWS.B2G_SOW,
 });
 
 const INITIAL_STATE_BY_WORKFLOW = Object.freeze({
@@ -51,17 +72,33 @@ const INITIAL_STATE_BY_WORKFLOW = Object.freeze({
 });
 
 const VALID_CHANNELS = new Set(Object.values(OPERATIONS_CHANNELS));
+const VALID_COMMERCIAL_MODELS = new Set(Object.values(COMMERCIAL_MODELS));
 
 /**
- * Resolve an intake channel without guessing from free-form request details.
- * Explicit channel wins. Category is only a controlled fallback for legacy
- * callers that have not yet been upgraded to send channelType.
+ * Resolve an official DANI channel without guessing from free-form request details.
+ * Explicit intake channel wins. Category is only a controlled fallback for legacy
+ * callers that have not yet been upgraded to send an official channel.
+ *
+ * B2C/B2B/B2B2C/B2G are commercial relationship/economic models, not channels.
+ * In particular, B2B2C must never become a sixth intake channel.
  */
 export function resolveIntakeChannel({ channelType, category } = {}) {
   if (channelType && VALID_CHANNELS.has(channelType)) {
+    return { channel: channelType, source: 'explicit', reason: null };
+  }
+
+  if (channelType && VALID_COMMERCIAL_MODELS.has(channelType)) {
     return {
-      channel: channelType,
-      source: 'explicit',
+      channel: null,
+      source: 'invalid_commercial_model_as_channel',
+      reason: 'COMMERCIAL_MODEL_IS_NOT_CHANNEL',
+    };
+  }
+
+  if (channelType && INTAKE_TO_OFFICIAL_CHANNEL[channelType]) {
+    return {
+      channel: INTAKE_TO_OFFICIAL_CHANNEL[channelType],
+      source: 'explicit_intake_type',
       reason: null,
     };
   }
@@ -74,22 +111,28 @@ export function resolveIntakeChannel({ channelType, category } = {}) {
     };
   }
 
-  return {
-    channel: null,
-    source: 'unresolved',
-    reason: 'CHANNEL_REQUIRED',
-  };
+  return { channel: null, source: 'unresolved', reason: 'CHANNEL_REQUIRED' };
 }
 
 /**
- * Map a validated channel to its operational state machine.
+ * Resolve the commercial relationship/economic model independently of channel.
+ * This is metadata, not a routing channel.
  */
-export function routeIntake({ channelType, category } = {}) {
+export function resolveCommercialModel({ commercialModel, channel } = {}) {
+  if (commercialModel && VALID_COMMERCIAL_MODELS.has(commercialModel)) return commercialModel;
+  if (channel === OPERATIONS_CHANNELS.CH01) return COMMERCIAL_MODELS.B2C;
+  if ([OPERATIONS_CHANNELS.CH02, OPERATIONS_CHANNELS.CH03, OPERATIONS_CHANNELS.CH04].includes(channel)) return COMMERCIAL_MODELS.B2B;
+  if (channel === OPERATIONS_CHANNELS.CH05) return COMMERCIAL_MODELS.B2G;
+  return null;
+}
+
+export function routeIntake({ channelType, category, commercialModel } = {}) {
   const resolved = resolveIntakeChannel({ channelType, category });
 
   if (!resolved.channel) {
     return {
       ...resolved,
+      commercialModel: resolveCommercialModel({ commercialModel, channel: null }),
       workflow: INTAKE_WORKFLOWS.MANUAL_REVIEW,
       initialState: REQUEST_STATES.NEW,
       requiresPricingResolution: false,
@@ -102,6 +145,7 @@ export function routeIntake({ channelType, category } = {}) {
 
   return {
     ...resolved,
+    commercialModel: resolveCommercialModel({ commercialModel, channel: resolved.channel }),
     workflow,
     initialState: INITIAL_STATE_BY_WORKFLOW[workflow],
     requiresPricingResolution: workflow !== INTAKE_WORKFLOWS.MANUAL_REVIEW,
@@ -117,6 +161,8 @@ export function buildIntakeRoutingContext(payload = {}) {
     channel: route.channel,
     channelSource: route.source,
     channelReason: route.reason,
+    commercialModel: route.commercialModel,
+    subchannel: payload.subchannel || null,
     workflow: route.workflow,
     initialState: route.initialState,
     requiresPricingResolution: route.requiresPricingResolution,
@@ -125,4 +171,4 @@ export function buildIntakeRoutingContext(payload = {}) {
   };
 }
 
-export { CATEGORY_TO_CHANNEL };
+export { CATEGORY_TO_CHANNEL, INTAKE_TO_OFFICIAL_CHANNEL };
