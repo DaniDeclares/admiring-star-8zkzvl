@@ -123,7 +123,7 @@ function ReviewCockpit(){
       <p style={muted}>Each component was priced from its own service contract and input snapshot. The package total below is the sum of those governed component calculations.</p>
       <div style={{display:'grid',gap:10}}>
         {packageItems.map((item,index)=><div key={item.serviceSku||index} style={{padding:13,border:'1px solid #eadfc9',borderRadius:11,background:'#fffaf0'}}>
-          <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong>{item.serviceName||item.serviceSku}</strong><div style={muted}>{item.serviceSku} · {item.sourceType||'GOVERNED'}</div></div><strong style={{color:'#5a1624'}}>${Number(item.calculation?.estimatedTotal||0).toFixed(2)}</strong></div>
+          <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong>{item.serviceName||item.serviceSku}</strong><div style={muted}>{item.serviceSku} · {item.componentRole||'PRIMARY'}{item.parentServiceSku?` · add-on to ${item.parentServiceSku}`:''} · {item.sourceType||'GOVERNED'}</div></div><strong style={{color:'#5a1624'}}>${Number(item.calculation?.estimatedTotal||0).toFixed(2)}</strong></div>
           {item.answers&&<div style={{marginTop:8,fontSize:12,color:'#6d5b60',display:'grid',gap:3}}>{Object.entries(item.answers).filter(([k,v])=>v!==''&&v!==null&&v!==false&&['materials_cost','pass_through_cost','tax_rate_percent','deposit_percent','quantity','hours','miles_one_way'].indexOf(k)<0).map(([k,v])=><div key={k}><strong>{k.replaceAll('_',' ')}:</strong> {String(v)}</div>)}</div>}
         </div>)}
       </div>
