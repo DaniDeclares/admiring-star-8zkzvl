@@ -31,7 +31,7 @@ const governedCatalog=async(channelType='B2C')=>prisma.$queryRawUnsafe(`
         s.billing_cycle AS "billingCycle", s.resident_discount_eligible AS "residentDiscountEligible", s.commercial_status AS status,
         s.id AS "runtimeServiceId"
  FROM public.dd_governed_service_offers o JOIN public.services s ON s.id=o.runtime_service_id
- LEFT JOIN LATERAL (SELECT r.base_price_cents FROM public.dd_service_pricing_rules r WHERE r.service_id=s.id AND r.channel_code=normalize_channel($1) AND r.status='ACTIVE' AND r.lock_status='LOCKED' ORDER BY r.effective_date DESC NULLS LAST, r.updated_at DESC NULLS LAST LIMIT 1) pr ON true
+ LEFT JOIN LATERAL (SELECT r.base_price_cents FROM public.dd_service_pricing_rules r WHERE r.service_id=s.id AND r.channel_code=$1 AND r.status='ACTIVE' AND r.lock_status='LOCKED' ORDER BY r.effective_date DESC NULLS LAST, r.updated_at DESC NULLS LAST LIMIT 1) pr ON true
  WHERE o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY') ORDER BY o.division, o.service_name`);
 
 const governedService=async(serviceId)=>getGovernedCommercialOffer(serviceId);
