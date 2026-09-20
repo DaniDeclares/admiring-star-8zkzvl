@@ -238,7 +238,7 @@ async function resolveQuoteLine(supabase, serviceSku, channelCode) {
   return { offer:governedOffer, service:governedService, rule:rules.find(r=>r.base_price_cents!=null)||rules[0]||null };
 }
 
-function aggregateQuoteCalculations(lineItems) {
+export function aggregateQuoteCalculations(lineItems) {
   const totals = lineItems.reduce((acc, item) => {
     const c=item.calculation;
     acc.baseSubtotal+=Number(c.baseSubtotal||0);
