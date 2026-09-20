@@ -331,7 +331,6 @@ export async function createEstimate(supabase, body) {
   if(estimateError) throw estimateError;
   return {estimate,service:{sku:offer.canonical_sku,name:offer.service_name,publicPrice:service.public_price_display||service.price_note||(service.starting_price!=null?`Starting at ${Number(service.starting_price).toFixed(2)}`:'Quote required')},calculation};
 }
-+Number(s.price).toFixed(2)+(s.unit && !['visit','project','service','flat','treatment','job','load','cycle','package','area','tree','wreath','section','mantel','rug','chair','sofa','mattress','mirror','bath','event','dispatch','audit log','delivery','run','walk','coordination','document','plan','minimum'].includes(s.unit) ? '/'+s.unit : ''),
     commercial_status:'CANONICAL_ACTIVE',
     commercial_intent_status:'SELL_NOW',
     governedOfferStatus:'SELL_NOW',
