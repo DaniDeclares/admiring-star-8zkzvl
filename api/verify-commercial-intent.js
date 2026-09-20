@@ -30,8 +30,14 @@ const governedCatalog=async()=>prisma.$queryRawUnsafe(`
         s.public_price_high AS "publicPriceHigh", s.public_price_display AS "publicPriceDisplay", s.pricing_type AS model,
         s.billing_cycle AS "billingCycle", s.resident_discount_eligible AS "residentDiscountEligible", s.commercial_status AS status,
         s.id AS "runtimeServiceId"
- FROM public.dd_governed_service_offers o JOIN public.services s ON s.id=o.runtime_service_id
- WHERE o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY') ORDER BY o.division, o.service_name`);
+ FROM public.dd_governed_service_offers o
+ JOIN public.services s ON s.id=o.runtime_service_id
+ JOIN public.dd_ch01_service_adjudication c1
+   ON c1.channel_code='CH01'
+  AND c1.sku=o.canonical_sku
+ WHERE o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY')
+   AND c1.disposition <> 'CROSS_CHANNEL_REVIEW'
+ ORDER BY o.division, o.service_name`);
 
 const governedService=async(serviceId)=>getGovernedCommercialOffer(serviceId);
 
@@ -69,13 +75,23 @@ export default async function handler(req,res){try{
  const channel=normalizeChannel(channelType,body.channel);
  const subchannel=String(body.subchannelCode||'').trim();
  const { verified: isVerifiedResident } = await resolveVerifiedCommunity(req);
- const channelGovernance = channel === 'CH02'
-   ? await getChannelGovernanceDecision(db.serviceId, channel)
-   : { allowed: true, reason: 'LEGACY_CHANNEL_GATE' };
+ const channelGovernance = (channel === 'CH01' || channel === 'CH02')
+   ? await getChannelGovernanceDecision(db.serviceId, channel, subchannel)
+   : { allowed: true, reason: 'LEGACY_CHANNEL_GATE', hasLockedActivePricing: false, hasLockedActiveSubchannelPricing: false };
  if (!channelGovernance.allowed) {
-   return json(res,409,{success:false,serviceId:db.serviceId,serviceName:db.name,checkoutEligible:false,intakeAvailable:false,frozenPriceSnapshot:null,message:'This service is not currently available through the selected property-management service path.',gateReason:channelGovernance.reason});
+   const message = channel === 'CH01'
+     ? 'This service is not currently available through the resident channel.'
+     : 'This service is not currently available through the selected property-management service path.';
+   return json(res,409,{success:false,serviceId:db.serviceId,serviceName:db.name,checkoutEligible:false,intakeAvailable:false,frozenPriceSnapshot:null,message,gateReason:channelGovernance.reason});
  }
- const gate=checkoutEligibility(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident,channelPricingType:channelGovernance.pricingType});
+ const gate=checkoutEligibility(db,{
+   channel,
+   subchannel,
+   isVerifiedCommunityResident:isVerifiedResident,
+   channelPricingType:channelGovernance.pricingType,
+   hasLockedActivePricing:channelGovernance.hasLockedActivePricing,
+   hasLockedActiveSubchannelPricing:channelGovernance.hasLockedActiveSubchannelPricing,
+ });
  const expectedPrice=await resolveGovernedChannelPrice(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident});
  if(!gate.eligible)return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frozenPriceSnapshot:gate.reason==='QUOTE_REQUIRED'?null:expectedPrice,checkoutEligible:false,intakeAvailable:true,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.',gateReason:gate.reason});
  return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frozenPriceSnapshot:expectedPrice,checkoutEligible:true,intakeAvailable:true,message:'Price confirmed for this request.'});
