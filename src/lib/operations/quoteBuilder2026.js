@@ -154,11 +154,29 @@ export function isHourlyBilled(service, rule) {
 // multiplier. Introducing condition-based pricing automation is a deliberate future commercial-
 // policy decision requiring documented tiers/formulas/testing/re-audit -- do not add it here as
 // an implicit fix.
+function configuredBasePrice(service, rule, answers) {
+  const model = service?.quote_input_schema?.pricing_model;
+  if (model !== 'BEDROOM_TIER') return { base: rule?.base_price_cents != null ? Number(rule.base_price_cents) / 100 : Number(service.starting_price || service.public_price_low || 0), flags: [] };
+
+  const fields = service.quote_input_schema || {};
+  const bedroom = String(answers?.bedroom_count ?? '').trim();
+  const tier = (fields.tiers || []).find(t => String(t.value) === bedroom);
+  if (!tier) return { base: 0, flags: ['LAYOUT_REVIEW'] };
+  return { base: Number(tier.price || 0), flags: [] };
+}
+
 export function calculate(service, rule, answers) {
   const a = answers || {};
   const pricingType = String(rule?.pricing_type || service.pricing_type || '').toUpperCase();
-  const ruleBase = rule?.base_price_cents != null ? Number(rule.base_price_cents)/100 : Number(service.starting_price || service.public_price_low || 0);
+  const configured = configuredBasePrice(service, rule, a);
+  const ruleBase = configured.base;
   let base = ruleBase;
+  const reviewFlags = [...configured.flags];
+  const model = service?.quote_input_schema?.pricing_model;
+  if (model === 'BEDROOM_TIER' && Boolean(a.severe_pet_mess)) {
+    const modifier = (service.quote_input_schema?.modifiers || []).find(m => m.key === 'severe_pet_mess');
+    if (modifier) base += Number(modifier.amount || 0);
+  }
   const quantity = Math.max(1, Number(a.quantity || 1));
   const hours = Math.max(0, Number(a.hours || 0));
   const hourly = isHourlyBilled(service, rule);
@@ -177,7 +195,8 @@ export function calculate(service, rule, answers) {
   const tax = subtotal*taxRate/100;
   const total = subtotal+tax;
   const deposit = total*Math.min(100,Math.max(0,Number(a.deposit_percent||0)))/100;
-  const reviewFlags=[];
+  if (model === 'BEDROOM_TIER' && Boolean(a.specialized_carpet_extraction)) reviewFlags.push('SPECIALTY_CARPET_SCOPE');
+  if (model === 'BEDROOM_TIER' && Boolean(a.abandoned_property_or_furniture)) reviewFlags.push('DEBRIS_FURNITURE_SCOPE');
   if (service.sourceType !== 'DANI_SPECIALS' && service.commercial_intent_status && service.commercial_intent_status !== 'SELL_NOW') reviewFlags.push('FULFILLMENT_OR_COMMERCIAL_GATE');
   if (service.sourceType !== 'DANI_SPECIALS' && ['VARIABLE_QUOTE','BESPOKE_SOW','SOW','SOW_PROCUREMENT','QUOTE','STARTING_AT','CONFIGURED'].some(t=>pricingType.includes(t))) reviewFlags.push('SCOPE_REVIEW');
   if (travelFee>0) reviewFlags.push('TRAVEL_CONFIRMATION');
