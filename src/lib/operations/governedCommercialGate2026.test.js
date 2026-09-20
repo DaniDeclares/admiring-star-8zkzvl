@@ -1,6 +1,6 @@
 jest.mock('../../../lib/prisma.js', () => ({ __esModule: true, default: {} }));
 
-import { economicGateFromOffer } from './governedCommercialGate2026';
+import { economicGateFromOffer, checkoutEligibility } from './governedCommercialGate2026';
 
 describe('economic checkout gate', () => {
   test('blocks missing economics', () => {
@@ -9,6 +9,32 @@ describe('economic checkout gate', () => {
       marginEconomics: 'PENDING_RECONCILIATION',
     }).reason).toBe('ECONOMICS_NOT_RECONCILED');
   });
+
+describe('LIVE_READY checkout release gate', () => {
+  const readyOffer = {
+    releaseState: 'LIVE_READY',
+    blockingGate: 'NONE',
+    commercialOfferStatus: 'SELL_NOW',
+    fulfillmentGateStatus: 'READY',
+    pricingType: 'FIXED',
+    baseCustomerPrice: 140,
+    internalCost: 'AUDITED: $50.00',
+    marginEconomics: 'AUDITED: price $140 - cost $50 = $90 (64.3%)',
+    ch01APriced: true,
+    channelAvailabilityCount: 1,
+    pricedChannelCount: 1,
+    authorizedProviderCapabilityCount: 1,
+  };
+
+  test('blocks a service that is not LIVE_READY even when legacy commercial gates pass', () => {
+    expect(checkoutEligibility({...readyOffer, releaseState:'HOLD', blockingGate:'RUNTIME_ACCURACY'}, {channel:'CH01',subchannel:'CH01-A'}).reason)
+      .toBe('SERVICE_NOT_LIVE_READY:RUNTIME_ACCURACY');
+  });
+
+  test('allows a fully released service through the legacy checkout gates', () => {
+    expect(checkoutEligibility(readyOffer, {channel:'CH01',subchannel:'CH01-A'}).eligible).toBe(true);
+  });
+});
 
   test('blocks draft economics even when the draft margin exceeds 50%', () => {
     expect(economicGateFromOffer({
