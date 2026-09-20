@@ -34,12 +34,12 @@ async function resolvePortalOrganization(req) {
 export default async function handler(req,res){
  if(req.method!=='POST')return res.status(405).json({error:'This action is not available.'});
  try{
-  const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,organizationName,locationAddress,timeline,budgetRange,requestedStartAt,requestedTimezone='America/New_York'}=req.body||{};
+  const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,commercialModel,subchannelCode,organizationName,locationAddress,timeline,budgetRange,requestedStartAt,requestedTimezone='America/New_York'}=req.body||{};
   if(!name||(!email&&!phone))return res.status(400).json({error:'Please provide your name and at least one way to contact you.'});
-  const routing=routeIntake({channelType,category});
+  const routing=routeIntake({channelType,category,commercialModel});
   const portalOrganizationId = await resolvePortalOrganization(req);
   if(!routing.channel)return res.status(400).json({error:'Please select the customer type that best fits your request.'});
-  const routingContext=buildIntakeRoutingContext({channelType,category});
+  const routingContext=buildIntakeRoutingContext({channelType,category,commercialModel,subchannel:subchannelCode});
   const serviceRef=pricingServiceId||serviceId||commercialIntent?.serviceId||null;
   const frozenPrice=commercialIntent?.frozenPriceSnapshot==null?null:Number(commercialIntent.frozenPriceSnapshot);
   if(commercialIntent&&frozenPrice!==null&&!Number.isFinite(frozenPrice))return res.status(400).json({error:'The selected commercial offer could not be securely frozen. Please start the request again.'});
