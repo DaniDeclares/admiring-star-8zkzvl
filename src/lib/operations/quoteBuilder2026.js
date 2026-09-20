@@ -251,7 +251,7 @@ function aggregateQuoteCalculations(lineItems) {
     acc.tax+=Number(c.tax||0);
     acc.estimatedTotal+=Number(c.estimatedTotal||0);
     acc.depositDue+=Number(c.depositDue||0);
-    acc.reviewFlags.push(...(c.reviewFlags||[]).map(flag=>item.sku+':'+flag));
+    acc.reviewFlags.push(...(c.reviewFlags||[]));
     if(c.needsReview) acc.needsReview=true;
     return acc;
   },{baseSubtotal:0,residentDiscount:0,travelFee:0,rushFee:0,materials:0,sourcingFee:0,passThrough:0,tax:0,estimatedTotal:0,depositDue:0,reviewFlags:[],needsReview:false});
