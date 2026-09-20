@@ -34,6 +34,8 @@ export const captureServiceLifecycle = (event, payload = {}) => capture(event, {
   service_id: payload.service_id || payload.serviceId || undefined,
   channel: payload.channel || payload.channelType || undefined,
   subchannel: payload.subchannel || payload.subchannelCode || undefined,
+  commercial_model: payload.commercial_model || payload.commercialModel || undefined,
+  relationship_role: payload.relationship_role || payload.relationshipRole || undefined,
   pricing_model: payload.pricing_model || undefined,
   commercialization_status: payload.commercialization_status || undefined,
   gate_state: payload.gate_state || undefined,
