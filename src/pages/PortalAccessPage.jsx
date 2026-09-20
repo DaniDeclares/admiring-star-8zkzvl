@@ -224,7 +224,7 @@ export default function PortalAccessPage() {
     // with Supabase Auth's own signup rate limit (confirmed in project logs:
     // consecutive 429s on /auth/v1/signup within seconds of each other).
     setBusy(false);
-    setError('Something interrupted account creation. Please wait a minute (repeated attempts in a row can trigger a temporary limit) and try again. If this keeps happening, contact DANI DECLARES directly.');
+    const message = e?.message ? String(e.message) : '';\n    setError(message || 'We could not complete account creation. Please try again once; if the problem persists, contact DANI DECLARES with the exact message shown here.');
     }
   };
   const isRateLimitError=(message)=>/rate limit|too many requests|429/i.test(String(message||''));
