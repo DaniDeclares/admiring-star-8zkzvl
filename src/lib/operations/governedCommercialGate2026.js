@@ -208,7 +208,7 @@ export async function getChannelGovernanceDecision(serviceId, channel, subchanne
     if (!['FRONT_DOOR', 'SUPPORTING_LAYER', 'CONTROLLED_QUOTE'].includes(row.disposition)) {
       return { allowed: false, reason: `CH01_ADJUDICATION_${row.disposition}` };
     }
-    if (String(row.availabilityStatus || '').toUpperCase() === 'INACTIVE') {
+    if (!row.availabilityStatus || String(row.availabilityStatus).toUpperCase() === 'INACTIVE') {
       return { allowed: false, reason: 'CH01_CHANNEL_NOT_AVAILABLE' };
     }
     return {
