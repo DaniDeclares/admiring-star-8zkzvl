@@ -66,12 +66,12 @@ export function resolveCanonicalOffers(governed, specials, governedStatusBySku =
     // special into the governed offer graph. Production catalog loading
     // supplies these status rows before resolution.
     if (!hasAnyGoverned) {
-      resolved.push({ ...special, canonicalOnlySpecial:true });
+      resolved.push({ ...special, sku:canonicalSku, sourceSpecialSku:special.sku, canonicalOnlySpecial:true });
       continue;
     }
 
     if (!base) {
-      resolved.push({ ...special, canonicalOnlySpecial:true });
+      resolved.push({ ...special, sku:canonicalSku, sourceSpecialSku:special.sku, canonicalOnlySpecial:true });
       continue;
     }
 
