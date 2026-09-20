@@ -73,9 +73,12 @@ export async function getGovernedCommercialOffer(serviceId) {
       s.starting_price AS "baseCustomerPrice",
       s.public_price_low AS "publicPriceLow",
       s.public_price_high AS "publicPriceHigh",
-      s.resident_discount_eligible AS "residentDiscountEligible"
+      s.resident_discount_eligible AS "residentDiscountEligible",
+      rc.release_state AS "releaseState",
+      rc.blocking_gate AS "blockingGate"
     FROM public.dd_governed_service_offers o
     JOIN public.services s ON s.id = o.runtime_service_id
+    LEFT JOIN public.dd_service_release_contract_v1 rc ON rc.canonical_sku = o.canonical_sku
     LEFT JOIN LATERAL (
       SELECT m.internal_cost, m.margin_economics
       FROM public.dd_master_service_universe m
@@ -112,6 +115,7 @@ export function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCom
 
 export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
+  if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
   if (offer.fulfillmentGateStatus !== 'READY') return { eligible: false, reason: 'FULFILLMENT_NOT_READY', price: null };
   if (isQuoteRequired(offer)) return { eligible: false, reason: 'QUOTE_REQUIRED', price: null };
