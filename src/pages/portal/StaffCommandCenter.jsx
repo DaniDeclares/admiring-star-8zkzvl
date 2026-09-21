@@ -173,7 +173,7 @@ export default function StaffCommandCenter({ session }) {
             <Pill tone={COLORS.warning}>{titleCase(newScopeRequest.status || 'new')}</Pill>
           </div>
           <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
-            <Link className="portal-primary" to="/portal/operations">Develop Scope in Operations →</Link>
+            <Link className="portal-primary" to={"/portal/scope?requestId="+encodeURIComponent(newScopeRequest.id)}>Develop Scope →</Link>
             <a className="portal-primary" href={`mailto:${newScopeRequest.client_email || ''}`}>Contact Customer</a>
           </div>
         </div> : <div style={{ padding: 18, borderRadius: 14, background: '#f2f8f4', color: COLORS.success }}>No unquoted requests are currently waiting for scope.</div>}
@@ -209,7 +209,7 @@ export default function StaffCommandCenter({ session }) {
 
     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,.8fr)', gap: 18, marginBottom: 18 }}>
       <Card eyebrow="Requests" title="Recent Opportunities">
-        {newScopeRequest && <Row title={newScopeRequest.service_needed || 'New request'} meta={`${newScopeRequest.organization_name || newScopeRequest.client_name || 'Customer'} · received ${date(newScopeRequest.created_at)}`} right={<Link className="portal-primary" to="/portal/operations">Open</Link>} />}
+        {newScopeRequest && <Row title={newScopeRequest.service_needed || 'New request'} meta={`${newScopeRequest.organization_name || newScopeRequest.client_name || 'Customer'} · received ${date(newScopeRequest.created_at)}`} right={<Link className="portal-primary" to={"/portal/scope?requestId="+encodeURIComponent(newScopeRequest.id)}>Develop Scope</Link>} />}
         {recentRequests.map(r => <Row key={r.id} title={r.service_needed || r.service_category || 'Service request'} meta={`${r.organization_name || r.client_name || 'Customer'} · ${titleCase(r.status || 'new')}`} right={<span style={{ color: COLORS.muted, fontSize: 11 }}>Request</span>} />)}
         {!requests.length && <div style={{ color: COLORS.muted }}>No service requests found.</div>}
       </Card>
