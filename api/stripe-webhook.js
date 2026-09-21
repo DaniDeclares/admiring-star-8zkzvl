@@ -3,7 +3,7 @@ import prisma from '../lib/prisma.js';
 import { nextStateAfterPayment, assertTransition } from '../src/lib/operations/workflowStateMachines2026.js';
 import { reconcileStripePayment } from '../src/lib/operations/accountingReconciliation2026.js';
 import { publishPaymentReconciled } from '../src/lib/operations/eventBroker2026.js';
-import { getGovernedCommercialOffer } from '../src/lib/operations/governedCommercialGate2026.js';
+import { getGovernedCommercialOffer, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
 import { captureServer } from '../src/lib/posthogAnalyticsServer.js';
 
 const secretKey=process.env.STRIPE_SECRET_KEY;
@@ -124,7 +124,19 @@ export default async function handler(req,res){
  if(requestId){
   try{
    const serviceId=String(session.metadata?.service_id||'').trim();
-   const offer=await getGovernedCommercialOffer(serviceId);
+   const requestForResolution=await prisma.serviceRequest.findUnique({where:{id:requestId}});
+   if(!requestForResolution)throw new Error(`ServiceRequest ${requestId} not found`);
+   const resolutionDetails=requestForResolution.property_details||{};
+   const resolutionSubchannel=String(resolutionDetails?.commercialIntent?.subchannelCode||resolutionDetails?.operationsRouting?.subchannelCode||'').trim();
+   const resolutionFrontDoor=String(resolutionDetails?.commercialIntent?.frontDoorCode||resolutionDetails?.frontDoorCode||'').trim();
+   const canonicalSelection=await resolveCH01CommercialSelection({
+    serviceId,
+    frontDoorCode:resolutionFrontDoor,
+    subchannelCode:resolutionSubchannel,
+    isVerifiedCommunityResident:resolutionSubchannel==='CH01-B'
+   });
+   if(!canonicalSelection.allowed)throw new Error(`CH01 canonical resolution failed: ${canonicalSelection.reason}`);
+   const offer=await getGovernedCommercialOffer(canonicalSelection.serviceId);
    if(!offer||offer.commercialOfferStatus!=='SELL_NOW'||offer.fulfillmentGateStatus!=='READY')return res.status(422).json({error:'Payment references a commercial offer that is no longer eligible for direct checkout.'});
    const result=await prisma.$transaction(async tx=>{
     const existing=await tx.$queryRaw`select id,invoice_id from public.dd_payment_events where provider_event_id=${event.id} limit 1`;
@@ -138,8 +150,10 @@ export default async function handler(req,res){
     const frozenSnapshot=Number(request.property_details?.commercialIntent?.frozenPriceSnapshot),paidAmount=money(Number(session.amount_total||0)/100);
     if(!Number.isFinite(frozenSnapshot)||frozenSnapshot<=0)throw new Error('Paid request has no valid frozen commercial price snapshot.');
     if(money(frozenSnapshot)!==paidAmount)throw new Error('Payment amount does not match the frozen commercial price.');
+    if(canonicalSelection.price!=null && money(Number(canonicalSelection.price))!==money(frozenSnapshot))throw new Error('Paid request no longer matches the authoritative CH01 commercial price.');
     const metadataServiceId=request.property_details?.commercialIntent?.serviceId||request.property_details?.pricingServiceId;
-    if(String(metadataServiceId||'')!==serviceId)throw new Error('Payment service metadata does not match the submitted service request.');
+    if(String(metadataServiceId||'')!==canonicalSelection.serviceId)throw new Error('Payment service metadata does not match the authoritative CH01 service resolution.');
+    if(String(request.property_details?.frontDoorCode||request.property_details?.commercialIntent?.frontDoorCode||'')!==canonicalSelection.frontDoorCode)throw new Error('Payment front door does not match the authoritative CH01 service resolution.');
     const currentState=String(request.status||'new').toUpperCase();
     assertTransition('B2C',currentState,'PAID');
     assertTransition('B2C','PAID',nextStateAfterPayment('B2C'));

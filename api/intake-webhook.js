@@ -1,7 +1,7 @@
 import prisma from '../lib/prisma.js';
 import { createClient } from '@supabase/supabase-js';
 import { buildIntakeRoutingContext, routeIntake } from '../src/lib/operations/intakeRouting2026.js';
-import { getChannelGovernanceDecision } from '../src/lib/operations/governedCommercialGate2026.js';
+import { getChannelGovernanceDecision, resolveCH01CommercialSelection, resolveVerifiedCommunity } from '../src/lib/operations/governedCommercialGate2026.js';
 import { publishOperationalEvent } from '../src/lib/operations/eventBroker2026.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 
@@ -48,10 +48,33 @@ export default async function handler(req,res){
   const portalOrganizationId = await resolvePortalOrganization(req);
   if(!routing.channel)return res.status(400).json({error:'Please select the customer type that best fits your request.'});
   const routingContext=buildIntakeRoutingContext({channelType,category,commercialModel});
-  const serviceRef=pricingServiceId||serviceId||commercialIntent?.serviceId||null;
-  const frozenPrice=commercialIntent?.frozenPriceSnapshot==null?null:Number(commercialIntent.frozenPriceSnapshot);
+  let serviceRef=pricingServiceId||serviceId||commercialIntent?.serviceId||null;
+  let serverCommercialIntent=commercialIntent||null;
+  let frozenPrice=commercialIntent?.frozenPriceSnapshot==null?null:Number(commercialIntent.frozenPriceSnapshot);
   if(commercialIntent&&frozenPrice!==null&&!Number.isFinite(frozenPrice))return res.status(400).json({error:'The selected commercial offer could not be securely frozen. Please start the request again.'});
-  if(channelType==='B2B_APT'&&serviceRef){
+  if(channelType==='B2C'&&serviceRef){
+   const { verified: isVerifiedCommunityResident } = await resolveVerifiedCommunity(req);
+   const canonicalSelection=await resolveCH01CommercialSelection({
+    serviceId:serviceRef,
+    frontDoorCode:frontDoorCode||'',
+    subchannelCode:commercialIntent?.subchannelCode||'',
+    isVerifiedCommunityResident
+   });
+   if(!canonicalSelection.allowed)return res.status(409).json({success:false,error:'This resident service is not currently authorized for the selected starting point.',gateReason:canonicalSelection.reason});
+   serviceRef=canonicalSelection.serviceId;
+   const governedPrice=canonicalSelection.price;
+   if(commercialIntent?.frozenPriceSnapshot!=null && governedPrice!=null && Math.round(Number(commercialIntent.frozenPriceSnapshot)*100)!==Math.round(Number(governedPrice)*100)){
+    return res.status(409).json({success:false,error:'The selected commercial price no longer matches the governed resident offer. Please start the request again.',gateReason:'CH01_PRICE_MISMATCH'});
+   }
+   frozenPrice=governedPrice;
+   serverCommercialIntent={
+    serviceId:canonicalSelection.serviceId,
+    frozenPriceSnapshot:governedPrice,
+    subchannelCode:canonicalSelection.subchannel,
+    frontDoorCode:canonicalSelection.frontDoorCode,
+    canonicalResolutionReason:canonicalSelection.reason
+   };
+  }else if(channelType==='B2B_APT'&&serviceRef){
    const channelGovernance=await getChannelGovernanceDecision(serviceRef,'CH02');
    if(!channelGovernance.allowed)return res.status(409).json({success:false,error:'This property-management service is not currently available through the selected service path.',gateReason:channelGovernance.reason});
   }
@@ -60,9 +83,9 @@ export default async function handler(req,res){
   let booking=null;
   const result=await prisma.$transaction(async tx=>{
    const lead=await tx.lead.create({data:{full_name:name,email:email||null,phone:phone||null,organization_name:organizationName||null,status:'new',notes:null}});
-   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:routingContext,pricingServiceId:serviceRef,commercialIntent:commercialIntent||null,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode},status:requestState,priority:'normal'}});
+   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:{...routingContext,subchannelCode:serverCommercialIntent?.subchannelCode||null},pricingServiceId:serviceRef,commercialIntent:serverCommercialIntent,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode},status:requestState,priority:'normal'}});
    if(portalOrganizationId) await tx.$executeRawUnsafe(`UPDATE public.service_requests SET organization_id=$1::uuid WHERE id=$2::uuid`, portalOrganizationId, request.id);
-   if(paymentEligible){await tx.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:locationAddress||null,timeline:timeline||null,intake_answers:{serviceId:serviceRef,commercialIntent},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});}
+   if(paymentEligible){await tx.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:locationAddress||null,timeline:timeline||null,intake_answers:{serviceId:serviceRef,commercialIntent:serverCommercialIntent},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});}
    if(requestedStartAt){
     const start=new Date(requestedStartAt); if(Number.isNaN(start.valueOf())) throw new Error('INVALID_REQUESTED_DATE_TIME');
     const special=serviceRef?await tx.$queryRawUnsafe(`SELECT service_name AS name,unit,price FROM public.danis_specials_offers WHERE service_id=$1 AND active=true AND market='GA' LIMIT 1`,serviceRef):[];

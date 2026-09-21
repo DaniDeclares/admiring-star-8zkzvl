@@ -1,5 +1,5 @@
 import prisma from '../lib/prisma.js';
-import { checkoutEligibility, getChannelGovernanceDecision, resolveGovernedChannelPrice, getGovernedCommercialOffer, normalizeChannel, resolveGovernedPrice, resolveVerifiedCommunity } from '../src/lib/operations/governedCommercialGate2026.js';
+import { checkoutEligibility, getChannelGovernanceDecision, resolveGovernedChannelPrice, getGovernedCommercialOffer, normalizeChannel, resolveGovernedPrice, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
 
 const CHANNELS_BY_DIVISION=Object.freeze({'01':['B2C','B2B_APT'],'02':['B2B_APT','B2B_RE','B2B','B2G'],'03':['B2B_RE','B2B_APT','B2B'],'04':['B2B','B2B_RE','B2B_APT','B2G'],'05':['B2C','B2B_APT','B2B_RE','B2G'],'06':['B2B','B2B_RE','B2G'],'07':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'08':['B2B_RE','B2B','B2G'],'09':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'10':['B2C','B2B_APT','B2B_RE','B2B'],'11':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'12':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'13':['B2B_APT','B2B_RE','B2B','B2G']});
 const json=(res,status,payload)=>res.status(status).json(payload);
@@ -67,16 +67,30 @@ export default async function handler(req,res){try{
  const channelType=String(body.channelType||'').trim(),allowed=CHANNELS_BY_DIVISION[db.division]||[];
  if(channelType&&!allowed.includes(channelType))return json(res,400,{error:'This service is not currently offered for the selected customer type.'});
  const channel=normalizeChannel(channelType,body.channel);
- const subchannel=String(body.subchannelCode||'').trim();
  const { verified: isVerifiedResident } = await resolveVerifiedCommunity(req);
- const channelGovernance = channel === 'CH02'
-   ? await getChannelGovernanceDecision(db.serviceId, channel)
-   : { allowed: true, reason: 'LEGACY_CHANNEL_GATE' };
- if (!channelGovernance.allowed) {
+ const requestedFrontDoor=String(body.frontDoorCode||'').trim();
+ let subchannel=String(body.subchannelCode||'').trim();
+ let channelGovernance={allowed:true,reason:'LEGACY_CHANNEL_GATE'};
+ let canonicalSelection=null;
+ if(channel==='CH01'){
+   canonicalSelection=await resolveCH01CommercialSelection({
+     serviceId:db.serviceId,
+     frontDoorCode:requestedFrontDoor,
+     subchannelCode:subchannel,
+     isVerifiedCommunityResident:isVerifiedResident
+   });
+   if(!canonicalSelection.allowed){
+     return json(res,409,{success:false,serviceId:db.serviceId,serviceName:db.name,checkoutEligible:false,intakeAvailable:false,frozenPriceSnapshot:null,message:'This resident service is not currently authorized for the selected starting point.',gateReason:canonicalSelection.reason});
+   }
+   subchannel=canonicalSelection.subchannel;
+ }else if(channel==='CH02'){
+   channelGovernance=await getChannelGovernanceDecision(db.serviceId,channel);
+ }
+ if(!channelGovernance.allowed){
    return json(res,409,{success:false,serviceId:db.serviceId,serviceName:db.name,checkoutEligible:false,intakeAvailable:false,frozenPriceSnapshot:null,message:'This service is not currently available through the selected property-management service path.',gateReason:channelGovernance.reason});
  }
  const gate=checkoutEligibility(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident,channelPricingType:channelGovernance.pricingType});
- const expectedPrice=await resolveGovernedChannelPrice(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident});
- if(!gate.eligible)return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frozenPriceSnapshot:gate.reason==='QUOTE_REQUIRED'?null:expectedPrice,checkoutEligible:false,intakeAvailable:true,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.',gateReason:gate.reason});
- return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frozenPriceSnapshot:expectedPrice,checkoutEligible:true,intakeAvailable:true,message:'Price confirmed for this request.'});
+ const expectedPrice=canonicalSelection?.price ?? await resolveGovernedChannelPrice(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident});
+ if(!gate.eligible)return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frontDoorCode:canonicalSelection?.frontDoorCode||requestedFrontDoor||null,subchannelCode:subchannel||null,frozenPriceSnapshot:gate.reason==='QUOTE_REQUIRED'?null:expectedPrice,checkoutEligible:false,intakeAvailable:true,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.',gateReason:gate.reason});
+ return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frontDoorCode:canonicalSelection?.frontDoorCode||requestedFrontDoor||null,subchannelCode:subchannel||null,frozenPriceSnapshot:expectedPrice,checkoutEligible:true,intakeAvailable:true,message:'Price confirmed for this request.'});
 }catch(error){console.error('Service verification failed:',error);return json(res,400,{error:'We could not confirm this service right now. Please try again or contact DANI DECLARES.'});}}
