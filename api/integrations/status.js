@@ -1,4 +1,4 @@
-import { requireStaff } from './_integrationOAuth.js';
+import { ENVIRONMENT, requireStaff } from './_integrationOAuth.js';
 
 export default async function handler(req,res){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
@@ -13,7 +13,7 @@ export default async function handler(req,res){
    QUICKBOOKS:Boolean(process.env.QUICKBOOKS_CLIENT_ID&&process.env.QUICKBOOKS_CLIENT_SECRET),
    INTEGRATION_ENCRYPTION_KEY:Boolean(process.env.INTEGRATION_TOKEN_ENCRYPTION_KEY),
   };
-  return res.status(200).json({success:true,environment,env,connections:connections||[]});
+  return res.status(200).json({success:true,environment:ENVIRONMENT,env,connections:connections||[]});
  }catch(error){
   return res.status(error.status||500).json({success:false,error:error.message||'INTEGRATION_STATUS_FAILED'});
  }
