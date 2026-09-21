@@ -56,6 +56,7 @@ const INITIAL_STATE_BY_WORKFLOW = Object.freeze({
 });
 
 const VALID_CHANNELS = new Set(Object.values(OPERATIONS_CHANNELS));
+const VALID_COMMERCIAL_MODELS = new Set(Object.values(COMMERCIAL_RELATIONSHIP_MODELS));
 
 /**
  * Resolve an intake channel without guessing from free-form request details.
@@ -71,7 +72,7 @@ export function resolveIntakeChannel({ channelType, category } = {}) {
     };
   }
 
-  if (category && CATEGORY_TO_CHANNEL[category]) {
+  if (channelType && VALID_COMMERCIAL_MODELS.has(channelType)) {\n    return { channel: null, source: 'invalid_commercial_model_as_channel', reason: 'COMMERCIAL_MODEL_IS_NOT_CHANNEL' };\n  }\n\n  if (category && CATEGORY_TO_CHANNEL[category]) {
     return {
       channel: CATEGORY_TO_CHANNEL[category],
       source: 'category_fallback',
