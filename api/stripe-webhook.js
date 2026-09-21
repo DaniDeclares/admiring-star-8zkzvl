@@ -3,7 +3,7 @@ import prisma from '../lib/prisma.js';
 import { nextStateAfterPayment, assertTransition } from '../src/lib/operations/workflowStateMachines2026.js';
 import { reconcileStripePayment } from '../src/lib/operations/accountingReconciliation2026.js';
 import { publishPaymentReconciled } from '../src/lib/operations/eventBroker2026.js';
-import { getGovernedCommercialOffer, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.mjs';
+import { getGovernedCommercialOffer, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
 import { captureServer } from '../src/lib/posthogAnalyticsServer.js';
 
 const secretKey=process.env.STRIPE_SECRET_KEY;
