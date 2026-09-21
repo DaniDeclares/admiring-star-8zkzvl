@@ -1,13 +1,11 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Building2, BriefcaseBusiness, Home, Landmark, UsersRound } from 'lucide-react';
+import { ArrowRight, Briefcase, CheckCircle2, Building2, Home, Landmark, MapPin } from 'lucide-react';
 
 const segments = [
   { key: 'resident', icon: Home, label: 'For Residents', title: 'Free up your time.', body: 'Household support, errands, organization, laundry, pet care, home watch and concierge help—coordinated through one request.', href: '/catalog?audience=residents' },
   { key: 'property', icon: Building2, label: 'For Property Teams', title: 'Take work off the onsite team.', body: 'Turn support, field coordination, documentation, readiness work and resident-facing execution for the tasks that keep properties moving.', href: '/services/property' },
-  { key: 'real-estate', icon: UsersRound, label: 'For Real Estate', title: 'Keep the transaction moving.', body: 'Listing prep, showing support, field verification, closing logistics and client experience support for agents and teams.', href: '/real-estate' },
-  { key: 'business', icon: BriefcaseBusiness, label: 'For Businesses', title: 'Keep the work behind the work moving.', body: 'Administrative, digital, creative, logistics, event and operational support for growing teams that need more capacity.', href: '/services/business-solutions' },
+  { key: 'real-estate', icon: MapPin, label: 'For Real Estate', title: 'Keep the transaction moving.', body: 'Listing prep, showing support, field verification, closing logistics and client experience support for agents and teams.', href: '/real-estate' },
+  { key: 'business', icon: Briefcase, label: 'For Businesses', title: 'Keep the work behind the work moving.', body: 'Administrative, digital, creative, logistics, event and operational support for growing teams that need more capacity.', href: '/services/business-solutions' },
   { key: 'government', icon: Landmark, label: 'For Government + Institutions', title: 'Defined scope. Documented execution.', body: 'Procurement-oriented administrative, facilities, logistics, documentation, supply and field support mapped to the actual requirement.', href: '/industries/government' },
 ];
 
