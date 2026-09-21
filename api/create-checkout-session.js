@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import prisma from '../lib/prisma.js';
-import { checkoutEligibility, getGovernedCommercialOffer, getChannelFromRequest, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
+import { checkoutEligibility, getGovernedCommercialOffer, getChannelFromRequest, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.mjs';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const json = (res,status,payload)=>res.status(status).json(payload);
