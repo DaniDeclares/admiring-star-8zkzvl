@@ -1,7 +1,7 @@
 import prisma from '../lib/prisma.js';
 import { createClient } from '@supabase/supabase-js';
 import { buildIntakeRoutingContext, routeIntake } from '../src/lib/operations/intakeRouting2026.js';
-import { getChannelGovernanceDecision, resolveCH01CommercialSelection, resolveVerifiedCommunity } from '../src/lib/operations/governedCommercialGate2026.js';
+import { getChannelGovernanceDecision, resolveCH01CommercialSelection, resolveVerifiedCommunity } from '../src/lib/operations/governedCommercialGate2026.mjs';
 import { publishOperationalEvent } from '../src/lib/operations/eventBroker2026.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 
