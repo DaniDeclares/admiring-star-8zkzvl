@@ -6,10 +6,18 @@ import { supabase } from '../../lib/supabaseClient.js';
 import './PortalWorkspacePage.css';
 
 const systems = [
-  { key:'ASANA', name:'Asana', auth:'OAuth 2.0', callback:'https://danideclares.com/api/integrations/asana/callback', provider:'https://app.asana.com/0/my-apps' },
-  { key:'NOTION', name:'Notion', auth:'Internal connection token (preferred for the DANI workspace) or public OAuth', callback:'https://danideclares.com/api/integrations/notion/callback', provider:'https://www.notion.so/my-integrations' },
-  { key:'QUICKBOOKS_ONLINE', name:'QuickBooks Online', auth:'OAuth 2.0', callback:'https://danideclares.com/api/integrations/quickbooks/callback', provider:'https://developer.intuit.com/' },
-  { key:'GOOGLE_VOICE', name:'Google Voice / 7173', auth:'Supported web/app access; SIP Link only where eligible', callback:'Not applicable', provider:'https://voice.google.com/' },
+  { key:'ASANA', name:'Asana', role:'Tasks & release execution', auth:'OAuth 2.0', callback:'https://danideclares.com/api/integrations/asana/callback', provider:'https://app.asana.com/0/my-apps' },
+  { key:'NOTION', name:'Notion', role:'SOPs, manuals & institutional knowledge', auth:'Internal connection token (preferred for the DANI workspace) or public OAuth', callback:'https://danideclares.com/api/integrations/notion/callback', provider:'https://www.notion.so/my-integrations' },
+  { key:'QUICKBOOKS_ONLINE', name:'QuickBooks Online', role:'Accounting authority', auth:'OAuth 2.0', callback:'https://danideclares.com/api/integrations/quickbooks/callback', provider:'https://developer.intuit.com/' },
+  { key:'GMAIL', name:'Gmail', role:'Business communications rail', auth:'Google OAuth 2.0', callback:'Production OAuth build required', provider:'https://mail.google.com/' },
+  { key:'GOOGLE_CALENDAR', name:'Google Calendar', role:'Appointment projection & availability', auth:'Google OAuth 2.0', callback:'Production OAuth build required', provider:'https://calendar.google.com/' },
+  { key:'GOOGLE_DRIVE', name:'Google Drive', role:'Documents, evidence & Google-native files', auth:'Google OAuth 2.0', callback:'Production OAuth build required', provider:'https://drive.google.com/' },
+  { key:'HUBSPOT', name:'HubSpot', role:'CRM & marketing engagement', auth:'OAuth 2.0 / private app', callback:'Production OAuth build required', provider:'https://app.hubspot.com/' },
+  { key:'AIRTABLE', name:'Airtable', role:'Planning, review & flexible workspaces', auth:'OAuth / scoped token', callback:'Production OAuth build required', provider:'https://airtable.com/' },
+  { key:'GITHUB', name:'GitHub', role:'Application source & version authority', auth:'GitHub App / OAuth', callback:'Managed developer connection', provider:'https://github.com/DaniDeclares/admiring-star-8zkzvl' },
+  { key:'VERCEL', name:'Vercel', role:'Deployment & runtime hosting authority', auth:'Vercel authorization', callback:'Managed deployment connection', provider:'https://vercel.com/' },
+  { key:'POSTHOG', name:'PostHog', role:'Product analytics & observability', auth:'Project API credentials', callback:'Production credentials required', provider:'https://app.posthog.com/' },
+  { key:'GOOGLE_VOICE', name:'Google Voice / 7173', role:'Current business calling surface', auth:'Supported web/app access; SIP Link only where eligible', callback:'Not applicable', provider:'https://voice.google.com/' },
 ];
 
 function IntegrationCard({ system, state, env, session, onRefresh }) {
@@ -20,6 +28,8 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
       : system.key === 'QUICKBOOKS_ONLINE'
         ? env.QUICKBOOKS
         : false;
+  const managed = ['GITHUB','VERCEL'].includes(system.key);
+  const externalOnly = ['GMAIL','GOOGLE_CALENDAR','GOOGLE_DRIVE','HUBSPOT','AIRTABLE','POSTHOG'].includes(system.key);
   const connected = (state?.connections || []).some(c => c.adapter_code === system.key && c.connection_status === 'CONNECTED');
   const notionInternalHealthy = system.key === 'NOTION' && Boolean(state?.notionInternalValid);
 
@@ -43,12 +53,14 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
   return <div style={{border:'1px solid #e6d9c8',borderRadius:16,padding:18,background:'#fff'}}>
     <div style={{display:'flex',justifyContent:'space-between',gap:10,alignItems:'flex-start'}}>
       <strong style={{fontSize:18,color:'#6b1f2b'}}>{system.name}</strong>
-      <span className='portal-pill'>{connected || notionInternalHealthy ? 'CONNECTED' : configured ? 'READY TO CONNECT' : 'CREDENTIALS REQUIRED'}</span>
+      <span className='portal-pill'>{connected || notionInternalHealthy ? 'DANI CONNECTED' : managed ? 'MANAGED CONNECTION' : configured ? 'READY TO CONNECT' : externalOnly ? 'PRODUCTION OAUTH REQUIRED' : 'CREDENTIALS REQUIRED'}</span>
     </div>
+    <p style={{fontSize:12,color:'#75696a',lineHeight:1.5}}><strong>DANI role:</strong> {system.role}</p>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5}}><strong>Auth:</strong> {system.auth}</p>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5,wordBreak:'break-word'}}><strong>Callback:</strong> {system.callback}</p>
-    {system.key !== 'GOOGLE_VOICE' && <button className='portal-primary' style={{border:0,cursor:'pointer'}} disabled={!configured} onClick={connect}>{system.key === 'NOTION' && env.NOTION_INTERNAL ? 'Validate token' : connected ? 'Reconnect' : 'Connect'} ↗</button>}
-    {system.key === 'GOOGLE_VOICE' && <a className='portal-primary' href={system.provider} target='_blank' rel='noreferrer'>Open Google Voice ↗</a>}
+    {!externalOnly && !managed && system.key !== 'GOOGLE_VOICE' && <button className='portal-primary' style={{border:0,cursor:'pointer'}} disabled={!configured} onClick={connect}>{system.key === 'NOTION' && env.NOTION_INTERNAL ? 'Validate token' : connected ? 'Reconnect' : 'Connect'} ↗</button>}
+    {(externalOnly || managed || system.key === 'GOOGLE_VOICE') && <a className='portal-primary' href={system.provider} target='_blank' rel='noreferrer'>Open {system.name} ↗</a>}
+    {externalOnly && <p className='portal-note' style={{marginTop:10}}>Available to ChatGPT does not mean the deployed DANI application has OAuth access. DANI will show this as connected only after its own server-side credentials and consent flow are configured.</p>}
     {(connected || notionInternalHealthy) && <p className='portal-note' style={{marginTop:10}}>{notionInternalHealthy && !connected ? 'The DANI Notion internal connection token is valid. Share the required parent pages/databases with that Notion connection before expecting page reads/writes.' : 'DANI has a stored, encrypted connection record. External IDs remain references; DANI retains its own runtime authority.'}</p>}
   </div>;
 }
@@ -83,6 +95,9 @@ function IntegrationsCenterPage({ session }) {
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(285px,1fr))',gap:12,marginTop:18}}>
       {systems.map(s=><IntegrationCard key={s.key} system={s} state={state} env={state.env||{}} session={session} onRefresh={load}/>)}
     </div>}
+  </section>
+  <section className='portal-card'><p className='portal-eyebrow'>Authority map</p><h2 style={{margin:'5px 0 0'}}>One system owns each kind of truth</h2>
+    <p className='portal-note'><strong>DANI / Supabase:</strong> customers, services, governed pricing, quotes, jobs, providers, compliance, authorization and operational lifecycle. <strong>GitHub:</strong> application source and migrations. <strong>Vercel:</strong> deployments/runtime. <strong>Notion:</strong> SOPs and knowledge. <strong>Asana:</strong> project/task execution. <strong>HubSpot:</strong> CRM engagement. <strong>Airtable:</strong> intentionally assigned planning/review datasets. <strong>Google:</strong> mailbox, calendar and document surfaces. <strong>PostHog:</strong> telemetry and product analytics.</p>
   </section>
   <section className='portal-card'><p className='portal-eyebrow'>Server configuration</p><h2 style={{margin:'5px 0 0'}}>Required variables</h2>
    <pre style={{whiteSpace:'pre-wrap',background:'#241d1e',color:'#f8efe4',borderRadius:12,padding:16,fontSize:12,lineHeight:1.6}}>INTEGRATION_TOKEN_ENCRYPTION_KEY
