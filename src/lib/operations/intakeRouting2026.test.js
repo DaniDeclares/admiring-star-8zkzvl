@@ -67,6 +67,17 @@ describe('DDOS intake routing', () => {
     );
   });
 
+
+  test('B2B2C never falls through to CH02 category fallback', () => {
+    expect(routeIntake({ channelType: 'B2B2C', category: 'PROPERTY_OPERATIONS' })).toEqual(
+      expect.objectContaining({
+        channel: null,
+        source: 'invalid_commercial_model_as_channel',
+        reason: 'COMMERCIAL_MODEL_IS_NOT_CHANNEL',
+        workflow: INTAKE_WORKFLOWS.MANUAL_REVIEW,
+      })
+    );
+  });
   test('B2B2C may be attached to a valid channel as relationship metadata', () => {
     expect(
       buildIntakeRoutingContext({
