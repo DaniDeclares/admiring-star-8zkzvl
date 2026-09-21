@@ -1,26 +1,21 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-import {
-  ArrowRight, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2,
-  FileText, Home, Landmark, Laptop, Palette, Truck, UsersRound
-} from 'lucide-react';
+import { ArrowRight, Briefcase, Building2, CheckCircle2, FileText, Home, Landmark, MapPin, Store } from 'lucide-react';
 
 const lanes = [
   { icon: Home, title: 'Residents', eyebrow: 'Everyday + personal', body: 'Household support, organization, errands, laundry, home watch, pet care, plant care, and concierge help.', href: '/catalog?audience=residents', cta: 'Explore resident services' },
   { icon: Building2, title: 'Property teams', eyebrow: 'Operational support', body: 'Turns, field support, inspections, documentation, punch lists, resident programs, logistics, and recurring property operations.', href: '/services/property', cta: 'Explore property support' },
-  { icon: UsersRound, title: 'Real estate', eyebrow: 'Listing + transaction', body: 'Listing readiness, showing support, closing logistics, field verification, client experience, and office support.', href: '/real-estate', cta: 'Explore real estate support' },
-  { icon: BriefcaseBusiness, title: 'Businesses', eyebrow: 'Back-office + field', body: 'Administrative support, digital setup, marketing, creative production, logistics, workplace support, and recurring operations.', href: '/services/business-solutions', cta: 'Explore business solutions' },
+  { icon: MapPin, title: 'Real estate', eyebrow: 'Listing + transaction', body: 'Listing readiness, showing support, closing logistics, field verification, client experience, and office support.', href: '/real-estate', cta: 'Explore real estate support' },
+  { icon: Briefcase, title: 'Businesses', eyebrow: 'Back-office + field', body: 'Administrative support, digital setup, marketing, creative production, logistics, workplace support, and recurring operations.', href: '/services/business-solutions', cta: 'Explore business solutions' },
   { icon: Landmark, title: 'Government + institutions', eyebrow: 'Procurement + execution', body: 'Procurement-oriented facilities, administrative, logistics, documentation, supply, production, and field support.', href: '/industries/government', cta: 'Explore procurement support' },
 ];
 
 const capabilities = [
-  [Laptop, 'Administrative & digital operations', 'Remote-friendly support that helps organizations keep the work moving.'],
-  [Truck, 'Logistics & field execution', 'Dispatchable pickup, delivery, sourcing, verification, and on-the-ground support.'],
-  [CalendarDays, 'Events & experiences', 'Planning, setup, production, guest support, community programming, and closeout.'],
-  [Palette, 'Creative & production', 'Design, apparel, signage, print, content, media, and branded assets.'],
+  [Briefcase, 'Administrative & digital operations', 'Remote-friendly support that helps organizations keep the work moving.'],
+  [MapPin, 'Logistics & field execution', 'Dispatchable pickup, delivery, sourcing, verification, and on-the-ground support.'],
+  [MapPin, 'Events & experiences', 'Planning, setup, production, guest support, community programming, and closeout.'],
+  [Store, 'Creative & production', 'Design, apparel, signage, print, content, media, and branded assets.'],
   [FileText, 'Documents & coordination', 'Structured document, coordination, records, and operational support within approved scope.'],
-  [UsersRound, 'Growth & relationship support', 'Prospecting, partnership development, referral support, and commercial operations.'],
+  [MapPin, 'Growth & relationship support', 'Prospecting, partnership development, referral support, and commercial operations.'],
 ];
 
 export default function PortfolioPage() {
