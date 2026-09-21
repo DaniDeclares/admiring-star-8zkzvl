@@ -6,9 +6,9 @@ const COLORS = {
   muted: '#75696a',
   border: '#e8dfe0',
   surface: '#fffdfc',
-  soft: '#f7f1f0',
-  accent: '#7c3f49',
-  danger: '#a52a3a',
+  soft: '#faf6f0',
+  accent: '#7a263a',
+  danger: '#9b3346',
   warning: '#9a6514',
   success: '#2d6a4f',
   info: '#355c7d',
@@ -128,18 +128,18 @@ export default function StaffCommandCenter({ session }) {
   const activeJobs = metrics.jobs.filter(j => !['COMPLETED','CANCELLED'].includes(String(j.job_status || '').toUpperCase())).slice(0, 6);
   const riskJobs = metrics.jobs.filter(j => ['DISPATCH_REVIEW','ASSIGNMENT_OFFERED','REWORK_REQUESTED','BLOCKED'].includes(String(j.job_status || '').toUpperCase())).slice(0, 5);
 
-  return <div style={{ color: COLORS.ink }}>
-    <header style={{ borderRadius: 22, padding: '26px 28px', background: 'linear-gradient(135deg, #241a1b 0%, #553238 60%, #7c3f49 100%)', color: '#fff', marginBottom: 18, boxShadow: '0 18px 50px rgba(33,25,26,.16)' }}>
+  return <div className="command-center-shell" style={{ color: COLORS.ink, background: '#f7f4ee', borderRadius: 24, padding: 6 }}>
+    <header className="command-hero" style={{ borderRadius: 22, padding: '26px 28px', background: '#fffdfc', color: COLORS.ink, marginBottom: 18, border: '1px solid #e4dbd2', boxShadow: '0 12px 30px rgba(33,25,26,.06)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.16em', opacity: .72 }}>DANI DECLARES</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.16em', color: COLORS.accent }}>DANI DECLARES</div>
           <h1 style={{ margin: '7px 0 8px', fontSize: 34, letterSpacing: '-.03em' }}>Operations Command Center</h1>
-          <p style={{ margin: 0, maxWidth: 720, color: 'rgba(255,255,255,.78)' }}>One operating view for requests, scope, quotes, payments, jobs, providers, evidence and exceptions.</p>
+          <p style={{ margin: 0, maxWidth: 720, color: COLORS.muted }}>One operating view for requests, scope, quotes, payments, jobs, providers, evidence and exceptions.</p>
         </div>
         <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
           <Link className="portal-primary" to="/portal/operations" style={{ background: '#fff', color: COLORS.ink }}>Open Operations</Link>
-          <Link className="portal-primary" to="/portal/quotes" style={{ background: 'rgba(255,255,255,.12)', color: '#fff', borderColor: 'rgba(255,255,255,.35)' }}>Build Quote</Link>
-          <button className="portal-refresh" onClick={load} style={{ color: '#fff', borderColor: 'rgba(255,255,255,.35)', background: 'transparent' }}>Refresh</button>
+          <Link className="portal-primary" to="/portal/quotes" style={{ background: COLORS.accent, color: '#fff', borderColor: COLORS.accent }}>Build Quote</Link>
+          <button className="portal-refresh" onClick={load} style={{ color: COLORS.accent, borderColor: '#d9c7c9', background: '#fff' }}>Refresh</button>
         </div>
       </div>
     </header>
@@ -152,6 +152,31 @@ export default function StaffCommandCenter({ session }) {
       <Metric label="Awaiting Customer" value={awaitingCustomer.length} detail="Sent / approved" />
       <Metric label="Active Jobs" value={metrics.activeJobs} detail="Production in motion" />
       <Metric label="At Risk" value={riskJobs.length + metrics.failedPayments} detail="Exceptions needing action" tone={riskJobs.length || metrics.failedPayments ? COLORS.danger : COLORS.success} />
+    </div>
+
+    <div className="command-control-tracks" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: 18, marginBottom: 18 }}>
+      <Card eyebrow="Field operations" title="Live Production Control" action={<Link to="/portal/operations">Open Dispatch →</Link>}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 10 }}>
+          <Metric label="Scheduled today" value={metrics.todayAppointments.length} detail="Appointments" tone={COLORS.info} />
+          <Metric label="Active jobs" value={metrics.activeJobs} detail="Production in motion" tone={metrics.activeJobs ? COLORS.info : COLORS.success} />
+          <Metric label="Routing review" value={metrics.dispatchReview} detail="Needs dispatch action" tone={metrics.dispatchReview ? COLORS.warning : COLORS.success} />
+        </div>
+        <div className="command-state-panel">
+          <div className="command-state-label">Execution states</div>
+          <div className="command-state-track">{['SCHEDULED','DISPATCHED','EN ROUTE','IN PROGRESS','BLOCKED','QA','COMPLETED'].map((state, index, arr) => <React.Fragment key={state}><span>{state}</span>{index < arr.length - 1 && <b>→</b>}</React.Fragment>)}</div>
+        </div>
+      </Card>
+      <Card eyebrow="Commercial control" title="Financial Ledger" action={<Link to="/portal/saved-quotes">Open Commercial →</Link>}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 10 }}>
+          <Metric label="Quote review" value={needsReview.length} detail="Commercial review" tone={needsReview.length ? COLORS.warning : COLORS.success} />
+          <Metric label="Ready to send" value={readyToSend.length} detail="Customer delivery" tone={readyToSend.length ? COLORS.accent : COLORS.success} />
+          <Metric label="Awaiting customer" value={awaitingCustomer.length} detail="Decision / payment path" tone={awaitingCustomer.length ? COLORS.warning : COLORS.success} />
+        </div>
+        <div className="command-state-panel">
+          <div className="command-state-label">Commercial chain</div>
+          <div className="command-state-track">{['QUOTE','REVIEW','SENT','APPROVED','PAYMENT','FULFILLMENT'].map((state, index, arr) => <React.Fragment key={state}><span>{state}</span>{index < arr.length - 1 && <b>→</b>}</React.Fragment>)}</div>
+        </div>
+      </Card>
     </div>
 
     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) minmax(330px,.85fr)', gap: 18, marginBottom: 18 }}>
