@@ -127,3 +127,5 @@ export default function PortalWorkspacePage() {
     <footer className="portal-footer"><strong>Commercial boundary:</strong> DANI DECLARES pricing is resolved upstream and frozen before operational execution. Portals coordinate work; they do not invent or rewrite rates.</footer>
   </main>;
 }
+
+// Production stabilization checkpoint: main restored to the last known-good release.
