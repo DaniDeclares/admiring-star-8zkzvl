@@ -4,6 +4,7 @@ import ProviderNav from './ProviderNav.jsx';
 import { Card, Empty, Requirement, buildProviderRequirements, statusLabel, formatDate, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
 import './PortalWorkspacePage.css';
 import StaffCommandCenter from './StaffCommandCenter.jsx';
+import OwnerHQPage from './OwnerHQPage.jsx';
 
 const ROLE_LABELS = { provider: 'DANI DECLARES Provider', resident: 'DANI DECLARES', customer: 'DANI DECLARES', property_manager: 'DANI DECLARES', procurement: 'DANI DECLARES', staff_admin: 'My Portal' };
 
@@ -58,7 +59,7 @@ export default function PortalWorkspacePage() {
   if (loading) return <main className="portal-shell"><p>Loading your DANI DECLARES workspace…</p></main>;
   if (error && !snapshot) return <main className="portal-shell"><div className="portal-alert">{error}</div></main>;
   const role = snapshot?.role || 'customer';
-  if (role === 'staff_admin') return <main className="portal-shell"><header className="portal-hero"><div><p className="portal-eyebrow">MY PORTAL</p><h1>My Portal</h1><p>Your authenticated owner and operations control center for sales, quoting, contract acquisition, fulfillment, dispatch, QA, customers, providers and business operations.</p></div><div className="portal-hero-actions"><AccountBadge session={session} /><button className="portal-refresh" onClick={load}>Refresh</button></div></header><StaffCommandCenter session={session} load={load} /></main>;
+  if (['admin','owner','staff_admin','staff'].includes(role)) return <OwnerHQPage />;
   const isProvider = role === 'provider'; const isCommercial = ['property_manager', 'procurement'].includes(role);
   const application = snapshot?.application || null;
   const capabilities = snapshot?.capabilities || [];
