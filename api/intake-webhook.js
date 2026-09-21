@@ -85,8 +85,53 @@ export default async function handler(req,res){
   const request=result.request;
   const notificationText=['New DANI DECLARES service request',`Name: ${name}`,`Email: ${email||'not provided'}`,`Phone: ${phone||'not provided'}`,`Customer type: ${channelType||'not specified'}`,`Starting point: ${frontDoorCode||'not specified'}`,`Service: ${serviceType||category||'not specified'}`,`Service reference: ${serviceRef||'not specified'}`,`Location: ${locationAddress||'not provided'}`,`Requested date/time: ${requestedStartAt||'not provided'}`,`Timeline: ${timeline||'not provided'}`,`Budget: ${budgetRange||'not provided'}`,`Request ID: ${request.id}`,`Booking hold: ${booking?.id||'none'}`].join('\n');
   try{
-   if(process.env.NOTIFICATION_EMAIL)await publishOperationalEvent({eventType:'LEAD_CREATED',aggregateType:'SERVICE_REQUEST',aggregateId:request.id,eventKey:`lead-created-email:${request.id}`,channel:'EMAIL',payload:{to:process.env.NOTIFICATION_EMAIL,subject:`New DANI DECLARES service request — ${serviceType||category||'New lead'}`,text:notificationText}});
-   if(process.env.NOTIFICATION_PHONE)await publishOperationalEvent({eventType:'LEAD_CREATED',aggregateType:'SERVICE_REQUEST',aggregateId:request.id,eventKey:`lead-created-sms:${request.id}`,channel:'SMS',payload:{to:process.env.NOTIFICATION_PHONE,text:`New DANI DECLARES request: ${name}; ${serviceType||category||'service'}; ${phone||email||''}; Request ${request.id}`}});
+   if(process.env.NOTIFICATION_EMAIL)await publishOperationalEvent({
+    eventType:'LEAD_CREATED',
+    aggregateType:'SERVICE_REQUEST',
+    aggregateId:request.id,
+    eventKey:`lead-created-operator-email:${request.id}`,
+    channel:'EMAIL',
+    payload:{to:process.env.NOTIFICATION_EMAIL,subject:`New DANI DECLARES service request — ${serviceType||category||'New lead'}`,text:notificationText}
+   });
+   // The operator notification and the customer confirmation are separate delivery
+   // intents. A successful intake must not depend on the operator mailbox being the
+   // same address as the customer's mailbox.
+   if(email && email.toLowerCase() !== String(process.env.NOTIFICATION_EMAIL||'').toLowerCase()) {
+    const customerText=[
+     'Thank you — DANI DECLARES received your service request.',
+     '',
+     `Request ID: ${request.id}`,
+     `Service: ${serviceType||category||'Request received'}`,
+     `Requested date/time: ${requestedStartAt||'Not specified'}`,
+     `Location: ${locationAddress||'Not specified'}`,
+     '',
+     'Your requested time is not a final appointment until DANI DECLARES confirms scope, availability and scheduling.',
+     'We will follow up with the next step for your request.',
+     '',
+     'DANI DECLARES LLC',
+     '(470) 485-7173'
+    ].join('\\n');
+    await publishOperationalEvent({
+     eventType:'CUSTOMER_REQUEST_RECEIVED',
+     aggregateType:'SERVICE_REQUEST',
+     aggregateId:request.id,
+     eventKey:`customer-request-received-email:${request.id}`,
+     channel:'EMAIL',
+     payload:{
+      to:email,
+      subject:'DANI DECLARES — Request received',
+      text:customerText
+     }
+    });
+   }
+   if(process.env.NOTIFICATION_PHONE)await publishOperationalEvent({
+    eventType:'LEAD_CREATED',
+    aggregateType:'SERVICE_REQUEST',
+    aggregateId:request.id,
+    eventKey:`lead-created-sms:${request.id}`,
+    channel:'SMS',
+    payload:{to:process.env.NOTIFICATION_PHONE,text:`New DANI DECLARES request: ${name}; ${serviceType||category||'service'}; ${phone||email||''}; Request ${request.id}`}
+   });
   }catch(notificationError){console.error('Lead notification queue error:',notificationError)}
   return res.status(200).json({success:true,message:'We received your request.',requestId:request.id,paymentPending:paymentEligible,status:requestState,booking:booking?{id:booking.id,startsAt:booking.requested_start_at,endsAt:booking.requested_end_at,holdExpiresAt:booking.hold_expires_at,durationMinutes:booking.duration_minutes}:null});
  }catch(error){
