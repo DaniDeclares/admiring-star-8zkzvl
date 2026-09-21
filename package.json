@@ -39,11 +39,11 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
-    ],
-    "devDependencies": {
-      "@playwright/test": "^1.63.0",
-      "checkly": "^9.5.0"
-    }
+    ]
   },
-  "homepage": "/"
+  "homepage": "/",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "checkly": "^9.5.0"
+  }
 }
