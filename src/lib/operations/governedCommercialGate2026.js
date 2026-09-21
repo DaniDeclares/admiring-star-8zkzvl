@@ -88,7 +88,9 @@ export async function getGovernedCommercialOffer(serviceId) {
       LIMIT 1
     ) m ON true
     WHERE o.canonical_sku = ${serviceId}
-    ORDER BY o.updated_at DESC, o.canonical_sku ASC
+      AND o.commercial_offer_status <> 'DO_NOT_SELL'
+    ORDER BY CASE o.commercial_offer_status WHEN 'SELL_NOW' THEN 0 WHEN 'INTAKE_ONLY' THEN 1 ELSE 2 END,
+             o.updated_at DESC, o.canonical_sku ASC
     LIMIT 1
   `;
   return rows[0] || null;
@@ -137,6 +139,7 @@ export async function getChannelGovernanceDecision(serviceId, channel) {
     FROM public.dd_ch02_service_adjudication a
     JOIN public.dd_governed_service_offers o
       ON o.canonical_sku = a.sku
+     AND o.commercial_offer_status <> 'DO_NOT_SELL'
     LEFT JOIN public.dd_service_channel_availability ca
       ON ca.service_id = o.runtime_service_id
      AND ca.channel_code = a.channel_code
