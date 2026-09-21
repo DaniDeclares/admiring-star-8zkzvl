@@ -1,6 +1,7 @@
-jest.mock('../../../lib/prisma.js', () => ({ __esModule: true, default: {} }));
+jest.mock('../../../lib/prisma.js', () => ({ __esModule: true, default: { $queryRaw: jest.fn() } }));
 
-import { economicGateFromOffer, checkoutEligibility } from './governedCommercialGate2026';
+import prisma from '../../../lib/prisma.js';
+import { economicGateFromOffer, checkoutEligibility, resolveCH01CommercialSelection } from './governedCommercialGate2026';
 
 describe('economic checkout gate', () => {
   test('blocks missing economics', () => {
@@ -73,3 +74,87 @@ describe('LIVE_READY checkout release gate', () => {
 });
 
 // CI release-contract verification pass.
+
+
+describe('CH01 canonical resolver controls', () => {
+  beforeEach(() => {
+    prisma.$queryRaw.mockReset();
+  });
+
+  test('excludes DO_NOT_SELL governed-offer rows so the launch SKU resolves to one commercial offer', async () => {
+    prisma.$queryRaw.mockResolvedValueOnce([{
+      serviceId: 'DNI-01A-001',
+      runtimeServiceId: 'runtime-1',
+      adjudicatedServiceName: 'Resident Refresh — Standard Maintenance Clean',
+      frontDoorCode: 'CH01-F01',
+      subchannelScope: ['CH01-A'],
+      disposition: 'FRONT_DOOR',
+      customerVisibleCandidate: true,
+      name: 'Resident Refresh — Standard Maintenance Clean',
+      commercialOfferStatus: 'SELL_NOW',
+      fulfillmentGateStatus: 'READY',
+      ch01APriced: true,
+      ch01BPriced: false,
+      pricingType: 'FIXED',
+      billingCycle: null,
+      residentDiscountEligible: true,
+      serviceCommercialStatus: 'ACTIVE',
+      releaseState: 'LIVE_READY',
+      blockingGate: 'NONE',
+      basePriceCents: 15000,
+      pricingLockStatus: 'LOCKED',
+      pricingStatus: 'ACTIVE',
+      subchannelPriceOverrideCents: null,
+      subchannelPricingActive: false,
+    }]);
+
+    const result = await resolveCH01CommercialSelection({
+      serviceId: 'DNI-01A-001',
+      frontDoorCode: 'CH01-F01',
+      subchannelCode: 'CH01-A',
+      isVerifiedCommunityResident: false,
+    });
+
+    expect(result.allowed).toBe(true);
+    expect(result.price).toBe(150);
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not apply the general resident discount to an explicit CH01-B override', async () => {
+    prisma.$queryRaw.mockResolvedValueOnce([{
+      serviceId: 'DNI-01A-001',
+      runtimeServiceId: 'runtime-1',
+      adjudicatedServiceName: 'Resident Refresh — Standard Maintenance Clean',
+      frontDoorCode: 'CH01-F01',
+      subchannelScope: ['CH01-B'],
+      disposition: 'FRONT_DOOR',
+      customerVisibleCandidate: true,
+      name: 'Resident Refresh — Standard Maintenance Clean',
+      commercialOfferStatus: 'SELL_NOW',
+      fulfillmentGateStatus: 'READY',
+      ch01APriced: true,
+      ch01BPriced: true,
+      pricingType: 'FIXED',
+      billingCycle: null,
+      residentDiscountEligible: true,
+      serviceCommercialStatus: 'ACTIVE',
+      releaseState: 'LIVE_READY',
+      blockingGate: 'NONE',
+      basePriceCents: null,
+      pricingLockStatus: null,
+      pricingStatus: null,
+      subchannelPriceOverrideCents: 12750,
+      subchannelPricingActive: true,
+    }]);
+
+    const result = await resolveCH01CommercialSelection({
+      serviceId: 'DNI-01A-001',
+      frontDoorCode: 'CH01-F01',
+      subchannelCode: 'CH01-B',
+      isVerifiedCommunityResident: true,
+    });
+
+    expect(result.allowed).toBe(true);
+    expect(result.price).toBe(127.5);
+  });
+});
