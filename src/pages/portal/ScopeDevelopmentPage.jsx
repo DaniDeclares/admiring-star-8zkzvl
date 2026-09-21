@@ -10,16 +10,16 @@ const blankScope={property_name:'',property_address:'',requested_window:'',compl
 const numberWord={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
 const parseCount=(value)=>{const n=Number(value);if(Number.isFinite(n)&&n>0)return n;return numberWord[String(value||'').toLowerCase()]||0;};
 const extractSourceFacts=(text='')=>{
- const apartmentMatch=text.match(/\\b(\\d+)\\s+apartments?\\b/i);
- const deadlineMatch=text.match(/within\\s+(\\d+)\\s+days?/i);
- const petMatch=text.match(/(\\w+)\\s+of the apartments have heavy pet damage/i);
- const deepMatch=text.match(/only\\s+(\\d+)\\s+need deep carpet cleaning/i);
- const evictionMatch=text.match(/eviction.*?(\\d+)-bedroom\\/(\\d+)-bath/i);
+ const apartmentMatch=text.match(/\b(\d+)\s+apartments?\b/i);
+ const deadlineMatch=text.match(/within\s+(\d+)\s+days?/i);
+ const petMatch=text.match(/(\w+)\s+of the apartments have heavy pet damage/i);
+ const deepMatch=text.match(/only\s+(\d+)\s+need deep carpet cleaning/i);
+ const evictionMatch=text.match(/eviction.*?(\d+)-bedroom\/(\d+)-bath/i);
  return [
   apartmentMatch&&`Request states ${apartmentMatch[1]} apartments require turnover.` ,
   petMatch&&`Request states ${parseCount(petMatch[1])} apartments have heavy pet damage.` ,
   deepMatch&&`Request states ${deepMatch[1]} apartments need deep carpet cleaning; the other apartments receive normal turnover carpet treatment.` ,
-  text.match(/All\\s+\\d+\\s+apartments? have carpet/i)&&'Request states all apartments have carpet.',
+  text.match(/All\s+\d+\s+apartments? have carpet/i)&&'Request states all apartments have carpet.',
   evictionMatch&&`Request identifies one eviction/cleanout as a ${evictionMatch[1]}-bedroom/${evictionMatch[2]}-bath family unit; the unit identifier was not provided.`,
   text.match(/checked for obvious damage or maintenance issues and documented/i)&&'Request requires obvious damage/maintenance issues to be checked and documented before release.',
   deadlineMatch&&`Requested turnaround: within ${deadlineMatch[1]} days of the request.`,
@@ -43,8 +43,8 @@ function Workspace(){
    const sr=await supabase.from('services').select('id,sku,name,pricing_type,starting_price,public_price_display,quote_input_schema,is_active').eq('division_id',2).eq('is_active',true).order('name');if(sr.error)throw sr.error;setServices(sr.data||[]);
    const saved=rr.data.scope_snapshot&&typeof rr.data.scope_snapshot==='object'?rr.data.scope_snapshot:{};
    const sourceFacts=extractSourceFacts(rr.data.request_details||'');
-   const sourceUnitCount=parseCount((rr.data.request_details||'').match(/\\b(\\d+)\\s+apartments?\\b/i)?.[1]);
-   const sourceDeadline=(rr.data.request_details||'').match(/within\\s+(\\d+)\\s+days?/i)?.[1];
+   const sourceUnitCount=parseCount((rr.data.request_details||'').match(/\b(\d+)\s+apartments?\b/i)?.[1]);
+   const sourceDeadline=(rr.data.request_details||'').match(/within\s+(\d+)\s+days?/i)?.[1];
    const isFreshScope=!Object.keys(saved).length;
    const merged={...blankScope,...saved,source_scope_facts:Array.isArray(saved.source_scope_facts)?saved.source_scope_facts:sourceFacts,units:Array.isArray(saved.units)?saved.units:[],components:Array.isArray(saved.components)?saved.components:[],quote_inputs:saved.quote_inputs||{},readiness:{...blankScope.readiness,...(saved.readiness||{})}};
    if(isFreshScope){
