@@ -4,7 +4,7 @@ export default async function handler(req,res){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
  try{
   const context=await requireStaff(req);
-  const {data:connections,error}=await context.supabase.from('dd_integration_connections').select('adapter_code,environment,external_account_id,connection_status,permissions,token_expires_at,last_sync_at,last_error,updated_at').in('adapter_code',['ASANA','NOTION','QUICKBOOKS_ONLINE','GOOGLE_VOICE']).order('updated_at',{ascending:false});
+  const {data:connections,error}=await context.supabase.from('dd_integration_connections').select('adapter_code,environment,external_account_id,connection_status,permissions,token_expires_at,last_sync_at,last_error,updated_at').in('adapter_code',['ASANA','NOTION','QUICKBOOKS_ONLINE','GOOGLE_VOICE','GMAIL','GOOGLE_CALENDAR','GOOGLE_DRIVE','HUBSPOT','AIRTABLE','GITHUB','VERCEL','POSTHOG']).order('updated_at',{ascending:false});
   if(error)throw error;
   let notionInternalValid = false;
   if (process.env.NOTION_TOKEN) {
