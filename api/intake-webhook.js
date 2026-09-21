@@ -36,9 +36,15 @@ async function resolvePortalOrganization(req) {
 export default async function handler(req,res){
  if(req.method!=='POST')return res.status(405).json({error:'This action is not available.'});
  try{
-  const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,organizationName,locationAddress,timeline,budgetRange,requestedStartAt,commercialModel,requestedTimezone='America/New_York'}=req.body||{};
+  const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,organizationName,locationAddress,timeline,budgetRange,requestedStartAt,commercialModel,requestedTimezone='America/New_York',frontDoorCode}=req.body||{};
   if(!name||(!email&&!phone))return res.status(400).json({error:'Please provide your name and at least one way to contact you.'});
   const routing=routeIntake({channelType,category});
+  const channelToCode={B2C:'CH01',B2B_APT:'CH02',B2B_RE:'CH03',B2B:'CH04',B2G:'CH05'};
+  const governedChannelCode=channelToCode[channelType]||null;
+  if(frontDoorCode && governedChannelCode){
+   const doorRows=await prisma.$queryRawUnsafe('SELECT front_door_code FROM public.dd_channel_front_doors WHERE channel_code=$1 AND front_door_code=$2 AND status=\'LOCKED\' LIMIT 1',governedChannelCode,frontDoorCode);
+   if(!doorRows.length)return res.status(400).json({error:'That starting point is not available for this customer path. Please choose another service path.'});
+  }
   const portalOrganizationId = await resolvePortalOrganization(req);
   if(!routing.channel)return res.status(400).json({error:'Please select the customer type that best fits your request.'});
   const routingContext=buildIntakeRoutingContext({channelType,category,commercialModel});
@@ -54,7 +60,7 @@ export default async function handler(req,res){
   let booking=null;
   const result=await prisma.$transaction(async tx=>{
    const lead=await tx.lead.create({data:{full_name:name,email:email||null,phone:phone||null,organization_name:organizationName||null,status:'new',notes:null}});
-   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:routingContext,pricingServiceId:serviceRef,commercialIntent:commercialIntent||null,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED'},status:requestState,priority:'normal'}});
+   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:routingContext,pricingServiceId:serviceRef,commercialIntent:commercialIntent||null,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode},status:requestState,priority:'normal'}});
    if(portalOrganizationId) await tx.$executeRawUnsafe(`UPDATE public.service_requests SET organization_id=$1::uuid WHERE id=$2::uuid`, portalOrganizationId, request.id);
    if(paymentEligible){await tx.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:locationAddress||null,timeline:timeline||null,intake_answers:{serviceId:serviceRef,commercialIntent},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});}
    if(requestedStartAt){
@@ -77,10 +83,55 @@ export default async function handler(req,res){
    return {lead,request};
   });
   const request=result.request;
-  const notificationText=['New DANI DECLARES service request',`Name: ${name}`,`Email: ${email||'not provided'}`,`Phone: ${phone||'not provided'}`,`Customer type: ${channelType||'not specified'}`,`Service: ${serviceType||category||'not specified'}`,`Service reference: ${serviceRef||'not specified'}`,`Location: ${locationAddress||'not provided'}`,`Requested date/time: ${requestedStartAt||'not provided'}`,`Timeline: ${timeline||'not provided'}`,`Budget: ${budgetRange||'not provided'}`,`Request ID: ${request.id}`,`Booking hold: ${booking?.id||'none'}`].join('\n');
+  const notificationText=['New DANI DECLARES service request',`Name: ${name}`,`Email: ${email||'not provided'}`,`Phone: ${phone||'not provided'}`,`Customer type: ${channelType||'not specified'}`,`Starting point: ${frontDoorCode||'not specified'}`,`Service: ${serviceType||category||'not specified'}`,`Service reference: ${serviceRef||'not specified'}`,`Location: ${locationAddress||'not provided'}`,`Requested date/time: ${requestedStartAt||'not provided'}`,`Timeline: ${timeline||'not provided'}`,`Budget: ${budgetRange||'not provided'}`,`Request ID: ${request.id}`,`Booking hold: ${booking?.id||'none'}`].join('\n');
   try{
-   if(process.env.NOTIFICATION_EMAIL)await publishOperationalEvent({eventType:'LEAD_CREATED',aggregateType:'SERVICE_REQUEST',aggregateId:request.id,eventKey:`lead-created-email:${request.id}`,channel:'EMAIL',payload:{to:process.env.NOTIFICATION_EMAIL,subject:`New DANI DECLARES service request — ${serviceType||category||'New lead'}`,text:notificationText}});
-   if(process.env.NOTIFICATION_PHONE)await publishOperationalEvent({eventType:'LEAD_CREATED',aggregateType:'SERVICE_REQUEST',aggregateId:request.id,eventKey:`lead-created-sms:${request.id}`,channel:'SMS',payload:{to:process.env.NOTIFICATION_PHONE,text:`New DANI DECLARES request: ${name}; ${serviceType||category||'service'}; ${phone||email||''}; Request ${request.id}`}});
+   if(process.env.NOTIFICATION_EMAIL)await publishOperationalEvent({
+    eventType:'LEAD_CREATED',
+    aggregateType:'SERVICE_REQUEST',
+    aggregateId:request.id,
+    eventKey:`lead-created-operator-email:${request.id}`,
+    channel:'EMAIL',
+    payload:{to:process.env.NOTIFICATION_EMAIL,subject:`New DANI DECLARES service request — ${serviceType||category||'New lead'}`,text:notificationText}
+   });
+   // The operator notification and the customer confirmation are separate delivery
+   // intents. A successful intake must not depend on the operator mailbox being the
+   // same address as the customer's mailbox.
+   if(email && email.toLowerCase() !== String(process.env.NOTIFICATION_EMAIL||'').toLowerCase()) {
+    const customerText=[
+     'Thank you — DANI DECLARES received your service request.',
+     '',
+     `Request ID: ${request.id}`,
+     `Service: ${serviceType||category||'Request received'}`,
+     `Requested date/time: ${requestedStartAt||'Not specified'}`,
+     `Location: ${locationAddress||'Not specified'}`,
+     '',
+     'Your requested time is not a final appointment until DANI DECLARES confirms scope, availability and scheduling.',
+     'We will follow up with the next step for your request.',
+     '',
+     'DANI DECLARES LLC',
+     '(470) 485-7173'
+    ].join('\\n');
+    await publishOperationalEvent({
+     eventType:'CUSTOMER_REQUEST_RECEIVED',
+     aggregateType:'SERVICE_REQUEST',
+     aggregateId:request.id,
+     eventKey:`customer-request-received-email:${request.id}`,
+     channel:'EMAIL',
+     payload:{
+      to:email,
+      subject:'DANI DECLARES — Request received',
+      text:customerText
+     }
+    });
+   }
+   if(process.env.NOTIFICATION_PHONE)await publishOperationalEvent({
+    eventType:'LEAD_CREATED',
+    aggregateType:'SERVICE_REQUEST',
+    aggregateId:request.id,
+    eventKey:`lead-created-sms:${request.id}`,
+    channel:'SMS',
+    payload:{to:process.env.NOTIFICATION_PHONE,text:`New DANI DECLARES request: ${name}; ${serviceType||category||'service'}; ${phone||email||''}; Request ${request.id}`}
+   });
   }catch(notificationError){console.error('Lead notification queue error:',notificationError)}
   return res.status(200).json({success:true,message:'We received your request.',requestId:request.id,paymentPending:paymentEligible,status:requestState,booking:booking?{id:booking.id,startsAt:booking.requested_start_at,endsAt:booking.requested_end_at,holdExpiresAt:booking.hold_expires_at,durationMinutes:booking.duration_minutes}:null});
  }catch(error){
