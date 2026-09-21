@@ -58,6 +58,8 @@ import BlogPostPage from "./pages/BlogPostPage.jsx";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import WeddingsPage from "./pages/WeddingsPage.jsx";
+import PortfolioPage from "./pages/PortfolioPage.jsx";
+import HandledCampaignPage from "./pages/HandledCampaignPage.jsx";
 
 // ServiceCta and several service detail pages build "/book?service=X" links
 // expecting RequestServicePage's ?service= param to pre-select that service.
@@ -73,6 +75,9 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/solutions" element={<PortfolioPage />} />
+        <Route path="/how-it-works" element={<PortfolioPage />} />
+        <Route path="/campaign/handled" element={<HandledCampaignPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/services" element={<ServicesPage />} />
