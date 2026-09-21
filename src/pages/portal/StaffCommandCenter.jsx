@@ -6,9 +6,9 @@ const COLORS = {
   muted: '#75696a',
   border: '#e8dfe0',
   surface: '#fffdfc',
-  soft: '#f7f1f0',
-  accent: '#7c3f49',
-  danger: '#a52a3a',
+  soft: '#faf6f0',
+  accent: '#7a263a',
+  danger: '#9b3346',
   warning: '#9a6514',
   success: '#2d6a4f',
   info: '#355c7d',
@@ -128,19 +128,19 @@ export default function StaffCommandCenter({ session }) {
   const activeJobs = metrics.jobs.filter(j => !['COMPLETED','CANCELLED'].includes(String(j.job_status || '').toUpperCase())).slice(0, 6);
   const riskJobs = metrics.jobs.filter(j => ['DISPATCH_REVIEW','ASSIGNMENT_OFFERED','REWORK_REQUESTED','BLOCKED'].includes(String(j.job_status || '').toUpperCase())).slice(0, 5);
 
-  return <div className="command-center-shell" style={{ color: COLORS.ink }}>
-    <header className="command-hero" style={{ borderRadius: 22, padding: '26px 28px', background: 'linear-gradient(135deg, #241a1b 0%, #553238 60%, #7c3f49 100%)', color: '#fff', marginBottom: 18, boxShadow: '0 18px 50px rgba(33,25,26,.16)' }}>
+  return <div className="command-center-shell" style={{ color: COLORS.ink, background: '#f7f4ee', borderRadius: 24, padding: 6 }}>
+    <header className="command-hero" style={{ borderRadius: 22, padding: '26px 28px', background: '#fffdfc', color: COLORS.ink, marginBottom: 18, border: '1px solid #e4dbd2', boxShadow: '0 12px 30px rgba(33,25,26,.06)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.16em', opacity: .72 }}>DANI DECLARES</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.16em', color: COLORS.accent }}>DANI DECLARES</div>
           <h1 style={{ margin: '7px 0 8px', fontSize: 34, letterSpacing: '-.03em' }}>Operations Command Center</h1>
-          <p style={{ margin: 0, maxWidth: 720, color: 'rgba(255,255,255,.78)' }}>One command view for what needs attention across requests, scope, commercial work, fulfillment, providers, QA and exceptions.</p>
+          <p style={{ margin: 0, maxWidth: 720, color: COLORS.muted }}>One command view for what needs attention across requests, scope, commercial work, fulfillment, providers, QA and exceptions.</p>
         </div>
         <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
           <Link className="portal-primary" to="/portal/operations" style={{ background: '#fff', color: COLORS.ink }}>Open Operations</Link>
-          <Link className="portal-primary" to="/portal/scope" style={{ background: 'rgba(255,255,255,.12)', color: '#fff', borderColor: 'rgba(255,255,255,.35)' }}>Scope Workspace</Link>
-          <Link className="portal-primary" to="/portal/quotes" style={{ background: 'rgba(255,255,255,.12)', color: '#fff', borderColor: 'rgba(255,255,255,.35)' }}>Quote Builder</Link>
-          <button className="portal-refresh" onClick={load} style={{ color: '#fff', borderColor: 'rgba(255,255,255,.35)', background: 'transparent' }}>Refresh</button>
+          <Link className="portal-primary" to="/portal/scope" style={{ background: COLORS.accent, color: '#fff', borderColor: COLORS.accent }}>Scope Workspace</Link>
+          <Link className="portal-primary" to="/portal/quotes" style={{ background: COLORS.accent, color: '#fff', borderColor: COLORS.accent }}>Quote Builder</Link>
+          <button className="portal-refresh" onClick={load} style={{ color: COLORS.accent, borderColor: '#d9c7c9', background: '#fff' }}>Refresh</button>
         </div>
       </div>
     </header>
