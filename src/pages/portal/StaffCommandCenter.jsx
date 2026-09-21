@@ -119,7 +119,7 @@ export default function StaffCommandCenter({ session }) {
   if (error) return <div className="portal-alert" role="alert">{error}</div>;
 
   const requests = metrics.requests;
-  const newScopeRequest = requests.find(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()) && !estimates.some(e => e.service_request_id === r.id));
+  const newScopeRequest = requests.find(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()) && String(r.scope_status||'NOT_STARTED').toUpperCase() !== 'COMPLETE' && !estimates.some(e => e.service_request_id === r.id)); const scopeReadyRequest = requests.find(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()) && String(r.scope_status||'NOT_STARTED').toUpperCase() === 'COMPLETE' && !estimates.some(e => e.service_request_id === r.id));
   const recentRequests = requests.filter(r => r.id !== newScopeRequest?.id).slice(0, 5);
   const readyToSend = estimates.filter(e => e.estimate_status === 'ready_to_send');
   const needsReview = estimates.filter(e => e.estimate_status === 'needs_review');
@@ -177,7 +177,7 @@ export default function StaffCommandCenter({ session }) {
             <Link className="portal-primary" to={"/portal/scope?requestId="+encodeURIComponent(newScopeRequest.id)}>Develop Scope →</Link>
             <a className="portal-primary" href={`mailto:${newScopeRequest.client_email || ''}`}>Contact Customer</a>
           </div>
-        </div> : <div style={{ padding: 18, borderRadius: 14, background: '#f2f8f4', color: COLORS.success }}>No unquoted requests are currently waiting for scope.</div>}
+        </div> : scopeReadyRequest ? <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 18, background: '#edf5fa' }}><Pill tone={COLORS.info}>Scope complete</Pill><h3 style={{ margin: '10px 0 5px', fontSize: 22 }}>{scopeReadyRequest.service_needed || scopeReadyRequest.service_category || 'Property service request'}</h3><div style={{ color: COLORS.muted }}>{scopeReadyRequest.organization_name || scopeReadyRequest.client_name || 'Customer'} · Scope version {scopeReadyRequest.scope_version || 1}</div><p style={{ margin: '12px 0', lineHeight: 1.5 }}>The structured scope is complete. Continue to Quote Builder to create the governed commercial estimate.</p><Link className="portal-primary" to={"/portal/quotes?requestId="+encodeURIComponent(scopeReadyRequest.id)}>Continue to Quote →</Link></div> : <div style={{ padding: 18, borderRadius: 14, background: '#f2f8f4', color: COLORS.success }}>No unquoted requests are currently waiting for scope.</div>}
       </Card>
 
       <Card eyebrow="Pipeline" title="Commercial Flow">
