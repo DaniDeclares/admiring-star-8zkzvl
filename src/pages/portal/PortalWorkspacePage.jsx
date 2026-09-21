@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import ProviderNav from './ProviderNav.jsx';
 import { Card, Empty, Requirement, buildProviderRequirements, statusLabel, formatDate, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
 import './PortalWorkspacePage.css';
-import StaffCommandCenter from './StaffCommandCenter.jsx';
 import OwnerHQPage from './OwnerHQPage.jsx';
 
 const ROLE_LABELS = { provider: 'DANI DECLARES Provider', resident: 'DANI DECLARES', customer: 'DANI DECLARES', property_manager: 'DANI DECLARES', procurement: 'DANI DECLARES', staff_admin: 'My Portal' };
