@@ -104,7 +104,7 @@ export default function StaffCommandCenter({ session }) {
     const changes = data?.changes || [];
     const evidence = data?.evidence || [];
     const payments = data?.payments || [];
-    const scopeRequired = requests.filter(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()) && !estimates.some(e => e.service_request_id === r.id)).length;
+    const openRequests=requests.filter(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()) && !estimates.some(e => e.service_request_id === r.id)); const scopeRequired=openRequests.filter(r => String(r.scope_status||'NOT_STARTED').toUpperCase() !== 'COMPLETE').length; const scopeComplete=openRequests.filter(r => String(r.scope_status||'NOT_STARTED').toUpperCase() === 'COMPLETE').length;
     const activeJobs = jobs.filter(j => !['COMPLETED','CANCELLED'].includes(String(j.job_status || '').toUpperCase())).length;
     const dispatchReview = jobs.filter(j => ['DISPATCH_REVIEW','ASSIGNMENT_OFFERED'].includes(String(j.job_status || '').toUpperCase())).length;
     const pendingEvidence = evidence.filter(e => String(e.verification_status || '').toUpperCase() === 'PENDING').length;
@@ -112,7 +112,7 @@ export default function StaffCommandCenter({ session }) {
     const failedPayments = payments.filter(p => ['failed','rejected'].includes(String(p.payment_status || p.status || '').toLowerCase())).length;
     const today = new Date(); today.setHours(0,0,0,0);
     const todayAppointments = appointments.filter(a => { const d = new Date(a.starts_at); return !Number.isNaN(d.getTime()) && d >= today && d < new Date(today.getTime()+86400000); });
-    return { requests, jobs, appointments, providers, changes, evidence, payments, scopeRequired, activeJobs, dispatchReview, pendingEvidence, pendingChanges, failedPayments, todayAppointments };
+    return { requests, jobs, appointments, providers, changes, evidence, payments, scopeRequired, scopeComplete, activeJobs, dispatchReview, pendingEvidence, pendingChanges, failedPayments, todayAppointments };
   }, [data, estimates]);
 
   if (loading) return <div style={{ padding: 8 }}><p style={{ color: COLORS.muted }}>Loading command center…</p></div>;
@@ -146,6 +146,7 @@ export default function StaffCommandCenter({ session }) {
 
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 10, marginBottom: 18 }}>
       <Metric label="New / Scope" value={metrics.scopeRequired} detail="Requests without a quote" tone={metrics.scopeRequired ? COLORS.danger : COLORS.success} />
+      <Metric label="Scope Complete" value={metrics.scopeComplete} detail="Ready for quote" tone={metrics.scopeComplete ? COLORS.info : COLORS.success} />
       <Metric label="Quotes to Review" value={needsReview.length} detail="Commercial review" tone={needsReview.length ? COLORS.warning : COLORS.success} />
       <Metric label="Ready to Send" value={readyToSend.length} detail="Customer delivery" />
       <Metric label="Awaiting Customer" value={awaitingCustomer.length} detail="Sent / approved" />
@@ -183,6 +184,7 @@ export default function StaffCommandCenter({ session }) {
         {[
           ['Requests', requests.length, COLORS.info],
           ['Scope required', metrics.scopeRequired, COLORS.danger],
+          ['Scope complete', metrics.scopeComplete, COLORS.info],
           ['Quote review', needsReview.length, COLORS.warning],
           ['Ready to send', readyToSend.length, COLORS.info],
           ['Awaiting customer', awaitingCustomer.length, COLORS.warning],
