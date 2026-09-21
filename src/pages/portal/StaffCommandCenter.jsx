@@ -104,7 +104,7 @@ export default function StaffCommandCenter({ session }) {
     const changes = data?.changes || [];
     const evidence = data?.evidence || [];
     const payments = data?.payments || [];
-    const scopeRequired = requests.filter(r => !estimates.some(e => e.service_request_id === r.id)).length;
+    const scopeRequired = requests.filter(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()) && !estimates.some(e => e.service_request_id === r.id)).length;
     const activeJobs = jobs.filter(j => !['COMPLETED','CANCELLED'].includes(String(j.job_status || '').toUpperCase())).length;
     const dispatchReview = jobs.filter(j => ['DISPATCH_REVIEW','ASSIGNMENT_OFFERED'].includes(String(j.job_status || '').toUpperCase())).length;
     const pendingEvidence = evidence.filter(e => String(e.verification_status || '').toUpperCase() === 'PENDING').length;
@@ -119,7 +119,7 @@ export default function StaffCommandCenter({ session }) {
   if (error) return <div className="portal-alert" role="alert">{error}</div>;
 
   const requests = metrics.requests;
-  const newScopeRequest = requests.find(r => !estimates.some(e => e.service_request_id === r.id));
+  const newScopeRequest = requests.find(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()) && !estimates.some(e => e.service_request_id === r.id));
   const recentRequests = requests.filter(r => r.id !== newScopeRequest?.id).slice(0, 5);
   const readyToSend = estimates.filter(e => e.estimate_status === 'ready_to_send');
   const needsReview = estimates.filter(e => e.estimate_status === 'needs_review');
@@ -144,7 +144,7 @@ export default function StaffCommandCenter({ session }) {
       </div>
     </header>
 
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0,1fr))', gap: 10, marginBottom: 18 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 10, marginBottom: 18 }}>
       <Metric label="New / Scope" value={metrics.scopeRequired} detail="Requests without a quote" tone={metrics.scopeRequired ? COLORS.danger : COLORS.success} />
       <Metric label="Quotes to Review" value={needsReview.length} detail="Commercial review" tone={needsReview.length ? COLORS.warning : COLORS.success} />
       <Metric label="Ready to Send" value={readyToSend.length} detail="Customer delivery" />
@@ -191,7 +191,7 @@ export default function StaffCommandCenter({ session }) {
       </Card>
     </div>
 
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 18, marginBottom: 18 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 18, marginBottom: 18 }}>
       <Card eyebrow="Dispatch" title="Today">
         {metrics.todayAppointments.length ? metrics.todayAppointments.slice(0, 6).map(a => <Row key={a.id} title={a.job_id ? `Job ${String(a.job_id).slice(0, 8)}` : 'Appointment'} meta={dateTime(a.starts_at)} right={<Pill tone={statusTone(a.appointment_status)}>{titleCase(a.appointment_status)}</Pill>} />) : <div style={{ color: COLORS.muted, padding: '12px 0' }}>No appointments scheduled today.</div>}
       </Card>
