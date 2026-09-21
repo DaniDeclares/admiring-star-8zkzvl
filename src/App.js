@@ -26,6 +26,7 @@ import PayPage from "./pages/PayPage.jsx";
 import ResidentWelcomePage from "./pages/ResidentWelcomePage.jsx";
 import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx";
 import OperationsConsolePage from "./pages/portal/OperationsConsolePage.jsx";
+import OwnerHQPage from "./pages/portal/OwnerHQPage.jsx";
 import ScopeDevelopmentPage from "./pages/portal/ScopeDevelopmentPage.jsx";
 import DispatchCalendarPage from "./pages/portal/DispatchCalendarPage.jsx";
 import ProviderApprovalPage from "./pages/portal/ProviderApprovalPage.jsx";
@@ -130,6 +131,8 @@ export default function App() {
         <Route path="/portal/messages" element={<ProviderMessagesPage />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
+        <Route path="/portal/hq" element={<OwnerHQPage />} />
+        <Route path="/portal/owner" element={<OwnerHQPage />} />
         <Route path="/portal/scope" element={<ScopeDevelopmentPage />} />
         <Route path="/portal/dispatch" element={<DispatchCalendarPage />} />
         <Route path="/portal/provider-approval" element={<ProviderApprovalPage />} />
