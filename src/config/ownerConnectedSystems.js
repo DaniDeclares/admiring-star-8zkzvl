@@ -75,6 +75,11 @@ export const OWNER_CONNECTED_SYSTEMS = [
 
 export const OWNER_PRIORITY_LINKS = [
   {
+    label: 'Integrations & Connections',
+    description: 'Configure and audit Asana, Notion, QuickBooks Online and the Google Voice/telephony boundary.',
+    href: '/portal/integrations',
+  },
+  {
     label: 'Government & Capital Readiness',
     description: 'SBA, SAM, state procurement, certifications, lender packages and targeted grant research.',
     href: 'https://app.asana.com/1/1218540418974397/project/1218709452415851',
