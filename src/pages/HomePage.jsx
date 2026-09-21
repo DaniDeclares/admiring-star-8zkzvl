@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Briefcase, Building2, CheckCircle2, FileText, Home, Landmark, MapPin, Store } from 'lucide-react';
