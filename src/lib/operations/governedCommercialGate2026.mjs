@@ -355,7 +355,7 @@ export async function resolveCH01CommercialSelection({
   }
   const subchannel = derivedSubchannel;
 
-  const rows = await prisma.$queryRaw\`
+  const rows = await prisma.$queryRaw`
     SELECT
       a.sku AS "serviceId",
       a.service_id AS "runtimeServiceId",
@@ -417,13 +417,13 @@ export async function resolveCH01CommercialSelection({
     ) c1b ON true
     WHERE a.channel_code = 'CH01'
       AND a.status = 'LOCKED'
-      AND a.sku = \${canonicalSku}
-      AND a.front_door_code = \${frontDoor}
+      AND a.sku = ${canonicalSku}
+      AND a.front_door_code = ${frontDoor}
       AND a.customer_visible_candidate = true
       AND a.disposition IN ('FRONT_DOOR', 'CONTROLLED_QUOTE')
-      AND a.subchannel_scope @> ARRAY[\${subchannel}]::text[]
+      AND a.subchannel_scope @> ARRAY[${subchannel}]::text[]
     ORDER BY a.updated_at DESC, a.id ASC
-  \`;
+  `;
 
   if (rows.length === 0) {
     return { allowed: false, reason: 'CH01_CANONICAL_SERVICE_NOT_AUTHORIZED_FOR_FRONT_DOOR' };
