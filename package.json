@@ -11,7 +11,7 @@
     "prisma": "^6.19.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-helmet-async": "^2.0.0",
+    "react-helmet-async": "^2.0.4",
     "react-router-dom": "^6.21.0",
     "react-scripts": "5.0.1",
     "stripe": "^14.10.0"
@@ -39,11 +39,11 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
-    ]
+    ],
+    "devDependencies": {
+      "@playwright/test": "^1.63.0",
+      "checkly": "^9.5.0"
+    }
   },
-  "homepage": "/",
-  "devDependencies": {
-    "@playwright/test": "^1.63.0",
-    "checkly": "^9.5.0"
-  }
+  "homepage": "/"
 }
