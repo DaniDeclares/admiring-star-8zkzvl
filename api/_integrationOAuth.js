@@ -69,14 +69,20 @@ export async function createOAuthState({ supabase, adapterCode, authUserId, code
 
 export async function consumeOAuthState({ supabase, state, adapterCode }) {
   if (!state) throw new Error('Missing OAuth state.');
-  const { data, error } = await supabase.from('dd_integration_oauth_states').select('*').eq('state_hash', sha256(state)).eq('adapter_code', adapterCode).is('consumed_at', null).gt('expires_at', new Date().toISOString()).maybeSingle();
+  const now = new Date().toISOString();
+  const { data: candidates, error } = await supabase.from('dd_integration_oauth_states').select('*').eq('state_hash', sha256(state)).eq('adapter_code', adapterCode).is('consumed_at', null).gt('expires_at', now).limit(1);
   if (error) throw error;
+  const data = candidates?.[0];
   if (!data) {
     const e = new Error('OAuth state is invalid or expired.'); e.status = 400; throw e;
   }
-  const { error: consumeError } = await supabase.from('dd_integration_oauth_states').update({ consumed_at: new Date().toISOString() }).eq('id', data.id).is('consumed_at', null);
+  const consumedAt = new Date().toISOString();
+  const { data: consumed, error: consumeError } = await supabase.from('dd_integration_oauth_states').update({ consumed_at: consumedAt }).eq('id', data.id).is('consumed_at', null).select('*').maybeSingle();
   if (consumeError) throw consumeError;
-  return { ...data, code_verifier: data.code_verifier_ciphertext ? decryptSecret(data.code_verifier_ciphertext) : null };
+  if (!consumed) {
+    const e = new Error('OAuth state was already consumed.'); e.status = 400; throw e;
+  }
+  return { ...consumed, code_verifier: consumed.code_verifier_ciphertext ? decryptSecret(consumed.code_verifier_ciphertext) : null };
 }
 
 export async function upsertConnection({ supabase, adapterCode, externalAccountId, authUserId, permissions, accessToken, refreshToken, tokenExpiresAt, metadata = {} }) {
