@@ -1,7 +1,7 @@
 jest.mock('../../../lib/prisma.js', () => ({ __esModule: true, default: { $queryRaw: jest.fn() } }));
 
 import prisma from '../../../lib/prisma.js';
-import { economicGateFromOffer, checkoutEligibility, resolveCH01CommercialSelection } from './governedCommercialGate2026';
+import { economicGateFromOffer, checkoutEligibility, resolveCH01CommercialSelection } from './governedCommercialGate2026.mjs';
 
 describe('economic checkout gate', () => {
   test('blocks missing economics', () => {
