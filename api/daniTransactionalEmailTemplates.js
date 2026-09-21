@@ -2,9 +2,9 @@
 // Email-safe: table layout, inline CSS, no client-side assets, graceful text fallback.
 
 const BRAND = {
-  burgundy: '#6B1F2B',
-  burgundyDark: '#4F1720',
-  burgundyLight: '#873340',
+  burgundy: '#800020',
+  burgundyDark: '#800020',
+  burgundyLight: '#722F37',
   ivory: '#F6F0E4',
   cream: '#EDE2D0',
   gold: '#C9A45C',
