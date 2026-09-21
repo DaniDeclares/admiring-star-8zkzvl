@@ -185,6 +185,35 @@ export default function StaffCommandCenter({ session }) {
       <Link to="/portal/operations" style={{ textDecoration: 'none' }}><Metric label="At Risk" value={riskJobs.length + metrics.failedPayments} detail="Exceptions needing action" tone={riskJobs.length || metrics.failedPayments ? COLORS.danger : COLORS.success} /></Link>
     </div>
 
+    <div className="command-control-tracks" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: 18, marginBottom: 18 }}>
+      <Card eyebrow="Field operations" title="Live Production Control" action={<Link to="/portal/dispatch">Open Dispatch →</Link>}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 10 }}>
+          <Metric label="Scheduled today" value={metrics.todayAppointments.length} detail="Appointments" tone={COLORS.info} />
+          <Metric label="Active jobs" value={metrics.activeJobs} detail="Production in motion" tone={metrics.activeJobs ? COLORS.info : COLORS.success} />
+          <Metric label="Routing review" value={metrics.dispatchReview} detail="Needs dispatch action" tone={metrics.dispatchReview ? COLORS.warning : COLORS.success} />
+        </div>
+        <div style={{ marginTop: 14, padding: 14, borderRadius: 14, background: '#faf6f0', border: '1px solid #e7ddd4' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', color: COLORS.accent, textTransform: 'uppercase' }}>Execution states</div>
+          <div className="command-state-track">
+            {['SCHEDULED','DISPATCHED','EN ROUTE','IN PROGRESS','BLOCKED','QA','COMPLETED'].map((state, index) => <React.Fragment key={state}><span>{state}</span>{index < 6 && <b>→</b>}</React.Fragment>)}
+          </div>
+        </div>
+      </Card>
+      <Card eyebrow="Commercial control" title="Financial Ledger" action={<Link to="/portal/saved-quotes">Open Commercial →</Link>}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 10 }}>
+          <Metric label="Quote review" value={needsReview.length} detail="Commercial review" tone={needsReview.length ? COLORS.warning : COLORS.success} />
+          <Metric label="Ready to send" value={readyToSend.length} detail="Customer delivery" tone={readyToSend.length ? COLORS.accent : COLORS.success} />
+          <Metric label="Awaiting customer" value={awaitingCustomer.length} detail="Decision / payment path" tone={awaitingCustomer.length ? COLORS.warning : COLORS.success} />
+        </div>
+        <div style={{ marginTop: 14, padding: 14, borderRadius: 14, background: '#faf6f0', border: '1px solid #e7ddd4' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', color: COLORS.accent, textTransform: 'uppercase' }}>Commercial chain</div>
+          <div className="command-state-track">
+            {['QUOTE','REVIEW','SENT','APPROVED','PAYMENT','FULFILLMENT'].map((state, index, arr) => <React.Fragment key={state}><span>{state}</span>{index < arr.length - 1 && <b>→</b>}</React.Fragment>)}
+          </div>
+        </div>
+      </Card>
+    </div>
+
     <div className="command-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) minmax(330px,.85fr)', gap: 18, marginBottom: 18 }}>
       <Card eyebrow="Priority queue" title="Needs Your Attention" action={<button className="portal-refresh" onClick={load}>Refresh data</button>}>
         {newScopeRequest ? <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 18, background: COLORS.soft }}>
