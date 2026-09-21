@@ -36,7 +36,7 @@ function statusTone(value) {
   return COLORS.info;
 }
 function Card({ title, eyebrow, children, action }) {
-  return <section style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 18, padding: 20, boxShadow: '0 10px 30px rgba(33,25,26,.05)' }}>
+  return <section className="command-card" style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 18, padding: 20, boxShadow: '0 10px 30px rgba(33,25,26,.05)' }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 14 }}>
       <div>
         {eyebrow && <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.13em', color: COLORS.accent, textTransform: 'uppercase' }}>{eyebrow}</div>}
@@ -48,17 +48,17 @@ function Card({ title, eyebrow, children, action }) {
   </section>;
 }
 function Metric({ label, value, detail, tone = COLORS.ink }) {
-  return <div style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16, minHeight: 104 }}>
+  return <div className="command-metric" style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16, minHeight: 104 }}>
     <div style={{ fontSize: 12, color: COLORS.muted, fontWeight: 700 }}>{label}</div>
     <div style={{ marginTop: 7, fontSize: 28, lineHeight: 1, fontWeight: 900, color: tone }}>{value}</div>
     {detail && <div style={{ marginTop: 8, fontSize: 12, color: COLORS.muted }}>{detail}</div>}
   </div>;
 }
 function Pill({ children, tone = COLORS.info }) {
-  return <span style={{ display: 'inline-flex', alignItems: 'center', borderRadius: 999, padding: '5px 9px', background: `${tone}14`, color: tone, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em' }}>{children}</span>;
+  return <span className="command-pill" style={{ display: 'inline-flex', alignItems: 'center', borderRadius: 999, padding: '5px 9px', background: `${tone}14`, color: tone, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em' }}>{children}</span>;
 }
 function Row({ title, meta, right, tone }) {
-  return <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, padding: '13px 0', borderBottom: `1px solid ${COLORS.border}` }}>
+  return <div className="command-row" style={{ display: 'flex', justifyContent: 'space-between', gap: 14, padding: '13px 0', borderBottom: `1px solid ${COLORS.border}` }}>
     <div style={{ minWidth: 0 }}>
       <div style={{ fontWeight: 800, color: COLORS.ink }}>{title}</div>
       <div style={{ marginTop: 4, color: COLORS.muted, fontSize: 12 }}>{meta}</div>
@@ -128,8 +128,8 @@ export default function StaffCommandCenter({ session }) {
   const activeJobs = metrics.jobs.filter(j => !['COMPLETED','CANCELLED'].includes(String(j.job_status || '').toUpperCase())).slice(0, 6);
   const riskJobs = metrics.jobs.filter(j => ['DISPATCH_REVIEW','ASSIGNMENT_OFFERED','REWORK_REQUESTED','BLOCKED'].includes(String(j.job_status || '').toUpperCase())).slice(0, 5);
 
-  return <div style={{ color: COLORS.ink }}>
-    <header style={{ borderRadius: 22, padding: '26px 28px', background: 'linear-gradient(135deg, #241a1b 0%, #553238 60%, #7c3f49 100%)', color: '#fff', marginBottom: 18, boxShadow: '0 18px 50px rgba(33,25,26,.16)' }}>
+  return <div className="command-center-shell" style={{ color: COLORS.ink }}>
+    <header className="command-hero" style={{ borderRadius: 22, padding: '26px 28px', background: 'linear-gradient(135deg, #241a1b 0%, #553238 60%, #7c3f49 100%)', color: '#fff', marginBottom: 18, boxShadow: '0 18px 50px rgba(33,25,26,.16)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.16em', opacity: .72 }}>DANI DECLARES</div>
@@ -145,7 +145,7 @@ export default function StaffCommandCenter({ session }) {
       </div>
     </header>
 
-    <section style={{ marginBottom: 18, padding: 16, border: '1px solid #e8dfe0', borderRadius: 18, background: COLORS.surface }}>
+    <section className="command-workspaces" style={{ marginBottom: 18, padding: 16, border: '1px solid #e8dfe0', borderRadius: 18, background: COLORS.surface }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.13em', color: COLORS.accent, textTransform: 'uppercase' }}>WORKSPACES</div>
@@ -175,7 +175,7 @@ export default function StaffCommandCenter({ session }) {
       </div>
     </section>
 
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 10, marginBottom: 18 }}>
+    <div className="command-metrics" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 10, marginBottom: 18 }}>
       <Link to="/portal/operations" style={{ textDecoration: 'none' }}><Metric label="New / Scope" value={metrics.scopeRequired} detail="Requests without a quote" tone={metrics.scopeRequired ? COLORS.danger : COLORS.success} /></Link>
       <Link to="/portal/quotes" style={{ textDecoration: 'none' }}><Metric label="Scope Complete" value={metrics.scopeComplete} detail="Ready for quote" tone={metrics.scopeComplete ? COLORS.info : COLORS.success} /></Link>
       <Link to="/portal/saved-quotes" style={{ textDecoration: 'none' }}><Metric label="Quotes to Review" value={needsReview.length} detail="Commercial review" tone={needsReview.length ? COLORS.warning : COLORS.success} /></Link>
@@ -185,7 +185,7 @@ export default function StaffCommandCenter({ session }) {
       <Link to="/portal/operations" style={{ textDecoration: 'none' }}><Metric label="At Risk" value={riskJobs.length + metrics.failedPayments} detail="Exceptions needing action" tone={riskJobs.length || metrics.failedPayments ? COLORS.danger : COLORS.success} /></Link>
     </div>
 
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) minmax(330px,.85fr)', gap: 18, marginBottom: 18 }}>
+    <div className="command-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) minmax(330px,.85fr)', gap: 18, marginBottom: 18 }}>
       <Card eyebrow="Priority queue" title="Needs Your Attention" action={<button className="portal-refresh" onClick={load}>Refresh data</button>}>
         {newScopeRequest ? <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 18, background: COLORS.soft }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 15, flexWrap: 'wrap' }}>
@@ -224,7 +224,7 @@ export default function StaffCommandCenter({ session }) {
       </Card>
     </div>
 
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 18, marginBottom: 18 }}>
+    <div className="command-triple-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 18, marginBottom: 18 }}>
       <Card eyebrow="Dispatch" title="Today">
         {metrics.todayAppointments.length ? metrics.todayAppointments.slice(0, 6).map(a => <Row key={a.id} title={a.job_id ? `Job ${String(a.job_id).slice(0, 8)}` : 'Appointment'} meta={dateTime(a.starts_at)} right={<Pill tone={statusTone(a.appointment_status)}>{titleCase(a.appointment_status)}</Pill>} />) : <div style={{ color: COLORS.muted, padding: '12px 0' }}>No appointments scheduled today.</div>}
       </Card>
@@ -240,7 +240,7 @@ export default function StaffCommandCenter({ session }) {
       </Card>
     </div>
 
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,.8fr)', gap: 18, marginBottom: 18 }}>
+    <div className="command-lower-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,.8fr)', gap: 18, marginBottom: 18 }}>
       <Card eyebrow="Requests" title="Recent Opportunities">
         {newScopeRequest && <Row title={newScopeRequest.service_needed || 'New request'} meta={`${newScopeRequest.organization_name || newScopeRequest.client_name || 'Customer'} · received ${date(newScopeRequest.created_at)}`} right={<Link className="portal-primary" to={"/portal/scope?requestId="+encodeURIComponent(newScopeRequest.id)}>Develop Scope</Link>} />}
         {recentRequests.map(r => <Row key={r.id} title={r.service_needed || r.service_category || 'Service request'} meta={`${r.organization_name || r.client_name || 'Customer'} · ${titleCase(r.status || 'new')}`} right={<span style={{ color: COLORS.muted, fontSize: 11 }}>Request</span>} />)}
