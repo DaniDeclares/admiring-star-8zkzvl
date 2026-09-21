@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, Briefcase, Building2, CheckCircle2, FileText, Home, Landmark, MapPin, Sparkles, Store } from 'lucide-react';
+import { ArrowRight, Briefcase, Building2, CheckCircle2, FileText, Home, Landmark, MapPin, Store } from 'lucide-react';
 import { getFamilyVisuals } from '../data/serviceVisuals2026.js';
 
 const audiences = [
