@@ -45,32 +45,6 @@ function ResidentInvitesCard({ session, properties }) {
   </Card>;
 }
 
-function PendingEstimatesQueue({ session }) {
-  const [estimates,setEstimates]=useState([]);
-  const [loading,setLoading]=useState(true);
-  const [error,setError]=useState('');
-  const load=async()=>{
-    setLoading(true);setError('');
-    try{
-      const r=await fetch('/api/portal-operations?estimates=1',{headers:{Authorization:`Bearer ${session.access_token}`}});
-      const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Could not load pending estimates.');
-      setEstimates((d.estimates||[]).filter(x=>['needs_review','ready_to_send'].includes(x.estimate_status)));
-    }catch(e){setError(e.message||'Could not load pending estimates.')}finally{setLoading(false);}
-  };
-  // Queue refresh is intentionally scoped to the authenticated staff session.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(()=>{load()},[]);
-  return <Card title="Pending Estimates Queue">
-    <p>Quotes that still need commercial review, plus estimates that have cleared review and are waiting for delivery.</p>
-    {error&&<div className="portal-alert">{error}</div>}
-    {loading?<p>Loading queue…</p>:estimates.length===0?<Empty>No pending estimates.</Empty>:estimates.slice(0,12).map(x=><div className="portal-row" key={x.id}>
-      <div><strong>{x.public_reference} · {x.client_name||'Unnamed customer'}</strong><small>{x.source_slug||'Quote Builder'} · {x.estimate_status.replaceAll('_',' ')} · {x.created_at?formatDate(x.created_at):''}</small>{(!x.client_phone||!x.client_email)&&<small style={{color:'#8a1d2d',fontWeight:800}}>Intake incomplete: {!x.client_phone&&'phone'}{(!x.client_phone&&!x.client_email)&&' + '}{!x.client_email&&'email'}</small>}</div>
-      <div style={{display:'flex',alignItems:'center',gap:10}}><strong>${Number(x.estimated_total||0).toFixed(2)}</strong><Link className="portal-primary" to={`/portal/estimates/${x.id}/review`}>Open Review</Link></div>
-    </div>)}
-    {estimates.length>12&&<p style={{marginTop:12,color:'#6d6263'}}>Showing the 12 most recent. Open Saved Quotes for the full queue.</p>}
-  </Card>;
-}
-
 export default function PortalWorkspacePage() {
   const { session, snapshot, loading, error, message, load, act } = useProviderWorkspace();
   const [messageDrafts, setMessageDrafts] = useState({});
