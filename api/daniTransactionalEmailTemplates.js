@@ -16,7 +16,6 @@ const BRAND = {
 
 const SITE_URL = 'https://danideclares.com';
 const OPERATIONS_URL = 'https://danideclares.com/portal/operations';
-const LOGO_URL = 'https://danideclares.com/dani-declares-logo.svg';
 
 function esc(value) {
   return String(value ?? '')
@@ -75,7 +74,7 @@ function shell({ eyebrow, title, intro, body, footerNote = 'WE HANDLE THE EXECUT
       '<tr><td style="padding:0 32px 32px;">' + body + '</td></tr>' +
       '<tr><td style="background:' + BRAND.burgundyDark + ';padding:22px 32px;">' +
         '<div style="font-family:Georgia,Times New Roman,serif;font-size:18px;color:#FFFFFF;">DANI DECLARES LLC</div>' +
-        '<div style="margin-top:6px;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;color:#EDE2D0;">Property support, people first.</div>' +
+        '<div style="margin-top:6px;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;color:#EDE2D0;">WE HANDLE THE EXECUTION.</div>' +
         '<div style="margin-top:10px;font-family:Arial,sans-serif;font-size:12px;line-height:1.7;color:#FFFFFF;">' +
           '<a href="tel:+14704857173" style="color:' + BRAND.goldLight + ';text-decoration:none;">(470) 485-7173</a> &nbsp;•&nbsp; ' +
           '<a href="mailto:admin@danideclares.com" style="color:' + BRAND.goldLight + ';text-decoration:none;">admin@danideclares.com</a> &nbsp;•&nbsp; ' +
@@ -152,7 +151,7 @@ export function renderOperatorServiceRequestEmail(data = {}) {
     title: 'New request received.',
     intro: 'A new request has been submitted through the DANI DECLARES platform. The request is ready for operational review.',
     body,
-    footerNote: 'OPERATIONS • EXECUTION • SUPPORT',
+    footerNote: 'WE HANDLE THE EXECUTION.',
   });
 }
 
