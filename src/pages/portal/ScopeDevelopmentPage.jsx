@@ -32,7 +32,7 @@ function Workspace(){
  const updateReady=(key,value)=>setScope(s=>({...s,readiness:{...s.readiness,[key]:value}}));
  const setUnitCount=value=>{setUnitCountInput(value);const n=Math.max(0,Math.min(100,Number(value)||0));setScope(s=>({...s,unit_count:n,units:Array.from({length:n},(_,i)=>s.units[i]||blankUnit())}));};
  const updateUnit=(index,key,value)=>setScope(s=>({...s,units:s.units.map((u,i)=>i===index?{...u,[key]:value}:u)}));
- const addComponent=()=>{if(!selectedService)return;const service=services.find(s=>s.sku===selectedService);if(!service)return;setScope(s=>s.components.some(c=>c.sku===service.sku)?s:{...s,components:[...s.components,{sku:service.sku,service_id:service.id,name:service.name,answers:{}}]});setSelectedService('');};
+ const addComponent=()=>{if(!selectedService)return;const service=services.find(s=>s.sku===selectedService);if(!service)return;const answers=(service.quote_input_schema?.fields||[]).reduce((a,f)=>{const v=derivedQuoteInputs[f.key];if(v!==undefined&&v!=='')a[f.key]=v;return a;},{});setScope(s=>s.components.some(c=>c.sku===service.sku)?s:{...s,components:[...s.components,{sku:service.sku,service_id:service.id,name:service.name,answers}]});setSelectedService('');};
  const removeComponent=sku=>setScope(s=>({...s,components:s.components.filter(c=>c.sku!==sku)}));
  const updateComponentAnswer=(sku,key,value)=>setScope(s=>({...s,components:s.components.map(c=>c.sku===sku?{...c,answers:{...c.answers,[key]:value}}:c)}));
 
