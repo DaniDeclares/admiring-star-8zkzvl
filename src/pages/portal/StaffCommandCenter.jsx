@@ -171,7 +171,7 @@ export default function StaffCommandCenter({ session }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 10, marginBottom: 18 }}>
       <Link to="/portal/operations" style={{ textDecoration: 'none' }}><Metric label="New / Scope" value={metrics.scopeRequired} detail="Requests without a quote" tone={metrics.scopeRequired ? COLORS.danger : COLORS.success} /></Link>
       <Link to="/portal/quotes" style={{ textDecoration: 'none' }}><Metric label="Scope Complete" value={metrics.scopeComplete} detail="Ready for quote" tone={metrics.scopeComplete ? COLORS.info : COLORS.success} /></Link>
-      <Link to="/portal/estimates" style={{ textDecoration: 'none' }}><Metric label="Quotes to Review" value={needsReview.length} detail="Commercial review" tone={needsReview.length ? COLORS.warning : COLORS.success} /></Link>
+      <Link to="/portal/saved-quotes" style={{ textDecoration: 'none' }}><Metric label="Quotes to Review" value={needsReview.length} detail="Commercial review" tone={needsReview.length ? COLORS.warning : COLORS.success} /></Link>
       <Link to="/portal/saved-quotes" style={{ textDecoration: 'none' }}><Metric label="Ready to Send" value={readyToSend.length} detail="Customer delivery" /></Link>
       <Link to="/portal/saved-quotes" style={{ textDecoration: 'none' }}><Metric label="Awaiting Customer" value={awaitingCustomer.length} detail="Sent / approved" /></Link>
       <Link to="/portal/operations" style={{ textDecoration: 'none' }}><Metric label="Active Jobs" value={metrics.activeJobs} detail="Production in motion" /></Link>
