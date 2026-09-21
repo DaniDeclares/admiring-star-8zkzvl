@@ -387,6 +387,7 @@ export async function resolveCH01CommercialSelection({
      AND fd.status = 'LOCKED'
     JOIN public.dd_governed_service_offers o
       ON o.canonical_sku = a.sku
+     AND o.commercial_offer_status <> 'DO_NOT_SELL'
     JOIN public.services s
       ON s.id = o.runtime_service_id
      AND s.id = a.service_id
@@ -439,14 +440,16 @@ export async function resolveCH01CommercialSelection({
     ? row.subchannelPricingActive === true
     : row.pricingStatus === 'ACTIVE' && row.pricingLockStatus === 'LOCKED';
   const price = Number.isFinite(pricingCents) && pricingCents > 0
-    ? resolveGovernedPrice(
+    ? (subchannel === 'CH01-B'
+      ? money(pricingCents / 100)
+      : resolveGovernedPrice(
         {
           baseCustomerPrice: pricingCents / 100,
           residentDiscountEligible: Boolean(row.residentDiscountEligible),
           pricingType: row.pricingType,
         },
         { channel: 'CH01', subchannel, isVerifiedCommunityResident },
-      )
+      ))
     : null;
 
   return {
