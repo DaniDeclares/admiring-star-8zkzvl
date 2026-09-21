@@ -1,6 +1,7 @@
 /* eslint-disable */
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Briefcase, CheckCircle2, Building2, Home, Landmark, MapPin } from 'lucide-react';
 
 const segments = [
