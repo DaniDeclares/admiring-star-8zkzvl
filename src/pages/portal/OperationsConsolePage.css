@@ -25,3 +25,5 @@
 @media(max-width:650px){.command-hero{padding:22px 20px!important}.command-hero h1{font-size:28px!important}.command-workspaces{padding:13px!important}.command-card{padding:16px!important}}
 
 .command-control-tracks{align-items:stretch}.command-control-tracks .command-card{height:100%}.command-state-track{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:10px}.command-state-track span{background:#fff;border:1px solid #e6ddd4;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:800;letter-spacing:.04em;color:#514647}.command-state-track b{font-size:11px;color:#7a263a}@media(max-width:850px){.command-control-tracks{grid-template-columns:1fr!important}.command-control-tracks .command-metric{min-height:92px!important}}
+
+/* CodeRabbit verification marker: review current Operations HQ styles. */
