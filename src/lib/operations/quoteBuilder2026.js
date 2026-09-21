@@ -183,8 +183,20 @@ function validateQuoteLineContract(service, answers, lineItem, requestedLineItem
   if(!schema?.ui_mode?.startsWith('SPECIALIZED_')) return;
   const fields=[...(schema.fields||[]),...(schema.commercial_inputs||[])];
   for(const field of fields){
-    if(field.required && (answers?.[field.key]===undefined || answers?.[field.key]===null || String(answers[field.key]).trim()==='')){
+    const value=answers?.[field.key];
+    if(field.required && (value===undefined || value===null || String(value).trim()==='')){
       throw new Error(`Missing required quote input: ${field.label || field.key}.`);
+    }
+    if(value!==undefined && value!==null){
+      if(Array.isArray(field.options) && field.options.length && !field.options.map(String).includes(String(value).trim())){
+        throw new Error(`Invalid quote input for ${service.sku}: ${field.label || field.key}.`);
+      }
+      if(field.type==='number' || field.min!==undefined || field.max!==undefined){
+        const numeric=Number(value);
+        if(!Number.isFinite(numeric)) throw new Error(`Invalid numeric quote input for ${service.sku}: ${field.label || field.key}.`);
+        if(field.min!==undefined && numeric < Number(field.min)) throw new Error(`Quote input below minimum for ${service.sku}: ${field.label || field.key}.`);
+        if(field.max!==undefined && numeric > Number(field.max)) throw new Error(`Quote input exceeds maximum for ${service.sku}: ${field.label || field.key}.`);
+      }
     }
   }
   if(lineItem?.componentRole==='COMPANION'){
