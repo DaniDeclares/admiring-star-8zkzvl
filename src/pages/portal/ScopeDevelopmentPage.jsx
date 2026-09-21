@@ -17,6 +17,17 @@ const blankScope={property_name:'',property_address:'',requested_window:'',compl
 
 const numberWord={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
 const parseCount=(value)=>{const n=Number(value);if(Number.isFinite(n)&&n>0)return n;return numberWord[String(value||'').toLowerCase()]||0;};
+const normalizeUnit=(unit={})=>{
+ const flags=Array.isArray(unit.condition_flags)?unit.condition_flags.slice():[];
+ const legacy=[['pet_damage','pet_damage'],['deep_carpet','deep_carpet'],['eviction','eviction'],['trashout','trashout']];
+ legacy.forEach(([field,key])=>{if(unit[field]&&!flags.includes(key))flags.push(key);});
+ let unitType=unit.unit_type||'';
+ if(!unitType&&unit.bedrooms!==''&&unit.bedrooms!=null){
+  const br=Number(unit.bedrooms);const ba=Number(unit.bathrooms);
+  if(Number.isFinite(br)&&Number.isFinite(ba))unitType=`${br}BR / ${ba}BA`;
+ }
+ return {...blankUnit(),...unit,unit_type:unitType,condition_level:unit.condition_level||unit.condition||'',condition_flags:flags};
+};
 const extractSourceFacts=(text='')=>{
  const apartmentMatch=text.match(/\b(\d+)\s+apartments?\b/i);
  const deadlineMatch=text.match(/within\s+(\d+)\s+days?/i);
@@ -54,7 +65,7 @@ function Workspace(){
    const sourceUnitCount=parseCount((rr.data.request_details||'').match(/\b(\d+)\s+apartments?\b/i)?.[1]);
    const sourceDeadline=(rr.data.request_details||'').match(/within\s+(\d+)\s+days?/i)?.[1];
    const isFreshScope=!Object.keys(saved).length;
-   const merged={...blankScope,...saved,source_scope_facts:Array.isArray(saved.source_scope_facts)?saved.source_scope_facts:sourceFacts,units:Array.isArray(saved.units)?saved.units:[],components:Array.isArray(saved.components)?saved.components:[],quote_inputs:saved.quote_inputs||{},readiness:{...blankScope.readiness,...(saved.readiness||{})}};
+   const merged={...blankScope,...saved,source_scope_facts:Array.isArray(saved.source_scope_facts)?saved.source_scope_facts:sourceFacts,units:Array.isArray(saved.units)?saved.units.map(normalizeUnit):[],components:Array.isArray(saved.components)?saved.components:[],quote_inputs:saved.quote_inputs||{},readiness:{...blankScope.readiness,...(saved.readiness||{})}};
    if(isFreshScope){
     merged.property_address=merged.property_address||rr.data.location_address||'';
     merged.unit_count=merged.unit_count||sourceUnitCount;
@@ -72,7 +83,7 @@ function Workspace(){
  const sourceText=request?.request_details||'';
  const update=(key,value)=>setScope(s=>({...s,[key]:value}));
  const updateReady=(key,value)=>setScope(s=>({...s,readiness:{...s.readiness,[key]:value}}));
- const setUnitCount=value=>{setUnitCountInput(value);const n=Math.max(0,Math.min(100,Number(value)||0));setScope(s=>({...s,unit_count:n,units:Array.from({length:n},(_,i)=>s.units[i]||blankUnit())}));};
+ const setUnitCount=value=>{setUnitCountInput(value);const n=Math.max(0,Math.min(100,Number(value)||0));setScope(s=>({...s,unit_count:n,units:Array.from({length:n},(_,i)=>normalizeUnit(s.units[i]||blankUnit()))}));};
  const updateUnit=(index,key,value)=>setScope(s=>({...s,units:s.units.map((u,i)=>i===index?{...u,[key]:value}:u)}));
  const toggleUnitCondition=(index,key)=>setScope(s=>({...s,units:s.units.map((u,i)=>{if(i!==index)return u;const flags=Array.isArray(u.condition_flags)?u.condition_flags:[];return {...u,condition_flags:flags.includes(key)?flags.filter(x=>x!==key):[...flags,key]};})}));
  const addComponent=()=>{if(!selectedService)return;const service=services.find(s=>s.sku===selectedService);if(!service)return;const answers=(service.quote_input_schema?.fields||[]).reduce((a,f)=>{const v=derivedQuoteInputs[f.key];if(v!==undefined&&v!=='')a[f.key]=v;return a;},{});setScope(s=>s.components.some(c=>c.sku===service.sku)?s:{...s,components:[...s.components,{sku:service.sku,service_id:service.id,name:service.name,answers}]});setSelectedService('');};
