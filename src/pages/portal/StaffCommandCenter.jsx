@@ -299,3 +299,5 @@ export default function StaffCommandCenter({ session }) {
     </div>
   </div>;
 }
+
+// CodeRabbit verification marker: review current Operations HQ implementation.
