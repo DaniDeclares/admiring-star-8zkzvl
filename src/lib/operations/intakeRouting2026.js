@@ -90,12 +90,16 @@ export function resolveIntakeChannel({ channelType, category } = {}) {
 /**
  * Map a validated channel to its operational state machine.
  */
-export function routeIntake({ channelType, category } = {}) {
+export function routeIntake({ channelType, category, commercialModel } = {}) {
   const resolved = resolveIntakeChannel({ channelType, category });
+  const resolvedCommercialModel = commercialModel && VALID_COMMERCIAL_MODELS.has(commercialModel)
+    ? commercialModel
+    : null;
 
   if (!resolved.channel) {
     return {
       ...resolved,
+      commercialModel: resolvedCommercialModel,
       workflow: INTAKE_WORKFLOWS.MANUAL_REVIEW,
       initialState: REQUEST_STATES.NEW,
       requiresPricingResolution: false,
@@ -108,6 +112,7 @@ export function routeIntake({ channelType, category } = {}) {
 
   return {
     ...resolved,
+    commercialModel: resolvedCommercialModel,
     workflow,
     initialState: INITIAL_STATE_BY_WORKFLOW[workflow],
     requiresPricingResolution: workflow !== INTAKE_WORKFLOWS.MANUAL_REVIEW,
@@ -118,7 +123,6 @@ export function routeIntake({ channelType, category } = {}) {
 
 export function buildIntakeRoutingContext(payload = {}) {
   const route = routeIntake(payload);
-  const commercialModel = COMMERCIAL_RELATIONSHIP_MODELS[payload.commercialModel] || null;
 
   return {
     channel: route.channel,
@@ -129,7 +133,8 @@ export function buildIntakeRoutingContext(payload = {}) {
     requiresPricingResolution: route.requiresPricingResolution,
     requiresProposal: route.requiresProposal,
     requiresSowReview: route.requiresSowReview,
-    commercialModel,
+    commercialModel: route.commercialModel,
+    subchannel: payload.subchannel || payload.subchannelCode || null,
   };
 }
 
