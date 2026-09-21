@@ -83,7 +83,17 @@ export default async function handler(req,res){
   let booking=null;
   const result=await prisma.$transaction(async tx=>{
    const lead=await tx.lead.create({data:{full_name:name,email:email||null,phone:phone||null,organization_name:organizationName||null,status:'new',notes:null}});
-   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:{...routingContext,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null},pricingServiceId:serviceRef,commercialIntent:serverCommercialIntent,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode},status:requestState,priority:'normal',channelType:channelType||null,officialChannel:governedChannelCode,commercialModel:routingContext.commercialModel||null,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null}});
+   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:{...routingContext,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null},pricingServiceId:serviceRef,commercialIntent:serverCommercialIntent,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode},status:requestState,priority:'normal'}});
+   await tx.$executeRawUnsafe(
+    `UPDATE public.service_requests
+     SET channel_type=$1, official_channel=$2, commercial_model=$3, subchannel_code=$4
+     WHERE id=$5::uuid`,
+    channelType||null,
+    governedChannelCode,
+    routingContext.commercialModel||null,
+    serverCommercialIntent?.subchannelCode||subchannelCode||null,
+    request.id
+   );
    if(portalOrganizationId) await tx.$executeRawUnsafe(`UPDATE public.service_requests SET organization_id=$1::uuid WHERE id=$2::uuid`, portalOrganizationId, request.id);
    if(paymentEligible){await tx.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:locationAddress||null,timeline:timeline||null,intake_answers:{serviceId:serviceRef,commercialIntent:serverCommercialIntent},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});}
    if(requestedStartAt){
