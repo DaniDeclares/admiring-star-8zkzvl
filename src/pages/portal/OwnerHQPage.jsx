@@ -197,6 +197,25 @@ function OwnerHq({ session }) {
   </main>;
 }
 
+function OwnerHQLoader() {
+  const [session, setSession] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState('');
+  React.useEffect(() => {
+    let active = true;
+    supabase.auth.getSession().then(({ data, error: authError }) => {
+      if (!active) return;
+      if (authError || !data.session) setError('Staff session required.');
+      else setSession(data.session);
+      setLoading(false);
+    });
+    return () => { active = false; };
+  }, []);
+  if (loading) return <main className="portal-shell"><p>Checking owner access…</p></main>;
+  if (error || !session) return <main className="portal-shell"><div className="portal-alert">{error || 'Staff session required.'}</div></main>;
+  return <OwnerHq session={session} />;
+}
+
 export default function OwnerHQPage() {
-  return <RequireStaffAuth><OwnerHq session={null} /></RequireStaffAuth>;
+  return <RequireStaffAuth><OwnerHQLoader /></RequireStaffAuth>;
 }
