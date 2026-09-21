@@ -88,6 +88,7 @@ export async function getGovernedCommercialOffer(serviceId) {
       LIMIT 1
     ) m ON true
     WHERE o.canonical_sku = ${serviceId}
+    ORDER BY o.updated_at DESC, o.canonical_sku ASC
     LIMIT 1
   `;
   return rows[0] || null;
@@ -275,3 +276,120 @@ export function getChannelFromRequest(request) {
   // check rejected every single request unconditionally.
   return normalizeChannel(routing.channel, routing.channel);
 }
+
+export async function resolveCH01CommercialSelection({
+  serviceId,
+  frontDoorCode,
+  subchannelCode,
+  isVerifiedCommunityResident = false,
+} = {}) {
+  const canonicalSku = String(serviceId || '').trim();
+  const frontDoor = String(frontDoorCode || '').trim();
+  const suppliedSubchannel = String(subchannelCode || '').trim();
+  if (!canonicalSku) return { allowed: false, reason: 'CH01_SERVICE_REQUIRED' };
+  if (!frontDoor) return { allowed: false, reason: 'CH01_FRONT_DOOR_REQUIRED' };
+
+  const derivedSubchannel = isVerifiedCommunityResident ? 'CH01-B' : 'CH01-A';
+  if (suppliedSubchannel && suppliedSubchannel !== derivedSubchannel) {
+    return { allowed: false, reason: 'CH01_SUBCHANNEL_MISMATCH' };
+  }
+  const subchannel = derivedSubchannel;
+
+  const rows = await prisma.$queryRaw\`
+    SELECT
+      a.sku AS "serviceId",
+      a.service_id AS "runtimeServiceId",
+      a.service_name AS "adjudicatedServiceName",
+      a.front_door_code AS "frontDoorCode",
+      a.subchannel_scope AS "subchannelScope",
+      a.disposition,
+      a.customer_visible_candidate AS "customerVisibleCandidate",
+      o.service_name AS name,
+      o.commercial_offer_status AS "commercialOfferStatus",
+      o.fulfillment_gate_status AS "fulfillmentGateStatus",
+      o.ch01_a_priced AS "ch01APriced",
+      o.ch01_b_priced AS "ch01BPriced",
+      s.pricing_type AS "pricingType",
+      s.billing_cycle AS "billingCycle",
+      s.resident_discount_eligible AS "residentDiscountEligible",
+      s.commercial_status AS "serviceCommercialStatus",
+      rc.release_state AS "releaseState",
+      rc.blocking_gate AS "blockingGate",
+      pr.base_price_cents AS "basePriceCents",
+      pr.lock_status AS "pricingLockStatus",
+      pr.status AS "pricingStatus"
+    FROM public.dd_ch01_service_adjudication a
+    JOIN public.dd_channel_front_doors fd
+      ON fd.channel_code = 'CH01'
+     AND fd.front_door_code = a.front_door_code
+     AND fd.status = 'LOCKED'
+    JOIN public.dd_governed_service_offers o
+      ON o.canonical_sku = a.sku
+    JOIN public.services s
+      ON s.id = o.runtime_service_id
+     AND s.id = a.service_id
+    LEFT JOIN public.dd_service_release_contract_v1 rc
+      ON rc.canonical_sku = o.canonical_sku
+    LEFT JOIN LATERAL (
+      SELECT base_price_cents, lock_status, status
+      FROM public.dd_service_pricing_rules
+      WHERE service_id = o.runtime_service_id
+        AND channel_code = 'CH01'
+        AND status = 'ACTIVE'
+        AND lock_status = 'LOCKED'
+      ORDER BY effective_date DESC NULLS LAST, updated_at DESC, id DESC
+      LIMIT 1
+    ) pr ON true
+    WHERE a.channel_code = 'CH01'
+      AND a.status = 'LOCKED'
+      AND a.sku = \${canonicalSku}
+      AND a.front_door_code = \${frontDoor}
+      AND a.customer_visible_candidate = true
+      AND a.disposition IN ('FRONT_DOOR', 'CONTROLLED_QUOTE')
+      AND a.subchannel_scope @> ARRAY[\${subchannel}]::text[]
+    ORDER BY a.updated_at DESC, a.id ASC
+  \`;
+
+  if (rows.length === 0) {
+    return { allowed: false, reason: 'CH01_CANONICAL_SERVICE_NOT_AUTHORIZED_FOR_FRONT_DOOR' };
+  }
+  if (rows.length > 1) {
+    return { allowed: false, reason: 'CH01_CANONICAL_SERVICE_RESOLUTION_AMBIGUOUS' };
+  }
+
+  const row = rows[0];
+  const pricingCents = row.basePriceCents == null ? null : Number(row.basePriceCents);
+  const pricingLocked = row.pricingStatus === 'ACTIVE' && row.pricingLockStatus === 'LOCKED';
+  const price = Number.isFinite(pricingCents) && pricingCents > 0
+    ? resolveGovernedPrice(
+        {
+          baseCustomerPrice: pricingCents / 100,
+          residentDiscountEligible: Boolean(row.residentDiscountEligible),
+          pricingType: row.pricingType,
+        },
+        { channel: 'CH01', subchannel, isVerifiedCommunityResident },
+      )
+    : null;
+
+  return {
+    allowed: true,
+    reason: 'CH01_CANONICAL_SERVICE_RESOLVED',
+    serviceId: row.serviceId,
+    runtimeServiceId: row.runtimeServiceId,
+    serviceName: row.name || row.adjudicatedServiceName,
+    frontDoorCode: row.frontDoorCode,
+    subchannel,
+    disposition: row.disposition,
+    pricingType: row.pricingType || null,
+    billingCycle: row.billingCycle || null,
+    commercialOfferStatus: row.commercialOfferStatus,
+    fulfillmentGateStatus: row.fulfillmentGateStatus,
+    releaseState: row.releaseState || null,
+    blockingGate: row.blockingGate || null,
+    ch01APriced: Boolean(row.ch01APriced),
+    ch01BPriced: Boolean(row.ch01BPriced),
+    pricingLocked,
+    price,
+  };
+}
+
