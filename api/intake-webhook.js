@@ -114,7 +114,27 @@ export default async function handler(req,res){
     aggregateId:request.id,
     eventKey:`lead-created-operator-email:${request.id}`,
     channel:'EMAIL',
-    payload:{to:process.env.NOTIFICATION_EMAIL,subject:`New DANI DECLARES service request — ${serviceType||category||'New lead'}`,text:notificationText}
+    payload:{
+      to:process.env.NOTIFICATION_EMAIL,
+      subject:`New DANI DECLARES service request — ${serviceType||category||'New lead'}`,
+      text:notificationText,
+      template:'operator-service-request',
+      templateData:{
+       requestId:request.id,
+       customerName:name,
+       customerEmail:email||'not provided',
+       customerPhone:phone||'not provided',
+       customerType:channelType||'not specified',
+       frontDoorCode:frontDoorCode||'not specified',
+       service:serviceType||category||'not specified',
+       serviceReference:serviceRef||'not specified',
+       location:locationAddress||'not provided',
+       requestedStartAt:requestedStartAt||null,
+       timeline:timeline||'not provided',
+       budget:budgetRange||'not provided',
+       bookingHold:booking?.id||'none'
+      }
+     }
    });
    // The operator notification and the customer confirmation are separate delivery
    // intents. A successful intake must not depend on the operator mailbox being the
@@ -143,7 +163,14 @@ export default async function handler(req,res){
      payload:{
       to:email,
       subject:'DANI DECLARES — Request received',
-      text:customerText
+      text:customerText,
+      template:'customer-request-received',
+      templateData:{
+       requestId:request.id,
+       service:serviceType||category||'Request received',
+       requestedStartAt:requestedStartAt||null,
+       location:locationAddress||'Not specified'
+      }
      }
     });
    }
