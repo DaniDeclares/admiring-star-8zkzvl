@@ -50,3 +50,41 @@ Objective architecture/data corrections may be executed when supported by the es
 ## Payment-specific control
 
 The direct-payment path must authorize from the governed Supabase runtime catalog, validate the frozen estimate server-side before creating Checkout, and reconcile the Stripe webhook before advancing the operational request/job state. Quote/SOW/variable services remain outside blind direct checkout.
+
+
+## Role & Workspace Architecture
+
+DANI DECLARES uses one governed platform with role-based workspaces. A dashboard is a permissioned view of shared authoritative data; it is not a separate database or competing source of truth.
+
+A single identity may hold multiple roles. Access is additive only where explicitly authorized. The owner may access multiple internal workspaces without maintaining separate accounts.
+
+Governed workspace families:
+
+- Owner / Executive — DANI HQ
+- Sales / Business Development — Sales Console
+- Operations / Dispatcher — Operations Command Center
+- Estimator / Quote Specialist — Quote Desk
+- Customer Service / Concierge — Customer Care
+- Provider Recruitment / Onboarding — Provider Management
+- Field Provider / Worker — Provider Portal
+- Quality Assurance / Field Supervisor — QA Console
+- Finance / Bookkeeping — Finance Console
+- Contracts / Account Management — Account Console
+- Marketing / Growth — Growth Console
+- System Administrator / Technical Operations — Admin Console
+- Customer — Customer Portal
+
+Government contracting/procurement, HR, compliance, inventory and purchasing begin as permissioned modules inside the appropriate workspace and become standalone workspaces only when operating volume and dedicated staffing justify the separation.
+
+### Workspace control rules
+
+1. Authentication establishes identity; authorization establishes roles and permissions; workspace routing follows the governed authorization result.
+2. Role and workspace are not one-to-one. One person may have multiple roles, and a workspace may require multiple granular permissions.
+3. Internal users must receive the minimum access required for their duties. Owner authority does not imply that every internal employee receives owner/system-administrator authority.
+4. Sales cannot override commercial, pricing, fulfillment or compliance gates merely to complete a sale.
+5. Provider onboarding authority is distinct from provider dispatch eligibility. Application does not equal qualification, verification, authorization, availability or dispatch eligibility.
+6. Finance access does not automatically grant provider, sales, customer, infrastructure or system-administration authority.
+7. System administration is separated from ordinary operations even when the owner can access both.
+8. A transaction initiated in one workspace must continue through the same governed operating chain rather than being re-created in another workspace.
+9. Supabase remains runtime/operational authority for identity-linked operational state and permissions consumed by the application; GitHub defines application behavior; other domain systems retain their authority as specified above.
+10. New positions should be implemented by composing roles/permissions and workspace modules before creating a new database or parallel application.
