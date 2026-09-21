@@ -4,7 +4,15 @@ import RequireStaffAuth from '../../components/auth/RequireStaffAuth.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 
 const P={ink:'#2b2022',muted:'#74676a',border:'#e5d9d2',surface:'#fffdfb',soft:'#f7f0eb',accent:'#6b1f2b',gold:'#8b6b1f',danger:'#9a2636',success:'#276b35',warning:'#9a6514'};
-const blankUnit=()=>({unit_number:'',unit_type:'',bedrooms:'',bathrooms:'',square_footage:'',condition:'',pet_damage:false,deep_carpet:false,eviction:false,trashout:false,maintenance_issues:'',unit_notes:''});
+const CONDITION_GROUPS=[
+ {label:'Cleaning & contents',items:[['heavy_soil','Heavy soil / intensive cleaning'],['pet_damage','Heavy pet damage'],['odor','Odor / deodorization concern'],['bio_condition','Special cleaning condition'],['trashout','Trash / haul-away required'],['eviction','Eviction / left belongings']]},
+ {label:'Flooring & surfaces',items:[['deep_carpet','Deep carpet cleaning'],['floor_damage','Flooring damage / replacement concern'],['wall_paint','Walls / paint / drywall concern'],['cabinet_surface','Cabinets / counters / surfaces concern']]},
+ {label:'Fixtures & appliances',items:[['appliances','Appliance condition / function concern'],['bathroom','Bathroom / fixture condition concern'],['lighting','Lighting / fixture concern'],['doors_hardware','Doors / locks / hardware concern'],['windows','Windows / screens / coverings concern']]},
+ {label:'Systems & maintenance',items:[['plumbing','Plumbing concern'],['electrical','Electrical concern'],['hvac','HVAC concern'],['pest','Pest evidence / treatment concern'],['safety','Safety / life-safety observation']]},
+ {label:'Exterior / other',items:[['exterior','Exterior / site condition concern'],['other','Other condition requiring review']]}
+];
+const CONDITION_LABELS=Object.fromEntries(CONDITION_GROUPS.flatMap(g=>g.items));
+const blankUnit=()=>({unit_number:'',unit_type:'',square_footage:'',condition_level:'',condition_flags:[],maintenance_issues:'',unit_notes:''});
 const blankScope={property_name:'',property_address:'',requested_window:'',completion_deadline:'',access_notes:'',occupancy:'vacant',unit_count:0,units:[],components:[],source_scope_facts:[],provider_capacity_review_required:true,assumptions:'',exclusions:'',customer_decisions_needed:'',quote_inputs:{},readiness:{property_identified:false,unit_count_confirmed:false,unit_scope_reviewed:false,service_components_selected:false,deadline_confirmed:false,access_confirmed:false,assumptions_reviewed:false,quote_inputs_ready:false,fulfillment_feasibility_review_required:true}};
 
 const numberWord={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
@@ -66,6 +74,7 @@ function Workspace(){
  const updateReady=(key,value)=>setScope(s=>({...s,readiness:{...s.readiness,[key]:value}}));
  const setUnitCount=value=>{setUnitCountInput(value);const n=Math.max(0,Math.min(100,Number(value)||0));setScope(s=>({...s,unit_count:n,units:Array.from({length:n},(_,i)=>s.units[i]||blankUnit())}));};
  const updateUnit=(index,key,value)=>setScope(s=>({...s,units:s.units.map((u,i)=>i===index?{...u,[key]:value}:u)}));
+ const toggleUnitCondition=(index,key)=>setScope(s=>({...s,units:s.units.map((u,i)=>{if(i!==index)return u;const flags=Array.isArray(u.condition_flags)?u.condition_flags:[];return {...u,condition_flags:flags.includes(key)?flags.filter(x=>x!==key):[...flags,key]};})}));
  const addComponent=()=>{if(!selectedService)return;const service=services.find(s=>s.sku===selectedService);if(!service)return;const answers=(service.quote_input_schema?.fields||[]).reduce((a,f)=>{const v=derivedQuoteInputs[f.key];if(v!==undefined&&v!=='')a[f.key]=v;return a;},{});setScope(s=>s.components.some(c=>c.sku===service.sku)?s:{...s,components:[...s.components,{sku:service.sku,service_id:service.id,name:service.name,answers}]});setSelectedService('');};
  const removeComponent=sku=>setScope(s=>({...s,components:s.components.filter(c=>c.sku!==sku)}));
  const updateComponentAnswer=(sku,key,value)=>setScope(s=>({...s,components:s.components.map(c=>c.sku===sku?{...c,answers:{...c.answers,[key]:value}}:c)}));
@@ -76,7 +85,7 @@ function Workspace(){
    unit_count:scope.unit_count,unit_numbers:scope.units.map(u=>u.unit_number).filter(Boolean).join(', '),
    unit_type:first.unit_type||'',square_footage:first.square_footage||'',access_notes:scope.access_notes,
    requested_window:scope.requested_window,completion_deadline:scope.completion_deadline,
-   current_condition:scope.units.map((u,i)=>'Unit '+(i+1)+': '+(u.condition||'not assessed')).join('; '),
+   current_condition:scope.units.map((u,i)=>'Unit '+(i+1)+': '+(u.condition_level||'not assessed')+(Array.isArray(u.condition_flags)&&u.condition_flags.length?' — '+u.condition_flags.map(k=>CONDITION_LABELS[k]||k).join(', '):'')).join('; '),
    punch_list_items:scope.units.map((u,i)=>u.maintenance_issues?'Unit '+(i+1)+': '+u.maintenance_issues:'').filter(Boolean).join('; '),
    checklist_required:true,photo_documentation_required:true,report_format:'Unit-level completion / condition record',
    stop_count:scope.unit_count,after_hours:false,sla:scope.completion_deadline||scope.requested_window||''
@@ -141,19 +150,15 @@ function Workspace(){
      {!scope.units.length?<div style={{padding:18,borderRadius:12,background:P.soft,color:P.muted}}>Enter the unit count to create the unit-by-unit scope grid.</div>:
       <div style={{display:'grid',gap:12}}>{scope.units.map((u,i)=><div key={i} style={{border:'1px solid '+P.border,borderRadius:14,padding:14,background:'#fff'}}>
        <div style={{display:'flex',justifyContent:'space-between',gap:10,marginBottom:10}}><strong>Unit {i+1}</strong>{!u.unit_number&&<span style={{fontSize:11,color:P.warning}}>Identifier not provided</span>}</div>
-       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',gap:9}}>
+       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:9}}>
         <Field label="Unit number" value={u.unit_number} onChange={v=>updateUnit(i,'unit_number',v)} placeholder="e.g. 204"/>
-        <Field label="Unit type" value={u.unit_type} onChange={v=>updateUnit(i,'unit_type',v)} placeholder="Studio / 1BR / 2BR"/>
-        <Field label="Bedrooms" value={u.bedrooms} onChange={v=>updateUnit(i,'bedrooms',v)} type="number"/>
-        <Field label="Bathrooms" value={u.bathrooms} onChange={v=>updateUnit(i,'bathrooms',v)} type="number"/>
-        <Field label="Square footage" value={u.square_footage} onChange={v=>updateUnit(i,'square_footage',v)} type="number"/>
-        <Field label="Condition" value={u.condition} onChange={v=>updateUnit(i,'condition',v)} placeholder="Standard / heavy / severe"/>
+        <label style={{display:'grid',gap:6,fontSize:12,fontWeight:800}}><span>Unit configuration</span><select value={u.unit_type||''} onChange={e=>updateUnit(i,'unit_type',e.target.value)} style={{width:'100%',boxSizing:'border-box',border:'1px solid '+P.border,borderRadius:10,padding:'10px 11px',background:'#fff',fontSize:14}}><option value="">Select configuration…</option>{['Studio / 1BA','1BR / 1BA','1BR / 1.5BA','2BR / 1BA','2BR / 2BA','2BR / 2.5BA','3BR / 1BA','3BR / 2BA','3BR / 2.5BA','3BR / 3BA','4BR / 2BA','4BR / 2.5BA','4BR / 3BA','Other / custom'].map(x=><option key={x} value={x}>{x}</option>)}</select></label>
+        <Field label="Square footage" value={u.square_footage} onChange={v=>updateUnit(i,'square_footage',v)} type="number" placeholder="Not yet known"/>
+        <label style={{display:'grid',gap:6,fontSize:12,fontWeight:800}}><span>Overall condition</span><select value={u.condition_level||''} onChange={e=>updateUnit(i,'condition_level',e.target.value)} style={{width:'100%',boxSizing:'border-box',border:'1px solid '+P.border,borderRadius:10,padding:'10px 11px',background:'#fff',fontSize:14}}><option value="">Not assessed</option><option value="standard">Standard turnover</option><option value="heavy">Heavy / intensive</option><option value="severe">Severe / special handling</option></select></label>
        </div>
-       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:8,marginTop:10}}>
-        <Check label="Heavy pet damage" checked={u.pet_damage} onChange={v=>updateUnit(i,'pet_damage',v)}/>
-        <Check label="Deep carpet cleaning" checked={u.deep_carpet} onChange={v=>updateUnit(i,'deep_carpet',v)}/>
-        <Check label="Eviction / cleanout" checked={u.eviction} onChange={v=>updateUnit(i,'eviction',v)}/>
-        <Check label="Trash / haul-away required" checked={u.trashout} onChange={v=>updateUnit(i,'trashout',v)}/>
+       <div style={{marginTop:12,padding:12,border:'1px solid '+P.border,borderRadius:12,background:P.soft}}>
+        <div style={{fontSize:11,fontWeight:900,letterSpacing:'.08em',textTransform:'uppercase',color:P.gold,marginBottom:8}}>Condition flags</div>
+        <div style={{display:'grid',gap:10}}>{CONDITION_GROUPS.map(group=><div key={group.label}><div style={{fontSize:11,fontWeight:800,color:P.muted,marginBottom:6}}>{group.label}</div><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:7}}>{group.items.map(([key,label])=><Check key={key} label={label} checked={Array.isArray(u.condition_flags)?u.condition_flags.includes(key):false} onChange={()=>toggleUnitCondition(i,key)}/>)}</div></div>)}</div>
        </div>
        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:10}}>
         <Area label="Maintenance / punch-list observations" value={u.maintenance_issues} onChange={v=>updateUnit(i,'maintenance_issues',v)}/>
