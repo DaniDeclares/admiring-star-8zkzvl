@@ -134,24 +134,48 @@ export default function StaffCommandCenter({ session }) {
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.16em', opacity: .72 }}>DANI DECLARES</div>
           <h1 style={{ margin: '7px 0 8px', fontSize: 34, letterSpacing: '-.03em' }}>Operations Command Center</h1>
-          <p style={{ margin: 0, maxWidth: 720, color: 'rgba(255,255,255,.78)' }}>One operating view for requests, scope, quotes, payments, jobs, providers, evidence and exceptions.</p>
+          <p style={{ margin: 0, maxWidth: 720, color: 'rgba(255,255,255,.78)' }}>One command view for what needs attention across requests, scope, commercial work, fulfillment, providers, QA and exceptions.</p>
         </div>
         <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
           <Link className="portal-primary" to="/portal/operations" style={{ background: '#fff', color: COLORS.ink }}>Open Operations</Link>
-          <Link className="portal-primary" to="/portal/quotes" style={{ background: 'rgba(255,255,255,.12)', color: '#fff', borderColor: 'rgba(255,255,255,.35)' }}>Build Quote</Link>
+          <Link className="portal-primary" to="/portal/scope" style={{ background: 'rgba(255,255,255,.12)', color: '#fff', borderColor: 'rgba(255,255,255,.35)' }}>Scope Workspace</Link>
+          <Link className="portal-primary" to="/portal/quotes" style={{ background: 'rgba(255,255,255,.12)', color: '#fff', borderColor: 'rgba(255,255,255,.35)' }}>Quote Builder</Link>
           <button className="portal-refresh" onClick={load} style={{ color: '#fff', borderColor: 'rgba(255,255,255,.35)', background: 'transparent' }}>Refresh</button>
         </div>
       </div>
     </header>
 
+    <section style={{ marginBottom: 18, padding: 16, border: `1px solid ${COLORS.border}`, borderRadius: 18, background: COLORS.surface }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.13em', color: COLORS.accent, textTransform: 'uppercase' }}>WORKSPACES</div>
+          <h2 style={{ margin: '5px 0 0', fontSize: 20, color: COLORS.ink }}>Operate by workflow</h2>
+        </div>
+        <div style={{ fontSize: 12, color: COLORS.muted }}>The Command Center routes work; each workspace owns its process.</div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 9 }}>
+        {[
+          ['/portal/operations', 'Requests', 'Intake & operational queues'],
+          ['/portal/scope', 'Scope', 'Develop the work definition'],
+          ['/portal/quotes', 'Quotes', 'Build governed commercial lines'],
+          ['/portal/dispatch', 'Jobs & Dispatch', 'Schedule and route production'],
+          ['/portal/provider-approval', 'Providers', 'Provider readiness & review'],
+          ['/portal/operations', 'Exceptions', 'Changes, QA, payments & blockers'],
+        ].map(([to, label, detail]) => <Link key={label} to={to} style={{ display: 'block', padding: '13px 14px', border: `1px solid ${COLORS.border}`, borderRadius: 13, background: COLORS.soft, color: COLORS.ink, textDecoration: 'none' }}>
+          <strong style={{ display: 'block', fontSize: 13 }}>{label}</strong>
+          <span style={{ display: 'block', marginTop: 4, fontSize: 11, lineHeight: 1.4, color: COLORS.muted }}>{detail}</span>
+        </Link>)}
+      </div>
+    </section>
+
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 10, marginBottom: 18 }}>
-      <Metric label="New / Scope" value={metrics.scopeRequired} detail="Requests without a quote" tone={metrics.scopeRequired ? COLORS.danger : COLORS.success} />
-      <Metric label="Scope Complete" value={metrics.scopeComplete} detail="Ready for quote" tone={metrics.scopeComplete ? COLORS.info : COLORS.success} />
-      <Metric label="Quotes to Review" value={needsReview.length} detail="Commercial review" tone={needsReview.length ? COLORS.warning : COLORS.success} />
-      <Metric label="Ready to Send" value={readyToSend.length} detail="Customer delivery" />
-      <Metric label="Awaiting Customer" value={awaitingCustomer.length} detail="Sent / approved" />
-      <Metric label="Active Jobs" value={metrics.activeJobs} detail="Production in motion" />
-      <Metric label="At Risk" value={riskJobs.length + metrics.failedPayments} detail="Exceptions needing action" tone={riskJobs.length || metrics.failedPayments ? COLORS.danger : COLORS.success} />
+      <Link to="/portal/operations" style={{ textDecoration: 'none' }}><Metric label="New / Scope" value={metrics.scopeRequired} detail="Requests without a quote" tone={metrics.scopeRequired ? COLORS.danger : COLORS.success} /></Link>
+      <Link to="/portal/quotes" style={{ textDecoration: 'none' }}><Metric label="Scope Complete" value={metrics.scopeComplete} detail="Ready for quote" tone={metrics.scopeComplete ? COLORS.info : COLORS.success} /></Link>
+      <Link to="/portal/estimates" style={{ textDecoration: 'none' }}><Metric label="Quotes to Review" value={needsReview.length} detail="Commercial review" tone={needsReview.length ? COLORS.warning : COLORS.success} /></Link>
+      <Link to="/portal/saved-quotes" style={{ textDecoration: 'none' }}><Metric label="Ready to Send" value={readyToSend.length} detail="Customer delivery" /></Link>
+      <Link to="/portal/saved-quotes" style={{ textDecoration: 'none' }}><Metric label="Awaiting Customer" value={awaitingCustomer.length} detail="Sent / approved" /></Link>
+      <Link to="/portal/operations" style={{ textDecoration: 'none' }}><Metric label="Active Jobs" value={metrics.activeJobs} detail="Production in motion" /></Link>
+      <Link to="/portal/operations" style={{ textDecoration: 'none' }}><Metric label="At Risk" value={riskJobs.length + metrics.failedPayments} detail="Exceptions needing action" tone={riskJobs.length || metrics.failedPayments ? COLORS.danger : COLORS.success} /></Link>
     </div>
 
     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) minmax(330px,.85fr)', gap: 18, marginBottom: 18 }}>
@@ -180,7 +204,7 @@ export default function StaffCommandCenter({ session }) {
         </div> : scopeReadyRequest ? <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 18, background: '#edf5fa' }}><Pill tone={COLORS.info}>Scope complete</Pill><h3 style={{ margin: '10px 0 5px', fontSize: 22 }}>{scopeReadyRequest.service_needed || scopeReadyRequest.service_category || 'Property service request'}</h3><div style={{ color: COLORS.muted }}>{scopeReadyRequest.organization_name || scopeReadyRequest.client_name || 'Customer'} · Scope version {scopeReadyRequest.scope_version || 1}</div><p style={{ margin: '12px 0', lineHeight: 1.5 }}>The structured scope is complete. Continue to Quote Builder to create the governed commercial estimate.</p><Link className="portal-primary" to={"/portal/quotes?requestId="+encodeURIComponent(scopeReadyRequest.id)}>Continue to Quote →</Link></div> : <div style={{ padding: 18, borderRadius: 14, background: '#f2f8f4', color: COLORS.success }}>No unquoted requests are currently waiting for scope.</div>}
       </Card>
 
-      <Card eyebrow="Pipeline" title="Commercial Flow">
+      <Card eyebrow="Pipeline" title="Work Pipeline">
         {[
           ['Requests', requests.length, COLORS.info],
           ['Scope required', metrics.scopeRequired, COLORS.danger],
