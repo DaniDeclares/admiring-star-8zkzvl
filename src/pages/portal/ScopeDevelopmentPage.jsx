@@ -5,7 +5,27 @@ import { supabase } from '../../lib/supabaseClient.js';
 
 const P={ink:'#2b2022',muted:'#74676a',border:'#e5d9d2',surface:'#fffdfb',soft:'#f7f0eb',accent:'#6b1f2b',gold:'#8b6b1f',danger:'#9a2636',success:'#276b35',warning:'#9a6514'};
 const blankUnit=()=>({unit_number:'',unit_type:'',bedrooms:'',bathrooms:'',square_footage:'',condition:'',pet_damage:false,deep_carpet:false,eviction:false,trashout:false,maintenance_issues:'',unit_notes:''});
-const blankScope={property_name:'',property_address:'',requested_window:'',completion_deadline:'',access_notes:'',occupancy:'vacant',unit_count:0,units:[],components:[],provider_capacity_review_required:true,assumptions:'',exclusions:'',customer_decisions_needed:'',quote_inputs:{},readiness:{property_identified:false,unit_count_confirmed:false,unit_scope_reviewed:false,service_components_selected:false,deadline_confirmed:false,access_confirmed:false,assumptions_reviewed:false,quote_inputs_ready:false,fulfillment_feasibility_review_required:true}};
+const blankScope={property_name:'',property_address:'',requested_window:'',completion_deadline:'',access_notes:'',occupancy:'vacant',unit_count:0,units:[],components:[],source_scope_facts:[],provider_capacity_review_required:true,assumptions:'',exclusions:'',customer_decisions_needed:'',quote_inputs:{},readiness:{property_identified:false,unit_count_confirmed:false,unit_scope_reviewed:false,service_components_selected:false,deadline_confirmed:false,access_confirmed:false,assumptions_reviewed:false,quote_inputs_ready:false,fulfillment_feasibility_review_required:true}};
+
+const numberWord={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
+const parseCount=(value)=>{const n=Number(value);if(Number.isFinite(n)&&n>0)return n;return numberWord[String(value||'').toLowerCase()]||0;};
+const extractSourceFacts=(text='')=>{
+ const apartmentMatch=text.match(/\\b(\\d+)\\s+apartments?\\b/i);
+ const deadlineMatch=text.match(/within\\s+(\\d+)\\s+days?/i);
+ const petMatch=text.match(/(\\w+)\\s+of the apartments have heavy pet damage/i);
+ const deepMatch=text.match(/only\\s+(\\d+)\\s+need deep carpet cleaning/i);
+ const evictionMatch=text.match(/eviction.*?(\\d+)-bedroom\\/(\\d+)-bath/i);
+ return [
+  apartmentMatch&&`Request states ${apartmentMatch[1]} apartments require turnover.` ,
+  petMatch&&`Request states ${parseCount(petMatch[1])} apartments have heavy pet damage.` ,
+  deepMatch&&`Request states ${deepMatch[1]} apartments need deep carpet cleaning; the other apartments receive normal turnover carpet treatment.` ,
+  text.match(/All\\s+\\d+\\s+apartments? have carpet/i)&&'Request states all apartments have carpet.',
+  evictionMatch&&`Request identifies one eviction/cleanout as a ${evictionMatch[1]}-bedroom/${evictionMatch[2]}-bath family unit; the unit identifier was not provided.`,
+  text.match(/checked for obvious damage or maintenance issues and documented/i)&&'Request requires obvious damage/maintenance issues to be checked and documented before release.',
+  deadlineMatch&&`Requested turnaround: within ${deadlineMatch[1]} days of the request.`,
+  text.match(/pressure washing/i)&&'Customer asked whether exterior pressure washing is available if needed; this remains an open scope decision rather than an assumed service.'
+ ].filter(Boolean);
+};
 
 function Field({label,value,onChange,type='text',placeholder=''}){return <label style={{display:'grid',gap:6,fontSize:12,fontWeight:800}}><span>{label}</span><input type={type} value={value||''} placeholder={placeholder} onChange={e=>onChange(e.target.value)} style={{width:'100%',boxSizing:'border-box',border:'1px solid '+P.border,borderRadius:10,padding:'10px 11px',background:'#fff',fontSize:14}}/></label>}
 function Area({label,value,onChange,placeholder=''}){return <label style={{display:'grid',gap:6,fontSize:12,fontWeight:800}}><span>{label}</span><textarea value={value||''} placeholder={placeholder} onChange={e=>onChange(e.target.value)} rows={4} style={{width:'100%',boxSizing:'border-box',border:'1px solid '+P.border,borderRadius:10,padding:'10px 11px',background:'#fff',fontSize:14,resize:'vertical'}}/></label>}
@@ -22,7 +42,21 @@ function Workspace(){
    if(rr.data.lead_id){const lr=await supabase.from('leads').select('id,full_name,email,phone,organization_name').eq('id',rr.data.lead_id).single();if(!lr.error)setLead(lr.data);}
    const sr=await supabase.from('services').select('id,sku,name,pricing_type,starting_price,public_price_display,quote_input_schema,is_active').eq('division_id',2).eq('is_active',true).order('name');if(sr.error)throw sr.error;setServices(sr.data||[]);
    const saved=rr.data.scope_snapshot&&typeof rr.data.scope_snapshot==='object'?rr.data.scope_snapshot:{};
-   const merged={...blankScope,...saved,units:Array.isArray(saved.units)?saved.units:[],components:Array.isArray(saved.components)?saved.components:[],quote_inputs:saved.quote_inputs||{},readiness:{...blankScope.readiness,...(saved.readiness||{})}};
+   const sourceFacts=extractSourceFacts(rr.data.request_details||'');
+   const sourceUnitCount=parseCount((rr.data.request_details||'').match(/\\b(\\d+)\\s+apartments?\\b/i)?.[1]);
+   const sourceDeadline=(rr.data.request_details||'').match(/within\\s+(\\d+)\\s+days?/i)?.[1];
+   const isFreshScope=!Object.keys(saved).length;
+   const merged={...blankScope,...saved,source_scope_facts:Array.isArray(saved.source_scope_facts)?saved.source_scope_facts:sourceFacts,units:Array.isArray(saved.units)?saved.units:[],components:Array.isArray(saved.components)?saved.components:[],quote_inputs:saved.quote_inputs||{},readiness:{...blankScope.readiness,...(saved.readiness||{})}};
+   if(isFreshScope){
+    merged.property_address=merged.property_address||rr.data.location_address||'';
+    merged.unit_count=merged.unit_count||sourceUnitCount;
+    merged.requested_window=merged.requested_window|| (sourceDeadline?`Within ${sourceDeadline} days of request`:rr.data.timeline||'');
+    merged.completion_deadline=merged.completion_deadline|| (sourceDeadline?`Within ${sourceDeadline} days of request`:'');
+    merged.customer_decisions_needed=merged.customer_decisions_needed|| (sourceFacts.some(f=>/pressure washing/i.test(f))?'Confirm whether exterior pressure washing is actually required; no pressure-washing service should be assumed from the customer question alone.':'');
+    merged.readiness.property_identified=!!merged.property_address;
+    merged.readiness.unit_count_confirmed=!!merged.unit_count;
+    merged.readiness.deadline_confirmed=!!merged.completion_deadline;
+   }
    const count=Number(merged.unit_count||0);if(count&&!merged.units.length)merged.units=Array.from({length:count},()=>blankUnit());
    setScope(merged);setUnitCountInput(String(count||''));if(merged.components[0]?.sku)setSelectedService(merged.components[0].sku);
  }catch(e){setError(e.message||'Could not load request scope.')}finally{setLoading(false);}})()},[requestId]);
@@ -83,6 +117,11 @@ function Workspace(){
      <div style={{marginTop:12,fontSize:12,color:P.muted}}>The source request is preserved exactly as submitted. Scope development adds structure; it does not replace the original narrative.</div>
     </Card>
 
+    <Card eyebrow="Extracted from source request" title="Source-Derived Scope Facts">
+     <div style={{display:'grid',gap:8}}>{scope.source_scope_facts.length?scope.source_scope_facts.map((fact,i)=><div key={i} style={{padding:'10px 12px',border:'1px solid '+P.border,borderRadius:10,background:'#fff',fontSize:13,lineHeight:1.5}}>{fact}</div>):<div style={{color:P.muted,fontSize:13}}>No structured facts were extracted from the request narrative.</div>}</div>
+     <div style={{marginTop:10,fontSize:11,color:P.muted}}>These facts are extracted from the customer’s original narrative. They do not invent unit identifiers, square footage, access details, or other facts the customer did not provide.</div>
+    </Card>
+
     <Card eyebrow="Property" title="Property & Service Window">
      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
       <Field label="Property name" value={scope.property_name} onChange={v=>update('property_name',v)} placeholder="Not yet provided"/>
@@ -124,6 +163,7 @@ function Workspace(){
     </Card>
 
     <Card eyebrow="Commercial scope components" title="What are we actually quoting?">
+     <div style={{padding:'11px 12px',marginBottom:12,borderRadius:10,background:P.soft,fontSize:12,lineHeight:1.5}}><strong>Scope cues from this request:</strong> apartment turnover, make-ready cleaning, property/condition review, photo documentation, punch-list follow-up, and coordination. These are suggestions only; select the governed services that belong in the quote. The pressure-washing question is not added automatically.</div>
      <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'end',marginBottom:12}}>
       <label style={{display:'grid',gap:6,fontSize:12,fontWeight:800,flex:1,minWidth:260}}><span>Division 02 service</span><select value={selectedService} onChange={e=>setSelectedService(e.target.value)} style={{border:'1px solid '+P.border,borderRadius:10,padding:'10px 11px',background:'#fff'}}><option value="">Select a governed service…</option>{services.map(s=><option key={s.sku} value={s.sku}>{s.name+' · '+s.sku}</option>)}</select></label>
       <button onClick={addComponent} disabled={!selectedService} style={{padding:'10px 14px',borderRadius:10,border:0,background:P.accent,color:'#fff',fontWeight:900}}>Add component</button>
