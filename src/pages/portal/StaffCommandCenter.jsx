@@ -145,7 +145,7 @@ export default function StaffCommandCenter({ session }) {
       </div>
     </header>
 
-    <section style={{ marginBottom: 18, padding: 16, border: `1px solid ${COLORS.border}`, borderRadius: 18, background: COLORS.surface }}>
+    <section style={{ marginBottom: 18, padding: 16, border: '1px solid #e8dfe0', borderRadius: 18, background: COLORS.surface }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.13em', color: COLORS.accent, textTransform: 'uppercase' }}>WORKSPACES</div>
@@ -154,17 +154,24 @@ export default function StaffCommandCenter({ session }) {
         <div style={{ fontSize: 12, color: COLORS.muted }}>The Command Center routes work; each workspace owns its process.</div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 9 }}>
-        {[
-          ['/portal/operations', 'Requests', 'Intake & operational queues'],
-          ['/portal/scope', 'Scope', 'Develop the work definition'],
-          ['/portal/quotes', 'Quotes', 'Build governed commercial lines'],
-          ['/portal/dispatch', 'Jobs & Dispatch', 'Schedule and route production'],
-          ['/portal/provider-approval', 'Providers', 'Provider readiness & review'],
-          ['/portal/operations', 'Exceptions', 'Changes, QA, payments & blockers'],
-        ].map(([to, label, detail]) => <Link key={label} to={to} style={{ display: 'block', padding: '13px 14px', border: `1px solid ${COLORS.border}`, borderRadius: 13, background: COLORS.soft, color: COLORS.ink, textDecoration: 'none' }}>
-          <strong style={{ display: 'block', fontSize: 13 }}>{label}</strong>
-          <span style={{ display: 'block', marginTop: 4, fontSize: 11, lineHeight: 1.4, color: COLORS.muted }}>{detail}</span>
-        </Link>)}
+        <Link to="/portal/operations" style={{ display: 'block', padding: '13px 14px', border: '1px solid #e8dfe0', borderRadius: 13, background: COLORS.soft, color: COLORS.ink, textDecoration: 'none' }}>
+          <strong style={{ display: 'block', fontSize: 13 }}>Requests</strong><span style={{ display: 'block', marginTop: 4, fontSize: 11, lineHeight: 1.4, color: COLORS.muted }}>Intake & operational queues</span>
+        </Link>
+        <Link to="/portal/scope" style={{ display: 'block', padding: '13px 14px', border: '1px solid #e8dfe0', borderRadius: 13, background: COLORS.soft, color: COLORS.ink, textDecoration: 'none' }}>
+          <strong style={{ display: 'block', fontSize: 13 }}>Scope</strong><span style={{ display: 'block', marginTop: 4, fontSize: 11, lineHeight: 1.4, color: COLORS.muted }}>Develop the work definition</span>
+        </Link>
+        <Link to="/portal/quotes" style={{ display: 'block', padding: '13px 14px', border: '1px solid #e8dfe0', borderRadius: 13, background: COLORS.soft, color: COLORS.ink, textDecoration: 'none' }}>
+          <strong style={{ display: 'block', fontSize: 13 }}>Quotes</strong><span style={{ display: 'block', marginTop: 4, fontSize: 11, lineHeight: 1.4, color: COLORS.muted }}>Build governed commercial lines</span>
+        </Link>
+        <Link to="/portal/dispatch" style={{ display: 'block', padding: '13px 14px', border: '1px solid #e8dfe0', borderRadius: 13, background: COLORS.soft, color: COLORS.ink, textDecoration: 'none' }}>
+          <strong style={{ display: 'block', fontSize: 13 }}>Jobs & Dispatch</strong><span style={{ display: 'block', marginTop: 4, fontSize: 11, lineHeight: 1.4, color: COLORS.muted }}>Schedule and route production</span>
+        </Link>
+        <Link to="/portal/provider-approval" style={{ display: 'block', padding: '13px 14px', border: '1px solid #e8dfe0', borderRadius: 13, background: COLORS.soft, color: COLORS.ink, textDecoration: 'none' }}>
+          <strong style={{ display: 'block', fontSize: 13 }}>Providers</strong><span style={{ display: 'block', marginTop: 4, fontSize: 11, lineHeight: 1.4, color: COLORS.muted }}>Provider readiness & review</span>
+        </Link>
+        <Link to="/portal/operations" style={{ display: 'block', padding: '13px 14px', border: '1px solid #e8dfe0', borderRadius: 13, background: COLORS.soft, color: COLORS.ink, textDecoration: 'none' }}>
+          <strong style={{ display: 'block', fontSize: 13 }}>Exceptions</strong><span style={{ display: 'block', marginTop: 4, fontSize: 11, lineHeight: 1.4, color: COLORS.muted }}>Changes, QA, payments & blockers</span>
+        </Link>
       </div>
     </section>
 
