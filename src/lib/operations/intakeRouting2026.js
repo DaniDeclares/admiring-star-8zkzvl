@@ -72,7 +72,15 @@ export function resolveIntakeChannel({ channelType, category } = {}) {
     };
   }
 
-  if (channelType && VALID_COMMERCIAL_MODELS.has(channelType)) {\n    return { channel: null, source: 'invalid_commercial_model_as_channel', reason: 'COMMERCIAL_MODEL_IS_NOT_CHANNEL' };\n  }\n\n  if (category && CATEGORY_TO_CHANNEL[category]) {
+  if (channelType && VALID_COMMERCIAL_MODELS.has(channelType)) {
+    return {
+      channel: null,
+      source: 'invalid_commercial_model_as_channel',
+      reason: 'COMMERCIAL_MODEL_IS_NOT_CHANNEL',
+    };
+  }
+
+  if (category && CATEGORY_TO_CHANNEL[category]) {
     return {
       channel: CATEGORY_TO_CHANNEL[category],
       source: 'category_fallback',
