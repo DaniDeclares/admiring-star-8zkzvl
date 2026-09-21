@@ -67,7 +67,7 @@ function Row({ title, meta, right, tone }) {
   </div>;
 }
 
-export default function StaffCommandCenter({ session, load: parentLoad }) {
+export default function StaffCommandCenter({ session }) {
   const [data, setData] = useState(null);
   const [estimates, setEstimates] = useState([]);
   const [loading, setLoading] = useState(true);
