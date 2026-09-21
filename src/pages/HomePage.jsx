@@ -1,27 +1,22 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-import {
-  ArrowRight, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2,
-  FileText, Home, Landmark, Laptop, Palette, Truck, UsersRound
-} from 'lucide-react';
+import { ArrowRight, Briefcase, Building2, CheckCircle2, FileText, Home, Landmark, MapPin, Sparkles, Store } from 'lucide-react';
 import { getFamilyVisuals } from '../data/serviceVisuals2026.js';
 
 const audiences = [
   { icon: Home, title: 'Residents', body: 'Household support, organization, errands, laundry, pet care, home watch and concierge help.', href: '/catalog?audience=residents', image: 'Home & Cleaning' },
   { icon: Building2, title: 'Property Teams', body: 'Turn support, field coordination, documentation, readiness work, resident programs and recurring operations.', href: '/services/property', image: 'Property, Facilities & Field Operations' },
-  { icon: UsersRound, title: 'Real Estate', body: 'Listing readiness, transaction support, field verification, closing logistics and client experience support.', href: '/real-estate', image: 'Real Estate & Closing Support' },
-  { icon: BriefcaseBusiness, title: 'Businesses', body: 'Administrative, digital, workplace, logistics, creative and operational support for growing teams.', href: '/services/business-solutions', image: 'Administrative & Business Operations' },
+  { icon: MapPin, title: 'Real Estate', body: 'Listing readiness, transaction support, field verification, closing logistics and client experience support.', href: '/real-estate', image: 'Real Estate & Closing Support' },
+  { icon: Briefcase, title: 'Businesses', body: 'Administrative, digital, workplace, logistics, creative and operational support for growing teams.', href: '/services/business-solutions', image: 'Administrative & Business Operations' },
   { icon: Landmark, title: 'Government + Institutions', body: 'Procurement-oriented facilities, administrative, logistics, documentation, supply and field support.', href: '/industries/government', image: 'Government & Institutional Procurement' },
 ];
 
 const capabilities = [
-  [Laptop, 'Administrative & digital operations', 'Remote-friendly support that keeps the work behind the work moving.'],
-  [Truck, 'Logistics & field execution', 'Dispatchable pickup, delivery, sourcing, verification and on-the-ground support.'],
-  [CalendarDays, 'Events & experiences', 'Planning, setup, production, guest support, community programming and closeout.'],
-  [Palette, 'Creative & production', 'Design, apparel, signage, print, content, media and branded assets.'],
+  [Briefcase, 'Administrative & digital operations', 'Remote-friendly support that keeps the work behind the work moving.'],
+  [MapPin, 'Logistics & field execution', 'Dispatchable pickup, delivery, sourcing, verification and on-the-ground support.'],
+  [MapPin, 'Events & experiences', 'Planning, setup, production, guest support, community programming and closeout.'],
+  [Store, 'Creative & production', 'Design, apparel, signage, print, content, media and branded assets.'],
   [FileText, 'Documents & coordination', 'Structured document, records, coordination and operational support within approved scope.'],
-  [UsersRound, 'Growth & relationship support', 'Prospecting, partnership development, referral support and commercial operations.'],
+  [MapPin, 'Growth & relationship support', 'Prospecting, partnership development, referral support and commercial operations.'],
 ];
 
 const process = [
