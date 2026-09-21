@@ -96,7 +96,7 @@ export default function PortfolioPage() {
             <p className="text-[#a17a2a] text-xs font-black uppercase tracking-[.18em]">How working with DANI feels</p>
             <h2 className="mt-3 text-3xl sm:text-4xl font-black text-[#45141d]">You bring us the need. We help organize the work.</h2>
             <p className="mt-5 text-[#6e6264] text-lg leading-relaxed">
-              We start by understanding what needs to happen, confirm the right scope and next step, then coordinate the approved work through DANI's operating system.
+              We start by understanding what needs to happen, confirm the right scope and next step, then coordinate the approved work through DANI’s operating system.
             </p>
             <div className="mt-7 space-y-3">
               {[
