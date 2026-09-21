@@ -21,12 +21,14 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
         ? env.QUICKBOOKS
         : false;
   const connected = (state?.connections || []).some(c => c.adapter_code === system.key && c.connection_status === 'CONNECTED');
+  const notionInternalHealthy = system.key === 'NOTION' && Boolean(state?.notionInternalValid);
 
   async function connect() {
     if (system.key === 'GOOGLE_VOICE') {
       window.open(system.provider, '_blank', 'noopener,noreferrer');
       return;
     }
+    if (system.key === 'NOTION' && env.NOTION_INTERNAL) { await onRefresh(); return; }
     const endpoint = system.key === 'QUICKBOOKS_ONLINE'
       ? '/api/integrations/quickbooks/start'
       : system.key === 'NOTION'
@@ -41,13 +43,13 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
   return <div style={{border:'1px solid #e6d9c8',borderRadius:16,padding:18,background:'#fff'}}>
     <div style={{display:'flex',justifyContent:'space-between',gap:10,alignItems:'flex-start'}}>
       <strong style={{fontSize:18,color:'#6b1f2b'}}>{system.name}</strong>
-      <span className='portal-pill'>{connected ? 'CONNECTED' : configured ? 'READY TO CONNECT' : 'CREDENTIALS REQUIRED'}</span>
+      <span className='portal-pill'>{connected || notionInternalHealthy ? 'CONNECTED' : configured ? 'READY TO CONNECT' : 'CREDENTIALS REQUIRED'}</span>
     </div>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5}}><strong>Auth:</strong> {system.auth}</p>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5,wordBreak:'break-word'}}><strong>Callback:</strong> {system.callback}</p>
-    {system.key !== 'GOOGLE_VOICE' && <button className='portal-primary' style={{border:0,cursor:'pointer'}} disabled={!configured} onClick={connect}>{connected ? 'Reconnect' : 'Connect'} ↗</button>}
+    {system.key !== 'GOOGLE_VOICE' && <button className='portal-primary' style={{border:0,cursor:'pointer'}} disabled={!configured} onClick={connect}>{system.key === 'NOTION' && env.NOTION_INTERNAL ? 'Validate token' : connected ? 'Reconnect' : 'Connect'} ↗</button>}
     {system.key === 'GOOGLE_VOICE' && <a className='portal-primary' href={system.provider} target='_blank' rel='noreferrer'>Open Google Voice ↗</a>}
-    {connected && <p className='portal-note' style={{marginTop:10}}>DANI has a stored, encrypted connection record. External IDs remain references; DANI retains its own runtime authority.</p>}
+    {(connected || notionInternalHealthy) && <p className='portal-note' style={{marginTop:10}}>{notionInternalHealthy && !connected ? 'The DANI Notion internal connection token is valid. Share the required parent pages/databases with that Notion connection before expecting page reads/writes.' : 'DANI has a stored, encrypted connection record. External IDs remain references; DANI retains its own runtime authority.'}</p>}
   </div>;
 }
 
