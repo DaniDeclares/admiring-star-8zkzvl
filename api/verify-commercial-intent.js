@@ -29,8 +29,20 @@ const governedCatalog=async()=>prisma.$queryRawUnsafe(`
         s.service_family AS family, s.description, s.starting_price AS "baseCustomerPrice", s.public_price_low AS "publicPriceLow",
         s.public_price_high AS "publicPriceHigh", s.public_price_display AS "publicPriceDisplay", s.pricing_type AS model,
         s.billing_cycle AS "billingCycle", s.resident_discount_eligible AS "residentDiscountEligible", s.commercial_status AS status,
-        s.id AS "runtimeServiceId"
+        s.id AS "runtimeServiceId",
+        rc.release_state AS "releaseState", rc.blocking_gate AS "blockingGate",
+        m.internal_cost AS "internalCost", m.margin_economics AS "marginEconomics",
+        o.ch01_a_priced AS "ch01LockedActivePricing"
  FROM public.dd_governed_service_offers o JOIN public.services s ON s.id=o.runtime_service_id
+ LEFT JOIN public.dd_service_release_contract_v1 rc ON rc.canonical_sku=o.canonical_sku
+ LEFT JOIN LATERAL (
+   SELECT m.internal_cost, m.margin_economics
+   FROM public.dd_master_service_universe m
+   WHERE m.canonical_sku=o.canonical_sku
+     AND m.lifecycle_status='CANONICAL_ACTIVE'
+   ORDER BY m.updated_at DESC
+   LIMIT 1
+ ) m ON true
  WHERE o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY') ORDER BY o.division, o.service_name`);
 
 const governedService=async(serviceId)=>getGovernedCommercialOffer(serviceId);
