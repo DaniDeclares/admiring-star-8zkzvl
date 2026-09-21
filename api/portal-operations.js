@@ -125,7 +125,25 @@ async function getStaffSnapshot(supabase) {
   ]);
   const errors = [requests, jobs, appointments, providers, changes, evidence, payments, pendingCapabilities, w9Submissions].filter(item => item.error);
   if (errors.length) throw errors[0].error;
-  return { requests: requests.data || [], jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [] };
+  const requestRows = requests.data || [];
+  const leadIds = [...new Set(requestRows.map(row => row.lead_id).filter(Boolean))];
+  let leadById = new Map();
+  if (leadIds.length) {
+    const { data: leads, error: leadsError } = await supabase.from('leads').select('id, full_name, email, phone, organization_name').in('id', leadIds);
+    if (leadsError) throw leadsError;
+    leadById = new Map((leads || []).map(lead => [lead.id, lead]));
+  }
+  const enrichedRequests = requestRows.map(row => {
+    const lead = row.lead_id ? leadById.get(row.lead_id) : null;
+    return {
+      ...row,
+      client_name: row.client_name || lead?.full_name || null,
+      client_email: row.client_email || lead?.email || null,
+      client_phone: row.client_phone || lead?.phone || null,
+      organization_name: row.organization_name || lead?.organization_name || null,
+    };
+  });
+  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [] };
 }
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
