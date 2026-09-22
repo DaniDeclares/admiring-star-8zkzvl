@@ -14,10 +14,6 @@ export function AccountBadge({ session }) {
   const signOut = async () => { await supabase.auth.signOut(); window.location.href = '/portal/login'; };
   return <div className="portal-account-badge">Signed in as <strong>{session.user.email}</strong><button type="button" onClick={signOut}>Sign out</button></div>;
 }
-
-// Mirrors the exact gates staff review at /portal/provider-approval (and that
-// dd_approve_provider_application enforces server-side) so this never becomes
-// a second, competing source of truth about what "approved" requires.
 export function buildProviderRequirements(application, capabilities) {
   const caps = capabilities || [];
   return [
@@ -32,34 +28,102 @@ export function buildProviderRequirements(application, capabilities) {
   ];
 }
 
-// Shared session/snapshot fetch + mutation logic for every /portal/* page.
-// Each page calls this independently rather than sharing a layout/context --
-// that means one fetch per page navigation instead of one per app session,
-// but it keeps every page a self-contained route (works on direct link/
-// refresh, no nested-router plumbing) which matters more here than shaving
-// a request off a tab switch.
 export function useProviderWorkspace() {
-  const [session, setSession] = useState(null); const [snapshot, setSnapshot] = useState(null); const [loading, setLoading] = useState(true); const [message, setMessage] = useState(''); const [error, setError] = useState('');
+  const [session, setSession] = useState(null);
+  const [snapshot, setSnapshot] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
   const load = useCallback(async () => {
-    setLoading(true); setError(''); const { data } = await supabase.auth.getSession();
-    if (!data.session) { setError('Please sign in to access your DANI DECLARES workspace.'); setLoading(false); return; }
-    setSession(data.session); const response = await fetch('/api/portal-operations', { headers: { Authorization: `Bearer ${data.session.access_token}` } }); const body = await response.json();
-    if (!response.ok || !body.success) setError(body.error || 'Portal data could not be loaded.'); else setSnapshot(body); setLoading(false);
+    setLoading(true);
+    setError('');
+    try {
+      const sessionResult = await supabase.auth.getSession();
+      if (sessionResult.error) throw sessionResult.error;
+      const activeSession = sessionResult.data?.session;
+      if (!activeSession) {
+        setSession(null);
+        setSnapshot(null);
+        setError('Please sign in to access your DANI DECLARES workspace.');
+        return;
+      }
+      setSession(activeSession);
+
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 15000);
+      let response;
+      try {
+        response = await fetch('/api/portal-operations', {
+          headers: { Authorization: `Bearer ${activeSession.access_token}` },
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+      } finally {
+        window.clearTimeout(timeout);
+      }
+
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || !body.success) {
+        throw new Error(body.error || `Portal data could not be loaded (HTTP ${response.status}).`);
+      }
+      setSnapshot(body);
+    } catch (e) {
+      const messageText = e?.name === 'AbortError'
+        ? 'DANI HQ took too long to respond. Please try Refresh again.'
+        : (e?.message || 'Portal data could not be loaded.');
+      setError(messageText);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { if (!session) return undefined; const timer = window.setInterval(load, 30000); const refreshOnFocus = () => { if (document.visibilityState === 'visible') load(); }; document.addEventListener('visibilitychange', refreshOnFocus); return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', refreshOnFocus); }; }, [session, load]);
+  useEffect(() => {
+    if (!session) return undefined;
+    const timer = window.setInterval(load, 30000);
+    const refreshOnFocus = () => { if (document.visibilityState === 'visible') load(); };
+    document.addEventListener('visibilitychange', refreshOnFocus);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', refreshOnFocus);
+    };
+  }, [session, load]);
+
   const actionEventName = (action) => ({ assignment_response: 'job_assigned', field_event: 'job_started', task_update: 'job_started', change_order_decision: 'estimate_accepted', completion_review: 'job_completed' }[action] || null);
   const act = async (action, payload) => {
-    setMessage(''); setError(''); if (!session) return; const response = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action, ...payload }) }); const body = await response.json();
-    if (!response.ok || !body.success) { captureServiceLifecycle('fulfillment_blocked',{route:window.location.pathname,gate_state:'portal_action_failed'}); setError(body.error || 'Action failed.'); } else { captureServiceLifecycle(actionEventName(action),{route:window.location.pathname}); setMessage('Updated successfully.'); await load(); }
+    setMessage(''); setError(''); if (!session) return;
+    try {
+      const response = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action, ...payload }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || !body.success) throw new Error(body.error || 'Action failed.');
+      if (actionEventName(action)) captureServiceLifecycle(actionEventName(action), { route: window.location.pathname });
+      setMessage('Updated successfully.');
+      await load();
+    } catch (e) {
+      captureServiceLifecycle('fulfillment_blocked', { route: window.location.pathname, gate_state: 'portal_action_failed' });
+      setError(e?.message || 'Action failed.');
+    }
   };
   const uploadEvidence = async (task, file) => {
-    if (!file || !session) return; setError(''); setMessage('Preparing secure evidence upload…');
-    const response = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action: 'create_evidence_upload', jobId: task.job_id, taskId: task.id, fileName: file.name, contentType: file.type, evidenceType: 'FIELD_PHOTO', fileMetadata: { size: file.size, type: file.type } }) }); const body = await response.json();
-    if (!response.ok || !body.success) { captureServiceLifecycle('fulfillment_blocked',{route:window.location.pathname,gate_state:'evidence_upload_blocked'}); return setError(body.error || 'Could not prepare evidence upload.'); }
-    const { error: uploadError } = await supabase.storage.from('dd-job-evidence').uploadToSignedUrl(body.path, body.token, file); if (uploadError) return setError(uploadError.message || 'Evidence upload failed.');
-    const finalize = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action: 'finalize_evidence', ...body.finalizePayload }) }); const finalizeBody = await finalize.json();
-    if (!finalize.ok || !finalizeBody.success) { captureServiceLifecycle('fulfillment_blocked',{route:window.location.pathname,gate_state:'evidence_finalize_blocked'}); return setError(finalizeBody.error || 'Evidence record could not be finalized.'); } captureServiceLifecycle('job_completed',{route:window.location.pathname,gate_state:'evidence_attached'}); setMessage('Evidence uploaded and attached to the task.'); await load();
+    if (!file || !session) return;
+    try {
+      setError(''); setMessage('Preparing secure evidence upload…');
+      const response = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action: 'create_evidence_upload', jobId: task.job_id, taskId: task.id, fileName: file.name, contentType: file.type, evidenceType: 'FIELD_PHOTO', fileMetadata: { size: file.size, type: file.type } }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || !body.success) throw new Error(body.error || 'Could not prepare evidence upload.');
+      const { error: uploadError } = await supabase.storage.from('dd-job-evidence').uploadToSignedUrl(body.path, body.token, file);
+      if (uploadError) throw uploadError;
+      const finalize = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action: 'finalize_evidence', ...body.finalizePayload }) });
+      const finalizeBody = await finalize.json().catch(() => ({}));
+      if (!finalize.ok || !finalizeBody.success) throw new Error(finalizeBody.error || 'Evidence record could not be finalized.');
+      captureServiceLifecycle('job_completed', { route: window.location.pathname, gate_state: 'evidence_attached' });
+      setMessage('Evidence uploaded and attached to the task.');
+      await load();
+    } catch (e) {
+      captureServiceLifecycle('fulfillment_blocked', { route: window.location.pathname, gate_state: 'evidence_upload_failed' });
+      setError(e?.message || 'Evidence upload failed.');
+    }
   };
   return { session, snapshot, loading, error, message, load, act, uploadEvidence };
 }
