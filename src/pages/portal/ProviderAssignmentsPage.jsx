@@ -24,6 +24,12 @@ export default function ProviderAssignmentsPage() {
             <small>{item.status} · {item.dd_estimates?.location_address || 'Location on file'}</small>
             <small>Proposed provider compensation: {'$' + Number(item.proposed_compensation || 0).toFixed(2)}</small>
             {item.scope_snapshot?.summary && <p className="portal-note">{item.scope_snapshot.summary}</p>}
+            {item.scope_snapshot?.components?.length ? <div className="portal-note"><strong>Your assigned work</strong><ul>{item.scope_snapshot.components.map((component,index)=><li key={component.componentCode||index}>{component.componentName||component.componentCode||'Work component'}{component.quantity!=null?` · ${component.quantity} ${component.unitType||''}`:''}</li>)}</ul></div> : null}
+            {item.scope_snapshot?.inclusions?.length ? <div className="portal-note"><strong>Included</strong><ul>{item.scope_snapshot.inclusions.map((value,index)=><li key={index}>{String(value)}</li>)}</ul></div> : null}
+            {item.scope_snapshot?.exclusions?.length ? <div className="portal-note"><strong>Not included</strong><ul>{item.scope_snapshot.exclusions.map((value,index)=><li key={index}>{String(value)}</li>)}</ul></div> : null}
+            {item.scope_snapshot?.completionCriteria?.length ? <div className="portal-note"><strong>Completion standard</strong><ul>{item.scope_snapshot.completionCriteria.map((value,index)=><li key={index}>{String(value)}</li>)}</ul></div> : null}
+            {item.scope_snapshot?.evidenceRequirements?.length ? <div className="portal-note"><strong>Evidence to submit</strong><ul>{item.scope_snapshot.evidenceRequirements.map((value,index)=><li key={index}>{String(value)}</li>)}</ul></div> : null}
+            {item.resource_requirements_snapshot?.length ? <div className="portal-note"><strong>Resources you must provide/verify</strong><ul>{item.resource_requirements_snapshot.map((req,index)=><li key={req.code||index}>{req.name||req.code||'Required resource'}{req.minimumQuantity>1?` · qty ${req.minimumQuantity}`:''}{req.compensationTreatment?` · ${String(req.compensationTreatment).replaceAll('_',' ').toLowerCase()}`:''}</li>)}</ul></div> : null}
             {item.status === 'COUNTEROFFERED' && <small>Counteroffer submitted: {'$' + Number(item.counter_compensation || 0).toFixed(2)}{item.counter_reason ? ' · ' + item.counter_reason : ''}</small>}
           </div>
           {item.status === 'OFFERED' && <div className="portal-actions" style={{alignItems:'flex-start',flexWrap:'wrap'}}>
