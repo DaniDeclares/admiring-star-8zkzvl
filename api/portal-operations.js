@@ -182,11 +182,23 @@ async function getDirectProviderAuthorizationSnapshot(supabase, providerId) {
   if (providerError) throw providerError;
   const org = provider?.dd_provider_organizations;
   if (!provider?.is_active || !org?.is_active) return null;
-  const { data: capabilities, error: capError } = await supabase
-    .from('dd_provider_capabilities')
-    .select('id, is_authorized, service_line, capability_key, services(sku)')
-    .eq('provider_id', providerId);
+  const [capabilitiesResult, signatureResult] = await Promise.all([
+    supabase
+      .from('dd_provider_capabilities')
+      .select('id, is_authorized, service_line, capability_key, services(sku)')
+      .eq('provider_id', providerId),
+    supabase
+      .from('dd_provider_agreement_signatures')
+      .select('signed_at, agreement_version, signer_full_name')
+      .eq('provider_id', providerId)
+      .order('signed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  const { data: capabilities, error: capError } = capabilitiesResult;
   if (capError) throw capError;
+  if (signatureResult.error) throw signatureResult.error;
+  const signature = signatureResult.data || null;
   return {
     application: {
       id: null,
@@ -195,6 +207,9 @@ async function getDirectProviderAuthorizationSnapshot(supabase, providerId) {
       insurance_status: null,
       identity_status: null,
       agreement_status: org.agreement_status,
+      agreement_signed_at: signature?.signed_at || null,
+      agreement_version: signature?.agreement_version || null,
+      agreement_signer_name: signature?.signer_full_name || null,
       background_check_status: null,
       compliance_status: org.compliance_status,
       legal_name: org.legal_name || org.name,
@@ -847,13 +862,29 @@ export default async function handler(req, res) {
       if (!payload.agreed) return fail(res, 'You must confirm you have read and agree to the Provider Agreement.');
       const { data: application, error: applicationError } = await context.supabase.from('dd_provider_applications').select('id, agreement_status').eq('applicant_user_id', context.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (applicationError) throw applicationError;
-      if (!application) return fail(res, 'No provider application was found for this account.', 404);
-      if (application.agreement_status === 'EXECUTED') return fail(res, 'This agreement has already been signed and cannot be re-signed.', 409);
       const forwardedFor = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-      const { error: signatureError } = await context.supabase.from('dd_provider_agreement_signatures').insert({ application_id: application.id, signer_user_id: context.user.id, signer_full_name: fullLegalName, agreement_version: PROVIDER_AGREEMENT_VERSION, ip_address: forwardedFor || req.socket?.remoteAddress || null, user_agent: req.headers['user-agent'] || null });
-      if (signatureError) throw signatureError;
-      const { error: updateError } = await context.supabase.from('dd_provider_applications').update({ agreement_status: 'EXECUTED' }).eq('id', application.id);
-      if (updateError) throw updateError;
+      if (application) {
+        if (application.agreement_status === 'EXECUTED') return fail(res, 'This agreement has already been signed and cannot be re-signed.', 409);
+        const { error: signatureError } = await context.supabase.from('dd_provider_agreement_signatures').insert({ application_id: application.id, signer_user_id: context.user.id, signer_full_name: fullLegalName, agreement_version: PROVIDER_AGREEMENT_VERSION, ip_address: forwardedFor || req.socket?.remoteAddress || null, user_agent: req.headers['user-agent'] || null });
+        if (signatureError) throw signatureError;
+        const { error: updateError } = await context.supabase.from('dd_provider_applications').update({ agreement_status: 'EXECUTED' }).eq('id', application.id);
+        if (updateError) throw updateError;
+      } else {
+        const providerId = context.identity?.entity_id;
+        if (!providerId) return fail(res, 'No provider profile is linked to this account.', 404);
+        const { data: provider, error: providerError } = await context.supabase
+          .from('dd_providers')
+          .select('id, org_id, is_active, dd_provider_organizations(agreement_status, is_active)')
+          .eq('id', providerId)
+          .maybeSingle();
+        if (providerError) throw providerError;
+        if (!provider?.is_active || !provider.dd_provider_organizations?.is_active) return fail(res, 'The linked provider profile is not active.', 403);
+        if (provider.dd_provider_organizations.agreement_status === 'EXECUTED') return fail(res, 'This agreement has already been signed and cannot be re-signed.', 409);
+        const { error: signatureError } = await context.supabase.from('dd_provider_agreement_signatures').insert({ provider_id: provider.id, provider_org_id: provider.org_id, signer_user_id: context.user.id, signer_full_name: fullLegalName, agreement_version: PROVIDER_AGREEMENT_VERSION, ip_address: forwardedFor || req.socket?.remoteAddress || null, user_agent: req.headers['user-agent'] || null });
+        if (signatureError) throw signatureError;
+        const { error: updateError } = await context.supabase.from('dd_provider_organizations').update({ agreement_status: 'EXECUTED', agreement_effective_date: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString() }).eq('id', provider.org_id);
+        if (updateError) throw updateError;
+      }
       return ok(res, { agreementStatus: 'EXECUTED' });
     }
     if (action === 'create_resident_invite') {
