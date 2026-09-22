@@ -1,7 +1,7 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
-import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
+import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin } from './_w9Crypto.js';
@@ -918,6 +918,15 @@ export default async function handler(req, res) {
         actorUserId: context.user.id
       });
       return ok(res, { assignment });
+    }
+    if (action === 'owner_estimate_assignment_response') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const result = await respondToOwnerEstimateAssignment(context.supabase, {
+        assignmentId: payload.assignmentId,
+        decision: payload.decision,
+        actorUserId: context.user.id
+      });
+      return ok(res, result);
     }
     if (action === 'resolve_estimate_counteroffer') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
