@@ -360,6 +360,16 @@ export default async function handler(req, res) {
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
+      if (req.query?.quoteEconomics === '1') {
+        const [componentsResult, providersResult] = await Promise.all([
+          context.supabase.from('dd_service_package_components').select('id,service_id,component_id,component_role,included_quantity,quantity_input_key,is_required,is_optional,fulfillment_mode,sort_order,dd_service_components(id,component_code,component_name,unit_type,cost_category,tax_classification,default_fulfillment_mode)').eq('is_active',true).order('sort_order',{ascending:true}),
+          context.supabase.from('dd_providers').select('id,first_name,last_name,role_title,is_active,dd_provider_organizations(name,accepts_new_work,is_active)').eq('is_active',true).order('first_name',{ascending:true})
+        ]);
+        if (componentsResult.error) throw componentsResult.error;
+        if (providersResult.error) throw providersResult.error;
+        const providers=(providersResult.data||[]).filter(p=>p.dd_provider_organizations?.is_active&&p.dd_provider_organizations?.accepts_new_work);
+        return ok(res,{role:context.role,ownerUserId:context.user.id,packageComponents:componentsResult.data||[],providers});
+      }
       if (req.query?.clientOrganizations === '1') {
         const { data: organizations, error } = await context.supabase.from('dd_client_organizations')
           .select('id,display_name,legal_name,channel_code,status').order('display_name', { ascending: true }).limit(500);
