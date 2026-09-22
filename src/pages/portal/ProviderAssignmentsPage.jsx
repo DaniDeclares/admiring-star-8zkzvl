@@ -24,6 +24,7 @@ export default function ProviderAssignmentsPage() {
             <small>{item.status} · {item.dd_estimates?.location_address || 'Location on file'}</small>
             <small>Proposed provider compensation: {'$' + Number(item.proposed_compensation || 0).toFixed(2)}</small>
             {item.scope_snapshot?.summary && <p className="portal-note">{item.scope_snapshot.summary}</p>}
+            {item.route_distance_miles!=null && <p className="portal-note"><strong>Travel:</strong> {Number(item.route_distance_miles).toFixed(1)} mi one-way · {Number(item.route_distance_miles*2).toFixed(1)} mi trip basis{item.travel_cost_snapshot!=null?` · ${Number(item.travel_cost_snapshot).toFixed(2)} travel included in offer`:''}</p>}
             {item.scope_snapshot?.components?.length ? <div className="portal-note"><strong>Your assigned work</strong><ul>{item.scope_snapshot.components.map((component,index)=><li key={component.componentCode||index}>{component.componentName||component.componentCode||'Work component'}{component.quantity!=null?` · ${component.quantity} ${component.unitType||''}`:''}</li>)}</ul></div> : null}
             {item.scope_snapshot?.inclusions?.length ? <div className="portal-note"><strong>Included</strong><ul>{item.scope_snapshot.inclusions.map((value,index)=><li key={index}>{String(value)}</li>)}</ul></div> : null}
             {item.scope_snapshot?.exclusions?.length ? <div className="portal-note"><strong>Not included</strong><ul>{item.scope_snapshot.exclusions.map((value,index)=><li key={index}>{String(value)}</li>)}</ul></div> : null}
