@@ -904,6 +904,22 @@ export default async function handler(req, res) {
       });
       return ok(res, { assignment });
     }
+    if (action === 'finalize_manual_provider_route') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const miles = Number(payload.routeDistanceMiles);
+      const sourceNote = String(payload.sourceNote || '').trim();
+      const verificationMethod = String(payload.verificationMethod || 'MANUAL_MAP_CHECK');
+      if (!payload.assignmentId || !Number.isFinite(miles) || miles < 0 || !sourceNote) return fail(res, 'assignmentId, non-negative routeDistanceMiles, and sourceNote are required.');
+      const { data, error } = await context.supabase.rpc('dd_finalize_manual_provider_route_offer', {
+        p_assignment_id: payload.assignmentId,
+        p_route_distance_miles: miles,
+        p_source_note: sourceNote,
+        p_verified_by: context.user.id,
+        p_verification_method: verificationMethod
+      });
+      if (error) throw error;
+      return ok(res, { routeResult: data });
+    }
     if (action === 'estimate_assignment_response') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const providerId = context.isStaff ? payload.providerId : context.identity?.entity_id;
