@@ -382,7 +382,7 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
         });
         if(jobAssignmentError) throw jobAssignmentError;
       }
-      const {error:jobUpdateError}=await supabase.from('dd_jobs').update({job_status:'ASSIGNED',assigned_to:providerId,updated_at:now}).eq('id',job.id);
+      const {error:jobUpdateError}=await supabase.from('dd_jobs').update({assigned_to:providerId,updated_at:now}).eq('id',job.id);
       if(jobUpdateError) throw jobUpdateError;
     }
   }
@@ -424,7 +424,7 @@ export async function respondToOwnerEstimateAssignment(supabase, { assignmentId,
   if(normalized==='ACCEPT'){
     if(job){
       const {error:jobUpdateError}=await supabase.from('dd_jobs').update({
-        job_status:'ASSIGNED_OWNER',assigned_to:`OWNER:${actorUserId}`,updated_at:now
+        assigned_to:`OWNER:${actorUserId}`,updated_at:now
       }).eq('id',job.id);
       if(jobUpdateError) throw jobUpdateError;
     }
@@ -438,7 +438,7 @@ export async function respondToOwnerEstimateAssignment(supabase, { assignmentId,
   await supabase.from('dd_estimates').update({assignment_readiness_status:'NEEDS_REASSIGNMENT'}).eq('id',offer.estimate_id);
   if(job){
     const {error:jobUpdateError}=await supabase.from('dd_jobs').update({
-      job_status:'DISPATCH_REVIEW',assigned_to:null,
+      job_status:'blocked',assigned_to:null,
       internal_notes:[job.internal_notes,'Owner first refusal declined; route to next eligible provider only after location/mileage economics resolve.'].filter(Boolean).join('\n'),
       updated_at:now
     }).eq('id',job.id);
