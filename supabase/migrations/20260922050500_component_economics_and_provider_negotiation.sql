@@ -41,6 +41,29 @@ create table if not exists public.dd_service_package_components (
   constraint dd_service_package_components_mode_chk check (fulfillment_mode is null or fulfillment_mode in ('IN_HOUSE','PROVIDER','PROCURED','SUBCONTRACTED','ADMINISTRATIVE','LOGISTICS'))
 );
 
+
+create table if not exists public.dd_component_cost_baselines (
+  id uuid primary key default gen_random_uuid(),
+  component_id uuid not null references public.dd_service_components(id) on delete cascade,
+  service_id uuid references public.services(id) on delete cascade,
+  cost_type text not null,
+  unit_cost numeric not null,
+  unit_type text not null,
+  currency text not null default 'USD',
+  evidence_status text not null default 'UNRESOLVED',
+  source_type text,
+  source_reference text,
+  effective_from timestamptz not null default now(),
+  effective_to timestamptz,
+  status text not null default 'DRAFT',
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint dd_component_cost_type_chk check (cost_type in ('OWNER_LABOR','PROVIDER_LABOR','MATERIAL','PROCUREMENT','SUBCONTRACT','TRAVEL','PAYMENT_PROCESSING','OTHER')),
+  constraint dd_component_cost_status_chk check (status in ('DRAFT','ACTIVE','PAUSED','RETIRED')),
+  constraint dd_component_cost_evidence_chk check (evidence_status in ('UNRESOLVED','OWNER_CONFIRMED','DOCUMENT_EVIDENCE','SYSTEM_VERIFIED','EXTERNAL_VERIFIED'))
+);
+
 create table if not exists public.dd_provider_compensation_rules (
   id uuid primary key default gen_random_uuid(),
   provider_id uuid references public.dd_providers(id) on delete cascade,
@@ -205,6 +228,7 @@ alter table public.dd_estimates
   add column if not exists active_economics_snapshot_id uuid references public.dd_estimate_economics_snapshots(id) on delete set null;
 
 create index if not exists idx_dd_package_components_service on public.dd_service_package_components(service_id) where is_active;
+create index if not exists idx_dd_component_cost_baselines_lookup on public.dd_component_cost_baselines(component_id,service_id,status,effective_from desc);
 create index if not exists idx_dd_comp_rules_provider_service on public.dd_provider_compensation_rules(provider_id,service_id,status);
 create index if not exists idx_dd_estimate_econ_estimate on public.dd_estimate_economics_snapshots(estimate_id,version desc);
 create index if not exists idx_dd_estimate_component_estimate on public.dd_estimate_component_snapshots(estimate_id);
@@ -216,6 +240,7 @@ create index if not exists idx_dd_job_cost_actuals_job on public.dd_job_cost_act
 
 alter table public.dd_service_components enable row level security;
 alter table public.dd_service_package_components enable row level security;
+alter table public.dd_component_cost_baselines enable row level security;
 alter table public.dd_provider_compensation_rules enable row level security;
 alter table public.dd_estimate_economics_snapshots enable row level security;
 alter table public.dd_estimate_component_snapshots enable row level security;
@@ -225,6 +250,7 @@ alter table public.dd_job_cost_actuals enable row level security;
 
 revoke all on public.dd_service_components from anon, authenticated;
 revoke all on public.dd_service_package_components from anon, authenticated;
+revoke all on public.dd_component_cost_baselines from anon, authenticated;
 revoke all on public.dd_provider_compensation_rules from anon, authenticated;
 revoke all on public.dd_estimate_economics_snapshots from anon, authenticated;
 revoke all on public.dd_estimate_component_snapshots from anon, authenticated;
@@ -234,6 +260,7 @@ revoke all on public.dd_job_cost_actuals from anon, authenticated;
 
 grant select,insert,update,delete on public.dd_service_components to service_role;
 grant select,insert,update,delete on public.dd_service_package_components to service_role;
+grant select,insert,update,delete on public.dd_component_cost_baselines to service_role;
 grant select,insert,update,delete on public.dd_provider_compensation_rules to service_role;
 grant select,insert,update,delete on public.dd_estimate_economics_snapshots to service_role;
 grant select,insert,update,delete on public.dd_estimate_component_snapshots to service_role;
@@ -243,6 +270,7 @@ grant select,insert,update,delete on public.dd_job_cost_actuals to service_role;
 
 comment on table public.dd_service_components is 'Reusable atomic work/cost components used to compose DANI services and packages. No customer price authority.';
 comment on table public.dd_service_package_components is 'Governed bill-of-work/material composition for a canonical runtime service. Defines inclusion, not customer price.';
+comment on table public.dd_component_cost_baselines is 'Evidence-backed component-level unit-cost authority. Separate from provider compensation and customer price.';
 comment on table public.dd_provider_compensation_rules is 'Provider compensation authority, separate from customer pricing and DANI margin requirements.';
 comment on table public.dd_estimate_economics_snapshots is 'Immutable-versioned expected economics frozen for an estimate before customer delivery.';
 comment on table public.dd_estimate_component_snapshots is 'Frozen component-level economics and fulfillment composition for an estimate version.';
