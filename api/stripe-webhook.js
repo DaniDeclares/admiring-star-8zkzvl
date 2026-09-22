@@ -141,7 +141,8 @@ export default async function handler(req,res){
    });
    if(!canonicalSelection.allowed)throw new Error(`CH01 canonical resolution failed: ${canonicalSelection.reason}`);
    const offer=await getGovernedCommercialOffer(canonicalSelection.serviceId);
-   if(!offer||offer.commercialOfferStatus!=='SELL_NOW'||offer.fulfillmentGateStatus!=='READY')return res.status(422).json({error:'Payment references a commercial offer that is no longer eligible for direct checkout.'});
+   if(!offer||offer.commercialOfferStatus!=='SELL_NOW'||offer.fulfillmentGateStatus!=='READY')return res.status(422).json({error:'Payment references a commercial offer that is no longer eligible for checkout.'});
+   const quoteRequired=QUOTE_PRICING_TYPES.has(String(offer.pricingType||'').toUpperCase());
    const result=await prisma.$transaction(async tx=>{
     const existing=await tx.$queryRaw`select id,invoice_id from public.dd_payment_events where provider_event_id=${event.id} limit 1`;
     if(existing.length)return {status:'IDEMPOTENT_REPLAY',paymentEventId:existing[0].id,invoiceId:existing[0].invoice_id};
@@ -154,17 +155,22 @@ export default async function handler(req,res){
     const estimate=await tx.dd_estimates.findFirst({where:{service_request_id:request.id},orderBy:{created_at:'desc'}});
     if(!estimate)throw new Error(`No frozen estimate found for paid request ${request.id}`);
     if(session.metadata?.estimate_id&&String(session.metadata.estimate_id)!==String(estimate.id))throw new Error('Payment estimate metadata does not match the current frozen estimate.');
-    const frozenSnapshot=Number(request.property_details?.commercialIntent?.frozenPriceSnapshot),paidAmount=money(Number(session.amount_total||0)/100);
-    if(!Number.isFinite(frozenSnapshot)||frozenSnapshot<=0)throw new Error('Paid request has no valid frozen commercial price snapshot.');
-    if(money(Number(estimate.estimated_total))!==money(frozenSnapshot))throw new Error('Frozen request price does not match the approved estimate total.');
+    const frozenSnapshot=Number(request.property_details?.commercialIntent?.frozenPriceSnapshot),approvedTotal=money(Number(estimate.estimated_total)),paidAmount=money(Number(session.amount_total||0)/100);
+    if(!Number.isFinite(approvedTotal)||approvedTotal<=0)throw new Error('Paid request has no valid approved estimate total.');
+    if(session.metadata?.full_estimate_amount&&money(Number(session.metadata.full_estimate_amount))!==approvedTotal)throw new Error('Payment metadata does not match the approved estimate total.');
+    if(!quoteRequired){
+      if(!Number.isFinite(frozenSnapshot)||frozenSnapshot<=0)throw new Error('Paid direct-checkout request has no valid frozen commercial price snapshot.');
+      if(approvedTotal!==money(frozenSnapshot))throw new Error('Frozen request price does not match the approved estimate total.');
+    }
     if(paymentType==='INITIAL_PAYMENT'){
       const expectedDeposit=money(Number(estimate.deposit_due));
+      if(!quoteRequired)throw new Error('Initial payment is only valid for an approved quote.');
       if(estimate.economics_status!=='PASS'||estimate.assignment_readiness_status!=='READY')throw new Error('Initial payment cannot be accepted for a commercially unresolved quote.');
-      if(expectedDeposit<=0||expectedDeposit>=money(frozenSnapshot))throw new Error('Approved quote has no valid partial initial payment.');
+      if(expectedDeposit<=0||expectedDeposit>=approvedTotal)throw new Error('Approved quote has no valid partial initial payment.');
       if(expectedDeposit!==paidAmount)throw new Error('Initial payment amount does not match the frozen deposit due.');
     }else{
-      if(money(frozenSnapshot)!==paidAmount)throw new Error('Full payment amount does not match the frozen commercial price.');
-      if(canonicalSelection.price!=null && money(Number(canonicalSelection.price))!==money(frozenSnapshot))throw new Error('Paid request no longer matches the authoritative CH01 commercial price.');
+      if(approvedTotal!==paidAmount)throw new Error('Full payment amount does not match the approved estimate total.');
+      if(!quoteRequired&&canonicalSelection.price!=null&&money(Number(canonicalSelection.price))!==approvedTotal)throw new Error('Paid request no longer matches the authoritative CH01 commercial price.');
     }
     const metadataServiceId=request.property_details?.commercialIntent?.serviceId||request.property_details?.pricingServiceId;
     if(String(metadataServiceId||'')!==canonicalSelection.serviceId)throw new Error('Payment service metadata does not match the authoritative CH01 service resolution.');
