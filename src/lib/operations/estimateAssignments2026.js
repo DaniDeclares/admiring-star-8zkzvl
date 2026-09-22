@@ -2,6 +2,7 @@ import { summarizeEconomics, evaluateCounteroffer, calculateCompensation } from 
 
 const VERIFIED = new Set(['RESEARCH_BENCHMARK','OWNER_CONFIRMED','DOCUMENT_EVIDENCE','SYSTEM_VERIFIED','EXTERNAL_VERIFIED']);
 const money = value => Math.round(Number(value || 0) * 100) / 100;
+export const DANI_OWNER_USER_ID = 'f88a5b79-ac5a-4690-ac28-62312328cb73';
 
 function isEffective(row, now = Date.now()) {
   const from = row?.effective_from ? new Date(row.effective_from).getTime() : 0;
@@ -31,6 +32,18 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   const { data: existing, error: versionError } = await supabase.from('dd_estimate_economics_snapshots').select('version').eq('estimate_id', estimateId).order('version',{ascending:false}).limit(1).maybeSingle();
   if (versionError) throw versionError;
   const version = Number(existing?.version || 0) + 1;
+
+  let ownerAuthorizedServiceIds = new Set();
+  if (serviceIds.length) {
+    const { data: ownerAuthRows, error: ownerAuthError } = await supabase.from('dd_owner_fulfillment_authorizations')
+      .select('service_id,authorization_status,evidence_status,effective_from,effective_to')
+      .eq('owner_user_id', DANI_OWNER_USER_ID)
+      .in('service_id', serviceIds);
+    if (ownerAuthError) throw ownerAuthError;
+    ownerAuthorizedServiceIds = new Set((ownerAuthRows || [])
+      .filter(row => isEffective(row) && ['ACTIVE','SCOPED'].includes(String(row.authorization_status || '').toUpperCase()) && VERIFIED.has(row.evidence_status))
+      .map(row => row.service_id));
+  }
 
   let packageRows = [];
   if (serviceIds.length) {
@@ -98,10 +111,11 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
     const answerQuantity = row.quantity_input_key ? Number(line.answers?.[row.quantity_input_key]) : NaN;
     const quantity = Number.isFinite(answerQuantity) && answerQuantity >= 0 ? answerQuantity : Number(row.included_quantity || 1);
     const plan = matchPlan(fulfillmentPlan, line, row);
-    const fulfillmentMode = plan?.fulfillmentMode || row.fulfillment_mode || component.default_fulfillment_mode;
-    const fulfillerType = plan?.fulfillerType || (fulfillmentMode === 'PROVIDER' ? 'UNASSIGNED' : fulfillmentMode === 'IN_HOUSE' ? 'UNASSIGNED' : fulfillmentMode === 'PROCURED' ? 'VENDOR' : fulfillmentMode === 'SUBCONTRACTED' ? 'SUBCONTRACTOR' : 'UNASSIGNED');
-    const providerId = plan?.providerId || null;
-    const ownerUserId = plan?.ownerUserId || null;
+    const ownerFirst = ownerAuthorizedServiceIds.has(row.service_id);
+    const fulfillmentMode = ownerFirst ? 'IN_HOUSE' : (plan?.fulfillmentMode || row.fulfillment_mode || component.default_fulfillment_mode);
+    const fulfillerType = ownerFirst ? 'OWNER' : (plan?.fulfillerType || (fulfillmentMode === 'PROVIDER' ? 'UNASSIGNED' : fulfillmentMode === 'IN_HOUSE' ? 'UNASSIGNED' : fulfillmentMode === 'PROCURED' ? 'VENDOR' : fulfillmentMode === 'SUBCONTRACTED' ? 'SUBCONTRACTOR' : 'UNASSIGNED'));
+    const providerId = ownerFirst ? null : (plan?.providerId || null);
+    const ownerUserId = ownerFirst ? DANI_OWNER_USER_ID : (plan?.ownerUserId || null);
 
     let proposedCompensation = 0;
     let compensationBasis = {};
