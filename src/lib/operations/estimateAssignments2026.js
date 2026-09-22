@@ -342,7 +342,14 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
   else {
     const amount=Number(counterCompensation);
     if(!Number.isFinite(amount)||amount<0) throw new Error('VALID_COUNTER_AMOUNT_REQUIRED');
-    next={status:'COUNTEROFFERED',responded_at:now,counter_compensation:money(amount),counter_basis:counterBasis||{},counter_reason:reason||null};
+    const effectiveMaximum=Math.min(Number(offer.maximum_payout_amount ?? Number.POSITIVE_INFINITY),Number(offer.economic_ceiling_amount ?? Number.POSITIVE_INFINITY));
+    const target=Number(offer.target_payout_amount ?? offer.proposed_compensation);
+    const bandStatus=amount>effectiveMaximum?'EXCEEDS_MAXIMUM':amount>target?'WITHIN_MAX_REVIEW':'WITHIN_TARGET';
+    next={
+      status:'COUNTEROFFERED',responded_at:now,counter_compensation:money(amount),
+      counter_basis:{...(counterBasis||{}),bandStatus},counter_reason:reason||null,
+      economic_impact_status:bandStatus==='EXCEEDS_MAXIMUM'?'REQUIRES_REPRICE':'WITHIN_FLOOR'
+    };
   }
   const { data: updated, error:updateError }=await supabase.from('dd_estimate_assignment_offers').update(next).eq('id',assignmentId).eq('status','OFFERED').select('*').single();
   if(updateError) throw updateError;
@@ -359,7 +366,17 @@ export async function resolveEstimateCounteroffer(supabase, { assignmentId, deci
   if(offer.status!=='COUNTEROFFERED') throw new Error('NO_OPEN_COUNTEROFFER');
   const {data:snapshot,error:snapshotError}=await supabase.from('dd_estimate_economics_snapshots').select('*').eq('id',offer.economics_snapshot_id).single();
   if(snapshotError) throw snapshotError;
-  const impact=evaluateCounteroffer(snapshot,offer.proposed_compensation,offer.counter_compensation);
+  const {data:acceptedCounters,error:acceptedError}=await supabase.from('dd_estimate_assignment_offers')
+    .select('proposed_compensation,counter_compensation').eq('estimate_id',offer.estimate_id).eq('economics_snapshot_id',offer.economics_snapshot_id)
+    .eq('status','OWNER_ACCEPTED_COUNTER').neq('id',assignmentId);
+  if(acceptedError) throw acceptedError;
+  const reservedDelta=(acceptedCounters||[]).reduce((sum,row)=>sum+Math.max(0,Number(row.counter_compensation||0)-Number(row.proposed_compensation||0)),0);
+  const adjustedSnapshot={...snapshot,minimum_viable_price:money(Number(snapshot.minimum_viable_price||0)+reservedDelta)};
+  const impact=evaluateCounteroffer(adjustedSnapshot,offer.proposed_compensation,offer.counter_compensation,{
+    targetPayout:offer.target_payout_amount,
+    maximumPayout:offer.maximum_payout_amount
+  });
+  impact.reservedCounterofferDelta=money(reservedDelta);
   const now=new Date().toISOString();
   const accepted=normalized==='ACCEPT';
   const status=accepted?'OWNER_ACCEPTED_COUNTER':'OWNER_REJECTED_COUNTER';
