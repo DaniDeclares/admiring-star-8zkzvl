@@ -38,11 +38,18 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   }
 
   const providerIds = [...new Set((fulfillmentPlan || []).map(p => p.providerId).filter(Boolean))];
+  const ownerUserIds = [...new Set((fulfillmentPlan || []).map(p => p.ownerUserId).filter(Boolean))];
   let compRules = [];
+  let ownerCompRules = [];
   if (providerIds.length && componentIds.length) {
     const { data, error } = await supabase.from('dd_provider_compensation_rules').select('*').in('provider_id',providerIds).in('component_id',componentIds).eq('status','ACTIVE');
     if (error) throw error;
     compRules = data || [];
+  }
+  if (ownerUserIds.length && componentIds.length) {
+    const { data, error } = await supabase.from('dd_owner_compensation_rules').select('*').in('owner_user_id',ownerUserIds).in('component_id',componentIds).eq('status','ACTIVE');
+    if (error) throw error;
+    ownerCompRules = data || [];
   }
 
   let policy = null;
@@ -92,13 +99,22 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
       compResolved = c.resolved;
       providerCompensation += c.amount;
     } else if (fulfillerType === 'OWNER' && ownerUserId) {
-      const explicit = Number(plan?.proposedCompensation);
-      const evidence = String(plan?.compensationEvidenceStatus || '');
-      if (Number.isFinite(explicit) && explicit >= 0 && VERIFIED.has(evidence)) {
-        proposedCompensation = money(explicit);
-        compensationBasis = { compensationType: plan?.compensationType || 'NEGOTIATED_PROJECT', evidenceStatus:evidence, sourceReference:plan?.sourceReference || null };
+      const rule = selectLatest(ownerCompRules, r => r.owner_user_id === ownerUserId && r.component_id === row.component_id && (!r.service_id || r.service_id === row.service_id));
+      const governed = calculateCompensation(rule, quantity, { percentBasisAmount: calculation?.estimatedTotal || 0 });
+      if (governed.resolved) {
+        proposedCompensation = governed.amount;
+        compensationBasis = { ...governed.basis, authority:'OWNER_COMPENSATION_RULE' };
         compResolved = true;
         ownerCompensation += proposedCompensation;
+      } else {
+        const explicit = Number(plan?.proposedCompensation);
+        const evidence = String(plan?.compensationEvidenceStatus || '');
+        if (Number.isFinite(explicit) && explicit >= 0 && VERIFIED.has(evidence)) {
+          proposedCompensation = money(explicit);
+          compensationBasis = { compensationType: plan?.compensationType || 'NEGOTIATED_PROJECT', evidenceStatus:evidence, sourceReference:plan?.sourceReference || 'QUOTE_BUILDER_OWNER_OVERRIDE', authority:'QUOTE_SPECIFIC_OWNER_OVERRIDE' };
+          compResolved = true;
+          ownerCompensation += proposedCompensation;
+        }
       }
     }
 
