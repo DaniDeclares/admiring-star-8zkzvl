@@ -16,7 +16,7 @@ export default function ProviderAssignmentsPage() {
     <header className="portal-hero"><div><p className="portal-eyebrow">DANI DECLARES PROVIDER</p><h1>Assignments</h1><p>Review proposed quote work before dispatch, then manage accepted jobs. Quote offers support Accept, Decline, or Counteroffer.</p></div><div className="portal-hero-actions"><AccountBadge session={session} /><button className="portal-refresh" onClick={load}>Refresh</button></div></header>
     <ProviderNav isApprovedProvider={isApproved} agreementSigned={isSigned} />
     {error && <div className="portal-alert" role="alert">{error}</div>}{message && <div className="portal-success" role="status">{message}</div>}
-    {!isApproved ? <LockedCard title="Assignments">Assignments unlock once your application is approved.</LockedCard> :
+    {!isApproved ? <LockedCard title="Assignments">Assignments unlock once your application is approved.</LockedCard> : <>
       <Card title="Quote Assignment Offers">
         {snapshot.quoteAssignments?.length ? snapshot.quoteAssignments.map(item => <div className="portal-row" key={item.id} style={{alignItems:'flex-start'}}>
           <div>
@@ -35,6 +35,6 @@ export default function ProviderAssignmentsPage() {
           </div>}
         </div>) : <Empty>No quote assignments are waiting for your response.</Empty>}
       </Card>
-      <Card title="Assignment Queue">{snapshot.assignments?.length ? snapshot.assignments.map(item => <div className="portal-row" key={item.id}><div><strong>{item.job?.job_title || 'Assigned Job'}</strong><small>{item.assignment_status} · {item.job?.location_address || 'Location on file'}{item.job?.sla_due_at ? ` · SLA due ${formatDate(item.job.sla_due_at)}` : ''}</small></div>{item.assignment_status === 'OFFERED' && <div className="portal-actions"><button onClick={() => act('assignment_response', { assignmentId: item.id, decision: 'ACCEPT' })}>Accept</button><button className="secondary" onClick={() => act('assignment_response', { assignmentId: item.id, decision: 'REJECT', reason: 'Provider declined assignment.' })}>Reject</button></div>}</div>) : <Empty />}</Card>}
+      <Card title="Assignment Queue">{snapshot.assignments?.length ? snapshot.assignments.map(item => <div className="portal-row" key={item.id}><div><strong>{item.job?.job_title || 'Assigned Job'}</strong><small>{item.assignment_status} · {item.job?.location_address || 'Location on file'}{item.job?.sla_due_at ? ` · SLA due ${formatDate(item.job.sla_due_at)}` : ''}</small></div>{item.assignment_status === 'OFFERED' && <div className="portal-actions"><button onClick={() => act('assignment_response', { assignmentId: item.id, decision: 'ACCEPT' })}>Accept</button><button className="secondary" onClick={() => act('assignment_response', { assignmentId: item.id, decision: 'REJECT', reason: 'Provider declined assignment.' })}>Reject</button></div>}</div>) : <Empty />}</Card></>}
   </main>;
 }
