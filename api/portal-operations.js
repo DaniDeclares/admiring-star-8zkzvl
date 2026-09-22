@@ -680,7 +680,7 @@ export default async function handler(req, res) {
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
       if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'Only READY_TO_SEND estimates can be delivered.', 409);
       if (estimate.economics_status !== 'PASS') return fail(res, 'Quote economics must PASS before delivery.', 409);
-      if (estimate.assignment_readiness_status !== 'READY') return fail(res, 'Required owner/provider assignments must be accepted before delivery.', 409);
+      if (!['PENDING_PAYMENT','READY'].includes(String(estimate.assignment_readiness_status || '').toUpperCase())) return fail(res, 'Quote fulfillment must be commercially resolved before delivery.', 409);
       if (!estimate.client_email) return fail(res, 'A customer email is required to deliver this quote.', 422);
       const identityGate = customerIdentityGate(estimate, context.user?.email);
       if (!identityGate.ok) return identityFailure(res, identityGate);
