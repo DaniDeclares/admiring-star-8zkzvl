@@ -36,7 +36,7 @@ export default function ProviderAgreementPage() {
     {error && <div className="portal-alert" role="alert">{error}</div>}{message && <div className="portal-success" role="status">{message}</div>}
     {isSigned ? (
       <Card title="Agreement Signed">
-        <p><strong>Signed by:</strong> the account holder on {formatDate(application?.reviewed_at || application?.submitted_at)}.</p>
+        <p><strong>Signed by:</strong> {application?.agreement_signer_name || 'the account holder'} on {formatDate(application?.agreement_signed_at || application?.reviewed_at || application?.submitted_at)}.</p>
         <p className="portal-note">Your signed agreement is on file with DANI DECLARES. Continue to <Link to="/portal/vendor-onboarding">upload your documents</Link> or view your <Link to="/portal/profile">profile</Link>.</p>
       </Card>
     ) : (
