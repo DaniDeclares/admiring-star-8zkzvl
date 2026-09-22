@@ -1,10 +1,17 @@
-import { summarizeEconomics, evaluateCounteroffer, calculateCompensation, calculateProviderEconomicCeiling, evaluatePayoutBand } from './componentEconomics2026.js';
+import { summarizeEconomics, evaluateCounteroffer, calculateCompensation } from './componentEconomics2026.js';
 
 const VERIFIED = new Set(['RESEARCH_BENCHMARK','OWNER_CONFIRMED','DOCUMENT_EVIDENCE','SYSTEM_VERIFIED','EXTERNAL_VERIFIED']);
 const money = value => Math.round(Number(value || 0) * 100) / 100;
 
+function isEffective(row, now = Date.now()) {
+  const from = row?.effective_from ? new Date(row.effective_from).getTime() : 0;
+  const to = row?.effective_to ? new Date(row.effective_to).getTime() : null;
+  return Number.isFinite(from) && from <= now && (to === null || (Number.isFinite(to) && to > now));
+}
+
 function selectLatest(rows, predicate) {
-  return (rows || []).filter(predicate).sort((a,b) => new Date(b.effective_from || 0) - new Date(a.effective_from || 0))[0] || null;
+  const now = Date.now();
+  return (rows || []).filter(row => isEffective(row, now) && predicate(row)).sort((a,b) => new Date(b.effective_from || 0) - new Date(a.effective_from || 0))[0] || null;
 }
 
 function payoutBandAmount(band, field, quantity) {
@@ -181,6 +188,25 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   const customerPrice = money(calculation?.estimatedTotal || 0);
   const overheadRecoveryRequirement = policy ? money(Number(policy.overhead_recovery_flat || 0) + customerPrice * Number(policy.overhead_recovery_percent || 0) / 100) : 0;
   const paymentProcessingCost = policy ? money(customerPrice * Number(policy.payment_processing_percent || 0) / 100) : 0;
+  const initialSummary = summarizeEconomics({
+    customerPrice, ownerCompensation, providerCompensation, materialsCost, procurementCost, subcontractCost, travelCost,
+    paymentProcessingCost, otherVariableCost, overheadRecoveryRequirement,
+    minimumContributionAmount:policy?.minimum_contribution_amount || 0,
+    minimumMarginPercent:policy?.minimum_margin_percent || 0,
+    unresolved: unresolvedReasons.length > 0
+  });
+  let remainingProviderHeadroom = Math.max(0, Number(initialSummary.economicHeadroom || 0));
+  providerCompensation = 0;
+  for (const draft of componentDrafts) {
+    if (draft.fulfillerType !== 'PROVIDER') continue;
+    const initial = money(draft.proposedCompensation);
+    const commercialMaximum = money(draft.compensationBasis?.maximumPayout ?? initial);
+    const budgeted = money(Math.min(commercialMaximum, initial + remainingProviderHeadroom));
+    remainingProviderHeadroom = money(Math.max(0, remainingProviderHeadroom - Math.max(0, budgeted - initial)));
+    draft.budgetedProviderCost = budgeted;
+    draft.compensationBasis = { ...draft.compensationBasis, budgetedProviderCost:budgeted };
+    providerCompensation = money(providerCompensation + budgeted);
+  }
   const workingCapitalRequired = policy ? money((ownerCompensation + providerCompensation + materialsCost + procurementCost + subcontractCost + travelCost + otherVariableCost) * Number(policy.working_capital_buffer_percent || 0) / 100) : 0;
   const summary = summarizeEconomics({
     customerPrice, ownerCompensation, providerCompensation, materialsCost, procurementCost, subcontractCost, travelCost,
@@ -228,11 +254,13 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
     for (const row of insertedComponents) {
       if (!['OWNER','PROVIDER'].includes(row.fulfiller_type)) continue;
       const key = row.fulfiller_type === 'OWNER' ? 'OWNER:' + row.owner_user_id : 'PROVIDER:' + row.provider_id;
-      const group = groups.get(key) || { assignmentType:row.fulfiller_type, providerId:row.provider_id||null, ownerUserId:row.owner_user_id||null, componentSnapshotIds:[], proposedCompensation:0, targetPayout:0, maximumPayout:0, components:[] };
+      const group = groups.get(key) || { assignmentType:row.fulfiller_type, providerId:row.provider_id||null, ownerUserId:row.owner_user_id||null, componentSnapshotIds:[], proposedCompensation:0, targetPayout:0, maximumPayout:0, budgetedProviderCost:0, components:[], compensationBases:[] };
       group.componentSnapshotIds.push(row.id);
       group.proposedCompensation = money(group.proposedCompensation + Number(row.proposed_compensation || 0));
       group.targetPayout = money(group.targetPayout + Number(row.compensation_basis_snapshot?.targetPayout ?? row.proposed_compensation ?? 0));
       group.maximumPayout = money(group.maximumPayout + Number(row.compensation_basis_snapshot?.maximumPayout ?? row.proposed_compensation ?? 0));
+      group.budgetedProviderCost = money(group.budgetedProviderCost + Number(row.compensation_basis_snapshot?.budgetedProviderCost ?? row.proposed_compensation ?? 0));
+      group.compensationBases.push(row.compensation_basis_snapshot || {});
       group.components.push({ componentCode:row.component_code, componentName:row.component_name, quantity:row.quantity, unitType:row.unit_type, canonicalSku:row.canonical_sku });
       groups.set(key, group);
     }
@@ -244,7 +272,7 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
         ownerUserId:group.ownerUserId,
         componentSnapshotIds:group.componentSnapshotIds,
         proposedCompensation:group.proposedCompensation,
-        proposedBasis:{ economicsSnapshotId:snapshot.id },
+        proposedBasis:{ economicsSnapshotId:snapshot.id, budgetedProviderCost:group.budgetedProviderCost, componentCompensationBases:group.compensationBases },
         targetPayout:group.assignmentType==='PROVIDER'?group.targetPayout:null,
         maximumPayout:group.assignmentType==='PROVIDER'?group.maximumPayout:null,
         scopeSnapshot:{ title:'Quote package assignment', summary:'Assigned components from the current frozen quote economics snapshot.', components:group.components },
@@ -285,19 +313,14 @@ export async function createEstimateAssignmentOffer(supabase, { estimateId, assi
   const now = new Date().toISOString();
   let bandFields={};
   if(type==='PROVIDER'){
-    const { data:snapshot, error:snapshotError }=await supabase.from('dd_estimate_economics_snapshots').select('*').eq('id',estimate.active_economics_snapshot_id).single();
-    if(snapshotError) throw snapshotError;
-    const economicCeiling=calculateProviderEconomicCeiling(snapshot,proposedCompensation);
-    const band=evaluatePayoutBand({
-      status:'ACTIVE', evidence_status:'SYSTEM_VERIFIED', initial_offer_amount:proposedCompensation,
-      target_payout_amount:targetPayout ?? proposedCompensation, maximum_payout_amount:maximumPayout ?? proposedCompensation,
-      source_reference:proposedBasis?.payoutBandId || null, equipment_basis:proposedBasis?.equipmentBasis || 'NOT_APPLICABLE',
-      material_basis:proposedBasis?.materialBasis || 'NOT_APPLICABLE', escalation_policy:proposedBasis?.escalationPolicy || {mode:'MANUAL',auto_step_up:false}
-    },economicCeiling);
-    if(!band.resolved) throw new Error(band.reason || 'PAYOUT_BAND_UNRESOLVED');
+    const commercialMaximum=money(maximumPayout ?? proposedCompensation);
+    const budgetedProviderCost=money(proposedBasis?.budgetedProviderCost ?? commercialMaximum);
+    const economicCeiling=money(Math.max(Number(proposedCompensation||0),budgetedProviderCost));
+    if(Number(proposedCompensation)>economicCeiling) throw new Error('INITIAL_OFFER_EXCEEDS_ECONOMIC_CEILING');
     bandFields={
-      initial_offer_amount:band.initialOffer,target_payout_amount:band.targetPayout,maximum_payout_amount:band.commercialMaximum,
-      economic_ceiling_amount:band.economicCeiling,budgeted_provider_cost:band.budgetedProviderCost,payout_band_snapshot:band
+      initial_offer_amount:money(proposedCompensation),target_payout_amount:money(targetPayout ?? proposedCompensation),maximum_payout_amount:commercialMaximum,
+      economic_ceiling_amount:economicCeiling,budgeted_provider_cost:budgetedProviderCost,
+      payout_band_snapshot:{initialOffer:money(proposedCompensation),targetPayout:money(targetPayout ?? proposedCompensation),commercialMaximum,economicCeiling,budgetedProviderCost,componentCompensationBases:proposedBasis?.componentCompensationBases||[]}
     };
   }
   const { data: offer, error: offerError } = await supabase.from('dd_estimate_assignment_offers').insert({
