@@ -72,6 +72,9 @@ left join lateral (
 left join lateral (
   select count(*) filter (where x.is_authorized=true)::int authorized_provider_capability_count from public.dd_provider_capabilities x where x.service_id=s.id
 ) pc on true
+-- Unresolved master records have no commercial identity yet. Keep them in the
+-- master reconciliation register until a canonical SKU is authorized.
+where nullif(btrim(m.canonical_sku),'') is not null
 on conflict (master_record_id) do update set
   canonical_sku=excluded.canonical_sku,
   service_name=excluded.service_name,
