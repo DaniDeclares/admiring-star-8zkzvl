@@ -102,6 +102,9 @@ export default async function handler(req,res){
            ${Number(invoice.amount_paid||0)/100},${invoice.currency||'usd'},${JSON.stringify(invoice.metadata||{})}::jsonb)
         returning id
       `;
+      if(paymentEstimate){
+        await tx.$queryRaw`select public.dd_activate_paid_estimate_assignments(${paymentEstimate.id}::uuid) as routing`;
+      }
       if(paymentJob){
         await publishPaymentReconciled({
           paymentEventId: paymentEvent[0].id,
@@ -166,7 +169,7 @@ export default async function handler(req,res){
     if(paymentType==='INITIAL_PAYMENT'){
       const expectedDeposit=money(Number(estimate.deposit_due));
       if(!quoteRequired)throw new Error('Initial payment is only valid for an approved quote.');
-      if(estimate.economics_status!=='PASS'||estimate.assignment_readiness_status!=='READY')throw new Error('Initial payment cannot be accepted for a commercially unresolved quote.');
+      if(estimate.economics_status!=='PASS'||!['PENDING_PAYMENT','READY'].includes(String(estimate.assignment_readiness_status||'').toUpperCase()))throw new Error('Initial payment cannot be accepted for a commercially unresolved quote.');
       if(expectedDeposit<=0||expectedDeposit>=approvedTotal)throw new Error('Approved quote has no valid partial initial payment.');
       if(expectedDeposit!==paidAmount)throw new Error('Initial payment amount does not match the frozen deposit due.');
     }else{
@@ -220,7 +223,11 @@ export default async function handler(req,res){
      job=await tx.dd_jobs.update({where:{id:job.id},data:{work_order_id:workOrderId},select:{id:true,public_reference:true,work_order_id:true}});
     }
     const reconciliation=await reconcileStripePayment(event,tx);
+    const [routingActivation]=await tx.$queryRaw`select public.dd_activate_paid_estimate_assignments(${estimate.id}::uuid) as routing`;
     await tx.serviceRequest.update({where:{id:request.id},data:{status:'job_created'}});
+    if(routingActivation?.routing){
+      console.log('Paid-first fulfillment routing activated',routingActivation.routing);
+    }
     // Queued on the same transaction as the reconciliation it describes: either both commit
     // together, or a failure here rolls back the job/status/reconciliation too, so a Stripe
     // retry starts clean instead of silently losing the notification behind an idempotent replay.
