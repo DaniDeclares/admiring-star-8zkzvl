@@ -151,7 +151,7 @@ async function getStaffSnapshot(supabase) {
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
     .from('dd_provider_applications')
-    .select('id, application_status, tax_form_status, insurance_status, identity_status, agreement_status, background_check_status, compliance_status, legal_name, applicant_type, contact_first_name, contact_last_name, contact_email, contact_phone, physical_address, service_area, service_notes, submitted_at, reviewed_at')
+    .select('id, application_status, tax_form_status, insurance_status, identity_status, agreement_status, background_check_status, compliance_status, legal_name, applicant_type, contact_first_name, contact_last_name, contact_email, contact_phone, physical_address, service_area, service_radius_miles, service_zip_codes, dispatch_location_verified_at, service_notes, submitted_at, reviewed_at')
     .eq('applicant_user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
