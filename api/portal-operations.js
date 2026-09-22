@@ -1,7 +1,7 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
-import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
+import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin } from './_w9Crypto.js';
@@ -151,7 +151,7 @@ async function getStaffSnapshot(supabase) {
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
     .from('dd_provider_applications')
-    .select('id, application_status, tax_form_status, insurance_status, identity_status, agreement_status, background_check_status, compliance_status, legal_name, applicant_type, contact_first_name, contact_last_name, contact_email, contact_phone, physical_address, service_area, service_notes, submitted_at, reviewed_at')
+    .select('id, application_status, tax_form_status, insurance_status, identity_status, agreement_status, background_check_status, compliance_status, legal_name, applicant_type, contact_first_name, contact_last_name, contact_email, contact_phone, physical_address, service_area, service_radius_miles, service_zip_codes, dispatch_location_verified_at, service_notes, submitted_at, reviewed_at')
     .eq('applicant_user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -918,6 +918,15 @@ export default async function handler(req, res) {
         actorUserId: context.user.id
       });
       return ok(res, { assignment });
+    }
+    if (action === 'owner_estimate_assignment_response') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const result = await respondToOwnerEstimateAssignment(context.supabase, {
+        assignmentId: payload.assignmentId,
+        decision: payload.decision,
+        actorUserId: context.user.id
+      });
+      return ok(res, result);
     }
     if (action === 'resolve_estimate_counteroffer') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);

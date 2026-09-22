@@ -2,6 +2,7 @@ import { summarizeEconomics, evaluateCounteroffer, calculateCompensation } from 
 
 const VERIFIED = new Set(['RESEARCH_BENCHMARK','OWNER_CONFIRMED','DOCUMENT_EVIDENCE','SYSTEM_VERIFIED','EXTERNAL_VERIFIED']);
 const money = value => Math.round(Number(value || 0) * 100) / 100;
+export const DANI_OWNER_USER_ID = 'f88a5b79-ac5a-4690-ac28-62312328cb73';
 
 function isEffective(row, now = Date.now()) {
   const from = row?.effective_from ? new Date(row.effective_from).getTime() : 0;
@@ -31,6 +32,18 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   const { data: existing, error: versionError } = await supabase.from('dd_estimate_economics_snapshots').select('version').eq('estimate_id', estimateId).order('version',{ascending:false}).limit(1).maybeSingle();
   if (versionError) throw versionError;
   const version = Number(existing?.version || 0) + 1;
+
+  let ownerAuthorizedServiceIds = new Set();
+  if (serviceIds.length) {
+    const { data: ownerAuthRows, error: ownerAuthError } = await supabase.from('dd_owner_fulfillment_authorizations')
+      .select('service_id,authorization_status,evidence_status,effective_from,effective_to')
+      .eq('owner_user_id', DANI_OWNER_USER_ID)
+      .in('service_id', serviceIds);
+    if (ownerAuthError) throw ownerAuthError;
+    ownerAuthorizedServiceIds = new Set((ownerAuthRows || [])
+      .filter(row => isEffective(row) && ['ACTIVE','SCOPED'].includes(String(row.authorization_status || '').toUpperCase()) && VERIFIED.has(row.evidence_status))
+      .map(row => row.service_id));
+  }
 
   let packageRows = [];
   if (serviceIds.length) {
@@ -98,10 +111,11 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
     const answerQuantity = row.quantity_input_key ? Number(line.answers?.[row.quantity_input_key]) : NaN;
     const quantity = Number.isFinite(answerQuantity) && answerQuantity >= 0 ? answerQuantity : Number(row.included_quantity || 1);
     const plan = matchPlan(fulfillmentPlan, line, row);
-    const fulfillmentMode = plan?.fulfillmentMode || row.fulfillment_mode || component.default_fulfillment_mode;
-    const fulfillerType = plan?.fulfillerType || (fulfillmentMode === 'PROVIDER' ? 'UNASSIGNED' : fulfillmentMode === 'IN_HOUSE' ? 'UNASSIGNED' : fulfillmentMode === 'PROCURED' ? 'VENDOR' : fulfillmentMode === 'SUBCONTRACTED' ? 'SUBCONTRACTOR' : 'UNASSIGNED');
-    const providerId = plan?.providerId || null;
-    const ownerUserId = plan?.ownerUserId || null;
+    const ownerFirst = ownerAuthorizedServiceIds.has(row.service_id);
+    const fulfillmentMode = ownerFirst ? 'IN_HOUSE' : (plan?.fulfillmentMode || row.fulfillment_mode || component.default_fulfillment_mode);
+    const fulfillerType = ownerFirst ? 'OWNER' : (plan?.fulfillerType || (fulfillmentMode === 'PROVIDER' ? 'UNASSIGNED' : fulfillmentMode === 'IN_HOUSE' ? 'UNASSIGNED' : fulfillmentMode === 'PROCURED' ? 'VENDOR' : fulfillmentMode === 'SUBCONTRACTED' ? 'SUBCONTRACTOR' : 'UNASSIGNED'));
+    const providerId = ownerFirst ? null : (plan?.providerId || null);
+    const ownerUserId = ownerFirst ? DANI_OWNER_USER_ID : (plan?.ownerUserId || null);
 
     let proposedCompensation = 0;
     let compensationBasis = {};
@@ -229,7 +243,6 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   }).select('*').single();
   if (snapshotError) throw snapshotError;
 
-  let insertedComponents=[];
   if (componentDrafts.length) {
     const inserts = componentDrafts.map(d => ({
       economics_snapshot_id:snapshot.id, estimate_id:estimateId, line_index:resolvedLineItems.indexOf(d.line), canonical_sku:d.line.canonicalSku,
@@ -241,46 +254,20 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
       expected_other_cost:d.baseline?.cost_type==='OTHER'?d.baselineAmount:0, tax_classification:d.component.tax_classification,
       economic_status:d.economicStatus, scope_snapshot:{ componentRole:d.row.component_role, allowanceDefinition:d.row.allowance_definition, exclusions:d.row.exclusion_definition, answers:d.line.answers }
     }));
-    const { data, error } = await supabase.from('dd_estimate_component_snapshots').insert(inserts).select('*');
+    const { error } = await supabase.from('dd_estimate_component_snapshots').insert(inserts);
     if (error) throw error;
-    insertedComponents = data || [];
   }
 
-  const assignmentsResolved = componentDrafts.length && componentDrafts.every(d => ['OWNER','PROVIDER','VENDOR','SUBCONTRACTOR'].includes(d.fulfillerType) && (d.fulfillerType !== 'PROVIDER' || d.providerId) && (d.fulfillerType !== 'OWNER' || d.ownerUserId));
-  let assignmentReadiness = assignmentsResolved ? 'READY_TO_OFFER' : 'UNRESOLVED';
-  if (assignmentsResolved && insertedComponents.length) {
-    await supabase.from('dd_estimate_assignment_offers').update({status:'SUPERSEDED',updated_at:new Date().toISOString()}).eq('estimate_id',estimateId).not('status','in','("SUPERSEDED","CANCELLED")');
-    const groups = new Map();
-    for (const row of insertedComponents) {
-      if (!['OWNER','PROVIDER'].includes(row.fulfiller_type)) continue;
-      const key = row.fulfiller_type === 'OWNER' ? 'OWNER:' + row.owner_user_id : 'PROVIDER:' + row.provider_id;
-      const group = groups.get(key) || { assignmentType:row.fulfiller_type, providerId:row.provider_id||null, ownerUserId:row.owner_user_id||null, componentSnapshotIds:[], proposedCompensation:0, targetPayout:0, maximumPayout:0, budgetedProviderCost:0, components:[], compensationBases:[] };
-      group.componentSnapshotIds.push(row.id);
-      group.proposedCompensation = money(group.proposedCompensation + Number(row.proposed_compensation || 0));
-      group.targetPayout = money(group.targetPayout + Number(row.compensation_basis_snapshot?.targetPayout ?? row.proposed_compensation ?? 0));
-      group.maximumPayout = money(group.maximumPayout + Number(row.compensation_basis_snapshot?.maximumPayout ?? row.proposed_compensation ?? 0));
-      group.budgetedProviderCost = money(group.budgetedProviderCost + Number(row.compensation_basis_snapshot?.budgetedProviderCost ?? row.proposed_compensation ?? 0));
-      group.compensationBases.push(row.compensation_basis_snapshot || {});
-      group.components.push({ componentCode:row.component_code, componentName:row.component_name, quantity:row.quantity, unitType:row.unit_type, canonicalSku:row.canonical_sku });
-      groups.set(key, group);
-    }
-    for (const group of groups.values()) {
-      await createEstimateAssignmentOffer(supabase, {
-        estimateId,
-        assignmentType:group.assignmentType,
-        providerId:group.providerId,
-        ownerUserId:group.ownerUserId,
-        componentSnapshotIds:group.componentSnapshotIds,
-        proposedCompensation:group.proposedCompensation,
-        proposedBasis:{ economicsSnapshotId:snapshot.id, budgetedProviderCost:group.budgetedProviderCost, componentCompensationBases:group.compensationBases },
-        targetPayout:group.assignmentType==='PROVIDER'?group.targetPayout:null,
-        maximumPayout:group.assignmentType==='PROVIDER'?group.maximumPayout:null,
-        scopeSnapshot:{ title:'Quote package assignment', summary:'Assigned components from the current frozen quote economics snapshot.', components:group.components },
-        actorUserId
-      });
-    }
-    assignmentReadiness = await refreshEstimateAssignmentReadiness(supabase, estimateId);
-  }
+  // Quote-time economics may model an owner/provider fulfillment plan, but it must
+  // never create a live fulfillment offer. Provider/owner offers are activated only
+  // after the customer's required payment has cleared (paid-first routing contract).
+  const assignmentsResolved = componentDrafts.length && componentDrafts.every(d =>
+    ['OWNER','PROVIDER','VENDOR','SUBCONTRACTOR'].includes(d.fulfillerType)
+    && (d.fulfillerType !== 'PROVIDER' || d.providerId)
+    && (d.fulfillerType !== 'OWNER' || d.ownerUserId)
+  );
+  const assignmentReadiness = assignmentsResolved ? 'PENDING_PAYMENT' : 'UNRESOLVED';
+
   const estimateUpdates = { economics_status:summary.economicsStatus, assignment_readiness_status:assignmentReadiness, active_economics_snapshot_id:snapshot.id };
   if (summary.economicsStatus !== 'PASS' || assignmentReadiness === 'UNRESOLVED') estimateUpdates.estimate_status = 'needs_review';
   const { error: updateError } = await supabase.from('dd_estimates').update(estimateUpdates).eq('id',estimateId);
@@ -309,7 +296,7 @@ export async function createEstimateAssignmentOffer(supabase, { estimateId, assi
   if (!estimate.active_economics_snapshot_id) throw new Error('ECONOMICS_SNAPSHOT_REQUIRED');
   const type=String(assignmentType||'').toUpperCase();
   if (!['OWNER','PROVIDER','VENDOR','SUBCONTRACTOR'].includes(type)) throw new Error('INVALID_ASSIGNMENT_TYPE');
-  const status = type === 'OWNER' ? 'ACCEPTED' : 'OFFERED';
+  const status = 'OFFERED';
   const now = new Date().toISOString();
   let bandFields={};
   if(type==='PROVIDER'){
@@ -327,10 +314,10 @@ export async function createEstimateAssignmentOffer(supabase, { estimateId, assi
     estimate_id:estimateId, economics_snapshot_id:estimate.active_economics_snapshot_id, assignment_type:type, provider_id:providerId,
     owner_user_id:ownerUserId, status, component_snapshot_ids:componentSnapshotIds, scope_snapshot:scopeSnapshot,
     proposed_compensation:money(proposedCompensation), proposed_basis:proposedBasis, ...bandFields,
-    offered_at:now, responded_at:type==='OWNER'?now:null, expires_at:expiresAt
+    offered_at:now, responded_at:null, expires_at:expiresAt
   }).select('*').single();
   if (offerError) throw offerError;
-  await supabase.from('dd_estimate_assignment_events').insert({ assignment_offer_id:offer.id,event_type:type==='OWNER'?'OWNER_ASSIGNMENT_CREATED':'ASSIGNMENT_OFFERED',actor_user_id:actorUserId,to_status:status,compensation_after:money(proposedCompensation),payload:{scopeSnapshot} });
+  await supabase.from('dd_estimate_assignment_events').insert({ assignment_offer_id:offer.id,event_type:type==='OWNER'?'OWNER_FIRST_REFUSAL_OFFERED':'ASSIGNMENT_OFFERED',actor_user_id:actorUserId,to_status:status,compensation_after:money(proposedCompensation),payload:{scopeSnapshot} });
   await refreshEstimateAssignmentReadiness(supabase, estimateId);
   return offer;
 }
@@ -377,8 +364,87 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
   const { data: updated, error:updateError }=await supabase.from('dd_estimate_assignment_offers').update(next).eq('id',assignmentId).eq('status','OFFERED').select('*').single();
   if(updateError) throw updateError;
   await supabase.from('dd_estimate_assignment_events').insert({assignment_offer_id:assignmentId,event_type:`PROVIDER_${normalized}`,actor_user_id:actorUserId,actor_provider_id:providerId,from_status:'OFFERED',to_status:updated.status,compensation_before:offer.proposed_compensation,compensation_after:normalized==='COUNTEROFFER'?updated.counter_compensation:offer.proposed_compensation,reason,payload:{counterBasis:counterBasis||null}});
+  if(normalized==='ACCEPT'){
+    const {error:estimateError}=await supabase.from('dd_estimates').select('id').eq('id',offer.estimate_id).single();
+    if(estimateError) throw estimateError;
+    const {data:job,error:jobError}=await supabase.from('dd_jobs').select('id').eq('estimate_id',offer.estimate_id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+    if(jobError) throw jobError;
+    if(job){
+      const {data:provider,error:providerError}=await supabase.from('dd_providers').select('id,org_id').eq('id',providerId).single();
+      if(providerError) throw providerError;
+      const {data:existingAssignment,error:existingAssignmentError}=await supabase.from('dd_job_assignments').select('id').eq('job_id',job.id).eq('provider_id',providerId).in('assignment_status',['OFFERED','ACCEPTED']).limit(1).maybeSingle();
+      if(existingAssignmentError) throw existingAssignmentError;
+      if(!existingAssignment){
+        const {error:jobAssignmentError}=await supabase.from('dd_job_assignments').insert({
+          job_id:job.id,provider_id:providerId,provider_org_id:provider?.org_id||null,
+          assignment_status:'ACCEPTED',provider_notes:'Accepted paid quote assignment.',
+          offered_at:offer.offered_at||now,accepted_at:now,response_at:now
+        });
+        if(jobAssignmentError) throw jobAssignmentError;
+      }
+      const {error:jobUpdateError}=await supabase.from('dd_jobs').update({job_status:'ASSIGNED',assigned_to:providerId,updated_at:now}).eq('id',job.id);
+      if(jobUpdateError) throw jobUpdateError;
+    }
+  }
   await refreshEstimateAssignmentReadiness(supabase, offer.estimate_id);
   return updated;
+}
+
+export async function respondToOwnerEstimateAssignment(supabase, { assignmentId, decision, actorUserId }) {
+  const normalized=String(decision||'').toUpperCase();
+  if(!['ACCEPT','DECLINE'].includes(normalized)) throw new Error('INVALID_OWNER_ASSIGNMENT_DECISION');
+  const {data:offer,error}=await supabase.from('dd_estimate_assignment_offers').select('*').eq('id',assignmentId).eq('assignment_type','OWNER').single();
+  if(error||!offer) throw error||new Error('OWNER_ASSIGNMENT_NOT_FOUND');
+  if(String(offer.owner_user_id)!==String(actorUserId)) throw new Error('OWNER_ASSIGNMENT_ACTOR_MISMATCH');
+  if(offer.status!=='OFFERED') throw new Error('OWNER_ASSIGNMENT_NOT_OPEN');
+
+  const {data:estimate,error:estimateError}=await supabase.from('dd_estimates')
+    .select('id,service_request_id,zip_code,active_economics_snapshot_id')
+    .eq('id',offer.estimate_id).single();
+  if(estimateError||!estimate) throw estimateError||new Error('ESTIMATE_NOT_FOUND');
+  const {data:job,error:jobError}=await supabase.from('dd_jobs')
+    .select('id,job_status,assigned_to,internal_notes').eq('estimate_id',offer.estimate_id)
+    .order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(jobError) throw jobError;
+
+  const now=new Date().toISOString();
+  const status=normalized==='ACCEPT'?'ACCEPTED':'DECLINED';
+  const {data:updated,error:updateError}=await supabase.from('dd_estimate_assignment_offers')
+    .update({status,responded_at:now,resolved_at:now,resolved_by:actorUserId,resolution:normalized})
+    .eq('id',assignmentId).eq('status','OFFERED').select('*').single();
+  if(updateError) throw updateError;
+
+  await supabase.from('dd_estimate_assignment_events').insert({
+    assignment_offer_id:assignmentId,event_type:`OWNER_${normalized}_ASSIGNMENT`,
+    actor_user_id:actorUserId,from_status:'OFFERED',to_status:status,
+    compensation_before:offer.proposed_compensation,compensation_after:offer.proposed_compensation,
+    payload:{paidFirst:true,ownerFirst:true}
+  });
+
+  if(normalized==='ACCEPT'){
+    if(job){
+      const {error:jobUpdateError}=await supabase.from('dd_jobs').update({
+        job_status:'ASSIGNED_OWNER',assigned_to:`OWNER:${actorUserId}`,updated_at:now
+      }).eq('id',job.id);
+      if(jobUpdateError) throw jobUpdateError;
+    }
+    await supabase.from('dd_estimates').update({assignment_readiness_status:'READY'}).eq('id',offer.estimate_id);
+    return {offer:updated,routing:{status:'OWNER_ACCEPTED',jobId:job?.id||null}};
+  }
+
+  // Owner decline never exposes the job to providers blindly. The job moves to
+  // a routing hold until a provider with verified dispatch-origin/location data
+  // can be ranked and the travel economics are known.
+  await supabase.from('dd_estimates').update({assignment_readiness_status:'NEEDS_REASSIGNMENT'}).eq('id',offer.estimate_id);
+  if(job){
+    const {error:jobUpdateError}=await supabase.from('dd_jobs').update({
+      job_status:'DISPATCH_REVIEW',assigned_to:null,
+      internal_notes:[job.internal_notes,'Owner first refusal declined; route to next eligible provider only after location/mileage economics resolve.'].filter(Boolean).join('\n'),
+      updated_at:now
+    }).eq('id',job.id);
+    if(jobUpdateError) throw jobUpdateError;
+  }
+  return {offer:updated,routing:{status:'NEEDS_REASSIGNMENT',jobId:job?.id||null}};
 }
 
 export async function resolveEstimateCounteroffer(supabase, { assignmentId, decision, actorUserId }) {

@@ -45,7 +45,7 @@ export default async function handler(req,res){
   if(!Number.isFinite(frozenAmount)||frozenAmount<=0)return json(res,422,{error:'The frozen estimate total could not be securely verified before payment.'});
   if(!quoteRequired&&(!Number.isFinite(governedAmount)||governedAmount<=0||Math.round(frozenAmount*100)!==Math.round(governedAmount*100)))return json(res,409,{error:'The frozen request price no longer matches the governed commercial price. Payment has been blocked and the request needs reconciliation.'});
   if(String(estimate.estimate_status||'').toLowerCase()!=='approved')return json(res,409,{error:'The estimate is not approved for payment.'});
-  if(quoteRequired&&(estimate.economics_status!=='PASS'||estimate.assignment_readiness_status!=='READY'))return json(res,409,{error:'The quote is not commercially ready for initial payment.'});
+  if(quoteRequired&&(estimate.economics_status!=='PASS'||!['PENDING_PAYMENT','READY'].includes(String(estimate.assignment_readiness_status||'').toUpperCase())))return json(res,409,{error:'The quote is not commercially ready for initial payment.'});
   const depositDue=Number(estimate.deposit_due);
   const initialPayment=quoteRequired&&Number.isFinite(depositDue)&&depositDue>0&&depositDue<frozenAmount;
   const paymentAmount=initialPayment?depositDue:frozenAmount;
