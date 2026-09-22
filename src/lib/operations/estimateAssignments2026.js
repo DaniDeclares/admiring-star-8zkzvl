@@ -313,8 +313,6 @@ export async function createEstimateAssignmentOffer(supabase, { estimateId, assi
   const now = new Date().toISOString();
   let bandFields={};
   if(type==='PROVIDER'){
-    const { data:snapshot, error:snapshotError }=await supabase.from('dd_estimate_economics_snapshots').select('*').eq('id',estimate.active_economics_snapshot_id).single();
-    if(snapshotError) throw snapshotError;
     const commercialMaximum=money(maximumPayout ?? proposedCompensation);
     const budgetedProviderCost=money(proposedBasis?.budgetedProviderCost ?? commercialMaximum);
     const economicCeiling=money(Math.max(Number(proposedCompensation||0),budgetedProviderCost));
