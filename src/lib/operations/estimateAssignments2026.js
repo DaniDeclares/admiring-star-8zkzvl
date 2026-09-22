@@ -246,41 +246,16 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
     insertedComponents = data || [];
   }
 
-  const assignmentsResolved = componentDrafts.length && componentDrafts.every(d => ['OWNER','PROVIDER','VENDOR','SUBCONTRACTOR'].includes(d.fulfillerType) && (d.fulfillerType !== 'PROVIDER' || d.providerId) && (d.fulfillerType !== 'OWNER' || d.ownerUserId));
-  let assignmentReadiness = assignmentsResolved ? 'READY_TO_OFFER' : 'UNRESOLVED';
-  if (assignmentsResolved && insertedComponents.length) {
-    await supabase.from('dd_estimate_assignment_offers').update({status:'SUPERSEDED',updated_at:new Date().toISOString()}).eq('estimate_id',estimateId).not('status','in','("SUPERSEDED","CANCELLED")');
-    const groups = new Map();
-    for (const row of insertedComponents) {
-      if (!['OWNER','PROVIDER'].includes(row.fulfiller_type)) continue;
-      const key = row.fulfiller_type === 'OWNER' ? 'OWNER:' + row.owner_user_id : 'PROVIDER:' + row.provider_id;
-      const group = groups.get(key) || { assignmentType:row.fulfiller_type, providerId:row.provider_id||null, ownerUserId:row.owner_user_id||null, componentSnapshotIds:[], proposedCompensation:0, targetPayout:0, maximumPayout:0, budgetedProviderCost:0, components:[], compensationBases:[] };
-      group.componentSnapshotIds.push(row.id);
-      group.proposedCompensation = money(group.proposedCompensation + Number(row.proposed_compensation || 0));
-      group.targetPayout = money(group.targetPayout + Number(row.compensation_basis_snapshot?.targetPayout ?? row.proposed_compensation ?? 0));
-      group.maximumPayout = money(group.maximumPayout + Number(row.compensation_basis_snapshot?.maximumPayout ?? row.proposed_compensation ?? 0));
-      group.budgetedProviderCost = money(group.budgetedProviderCost + Number(row.compensation_basis_snapshot?.budgetedProviderCost ?? row.proposed_compensation ?? 0));
-      group.compensationBases.push(row.compensation_basis_snapshot || {});
-      group.components.push({ componentCode:row.component_code, componentName:row.component_name, quantity:row.quantity, unitType:row.unit_type, canonicalSku:row.canonical_sku });
-      groups.set(key, group);
-    }
-    for (const group of groups.values()) {
-      await createEstimateAssignmentOffer(supabase, {
-        estimateId,
-        assignmentType:group.assignmentType,
-        providerId:group.providerId,
-        ownerUserId:group.ownerUserId,
-        componentSnapshotIds:group.componentSnapshotIds,
-        proposedCompensation:group.proposedCompensation,
-        proposedBasis:{ economicsSnapshotId:snapshot.id, budgetedProviderCost:group.budgetedProviderCost, componentCompensationBases:group.compensationBases },
-        targetPayout:group.assignmentType==='PROVIDER'?group.targetPayout:null,
-        maximumPayout:group.assignmentType==='PROVIDER'?group.maximumPayout:null,
-        scopeSnapshot:{ title:'Quote package assignment', summary:'Assigned components from the current frozen quote economics snapshot.', components:group.components },
-        actorUserId
-      });
-    }
-    assignmentReadiness = await refreshEstimateAssignmentReadiness(supabase, estimateId);
-  }
+  // Quote-time economics may model an owner/provider fulfillment plan, but it must
+  // never create a live fulfillment offer. Provider/owner offers are activated only
+  // after the customer's required payment has cleared (paid-first routing contract).
+  const assignmentsResolved = componentDrafts.length && componentDrafts.every(d =>
+    ['OWNER','PROVIDER','VENDOR','SUBCONTRACTOR'].includes(d.fulfillerType)
+    && (d.fulfillerType !== 'PROVIDER' || d.providerId)
+    && (d.fulfillerType !== 'OWNER' || d.ownerUserId)
+  );
+  const assignmentReadiness = assignmentsResolved ? 'PENDING_PAYMENT' : 'UNRESOLVED';
+
   const estimateUpdates = { economics_status:summary.economicsStatus, assignment_readiness_status:assignmentReadiness, active_economics_snapshot_id:snapshot.id };
   if (summary.economicsStatus !== 'PASS' || assignmentReadiness === 'UNRESOLVED') estimateUpdates.estimate_status = 'needs_review';
   const { error: updateError } = await supabase.from('dd_estimates').update(estimateUpdates).eq('id',estimateId);
