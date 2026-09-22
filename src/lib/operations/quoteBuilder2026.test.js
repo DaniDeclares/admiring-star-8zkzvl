@@ -57,7 +57,7 @@ test('drops canonical specials when every governed counterpart is DO_NOT_SELL', 
 });
 
 
-test('prices D11 apparel from the governed production ladder instead of the $25 setup amount', () => {
+test('keeps D11 apparel under review until an authoritative total-price formula exists', () => {
   const service = {
     sku:'DNI-11A-017',
     pricing_type:'VARIABLE_QUOTE',
@@ -67,9 +67,10 @@ test('prices D11 apparel from the governed production ladder instead of the $25 
   };
   const rule = { pricing_type:'VARIABLE_QUOTE', base_price_cents:2500, resident_discount_eligible:false };
 
-  expect(calculate(service, rule, { quantity:1 }).baseSubtotal).toBe(43);
-  expect(calculate(service, rule, { quantity:12 }).baseSubtotal).toBe(300);
-  expect(calculate(service, rule, { quantity:13 }).baseSubtotal).toBe(318);
-  expect(calculate(service, rule, { quantity:24 }).baseSubtotal).toBe(540);
-  expect(calculate(service, rule, { quantity:50 }).baseSubtotal).toBe(1050);
+  for (const quantity of [1,12,13,24,50]) {
+    const result = calculate(service, rule, { quantity });
+    expect(result.baseSubtotal).toBe(25);
+    expect(result.reviewFlags).toContain('APPAREL_TOTAL_PRICE_REVIEW');
+    expect(result.needsReview).toBe(true);
+  }
 });
