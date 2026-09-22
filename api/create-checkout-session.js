@@ -51,9 +51,24 @@ export default async function handler(req,res){
   const paymentAmount=initialPayment?depositDue:frozenAmount;
   const paymentType=initialPayment?'INITIAL_PAYMENT':'FULL_PAYMENT';
   const recurring=String(offer.billingCycle||'').toLowerCase()==='month';
-  const paymentMetadata={request_id:requestId,service_id:serviceId,estimate_id:estimate.id,channel,subchannel,payment_type:paymentType,full_estimate_amount:String(frozenAmount),deposit_due:String(initialPayment?depositDue:frozenAmount),balance_due:String(Math.max(frozenAmount-paymentAmount,0))};
+  if(recurring&&quoteRequired)return json(res,409,{error:'Recurring quote-priced services require owner review before subscription checkout.'});
+  const paymentMetadata={request_id:requestId,service_id:serviceId,estimate_id:estimate.id,canonical_sku:offer.serviceId,channel,subchannel,payment_type:recurring?'SUBSCRIPTION':paymentType,full_estimate_amount:String(frozenAmount),deposit_due:String(initialPayment?depositDue:frozenAmount),balance_due:String(Math.max(frozenAmount-paymentAmount,0))};
   const params={mode:recurring?'subscription':'payment',customer_email:email,line_items:[{price_data:{currency:'usd',unit_amount:Math.round(paymentAmount*100),product_data:{name:initialPayment?`${offer.name} — Initial Payment`:offer.name,metadata:paymentMetadata},...(recurring?{recurring:{interval:'month'}}:{})},quantity:1}],metadata:paymentMetadata,...(recurring?{}:{payment_intent_data:{metadata:paymentMetadata}}),success_url:`${siteOrigin(req)}/request-service?service=${encodeURIComponent(serviceId)}&paid=1&request_id=${encodeURIComponent(requestId)}`,cancel_url:`${siteOrigin(req)}/request-service?service=${encodeURIComponent(serviceId)}&canceled=1&request_id=${encodeURIComponent(requestId)}`};
-  const session=await stripe.checkout.sessions.create(params,{idempotencyKey:`dani-checkout:${requestId}:${paymentType}`});
+  const session=await stripe.checkout.sessions.create(params,{idempotencyKey:`dani-checkout:${requestId}:${recurring?'SUBSCRIPTION':paymentType}`});
+  if(recurring){
+   await prisma.$executeRaw`
+    insert into public.dd_service_subscriptions
+      (service_request_id,estimate_id,service_id,canonical_sku,stripe_checkout_session_id,subscription_status,raw_metadata)
+    values
+      (${requestId}::uuid,${estimate.id}::uuid,${offer.runtimeServiceId}::uuid,${offer.serviceId},${session.id},'CHECKOUT_CREATED',${JSON.stringify(paymentMetadata)}::jsonb)
+    on conflict(service_request_id,canonical_sku) do update
+      set stripe_checkout_session_id=excluded.stripe_checkout_session_id,
+          estimate_id=excluded.estimate_id,
+          subscription_status='CHECKOUT_CREATED',
+          raw_metadata=excluded.raw_metadata,
+          updated_at=now()
+   `;
+  }
   return json(res,200,{success:true,url:session.url,sessionId:session.id});
  }catch(error){console.error('Stripe checkout creation failed:',error);return json(res,500,{error:'Secure checkout could not be opened. Please try again or contact DANI DECLARES.'});}
 }
