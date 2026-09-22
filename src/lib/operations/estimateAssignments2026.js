@@ -182,6 +182,21 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   return { snapshot, assignmentReadiness, unresolvedReasons:[...new Set(unresolvedReasons)] };
 }
 
+async function refreshEstimateAssignmentReadiness(supabase, estimateId) {
+  const { data: offers, error } = await supabase.from('dd_estimate_assignment_offers').select('status,economic_impact_status').eq('estimate_id',estimateId).neq('status','SUPERSEDED').neq('status','CANCELLED');
+  if (error) throw error;
+  let status='UNRESOLVED';
+  if ((offers||[]).length) {
+    if (offers.some(o => o.economic_impact_status === 'REQUIRES_REPRICE' || o.economic_impact_status === 'REQUIRES_CUSTOMER_REAPPROVAL')) status='NEEDS_REPRICE';
+    else if (offers.some(o => o.status === 'COUNTEROFFERED')) status='COUNTER_PENDING';
+    else if (offers.some(o => o.status === 'DECLINED')) status='NEEDS_REASSIGNMENT';
+    else if (offers.some(o => ['PROPOSED','OFFERED','REVISED'].includes(o.status))) status='AWAITING_PROVIDER';
+    else if (offers.every(o => ['ACCEPTED','OWNER_ACCEPTED_COUNTER'].includes(o.status))) status='READY';
+  }
+  await supabase.from('dd_estimates').update({assignment_readiness_status:status}).eq('id',estimateId);
+  return status;
+}
+
 export async function createEstimateAssignmentOffer(supabase, { estimateId, assignmentType, providerId = null, ownerUserId = null, componentSnapshotIds = [], proposedCompensation = 0, proposedBasis = {}, scopeSnapshot = {}, actorUserId = null, expiresAt = null }) {
   const { data: estimate, error } = await supabase.from('dd_estimates').select('id,active_economics_snapshot_id,economics_status,estimated_total').eq('id',estimateId).single();
   if (error || !estimate) throw error || new Error('ESTIMATE_NOT_FOUND');
@@ -197,6 +212,7 @@ export async function createEstimateAssignmentOffer(supabase, { estimateId, assi
   }).select('*').single();
   if (offerError) throw offerError;
   await supabase.from('dd_estimate_assignment_events').insert({ assignment_offer_id:offer.id,event_type:type==='OWNER'?'OWNER_ASSIGNMENT_CREATED':'ASSIGNMENT_OFFERED',actor_user_id:actorUserId,to_status:status,compensation_after:money(proposedCompensation),payload:{scopeSnapshot} });
+  await refreshEstimateAssignmentReadiness(supabase, estimateId);
   return offer;
 }
 
@@ -235,6 +251,7 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
   const { data: updated, error:updateError }=await supabase.from('dd_estimate_assignment_offers').update(next).eq('id',assignmentId).eq('status','OFFERED').select('*').single();
   if(updateError) throw updateError;
   await supabase.from('dd_estimate_assignment_events').insert({assignment_offer_id:assignmentId,event_type:`PROVIDER_${normalized}`,actor_user_id:actorUserId,actor_provider_id:providerId,from_status:'OFFERED',to_status:updated.status,compensation_before:offer.proposed_compensation,compensation_after:normalized==='COUNTEROFFER'?updated.counter_compensation:offer.proposed_compensation,reason,payload:{counterBasis:counterBasis||null}});
+  await refreshEstimateAssignmentReadiness(supabase, offer.estimate_id);
   return updated;
 }
 
@@ -260,5 +277,6 @@ export async function resolveEstimateCounteroffer(supabase, { assignmentId, deci
     await supabase.from('dd_estimates').update(updates).eq('id',offer.estimate_id);
   }
   await supabase.from('dd_estimate_assignment_events').insert({assignment_offer_id:assignmentId,event_type:`OWNER_${normalized}_COUNTEROFFER`,actor_user_id:actorUserId,from_status:'COUNTEROFFERED',to_status:status,compensation_before:offer.proposed_compensation,compensation_after:accepted?offer.counter_compensation:offer.proposed_compensation,payload:{impact}});
+  await refreshEstimateAssignmentReadiness(supabase, offer.estimate_id);
   return {offer:updated,impact};
 }
