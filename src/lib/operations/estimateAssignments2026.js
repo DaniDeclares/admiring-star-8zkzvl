@@ -1,10 +1,15 @@
-import { summarizeEconomics, evaluateCounteroffer, calculateCompensation } from './componentEconomics2026.js';
+import { summarizeEconomics, evaluateCounteroffer, calculateCompensation, calculateProviderEconomicCeiling, evaluatePayoutBand } from './componentEconomics2026.js';
 
-const VERIFIED = new Set(['OWNER_CONFIRMED','DOCUMENT_EVIDENCE','SYSTEM_VERIFIED','EXTERNAL_VERIFIED']);
+const VERIFIED = new Set(['RESEARCH_BENCHMARK','OWNER_CONFIRMED','DOCUMENT_EVIDENCE','SYSTEM_VERIFIED','EXTERNAL_VERIFIED']);
 const money = value => Math.round(Number(value || 0) * 100) / 100;
 
 function selectLatest(rows, predicate) {
   return (rows || []).filter(predicate).sort((a,b) => new Date(b.effective_from || 0) - new Date(a.effective_from || 0))[0] || null;
+}
+
+function payoutBandAmount(band, field, quantity) {
+  const raw=Number(band?.[field] || 0);
+  return ['HOURLY','PER_UNIT','PER_SEAT','PER_DEVICE','PER_GARMENT','MILEAGE'].includes(band?.compensation_type) ? money(raw * Math.max(0,Number(quantity||0))) : money(raw);
 }
 
 function matchPlan(plan, line, component) {
@@ -40,11 +45,15 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   const providerIds = [...new Set((fulfillmentPlan || []).map(p => p.providerId).filter(Boolean))];
   const ownerUserIds = [...new Set((fulfillmentPlan || []).map(p => p.ownerUserId).filter(Boolean))];
   let compRules = [];
+  let payoutBands = [];
   let ownerCompRules = [];
   if (providerIds.length && componentIds.length) {
     const { data, error } = await supabase.from('dd_provider_compensation_rules').select('*').in('provider_id',providerIds).in('component_id',componentIds).eq('status','ACTIVE');
     if (error) throw error;
     compRules = data || [];
+    const { data: bands, error: bandError } = await supabase.from('dd_provider_payout_bands').select('*').in('component_id',componentIds).in('service_id',serviceIds).eq('status','ACTIVE');
+    if (bandError) throw bandError;
+    payoutBands = (bands || []).filter(row => !row.provider_id || providerIds.includes(row.provider_id));
   }
   if (ownerUserIds.length && componentIds.length) {
     const { data, error } = await supabase.from('dd_owner_compensation_rules').select('*').in('owner_user_id',ownerUserIds).in('component_id',componentIds).eq('status','ACTIVE');
@@ -92,12 +101,28 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
     let compResolved = ['VENDOR','SUBCONTRACTOR'].includes(fulfillerType);
 
     if (fulfillerType === 'PROVIDER' && providerId) {
-      const rule = selectLatest(compRules, r => r.provider_id === providerId && r.component_id === row.component_id && (!r.service_id || r.service_id === row.service_id));
-      const c = calculateCompensation(rule, quantity, { percentBasisAmount: calculation?.estimatedTotal || 0 });
-      proposedCompensation = c.amount;
-      compensationBasis = c.basis;
-      compResolved = c.resolved;
-      providerCompensation += c.amount;
+      const specificBand = selectLatest(payoutBands, r => r.provider_id === providerId && r.component_id === row.component_id && r.service_id === row.service_id && VERIFIED.has(r.evidence_status));
+      const standardBand = selectLatest(payoutBands, r => !r.provider_id && r.component_id === row.component_id && r.service_id === row.service_id && VERIFIED.has(r.evidence_status));
+      const band = specificBand || standardBand;
+      if (band) {
+        proposedCompensation = payoutBandAmount(band,'initial_offer_amount',quantity);
+        compensationBasis = {
+          authority:'PROVIDER_PAYOUT_BAND', payoutBandId:band.id, compensationType:band.compensation_type,
+          initialOffer:proposedCompensation, targetPayout:payoutBandAmount(band,'target_payout_amount',quantity),
+          maximumPayout:payoutBandAmount(band,'maximum_payout_amount',quantity), evidenceStatus:band.evidence_status,
+          sourceReference:band.source_reference || null, equipmentBasis:band.equipment_basis, materialBasis:band.material_basis,
+          escalationPolicy:band.escalation_policy || {mode:'MANUAL',auto_step_up:false}
+        };
+        compResolved = true;
+        providerCompensation += proposedCompensation;
+      } else {
+        const rule = selectLatest(compRules, r => r.provider_id === providerId && r.component_id === row.component_id && (!r.service_id || r.service_id === row.service_id));
+        const calculated = calculateCompensation(rule, quantity, { percentBasisAmount: calculation?.estimatedTotal || 0 });
+        proposedCompensation = calculated.amount;
+        compensationBasis = calculated.basis;
+        compResolved = calculated.resolved;
+        providerCompensation += calculated.amount;
+      }
     } else if (fulfillerType === 'OWNER' && ownerUserId) {
       const rule = selectLatest(ownerCompRules, r => r.owner_user_id === ownerUserId && r.component_id === row.component_id && (!r.service_id || r.service_id === row.service_id));
       const governed = calculateCompensation(rule, quantity, { percentBasisAmount: calculation?.estimatedTotal || 0 });
@@ -157,12 +182,13 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   const overheadRecoveryRequirement = policy ? money(Number(policy.overhead_recovery_flat || 0) + customerPrice * Number(policy.overhead_recovery_percent || 0) / 100) : 0;
   const paymentProcessingCost = policy ? money(customerPrice * Number(policy.payment_processing_percent || 0) / 100) : 0;
   const workingCapitalRequired = policy ? money((ownerCompensation + providerCompensation + materialsCost + procurementCost + subcontractCost + travelCost + otherVariableCost) * Number(policy.working_capital_buffer_percent || 0) / 100) : 0;
-  const summary = summarizeEconomics({ customerPrice, ownerCompensation, providerCompensation, materialsCost, procurementCost, subcontractCost, travelCost, paymentProcessingCost, otherVariableCost, overheadRecoveryRequirement, unresolved: unresolvedReasons.length > 0 });
-
-  if (policy && summary.economicsStatus !== 'UNRESOLVED') {
-    if (policy.minimum_margin_percent != null && Number(summary.expectedMarginPercent || 0) < Number(policy.minimum_margin_percent)) summary.economicsStatus = 'FAIL';
-    if (policy.minimum_contribution_amount != null && Number(summary.expectedContribution || 0) < Number(policy.minimum_contribution_amount)) summary.economicsStatus = 'FAIL';
-  }
+  const summary = summarizeEconomics({
+    customerPrice, ownerCompensation, providerCompensation, materialsCost, procurementCost, subcontractCost, travelCost,
+    paymentProcessingCost, otherVariableCost, overheadRecoveryRequirement,
+    minimumContributionAmount:policy?.minimum_contribution_amount || 0,
+    minimumMarginPercent:policy?.minimum_margin_percent || 0,
+    unresolved: unresolvedReasons.length > 0
+  });
 
   const { data: snapshot, error: snapshotError } = await supabase.from('dd_estimate_economics_snapshots').insert({
     estimate_id: estimateId, version, economics_status: summary.economicsStatus, customer_price: summary.customerPrice,
@@ -172,7 +198,7 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
     overhead_recovery_requirement: summary.overheadRecoveryRequirement, minimum_viable_price: summary.minimumViablePrice,
     expected_contribution: summary.expectedContribution, expected_margin_percent: summary.expectedMarginPercent,
     working_capital_required: workingCapitalRequired, discount_amount: money(calculation?.residentDiscount || 0), tax_amount: money(calculation?.tax || 0),
-    snapshot_payload: { unresolvedReasons:[...new Set(unresolvedReasons)], economicPolicyId: policy?.id || null, channelCode, calculation },
+    snapshot_payload: { unresolvedReasons:[...new Set(unresolvedReasons)], economicPolicyId: policy?.id || null, channelCode, calculation, requiredDaniContribution:summary.requiredDaniContribution, retainedAfterOverhead:summary.retainedAfterOverhead, economicHeadroom:summary.economicHeadroom },
     captured_by: actorUserId
   }).select('*').single();
   if (snapshotError) throw snapshotError;
