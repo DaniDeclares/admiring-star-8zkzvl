@@ -1,0 +1,1 @@
+begin; alter table public.dd_work_orders add column if not exists execution_hard_cap interval, add column if not exists baseline_resource_count integer not null default 1; commit;
