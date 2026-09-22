@@ -1,7 +1,6 @@
 -- Production-proven runtime identities for the locked 279-SKU pricing classification.
 -- Restores only identity/catalog fields required before the 2026-09-19 pricing-engine backfill.
-insert into public.services (id,division_id,slug,name,sku,service_family)
-values
+with baseline(id,division_id,slug,name,sku,service_family) as (values
 ('908e63f3-cd9d-4f3b-af62-7a742e6e3dc7'::uuid,6,'d06-001','LLC Formation Support','DNI-06A-001','Business Formation & Digital Infrastructure'),
 ('80720107-6722-4902-ad49-e2ae2abb6c87'::uuid,6,'d06-002','Corporation Formation Support','DNI-06A-002','Business Formation & Digital Infrastructure'),
 ('8360f2b7-c1cd-4f76-9990-50ae70c705b6'::uuid,6,'d06-003','DBA/Fictitious Name Support','DNI-06A-003','Business Formation & Digital Infrastructure'),
@@ -42,5 +41,8 @@ values
 ('36a69f20-3c49-47fa-8e66-979e4ae9d234'::uuid,7,'d07-018','Property Photography','DNI-07A-018','Marketing, Content & Media Production'),
 ('f197e3a3-87db-476a-aff4-d66d654adbd5'::uuid,7,'d07-019','Brand Photography','DNI-07A-019','Marketing, Content & Media Production'),
 ('885696a0-5dac-4eb9-a673-80e4dc28ecfd'::uuid,7,'d07-020','Video Editing','DNI-07A-020','Marketing, Content & Media Production')
-on conflict (id) do update set sku=excluded.sku;
+)
+insert into public.services (id,division_id,slug,name,sku,service_family)
+select b.* from baseline b
+where not exists (select 1 from public.services s where s.id=b.id or s.sku=b.sku or s.slug=b.slug);
 update public.services set commercial_status='CANONICAL_ACTIVE',source_sku=coalesce(source_sku,sku),commercial_intent_status='SELL_NOW' where sku in ('DNI-06A-001','DNI-06A-002','DNI-06A-003','DNI-06A-004','DNI-06A-005','DNI-06A-006','DNI-06A-007','DNI-06A-008','DNI-06A-009','DNI-06A-010','DNI-06A-011','DNI-06A-012','DNI-06A-013','DNI-06A-014','DNI-06A-015','DNI-06A-016','DNI-06A-017','DNI-06A-018','DNI-06A-019','DNI-06A-020','DNI-07A-001','DNI-07A-002','DNI-07A-003','DNI-07A-004','DNI-07A-005','DNI-07A-006','DNI-07A-007','DNI-07A-008','DNI-07A-009','DNI-07A-010','DNI-07A-011','DNI-07A-012','DNI-07A-013','DNI-07A-014','DNI-07A-015','DNI-07A-016','DNI-07A-017','DNI-07A-018','DNI-07A-019','DNI-07A-020');
