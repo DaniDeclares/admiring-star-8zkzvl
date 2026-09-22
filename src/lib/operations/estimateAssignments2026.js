@@ -177,7 +177,7 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   }
 
   const assignmentReadiness = componentDrafts.length && componentDrafts.every(d => ['OWNER','PROVIDER','VENDOR','SUBCONTRACTOR'].includes(d.fulfillerType) && (d.fulfillerType !== 'PROVIDER' || d.providerId) && (d.fulfillerType !== 'OWNER' || d.ownerUserId)) ? 'READY_TO_OFFER' : 'UNRESOLVED';
-  const { error: updateError } = await supabase.from('dd_estimates').update({ economics_status:summary.economicsStatus, assignment_readiness_status:assignmentReadiness, active_economics_snapshot_id:snapshot.id }).eq('id',estimateId);
+  const estimateUpdates = { economics_status:summary.economicsStatus, assignment_readiness_status:assignmentReadiness, active_economics_snapshot_id:snapshot.id };\n  if (summary.economicsStatus !== 'PASS' || assignmentReadiness === 'UNRESOLVED') estimateUpdates.estimate_status = 'needs_review';\n  const { error: updateError } = await supabase.from('dd_estimates').update(estimateUpdates).eq('id',estimateId);
   if (updateError) throw updateError;
   return { snapshot, assignmentReadiness, unresolvedReasons:[...new Set(unresolvedReasons)] };
 }
