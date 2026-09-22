@@ -243,7 +243,6 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   }).select('*').single();
   if (snapshotError) throw snapshotError;
 
-  let insertedComponents=[];
   if (componentDrafts.length) {
     const inserts = componentDrafts.map(d => ({
       economics_snapshot_id:snapshot.id, estimate_id:estimateId, line_index:resolvedLineItems.indexOf(d.line), canonical_sku:d.line.canonicalSku,
@@ -255,9 +254,8 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
       expected_other_cost:d.baseline?.cost_type==='OTHER'?d.baselineAmount:0, tax_classification:d.component.tax_classification,
       economic_status:d.economicStatus, scope_snapshot:{ componentRole:d.row.component_role, allowanceDefinition:d.row.allowance_definition, exclusions:d.row.exclusion_definition, answers:d.line.answers }
     }));
-    const { data, error } = await supabase.from('dd_estimate_component_snapshots').insert(inserts).select('*');
+    const { error } = await supabase.from('dd_estimate_component_snapshots').insert(inserts);
     if (error) throw error;
-    insertedComponents = data || [];
   }
 
   // Quote-time economics may model an owner/provider fulfillment plan, but it must
@@ -298,7 +296,7 @@ export async function createEstimateAssignmentOffer(supabase, { estimateId, assi
   if (!estimate.active_economics_snapshot_id) throw new Error('ECONOMICS_SNAPSHOT_REQUIRED');
   const type=String(assignmentType||'').toUpperCase();
   if (!['OWNER','PROVIDER','VENDOR','SUBCONTRACTOR'].includes(type)) throw new Error('INVALID_ASSIGNMENT_TYPE');
-  const status = type === 'OWNER' ? 'ACCEPTED' : 'OFFERED';
+  const status = 'OFFERED';
   const now = new Date().toISOString();
   let bandFields={};
   if(type==='PROVIDER'){
@@ -316,10 +314,10 @@ export async function createEstimateAssignmentOffer(supabase, { estimateId, assi
     estimate_id:estimateId, economics_snapshot_id:estimate.active_economics_snapshot_id, assignment_type:type, provider_id:providerId,
     owner_user_id:ownerUserId, status, component_snapshot_ids:componentSnapshotIds, scope_snapshot:scopeSnapshot,
     proposed_compensation:money(proposedCompensation), proposed_basis:proposedBasis, ...bandFields,
-    offered_at:now, responded_at:type==='OWNER'?now:null, expires_at:expiresAt
+    offered_at:now, responded_at:null, expires_at:expiresAt
   }).select('*').single();
   if (offerError) throw offerError;
-  await supabase.from('dd_estimate_assignment_events').insert({ assignment_offer_id:offer.id,event_type:type==='OWNER'?'OWNER_ASSIGNMENT_CREATED':'ASSIGNMENT_OFFERED',actor_user_id:actorUserId,to_status:status,compensation_after:money(proposedCompensation),payload:{scopeSnapshot} });
+  await supabase.from('dd_estimate_assignment_events').insert({ assignment_offer_id:offer.id,event_type:type==='OWNER'?'OWNER_FIRST_REFUSAL_OFFERED':'ASSIGNMENT_OFFERED',actor_user_id:actorUserId,to_status:status,compensation_after:money(proposedCompensation),payload:{scopeSnapshot} });
   await refreshEstimateAssignmentReadiness(supabase, estimateId);
   return offer;
 }
@@ -367,7 +365,7 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
   if(updateError) throw updateError;
   await supabase.from('dd_estimate_assignment_events').insert({assignment_offer_id:assignmentId,event_type:`PROVIDER_${normalized}`,actor_user_id:actorUserId,actor_provider_id:providerId,from_status:'OFFERED',to_status:updated.status,compensation_before:offer.proposed_compensation,compensation_after:normalized==='COUNTEROFFER'?updated.counter_compensation:offer.proposed_compensation,reason,payload:{counterBasis:counterBasis||null}});
   if(normalized==='ACCEPT'){
-    const {data:estimate,error:estimateError}=await supabase.from('dd_estimates').select('id,service_request_id').eq('id',offer.estimate_id).single();
+    const {error:estimateError}=await supabase.from('dd_estimates').select('id').eq('id',offer.estimate_id).single();
     if(estimateError) throw estimateError;
     const {data:job,error:jobError}=await supabase.from('dd_jobs').select('id').eq('estimate_id',offer.estimate_id).order('created_at',{ascending:false}).limit(1).maybeSingle();
     if(jobError) throw jobError;
