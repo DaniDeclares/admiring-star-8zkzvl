@@ -1,7 +1,6 @@
 -- Production-proven runtime identities for the locked 279-SKU pricing classification.
 -- Restores only identity/catalog fields required before the 2026-09-19 pricing-engine backfill.
-insert into public.services (id,division_id,slug,name,sku,service_family)
-values
+with baseline(id,division_id,slug,name,sku,service_family) as (values
 ('f5dc860b-816e-486f-b40a-c6dd9cbbb612'::uuid,10,'d10-001','Event Consultation','DNI-10A-001','Experiences & Resident Programming'),
 ('e795b0f8-0c78-48b4-8e65-065774751c9e'::uuid,10,'d10-002','Event Concept Development','DNI-10A-002','Experiences & Resident Programming'),
 ('be548c13-507b-47db-932b-d97bc80898b6'::uuid,10,'d10-003','Event Planning','DNI-10A-003','Experiences & Resident Programming'),
@@ -43,5 +42,8 @@ values
 ('b5412700-138d-4a82-90a8-73c7c0bf93b1'::uuid,11,'d11-018','Heat Press Apparel','DNI-11A-018','Creative Design & Production'),
 ('4d9f63c5-8b9a-4a8b-bb2a-9894de5382c6'::uuid,11,'d11-019','Promotional Merchandise','DNI-11A-019','Creative Design & Production'),
 ('2039f3d7-e6d1-4adb-8158-f09e98bf7747'::uuid,11,'d11-020','Custom Product Fabrication','DNI-11A-020','Creative Design & Production')
-on conflict (id) do update set sku=excluded.sku;
+)
+insert into public.services (id,division_id,slug,name,sku,service_family)
+select b.* from baseline b
+where not exists (select 1 from public.services s where s.id=b.id or s.sku=b.sku or s.slug=b.slug);
 update public.services set commercial_status='CANONICAL_ACTIVE',source_sku=coalesce(source_sku,sku),commercial_intent_status='SELL_NOW' where sku in ('DNI-10A-001','DNI-10A-002','DNI-10A-003','DNI-10A-004','DNI-10A-005','DNI-10A-006','DNI-10A-007','DNI-10A-008','DNI-10A-009','DNI-10A-010','DNI-10A-011','DNI-10A-012','DNI-10A-013','DNI-10A-014','DNI-10A-015','DNI-10A-016','DNI-10A-017','DNI-10A-018','DNI-10A-019','DNI-10A-020','DNI-10A-021','DNI-11A-001','DNI-11A-002','DNI-11A-003','DNI-11A-004','DNI-11A-005','DNI-11A-006','DNI-11A-007','DNI-11A-008','DNI-11A-009','DNI-11A-010','DNI-11A-011','DNI-11A-012','DNI-11A-013','DNI-11A-014','DNI-11A-015','DNI-11A-016','DNI-11A-017','DNI-11A-018','DNI-11A-019','DNI-11A-020');
