@@ -78,7 +78,7 @@ export default async function handler(req,res){
        values(${event.id},${invoice.payment_intent||invoice.id},${paidRequest.id}::uuid,${job.id}::uuid,${event.type},'SUCCEEDED',${received},${invoice.currency||'usd'},${JSON.stringify(invoice.metadata||{})}::jsonb)
        on conflict(provider_event_id) do nothing
       `;
-      if(paidEstimate.economics_status==='PASS'&&paidEstimate.active_economics_snapshot_id) await prisma.$queryRaw`select public.dd_activate_paid_estimate_assignments(${paidEstimate.id}::uuid) as routing`;
+      if(paidEstimate.economics_status==='PASS'&&paidEstimate.active_economics_snapshot_id){ await prisma.$queryRaw`select public.dd_activate_paid_estimate_assignments(${paidEstimate.id}::uuid) as routing`; await finalizeProposedProviderRoutes(prisma,paidEstimate.id); }
      }
      return res.status(200).json({received:true,subscriptionInvoice:true,status:event.type});
     }
@@ -169,6 +169,7 @@ export default async function handler(req,res){
       }
     }
    });
+   if(event.type==='invoice.paid'&&row.estimate_id) await finalizeProposedProviderRoutes(prisma,row.estimate_id);
    return res.status(200).json({received:true,reconciled:true,invoiceId:row.id,status:nextStatus});
   }catch(error){
    console.error('Failed to reconcile Stripe invoice event:',error.message);
@@ -302,9 +303,10 @@ export default async function handler(req,res){
     // together, or a failure here rolls back the job/status/reconciliation too, so a Stripe
     // retry starts clean instead of silently losing the notification behind an idempotent replay.
     await publishPaymentReconciled(reconciliation,tx);
-    return {status:'RECONCILED',job,reconciliation};
+    return {status:'RECONCILED',job,reconciliation,estimateId:estimate.id};
    });
    if(result.status==='IDEMPOTENT_REPLAY')return res.status(200).json({received:true,idempotent:true});
+   await finalizeProposedProviderRoutes(prisma,result.estimateId);
    await captureServer('payment_completed',{request_id:requestId,service_id:serviceId,payment_state:'completed',transaction_status:result.status,job_reference:result.job?.public_reference||undefined,route:'/api/stripe-webhook'});
    console.log(`B2C payment accepted; request ${requestId} -> job ${result.job.public_reference}.`);
   }catch(error){await captureServer('payment_reconciliation_failed',{request_id:requestId,service_id:String(session.metadata?.service_id||'').trim()||undefined,error_type:'operational_transition',route:'/api/stripe-webhook'});console.error('Failed to transition/reconcile paid B2C request:',error.message);return res.status(500).json({error:'Payment received but operational/accounting transition failed'});}
