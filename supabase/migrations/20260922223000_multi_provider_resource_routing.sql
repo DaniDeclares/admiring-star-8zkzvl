@@ -146,3 +146,11 @@ comment on table public.dd_fulfillment_work_packages is 'Component-level product
 comment on table public.dd_work_package_requirements is 'Capability, equipment, credential, headcount and supply requirements that must be satisfied before a provider slot may be offered.';
 comment on table public.dd_work_package_provider_slots is 'One assignable provider seat within a work package. Multiple slots support crews; different capability keys support specialist collaboration.';
 comment on column public.dd_provider_assets.ownership_type is 'DANI does not operate an equipment-rental program by default. Provider-owned/leased assets are independent-business resources; DANI/customer assets require explicit job-level handling.';
+
+
+alter table public.dd_sales_queue
+  add column if not exists front_door_code text,
+  add column if not exists front_door_notes text;
+
+comment on column public.dd_sales_queue.front_door_code is
+'Problem-led sales entry point from dd_channel_front_doors. Sales discovery starts with the buyer problem/front door, then composes only authorized canonical services.';
