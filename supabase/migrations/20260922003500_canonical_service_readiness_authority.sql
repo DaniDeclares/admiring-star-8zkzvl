@@ -3,7 +3,7 @@
 -- 1) Preserve dd_service_readiness_v1 as offer/configuration-level diagnostic history.
 -- 2) Preserve dd_service_release_contract_v1 as the production release authority.
 -- 3) Provide a one-row-per-canonical-SKU summary so offer rows are never counted as services.
--- No business records are mutated by this migration.
+-- No business records are mutated by this migration.\n-- Reassert security-invoker on both authority views because live metadata showed the release view had lost the option.\nALTER VIEW public.dd_service_readiness_v1 SET (security_invoker = true);\nALTER VIEW public.dd_service_release_contract_v1 SET (security_invoker = true);
 
 COMMENT ON VIEW public.dd_service_readiness_v1 IS
 'CONFIGURATION DIAGNOSTIC ONLY. Grain is governed-offer row, not canonical service. Do not use row counts or LIVE_* labels from this view as production release authority. Use dd_service_canonical_readiness_v1 for one-row-per-SKU reporting and dd_service_release_contract_v1 for production release authority.';
