@@ -50,3 +50,26 @@ alter table public.dd_estimate_assignment_offers
   add column if not exists economic_ceiling_amount numeric,
   add column if not exists budgeted_provider_cost numeric,
   add column if not exists payout_band_snapshot jsonb not null default '{}'::jsonb;
+
+
+-- Owner-confirmed fulfillment corrections, 2026-09-22.
+-- DTF/heat-press may be owner fulfilled or provider fulfilled.
+-- Computer/peripheral setup must not route to owner direct fulfillment.
+update public.dd_service_work_order_routing_templates r
+set capability_key='COMPUTER_TECHNICAL_SUPPORT',
+    routing_instructions='Route only to an authorized technical provider matching the governed computer/peripheral capability. Owner direct fulfillment is not authorized. OWNER_CONFIRMED 2026-09-22.',
+    updated_at=now()
+from public.services s
+where r.service_id=s.id
+  and s.sku='DNI-06A-018'
+  and r.capability_key='OWNER_DIRECT_FULFILLMENT';
+
+insert into public.dd_service_work_order_routing_templates
+(service_id,channel_code,capability_key,selection_policy,routing_instructions,is_active)
+select s.id,'CH04','OWNER_DIRECT_FULFILLMENT','AUTHORIZED_CAPABILITY_MATCH',
+       'Owner-confirmed DTF/heat-press production capability. DANI may fulfill directly or route to an authorized DTF provider based on governed fulfillment economics and availability. OWNER_CONFIRMED 2026-09-22.',
+       true
+from public.services s
+where s.sku in ('DNI-11A-017','DNI-11A-018')
+on conflict (service_id,channel_code,capability_key)
+do update set routing_instructions=excluded.routing_instructions,is_active=true,updated_at=now();
