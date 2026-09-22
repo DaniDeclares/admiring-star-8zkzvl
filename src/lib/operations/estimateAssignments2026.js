@@ -325,8 +325,8 @@ export async function createEstimateAssignmentOffer(supabase, { estimateId, assi
 export async function getProviderEstimateAssignments(supabase, providerId) {
   if (!providerId) return [];
   const { data, error } = await supabase.from('dd_estimate_assignment_offers')
-    .select('id,estimate_id,status,scope_snapshot,proposed_compensation,proposed_basis,counter_compensation,counter_basis,counter_reason,economic_impact_status,offer_version,offered_at,responded_at,resolved_at,expires_at,dd_estimates(public_reference,client_name,organization_name,location_address,city,state,zip_code,timeline,requested_date,estimate_status,estimated_total)')
-    .eq('provider_id',providerId).order('created_at',{ascending:false}).limit(100);
+    .select('id,estimate_id,status,scope_snapshot,resource_requirements_snapshot,proposed_compensation,proposed_basis,counter_compensation,counter_basis,counter_reason,economic_impact_status,offer_version,offered_at,responded_at,resolved_at,expires_at,route_distance_miles,route_distance_source,travel_cost_snapshot,jurisdiction_snapshot,dd_estimates(public_reference,client_name,organization_name,location_address,city,state,zip_code,timeline,requested_date,estimate_status,estimated_total)')
+    .eq('provider_id',providerId).neq('status','PROPOSED').order('created_at',{ascending:false}).limit(100);
   if (error) throw error;
   return data || [];
 }
