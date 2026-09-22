@@ -169,12 +169,27 @@ export function isHourlyBilled(service, rule) {
 // policy decision requiring documented tiers/formulas/testing/re-audit -- do not add it here as
 // an implicit fix.
 function configuredBasePrice(service, rule, answers) {
-  const model = service?.quote_input_schema?.pricing_model;
+  const schema = service?.quote_input_schema || {};
+  const model = schema.pricing_model;
+  const uiMode = schema.ui_mode;
+
+  // D11 apparel is a configured quote, not a fixed $25 checkout. The governed
+  // ladder is $25 setup + $18/item below the first batch, then the approved
+  // 12/$300, 24/$540 and 50/$1,050 batch anchors with $18 incremental units
+  // between/above anchors. This prevents a multi-garment frozen estimate from
+  // collapsing back to the $25 catalog setup amount.
+  if (uiMode === 'APPAREL_PRODUCTION') {
+    const quantity = Math.max(1, Math.floor(Number(answers?.quantity || 1)));
+    if (quantity < 12) return { base: 25 + (18 * quantity), flags: [] };
+    if (quantity < 24) return { base: 300 + (18 * (quantity - 12)), flags: [] };
+    if (quantity < 50) return { base: 540 + (18 * (quantity - 24)), flags: [] };
+    return { base: 1050 + (18 * (quantity - 50)), flags: [] };
+  }
+
   if (model !== 'BEDROOM_TIER') return { base: rule?.base_price_cents != null ? Number(rule.base_price_cents) / 100 : Number(service.starting_price || service.public_price_low || 0), flags: [] };
 
-  const fields = service.quote_input_schema || {};
   const bedroom = String(answers?.bedroom_count ?? '').trim();
-  const tier = (fields.tiers || []).find(t => String(t.value) === bedroom);
+  const tier = (schema.tiers || []).find(t => String(t.value) === bedroom);
   if (!tier) return { base: 0, flags: ['LAYOUT_REVIEW'] };
   return { base: Number(tier.price || 0), flags: [] };
 }
