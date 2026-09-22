@@ -1,3 +1,4 @@
+import { createEstimateEconomicsSnapshot } from './estimateAssignments2026.js';
 const CHANNELS = Object.freeze({ regular_resident: 'CH01', apartment_resident: 'CH01', property_manager: 'CH02', realtor: 'CH03', business: 'CH04', government: 'CH05' });
 const ESTIMATE_CLIENT_TYPES = Object.freeze({ regular_resident: 'other', apartment_resident: 'renter', property_manager: 'property_manager', realtor: 'realtor', business: 'business', government: 'other' });
 const money = value => Math.round(Number(value || 0) * 100) / 100;
@@ -384,6 +385,7 @@ export async function createEstimate(supabase, body) {
       serviceName:resolved.offer.service_name,
       sourceType:resolved.service.sourceType||'GOVERNED',
       divisionId:resolved.service.division_id||resolved.offer.division||'01',
+      runtimeServiceId:resolved.service.id||resolved.offer.runtime_service_id||null,
       publicPrice:resolved.service.public_price_display||resolved.service.price_note||(resolved.service.starting_price!=null?`Starting at ${Number(resolved.service.starting_price).toFixed(2)}`:'Quote required'),
       parentLineId:item?.parentLineId||null,
       parentServiceSku:item?.parentServiceSku||null,
@@ -440,7 +442,10 @@ export async function createEstimate(supabase, body) {
     estimate=result.data; estimateError=result.error;
   }
   if(estimateError) throw estimateError;
-  return {estimate,service:{sku:offer.canonical_sku,name:offer.service_name,publicPrice:service.public_price_display||service.price_note||(service.starting_price!=null?`Starting at ${Number(service.starting_price).toFixed(2)}`:'Quote required')},calculation};
+  const economics = await createEstimateEconomicsSnapshot(supabase, { estimateId:estimate.id, resolvedLineItems, calculation, fulfillmentPlan:Array.isArray(body.fulfillmentPlan)?body.fulfillmentPlan:[], actorUserId:body.actorUserId||null, channelCode });
+  const { data: refreshedEstimate, error: refreshError } = await supabase.from('dd_estimates').select('id,public_reference,estimate_status,estimated_total,deposit_due,quote_disclaimer,economics_status,assignment_readiness_status,active_economics_snapshot_id').eq('id',estimate.id).single();
+  if(refreshError) throw refreshError;
+  return {estimate:refreshedEstimate,service:{sku:offer.canonical_sku,name:offer.service_name,publicPrice:service.public_price_display||service.price_note||(service.starting_price!=null?`Starting at ${Number(service.starting_price).toFixed(2)}`:'Quote required')},calculation,economics};
 }
 /**
  * Resolve the two catalog populations into one operator-facing offer graph.

@@ -1,6 +1,7 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
+import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin } from './_w9Crypto.js';
@@ -143,7 +144,8 @@ async function getStaffSnapshot(supabase) {
       organization_name: row.organization_name || lead?.organization_name || null,
     };
   });
-  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [] };
+  const estimateAssignments = await getOwnerEstimateAssignments(supabase);
+  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], estimateAssignments };
 }
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
@@ -250,11 +252,12 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   }
   const w9 = await getW9Status(supabase, userId);
   applicationSnapshot = { ...applicationSnapshot, w9 };
-  if (!providerId) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
+  if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
+  const quoteAssignments = await getProviderEstimateAssignments(supabase, providerId);
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
   const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
-  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
+  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], quoteAssignments, tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
   const [jobsResult, tasks, evidence, appointments, payouts, messages] = await Promise.all([
     supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, sla_due_at, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
@@ -270,7 +273,7 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   if (payouts.error) throw payouts.error;
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
-  return { ...applicationSnapshot, assignments: safeAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], payouts: payouts.data || [], messages };
+  return { ...applicationSnapshot, assignments: safeAssignments, quoteAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], payouts: payouts.data || [], messages };
 }
 // A resident's own dd_portal_identities.organization_id is only ever set by
 // dd_consume_apartment_resident_invite_impl (see the property-invite RPCs),
@@ -357,6 +360,16 @@ export default async function handler(req, res) {
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
+      if (req.query?.quoteEconomics === '1') {
+        const [componentsResult, providersResult] = await Promise.all([
+          context.supabase.from('dd_service_package_components').select('id,service_id,component_id,component_role,included_quantity,quantity_input_key,is_required,is_optional,fulfillment_mode,sort_order,dd_service_components(id,component_code,component_name,unit_type,cost_category,tax_classification,default_fulfillment_mode)').eq('is_active',true).order('sort_order',{ascending:true}),
+          context.supabase.from('dd_providers').select('id,first_name,last_name,role_title,is_active,dd_provider_organizations(name,accepts_new_work,is_active)').eq('is_active',true).order('first_name',{ascending:true})
+        ]);
+        if (componentsResult.error) throw componentsResult.error;
+        if (providersResult.error) throw providersResult.error;
+        const providers=(providersResult.data||[]).filter(p=>p.dd_provider_organizations?.is_active&&p.dd_provider_organizations?.accepts_new_work);
+        return ok(res,{role:context.role,ownerUserId:context.user.id,packageComponents:componentsResult.data||[],providers});
+      }
       if (req.query?.clientOrganizations === '1') {
         const { data: organizations, error } = await context.supabase.from('dd_client_organizations')
           .select('id,display_name,legal_name,channel_code,status').order('display_name', { ascending: true }).limit(500);
@@ -609,7 +622,7 @@ export default async function handler(req, res) {
       }
       return ok(res, { submissionId, status });
     }
-    if (action === 'create_estimate') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, await createEstimate(context.supabase, payload)); }
+    if (action === 'create_estimate') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, await createEstimate(context.supabase, { ...payload, actorUserId: context.user.id })); }
     if (action === 'update_estimate') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const estimateId = String(payload.estimateId || '').trim();
@@ -617,7 +630,7 @@ export default async function handler(req, res) {
       const existing = await context.supabase.from('dd_estimates').select('id,public_reference,estimate_status').eq('id', estimateId).maybeSingle();
       if (existing.error) throw existing.error;
       if (!existing.data) return fail(res, 'Saved estimate not found.', 404);
-      const rebuilt = await createEstimate(context.supabase, { ...payload, updateEstimateId: estimateId });
+      const rebuilt = await createEstimate(context.supabase, { ...payload, updateEstimateId: estimateId, actorUserId: context.user.id });
       return ok(res, { ...rebuilt, notice: 'Saved estimate updated in place.' });
     }
     if (action === 'review_estimate') {
@@ -641,7 +654,7 @@ export default async function handler(req, res) {
         ? intakeAnswers.lineItems
         : [{ serviceSku, answers: currentAnswers }];
       const reviewedLineItems = storedLineItems.map((line, index) => index === 0 ? { ...line, answers: mergedAnswers } : line);
-      const rebuilt = await createEstimate(context.supabase, { updateEstimateId: estimateId, preserveEstimateStatus: true, serviceSku, clientType, lineItems: reviewedLineItems, answers: mergedAnswers, requestId: estimate.service_request_id || undefined, clientName: estimate.client_name, clientPhone: estimate.client_phone, clientEmail: estimate.client_email, organizationName: estimate.organization_name, locationAddress: estimate.location_address, city: estimate.city, state: estimate.state, zipCode: estimate.zip_code, timeline: estimate.timeline, requestedDate: estimate.requested_date, clientNotes: estimate.client_notes, internalNotes: estimate.internal_notes, priority: estimate.priority });
+      const rebuilt = await createEstimate(context.supabase, { updateEstimateId: estimateId, preserveEstimateStatus: true, serviceSku, clientType, lineItems: reviewedLineItems, answers: mergedAnswers, requestId: estimate.service_request_id || undefined, clientName: estimate.client_name, clientPhone: estimate.client_phone, clientEmail: estimate.client_email, organizationName: estimate.organization_name, locationAddress: estimate.location_address, city: estimate.city, state: estimate.state, zipCode: estimate.zip_code, timeline: estimate.timeline, requestedDate: estimate.requested_date, clientNotes: estimate.client_notes, internalNotes: estimate.internal_notes, priority: estimate.priority, actorUserId: context.user.id });
       const flags = rebuilt.calculation.reviewFlags || [];
       const resolved = flags.filter(flag => resolutions[flag] === true);
       const unresolved = flags.filter(flag => resolutions[flag] !== true);
@@ -665,6 +678,8 @@ export default async function handler(req, res) {
       if (estimateError) throw estimateError;
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
       if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'Only READY_TO_SEND estimates can be delivered.', 409);
+      if (estimate.economics_status !== 'PASS') return fail(res, 'Quote economics must PASS before delivery.', 409);
+      if (estimate.assignment_readiness_status !== 'READY') return fail(res, 'Required owner/provider assignments must be accepted before delivery.', 409);
       if (!estimate.client_email) return fail(res, 'A customer email is required to deliver this quote.', 422);
       const identityGate = customerIdentityGate(estimate, context.user?.email);
       if (!identityGate.ok) return identityFailure(res, identityGate);
@@ -841,6 +856,42 @@ export default async function handler(req, res) {
       if (error) throw error;
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
       return ok(res, { estimate });
+    }
+    if (action === 'create_estimate_assignment') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const assignment = await createEstimateAssignmentOffer(context.supabase, {
+        estimateId: payload.estimateId,
+        assignmentType: payload.assignmentType,
+        providerId: payload.providerId || null,
+        ownerUserId: payload.assignmentType === 'OWNER' ? (payload.ownerUserId || context.user.id) : null,
+        componentSnapshotIds: Array.isArray(payload.componentSnapshotIds) ? payload.componentSnapshotIds : [],
+        proposedCompensation: payload.proposedCompensation || 0,
+        proposedBasis: payload.proposedBasis || {},
+        scopeSnapshot: payload.scopeSnapshot || {},
+        actorUserId: context.user.id,
+        expiresAt: payload.expiresAt || null
+      });
+      return ok(res, { assignment });
+    }
+    if (action === 'estimate_assignment_response') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const providerId = context.isStaff ? payload.providerId : context.identity?.entity_id;
+      if (!providerId) return fail(res, 'Provider identity required.', 403);
+      const assignment = await respondToEstimateAssignment(context.supabase, {
+        assignmentId: payload.assignmentId,
+        providerId,
+        decision: payload.decision,
+        counterCompensation: payload.counterCompensation,
+        counterBasis: payload.counterBasis || null,
+        reason: payload.reason || null,
+        actorUserId: context.user.id
+      });
+      return ok(res, { assignment });
+    }
+    if (action === 'resolve_estimate_counteroffer') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const result = await resolveEstimateCounteroffer(context.supabase, { assignmentId: payload.assignmentId, decision: payload.decision, actorUserId: context.user.id });
+      return ok(res, result);
     }
     if (action === 'dispatch_offer') { const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status); return ok(res, { assignment: await createDispatchOffer(context.supabase, context.user.id, payload) }); }
     if (action === 'schedule_appointment') {
