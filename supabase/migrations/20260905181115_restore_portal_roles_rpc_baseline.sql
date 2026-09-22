@@ -1,0 +1,1 @@
+create or replace function public.dd_get_my_portal_roles() returns public.dd_portal_role[] language sql stable security definer set search_path='' as $$ select coalesce(array_agg(r.role order by r.role),'{}'::public.dd_portal_role[]) from public.dd_portal_user_roles r where r.user_id=(select auth.uid()) and r.is_active=true; $$;
