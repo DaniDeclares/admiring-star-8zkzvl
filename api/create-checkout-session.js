@@ -1,6 +1,8 @@
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 import prisma from '../lib/prisma.js';
 import { checkoutEligibility, getGovernedCommercialOffer, getChannelFromRequest, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
+import { ensureOwnerDirectCheckoutEconomics } from '../src/lib/operations/ownerDirectCheckout2026.js';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const json = (res,status,payload)=>res.status(status).json(payload);
@@ -39,13 +41,21 @@ export default async function handler(req,res){
   const quoteRequired=QUOTE_PRICING_TYPES.has(String(offer?.pricingType||'').toUpperCase());
   const gate=checkoutEligibility(offer,{channel,subchannel,isVerifiedCommunityResident});
   if(!gate.eligible&&!(quoteRequired&&gate.reason==='QUOTE_REQUIRED'))return json(res,409,{error:'This service is not currently eligible for online payment.',reason:gate.reason});
-  const estimate=await prisma.dd_estimates.findFirst({where:{service_request_id:request.id},orderBy:{created_at:'desc'},select:{id:true,estimated_total:true,deposit_due:true,estimate_status:true,economics_status:true,assignment_readiness_status:true}});
+  const estimate=await prisma.dd_estimates.findFirst({where:{service_request_id:request.id},orderBy:{created_at:'desc'},select:{id:true,estimated_total:true,deposit_due:true,estimate_status:true,economics_status:true,assignment_readiness_status:true,active_economics_snapshot_id:true,intake_answers:true}});
   if(!estimate)return json(res,422,{error:'No frozen estimate was found for this payment request.'});
   const frozenAmount=Number(estimate.estimated_total),governedAmount=Number(gate.price);
   if(!Number.isFinite(frozenAmount)||frozenAmount<=0)return json(res,422,{error:'The frozen estimate total could not be securely verified before payment.'});
   if(!quoteRequired&&(!Number.isFinite(governedAmount)||governedAmount<=0||Math.round(frozenAmount*100)!==Math.round(governedAmount*100)))return json(res,409,{error:'The frozen request price no longer matches the governed commercial price. Payment has been blocked and the request needs reconciliation.'});
   if(String(estimate.estimate_status||'').toLowerCase()!=='approved')return json(res,409,{error:'The estimate is not approved for payment.'});
   if(quoteRequired&&(estimate.economics_status!=='PASS'||!['PENDING_PAYMENT','READY'].includes(String(estimate.assignment_readiness_status||'').toUpperCase())))return json(res,409,{error:'The quote is not commercially ready for initial payment.'});
+  if(!quoteRequired){
+   const supabaseUrl=process.env.SUPABASE_URL||process.env.REACT_APP_SUPABASE_URL;
+   const serviceKey=process.env.SUPABASE_SERVICE_ROLE_KEY;
+   if(!supabaseUrl||!serviceKey)return json(res,503,{error:'Checkout economics verification is temporarily unavailable.'});
+   const supabase=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
+   const economics=await ensureOwnerDirectCheckoutEconomics(supabase,{estimate,offer,request,amount:frozenAmount});
+   if(!economics.ready)return json(res,409,{error:'This request needs a reviewed quote before payment can continue.'});
+  }
   const depositDue=Number(estimate.deposit_due);
   const initialPayment=quoteRequired&&Number.isFinite(depositDue)&&depositDue>0&&depositDue<frozenAmount;
   const paymentAmount=initialPayment?depositDue:frozenAmount;
