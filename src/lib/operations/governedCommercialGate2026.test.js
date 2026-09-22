@@ -53,6 +53,7 @@ describe('LIVE_READY checkout release gate', () => {
     internalCost: 'AUDITED: $50.00',
     marginEconomics: 'AUDITED: price $140 - cost $50 = $90 (64.3%)',
     ch01APriced: true,
+    ch01LockedActivePricing: true,
     channelAvailabilityCount: 1,
     pricedChannelCount: 1,
     authorizedProviderCapabilityCount: 1,
