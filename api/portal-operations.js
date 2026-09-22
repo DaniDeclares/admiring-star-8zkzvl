@@ -107,7 +107,7 @@ function sanitizeProviderAssignment(assignment) {
   return { id: assignment.id, job_id: assignment.job_id, provider_id: assignment.provider_id, assignment_status: assignment.assignment_status, provider_notes: assignment.provider_notes, offered_at: assignment.offered_at, accepted_at: assignment.accepted_at, rejected_at: assignment.rejected_at, cancelled_at: assignment.cancelled_at, offer_expires_at: assignment.offer_expires_at, response_at: assignment.response_at, offer_sequence: assignment.offer_sequence, job: sanitizeProviderJob(assignment.job) };
 }
 async function getStaffSnapshot(supabase) {
-  const [requests, jobs, appointments, providers, changes, evidence, payments, pendingCapabilities, w9Submissions] = await Promise.all([
+  const [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions] = await Promise.all([
     supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_jobs').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_job_appointments').select('*').order('starts_at', { ascending: true }).limit(100),
@@ -115,6 +115,7 @@ async function getStaffSnapshot(supabase) {
     supabase.from('dd_change_orders').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_job_evidence').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_payment_events').select('*').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_invoices').select('id,public_reference,estimate_id,job_id,invoice_status,total_amount,deposit_due,balance_due,stripe_payment_link,hosted_invoice_url,updated_at').order('created_at', { ascending: false }).limit(100),
     // Self-requested additions from the provider "My Services" page (add_service_request
     // source) sit here as is_authorized:false until staff reviews them -- same as every
     // other capability, no self-service action ever sets is_authorized:true.
@@ -124,7 +125,7 @@ async function getStaffSnapshot(supabase) {
     // is separately logged) when a real number is actually needed.
     supabase.from('dd_provider_w9_submissions').select('id, provider_application_id, provider_org_id, line1_name, classification, tin_type, tin_last_four, status, created_at, dd_provider_organizations(name)').eq('status', 'SUBMITTED').order('created_at', { ascending: false }).limit(100),
   ]);
-  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, pendingCapabilities, w9Submissions].filter(item => item.error);
+  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions].filter(item => item.error);
   if (errors.length) throw errors[0].error;
   const requestRows = requests.data || [];
   const leadIds = [...new Set(requestRows.map(row => row.lead_id).filter(Boolean))];
@@ -145,7 +146,7 @@ async function getStaffSnapshot(supabase) {
     };
   });
   const estimateAssignments = await getOwnerEstimateAssignments(supabase);
-  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], estimateAssignments };
+  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], estimateAssignments };
 }
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
@@ -693,6 +694,36 @@ export default async function handler(req, res) {
       if (!updated) return fail(res, 'Quote changed while being delivered. Reload and retry.', 409);
       return ok(res, { estimate: updated, delivery: { channel: 'CUSTOMER_PORTAL', status: 'SENT' }, portalAccount });
     }
+    if (action === 'create_balance_checkout') {
+      const guard = requireRole(context, STAFF_ROLES);
+      if (guard) return guard;
+      if (!stripe) return fail(res, 'Stripe payment execution is not configured.', 503);
+      const invoiceId = String(payload.invoiceId || '').trim();
+      if (!invoiceId) return fail(res, 'invoiceId is required.');
+      const { data: invoiceRow, error: invoiceError } = await context.supabase.from('dd_invoices').select('*').eq('id', invoiceId).maybeSingle();
+      if (invoiceError) throw invoiceError;
+      if (!invoiceRow) return fail(res, 'Invoice not found.', 404);
+      const balance = Number(invoiceRow.balance_due || 0);
+      if (!Number.isFinite(balance) || balance <= 0) return fail(res, 'This invoice has no outstanding balance.', 409);
+      if (!invoiceRow.estimate_id || !invoiceRow.job_id) return fail(res, 'Balance checkout requires an estimate-linked job.', 409);
+      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('id,service_request_id,client_email,public_reference,estimated_total').eq('id', invoiceRow.estimate_id).maybeSingle();
+      if (estimateError) throw estimateError;
+      if (!estimate?.client_email) return fail(res, 'Customer email is required for balance checkout.', 422);
+      const { data: request, error: requestError } = await context.supabase.from('service_requests').select('id,property_details').eq('id', estimate.service_request_id).maybeSingle();
+      if (requestError) throw requestError;
+      const serviceId=String(request?.property_details?.commercialIntent?.serviceId||request?.property_details?.pricingServiceId||'').trim();
+      const metadata={request_id:request?.id||'',service_id:serviceId,estimate_id:estimate.id,job_id:invoiceRow.job_id,invoice_id:invoiceRow.id,payment_type:'BALANCE_PAYMENT',balance_due:String(balance),full_estimate_amount:String(estimate.estimated_total||invoiceRow.total_amount||0)};
+      const origin=`${req.headers['x-forwarded-proto']||'https'}://${req.headers['x-forwarded-host']||req.headers.host}`;
+      const session=await stripe.checkout.sessions.create({
+        mode:'payment',customer_email:estimate.client_email,
+        line_items:[{price_data:{currency:'usd',unit_amount:Math.round(balance*100),product_data:{name:`DANI DECLARES — Balance — ${estimate.public_reference||invoiceRow.public_reference}`,metadata}},quantity:1}],
+        metadata,payment_intent_data:{metadata},
+        success_url:`${origin}/portal?balance_paid=1`,cancel_url:`${origin}/portal?balance_canceled=1`
+      },{idempotencyKey:`dani-balance:${invoiceRow.id}:${Math.round(balance*100)}`});
+      await context.supabase.from('dd_invoices').update({stripe_payment_link:session.url,updated_at:new Date().toISOString()}).eq('id',invoiceRow.id);
+      return ok(res,{balanceCheckoutUrl:session.url,sessionId:session.id,invoiceId:invoiceRow.id,balance});
+    }
+
     if (action === 'create_stripe_invoice') {
       const guard = requireRole(context, STAFF_ROLES);
       const isStaffRequest = !guard || context.isStaff;
