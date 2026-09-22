@@ -36,12 +36,12 @@ export default async function handler(req,res){
   if(!canonicalSelection.allowed)return json(res,409,{error:'This resident service is not currently authorized for payment through the submitted starting point.',reason:canonicalSelection.reason});
   const subchannel=canonicalSelection.subchannel;
   const offer=await getGovernedCommercialOffer(canonicalSelection.serviceId);
+  const quoteRequired=QUOTE_PRICING_TYPES.has(String(offer?.pricingType||'').toUpperCase());
   const gate=checkoutEligibility(offer,{channel,subchannel,isVerifiedCommunityResident});
-  if(!gate.eligible)return json(res,409,{error:'This service is not currently eligible for direct online payment.',reason:gate.reason});
+  if(!gate.eligible&&!(quoteRequired&&gate.reason==='QUOTE_REQUIRED'))return json(res,409,{error:'This service is not currently eligible for online payment.',reason:gate.reason});
   const estimate=await prisma.dd_estimates.findFirst({where:{service_request_id:request.id},orderBy:{created_at:'desc'},select:{id:true,estimated_total:true,deposit_due:true,estimate_status:true,economics_status:true,assignment_readiness_status:true}});
   if(!estimate)return json(res,422,{error:'No frozen estimate was found for this payment request.'});
   const frozenAmount=Number(estimate.estimated_total),governedAmount=Number(gate.price);
-  const quoteRequired=QUOTE_PRICING_TYPES.has(String(offer.pricingType||'').toUpperCase());
   if(!Number.isFinite(frozenAmount)||frozenAmount<=0)return json(res,422,{error:'The frozen estimate total could not be securely verified before payment.'});
   if(!quoteRequired&&(!Number.isFinite(governedAmount)||governedAmount<=0||Math.round(frozenAmount*100)!==Math.round(governedAmount*100)))return json(res,409,{error:'The frozen request price no longer matches the governed commercial price. Payment has been blocked and the request needs reconciliation.'});
   if(String(estimate.estimate_status||'').toLowerCase()!=='approved')return json(res,409,{error:'The estimate is not approved for payment.'});
