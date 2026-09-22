@@ -9,9 +9,9 @@ const systems = [
   { key:'ASANA', name:'Asana', role:'Tasks & release execution', auth:'OAuth 2.0', callback:'https://danideclares.com/api/integrations/asana/callback', provider:'https://app.asana.com/0/my-apps' },
   { key:'NOTION', name:'Notion', role:'SOPs, manuals & institutional knowledge', auth:'Internal connection token (preferred for the DANI workspace) or public OAuth', callback:'https://danideclares.com/api/integrations/notion/callback', provider:'https://www.notion.so/my-integrations' },
   { key:'QUICKBOOKS_ONLINE', name:'QuickBooks Online', role:'Accounting authority', auth:'OAuth 2.0', callback:'https://danideclares.com/api/integrations/quickbooks/callback', provider:'https://developer.intuit.com/' },
-  { key:'GMAIL', name:'Gmail', role:'Business communications rail', auth:'Google OAuth 2.0', callback:'Production OAuth build required', provider:'https://mail.google.com/' },
-  { key:'GOOGLE_CALENDAR', name:'Google Calendar', role:'Appointment projection & availability', auth:'Google OAuth 2.0', callback:'Production OAuth build required', provider:'https://calendar.google.com/' },
-  { key:'GOOGLE_DRIVE', name:'Google Drive', role:'Documents, evidence & Google-native files', auth:'Google OAuth 2.0', callback:'Production OAuth build required', provider:'https://drive.google.com/' },
+  { key:'GMAIL', name:'Gmail', role:'Business communications rail', auth:'Google OAuth 2.0', callback:'https://danideclares.com/api/integrations/google/callback', provider:'https://mail.google.com/' },
+  { key:'GOOGLE_CALENDAR', name:'Google Calendar', role:'Appointment projection & availability', auth:'Google OAuth 2.0', callback:'https://danideclares.com/api/integrations/google/callback', provider:'https://calendar.google.com/' },
+  { key:'GOOGLE_DRIVE', name:'Google Drive', role:'Documents, evidence & Google-native files', auth:'Google OAuth 2.0', callback:'https://danideclares.com/api/integrations/google/callback', provider:'https://drive.google.com/' },
   { key:'HUBSPOT', name:'HubSpot', role:'CRM & marketing engagement', auth:'OAuth 2.0 / private app', callback:'Production OAuth build required', provider:'https://app.hubspot.com/' },
   { key:'AIRTABLE', name:'Airtable', role:'Planning, review & flexible workspaces', auth:'OAuth / scoped token', callback:'Production OAuth build required', provider:'https://airtable.com/' },
   { key:'GITHUB', name:'GitHub', role:'Application source & version authority', auth:'GitHub App / OAuth', callback:'Managed developer connection', provider:'https://github.com/DaniDeclares/admiring-star-8zkzvl' },
@@ -21,7 +21,8 @@ const systems = [
 ];
 
 function IntegrationCard({ system, state, env, session, onRefresh }) {
-  const configured = system.key === 'ASANA'
+  const googleWorkspace = ['GMAIL','GOOGLE_CALENDAR','GOOGLE_DRIVE'].includes(system.key);
+  const configured = googleWorkspace ? env.GOOGLE : system.key === 'ASANA'
     ? env.ASANA
     : system.key === 'NOTION'
       ? (env.NOTION_INTERNAL || env.NOTION_PUBLIC)
@@ -29,7 +30,7 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
         ? env.QUICKBOOKS
         : false;
   const managed = ['GITHUB','VERCEL'].includes(system.key);
-  const externalOnly = ['GMAIL','GOOGLE_CALENDAR','GOOGLE_DRIVE','HUBSPOT','AIRTABLE','POSTHOG'].includes(system.key);
+  const externalOnly = ['HUBSPOT','AIRTABLE','POSTHOG'].includes(system.key);
   const connected = (state?.connections || []).some(c => c.adapter_code === system.key && c.connection_status === 'CONNECTED');
   const notionInternalHealthy = system.key === 'NOTION' && Boolean(state?.notionInternalValid);
 
@@ -39,7 +40,9 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
       return;
     }
     if (system.key === 'NOTION' && env.NOTION_INTERNAL) { await onRefresh(); return; }
-    const endpoint = system.key === 'QUICKBOOKS_ONLINE'
+    const endpoint = googleWorkspace
+      ? '/api/integrations/google/start'
+      : system.key === 'QUICKBOOKS_ONLINE'
       ? '/api/integrations/quickbooks/start'
       : system.key === 'NOTION'
         ? '/api/integrations/notion/start'
@@ -113,7 +116,7 @@ NOTION_OAUTH_REDIRECT_URI
 QUICKBOOKS_CLIENT_ID
 QUICKBOOKS_CLIENT_SECRET
 QUICKBOOKS_REDIRECT_URI
-QUICKBOOKS_ENVIRONMENT</pre>
+QUICKBOOKS_ENVIRONMENT\n\nGOOGLE_CLIENT_ID\nGOOGLE_CLIENT_SECRET\nGOOGLE_REDIRECT_URI</pre>
    <p className='portal-note'>Only set these in the server-side deployment secret store. The browser never receives the client secret or OAuth refresh token.</p>
   </section>
   <section className='portal-card'><p className='portal-eyebrow'>Google Voice / 7173</p><h2 style={{margin:'5px 0 0'}}>Keep the number unchanged while we establish the programmable call path</h2>

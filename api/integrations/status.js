@@ -18,6 +18,7 @@ export default async function handler(req,res){
    NOTION_INTERNAL:Boolean(process.env.NOTION_TOKEN),
    NOTION_PUBLIC:Boolean(process.env.NOTION_OAUTH_CLIENT_ID&&process.env.NOTION_OAUTH_CLIENT_SECRET),
    QUICKBOOKS:Boolean(process.env.QUICKBOOKS_CLIENT_ID&&process.env.QUICKBOOKS_CLIENT_SECRET),
+   GOOGLE:Boolean(process.env.GOOGLE_CLIENT_ID&&process.env.GOOGLE_CLIENT_SECRET),
    INTEGRATION_ENCRYPTION_KEY:Boolean(process.env.INTEGRATION_TOKEN_ENCRYPTION_KEY),
   };
   return res.status(200).json({success:true,environment:ENVIRONMENT,env,notionInternalValid,connections:connections||[]});
