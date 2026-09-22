@@ -366,8 +366,87 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
   const { data: updated, error:updateError }=await supabase.from('dd_estimate_assignment_offers').update(next).eq('id',assignmentId).eq('status','OFFERED').select('*').single();
   if(updateError) throw updateError;
   await supabase.from('dd_estimate_assignment_events').insert({assignment_offer_id:assignmentId,event_type:`PROVIDER_${normalized}`,actor_user_id:actorUserId,actor_provider_id:providerId,from_status:'OFFERED',to_status:updated.status,compensation_before:offer.proposed_compensation,compensation_after:normalized==='COUNTEROFFER'?updated.counter_compensation:offer.proposed_compensation,reason,payload:{counterBasis:counterBasis||null}});
+  if(normalized==='ACCEPT'){
+    const {data:estimate,error:estimateError}=await supabase.from('dd_estimates').select('id,service_request_id').eq('id',offer.estimate_id).single();
+    if(estimateError) throw estimateError;
+    const {data:job,error:jobError}=await supabase.from('dd_jobs').select('id').eq('estimate_id',offer.estimate_id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+    if(jobError) throw jobError;
+    if(job){
+      const {data:provider,error:providerError}=await supabase.from('dd_providers').select('id,org_id').eq('id',providerId).single();
+      if(providerError) throw providerError;
+      const {data:existingAssignment,error:existingAssignmentError}=await supabase.from('dd_job_assignments').select('id').eq('job_id',job.id).eq('provider_id',providerId).in('assignment_status',['OFFERED','ACCEPTED']).limit(1).maybeSingle();
+      if(existingAssignmentError) throw existingAssignmentError;
+      if(!existingAssignment){
+        const {error:jobAssignmentError}=await supabase.from('dd_job_assignments').insert({
+          job_id:job.id,provider_id:providerId,provider_org_id:provider?.org_id||null,
+          assignment_status:'ACCEPTED',provider_notes:'Accepted paid quote assignment.',
+          offered_at:offer.offered_at||now,accepted_at:now,response_at:now
+        });
+        if(jobAssignmentError) throw jobAssignmentError;
+      }
+      const {error:jobUpdateError}=await supabase.from('dd_jobs').update({job_status:'ASSIGNED',assigned_to:providerId,updated_at:now}).eq('id',job.id);
+      if(jobUpdateError) throw jobUpdateError;
+    }
+  }
   await refreshEstimateAssignmentReadiness(supabase, offer.estimate_id);
   return updated;
+}
+
+export async function respondToOwnerEstimateAssignment(supabase, { assignmentId, decision, actorUserId }) {
+  const normalized=String(decision||'').toUpperCase();
+  if(!['ACCEPT','DECLINE'].includes(normalized)) throw new Error('INVALID_OWNER_ASSIGNMENT_DECISION');
+  const {data:offer,error}=await supabase.from('dd_estimate_assignment_offers').select('*').eq('id',assignmentId).eq('assignment_type','OWNER').single();
+  if(error||!offer) throw error||new Error('OWNER_ASSIGNMENT_NOT_FOUND');
+  if(String(offer.owner_user_id)!==String(actorUserId)) throw new Error('OWNER_ASSIGNMENT_ACTOR_MISMATCH');
+  if(offer.status!=='OFFERED') throw new Error('OWNER_ASSIGNMENT_NOT_OPEN');
+
+  const {data:estimate,error:estimateError}=await supabase.from('dd_estimates')
+    .select('id,service_request_id,zip_code,active_economics_snapshot_id')
+    .eq('id',offer.estimate_id).single();
+  if(estimateError||!estimate) throw estimateError||new Error('ESTIMATE_NOT_FOUND');
+  const {data:job,error:jobError}=await supabase.from('dd_jobs')
+    .select('id,job_status,assigned_to').eq('estimate_id',offer.estimate_id)
+    .order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(jobError) throw jobError;
+
+  const now=new Date().toISOString();
+  const status=normalized==='ACCEPT'?'ACCEPTED':'DECLINED';
+  const {data:updated,error:updateError}=await supabase.from('dd_estimate_assignment_offers')
+    .update({status,responded_at:now,resolved_at:now,resolved_by:actorUserId,resolution:normalized})
+    .eq('id',assignmentId).eq('status','OFFERED').select('*').single();
+  if(updateError) throw updateError;
+
+  await supabase.from('dd_estimate_assignment_events').insert({
+    assignment_offer_id:assignmentId,event_type:`OWNER_${normalized}_ASSIGNMENT`,
+    actor_user_id:actorUserId,from_status:'OFFERED',to_status:status,
+    compensation_before:offer.proposed_compensation,compensation_after:offer.proposed_compensation,
+    payload:{paidFirst:true,ownerFirst:true}
+  });
+
+  if(normalized==='ACCEPT'){
+    if(job){
+      const {error:jobUpdateError}=await supabase.from('dd_jobs').update({
+        job_status:'ASSIGNED_OWNER',assigned_to:`OWNER:${actorUserId}`,updated_at:now
+      }).eq('id',job.id);
+      if(jobUpdateError) throw jobUpdateError;
+    }
+    await supabase.from('dd_estimates').update({assignment_readiness_status:'READY'}).eq('id',offer.estimate_id);
+    return {offer:updated,routing:{status:'OWNER_ACCEPTED',jobId:job?.id||null}};
+  }
+
+  // Owner decline never exposes the job to providers blindly. The job moves to
+  // a routing hold until a provider with verified dispatch-origin/location data
+  // can be ranked and the travel economics are known.
+  await supabase.from('dd_estimates').update({assignment_readiness_status:'NEEDS_REASSIGNMENT'}).eq('id',offer.estimate_id);
+  if(job){
+    const {error:jobUpdateError}=await supabase.from('dd_jobs').update({
+      job_status:'DISPATCH_REVIEW',assigned_to:null,
+      internal_notes:[job.internal_notes,'Owner first refusal declined; route to next eligible provider only after location/mileage economics resolve.'].filter(Boolean).join('\n'),
+      updated_at:now
+    }).eq('id',job.id);
+    if(jobUpdateError) throw jobUpdateError;
+  }
+  return {offer:updated,routing:{status:'NEEDS_REASSIGNMENT',jobId:job?.id||null}};
 }
 
 export async function resolveEstimateCounteroffer(supabase, { assignmentId, decision, actorUserId }) {
