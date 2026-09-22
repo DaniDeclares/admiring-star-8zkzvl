@@ -45,6 +45,8 @@ select
 from public.dd_service_release_contract_legacy_v1 l
 left join public.dd_service_economics_authority_v1 e on e.canonical_sku=l.canonical_sku;
 
+grant select on public.dd_service_release_contract_v1 to authenticated, service_role;
+
 comment on view public.dd_service_release_contract_v1 is 'Production release authority. Preserves the canonical nine-gate contract while economics is governed by dd_service_economics_authority_v1 rather than legacy free-text internal_cost/margin_economics.';
 comment on view public.dd_service_release_contract_legacy_v1 is 'Audit-only predecessor retained to trace the former free-text economics gate. Not production release authority.';
 
