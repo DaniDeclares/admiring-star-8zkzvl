@@ -154,6 +154,41 @@ async function loadRules(supabase, serviceId, channelCode) {
   if (error) throw error;
   return data || [];
 }
+async function resolveQuoteMarket(supabase, { state, city } = {}) {
+  const stateCode=String(state||'').trim().toUpperCase();
+  const cityName=String(city||'').trim();
+  if(!stateCode) return { market:null, stateCode:null, resolution:'UNRESOLVED' };
+
+  const {data:markets,error}=await supabase.from('dd_service_markets')
+    .select('id,market_code,market_name,state_code,pricing_zone_code,dispatch_origin_code,status,notes')
+    .eq('state_code',stateCode);
+  if(error) throw error;
+  const rows=markets||[];
+  const exact=cityName ? rows.find(m=>String(m.market_name||'').trim().toLowerCase()===cityName.toLowerCase()) : null;
+  const stateFallback=rows.find(m=>m.market_code===`${stateCode}_GENERAL`) || (stateCode==='SC'?rows.find(m=>m.market_code==='SC_GENERAL'):null);
+  const market=exact||stateFallback||null;
+  return {
+    market,
+    stateCode,
+    city:cityName||null,
+    resolution:exact?'EXACT_CITY':stateFallback?'STATE_FALLBACK':'STATE_ONLY'
+  };
+}
+
+async function loadMarketRule(supabase, { marketId, serviceId, channelCode } = {}) {
+  if(!marketId||!serviceId) return null;
+  const {data,error}=await supabase.from('dd_service_market_pricing_rules')
+    .select('id,market_id,service_id,pricing_rule_id,channel_code,subchannel_code,price_override_cents,status,notes')
+    .eq('market_id',marketId)
+    .eq('service_id',serviceId)
+    .eq('channel_code',channelCode)
+    .eq('status','OWNER_APPROVED')
+    .order('updated_at',{ascending:false})
+    .limit(1)
+    .maybeSingle();
+  if(error) throw error;
+  return data||null;
+}
 
 export function isHourlyBilled(service, rule) {
   const pricingType = String(rule?.pricing_type || service?.pricing_type || '').toUpperCase();
@@ -280,7 +315,7 @@ export function calculate(service, rule, answers) {
   return { baseSubtotal:money(base), residentDiscount:money(discount), travelFee:money(travelFee), rushFee:money(rushFee), materials:money(materials), sourcingFee:money(sourcingFee), passThrough:money(passThrough), tax:money(tax), taxRate, estimatedTotal:money(total), depositDue:money(deposit), reviewFlags, needsReview:reviewFlags.length>0, isHourly:hourly, ratePerUnit:money(ruleBase) };
 }
 
-async function resolveQuoteLine(supabase, serviceSku, channelCode) {
+async function resolveQuoteLine(supabase, serviceSku, channelCode, marketContext = null) {
   const sku = String(serviceSku || '').trim();
   if (!sku) throw new Error('Choose a service.');
 
@@ -325,7 +360,12 @@ async function resolveQuoteLine(supabase, serviceSku, channelCode) {
   if (!governedService) throw new Error(`The service record ${canonicalSku} could not be resolved.`);
 
   const rules = await loadRules(supabase, governedService.id, channelCode);
-  return { offer:governedOffer, service:governedService, rule:rules.find(r=>r.base_price_cents!=null)||rules[0]||null };
+  const baseRule=rules.find(r=>r.base_price_cents!=null)||rules[0]||null;
+  const marketRule=marketContext?.market?.id ? await loadMarketRule(supabase,{marketId:marketContext.market.id,serviceId:governedService.id,channelCode}) : null;
+  const rule=marketRule?.price_override_cents!=null
+    ? {...(baseRule||{}),base_price_cents:marketRule.price_override_cents,market_rule_id:marketRule.id,market_code:marketContext.market.market_code,market_pricing_status:marketRule.status}
+    : baseRule;
+  return { offer:governedOffer, service:governedService, rule, marketRule };
 }
 export function aggregateQuoteCalculations(lineItems) {
   const totals = lineItems.reduce((acc, item) => {
@@ -370,6 +410,7 @@ export async function createEstimate(supabase, body) {
   if(!serviceSku) throw new Error('Choose a service.');
   const clientType=String(body.clientType||'business');
   const channelCode=CHANNELS[clientType]||'CH04';
+  const marketContext=await resolveQuoteMarket(supabase,{state:body.state||'GA',city:body.city||''});
   const requestedLineItems = Array.isArray(body.lineItems) && body.lineItems.length
     ? body.lineItems
     : [{ serviceSku: body.serviceSku, answers: body.answers || {} }];
@@ -379,7 +420,7 @@ export async function createEstimate(supabase, body) {
     const itemSku = String(item?.serviceSku || '').trim();
     if (!itemSku) throw new Error('Every package component must have a service.');
     const itemAnswers = { ...(item.answers || {}), apply_resident_discount:false, apartment_resident:clientType==='apartment_resident' };
-    const resolved = await resolveQuoteLine(supabase, itemSku, channelCode);
+    const resolved = await resolveQuoteLine(supabase, itemSku, channelCode, marketContext);
     item.__resolvedService=resolved.service;
     const calcService = {
       ...resolved.service,
@@ -389,6 +430,14 @@ export async function createEstimate(supabase, body) {
     };
     validateQuoteLineContract(calcService, itemAnswers, item, requestedLineItems);
     const calculation = calculate(calcService, resolved.rule, itemAnswers);
+    const marketNeedsReview = marketContext.stateCode==='SC' && !resolved.marketRule;
+    if(marketNeedsReview){
+      calculation.reviewFlags=[...new Set([...(calculation.reviewFlags||[]),'SC_MARKET_RESEARCH_REQUIRED'])];
+      calculation.needsReview=true;
+    } else if(marketContext.market && !resolved.marketRule) {
+      calculation.reviewFlags=[...new Set([...(calculation.reviewFlags||[]),'MARKET_BASELINE_USED'])];
+      calculation.needsReview=true;
+    }
     resolvedLineItems.push({
       serviceSku:itemSku,
       canonicalSku:resolved.offer.canonical_sku,
@@ -401,6 +450,17 @@ export async function createEstimate(supabase, body) {
       parentServiceSku:item?.parentServiceSku||null,
       componentRole:item?.componentRole||'PRIMARY',
       answers:itemAnswers,
+      marketSnapshot:{
+        marketId:marketContext.market?.id||null,
+        marketCode:marketContext.market?.market_code||null,
+        stateCode:marketContext.stateCode,
+        city:marketContext.city,
+        resolution:marketContext.resolution,
+        marketStatus:marketContext.market?.status||null,
+        marketRuleId:resolved.marketRule?.id||null,
+        marketPricingStatus:resolved.marketRule?.status||null,
+        pricingSource:resolved.marketRule?'OWNER_APPROVED_MARKET_OVERRIDE':'BASE_SERVICE_RULE'
+      },
       calculation
     });
   }
@@ -442,7 +502,7 @@ export async function createEstimate(supabase, body) {
   };
   const offer = { canonical_sku:primary.canonicalSku, service_name:primary.serviceName, division:primary.divisionId };
   const publicReference=existingEstimate?.public_reference||`EST-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
-  const payload={public_reference:publicReference,division_slug:String(service.division_id||offer.division||'01').padStart(2,'0'),source_slug:resolvedLineItems.length>1?'package_quote':(service.sourceType==='DANI_SPECIALS'?'danis_specials_owner_quote':'admin_quote_builder'),lead_id:sourceLeadId,service_request_id:sourceRequest?.id||null,client_name:String(body.clientName||'').trim()||null,client_phone:String(body.clientPhone||'').trim()||null,client_email:String(body.clientEmail||'').trim()||null,client_type:ESTIMATE_CLIENT_TYPES[clientType]||'other',organization_name:String(body.organizationName||'').trim()||null,location_address:String(body.locationAddress||'').trim()||null,city:String(body.city||'').trim()||null,state:String(body.state||'GA').trim().toUpperCase()||null,zip_code:String(body.zipCode||'').trim()||null,timeline:String(body.timeline||'').trim()||null,rush_requested:Boolean(primary.answers.rush),requested_date:body.requestedDate||null,intake_answers:{serviceSku:primary.serviceSku,serviceName:primary.serviceName,originalClientType:clientType,channelCode,sourceType:primary.sourceType,answers:primary.answers,lineItems:resolvedLineItems,pricingSnapshot:{capturedAt:new Date().toISOString(),package:true,lineItems:resolvedLineItems,reviewFlags:calculation.reviewFlags,...calculation}},client_notes:String(body.clientNotes||'').trim()||null,internal_notes:String(body.internalNotes||'').trim()||null,estimate_status:body.preserveEstimateStatus && existingEstimate ? existingEstimate.estimate_status : (calculation.needsReview?'needs_review':'estimated'),priority:String(body.priority||'normal'),base_subtotal:calculation.baseSubtotal,addon_subtotal:Math.max(0,calculation.baseSubtotal-(resolvedLineItems[0]?.calculation.baseSubtotal||0)),travel_fee:calculation.travelFee,rush_fee:calculation.rushFee,supplies_fee:calculation.sourcingFee+calculation.materials,pass_through_fee:calculation.passThrough,tax_amount:calculation.tax,estimated_total:calculation.estimatedTotal,deposit_due:calculation.depositDue,quote_disclaimer:'Estimate generated from the current DANI DECLARES commercial catalog. Package components retain their individual quote inputs and governed pricing snapshots. Final price remains subject to scope, location, materials/pass-throughs, fulfillment authorization, tax review and applicable service-specific gates.'};
+  const payload={public_reference:publicReference,division_slug:String(service.division_id||offer.division||'01').padStart(2,'0'),source_slug:resolvedLineItems.length>1?'package_quote':(service.sourceType==='DANI_SPECIALS'?'danis_specials_owner_quote':'admin_quote_builder'),lead_id:sourceLeadId,service_request_id:sourceRequest?.id||null,client_name:String(body.clientName||'').trim()||null,client_phone:String(body.clientPhone||'').trim()||null,client_email:String(body.clientEmail||'').trim()||null,client_type:ESTIMATE_CLIENT_TYPES[clientType]||'other',organization_name:String(body.organizationName||'').trim()||null,location_address:String(body.locationAddress||'').trim()||null,city:String(body.city||'').trim()||null,state:String(body.state||'GA').trim().toUpperCase()||null,zip_code:String(body.zipCode||'').trim()||null,market_id:marketContext.market?.id||null,market_code:marketContext.market?.market_code||null,jurisdiction_snapshot:{stateCode:marketContext.stateCode,city:marketContext.city,marketCode:marketContext.market?.market_code||null,marketName:marketContext.market?.market_name||null,pricingZoneCode:marketContext.market?.pricing_zone_code||null,dispatchOriginCode:marketContext.market?.dispatch_origin_code||null,resolution:marketContext.resolution,marketStatus:marketContext.market?.status||null,capturedAt:new Date().toISOString()},timeline:String(body.timeline||'').trim()||null,rush_requested:Boolean(primary.answers.rush),requested_date:body.requestedDate||null,intake_answers:{serviceSku:primary.serviceSku,serviceName:primary.serviceName,originalClientType:clientType,channelCode,sourceType:primary.sourceType,marketSnapshot:{marketId:marketContext.market?.id||null,marketCode:marketContext.market?.market_code||null,stateCode:marketContext.stateCode,city:marketContext.city,resolution:marketContext.resolution,marketStatus:marketContext.market?.status||null},answers:primary.answers,lineItems:resolvedLineItems,pricingSnapshot:{capturedAt:new Date().toISOString(),package:true,lineItems:resolvedLineItems,reviewFlags:calculation.reviewFlags,...calculation}},client_notes:String(body.clientNotes||'').trim()||null,internal_notes:String(body.internalNotes||'').trim()||null,estimate_status:body.preserveEstimateStatus && existingEstimate ? existingEstimate.estimate_status : (calculation.needsReview?'needs_review':'estimated'),priority:String(body.priority||'normal'),base_subtotal:calculation.baseSubtotal,addon_subtotal:Math.max(0,calculation.baseSubtotal-(resolvedLineItems[0]?.calculation.baseSubtotal||0)),travel_fee:calculation.travelFee,rush_fee:calculation.rushFee,supplies_fee:calculation.sourcingFee+calculation.materials,pass_through_fee:calculation.passThrough,tax_amount:calculation.tax,estimated_total:calculation.estimatedTotal,deposit_due:calculation.depositDue,quote_disclaimer:'Estimate generated from the current DANI DECLARES commercial catalog. Package components retain their individual quote inputs and governed pricing snapshots. Final price remains subject to scope, location, materials/pass-throughs, fulfillment authorization, tax review and applicable service-specific gates.'};
   let estimate, estimateError;
   if(updateEstimateId){
     const result=await supabase.from('dd_estimates').update(payload).eq('id',updateEstimateId).select('id,public_reference,estimate_status,estimated_total,deposit_due,quote_disclaimer').single();
