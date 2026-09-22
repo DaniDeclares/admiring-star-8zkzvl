@@ -32,7 +32,8 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
         : system.key === 'HUBSPOT'
           ? env.HUBSPOT
           : false;
-  const managed = ['GITHUB','VERCEL','GOOGLE_MAPS_ROUTING'].includes(system.key);
+  const managed = ['GITHUB','VERCEL'].includes(system.key);
+  const manualCredential = system.key === 'GOOGLE_MAPS_ROUTING';
   const externalOnly = ['AIRTABLE','POSTHOG'].includes(system.key);
   const connected = (state?.connections || []).some(c => c.adapter_code === system.key && c.connection_status === 'CONNECTED');
   const notionInternalHealthy = system.key === 'NOTION' && Boolean(state?.notionInternalValid);
@@ -61,13 +62,13 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
   return <div style={{border:'1px solid #e6d9c8',borderRadius:16,padding:18,background:'#fff'}}>
     <div style={{display:'flex',justifyContent:'space-between',gap:10,alignItems:'flex-start'}}>
       <strong style={{fontSize:18,color:'#6b1f2b'}}>{system.name}</strong>
-      <span className='portal-pill'>{connected || notionInternalHealthy ? 'DANI CONNECTED' : managed ? 'MANAGED CONNECTION' : configured ? 'READY TO CONNECT' : externalOnly ? 'PRODUCTION OAUTH REQUIRED' : 'CREDENTIALS REQUIRED'}</span>
+      <span className='portal-pill'>{connected || notionInternalHealthy || (manualCredential && configured) ? 'DANI CONNECTED' : managed ? 'MANAGED CONNECTION' : manualCredential ? 'CREDENTIAL REQUIRED' : configured ? 'READY TO CONNECT' : externalOnly ? 'PRODUCTION OAUTH REQUIRED' : 'CREDENTIALS REQUIRED'}</span>
     </div>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5}}><strong>DANI role:</strong> {system.role}</p>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5}}><strong>Auth:</strong> {system.auth}</p>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5,wordBreak:'break-word'}}><strong>Callback:</strong> {system.callback}</p>
-    {!externalOnly && !managed && system.key !== 'GOOGLE_VOICE' && <button className='portal-primary' style={{border:0,cursor:'pointer'}} disabled={!configured} onClick={connect}>{system.key === 'NOTION' && env.NOTION_INTERNAL ? 'Validate token' : connected ? 'Reconnect' : 'Connect'} ↗</button>}
-    {(externalOnly || managed || system.key === 'GOOGLE_VOICE') && <a className='portal-primary' href={system.provider} target='_blank' rel='noreferrer'>Open {system.name} ↗</a>}
+    {!externalOnly && !managed && !manualCredential && system.key !== 'GOOGLE_VOICE' && <button className='portal-primary' style={{border:0,cursor:'pointer'}} disabled={!configured} onClick={connect}>{system.key === 'NOTION' && env.NOTION_INTERNAL ? 'Validate token' : connected ? 'Reconnect' : 'Connect'} ↗</button>}
+    {(externalOnly || managed || manualCredential || system.key === 'GOOGLE_VOICE') && <a className='portal-primary' href={system.provider} target='_blank' rel='noreferrer'>Open {system.name} ↗</a>}
     {externalOnly && <p className='portal-note' style={{marginTop:10}}>Available to ChatGPT does not mean the deployed DANI application has OAuth access. DANI will show this as connected only after its own server-side credentials and consent flow are configured.</p>}
     {(connected || notionInternalHealthy) && <p className='portal-note' style={{marginTop:10}}>{notionInternalHealthy && !connected ? 'The DANI Notion internal connection token is valid. Share the required parent pages/databases with that Notion connection before expecting page reads/writes.' : 'DANI has a stored, encrypted connection record. External IDs remain references; DANI retains its own runtime authority.'}</p>}
   </div>;
