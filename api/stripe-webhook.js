@@ -102,7 +102,7 @@ export default async function handler(req,res){
            ${Number(invoice.amount_paid||0)/100},${invoice.currency||'usd'},${JSON.stringify(invoice.metadata||{})}::jsonb)
         returning id
       `;
-      if(paymentEstimate){
+      if(paymentEstimate?.economics_status==='PASS' && paymentEstimate?.active_economics_snapshot_id){
         await tx.$queryRaw`select public.dd_activate_paid_estimate_assignments(${paymentEstimate.id}::uuid) as routing`;
       }
       if(paymentJob){
@@ -223,7 +223,10 @@ export default async function handler(req,res){
      job=await tx.dd_jobs.update({where:{id:job.id},data:{work_order_id:workOrderId},select:{id:true,public_reference:true,work_order_id:true}});
     }
     const reconciliation=await reconcileStripePayment(event,tx);
-    const [routingActivation]=await tx.$queryRaw`select public.dd_activate_paid_estimate_assignments(${estimate.id}::uuid) as routing`;
+    let routingActivation=null;
+    if(estimate.economics_status==='PASS' && estimate.active_economics_snapshot_id){
+      [routingActivation]=await tx.$queryRaw`select public.dd_activate_paid_estimate_assignments(${estimate.id}::uuid) as routing`;
+    }
     await tx.serviceRequest.update({where:{id:request.id},data:{status:'job_created'}});
     if(routingActivation?.routing){
       console.log('Paid-first fulfillment routing activated',routingActivation.routing);
