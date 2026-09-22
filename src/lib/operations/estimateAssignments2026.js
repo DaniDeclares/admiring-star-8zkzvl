@@ -1,12 +1,12 @@
-import { summarizeEconomics, evaluateCounteroffer, calculateCompensation, calculateProviderEconomicCeiling, evaluatePayoutBand } from './componentEconomics2026.js';
+import { summarizeEconomics, evaluateCounteroffer, calculateCompensation } from './componentEconomics2026.js';
 
 const VERIFIED = new Set(['RESEARCH_BENCHMARK','OWNER_CONFIRMED','DOCUMENT_EVIDENCE','SYSTEM_VERIFIED','EXTERNAL_VERIFIED']);
 const money = value => Math.round(Number(value || 0) * 100) / 100;
 
 function isEffective(row, now = Date.now()) {
   const from = row?.effective_from ? new Date(row.effective_from).getTime() : 0;
-  const to = row?.effective_to ? new Date(row.effective_to).getTime() : Number.POSITIVE_INFINITY;
-  return Number.isFinite(from) && from <= now && Number.isFinite(to) && to > now;
+  const to = row?.effective_to ? new Date(row.effective_to).getTime() : null;
+  return Number.isFinite(from) && from <= now && (to === null || (Number.isFinite(to) && to > now));
 }
 
 function selectLatest(rows, predicate) {
