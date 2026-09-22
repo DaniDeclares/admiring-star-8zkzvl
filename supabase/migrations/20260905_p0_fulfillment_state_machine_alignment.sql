@@ -74,7 +74,7 @@ with open_jobs as (
  where upper(coalesce(c.capacity_status,''))='AVAILABLE' and c.max_jobs_per_day>current_jobs and c.max_concurrent_jobs>current_jobs and org.is_active and upper(coalesce(org.qualification_status,''))='QUALIFIED' and upper(coalesce(org.compliance_status,''))='VERIFIED' and upper(coalesce(org.agreement_status,'')) in ('ACTIVE','EXECUTED') and upper(coalesce(org.network_access_level,''))='AUTHORIZED' and upper(coalesce(org.permission_status,''))='AUTHORIZED' and coalesce(org.accepts_new_work,false)
  and (o.work_order_id is null or not exists(select 1 from dd_work_orders wo where wo.id=o.work_order_id and wo.service_id is not null) or exists(select 1 from dd_work_orders wo join dd_provider_capabilities pc on pc.provider_org_id=org.id and pc.provider_id=p.id and pc.service_id=wo.service_id and pc.is_authorized where wo.id=o.work_order_id))
  and not exists(select 1 from dd_job_assignments a where a.job_id=o.jid and a.provider_id=c.provider_id and a.assignment_status in ('OFFERED','ACCEPTED'))
-), ranked as (select c.*,row_number() over(partition by jid order by score desc,pid) rn), ins as (
+), ranked as (select candidates.*,row_number() over(partition by jid order by score desc,pid) rn from candidates), ins as (
  insert into dd_job_assignments(job_id,provider_id,assignment_status,offered_at,created_at,updated_at) select jid,pid,'OFFERED',now(),now(),now() from ranked where rn=1 returning id aid,job_id jid,provider_id pid)
 select i.jid,i.pid,i.aid,r.score from ins i join ranked r on r.jid=i.jid and r.pid=i.pid; $$;
 
