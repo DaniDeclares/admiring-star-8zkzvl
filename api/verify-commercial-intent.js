@@ -63,11 +63,15 @@ const legacySpecial=async(serviceId)=>{
 
 export default async function handler(req,res){try{
  if(req.method==='GET'&&req.query?.catalog==='1'){
-   const [rows,specials]=await Promise.all([governedCatalog(),specialRows()]);
+   const [rows,specials,frontDoors]=await Promise.all([
+     governedCatalog(),
+     specialRows(),
+     prisma.$queryRawUnsafe(`select channel_code as "channelCode",front_door_code as "frontDoorCode",front_door_name as "frontDoorName",audience,customer_promise as "customerPromise",primary_triggers as "primaryTriggers",required_context as "requiredContext",public_navigation_order as "navigationOrder" from public.dd_channel_front_doors where status='LOCKED' order by channel_code,public_navigation_order`)
+   ]);
    const byCanonical=new Map(),unmapped=[];
    for(const s of specials){if(s.canonicalSku){if(!byCanonical.has(s.canonicalSku))byCanonical.set(s.canonicalSku,[]);byCanonical.get(s.canonicalSku).push(s);}else unmapped.push(s);}
    const services=rows.map(s=>{const gate=checkoutEligibility(s,{channel:'CH01',subchannel:'CH01-A'});return {...s,market:'GA',checkoutEligible:gate.eligible,intakeAvailable:true,approvedSpecialOfferCount:(byCanonical.get(s.serviceId)||[]).length,approvedSpecialOffers:(byCanonical.get(s.serviceId)||[])};});
-   return json(res,200,{success:true,count:services.length,services,approvedLegacyOfferCount:unmapped.length,approvedLegacyOffers:unmapped});
+   return json(res,200,{success:true,count:services.length,services,frontDoors,approvedLegacyOfferCount:unmapped.length,approvedLegacyOffers:unmapped});
  }
  if(req.method!=='POST')return json(res,405,{error:'This action is not available.'});
  const body=req.body||{},serviceId=String(body.serviceId||'').trim();
