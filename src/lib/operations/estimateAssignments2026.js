@@ -405,7 +405,7 @@ export async function respondToOwnerEstimateAssignment(supabase, { assignmentId,
     .eq('id',offer.estimate_id).single();
   if(estimateError||!estimate) throw estimateError||new Error('ESTIMATE_NOT_FOUND');
   const {data:job,error:jobError}=await supabase.from('dd_jobs')
-    .select('id,job_status,assigned_to').eq('estimate_id',offer.estimate_id)
+    .select('id,job_status,assigned_to,internal_notes').eq('estimate_id',offer.estimate_id)
     .order('created_at',{ascending:false}).limit(1).maybeSingle();
   if(jobError) throw jobError;
 
