@@ -1,7 +1,7 @@
 # DANI Provider Referral, Incentive & CH01-B Resident Benefit Architecture
 
 **Decision date:** 2026-09-22  
-**Status:** LOCKED AS ARCHITECTURE; runtime pricing activation remains separately governed.
+**Status:** LOCKED AS ARCHITECTURE; runtime pricing implementation follows governed release controls.
 
 ## Purpose
 
@@ -43,19 +43,40 @@ Supported reward types should include:
 
 Provider referral rewards, client referral rewards, and partner referral rewards remain separate program records and rules.
 
-## CH01-B apartment resident benefit
+## Locked CH01-A / CH01-B resident-benefit rule
 
-The current system baseline of **15% qualifying CH01 resident pricing remains unchanged for now**.
+**CH01-A — regular/direct residents:** standard CH01 pricing. No apartment-program discount or perk package by default.
 
-The design decision is to evaluate a **10% always-on qualifying resident benefit plus practical perks** as the next test structure. Potential perks include priority booking windows, qualifying dispatch benefits, resident-only service days, service credits, and partner offers.
+**CH01-B — apartment/property residents:** the B2B2C apartment-resident customer/beneficiary path. CH01-B is available only after the apartment/property has become a DANI DECLARES client and sends residents an authenticated enrollment link/invitation.
 
-A property/community that explicitly funds a stronger program may use a **15% Signature Resident Benefit** subject to program terms, service-level economics, eligibility, and any required disclosures.
+### CH01-B benefit
 
-The resident benefit must not leak into CH02 organization pricing and must not create a second price book.
+The locked baseline is **10% off qualifying CH01-B services + the governed apartment-program perk package**.
+
+The perk package may include, where the property program enables it and economics support it:
+
+- priority booking windows
+- resident-only service days
+- qualifying dispatch benefits
+- service credits
+- partner offers
+- other explicitly defined property-program benefits
+
+The 10% + perks benefit is **not a public resident promotion**. It exists primarily to strengthen the DANI value proposition for winning and retaining apartment/property clients.
+
+The previous **15% baseline is retired**. Do not implement or describe 15% as the standard CH01-B benefit.
+
+A stronger/different property-specific benefit requires a separately governed program with explicit eligibility, funding, effective dates, disclosures, and economic approval.
 
 ## Economic rule
 
-No blanket resident discount is activated or changed without service-level economics validation. The economics layer should evaluate customer price, provider payout, travel/material costs, contribution, and incremental acquisition/retention value.
+The 10% resident benefit must be evaluated at the service/program level against customer price, provider payout, travel/material costs, contribution margin, and the incremental value of the property relationship. It must not be applied by an uncontrolled client-side percentage toggle.
+
+## Property-led commercial sequence
+
+**DANI wins property/client → property program is activated → property distributes resident enrollment link → resident joins CH01-B → resident receives 10% + perks → resident usage demonstrates program value → property relationship can be retained/expanded.**
+
+Resident enrollment and usage are supporting evidence of property-program value, not the primary consumer acquisition target.
 
 ## System ownership
 
@@ -72,4 +93,4 @@ External systems never become DANI authority merely because they contain a dupli
 
 ## Implementation boundary
 
-This architecture does **not** itself change live pricing, legal terms, provider compensation, or eligibility. Those changes require their normal governed approval/release path.
+This architecture supersedes the prior 15% CH01-B baseline. Runtime pricing changes must still follow the governed GitHub/Supabase release process and must not be made by creating a second pricing authority.
