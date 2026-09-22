@@ -120,7 +120,11 @@ export default async function handler(req,res){
   }
  }
  if(event.type!=='checkout.session.completed')return res.status(200).json({received:true});
- const session=event.data.object,requestId=session.metadata?.request_id,changeOrderId=session.metadata?.change_order_id;
+ const session=event.data.object,requestId=session.metadata?.request_id,changeOrderId=session.metadata?.change_order_id,paymentType=String(session.metadata?.payment_type||'FULL_PAYMENT').toUpperCase();
+ if(requestId&&paymentType==='BALANCE_PAYMENT'){
+  try{const reconciliation=await prisma.$transaction(async tx=>{const rec=await reconcileStripePayment(event,tx);await publishPaymentReconciled(rec,tx);return rec;});return res.status(200).json({received:true,reconciled:true,paymentType,balanceDue:reconciliation.balanceDue});}
+  catch(error){console.error('Failed to reconcile balance payment:',error.message);return res.status(500).json({error:'Balance payment received but reconciliation failed'});}
+ }
  if(requestId){
   try{
    const serviceId=String(session.metadata?.service_id||'').trim();
@@ -147,10 +151,21 @@ export default async function handler(req,res){
     if(!request)throw new Error(`ServiceRequest ${requestId} not found`);
     const channel=readChannel(request.property_details);
     if(channel!=='B2C')throw new Error(`Payment webhook cannot auto-create a job for channel ${channel||'UNKNOWN'}`);
+    const estimate=await tx.dd_estimates.findFirst({where:{service_request_id:request.id},orderBy:{created_at:'desc'}});
+    if(!estimate)throw new Error(`No frozen estimate found for paid request ${request.id}`);
+    if(session.metadata?.estimate_id&&String(session.metadata.estimate_id)!==String(estimate.id))throw new Error('Payment estimate metadata does not match the current frozen estimate.');
     const frozenSnapshot=Number(request.property_details?.commercialIntent?.frozenPriceSnapshot),paidAmount=money(Number(session.amount_total||0)/100);
     if(!Number.isFinite(frozenSnapshot)||frozenSnapshot<=0)throw new Error('Paid request has no valid frozen commercial price snapshot.');
-    if(money(frozenSnapshot)!==paidAmount)throw new Error('Payment amount does not match the frozen commercial price.');
-    if(canonicalSelection.price!=null && money(Number(canonicalSelection.price))!==money(frozenSnapshot))throw new Error('Paid request no longer matches the authoritative CH01 commercial price.');
+    if(money(Number(estimate.estimated_total))!==money(frozenSnapshot))throw new Error('Frozen request price does not match the approved estimate total.');
+    if(paymentType==='INITIAL_PAYMENT'){
+      const expectedDeposit=money(Number(estimate.deposit_due));
+      if(estimate.economics_status!=='PASS'||estimate.assignment_readiness_status!=='READY')throw new Error('Initial payment cannot be accepted for a commercially unresolved quote.');
+      if(expectedDeposit<=0||expectedDeposit>=money(frozenSnapshot))throw new Error('Approved quote has no valid partial initial payment.');
+      if(expectedDeposit!==paidAmount)throw new Error('Initial payment amount does not match the frozen deposit due.');
+    }else{
+      if(money(frozenSnapshot)!==paidAmount)throw new Error('Full payment amount does not match the frozen commercial price.');
+      if(canonicalSelection.price!=null && money(Number(canonicalSelection.price))!==money(frozenSnapshot))throw new Error('Paid request no longer matches the authoritative CH01 commercial price.');
+    }
     const metadataServiceId=request.property_details?.commercialIntent?.serviceId||request.property_details?.pricingServiceId;
     if(String(metadataServiceId||'')!==canonicalSelection.serviceId)throw new Error('Payment service metadata does not match the authoritative CH01 service resolution.');
     if(String(request.property_details?.frontDoorCode||request.property_details?.commercialIntent?.frontDoorCode||'')!==canonicalSelection.frontDoorCode)throw new Error('Payment front door does not match the authoritative CH01 service resolution.');
@@ -159,8 +174,6 @@ export default async function handler(req,res){
     assertTransition('B2C','PAID',nextStateAfterPayment('B2C'));
     let job=await tx.dd_jobs.findFirst({where:{service_request_id:request.id},select:{id:true,public_reference:true,work_order_id:true}});
     if(!job){
-     const estimate=await tx.dd_estimates.findFirst({where:{service_request_id:request.id},orderBy:{created_at:'desc'},select:{id:true,division_slug:true}});
-     if(!estimate)throw new Error(`No frozen estimate found for paid request ${request.id}`);
      job=await tx.dd_jobs.create({data:{estimate_id:estimate.id,lead_id:request.leadId||null,service_request_id:request.id,division_slug:estimate.division_slug||'concierge',job_title:request.service_needed||request.service_category||'Dani Declares Service',job_status:'new',location_address:request.location_address||null,scope_summary:request.request_details||null},select:{id:true,public_reference:true,work_order_id:true}});
     }
     if(!job.work_order_id){
