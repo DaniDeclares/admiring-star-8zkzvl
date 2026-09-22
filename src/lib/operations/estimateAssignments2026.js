@@ -161,6 +161,7 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
   }).select('*').single();
   if (snapshotError) throw snapshotError;
 
+  let insertedComponents=[];
   if (componentDrafts.length) {
     const inserts = componentDrafts.map(d => ({
       economics_snapshot_id:snapshot.id, estimate_id:estimateId, line_index:resolvedLineItems.indexOf(d.line), canonical_sku:d.line.canonicalSku,
@@ -172,12 +173,43 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
       expected_other_cost:d.baseline?.cost_type==='OTHER'?d.baselineAmount:0, tax_classification:d.component.tax_classification,
       economic_status:d.economicStatus, scope_snapshot:{ componentRole:d.row.component_role, allowanceDefinition:d.row.allowance_definition, exclusions:d.row.exclusion_definition, answers:d.line.answers }
     }));
-    const { error } = await supabase.from('dd_estimate_component_snapshots').insert(inserts);
+    const { data, error } = await supabase.from('dd_estimate_component_snapshots').insert(inserts).select('*');
     if (error) throw error;
+    insertedComponents = data || [];
   }
 
-  const assignmentReadiness = componentDrafts.length && componentDrafts.every(d => ['OWNER','PROVIDER','VENDOR','SUBCONTRACTOR'].includes(d.fulfillerType) && (d.fulfillerType !== 'PROVIDER' || d.providerId) && (d.fulfillerType !== 'OWNER' || d.ownerUserId)) ? 'READY_TO_OFFER' : 'UNRESOLVED';
-  const estimateUpdates = { economics_status:summary.economicsStatus, assignment_readiness_status:assignmentReadiness, active_economics_snapshot_id:snapshot.id };\n  if (summary.economicsStatus !== 'PASS' || assignmentReadiness === 'UNRESOLVED') estimateUpdates.estimate_status = 'needs_review';\n  const { error: updateError } = await supabase.from('dd_estimates').update(estimateUpdates).eq('id',estimateId);
+  const assignmentsResolved = componentDrafts.length && componentDrafts.every(d => ['OWNER','PROVIDER','VENDOR','SUBCONTRACTOR'].includes(d.fulfillerType) && (d.fulfillerType !== 'PROVIDER' || d.providerId) && (d.fulfillerType !== 'OWNER' || d.ownerUserId));
+  let assignmentReadiness = assignmentsResolved ? 'READY_TO_OFFER' : 'UNRESOLVED';
+  if (assignmentsResolved && insertedComponents.length) {
+    await supabase.from('dd_estimate_assignment_offers').update({status:'SUPERSEDED',updated_at:new Date().toISOString()}).eq('estimate_id',estimateId).not('status','in','("SUPERSEDED","CANCELLED")');
+    const groups = new Map();
+    for (const row of insertedComponents) {
+      if (!['OWNER','PROVIDER'].includes(row.fulfiller_type)) continue;
+      const key = row.fulfiller_type === 'OWNER' ? 'OWNER:' + row.owner_user_id : 'PROVIDER:' + row.provider_id;
+      const group = groups.get(key) || { assignmentType:row.fulfiller_type, providerId:row.provider_id||null, ownerUserId:row.owner_user_id||null, componentSnapshotIds:[], proposedCompensation:0, components:[] };
+      group.componentSnapshotIds.push(row.id);
+      group.proposedCompensation = money(group.proposedCompensation + Number(row.proposed_compensation || 0));
+      group.components.push({ componentCode:row.component_code, componentName:row.component_name, quantity:row.quantity, unitType:row.unit_type, canonicalSku:row.canonical_sku });
+      groups.set(key, group);
+    }
+    for (const group of groups.values()) {
+      await createEstimateAssignmentOffer(supabase, {
+        estimateId,
+        assignmentType:group.assignmentType,
+        providerId:group.providerId,
+        ownerUserId:group.ownerUserId,
+        componentSnapshotIds:group.componentSnapshotIds,
+        proposedCompensation:group.proposedCompensation,
+        proposedBasis:{ economicsSnapshotId:snapshot.id },
+        scopeSnapshot:{ title:'Quote package assignment', summary:'Assigned components from the current frozen quote economics snapshot.', components:group.components },
+        actorUserId
+      });
+    }
+    assignmentReadiness = await refreshEstimateAssignmentReadiness(supabase, estimateId);
+  }
+  const estimateUpdates = { economics_status:summary.economicsStatus, assignment_readiness_status:assignmentReadiness, active_economics_snapshot_id:snapshot.id };
+  if (summary.economicsStatus !== 'PASS' || assignmentReadiness === 'UNRESOLVED') estimateUpdates.estimate_status = 'needs_review';
+  const { error: updateError } = await supabase.from('dd_estimates').update(estimateUpdates).eq('id',estimateId);
   if (updateError) throw updateError;
   return { snapshot, assignmentReadiness, unresolvedReasons:[...new Set(unresolvedReasons)] };
 }
