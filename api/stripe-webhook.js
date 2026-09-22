@@ -9,6 +9,7 @@ import { captureServer } from '../src/lib/posthogAnalyticsServer.js';
 const secretKey=process.env.STRIPE_SECRET_KEY;
 const webhookSecret=process.env.STRIPE_WEBHOOK_SECRET;
 const stripe=secretKey?new Stripe(secretKey):null;
+const QUOTE_PRICING_TYPES=new Set(['BESPOKE_SOW','SOW','SOW_PROCUREMENT','QUOTE','STARTING_AT','CONFIGURED','VARIABLE_QUOTE']);
 export const config={api:{bodyParser:false}};
 async function getRawBody(req){const chunks=[];for await(const chunk of req)chunks.push(typeof chunk==='string'?Buffer.from(chunk):chunk);return Buffer.concat(chunks);}
 function readChannel(propertyDetails){return propertyDetails?.operationsRouting?.channelType||propertyDetails?.operationsRouting?.channel||null;}
