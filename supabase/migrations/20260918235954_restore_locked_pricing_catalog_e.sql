@@ -1,6 +1,6 @@
 -- Production-proven runtime identities for the locked 279-SKU pricing classification.
 -- Restores only identity/catalog fields required before the 2026-09-19 pricing-engine backfill.
-insert into public.services (id,division_id,slug,name,sku,service_family,commercial_status,source_sku,commercial_intent_status)
+insert into public.services (id,division_id,slug,name,sku,service_family)
 values
 ('752a6328-d77a-4904-a10b-9918119a24f1'::uuid,12,'d12-001','Local Courier','DNI-12A-001','Logistics, Courier & Asset Sourcing'),
 ('8d654977-7c3e-4a1f-ad92-ba7704a8647a'::uuid,12,'d12-002','Same-Day Courier','DNI-12A-002','Logistics, Courier & Asset Sourcing'),
@@ -45,5 +45,5 @@ values
 ('32c7eff7-1f41-4a83-87fe-d1e63653c3a4'::uuid,13,'d13-018','Facilities Support Coordination','DNI-13A-018','Government & Institutional Procurement'),
 ('749db68b-7376-4b00-9e32-f259845e58ff'::uuid,13,'d13-019','Administrative Support Contracts','DNI-13A-019','Government & Institutional Procurement'),
 ('f220c7e3-044b-4e72-a280-8173e0b7507a'::uuid,13,'d13-020','Solicitation-Specific Coordination','DNI-13A-020','Government & Institutional Procurement')
-on conflict (id) do update set sku=excluded.sku, commercial_status='CANONICAL_ACTIVE', source_sku=excluded.sku, commercial_intent_status='SELL_NOW';
+on conflict (id) do update set sku=excluded.sku;
 update public.services set commercial_status='CANONICAL_ACTIVE',source_sku=coalesce(source_sku,sku),commercial_intent_status='SELL_NOW' where sku in ('DNI-12A-001','DNI-12A-002','DNI-12A-003','DNI-12A-004','DNI-12A-005','DNI-12A-006','DNI-12A-007','DNI-12A-008','DNI-12A-009','DNI-12A-010','DNI-12A-011','DNI-12A-012','DNI-12A-013','DNI-12A-014','DNI-12A-015','DNI-12A-016','DNI-12A-017','DNI-12A-018','DNI-12A-019','DNI-12A-020','DNI-12A-021','DNI-12A-027','DNI-12A-028','DNI-13A-001','DNI-13A-002','DNI-13A-003','DNI-13A-004','DNI-13A-005','DNI-13A-006','DNI-13A-007','DNI-13A-008','DNI-13A-009','DNI-13A-010','DNI-13A-011','DNI-13A-012','DNI-13A-013','DNI-13A-014','DNI-13A-015','DNI-13A-016','DNI-13A-017','DNI-13A-018','DNI-13A-019','DNI-13A-020');
