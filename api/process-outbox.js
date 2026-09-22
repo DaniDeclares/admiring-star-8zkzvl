@@ -6,29 +6,22 @@ const MAX_RETRIES = Number(process.env.NOTIFICATION_MAX_RETRIES || 5);
 const BATCH_SIZE = Math.min(100, Math.max(1, Number(process.env.NOTIFICATION_BATCH_SIZE || 20)));
 const DEFAULT_RESEND_FROM = 'notifications@danideclares.com';
 
-async function sendEmail(payload) {
+async function sendEmail(payload, idempotencyKey) {
   const apiKey = process.env.RESEND_API_KEY;
   const configuredFrom = process.env.RESEND_FROM_EMAIL || process.env.NOTIFICATION_FROM_EMAIL;
-  // Resend's onboarding sender is test-only. Never allow it into production delivery.
-  const from = configuredFrom && !configuredFrom.endsWith('@resend.dev')
-    ? configuredFrom
-    : DEFAULT_RESEND_FROM;
+  const from = configuredFrom && !configuredFrom.endsWith('@resend.dev') ? configuredFrom : DEFAULT_RESEND_FROM;
   if (!apiKey) throw new Error('RESEND_NOT_CONFIGURED');
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
     body: JSON.stringify({
-      from,
-      to: payload.to,
-      subject: payload.subject || 'Dani Declares Update',
-      html: payload.html || renderTransactionalEmail({
-        template: payload.template,
-        data: payload.templateData,
-        fallbackText: payload.text || '',
-      }),
+      from, to: payload.to, subject: payload.subject || 'Dani Declares Update',
+      html: payload.html || renderTransactionalEmail({ template: payload.template, data: payload.templateData, fallbackText: payload.text || '' }),
     }),
   });
+  const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(`RESEND_${response.status}`);
+  return { externalReference: result.id || null };
 }
 
 async function sendSms(payload) {
@@ -37,24 +30,21 @@ async function sendSms(payload) {
   const apiKeySecret = process.env.TWILIO_API_KEY_SECRET;
   const from = process.env.TWILIO_FROM_NUMBER || process.env.TWILIO_PHONE_NUMBER;
   if (!accountSid || !apiKeySid || !apiKeySecret || !from) throw new Error('TWILIO_NOT_CONFIGURED');
-  const body = new URLSearchParams({
-    To: payload.to,
-    From: from,
-    Body: payload.text || payload.message || 'Dani Declares update.',
-  });
+  const body = new URLSearchParams({ To: payload.to, From: from, Body: payload.text || payload.message || 'Dani Declares update.' });
   const auth = Buffer.from(`${apiKeySid}:${apiKeySecret}`).toString('base64');
   const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
-    method: 'POST',
-    headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
+    method: 'POST', headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body,
   });
+  const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(`TWILIO_${response.status}`);
+  return { externalReference: result.sid || null };
 }
 
 async function deliver(item) {
-  if (item.channel === 'EMAIL') return sendEmail(item.payload || {});
+  const key = String(item.event_key || item.id);
+  if (item.channel === 'EMAIL') return sendEmail(item.payload || {}, key);
   if (item.channel === 'SMS') return sendSms(item.payload || {});
-  if (item.channel === 'INTERNAL') return;
+  if (item.channel === 'INTERNAL') return { externalReference: null };
   throw new Error(`UNSUPPORTED_OUTBOX_CHANNEL:${item.channel}`);
 }
 
@@ -75,22 +65,22 @@ export default async function handler(req, res) {
     for (const item of items) {
       try {
         const claimed = await prisma.$executeRaw`
-          update public.dd_event_outbox
-          set status = 'PROCESSING', attempts = attempts + 1, updated_at = now()
-          where id = ${item.id}::uuid and status in ('PENDING','FAILED') and attempts < ${MAX_RETRIES}
+          update public.dd_event_outbox set status='PROCESSING', attempts=attempts+1, updated_at=now()
+          where id=${item.id}::uuid and status in ('PENDING','FAILED') and attempts < ${MAX_RETRIES}
         `;
         if (!claimed) continue;
-        await deliver(item);
+        const delivery = await deliver(item);
         await prisma.$executeRaw`
-          update public.dd_event_outbox set status = 'PROCESSED', processed_at = now(), updated_at = now(), last_error = null where id = ${item.id}::uuid
+          update public.dd_event_outbox set status='PROCESSED', processed_at=now(), updated_at=now(), last_error=null where id=${item.id}::uuid
         `;
-        results.push({ eventKey: item.event_key, status: 'PROCESSED' });
+        results.push({ eventKey: item.event_key, status: 'PROCESSED', externalReference: delivery?.externalReference || null });
       } catch (error) {
         const attempts = Number(item.attempts || 0) + 1;
         const terminal = attempts >= MAX_RETRIES;
         const delayMinutes = Math.min(60, 2 ** Math.min(attempts, 5));
         await prisma.$executeRaw`
-          update public.dd_event_outbox set status = 'FAILED', last_error = ${String(error.message || error)}, available_at = ${terminal ? new Date() : new Date(Date.now() + delayMinutes * 60 * 1000)}, updated_at = now() where id = ${item.id}::uuid
+          update public.dd_event_outbox set status='FAILED', last_error=${String(error.message || error)},
+          available_at=${terminal ? new Date() : new Date(Date.now()+delayMinutes*60*1000)}, updated_at=now() where id=${item.id}::uuid
         `;
         results.push({ eventKey: item.event_key, status: 'FAILED', terminal, error: String(error.message || error) });
       }
