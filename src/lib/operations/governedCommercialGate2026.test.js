@@ -75,14 +75,13 @@ describe('LIVE_READY checkout release gate', () => {
 
 
 describe('CH01 canonical resolver controls', () => {
-  test('requires a canonical service and front door before commercial resolution', async () => {
-    expect((await resolveCH01CommercialSelection({})).reason).toBe('CH01_SERVICE_REQUIRED');
-    expect((await resolveCH01CommercialSelection({serviceId:'DNI-01A-001'})).reason).toBe('CH01_FRONT_DOOR_REQUIRED');
-  });
-
-  test('rejects a caller-supplied resident subchannel that conflicts with verified status', async () => {
-    const result=await resolveCH01CommercialSelection({serviceId:'DNI-01A-001',frontDoorCode:'CH01-F01',subchannelCode:'CH01-B',isVerifiedCommunityResident:false});
-    expect(result.allowed).toBe(false);
-    expect(result.reason).toBe('CH01_SUBCHANNEL_MISMATCH');
-  });
+ test('requires a canonical service and front door before commercial resolution', async () => {
+  expect((await resolveCH01CommercialSelection({})).reason).toBe('CH01_SERVICE_REQUIRED');
+  expect((await resolveCH01CommercialSelection({serviceId:'DNI-01A-001'})).reason).toBe('CH01_FRONT_DOOR_REQUIRED');
+ });
+ test('rejects a caller-supplied resident subchannel that conflicts with verified status', async () => {
+  const result=await resolveCH01CommercialSelection({serviceId:'DNI-01A-001',frontDoorCode:'CH01-F01',subchannelCode:'CH01-B',isVerifiedCommunityResident:false});
+  expect(result.allowed).toBe(false);
+  expect(result.reason).toBe('CH01_SUBCHANNEL_MISMATCH');
+ });
 });
