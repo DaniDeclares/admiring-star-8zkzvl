@@ -33,6 +33,31 @@ async function resolvePortalOrganization(req) {
   return identity?.organization_id || null;
 }
 
+function intakeErrorCode(error){
+ const message=String(error?.message||'');
+ if(message.includes('REQUESTED_TIME_UNAVAILABLE')) return 'INTAKE_TIME_UNAVAILABLE';
+ if(message.includes('CH01_')) return 'INTAKE_CH01_GOVERNANCE';
+ if(error instanceof SyntaxError) return 'INTAKE_MODULE_OR_PAYLOAD_SYNTAX';
+ if(/prisma\.\$queryRaw/i.test(message)) return 'INTAKE_DB_ADAPTER';
+ if(/unique constraint|P2002/i.test(message)) return 'INTAKE_DUPLICATE_CONSTRAINT';
+ if(/foreign key|P2003/i.test(message)) return 'INTAKE_RELATION_CONSTRAINT';
+ return 'INTAKE_PERSISTENCE_FAILED';
+}
+async function recordIntakeFailure(req,error,stage='request_persistence'){
+ const traceId=crypto.randomUUID();
+ const code=intakeErrorCode(error);
+ try{
+  const url=process.env.SUPABASE_URL||process.env.REACT_APP_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if(url&&key){
+   const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+   const b=req.body||{};
+   await admin.from('dd_public_intake_failures').insert({trace_id:traceId,route:'/api/intake-webhook',stage,error_code:code,error_name:error?.name||null,error_message:String(error?.message||'').slice(0,2000),service_id:b.pricingServiceId||b.serviceId||b.commercialIntent?.serviceId||null,front_door_code:b.frontDoorCode||null,channel_type:b.channelType||null,customer_email:b.email||null,request_context:{requestedStartAt:b.requestedStartAt||null,locationState:b.locationState||null,locationZip:b.locationZip||null}});
+  }
+ }catch(diagError){console.error('Intake diagnostic persistence error:',diagError)}
+ console.error('Intake failure diagnostic',{traceId,code,stage,error:error?.stack||String(error)});
+ return {traceId,code};
+}
+
 export default async function handler(req,res){
  if(req.method!=='POST')return res.status(405).json({error:'This action is not available.'});
  try{
@@ -195,8 +220,8 @@ export default async function handler(req,res){
  }catch(error){
   captureServerException(error,{route:'/api/intake-webhook',stage:'request_persistence'});
   await flushServerSentry();
-  console.error('Intake persistence error:',error);
-  if(String(error?.message||'').includes('REQUESTED_TIME_UNAVAILABLE'))return res.status(409).json({error:'That requested time is no longer available. Please choose another date or time.'});
-  return res.status(500).json({error:'We could not save your request right now. Please try again or contact DANI DECLARES.'});
+  const diagnostic=await recordIntakeFailure(req,error);
+  if(String(error?.message||'').includes('REQUESTED_TIME_UNAVAILABLE'))return res.status(409).json({error:'That requested time is no longer available. Please choose another date or time.',errorCode:diagnostic.code,reference:diagnostic.traceId});
+  return res.status(500).json({error:'We could not save your request right now. Please try again or contact DANI DECLARES.',errorCode:diagnostic.code,reference:diagnostic.traceId});
  }
 }
