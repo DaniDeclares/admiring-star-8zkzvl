@@ -922,18 +922,34 @@ export default async function handler(req, res) {
     }
     if (action === 'estimate_assignment_response') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      const providerId = context.isStaff ? payload.providerId : context.identity?.entity_id;
-      if (!providerId) return fail(res, 'Provider identity required.', 403);
-      const assignment = await respondToEstimateAssignment(context.supabase, {
-        assignmentId: payload.assignmentId,
-        providerId,
-        decision: payload.decision,
-        counterCompensation: payload.counterCompensation,
-        counterBasis: payload.counterBasis || null,
-        reason: payload.reason || null,
-        actorUserId: context.user.id
+      if (context.isStaff) return fail(res, 'Provider-bound offer responses must be performed from a provider session.', 403);
+      if (!payload.assignmentId) return fail(res, 'assignmentId is required.');
+
+      // Provider responses intentionally cross the hardened provider-safe RPC boundary.
+      // The RPC resolves provider identity from the authenticated JWT and binds the
+      // assignment server-side; the browser/API payload never gets to choose provider_id.
+      const decision = String(payload.decision || '').toUpperCase();
+      if (decision === 'COUNTEROFFER') {
+        const amount = Number(payload.counterCompensation);
+        const reason = String(payload.reason || '').trim();
+        if (!Number.isFinite(amount) || amount <= 0 || !reason) return fail(res, 'A positive counteroffer amount and reason are required.');
+        const { data, error } = await context.supabase.rpc('dd_submit_my_provider_counteroffer', {
+          p_assignment_id: payload.assignmentId,
+          p_counter_compensation: amount,
+          p_reason: reason,
+          p_counter_basis: payload.counterBasis || null
+        });
+        if (error) return fail(res, error.message || 'Counteroffer could not be submitted.', 400);
+        return ok(res, { assignment: data });
+      }
+      if (!['ACCEPT','DECLINE'].includes(decision)) return fail(res, 'Decision must be ACCEPT, DECLINE, or COUNTEROFFER.');
+      const { data, error } = await context.supabase.rpc('dd_respond_to_my_offer', {
+        p_assignment_id: payload.assignmentId,
+        p_decision: decision,
+        p_reason: payload.reason || null
       });
-      return ok(res, { assignment });
+      if (error) return fail(res, error.message || 'Offer response could not be submitted.', 400);
+      return ok(res, { assignment: data });
     }
     if (action === 'owner_estimate_assignment_response') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
