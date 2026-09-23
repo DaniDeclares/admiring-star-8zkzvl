@@ -939,3 +939,6 @@ insert into public.dd_governed_service_offers(id,master_record_id,canonical_sku,
 select v.offer_id,m.id,v.sku,v.service_name,v.division,v.obj,s.id,v.prc,v.mrc,0,0,v.pcc,v.a,v.b,'SELL_NOW','READY','Production-proven governed offer identity restored for historical replay.','MASTER_COMMERCIAL_UNIVERSE'
 from v join public.services s on s.sku=v.sku join lateral (select id from public.dd_master_service_universe mm where mm.canonical_sku=v.sku order by (mm.lifecycle_status='CANONICAL_ACTIVE') desc,mm.created_at desc limit 1) m on true
 where not exists(select 1 from public.dd_governed_service_offers o where o.canonical_sku=v.sku);
+-- Preserve the pre-pass-2 engine state proven by the original 20260919124837 assertions.
+update public.services set pricing_engine_code=null where sku in ('DNI-12A-012','DNI-12A-013','DNI-12A-014','DNI-12A-015','DNI-12A-016','DNI-12A-017','DNI-12A-018','DNI-12A-019','DNI-12A-020','DNI-12A-027','DNI-12A-028');
+update public.services set pricing_engine_code=null where sku in ('DNI-01A-001','DNI-01A-002','DNI-01A-036','DNI-01A-037','DNI-01A-038','DNI-01A-041','DNI-01B-001','DNI-01B-002','DNI-01B-003','DNI-01B-004','DNI-01B-005','DNI-01B-006','DNI-01B-007','DNI-01B-009','DNI-01B-010','DNI-01D-005','DNI-01D-006','DNI-01G-001');
