@@ -17,6 +17,17 @@ catalog/checkout stack.
 All four are drafts needing attorney review before a real signature depends
 on them, same as the existing `DANI_PROVIDER_AGREEMENT_DRAFT.md`.
 
+**Revised after Dani's first review** (PR #231) to fix four issues: the
+checkout-link instructions overstated what `api/create-checkout-session.js`
+actually accepts today (CH01 only, recurring quote-priced sales blocked
+pending owner review); the PCI-DSS language mischaracterized what the rule
+itself prohibits (SAD/CVV retention after authorization) versus what's a DANI
+policy choice (no manual capture at all); the Key Terms/agreement opened by
+asserting contractor classification as settled rather than describing intent
+subject to the whole relationship in fact; and there was no requirement to
+snapshot which document/schedule version a signature actually attached to.
+All four are corrected in the files below.
+
 ## What was worth keeping from WWA's structure
 
 - A short plain-language **key terms acknowledgment**, initialed section by
@@ -32,13 +43,18 @@ on them, same as the existing `DANI_PROVIDER_AGREEMENT_DRAFT.md`.
 
 - **Payment collection.** WWA's script has reps read back full card numbers,
   CVVs, and billing zip codes on the call. Dani separately flagged that WWA's
-  actual process has reps then relaying that data through a Teams chat — full
-  PANs and CVVs moving through chat is a PCI-DSS violation and a breach
-  waiting to happen. DANI DECLARES already has a hosted Stripe Checkout flow
-  (`api/create-checkout-session.js`); the new materials route every payment
-  through that link instead of having anyone key in card data. This isn't a
-  style choice — it removes the practice by design rather than telling people
-  not to do it.
+  actual process has reps then relaying that data through a Teams chat. DANI
+  DECLARES already has a hosted Stripe Checkout flow
+  (`api/create-checkout-session.js`); the new materials route payment through
+  that link wherever it's available instead of having anyone key in card
+  data. That's currently narrower than "every payment," though — see the
+  correction below and in the gaps section: the endpoint only serves
+  checkout-eligible Resident Concierge (CH01) sales today, so the other
+  channels need a real (still-unbuilt) governed alternative to manual card
+  capture, not a document that pretends the link already covers them. The
+  policy itself — manual card/CVV capture by voice or chat is never
+  acceptable, and CVV is never retained after authorization — holds
+  everywhere regardless of which payment path is live.
 - **Manufactured urgency and fake "exception" discounts.** WWA's script
   pitches a set price ($199/$299) as a special "compliment" discount the rep
   is personally extending, and repeatedly states a discount "expires when we
@@ -74,12 +90,25 @@ on them, same as the existing `DANI_PROVIDER_AGREEMENT_DRAFT.md`.
 - **No written data-handling/PCI policy anywhere in WWA's contractor
   paperwork.** The agreement addresses confidentiality of lead/customer
   information broadly but never mentions payment card data specifically or
-  who's liable if it's mishandled. Section 6 of the new agreement fixes this
-  for DANI's own flow by removing manual card handling entirely, but if DANI
-  ever needs a fallback for customers who can't use a checkout link, that
-  fallback needs its own written procedure (e.g., a PCI-compliant phone
-  payment IVR) — don't let convenience quietly reintroduce manual card
-  capture.
+  who's liable if it's mishandled. Section 6 of the new agreement bans manual
+  card handling as policy, but the actual checkout link only covers
+  checkout-eligible CH01 sales — every other channel, and any recurring
+  quote-priced sale, currently has **no** governed payment path at all in the
+  codebase. That fallback (an invoicing flow, or a PCI-compliant phone/IVR
+  option if DANI ever wants one) still needs to be built; don't let the gap
+  quietly get filled by someone taking a card number over the phone because
+  the "proper" path doesn't exist yet for their sale.
+- **No immutable record of what was actually signed.** The agreement's
+  signature line binds the signer to its terms "as in effect on the date
+  shown," and compensation lives in a separately-versioned schedule — but
+  nothing here specifies how the portal should preserve *which* version of
+  which document a given signature actually attached to. Before this goes
+  live in the onboarding portal, store a snapshot at signing time: the
+  agreement's version/hash, the compensation schedule's version, and the
+  signed timestamp, together and immutably, the same way `dd_estimates`
+  freezes a price so later catalog edits can't retroactively change what a
+  customer agreed to. Otherwise a later edit to either document makes it
+  ambiguous what a given contractor actually signed.
 - **No recording-consent policy.** Neither WWA document says whether/where
   calls are recorded or how consent is handled across two-party-consent
   states. DANI needs an actual policy here (which states require dual

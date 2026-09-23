@@ -22,10 +22,19 @@ only with legal sign-off.
 
 ## 1. Relationship
 
-Signing this agreement does not create employment, partnership, or agency.
-The signer ("Contractor") is an independent contractor responsible for their
-own taxes, insurance, equipment, and benefits. DANI does not withhold taxes or
-provide employee benefits.
+This agreement states the parties' intent: the signer ("Contractor") is
+engaged as an independent contractor, not an employee, partner, or agent, and
+is responsible for their own taxes, insurance, equipment, and benefits. DANI
+does not withhold taxes or provide employee benefits.
+
+That stated intent does not by itself decide the legal classification — it
+depends on the whole relationship in fact, not this document's label. Training,
+a required call framework, compliance instructions, coaching/evaluation, and
+DANI-approved leads and pricing (all present in this program — see Sections 2,
+4, and 5, and the training guide) are exactly the kind of behavioral-control
+factors the IRS and state agencies weigh when they look past a contract's
+label. Have counsel review the actual program, including whether and how
+training runs, before treating this document as having settled the question.
 
 ## 2. Scope of Work
 
@@ -84,14 +93,29 @@ compliance checklist in full.
 
 Contractor never collects, writes down, or repeats back a customer's full
 card number, CVV, or bank account/routing number by phone, text, email, or any
-chat tool (Teams, Slack, SMS, etc.). DANI's checkout is a hosted Stripe
-Checkout link generated from the service request/estimate (see
-`api/create-checkout-session.js`); Contractor's job is to get the customer to
-that link, not to take payment details directly. If a customer cannot use the
-link, escalate to DANI's finance/ops contact rather than keying it in
-yourself. This is a hard rule, not a judgment call — full PANs and CVVs moving
-through chat is a PCI-DSS violation and a breach waiting to happen, and it is
-the one practice from other programs that must never be copied here.
+chat tool (Teams, Slack, SMS, etc.), regardless of what the payment path
+underneath turns out to be. This is DANI policy, not a judgment call, and it
+is the one practice from other programs that must never be copied here:
+manual capture of card data expands what falls inside PCI scope and DANI
+prohibits it outright. Separately, and regardless of how payment is captured,
+CVV/other sensitive authentication data must never be retained after
+authorization — that retention, specifically, is what PCI DSS itself
+prohibits.
+
+Where it's actually available, Contractor's job is to get the customer to
+DANI's hosted Stripe Checkout link generated from their service request/
+estimate (see `api/create-checkout-session.js`), not to take payment details
+directly. That link only exists today for Resident Concierge (channel CH01)
+requests that are live, sell-now, fulfillment-ready, and priced — a one-time
+quote-priced sale can still checkout for a deposit once its estimate is
+approved and cleared, but a **recurring** quote-priced sale is blocked from
+checkout entirely pending owner review, and every other channel (apartment,
+real-estate, B2B, or government/B2G business) has no checkout link at all
+right now. For any of those non-checkout-eligible cases, escalate to DANI's
+finance/ops contact for the governed invoicing path rather than improvising —
+and that governed path is itself a gap DANI needs to build, not something
+this document invents. Whatever the path, the rule above holds: no card
+numbers or CVVs by voice or chat, ever, as a workaround.
 
 ## 7. Confidentiality
 
@@ -147,3 +171,10 @@ separately signed writing says otherwise.
 By typing your full legal name and submitting the signature form in the DANI
 DECLARES contractor portal, you affirm that you have read and agree to be
 bound by the terms above as in effect on the date shown at signing.
+
+**Implementation note (not part of the signed text):** "as in effect on the
+date shown at signing" only means something if the portal actually preserves
+what that means. At the moment of signature, store an immutable snapshot —
+this agreement's version/hash, the compensation schedule's version, and the
+signed timestamp, together — so a later edit to either document can never
+make it ambiguous which terms and rates a given signature actually covers.

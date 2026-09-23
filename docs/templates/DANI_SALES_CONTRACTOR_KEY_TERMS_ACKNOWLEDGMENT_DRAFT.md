@@ -12,10 +12,15 @@ signature at the bottom.
 
 ---
 
-**1. You're a contractor, not an employee.**
-No tax withholding, no benefits, you carry your own insurance and equipment.
-You're free to control how and when you get the work done, within whatever
-compensation schedule and compliance rules apply.
+**1. This engages you as a contractor, not an employee.**
+No tax withholding, no benefits — you carry your own insurance and equipment,
+and this document doesn't by itself make you an employee. But calling it a
+contractor role doesn't settle the legal question either: that depends on how
+the relationship actually runs (training, required call methods, coaching,
+DANI-approved leads and pricing all count as factors), not on this label. If
+anything about how this actually operates feels more like a job with a set
+schedule and someone directing your every move than an independent business,
+say so — that's a real classification question, not just paperwork.
 
 Initials: __________
 
@@ -46,10 +51,14 @@ Initials: __________
 
 **5. Payment collection never goes through voice or chat.**
 You never take, write down, or repeat a customer's card number, CVV, or bank
-details over the phone or in any chat tool. You send DANI's secure checkout
-link and the customer pays there. If that doesn't work for them, you escalate
-to DANI's ops contact — you don't work around it by keying the number in
-yourself.
+details over the phone or in any chat tool — that's DANI policy regardless of
+what's technically permitted elsewhere, and CVVs specifically must never be
+stored after a charge goes through. Where DANI's secure checkout link is
+available for the sale you're closing, send it and the customer pays there.
+Not every service has that link yet (it's currently limited to certain
+resident-concierge sales) — for anything else, escalate to DANI's ops contact
+for the proper process. You never work around either case by keying a card
+number in yourself.
 
 Initials: __________
 

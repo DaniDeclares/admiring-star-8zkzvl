@@ -14,8 +14,17 @@ These are hard rules, not style preferences. A new contractor should be able
 to repeat them back before their first live call:
 
 1. **Never take a card number, CVV, or bank account/routing number by voice,
-   text, or chat.** Send the Stripe checkout link generated from the
-   customer's estimate. If they can't use it, escalate — don't work around it.
+   text, or chat.** This is DANI policy across the board, because manual
+   capture expands PCI scope — it holds even for sales where a checkout link
+   isn't available yet. Where a Stripe checkout link *is* available (today,
+   that's checkout-eligible Resident Concierge / CH01 sales — most other
+   channels and any recurring quote-priced sale don't have one yet), send
+   that link generated from the customer's estimate. If a link isn't
+   available or the customer can't use it, escalate to DANI's ops/finance
+   contact for the proper process — don't work around it by taking the
+   number yourself. Separately, whatever the collection path, CVV must never
+   be stored after a charge is authorized — that's the one PCI DSS actually
+   forbids outright.
 2. **Never manufacture urgency.** No "this price expires when we hang up," no
    fake "last spot," unless it is literally true and DANI has approved saying
    it.
@@ -33,9 +42,10 @@ to repeat them back before their first live call:
    same day.
 
 Breaking any of the above is a same-day escalation to DANI, not a coaching
-note for later — several of these are legal requirements (FTC Telemarketing
-Sales Rule, state mini-TSRs, PCI-DSS), and liability for violating them can
-land on the individual caller.
+note for later — several of these track legal requirements (FTC Telemarketing
+Sales Rule, state mini-TSRs, and DANI's own PCI-scope-reduction policy), and
+liability for violating the telemarketing rules specifically can land on the
+individual caller, not just DANI.
 
 ## 1. Opening
 
@@ -82,9 +92,14 @@ and expected; talking someone out of a legitimate pause is not.
 ## 5. Closing — sending payment
 
 Once they're ready: confirm the service, price, and any recurring terms out
-loud, confirm their email, and send the Stripe checkout link tied to their
-estimate. Stay on the line if useful while they complete it, then confirm
-receipt before ending the call. Never ask for the card number yourself.
+loud, confirm their email, and check whether this sale is checkout-eligible.
+If it is, send the Stripe checkout link tied to their estimate, stay on the
+line if useful while they complete it, then confirm receipt before ending the
+call. If it isn't — a channel other than Resident Concierge, or a recurring
+quote-priced service, which is blocked from online checkout pending owner
+review — tell the customer honestly that finishing their order needs one more
+step, and hand off to DANI's ops/finance contact for that. Never ask for the
+card number yourself either way.
 
 ## 6. Wrap-up
 
