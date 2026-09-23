@@ -2,9 +2,34 @@
   "version": 2,
   "buildCommand": "REACT_APP_SENTRY_DSN=\"$NEXT_PUBLIC_SENTRY_DSN\" REACT_APP_VERCEL_ENV=\"$VERCEL_ENV\" REACT_APP_VERCEL_GIT_COMMIT_SHA=\"$VERCEL_GIT_COMMIT_SHA\" npm run build",
   "rewrites": [
-    { "source": "/api/portal-dispatch", "destination": "/api/portal-fulfillment-dispatch" },
-    { "source": "/api/portal-fulfillment", "destination": "/api/portal-fulfillment-dispatch" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/api/portal-dispatch",
+      "destination": "/api/portal-fulfillment-dispatch"
+    },
+    {
+      "source": "/api/portal-fulfillment",
+      "destination": "/api/portal-fulfillment-dispatch"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.danideclares.com"
+        }
+      ],
+      "destination": "https://danideclares.com/:path*",
+      "permanent": true
+    }
   ]
 }
