@@ -104,6 +104,9 @@ export default function App() {
         {/* One platform, three role-based experiences. */}
         <Route path="/portal" element={<PortalWorkspacePage />} />
         <Route path="/portal/customer" element={<Navigate to="/portal" replace />} />
+        <Route path="/portal/customer/orders" element={<PortalWorkspacePage />} />
+        <Route path="/portal/customer/messages" element={<PortalWorkspacePage />} />
+        <Route path="/portal/customer/payments" element={<PortalWorkspacePage />} />
         <Route path="/portal/provider" element={<Navigate to="/portal" replace />} />
         <Route path="/portal/my-portal" element={<Navigate to="/portal" replace />} />
         <Route path="/my-portal" element={<Navigate to="/portal" replace />} />
