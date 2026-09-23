@@ -1029,6 +1029,15 @@ export default async function handler(req, res) {
       if (error) return fail(res, error.message || 'Could not load resident invitations.', 400);
       return ok(res, { invites: data || [] });
     }
+    if (action === 'start_my_job' || action === 'complete_my_job') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      if (context.isStaff) return fail(res, 'Provider job execution must be performed from a provider session.', 403);
+      if (!payload.jobId) return fail(res, 'jobId is required.');
+      const rpc = action === 'start_my_job' ? 'dd_start_job' : 'dd_complete_job';
+      const { data, error } = await context.supabase.rpc(rpc, { p_job_id: payload.jobId });
+      if (error) return fail(res, error.message || 'Job state could not be updated.', 400);
+      return ok(res, { job: data });
+    }
     if (action === 'field_event') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const providerId = context.isStaff ? payload.providerId : context.identity.entity_id;
