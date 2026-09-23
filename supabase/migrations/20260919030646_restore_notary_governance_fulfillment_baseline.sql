@@ -1,0 +1,23 @@
+-- Restore production-proven Division 05 master/offer/capability layers before channel verification.
+insert into public.dd_master_service_universe(id,division,service_name,commercial_object_type,canonical_sku,lifecycle_status,source_authority,created_at,updated_at)
+select x.id::uuid,'05',s.name,case when substring(s.sku from 9)::int <=20 then 'SERV' else null end,s.sku,'CANONICAL_ACTIVE',
+case when substring(s.sku from 9)::int <=20 then 'Owner commercialization directive + 2026 market research' else 'OWNER_REAL_CONTRACT_AND_HISTORICAL_RATES_2026-09-18' end,
+case when substring(s.sku from 9)::int in (24,26,27) then '2026-09-17 23:02:11.166542+00'::timestamptz when substring(s.sku from 9)::int >=21 then '2026-08-31 18:34:00.820001+00'::timestamptz else '2026-08-29 18:24:31.446608+00'::timestamptz end,
+case when substring(s.sku from 9)::int >=21 then '2026-09-18 02:23:14.118268+00'::timestamptz else '2026-08-29 18:24:31.446608+00'::timestamptz end
+from public.services s join (values
+('DNI-05A-001','d67a4b9d-43c0-47bd-b14e-a6906d2255bf'),('DNI-05A-002','c6257449-8da9-4967-b2d3-1b5218413a54'),('DNI-05A-003','6dceb5c0-c4ee-4971-b8d9-92a00a1dc9be'),('DNI-05A-004','a80b7008-f0f9-4ccd-a294-6e744dafec9f'),('DNI-05A-005','515555d0-1e39-490c-a3fd-685afbd262ab'),('DNI-05A-006','2c5e9535-5b2c-48e4-b356-8cd406f76311'),('DNI-05A-007','cb30dc79-74f6-451e-bc15-3440c1d63e18'),('DNI-05A-008','b3390de0-62b9-4f75-a00e-a533b67a054e'),('DNI-05A-009','b9ab193a-126f-4fc3-93fd-804625b3f4fd'),('DNI-05A-010','eddf69bf-13c5-408b-9310-9716f66731f3'),('DNI-05A-011','fd015784-41ab-4394-93e9-61a9458d031a'),('DNI-05A-012','ac8ffbee-803d-4c38-b062-fa02b8cd51ac'),('DNI-05A-013','281fe8bc-dbe8-4eda-97e7-95f0baaa4d1d'),('DNI-05A-014','5826285a-fecf-4f2a-9db8-6d78a37a69d0'),('DNI-05A-015','9a0aeb1b-712f-4fcb-8839-c79aa8973407'),('DNI-05A-016','ef64cfb9-24fe-4d83-9bc5-0d40cd60bbe5'),('DNI-05A-017','3246858d-29b4-4754-8c37-921c2d160238'),('DNI-05A-018','a0d56061-7ebb-4ab1-94a2-e3c24fddc0ce'),('DNI-05A-019','12b869d4-bcf8-403b-89ae-5d83114fa23f'),('DNI-05A-020','e9beb352-a453-4e2e-90c8-82273be23c2f'),('DNI-05A-021','b25cd435-0cdf-447e-b668-a52df0796f89'),('DNI-05A-022','17e7206d-f9c8-48cb-837d-7aac48152d90'),('DNI-05A-023','bef36785-3373-4360-8886-a8203e607d80'),('DNI-05A-024','34098031-50b7-421f-a50e-52e80d462860'),('DNI-05A-025','86cd8649-260a-4401-a20c-657602f4b861'),('DNI-05A-026','367936e2-c9ba-4b9e-ae1e-3c000f16df44'),('DNI-05A-027','c81f2027-dc3c-46ec-ab6b-da903dbc1e3a')) x(sku,id) on x.sku=s.sku
+where not exists(select 1 from public.dd_master_service_universe m where m.canonical_sku=s.sku);
+
+insert into public.dd_provider_capabilities(provider_id,provider_org_id,service_id,service_line,is_authorized,capability_key,tier_availability)
+select 'acba894f-a8c7-4156-b981-fa08acc9e65b'::uuid,'19c10267-898f-4c10-a25e-186f6aff8771'::uuid,s.id,s.name,true,'NOTARY_PUBLIC','{}'::jsonb
+from public.services s where s.sku between 'DNI-05A-001' and 'DNI-05A-027'
+and not exists(select 1 from public.dd_provider_capabilities p where p.provider_id='acba894f-a8c7-4156-b981-fa08acc9e65b' and p.service_id=s.id and p.capability_key='NOTARY_PUBLIC');
+
+insert into public.dd_governed_service_offers(master_record_id,canonical_sku,service_name,division,commercial_object_type,runtime_service_id,pricing_rule_count,market_rule_count,channel_availability_count,authorized_provider_capability_count,priced_channel_count,ch01_a_priced,ch01_b_priced,commercial_offer_status,fulfillment_gate_status,offer_basis,source_authority)
+select m.id,s.sku,s.name,'05',m.commercial_object_type,s.id,5,0,case when s.sku='DNI-05A-007' then 0 else 4 end,1,5,true,false,
+case when s.sku='DNI-05A-007' then 'DO_NOT_SELL' else 'SELL_NOW' end,'READY',
+case when substring(s.sku from 9)::int <=20 then 'Derived non-destructively from Master Service Universe + existing service pricing rules + market commercial rules + channel availability + authorized provider capability counts.' else 'Priced 2026-09-18 from real Dani Declares rates (signed client contract and historical Drive rates), per owner instruction to use her own real numbers for notary pricing rather than market research.' end,
+case when substring(s.sku from 9)::int <=20 then 'MASTER_COMMERCIAL_UNIVERSE' else 'OWNER_REAL_CONTRACT_AND_HISTORICAL_RATES_2026-09-18' end
+from public.services s join public.dd_master_service_universe m on m.canonical_sku=s.sku
+where s.sku between 'DNI-05A-001' and 'DNI-05A-027'
+and not exists(select 1 from public.dd_governed_service_offers o where o.canonical_sku=s.sku);
