@@ -1,3 +1,8 @@
+jest.mock('../../../lib/prisma.js', () => ({
+  __esModule: true,
+  default: { $queryRawUnsafe: jest.fn() },
+}));
+
 import { economicGateFromOffer, checkoutEligibility, resolveCH01CommercialSelection } from './governedCommercialGate2026.mjs';
 
 describe('economic checkout gate', () => {
@@ -72,7 +77,6 @@ describe('LIVE_READY checkout release gate', () => {
 });
 
 // CI release-contract verification pass.
-
 
 describe('CH01 canonical resolver controls', () => {
  test('requires a canonical service and front door before commercial resolution', async () => {
