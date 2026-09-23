@@ -12,7 +12,6 @@ begin
    update public.dd_provider_capabilities set provider_org_id='6bb73275-cd4d-44ea-98e4-19113d1954cc' where provider_org_id=old_id;
    update public.dd_provider_compliance_items set provider_org_id='6bb73275-cd4d-44ea-98e4-19113d1954cc' where provider_org_id=old_id;
    update public.dd_provider_coverage set provider_org_id='6bb73275-cd4d-44ea-98e4-19113d1954cc' where provider_org_id=old_id;
-   update public.dd_provider_documents set provider_org_id='6bb73275-cd4d-44ea-98e4-19113d1954cc' where provider_org_id=old_id;
    update public.dd_provider_rate_cards set provider_org_id='6bb73275-cd4d-44ea-98e4-19113d1954cc' where provider_org_id=old_id;
    update public.dd_provider_source_evidence set provider_org_id='6bb73275-cd4d-44ea-98e4-19113d1954cc' where provider_org_id=old_id;
    update public.dd_providers set org_id='6bb73275-cd4d-44ea-98e4-19113d1954cc' where org_id=old_id;
