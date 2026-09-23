@@ -369,14 +369,22 @@ export default async function handler(req, res) {
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
       if (req.query?.quoteEconomics === '1') {
-        const [componentsResult, providersResult] = await Promise.all([
+        const [componentsResult, providersResult, governedPackagesResult] = await Promise.all([
           context.supabase.from('dd_service_package_components').select('id,service_id,component_id,component_role,included_quantity,quantity_input_key,is_required,is_optional,fulfillment_mode,sort_order,dd_service_components(id,component_code,component_name,unit_type,cost_category,tax_classification,default_fulfillment_mode)').eq('is_active',true).order('sort_order',{ascending:true}),
-          context.supabase.from('dd_providers').select('id,first_name,last_name,role_title,is_active,dd_provider_organizations(name,accepts_new_work,is_active)').eq('is_active',true).order('first_name',{ascending:true})
+          context.supabase.from('dd_providers').select('id,first_name,last_name,role_title,is_active,dd_provider_organizations(name,accepts_new_work,is_active)').eq('is_active',true).order('first_name',{ascending:true}),
+          // Live Discovery package-match support (slice 1 of the commercial composition
+          // engine -- see /mnt/project-files/quote-builder/quote-builder-audit-2026-09-23.md).
+          // Distinct from dd_service_package_components above, which is fulfillment BOM, not
+          // customer pricing. Returns every package regardless of status so staff can see
+          // near-misses too; matchPackages() in scopeComposer2026.js filters to SELL_NOW.
+          context.supabase.from('dd_governed_packages').select('id,package_code,package_name,division,commercial_offer_status,package_price_cents,pricing_type,dd_governed_package_components(canonical_sku,quantity,is_required,sort_order)').order('package_name',{ascending:true})
         ]);
         if (componentsResult.error) throw componentsResult.error;
         if (providersResult.error) throw providersResult.error;
+        if (governedPackagesResult.error) throw governedPackagesResult.error;
         const providers=(providersResult.data||[]).filter(p=>p.dd_provider_organizations?.is_active&&p.dd_provider_organizations?.accepts_new_work);
-        return ok(res,{role:context.role,ownerUserId:context.user.id,packageComponents:componentsResult.data||[],providers});
+        const governedPackages=(governedPackagesResult.data||[]).map(p=>({id:p.id,package_code:p.package_code,package_name:p.package_name,division:p.division,commercial_offer_status:p.commercial_offer_status,package_price_cents:p.package_price_cents,pricing_type:p.pricing_type,components:(p.dd_governed_package_components||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))}));
+        return ok(res,{role:context.role,ownerUserId:context.user.id,packageComponents:componentsResult.data||[],providers,governedPackages});
       }
       if (req.query?.clientOrganizations === '1') {
         const { data: organizations, error } = await context.supabase.from('dd_client_organizations')
