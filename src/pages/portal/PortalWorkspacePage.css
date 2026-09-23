@@ -11,3 +11,7 @@
   .portal-message-compose button{min-height:44px}
   .portal-actions button,.portal-primary,.portal-refresh,.portal-upload{min-height:44px}
 }
+
+.portal-install-app{border:1px solid #6b1f2b;background:#6b1f2b;color:#fff;border-radius:999px;padding:10px 16px;font-weight:800;cursor:pointer;margin:0 0 16px;box-shadow:0 8px 20px rgba(107,31,43,.16)}
+.portal-install-app:hover{filter:brightness(.95)}
+@media(max-width:700px){.portal-install-app{position:fixed;right:16px;bottom:16px;z-index:30;min-height:48px;box-shadow:0 10px 30px rgba(0,0,0,.22)}}
