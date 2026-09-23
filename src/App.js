@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
+import SeoRouteMetadata from "./components/SeoRouteMetadata.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
@@ -75,6 +76,7 @@ function BookRedirect() {
 export default function App() {
   return (
     <Layout>
+      <SeoRouteMetadata />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/solutions" element={<PortfolioPage />} />
