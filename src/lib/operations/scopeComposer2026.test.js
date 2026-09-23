@@ -1,0 +1,9 @@
+import { interpretDiscoveryText } from './liveDiscoveryInterpreter2026.js';import { composeScope } from './scopeComposer2026.js';
+const services=[{sku:'BATH',name:'Bathroom Detail & Sanitization',service_family:'CLEANING',releaseState:'LIVE_READY',governedOfferStatus:'SELL_NOW'},{sku:'BED',name:'Bedroom Light Cleaning Vacuum & Dust',service_family:'CLEANING',releaseState:'LIVE_READY',governedOfferStatus:'SELL_NOW'},{sku:'MOVE',name:'Deposit Security Move-Out Turn',service_family:'CLEANING',releaseState:'LIVE_READY',governedOfferStatus:'SELL_NOW'},{sku:'PET',name:'Severe Pet Mess / Heavy Soil',service_family:'CLEANING',releaseState:'LIVE_READY',governedOfferStatus:'SELL_NOW'}];
+const compose=text=>composeScope({evidence:interpretDiscoveryText(text),services});
+test('Krystal fixture finds bathroom and bedroom scope',()=>{const r=compose('I only need the two bathrooms, but could you vacuum and dust my bedroom too?');expect(r.evidence.facts.find(f=>f.type==='bathroom')?.value).toBe(2);expect(r.suggestedComponents.map(x=>x.serviceSku)).toEqual(expect.arrayContaining(['BATH','BED']));});
+test('recurring stays discovery evidence',()=>{const r=compose('I need help keeping the bathrooms maintained every two weeks.');expect(r.evidence.signals).toContain('recurring');expect(r.reviewRequired).toBe(true);});
+test('move-out surfaces move-out scope',()=>expect(compose('I am moving out and need my deposit back.').suggestedComponents.map(x=>x.serviceSku)).toContain('MOVE'));
+test('pet condition asks severity',()=>expect(compose('There is pet mess in the room.').unresolvedQuestions).toContain('pet_condition_severity'));
+test('negative scope evidence is preserved',()=>expect(compose("I only need the bathrooms. Don't clean the kitchen.").evidence.negatives.length).toBeGreaterThan(0));
+test('package recognition invents nothing',()=>expect(compose('two bathrooms and vacuum bedroom').packageCandidates).toEqual([]));
