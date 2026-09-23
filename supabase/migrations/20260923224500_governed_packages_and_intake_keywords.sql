@@ -66,3 +66,52 @@ comment on table public.dd_service_addon_rules is 'Add-on-role governed pricing 
 -- powers is surfaced as a human-reviewed candidate, not an auto-added line item.
 alter table public.services add column if not exists intake_keywords text[];
 comment on column public.services.intake_keywords is 'Optional free-text phrases the Live Discovery scope-composer matches against raw customer language to suggest this service as a candidate. Never authoritative on its own.';
+
+-- These three tables carry governed commercial pricing (package prices, add-on prices)
+-- the same way dd_governed_service_offers does, so they get the same access shape:
+-- no anon/public access at all, staff/procurement read via portal identity, and every
+-- write path goes through the server (Quote Builder / createEstimate, which connects
+-- with SUPABASE_SERVICE_ROLE_KEY and therefore bypasses RLS regardless of policy).
+-- Nothing in the application reads these tables directly with the anon/authenticated
+-- client key, so this changes no runtime behavior -- it only removes the standing
+-- exposure of default table privileges once RLS was missing.
+alter table public.dd_governed_packages enable row level security;
+alter table public.dd_governed_package_components enable row level security;
+alter table public.dd_service_addon_rules enable row level security;
+
+revoke all on public.dd_governed_packages from anon, authenticated;
+revoke all on public.dd_governed_package_components from anon, authenticated;
+revoke all on public.dd_service_addon_rules from anon, authenticated;
+grant select on public.dd_governed_packages to authenticated;
+grant select on public.dd_governed_package_components to authenticated;
+grant select on public.dd_service_addon_rules to authenticated;
+
+drop policy if exists staff_admin_select_dd_governed_packages on public.dd_governed_packages;
+create policy staff_admin_select_dd_governed_packages on public.dd_governed_packages
+  for select to authenticated
+  using (exists (
+    select 1 from dd_portal_identities pi
+    where pi.auth_user_id = auth.uid()
+      and pi.is_active = true
+      and pi.portal_role = any (array['staff_admin','procurement'])
+  ));
+
+drop policy if exists staff_admin_select_dd_governed_package_components on public.dd_governed_package_components;
+create policy staff_admin_select_dd_governed_package_components on public.dd_governed_package_components
+  for select to authenticated
+  using (exists (
+    select 1 from dd_portal_identities pi
+    where pi.auth_user_id = auth.uid()
+      and pi.is_active = true
+      and pi.portal_role = any (array['staff_admin','procurement'])
+  ));
+
+drop policy if exists staff_admin_select_dd_service_addon_rules on public.dd_service_addon_rules;
+create policy staff_admin_select_dd_service_addon_rules on public.dd_service_addon_rules
+  for select to authenticated
+  using (exists (
+    select 1 from dd_portal_identities pi
+    where pi.auth_user_id = auth.uid()
+      and pi.is_active = true
+      and pi.portal_role = any (array['staff_admin','procurement'])
+  ));
