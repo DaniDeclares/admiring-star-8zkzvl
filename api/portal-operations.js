@@ -253,12 +253,19 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   }
   const w9 = await getW9Status(supabase, userId);
   applicationSnapshot = { ...applicationSnapshot, w9 };
-  if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
+  if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], financials: { earnings: [], payables: [], payouts: [] }, payouts: [], messages: [] };
+
+  // Financials are read through the provider-bound projection. The Worker App
+  // can display governed earning/payable/payout state but cannot approve,
+  // process, reconcile, or mutate accounting records.
+  const { data: financialsData, error: financialsError } = await supabase.rpc('dd_get_my_provider_financials');
+  if (financialsError) throw financialsError;
+  const financials = financialsData || { earnings: [], payables: [], payouts: [] };
   const quoteAssignments = await getProviderEstimateAssignments(supabase, providerId);
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
   const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
-  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], quoteAssignments, tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
+  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], quoteAssignments, tasks: [], evidence: [], appointments: [], financials, payouts: financials.payouts || [], messages: [] };
   const [jobsResult, tasks, evidence, appointments, payouts, messages] = await Promise.all([
     supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, sla_due_at, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
@@ -274,7 +281,7 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   if (payouts.error) throw payouts.error;
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
-  return { ...applicationSnapshot, assignments: safeAssignments, quoteAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], payouts: payouts.data || [], messages };
+  return { ...applicationSnapshot, assignments: safeAssignments, quoteAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], financials, payouts: financials.payouts || payouts.data || [], messages };
 }
 // A resident's own dd_portal_identities.organization_id is only ever set by
 // dd_consume_apartment_resident_invite_impl (see the property-invite RPCs),
@@ -922,18 +929,34 @@ export default async function handler(req, res) {
     }
     if (action === 'estimate_assignment_response') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      const providerId = context.isStaff ? payload.providerId : context.identity?.entity_id;
-      if (!providerId) return fail(res, 'Provider identity required.', 403);
-      const assignment = await respondToEstimateAssignment(context.supabase, {
-        assignmentId: payload.assignmentId,
-        providerId,
-        decision: payload.decision,
-        counterCompensation: payload.counterCompensation,
-        counterBasis: payload.counterBasis || null,
-        reason: payload.reason || null,
-        actorUserId: context.user.id
+      if (context.isStaff) return fail(res, 'Provider-bound offer responses must be performed from a provider session.', 403);
+      if (!payload.assignmentId) return fail(res, 'assignmentId is required.');
+
+      // Provider responses intentionally cross the hardened provider-safe RPC boundary.
+      // The RPC resolves provider identity from the authenticated JWT and binds the
+      // assignment server-side; the browser/API payload never gets to choose provider_id.
+      const decision = String(payload.decision || '').toUpperCase();
+      if (decision === 'COUNTEROFFER') {
+        const amount = Number(payload.counterCompensation);
+        const reason = String(payload.reason || '').trim();
+        if (!Number.isFinite(amount) || amount <= 0 || !reason) return fail(res, 'A positive counteroffer amount and reason are required.');
+        const { data, error } = await context.supabase.rpc('dd_submit_my_provider_counteroffer', {
+          p_assignment_id: payload.assignmentId,
+          p_counter_compensation: amount,
+          p_reason: reason,
+          p_counter_basis: payload.counterBasis || null
+        });
+        if (error) return fail(res, error.message || 'Counteroffer could not be submitted.', 400);
+        return ok(res, { assignment: data });
+      }
+      if (!['ACCEPT','DECLINE'].includes(decision)) return fail(res, 'Decision must be ACCEPT, DECLINE, or COUNTEROFFER.');
+      const { data, error } = await context.supabase.rpc('dd_respond_to_my_offer', {
+        p_assignment_id: payload.assignmentId,
+        p_decision: decision,
+        p_reason: payload.reason || null
       });
-      return ok(res, { assignment });
+      if (error) return fail(res, error.message || 'Offer response could not be submitted.', 400);
+      return ok(res, { assignment: data });
     }
     if (action === 'owner_estimate_assignment_response') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
@@ -1012,6 +1035,15 @@ export default async function handler(req, res) {
       const { data, error } = await context.supabase.rpc('dd_list_property_resident_invites', { p_property_id: propertyId });
       if (error) return fail(res, error.message || 'Could not load resident invitations.', 400);
       return ok(res, { invites: data || [] });
+    }
+    if (action === 'start_my_job' || action === 'complete_my_job') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      if (context.isStaff) return fail(res, 'Provider job execution must be performed from a provider session.', 403);
+      if (!payload.jobId) return fail(res, 'jobId is required.');
+      const rpc = action === 'start_my_job' ? 'dd_start_job' : 'dd_complete_job';
+      const { data, error } = await context.supabase.rpc(rpc, { p_job_id: payload.jobId });
+      if (error) return fail(res, error.message || 'Job state could not be updated.', 400);
+      return ok(res, { job: data });
     }
     if (action === 'field_event') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);

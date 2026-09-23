@@ -2,18 +2,18 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const TABS = [
-  { to: '/portal', label: 'Overview', locked: false, needsAgreement: false },
-  { to: '/portal/field', label: 'DANI FIELD', locked: true, needsAgreement: true },
-  { to: '/portal/provider-agreement', label: 'Provider Agreement', locked: false, needsAgreement: false },
+  { to: '/portal', label: 'Home', locked: false, needsAgreement: false },
+  { to: '/portal/field', label: 'Work', locked: true, needsAgreement: true },
+  { to: '/portal/assignments', label: 'Offers', locked: true, needsAgreement: true },
+  { to: '/portal/checklist', label: 'Tasks', locked: true, needsAgreement: true },
+  { to: '/portal/payouts', label: 'Earnings', locked: true, needsAgreement: true },
+  { to: '/portal/provider-agreement', label: 'Agreement', locked: false, needsAgreement: false },
   { to: '/portal/vendor-onboarding', label: 'Documents', locked: false, needsAgreement: true },
   { to: '/portal/w9', label: 'Tax Form (W-9)', locked: false, needsAgreement: true },
   { to: '/portal/profile', label: 'Profile', locked: false, needsAgreement: true },
   { to: '/portal/services', label: 'My Services', locked: false, needsAgreement: true },
-  { to: '/portal/assignments', label: 'Assignments', locked: true, needsAgreement: true },
   { to: '/portal/schedule', label: 'Schedule', locked: true, needsAgreement: true },
-  { to: '/portal/checklist', label: 'Field Checklist', locked: true, needsAgreement: true },
   { to: '/portal/evidence', label: 'Evidence', locked: true, needsAgreement: true },
-  { to: '/portal/payouts', label: 'Payouts', locked: true, needsAgreement: true },
   { to: '/portal/messages', label: 'Messages', locked: true, needsAgreement: true },
   { to: '/portal/settings', label: 'Notifications', locked: false, needsAgreement: true },
 ];
