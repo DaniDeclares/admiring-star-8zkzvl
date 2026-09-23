@@ -352,4 +352,41 @@ export async function resolveCH01CommercialSelection({
   frontDoorCode,
   subchannelCode,
   isVerifiedCommunityResident = false,
+} = {}) {
+  const canonicalSku = String(serviceId || '').trim();
+  const frontDoor = String(frontDoorCode || '').trim();
+  const suppliedSubchannel = String(subchannelCode || '').trim();
+  if (!canonicalSku) return { allowed: false, reason: 'CH01_SERVICE_REQUIRED' };
+  if (!frontDoor) return { allowed: false, reason: 'CH01_FRONT_DOOR_REQUIRED' };
+
+  const derivedSubchannel = isVerifiedCommunityResident ? 'CH01-B' : 'CH01-A';
+  if (suppliedSubchannel && suppliedSubchannel !== derivedSubchannel) {
+    return { allowed: false, reason: 'CH01_SUBCHANNEL_MISMATCH' };
+  }
+  const subchannel = derivedSubchannel;
+  const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return { allowed: false, reason: 'CH01_DATABASE_UNAVAILABLE' };
+  const admin = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+
+  const [{ data: door }, { data: adjudications }] = await Promise.all([
+    admin.from('dd_channel_front_doors').select('front_door_code').eq('channel_code','CH01').eq('front_door_code',frontDoor).eq('status','LOCKED').maybeSingle(),
+    admin.from('dd_ch01_service_adjudication').select('sku,service_id,service_name,front_door_code,subchannel_scope,disposition,customer_visible_candidate,updated_at,id').eq('channel_code','CH01').eq('status','LOCKED').eq('sku',canonicalSku).eq('front_door_code',frontDoor).eq('customer_visible_candidate',true).in('disposition',['FRONT_DOOR','CONTROLLED_QUOTE']).contains('subchannel_scope',[subchannel]).order('updated_at',{ascending:false}).order('id',{ascending:true}),
+  ]);
+  if (!door || !adjudications?.length) return { allowed:false, reason:'CH01_CANONICAL_SERVICE_NOT_AUTHORIZED_FOR_FRONT_DOOR' };
+  if (adjudications.length > 1) return { allowed:false, reason:'CH01_CANONICAL_SERVICE_RESOLUTION_AMBIGUOUS' };
+  const a=adjudications[0];
+
+  const { data: offer } = await admin.from('dd_governed_service_offers').select('canonical_sku,runtime_service_id,service_name,commercial_offer_status,fulfillment_gate_status,ch01_a_priced,ch01_b_priced').eq('canonical_sku',canonicalSku).neq('commercial_offer_status','DO_NOT_SELL').maybeSingle();
+  if (!offer || offer.runtime_service_id !== a.service_id) return { allowed:false, reason:'CH01_CANONICAL_SERVICE_NOT_AUTHORIZED_FOR_FRONT_DOOR' };
+  const [{ data: service }, { data: release }, { data: pricing }, { data: subPricing }] = await Promise.all([
+    admin.from('services').select('pricing_type,billing_cycle,resident_discount_eligible,commercial_status').eq('id',offer.runtime_service_id).maybeSingle(),
+    admin.from('dd_service_release_contract_v1').select('release_state,blocking_gate').eq('canonical_sku',canonicalSku).maybeSingle(),
+    admin.from('dd_service_pricing_rules').select('base_price_cents,lock_status,status,effective_date,updated_at,id').eq('service_id',offer.runtime_service_id).eq('channel_code','CH01').eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle(),
+    admin.from('dd_service_market_pricing_rules').select('price_override_cents,updated_at,id').eq('service_id',offer.runtime_service_id).eq('channel_code','CH01').eq('subchannel_code','CH01-B').eq('status','ACTIVE').gt('price_override_cents',0).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle(),
+  ]);
+  const pricingCents=subchannel==='CH01-B'?Number(subPricing?.price_override_cents||0):Number(pricing?.base_price_cents||0);
+  const pricingLocked=subchannel==='CH01-B'?pricingCents>0:pricing?.status==='ACTIVE'&&pricing?.lock_status==='LOCKED';
+  const price=pricingCents>0?(subchannel==='CH01-B'?money(pricingCents/100):resolveGovernedPrice({baseCustomerPrice:pricingCents/100,residentDiscountEligible:Boolean(service?.resident_discount_eligible),pricingType:service?.pricing_type},{channel:'CH01',subchannel,isVerifiedCommunityResident})):null;
+  return {allowed:true,reason:'CH01_CANONICAL_SERVICE_RESOLVED',serviceId:canonicalSku,runtimeServiceId:offer.runtime_service_id,serviceName:offer.service_name||a.service_name,frontDoorCode:frontDoor,subchannel,disposition:a.disposition,pricingType:service?.pricing_type||null,billingCycle:service?.billing_cycle||null,commercialOfferStatus:offer.commercial_offer_status,fulfillmentGateStatus:offer.fulfillment_gate_status,releaseState:release?.release_state||null,blockingGate:release?.blocking_gate||null,ch01APriced:Boolean(offer.ch01_a_priced),ch01BPriced:Boolean(offer.ch01_b_priced),pricingLocked,hasLockedActivePricing:subchannel==='CH01-A'?pricingLocked:true,hasLockedActiveSubchannelPricing:subchannel==='CH01-B'?pricingLocked:true,price};
 }
