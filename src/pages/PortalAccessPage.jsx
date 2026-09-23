@@ -30,6 +30,7 @@ export default function PortalAccessPage() {
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get('property_invite') || '';
   const requestedRole = searchParams.get('role') || '';
+  const resumeProvider = searchParams.get('resume') === '1';
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/portal/access';
   const audience = pathname.endsWith('/providers') ? 'provider' : pathname.endsWith('/partners') ? 'partners' : requestedRole;
   const [mode,setMode]=useState('choose');
@@ -52,6 +53,21 @@ export default function PortalAccessPage() {
   const [selectedCategories,setSelectedCategories]=useState(() => ({}));
   const [providerStep,setProviderStep]=useState(1);
   const [providerApplicantType,setProviderApplicantType]=useState('INDIVIDUAL');
+  const [resumeSession,setResumeSession]=useState(null);
+
+  useEffect(()=>{
+    if(!resumeProvider) return;
+    supabase.auth.getSession().then(({data})=>{
+      const session=data?.session||null;
+      setResumeSession(session);
+      if(session?.user){
+        const meta=session.user.user_metadata||{};
+        setForm(prev=>({...prev,firstName:prev.firstName||meta.first_name||'',lastName:prev.lastName||meta.last_name||'',email:session.user.email||prev.email,password:'RESUME_EXISTING_ACCOUNT',confirm:'RESUME_EXISTING_ACCOUNT'}));
+        setSelected(OPTIONS.find(o=>o.key==='provider'));
+        setMode('form');
+      }
+    });
+  },[resumeProvider]);
 
   const visibleOptions = useMemo(() => {
     if (audience === 'provider') return OPTIONS.filter(o => o.key === 'provider');
@@ -191,7 +207,7 @@ export default function PortalAccessPage() {
   };
 
   const providerStepValid=()=>{
-    if(providerStep===1){
+    if(providerStep===1 && !resumeProvider){
       if(!form.firstName.trim()||!form.lastName.trim()||!form.email.trim()){setError('Fill in your name and email to continue.');return false;}
       if(form.password.length<8){setError('Use a password with at least 8 characters.');return false;}
       if(form.password!==form.confirm){setError('Passwords do not match.');return false;}
@@ -293,6 +309,13 @@ export default function PortalAccessPage() {
     });
     if(stagingError){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'staging'});captureSentryEvent('staging_failed',{account_type:selected?.key||'unknown',error_type:'staging'});captureSentryException(stagingError,{stage:'staging'});return setError(`Something interrupted account creation: ${stagingError}`);}
 
+    if(resumeProvider){
+      if(!resumeSession?.user){setBusy(false);return setError('Sign in to your existing provider account before resuming the application.');}
+      const {data:result,error:completeError}=await supabase.rpc('dd_consume_provider_intake_staging',{p_staging_id:stagingId});
+      if(completeError || !result?.success){setBusy(false);return setError(completeError?.message||result?.error||'We could not restore the provider application.');}
+      setBusy(false);setDone('Your provider application has been restored and submitted for review.');setMode('done');return;
+    }
+
     const {data,error:authError}=await supabase.auth.signUp({email:normalizedEmail,password:form.password,options:{emailRedirectTo:`${SITE_URL}/portal/login?intake=${encodeURIComponent(stagingId)}`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     // A staging row can be left behind here (signup failed, or the email
     // already belongs to a confirmed account below) -- it simply expires
@@ -339,7 +362,7 @@ export default function PortalAccessPage() {
 
   const providerForm = <form onSubmit={submit} onKeyDown={e=>{if(providerStep<4&&e.key==='Enter'){e.preventDefault();nextProviderStep();}}}>
     <div className="portal-wizard-steps">{PROVIDER_STEPS.map((label,index)=>{const stepNumber=index+1;return <div key={label} className={`portal-wizard-step${providerStep===stepNumber?' active':''}${providerStep>stepNumber?' done':''}`}><span>{stepNumber}</span>{label}</div>;})}</div>
-    {providerStep===1&&<div className="portal-form-grid">
+    {providerStep===1&&resumeProvider&&<div className="portal-form-grid"><div className="portal-wide"><strong>Existing provider account</strong><p>You are signed in as {form.email}. Your login is being kept; continue to restore only the missing provider application.</p></div><label>First name<input name="firstName" required value={form.firstName} onChange={update}/></label><label>Last name<input name="lastName" required value={form.lastName} onChange={update}/></label><label>Email<input type="email" readOnly value={form.email}/></label><label>Phone<input name="phone" value={form.phone} onChange={update}/></label></div>}{providerStep===1&&!resumeProvider&&<div className="portal-form-grid">
       <label>First name<input name="firstName" required value={form.firstName} onChange={update}/></label>
       <label>Last name<input name="lastName" required value={form.lastName} onChange={update}/></label>
       <label>Email<input type="email" name="email" required value={form.email} onChange={update}/></label>
