@@ -35,10 +35,6 @@ for(const [route,[title,description,copy]] of Object.entries(routes)){
   .replace(/<meta property="og:title" content="[^"]*"\s*\/>/, `<meta property="og:title" content="${esc(title)}"/>`)
   .replace(/<meta property="og:description" content="[^"]*"\s*\/>/, `<meta property="og:description" content="${esc(description)}"/>`)
   .replace(/<meta property="og:url" content="[^"]*"\s*\/>/, `<meta property="og:url" content="${canonical}"/>`)
-  .replace(/<meta name="twitter:title" content="[^"]*"\\s*\\/>/, `<meta name="twitter:title" content="${esc(title)}"/>`)
-  .replace(/<meta name="twitter:description" content="[^"]*"\\s*\\/>/, `<meta name="twitter:description" content="${esc(description)}"/>`)
-  .replace(/<meta name="application-name" content="[^"]*"\\s*\\/>/, '<meta name="application-name" content="DANI DECLARES"/>')
-  .replace(/<meta name="apple-mobile-web-app-title" content="[^"]*"\\s*\\/>/, '<meta name="apple-mobile-web-app-title" content="DANI DECLARES"/>')
   .replace('</head>',`<link rel="canonical" href="${canonical}"/></head>`)
   .replace('<div id="root"></div>',`<div id="root"><main><h1>${esc(title.replace(/ \| DANI DECLARES$/,''))}</h1><p>${esc(copy)}</p><p><a href="/request-service">Request service</a></p></main></div>`);
  const name=route==='/'?'home':route.slice(1).replaceAll('/','--');
