@@ -941,10 +941,10 @@ export default async function handler(req, res) {
         const reason = String(payload.reason || '').trim();
         if (!Number.isFinite(amount) || amount <= 0 || !reason) return fail(res, 'A positive counteroffer amount and reason are required.');
         const { data, error } = await context.supabase.rpc('dd_submit_my_provider_counteroffer', {
-          p_assignment_id: payload.assignmentId,
+          p_offer_id: payload.assignmentId,
           p_counter_compensation: amount,
-          p_reason: reason,
-          p_counter_basis: payload.counterBasis || null
+          p_counter_reason: reason,
+          p_counter_basis: payload.counterBasis || {}
         });
         if (error) return fail(res, error.message || 'Counteroffer could not be submitted.', 400);
         return ok(res, { assignment: data });
@@ -952,7 +952,7 @@ export default async function handler(req, res) {
       if (!['ACCEPT','DECLINE'].includes(decision)) return fail(res, 'Decision must be ACCEPT, DECLINE, or COUNTEROFFER.');
       const { data, error } = await context.supabase.rpc('dd_respond_to_my_offer', {
         p_assignment_id: payload.assignmentId,
-        p_decision: decision,
+        p_accept: decision === 'ACCEPT',
         p_reason: payload.reason || null
       });
       if (error) return fail(res, error.message || 'Offer response could not be submitted.', 400);
