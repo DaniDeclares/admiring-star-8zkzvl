@@ -1,6 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 import prisma from '../../../lib/prisma.js';
 
+
+function queryRaw(strings, ...values) {
+  let sql = '';
+  for (let i = 0; i < strings.length; i += 1) {
+    sql += strings[i];
+    if (i < values.length) sql += `${i + 1}`;
+  }
+  return prisma.$queryRawUnsafe(sql, ...values);
+}
+
 const ECONOMIC_MARGIN_FLOOR_PERCENT = 50;
 
 function parseEconomicMarginPercent(value) {
@@ -53,7 +63,7 @@ export function normalizeChannel(channelType, channel) {
 }
 
 export async function getGovernedCommercialOffer(serviceId) {
-  const rows = await prisma.$queryRaw`
+  const rows = await queryRaw`
     SELECT
       o.canonical_sku AS "serviceId",
       o.service_name AS name,
@@ -147,7 +157,7 @@ export async function getChannelGovernanceDecision(serviceId, channel) {
     return { allowed: false, reason: 'CHANNEL_REQUIRED' };
   }
 
-  const rows = await prisma.$queryRaw`
+  const rows = await queryRaw`
     SELECT
       a.disposition,
       a.proposed_front_door AS "proposedFrontDoor",
@@ -212,7 +222,7 @@ export async function getChannelGovernanceDecision(serviceId, channel) {
 export async function resolveGovernedChannelPrice(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
   if (!offer) return null;
   if (channel === 'CH01' && subchannel === 'CH01-B') {
-    const rows = await prisma.$queryRaw`
+    const rows = await queryRaw`
       SELECT price_override_cents
       FROM public.dd_service_market_pricing_rules
       WHERE service_id = ${offer.runtimeServiceId}
@@ -229,7 +239,7 @@ export async function resolveGovernedChannelPrice(offer, { channel, subchannel, 
     return money(cents / 100);
   }
   if (channel === 'CH01' && subchannel === 'CH01-A') {
-    const rows = await prisma.$queryRaw`
+    const rows = await queryRaw`
       SELECT base_price_cents
       FROM public.dd_service_pricing_rules
       WHERE service_id = ${offer.runtimeServiceId}
@@ -244,7 +254,7 @@ export async function resolveGovernedChannelPrice(offer, { channel, subchannel, 
     return money(cents / 100);
   }
   if (channel !== 'CH02') return resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident });
-  const rows = await prisma.$queryRaw`
+  const rows = await queryRaw`
     SELECT base_price_cents
     FROM public.dd_service_pricing_rules
     WHERE service_id = ${offer.runtimeServiceId}
@@ -355,7 +365,7 @@ export async function resolveCH01CommercialSelection({
   }
   const subchannel = derivedSubchannel;
 
-  const rows = await prisma.$queryRaw`
+  const rows = await queryRaw`
     SELECT
       a.sku AS "serviceId",
       a.service_id AS "runtimeServiceId",
