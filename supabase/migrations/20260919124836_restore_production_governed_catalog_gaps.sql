@@ -942,3 +942,12 @@ where not exists(select 1 from public.dd_governed_service_offers o where o.canon
 -- Preserve the pre-pass-2 engine state proven by the original 20260919124837 assertions.
 update public.services set pricing_engine_code='C' where sku in ('DNI-12A-012','DNI-12A-013','DNI-12A-014','DNI-12A-015','DNI-12A-016','DNI-12A-017','DNI-12A-018','DNI-12A-019','DNI-12A-020','DNI-12A-027','DNI-12A-028');
 update public.services set pricing_engine_code=null where sku in ('DNI-01A-001','DNI-01A-002','DNI-01A-036','DNI-01A-037','DNI-01A-038','DNI-01A-041','DNI-01B-001','DNI-01B-002','DNI-01B-003','DNI-01B-004','DNI-01B-005','DNI-01B-006','DNI-01B-007','DNI-01B-009','DNI-01B-010','DNI-01D-005','DNI-01D-006','DNI-01G-001');
+
+-- Preserved candidates already present before the owner-default fulfillment sweep were intake-only, not SELL_NOW candidates.
+update public.dd_governed_service_offers o set commercial_offer_status='INTAKE_ONLY'
+from public.services s, public.dd_master_service_universe m
+where o.runtime_service_id=s.id and o.master_record_id=m.id
+  and coalesce(o.authorized_provider_capability_count,0)=0 and o.commercial_offer_status='SELL_NOW' and o.fulfillment_gate_status='READY'
+  and m.division<>'13' and o.canonical_sku not in ('DNI-02A-008','DNI-06A-019')
+  and not (m.division='12' and coalesce(m.provider_qualifications,'') ilike '%drivers/carriers%')
+  and s.created_at <= '2026-09-19 17:30:00+00'::timestamptz;
