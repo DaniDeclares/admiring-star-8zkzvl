@@ -23,6 +23,11 @@ export default function ProviderNav({ isApprovedProvider, agreementSigned }) {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [standalone, setStandalone] = useState(false);
   useEffect(() => {
+    const manifest = document.querySelector('link[rel="manifest"]');
+    if (manifest) manifest.setAttribute('href', '/manifest-worker.json');
+    document.title = 'DANI Worker App';
+  }, []);
+  useEffect(() => {
     const updateStandalone = () => setStandalone(window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true);
     const capture = event => { event.preventDefault(); setInstallPrompt(event); };
     updateStandalone();
