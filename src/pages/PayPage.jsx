@@ -1,6 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowRight,CheckCircle2,ShieldCheck} from 'lucide-react';
 import {supabase} from '../lib/supabaseClient.js';
+import {captureServiceLifecycle} from '../lib/posthogAnalytics.js';
 
 export default function PayPage(){
  const params=useMemo(()=>typeof window==='undefined'?new URLSearchParams():new URLSearchParams(window.location.search),[]);
@@ -14,15 +15,16 @@ export default function PayPage(){
  // on the server has no way to tell them apart from an anonymous guest, and
  // a real CH01-B customer would be incorrectly rejected as unverified.
  const pay=async e=>{e?.preventDefault();if(!requestId||!serviceId||!email){setError('Missing request details. Please use the payment link from your confirmation email, or contact DANI DECLARES.');return;}
-  setStatus('loading');setError('');
+  setStatus('loading');setError('');captureServiceLifecycle('payment_started',{service_id:serviceId,request_id:requestId,payment_state:'started',route:'/pay'});
   try{
    const {data:sessionData}=await supabase.auth.getSession();
    const token=sessionData?.session?.access_token||null;
    const r=await fetch('/api/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({requestId,serviceId,email})});
    const d=await r.json();
    if(!r.ok||!d.success||!d.url)throw new Error(d.error||'We could not open secure checkout right now.');
+   captureServiceLifecycle('payment_checkout_opened',{service_id:serviceId,request_id:requestId,payment_state:'checkout_opened',route:'/pay'});
    window.location.href=d.url;
-  }catch(err){setError(err.message||'We could not open secure checkout right now.');setStatus('error');}
+  }catch(err){captureServiceLifecycle('payment_failed',{service_id:serviceId,request_id:requestId,payment_state:'failed',route:'/pay'});setError(err.message||'We could not open secure checkout right now.');setStatus('error');}
  };
  useEffect(()=>{if(status==='ready')pay();},[]); // eslint-disable-line react-hooks/exhaustive-deps
  return <div className="min-h-screen bg-[#fffaf1] text-[#302226]">

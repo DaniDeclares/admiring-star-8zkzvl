@@ -1,11 +1,13 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
+import SeoRouteMetadata from "./components/SeoRouteMetadata.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import ServicesPage from "./pages/ServicesPage.jsx";
 import CommercialCatalogPage from "./pages/CommercialCatalogPage.jsx";
+import ServiceCategoryPage from "./pages/ServiceCategoryPage.jsx";
 import BusinessSolutionsPage from "./pages/BusinessSolutionsPage.jsx";
 import PrintStudioPage from "./pages/services/PrintStudioPage.jsx";
 import EventsPage from "./pages/services/EventsPage.jsx";
@@ -25,6 +27,10 @@ import PayPage from "./pages/PayPage.jsx";
 import ResidentWelcomePage from "./pages/ResidentWelcomePage.jsx";
 import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx";
 import OperationsConsolePage from "./pages/portal/OperationsConsolePage.jsx";
+import OwnerHQPage from "./pages/portal/OwnerHQPage.jsx";
+import IntegrationsCenterPage from "./pages/portal/IntegrationsCenterPage.jsx";
+import ScopeDevelopmentPage from "./pages/portal/ScopeDevelopmentPage.jsx";
+import DispatchCalendarPage from "./pages/portal/DispatchCalendarPage.jsx";
 import ProviderApprovalPage from "./pages/portal/ProviderApprovalPage.jsx";
 import PortalWorkspacePage from "./pages/portal/PortalWorkspacePage.jsx";
 import ProviderAssignmentsPage from "./pages/portal/ProviderAssignmentsPage.jsx";
@@ -34,8 +40,13 @@ import ProviderAgreementPage from "./pages/portal/ProviderAgreementPage.jsx";
 import ProviderEvidencePage from "./pages/portal/ProviderEvidencePage.jsx";
 import ProviderPayoutsPage from "./pages/portal/ProviderPayoutsPage.jsx";
 import ProviderProfilePage from "./pages/portal/ProviderProfilePage.jsx";
+import ProviderServicesPage from "./pages/portal/ProviderServicesPage.jsx";
+import ProviderW9Page from "./pages/portal/ProviderW9Page.jsx";
 import ProviderMessagesPage from "./pages/portal/ProviderMessagesPage.jsx";
+import ProviderFieldPage from "./pages/portal/ProviderFieldPage.jsx";
 import QuoteBuilderPage from "./pages/portal/QuoteBuilderPage.jsx";
+import SavedQuotesPage from "./pages/portal/SavedQuotesPage.jsx";
+import EstimateReviewCockpitPage from "./pages/portal/EstimateReviewCockpitPage.jsx";
 import ContractAcquisitionPage from "./pages/portal/ContractAcquisitionPage.jsx";
 import ContractingPeriodPage from "./pages/portal/ContractingPeriodPage.jsx";
 import PortalAccessPage from "./pages/PortalAccessPage.jsx";
@@ -43,12 +54,15 @@ import PortalLoginPage from "./pages/PortalLoginPage.jsx";
 import PortalForgotPasswordPage from "./pages/PortalForgotPasswordPage.jsx";
 import PortalResetPasswordPage from "./pages/PortalResetPasswordPage.jsx";
 import ChangePasswordPage from "./pages/portal/ChangePasswordPage.jsx";
+import NotificationSettingsPage from "./pages/portal/NotificationSettingsPage.jsx";
 import VendorOnboardingUploadPage from "./pages/VendorOnboardingUploadPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import WeddingsPage from "./pages/WeddingsPage.jsx";
+import PortfolioPage from "./pages/PortfolioPage.jsx";
+import HandledCampaignPage from "./pages/HandledCampaignPage.jsx";
 
 // ServiceCta and several service detail pages build "/book?service=X" links
 // expecting RequestServicePage's ?service= param to pre-select that service.
@@ -62,12 +76,17 @@ function BookRedirect() {
 export default function App() {
   return (
     <Layout>
+      <SeoRouteMetadata />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/solutions" element={<PortfolioPage />} />
+        <Route path="/how-it-works" element={<PortfolioPage />} />
+        <Route path="/campaign/handled" element={<HandledCampaignPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/catalog" element={<CommercialCatalogPage />} />
+        <Route path="/services/category/:slug" element={<ServiceCategoryPage />} />
         <Route path="/services/business" element={<BusinessSolutionsPage />} />
         <Route path="/services/business-solutions" element={<BusinessSolutionsPage />} />
         <Route path="/services/print-studio" element={<PrintStudioPage />} />
@@ -87,6 +106,9 @@ export default function App() {
         {/* One platform, three role-based experiences. */}
         <Route path="/portal" element={<PortalWorkspacePage />} />
         <Route path="/portal/customer" element={<Navigate to="/portal" replace />} />
+        <Route path="/portal/customer/orders" element={<PortalWorkspacePage />} />
+        <Route path="/portal/customer/messages" element={<PortalWorkspacePage />} />
+        <Route path="/portal/customer/payments" element={<PortalWorkspacePage />} />
         <Route path="/portal/provider" element={<Navigate to="/portal" replace />} />
         <Route path="/portal/my-portal" element={<Navigate to="/portal" replace />} />
         <Route path="/my-portal" element={<Navigate to="/portal" replace />} />
@@ -100,21 +122,32 @@ export default function App() {
         <Route path="/portal/forgot-password" element={<PortalForgotPasswordPage />} />
         <Route path="/portal/reset-password" element={<PortalResetPasswordPage />} />
         <Route path="/portal/change-password" element={<ChangePasswordPage />} />
+        <Route path="/portal/settings" element={<NotificationSettingsPage />} />
         <Route path="/portal/provider-agreement" element={<ProviderAgreementPage />} />
         <Route path="/portal/vendor-onboarding" element={<VendorOnboardingUploadPage />} />
+        <Route path="/portal/field" element={<ProviderFieldPage />} />
         <Route path="/portal/assignments" element={<ProviderAssignmentsPage />} />
         <Route path="/portal/schedule" element={<ProviderSchedulePage />} />
         <Route path="/portal/checklist" element={<ProviderChecklistPage />} />
         <Route path="/portal/evidence" element={<ProviderEvidencePage />} />
         <Route path="/portal/payouts" element={<ProviderPayoutsPage />} />
         <Route path="/portal/profile" element={<ProviderProfilePage />} />
+        <Route path="/portal/services" element={<ProviderServicesPage />} />
+        <Route path="/portal/w9" element={<ProviderW9Page />} />
         <Route path="/portal/messages" element={<ProviderMessagesPage />} />
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
+        <Route path="/portal/hq" element={<OwnerHQPage />} />
+        <Route path="/portal/owner" element={<OwnerHQPage />} />
+        <Route path="/portal/integrations" element={<IntegrationsCenterPage />} />
+        <Route path="/portal/scope" element={<ScopeDevelopmentPage />} />
+        <Route path="/portal/dispatch" element={<DispatchCalendarPage />} />
         <Route path="/portal/provider-approval" element={<ProviderApprovalPage />} />
         <Route path="/portal/acquisition" element={<ContractAcquisitionPage />} />
         <Route path="/portal/contracting" element={<ContractingPeriodPage />} />
         <Route path="/portal/quotes" element={<QuoteBuilderPage />} />
+        <Route path="/portal/saved-quotes" element={<SavedQuotesPage />} />
+        <Route path="/portal/estimates/:id/review" element={<EstimateReviewCockpitPage />} />
         <Route path="/portal/resident" element={<PortalWorkspacePage />} />
         <Route path="/portal/property-manager" element={<PortalWorkspacePage />} />
         <Route path="/portal/procurement" element={<PortalWorkspacePage />} />

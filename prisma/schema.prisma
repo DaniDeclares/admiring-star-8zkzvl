@@ -53,6 +53,12 @@ model ServiceRequest {
   govcon_details     Json                 @default("{}")
   status             String               @default("new")
   priority           String               @default("normal")
+  channelType        String?              @map("channel_type")
+  officialChannel    String?              @map("official_channel")
+  commercialModel    String?              @map("commercial_model")
+  subchannelCode     String?              @map("subchannel_code")
+  jurisdictionState  String?              @map("jurisdiction_state")
+  organizationId     String?              @map("organization_id") @db.Uuid
   quote_amount       Decimal?             @db.Decimal(10, 2)
   internal_notes     String?
   createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)

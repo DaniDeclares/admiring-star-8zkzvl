@@ -19,8 +19,8 @@ No additional official customer channels are created for specialists, products, 
 
 CH01 is internally segmented into **two resident customer subchannels**. These are not additional official commercial channels; they distinguish how the resident relationship enters DANI DECLARES:
 
-- **CH01-A — Apartment / Property Residents**: residents connected to a participating apartment community, property, or property-management relationship. May receive applicable resident benefits, property-specific offers, portal access, and resident pricing.
-- **CH01-B — Regular / Direct Residents**: residents/customers who purchase directly from DANI DECLARES without a participating apartment/property relationship. They receive applicable direct Resident Concierge offerings and standard eligibility rules.
+- **CH01-A — Regular / Direct Residents**: residents/customers who purchase directly from DANI DECLARES without a participating apartment/property relationship.
+- **CH01-B — Apartment / Property Residents**: residents connected to a participating apartment community, property, or property-management relationship. May receive applicable resident benefits, property-specific offers, portal access, and resident pricing.
 
 A resident request may touch multiple DANI divisions. The subchannel identifies the customer relationship; it does not restrict which DANI service/division can fulfill the request.
 
@@ -118,7 +118,7 @@ The canonical provider transaction is:
 ## 10. Current Production State — 2026-08-27
 
 - Canonical five-channel database migration applied successfully.
-- Duplicate resident channel was consolidated into CH01 Resident Concierge with CH01-A Apartment / Property Residents and CH01-B Regular / Direct Residents.
+- Duplicate resident channel was consolidated into CH01 Resident Concierge with CH01-A Regular / Direct Residents and CH01-B Apartment / Property Residents.
 - Supabase currently contains five active commercial channels after reconciliation.
 - Supabase Vault contains the `dd_cron_secret` secret name; the secret value is never stored in source control.
 - Production Auth currently has zero users; intentional staff/provider/customer identities remain an activation gate.
@@ -138,3 +138,14 @@ The canonical provider transaction is:
 - New official channels created merely for customer types, specialists, products, events, commercial models, or fulfillment resources
 
 Historical records may remain available for audit and provenance but are not active commercial authority.
+
+
+## 5A. B2B2C / CH02 → CH01-B contract
+B2B2C is a commercial relationship model, not an official channel. For apartment/community relationships, the organization-side commercial relationship is **CH02 — Property Management & Apartments** and the resident-side experience is **CH01-B — Apartment / Property Residents**. The two identities remain distinct.
+
+If the organization pays DANI, CH02 controls the organization-side transaction and the resident is recipient/beneficiary. If the resident pays DANI, the transaction follows CH01-B resident pricing/eligibility while the organization relationship remains program/eligibility context. B2B2C metadata must never replace CH01–CH05 routing, create a sixth channel, or create a new price book/SKU.
+
+## 5B. Channel-factory release contract
+Every channel/division release follows: **Channel → buyer/segment → outcome/use case → canonical offer/SKU → commercial model → pricing → availability → qualification/fulfillment → payment → application/API → evidence.**
+
+Readiness is layered: **Launchable** means the specific service/cohort passes its commercial, pricing, channel, quote, fulfillment, provider, payment, runtime and smoke-test gates; **Production System** means the required customer/sales/provider journeys work end-to-end; **Enterprise** means cross-system reconciliation is complete. Green does not require every division to be equally optimized for sales.

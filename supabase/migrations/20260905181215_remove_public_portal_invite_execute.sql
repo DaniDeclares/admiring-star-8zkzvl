@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.dd_consume_apartment_resident_invite(text, uuid, uuid) FROM PUBLIC;

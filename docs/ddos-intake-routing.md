@@ -12,7 +12,6 @@ The intake layer is the first operational discriminator for Dani Declares. A req
 | B2B_APT | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
 | B2B_RE | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
 | B2B | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
-| B2B2C | `B2B_PROPOSAL` | `PROPOSAL_PENDING` |
 | B2G | `B2G_SOW` | `SOW_REVIEW` |
 
 ## Routing rules
@@ -21,8 +20,9 @@ The intake layer is the first operational discriminator for Dani Declares. A req
 2. Legacy callers may use a controlled category fallback. The fallback is recorded as `category_fallback` so it can be retired after migration.
 3. Unknown or missing channels do **not** default to B2C. They enter `MANUAL_REVIEW` and the API rejects unresolved intake until a valid channel is supplied.
 4. Channel selection does not set a price. Pricing remains the responsibility of the canonical pricing resolver.
-5. B2C discounts do not cross into B2B, B2B2C, or B2G simply because a capability is shared.
-6. B2G enters SOW/procurement review and never becomes an instant numeric checkout flow.
+5. B2C discounts do not cross into organizational pricing simply because a capability is shared.
+6. B2B2C is a commercial relationship model, not an intake channel. It must be carried as relationship metadata alongside an official channel; for apartment/community workflows the organization-side channel is CH02 and resident direct transactions use CH01/CH01-B as governed.
+7. B2G enters SOW/procurement review and never becomes an instant numeric checkout flow.
 
 ## Persistence
 

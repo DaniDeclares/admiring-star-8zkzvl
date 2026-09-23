@@ -10,6 +10,17 @@ const scPhone = {
 
 export const SHOW_FESTIVAL = false;
 
+// Canonical production origin for links embedded in outbound emails (signup
+// confirmation, password reset). Deliberately NOT window.location.origin:
+// this app is also reachable at Vercel preview/branch URLs, and at least two
+// real people (a provider application and a password-reset-equivalent flow)
+// got emailed a confirmation link pointing at a Vercel preview deployment
+// instead of the real site -- Vercel's own deployment-protection login page
+// intercepted them before they ever reached DANI DECLARES. Whatever origin
+// happened to be loaded when the form was submitted must never end up in an
+// email; it must always be the real public domain.
+export const SITE_URL = "https://danideclares.com";
+
 export const siteConfig = {
   serviceAreaText: "Serving Atlanta, Doraville, Dunwoody, and beyond.",
   phoneNumbers: {

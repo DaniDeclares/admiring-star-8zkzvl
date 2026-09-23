@@ -1,0 +1,1 @@
+create table if not exists public.danis_specials_offers (service_id text primary key, family text not null, service_name text not null, unit text not null, price numeric(10,2) not null, active boolean not null default true, market text not null default 'GA');

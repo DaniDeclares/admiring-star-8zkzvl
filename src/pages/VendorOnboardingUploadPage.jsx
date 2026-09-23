@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import ProviderNav from './portal/ProviderNav.jsx';
 import './portal/PortalWorkspacePage.css';
+import { captureServiceLifecycle } from '../lib/posthogAnalytics.js';
 
 const ACCEPT = '.pdf,.doc,.docx,.png,.jpg,.jpeg';
 const MAX = 10 * 1024 * 1024;
@@ -18,7 +19,9 @@ const PROVIDER_DOCS = [
   { key: 'MOTOR_CARRIER_AUTHORITY', label: 'Motor carrier / DOT authority', help: 'Upload your DOT/MC operating authority documentation if your capability involves commercial vehicle transport.', hasNumber: true },
   { key: 'BACKGROUND_CONSENT', label: 'Background-check consent', help: 'Upload the requested signed consent form when applicable.' },
   { key: 'PORTFOLIO', label: 'Portfolio', help: 'Supporting work examples.' },
+  { key: 'PROVIDER_PRICE_SHEET', label: 'Your price sheet (optional for individuals; required for business providers)', help: 'Upload the prices/rates your business charges for the services you want DANI DECLARES to consider. DANI DECLARES retains customer pricing authority; this is provider commercial input, not customer-facing pricing.' },
   { key: 'WORK_SAMPLE', label: 'Work sample', help: 'Supporting evidence of capability.' },
+  { key: 'PRICING_SHEET', label: 'Your pricing sheet or rate card', help: 'Upload your own price list or rate card if you have one — DANI DECLARES staff will review it when deciding what to offer and at what price, rather than asking you to re-key it by phone.' },
   { key: 'OTHER', label: 'Other supporting document', help: 'Use for evidence that does not fit another category.' },
 ];
 
@@ -28,6 +31,9 @@ export default function VendorOnboardingUploadPage() {
   const [providerMode, setProviderMode] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const [application, setApplication] = useState(null);
+  const [applicantType, setApplicantType] = useState(null);
+  const [capabilities, setCapabilities] = useState([]);
+  const [selectedCapabilities, setSelectedCapabilities] = useState({});
   const [providerFiles, setProviderFiles] = useState({});
   const [documentNumbers, setDocumentNumbers] = useState({});
   const [companyFiles, setCompanyFiles] = useState([]);
@@ -51,14 +57,25 @@ export default function VendorOnboardingUploadPage() {
         if (identity?.portal_role !== 'provider') return;
         const { data: apps, error: appError } = await supabase
           .from('dd_provider_applications')
-          .select('id,application_status,legal_name,tax_form_status,insurance_status,identity_status,agreement_status,compliance_status')
+          .select('id,application_status,applicant_type,legal_name,tax_form_status,insurance_status,identity_status,agreement_status,compliance_status')
           .eq('applicant_user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1);
         if (appError) throw appError;
         if (!cancelled) {
           setProviderMode(true);
-          setApplication(apps?.[0] || null);
+          const currentApplication = apps?.[0] || null;
+          setApplication(currentApplication);
+          setApplicantType(currentApplication?.applicant_type || null);
+          if (currentApplication?.id) {
+            const { data: capabilityRows, error: capabilityError } = await supabase
+              .from('dd_provider_application_capabilities')
+              .select('id, canonical_sku, capability_description, capability_key, authorization_status, evidence_status, requirement_status')
+              .eq('application_id', currentApplication.id)
+              .order('canonical_sku');
+            if (capabilityError) throw capabilityError;
+            if (!cancelled) setCapabilities(capabilityRows || []);
+          }
         }
       } catch (e) {
         if (!cancelled) setError(e?.message || 'We could not load your onboarding application.');
@@ -94,6 +111,7 @@ export default function VendorOnboardingUploadPage() {
       if (!user) throw new Error('Please sign in before uploading provider documents.');
       const selected = Object.entries(providerFiles).filter(([, file]) => file);
       if (!selected.length) throw new Error('Choose at least one provider document.');
+      if (applicantType === 'BUSINESS' && !providerFiles.PROVIDER_PRICE_SHEET) throw new Error('Business providers must upload their own price sheet before submitting provider documents.');
 
       for (const [documentType, file] of selected) {
         const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -108,12 +126,15 @@ export default function VendorOnboardingUploadPage() {
           p_document_type: documentType,
           p_storage_path: path,
           p_document_number: documentNumbers[documentType]?.trim() || null,
+          p_capability_id: selectedCapabilities[documentType] || null,
         });
         if (recordError) throw recordError;
+        captureServiceLifecycle('provider_document_uploaded',{capability_key:selectedCapabilities[documentType] ? 'linked_capability' : undefined,route:'/portal/vendor-onboarding'});
       }
 
       setProviderFiles({});
       setDocumentNumbers({});
+      setSelectedCapabilities({});
       setMessage('Your provider documents were submitted. They remain pending verification; uploading documents does not authorize dispatch or work.');
       const { data: refreshed } = await supabase
         .from('dd_provider_applications')
@@ -176,6 +197,7 @@ export default function VendorOnboardingUploadPage() {
       {application && <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,margin:'24px 0'}}>
         <strong>{application.legal_name || 'Provider application'}</strong>
         <p style={{margin:'8px 0 0'}}>Application status: <strong>{application.application_status}</strong></p>
+        <p style={{margin:'8px 0 0'}}>Provider type: <strong>{application.applicant_type || applicantType || 'INDIVIDUAL'}</strong> · Price sheet: <strong>{applicantType === 'BUSINESS' ? 'Required' : 'Optional'}</strong></p>
         <p style={{margin:'8px 0 0'}}>Compliance: <strong>{application.compliance_status}</strong></p>
         <p style={{margin:'8px 0 0'}}>Document statuses — W-9: {application.tax_form_status} · Insurance: {application.insurance_status} · ID: {application.identity_status} · Agreement: {application.agreement_status}</p>
       </div>}
@@ -189,6 +211,18 @@ export default function VendorOnboardingUploadPage() {
             <strong>{doc.label}</strong><span style={{fontSize:14}}>{doc.help}</span>
             <input type="file" accept={ACCEPT} onChange={e=>setProviderFile(doc.key,e.target.files?.[0] || null)} />
             {providerFiles[doc.key] && <span style={{fontSize:14}}>Selected: {providerFiles[doc.key].name}</span>}
+            {capabilities.length > 0 && <div style={{display:'grid',gap:6}}>
+              <span style={{fontSize:14,fontWeight:600}}>Capability this document supports (optional)</span>
+              <select
+                value={selectedCapabilities[doc.key] || ''}
+                onChange={e=>setSelectedCapabilities(prev=>({...prev,[doc.key]:e.target.value || null}))}
+                style={{padding:8,border:'1px solid #ccc',borderRadius:6}}
+              >
+                <option value="">General application document</option>
+                {capabilities.map(cap => <option key={cap.id} value={cap.id}>{cap.canonical_sku} — {cap.capability_description}</option>)}
+              </select>
+              <span style={{fontSize:12,color:'#555'}}>Use this for a license, certification, auto-insurance, or other evidence tied to a specific capability. General documents can be left unlinked.</span>
+            </div>}
             {doc.hasNumber && <input type="text" placeholder="Reference / ID number (optional)" value={documentNumbers[doc.key] || ''} onChange={e=>setDocumentNumbers(prev=>({...prev,[doc.key]:e.target.value}))} style={{padding:8,border:'1px solid #ccc',borderRadius:6}} />}
           </label>)}
         </div>
@@ -197,6 +231,8 @@ export default function VendorOnboardingUploadPage() {
         <button type="submit" disabled={busy} style={{marginTop:20,padding:'12px 18px',fontWeight:700}}>{busy ? 'Submitting…' : 'Submit provider documents'}</button>
       </form>}
       <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,marginTop:24}}>
+        <strong>Pricing note</strong>
+        <p style={{marginBottom:8}}>You may submit your own rates. Individual providers are not required to provide a price sheet. Business providers must provide one for commercial review. DANI DECLARES still sets and publishes customer pricing; provider-submitted rates are used for economics, negotiation, and fulfillment planning.</p>
         <strong>Important</strong>
         <p style={{marginBottom:0}}>Document receipt is not approval. Provider qualification, verification, authorization, and dispatch eligibility remain separate decisions. Do not upload passwords, banking credentials, or unnecessary sensitive information.</p>
       </div>

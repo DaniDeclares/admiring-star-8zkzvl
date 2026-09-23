@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS public.dd_commercial_relationships (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), portal_identity_id uuid REFERENCES public.dd_portal_identities(id), relationship_type text NOT NULL REFERENCES public.dd_relationship_types(code), channel_code text REFERENCES public.dd_commercial_channels(code), organization_id uuid, provider_org_id uuid REFERENCES public.dd_provider_organizations(id), network_access_level text REFERENCES public.dd_network_access_levels(code), status text NOT NULL DEFAULT 'ACTIVE', source text, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+ALTER TABLE public.dd_commercial_relationships ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.dd_commercial_relationships FROM anon, authenticated;
+CREATE INDEX IF NOT EXISTS idx_dd_commercial_relationships_portal_identity ON public.dd_commercial_relationships(portal_identity_id);
+CREATE INDEX IF NOT EXISTS idx_dd_commercial_relationships_channel ON public.dd_commercial_relationships(channel_code);
+CREATE INDEX IF NOT EXISTS idx_dd_commercial_relationships_provider_org ON public.dd_commercial_relationships(provider_org_id);

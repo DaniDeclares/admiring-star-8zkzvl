@@ -15,6 +15,9 @@ function ProviderApproval() {
   const [message, setMessage] = useState('');
   const [requirementsBySku, setRequirementsBySku] = useState(new Map());
   const [requirementDefs, setRequirementDefs] = useState(new Map());
+  const [editingContact, setEditingContact] = useState(false);
+  const [contactForm, setContactForm] = useState({});
+
 
   const load = async () => {
     setLoading(true); setError('');
@@ -42,6 +45,38 @@ function ProviderApproval() {
   useEffect(() => { load(); }, []);
 
   const selected = useMemo(() => applications.find(a => a.id === selectedId) || applications[0] || null, [applications, selectedId]);
+
+  const beginContactEdit = () => {
+    if (!selected) return;
+    setContactForm({
+      legal_name: selected.legal_name || '',
+      contact_first_name: selected.contact_first_name || '',
+      contact_last_name: selected.contact_last_name || '',
+      contact_email: selected.contact_email || '',
+      contact_phone: selected.contact_phone || '',
+      physical_address: selected.physical_address || '',
+      service_area: selected.service_area || '',
+    });
+    setEditingContact(true); setError(''); setMessage('');
+  };
+
+  const saveContactEdit = async () => {
+    if (!selected) return;
+    setBusy(true); setError(''); setMessage('');
+    const { data: auth } = await supabase.auth.getSession();
+    if (!auth.session) { setBusy(false); setError('Staff session required.'); return; }
+    const response = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.session.access_token}` }, body: JSON.stringify({ action: 'update_provider_application', applicationId: selected.id, ...contactForm }) });
+    const body = await response.json();
+    const invokeError = !response.ok ? new Error(body?.error || 'Provider contact details could not be updated.') : null;
+    if (invokeError || !body?.success) {
+      setError(body?.error || invokeError?.message || 'Provider contact details could not be updated.');
+      setBusy(false); return;
+    }
+    setEditingContact(false);
+    setMessage('Provider application contact details updated.');
+    await load();
+    setBusy(false);
+  };
 
   const act = async (action, payload = {}) => {
     if (!selected) return;
@@ -133,11 +168,43 @@ function ProviderApproval() {
           </div>
         </section>
 
-        <section style={{marginBottom:28}}><h3>Application details</h3><div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10,color:'#444'}}><div><strong>Type:</strong> {selected.applicant_type}</div><div><strong>Phone:</strong> {selected.contact_phone || '—'}</div><div><strong>Service area:</strong> {selected.service_area || '—'}</div><div><strong>Website:</strong> {selected.website || '—'}</div><div><strong>Experience:</strong> {selected.years_experience || '—'}</div><div><strong>Availability:</strong> {selected.availability || '—'}</div></div><p style={{whiteSpace:'pre-wrap'}}><strong>Service notes:</strong><br/>{selected.service_notes || '—'}</p></section>
+        <section style={{marginBottom:28}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,flexWrap:'wrap'}}>
+            <h3 style={{margin:0}}>Application details</h3>
+            {!editingContact && <button disabled={busy} onClick={beginContactEdit}>Edit contact & address</button>}
+          </div>
+          {editingContact ? <div style={{marginTop:14,padding:16,border:'1px solid #e4e4e4',borderRadius:12,display:'grid',gap:12}}>
+            <p style={{margin:'0 0 4px',color:'#666',fontSize:13}}>Staff correction only. Changes are recorded in the application event history. This does not alter provider authorization, pricing, or approval gates.</p>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10}}>
+              {[
+                ['legal_name','Legal name'],['contact_first_name','First name'],['contact_last_name','Last name'],
+                ['contact_email','Email'],['contact_phone','Phone'],['physical_address','Address'],
+                ['service_area','Service area'],
+              ].map(([key,label])=><label key={key} style={{display:'grid',gap:5,fontWeight:700}}>{label}<input value={contactForm[key] || ''} onChange={e=>setContactForm(f=>({...f,[key]:e.target.value}))}/></label>)}
+            </div>
+            <div style={{display:'flex',gap:10}}>
+              <button disabled={busy} onClick={saveContactEdit}>Save correction</button>
+              <button disabled={busy} onClick={()=>setEditingContact(false)}>Cancel</button>
+            </div>
+          </div> : <div style={{marginTop:14,display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10,color:'#444'}}>
+            <div><strong>Legal name:</strong> {selected.legal_name || '—'}</div>
+            <div><strong>Type:</strong> {selected.applicant_type}</div>
+            <div><strong>First name:</strong> {selected.contact_first_name || '—'}</div>
+            <div><strong>Last name:</strong> {selected.contact_last_name || '—'}</div>
+            <div><strong>Email:</strong> {selected.contact_email || '—'}</div>
+            <div><strong>Phone:</strong> {selected.contact_phone || '—'}</div>
+            <div><strong>Address:</strong> {selected.physical_address || '—'}</div>
+            <div><strong>Service area:</strong> {selected.service_area || '—'}</div>
+            <div><strong>Website:</strong> {selected.website || '—'}</div>
+            <div><strong>Experience:</strong> {selected.years_experience || '—'}</div>
+            <div><strong>Availability:</strong> {selected.availability || '—'}</div>
+          </div>}
+          <p style={{whiteSpace:'pre-wrap'}}><strong>Service notes:</strong><br/>{selected.service_notes || '—'}</p>
+        </section>
 
         <section style={{marginBottom:28}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:10}}><h3 style={{margin:0}}>Canonical service capabilities</h3>{(selected.capabilities||[]).some(c=>c.authorization_status!=='AUTHORIZED') && <button disabled={busy} onClick={bulkAuthorizePending}>Authorize all pending ({(selected.capabilities||[]).filter(c=>c.authorization_status!=='AUTHORIZED').length})</button>}</div>{!(selected.capabilities||[]).length && <p>No canonical services selected.</p>}{(selected.capabilities||[]).map(cap=>{const reqs=requirementsBySku.get(cap.canonical_sku)||[];return <div key={cap.id} style={{display:'flex',justifyContent:'space-between',gap:20,alignItems:'center',padding:14,border:'1px solid #eee',borderRadius:10,marginBottom:8}}><div><strong>{cap.canonical_sku || 'Unmapped'} · {cap.capability_description || cap.capability_key}</strong><div style={{fontSize:12,color:'#666',marginTop:5}}>Authorization: {cap.authorization_status} · Evidence: {cap.evidence_status} · Requirement: {cap.requirement_status}</div>{reqs.length>0 && <div style={{fontSize:12,color:'#8a4b00',marginTop:5}}>Suggested requirement{reqs.length>1?'s':''}: {reqs.map(r=>requirementDefs.get(r.requirement_code)||r.requirement_code).join(', ')}</div>}</div><div>{cap.authorization_status!=='AUTHORIZED' ? <button disabled={busy} onClick={()=>act('verify_capability',{capabilityId:cap.id,decision:'AUTHORIZED'})}>Authorize</button> : <button disabled={busy} onClick={()=>act('verify_capability',{capabilityId:cap.id,decision:'REJECTED'})}>Revoke</button>}</div></div>;})}</section>
 
-        <section style={{marginBottom:28}}><h3>Application documents</h3>{!(selected.documents||[]).length && <p>No application documents submitted.</p>}{(selected.documents||[]).map(doc=><div key={doc.id} style={{display:'flex',justifyContent:'space-between',gap:20,alignItems:'center',padding:14,border:'1px solid #eee',borderRadius:10,marginBottom:8}}><div><strong>{doc.document_type}{doc.document_number ? ` — ${doc.document_number}` : ''}</strong><div style={{fontSize:12,color:'#666',marginTop:5}}>{doc.verification_status}{doc.issuing_authority ? ` · issued by ${doc.issuing_authority}` : ''}{doc.expiration_date ? ` · expires ${doc.expiration_date}` : ''}</div>{doc.signed_url ? <a href={doc.signed_url} target="_blank" rel="noreferrer" style={{fontSize:12,fontWeight:700}}>View uploaded file →</a> : <span style={{fontSize:12,color:'#a00'}}>No file on record</span>}</div><div>{doc.verification_status==='VERIFIED' ? <button disabled={busy} onClick={()=>act('verify_document',{documentId:doc.id,decision:'REJECTED',notes:'Rejected during staff review.'})}>Reject</button> : <button disabled={busy} onClick={()=>act('verify_document',{documentId:doc.id,decision:'VERIFIED'})}>Verify</button>}</div></div>)}</section>
+        <section style={{marginBottom:28}}><h3>Application documents</h3>{!(selected.documents||[]).length && <p>No application documents submitted.</p>}{(selected.documents||[]).map(doc=><div key={doc.id} style={{display:'flex',justifyContent:'space-between',gap:20,alignItems:'center',padding:14,border:doc.document_type==='PRICING_SHEET'?'1px solid #d9a441':'1px solid #eee',borderRadius:10,marginBottom:8,background:doc.document_type==='PRICING_SHEET'?'#fffaf0':undefined}}><div><strong>{doc.document_type}{doc.document_number ? ` — ${doc.document_number}` : ''}</strong>{doc.document_type==='PRICING_SHEET' && <div style={{fontSize:12,color:'#8a4b00',marginTop:5}}>Review for possible new/updated services — this is a catalog input, not a compliance document. Add anything real and priced to the canonical catalog the same way other pricing sheets have been reconciled.</div>}<div style={{fontSize:12,color:'#666',marginTop:5}}>{doc.verification_status}{doc.issuing_authority ? ` · issued by ${doc.issuing_authority}` : ''}{doc.expiration_date ? ` · expires ${doc.expiration_date}` : ''}</div>{doc.signed_url ? <a href={doc.signed_url} target="_blank" rel="noreferrer" style={{fontSize:12,fontWeight:700}}>View uploaded file →</a> : <span style={{fontSize:12,color:'#a00'}}>No file on record</span>}</div><div>{doc.verification_status==='VERIFIED' ? <button disabled={busy} onClick={()=>act('verify_document',{documentId:doc.id,decision:'REJECTED',notes:'Rejected during staff review.'})}>Reject</button> : <button disabled={busy} onClick={()=>act('verify_document',{documentId:doc.id,decision:'VERIFIED'})}>{doc.document_type==='PRICING_SHEET'?'Mark reviewed':'Verify'}</button>}</div></div>)}</section>
 
         <section style={{padding:18,borderRadius:12,background:'#f7f7f7'}}><h3 style={{marginTop:0}}>Activation rule</h3><p style={{marginBottom:0}}>Approval creates/activates the provider organization and provider identity, authorizes only the reviewed canonical services, activates an initial capacity profile, and records DANI DECLARES commercial authority. It does <strong>not</strong> give the provider customer-pricing or marketing authority.</p><button disabled={busy || selected.application_status==='APPROVED' || !(selected.tax_form_status==='VERIFIED'||selected.tax_form_status==='NOT_REQUIRED') || !(selected.insurance_status==='VERIFIED'||selected.insurance_status==='NOT_REQUIRED') || selected.identity_status!=='VERIFIED' || selected.agreement_status!=='EXECUTED' || !['CLEARED','NOT_REQUIRED'].includes(selected.background_check_status) || selected.compliance_status!=='VERIFIED' || !(selected.capabilities||[]).length || !(selected.capabilities||[]).every(c=>c.authorization_status==='AUTHORIZED'&&c.evidence_status==='VERIFIED'&&['VERIFIED','NOT_REQUIRED'].includes(c.requirement_status)) || !(selected.documents||[]).every(d=>!['PENDING','REJECTED','EXPIRED'].includes(d.verification_status))} onClick={()=>act('approve_and_activate')} style={{marginTop:14,padding:'12px 18px',fontWeight:800}}>Approve & Activate Provider</button></section>
       </article> : <div style={{padding:24,border:'1px solid #e4e4e4',borderRadius:14}}>No application selected.</div>}

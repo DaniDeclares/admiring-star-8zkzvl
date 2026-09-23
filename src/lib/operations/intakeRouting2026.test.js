@@ -1,4 +1,5 @@
 import {
+  COMMERCIAL_RELATIONSHIP_MODELS,
   INTAKE_WORKFLOWS,
   OPERATIONS_CHANNELS,
   REQUEST_STATES,
@@ -55,6 +56,32 @@ describe('DDOS intake routing', () => {
     );
   });
 
+  test('B2B2C is a commercial model, not an official channel', () => {
+    expect(routeIntake({ channelType: 'B2B2C' })).toEqual(
+      expect.objectContaining({
+        channel: null,
+        source: 'invalid_commercial_model_as_channel',
+        workflow: INTAKE_WORKFLOWS.MANUAL_REVIEW,
+        initialState: REQUEST_STATES.NEW,
+      })
+    );
+  });
+
+  test('B2B2C may be attached to a valid channel as relationship metadata', () => {
+    expect(
+      buildIntakeRoutingContext({
+        channelType: OPERATIONS_CHANNELS.B2B_APT,
+        commercialModel: COMMERCIAL_RELATIONSHIP_MODELS.B2B2C,
+      })
+    ).toEqual(
+      expect.objectContaining({
+        channel: OPERATIONS_CHANNELS.B2B_APT,
+        commercialModel: COMMERCIAL_RELATIONSHIP_MODELS.B2B2C,
+        workflow: INTAKE_WORKFLOWS.B2B_PROPOSAL,
+      })
+    );
+  });
+
   test('legacy category can safely fall back to a controlled channel', () => {
     expect(resolveIntakeChannel({ category: 'PROPERTY_OPERATIONS' })).toEqual({
       channel: OPERATIONS_CHANNELS.B2B_APT,
@@ -87,6 +114,7 @@ describe('DDOS intake routing', () => {
       requiresPricingResolution: true,
       requiresProposal: true,
       requiresSowReview: false,
+      commercialModel: null,
     });
   });
 });

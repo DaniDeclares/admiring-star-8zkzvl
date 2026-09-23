@@ -25,7 +25,8 @@ export default function ContactPage() {
     email: '',
     phone: '',
     category: 'business',
-    message: ''
+    message: '',
+    locationAddress: '', locationCity: '', locationState: 'GA', locationZip: ''
   });
 
   const handleSubmit = async (e) => {
@@ -44,6 +45,10 @@ export default function ContactPage() {
           category: formData.category,
           serviceType: CATEGORY_LABELS[formData.category] || 'Contact form inquiry',
           details: formData.message,
+          locationAddress: formData.locationAddress,
+          locationCity: formData.locationCity,
+          locationState: formData.locationState,
+          locationZip: formData.locationZip,
         }),
       });
       const body = await response.json();
@@ -102,6 +107,15 @@ export default function ContactPage() {
                     <option value="creative">Custom Printing, Apparel & NFC</option>
                     <option value="events">Weddings & Event Logistics</option>
                   </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 uppercase mb-1">Service Address</label>
+                  <input type="text" required placeholder="Street address" value={formData.locationAddress} onChange={(e) => setFormData({...formData, locationAddress: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <input type="text" required placeholder="City" value={formData.locationCity} onChange={(e) => setFormData({...formData, locationCity: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none" />
+                  <select required value={formData.locationState} onChange={(e) => setFormData({...formData, locationState: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none"><option value="GA">GA</option><option value="SC">SC</option></select>
+                  <input type="text" required inputMode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" placeholder="ZIP" value={formData.locationZip} onChange={(e) => setFormData({...formData, locationZip: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:border-amber-400 focus:outline-none" />
                 </div>
                 <div>
                   <label className="block text-xs font-mono text-slate-400 uppercase mb-1">Project Details / Scope</label>

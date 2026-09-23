@@ -1,0 +1,5 @@
+create policy "dd_client_organizations_staff_all" on public.dd_client_organizations for all to authenticated using (private.dd_is_staff_admin()) with check (private.dd_is_staff_admin());
+create policy "dd_client_properties_staff_all" on public.dd_client_properties for all to authenticated using (private.dd_is_staff_admin()) with check (private.dd_is_staff_admin());
+create policy "dd_property_resident_access_staff_all" on public.dd_property_resident_access for all to authenticated using (private.dd_is_staff_admin()) with check (private.dd_is_staff_admin());
+create policy "dd_property_resident_invites_staff_all" on public.dd_property_resident_invites for all to authenticated using (private.dd_is_staff_admin()) with check (private.dd_is_staff_admin());
+create policy "dd_provider_capability_discovery_staff_all" on public.dd_provider_capability_discovery for all to authenticated using (private.dd_is_staff_admin()) with check (private.dd_is_staff_admin());

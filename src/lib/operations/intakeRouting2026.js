@@ -3,6 +3,12 @@ export const OPERATIONS_CHANNELS = Object.freeze({
   B2B_APT: 'B2B_APT',
   B2B_RE: 'B2B_RE',
   B2B: 'B2B',
+  B2G: 'B2G',
+});
+
+export const COMMERCIAL_RELATIONSHIP_MODELS = Object.freeze({
+  B2C: 'B2C',
+  B2B: 'B2B',
   B2B2C: 'B2B2C',
   B2G: 'B2G',
 });
@@ -39,7 +45,6 @@ const WORKFLOW_BY_CHANNEL = Object.freeze({
   [OPERATIONS_CHANNELS.B2B_APT]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
   [OPERATIONS_CHANNELS.B2B_RE]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
   [OPERATIONS_CHANNELS.B2B]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
-  [OPERATIONS_CHANNELS.B2B2C]: INTAKE_WORKFLOWS.B2B_PROPOSAL,
   [OPERATIONS_CHANNELS.B2G]: INTAKE_WORKFLOWS.B2G_SOW,
 });
 
@@ -51,6 +56,7 @@ const INITIAL_STATE_BY_WORKFLOW = Object.freeze({
 });
 
 const VALID_CHANNELS = new Set(Object.values(OPERATIONS_CHANNELS));
+const VALID_COMMERCIAL_MODELS = new Set(Object.values(COMMERCIAL_RELATIONSHIP_MODELS));
 
 /**
  * Resolve an intake channel without guessing from free-form request details.
@@ -64,6 +70,10 @@ export function resolveIntakeChannel({ channelType, category } = {}) {
       source: 'explicit',
       reason: null,
     };
+  }
+
+  if (channelType && VALID_COMMERCIAL_MODELS.has(channelType)) {
+    return { channel: null, source: 'invalid_commercial_model_as_channel', reason: 'COMMERCIAL_MODEL_IS_NOT_CHANNEL' };
   }
 
   if (category && CATEGORY_TO_CHANNEL[category]) {
@@ -112,6 +122,7 @@ export function routeIntake({ channelType, category } = {}) {
 
 export function buildIntakeRoutingContext(payload = {}) {
   const route = routeIntake(payload);
+  const commercialModel = COMMERCIAL_RELATIONSHIP_MODELS[payload.commercialModel] || null;
 
   return {
     channel: route.channel,
@@ -122,6 +133,7 @@ export function buildIntakeRoutingContext(payload = {}) {
     requiresPricingResolution: route.requiresPricingResolution,
     requiresProposal: route.requiresProposal,
     requiresSowReview: route.requiresSowReview,
+    commercialModel,
   };
 }
 

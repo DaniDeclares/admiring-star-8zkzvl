@@ -10,6 +10,7 @@ export default function BookingFormHandler() {
     details: '',
     pathway: 'property',
     zipCode: '',
+    locationAddress: '', locationCity: '', locationState: 'GA',
     urgency: 'medium'
   });
 
@@ -26,7 +27,7 @@ export default function BookingFormHandler() {
       const res = await fetch('/api/intake-webhook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, zipCode: cleanZip })
+        body: JSON.stringify({ name:formData.name,email:formData.email,phone:formData.phone,category:formData.category,details:formData.details,channelType:'B2B_APT',serviceType:'Property service request',locationAddress:formData.locationAddress,locationCity:formData.locationCity,locationState:formData.locationState,locationZip:cleanZip })
       });
 
       const result = await res.json();
@@ -61,6 +62,9 @@ export default function BookingFormHandler() {
         required 
         style={{ padding: '10px', borderRadius: '4px', border: '1px solid #CCC' }}
       />
+      <input type="text" placeholder="Service street address *" value={formData.locationAddress} onChange={(e)=>setFormData({...formData,locationAddress:e.target.value})} required style={{ padding:'10px',borderRadius:'4px',border:'1px solid #CCC' }} />
+      <input type="text" placeholder="City *" value={formData.locationCity} onChange={(e)=>setFormData({...formData,locationCity:e.target.value})} required style={{ padding:'10px',borderRadius:'4px',border:'1px solid #CCC' }} />
+      <select value={formData.locationState} onChange={(e)=>setFormData({...formData,locationState:e.target.value})} required style={{ padding:'10px',borderRadius:'4px',border:'1px solid #CCC' }}><option value="GA">GA</option><option value="SC">SC</option></select>
       <input 
         type="text" 
         placeholder="ZIP Code (e.g. 30084) *" 

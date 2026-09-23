@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma.js';
+import { renderTransactionalEmail } from './daniTransactionalEmailTemplates.js';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 const MAX_RETRIES = Number(process.env.NOTIFICATION_MAX_RETRIES || 5);
@@ -20,7 +21,11 @@ async function sendEmail(payload) {
       from,
       to: payload.to,
       subject: payload.subject || 'Dani Declares Update',
-      html: payload.html || `<p>${payload.text || ''}</p>`,
+      html: payload.html || renderTransactionalEmail({
+        template: payload.template,
+        data: payload.templateData,
+        fallbackText: payload.text || '',
+      }),
     }),
   });
   if (!response.ok) throw new Error(`RESEND_${response.status}`);

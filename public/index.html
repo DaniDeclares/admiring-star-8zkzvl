@@ -8,19 +8,37 @@
 
     <meta property="og:title" content="DANI DECLARES LLC | Operations • Execution • Support" />
     <meta property="og:description" content="White-glove execution for residents, property managers, real estate professionals, businesses, government and institutional partners, and qualified service providers across Georgia and regional South Carolina." />
-    <meta property="og:image" content="https://www.danideclares.com/dani-declares-logo.svg" />
-    <meta property="og:url" content="https://www.danideclares.com" />
+    <meta property="og:image" content="https://danideclares.com/dani-declares-logo.svg" />
+    <meta property="og:url" content="https://danideclares.com" />
     <meta property="og:type" content="website" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="DANI DECLARES LLC | Operations • Execution • Support" />
     <meta name="twitter:description" content="Facility, field, administrative, logistics, production, and institutional execution support serving Georgia and regional South Carolina. Service providers can apply to join the DANI DECLARES provider network." />
-    <meta name="twitter:image" content="https://www.danideclares.com/dani-declares-logo.svg" />
+    <meta name="twitter:image" content="https://danideclares.com/dani-declares-logo.svg" />
 
     <link rel="icon" type="image/png" sizes="64x64" href="%PUBLIC_URL%/dani-declares-favicon.png" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/dani-declares-favicon.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <meta name="application-name" content="DANI Worker App" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="DANI Worker" />
 
     <title>DANI DECLARES LLC | Operations • Execution • Support</title>
+
+    <!-- Sentry browser monitoring. The DSN is a public client identifier; no secret token is embedded. -->
+    <script src="https://browser.sentry-cdn.com/10.75.0/bundle.tracing.min.js" crossorigin="anonymous"></script>
+    <script>
+      if (window.Sentry && "%REACT_APP_SENTRY_DSN%") {
+        window.Sentry.init({
+          dsn: "%REACT_APP_SENTRY_DSN%",
+          environment: "%REACT_APP_VERCEL_ENV%" || "production",
+          release: "%REACT_APP_VERCEL_GIT_COMMIT_SHA%",
+          tracesSampleRate: 0.1,
+        });
+      }
+    </script>
   </head>
   <body class="bg-slate-950 text-slate-100 antialiased">
     <noscript>You need to enable JavaScript to run this app.</noscript>

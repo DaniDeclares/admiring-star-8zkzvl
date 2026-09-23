@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
-import { savePendingOnboarding } from '../lib/pendingOnboarding.js';
+import { createProviderIntakeStaging } from '../lib/pendingOnboarding.js';
+import { capture, captureServiceLifecycle } from '../lib/posthogAnalytics.js';
+import { captureSentryEvent, captureSentryException } from '../lib/sentry.js';
+import { SITE_URL } from '../data/siteConfig.js';
+import { BUCKETS, bucketForFamily } from '../data/serviceCatalogFamilies.js';
 import './PortalAccessPage.css';
 
 const OPTIONS = [
@@ -32,11 +36,13 @@ export default function PortalAccessPage() {
   const [selected,setSelected]=useState(null);
   const [propertyInvite,setPropertyInvite]=useState(null);
   const [inviteChecking,setInviteChecking]=useState(false);
-  const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',address:'',city:'',state:'GA',zip:'',services:'',password:'',confirm:''});
+  const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',rateExpectation:'',address:'',city:'',state:'GA',zip:'',serviceRadiusMiles:'25',services:'',password:'',confirm:''});
   const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [done,setDone]=useState('');
   const [catalogServices,setCatalogServices]=useState([]);
   const [licenseGatedSkus,setLicenseGatedSkus]=useState(() => new Set());
   const [categories,setCategories]=useState([]);
+  const [selectedServiceIds,setSelectedServiceIds]=useState(() => ({}));
+  const [expandedDoors,setExpandedDoors]=useState(() => ({}));
   const [catalogLoading,setCatalogLoading]=useState(false);
   // Keyed by category_key -> { checked, equipmentAnswer }. Applicants pick a parent
   // skill category (Cleaning, Notary, Courier, etc.) instead of hand-picking from the
@@ -45,6 +51,7 @@ export default function PortalAccessPage() {
   // Division-1 sub-families that genuinely need different equipment questions).
   const [selectedCategories,setSelectedCategories]=useState(() => ({}));
   const [providerStep,setProviderStep]=useState(1);
+  const [providerApplicantType,setProviderApplicantType]=useState('INDIVIDUAL');
 
   const visibleOptions = useMemo(() => {
     if (audience === 'provider') return OPTIONS.filter(o => o.key === 'provider');
@@ -103,7 +110,7 @@ export default function PortalAccessPage() {
       // not a field capability -- excluded from expansion the same way it
       // always has been.
       const [servicesResult, categoriesResult, requirementsResult] = await Promise.all([
-        supabase.from('services').select('id, name, sku, division_id').neq('sku', 'DNI-12A-028').order('name'),
+        supabase.from('services').select('id, name, sku, division_id, service_family').neq('sku', 'DNI-12A-028').order('name'),
         supabase.from('dd_provider_capability_categories').select('*').order('display_order'),
         supabase.from('dd_service_capability_requirements').select('canonical_sku, requirement_code').in('requirement_code', ['LICENSE_SERVICE', 'CERT_SERVICE', 'AUTO_MOBILE']).eq('required', true),
       ]);
@@ -118,26 +125,59 @@ export default function PortalAccessPage() {
   }, [selected]);
 
   // A category maps to every canonical service in its division (optionally
-  // narrowed to a canonical_sku_prefix for the Division-1 sub-families).
-  const servicesForCategory = (category) => catalogServices.filter(s => s.division_id === category.division_id && (!category.canonical_sku_prefix || (s.sku || '').startsWith(`DNI-${category.canonical_sku_prefix}-`)));
+  // narrowed to a canonical_sku_prefix for the Division-1 sub-families). When a category
+  // carries an explicit canonical_skus list instead (divisions with no sub-prefix scheme,
+  // where only a subset of the division's services belong in this category), that list is
+  // used verbatim rather than the division/prefix match. canonical_service_ids is the same
+  // idea for real, priced services that were never assigned a canonical DNI- SKU code (so
+  // there's no sku string to put in canonical_skus) -- matched by real services.id instead.
+  const servicesForCategory = (category) => {
+    if (Array.isArray(category.canonical_service_ids) && category.canonical_service_ids.length > 0) {
+      return catalogServices.filter(s => category.canonical_service_ids.includes(s.id));
+    }
+    if (Array.isArray(category.canonical_skus) && category.canonical_skus.length > 0) {
+      return catalogServices.filter(s => category.canonical_skus.includes(s.sku));
+    }
+    return catalogServices.filter(s => s.division_id === category.division_id && (!category.canonical_sku_prefix || (s.sku || '').startsWith(`DNI-${category.canonical_sku_prefix}-`)));
+  };
 
-  const toggleCategory = (categoryKey) => {
-    setSelectedCategories(prev => {
+  const toggleService = (service, category) => {
+    setSelectedServiceIds(prev => {
       const next = { ...prev };
-      if (next[categoryKey]?.checked) delete next[categoryKey];
-      else next[categoryKey] = { checked: true, equipmentAnswer: '' };
+      if (next[service.id]) delete next[service.id];
+      else {
+        next[service.id] = true;
+        captureServiceLifecycle('provider_service_selected',{service_id:service.id,sku:service.sku,capability_key:category?.category_key||null,route:'/portal/access'});
+      }
       return next;
     });
   };
+  const toggleDoor = (doorKey) => setExpandedDoors(prev => ({ ...prev, [doorKey]: !prev[doorKey] }));
   const setCategoryAnswer = (categoryKey, value) => {
     setSelectedCategories(prev => ({ ...prev, [categoryKey]: { ...prev[categoryKey], equipmentAnswer: value } }));
   };
 
-  const selectedCategoryCount = Object.values(selectedCategories).filter(c => c?.checked).length;
-  const selectedServicesPreview = useMemo(() => {
-    const active = categories.filter(c => selectedCategories[c.category_key]?.checked);
-    return active.flatMap(c => servicesForCategory(c));
-  }, [categories, selectedCategories, catalogServices]); // eslint-disable-line react-hooks/exhaustive-deps
+  const selectedServicesPreview = useMemo(() => catalogServices.filter(s => selectedServiceIds[s.id]), [catalogServices, selectedServiceIds]);
+  const selectedServiceCount = selectedServicesPreview.length;
+
+  const serviceCategoryById = useMemo(() => {
+    const map = new Map();
+    categories.forEach(category => servicesForCategory(category).forEach(service => {
+      if (!map.has(service.id)) map.set(service.id, category);
+    }));
+    return map;
+  }, [categories, catalogServices]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const providerDoorGroups = useMemo(() => {
+    const grouped = new Map(BUCKETS.map(door => [door.key, { door, services: [] }]));
+    catalogServices.forEach(service => {
+      if (!service.service_family) return;
+      const door = bucketForFamily(service.service_family);
+      if (!door || door.key === 'other-services' || !serviceCategoryById.has(service.id)) return;
+      grouped.get(door.key)?.services.push(service);
+    });
+    return BUCKETS.map(door => grouped.get(door.key)).filter(group => group?.services.length);
+  }, [catalogServices, serviceCategoryById]);
 
   const update=(e)=>setForm({...form,[e.target.name]:e.target.value});
   const choose=(option)=>{
@@ -147,6 +187,7 @@ export default function PortalAccessPage() {
       return;
     }
     setSelected(option);setMode('form');setProviderStep(1);
+    if(option.key==='provider') { capture('provider_application_started',{route:'/portal/access'}); captureSentryEvent('account_form_started',{account_type:'provider',route:'/portal/access'}); }
   };
 
   const providerStepValid=()=>{
@@ -155,7 +196,13 @@ export default function PortalAccessPage() {
       if(form.password.length<8){setError('Use a password with at least 8 characters.');return false;}
       if(form.password!==form.confirm){setError('Passwords do not match.');return false;}
     }
-    if(providerStep===3&&!selectedCategoryCount){setError('Select at least one category of work you can fulfill.');return false;}
+    if(providerStep===2){
+      if(providerApplicantType==='BUSINESS'&&!form.organization.trim()){setError('Enter the business or organization name for a business provider application.');return false;}
+      if(!form.address.trim()||!form.city.trim()||!form.state.trim()||!form.zip.trim()){setError('Enter the dispatch address you will normally travel from. DANI uses it to determine service area and job mileage.');return false;}
+      const radius=Number(form.serviceRadiusMiles);
+      if(!Number.isFinite(radius)||radius<=0||radius>250){setError('Enter a service radius between 1 and 250 miles.');return false;}
+    }
+    if(providerStep===3&&!selectedServiceCount){setError('Select at least one specific service you can fulfill.');return false;}
     setError('');return true;
   };
   const nextProviderStep=()=>{if(providerStepValid())setProviderStep(s=>Math.min(s+1,4));};
@@ -169,24 +216,38 @@ export default function PortalAccessPage() {
     if(form.password.length<8)return setError('Use a password with at least 8 characters.');
     if(form.password!==form.confirm)return setError('Passwords do not match.');
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
-    if(selected?.key==='provider' && !selectedCategoryCount)return setError('Select at least one category of work you can fulfill.');
+    if(selected?.key==='provider' && !selectedServiceCount)return setError('Select at least one specific service you can fulfill.');
     setBusy(true);
-    const {data,error:authError}=await supabase.auth.signUp({email:form.email.trim(),password:form.password,options:{emailRedirectTo:`${window.location.origin}/portal/login`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
-    if(authError){setBusy(false);return setError(authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
-    // Supabase deliberately returns a fake success with no error and no new
-    // identity when signUp() is called with an email that already belongs to
-    // a confirmed account, to prevent account enumeration. data.user.identities
-    // is the documented way to detect that case -- without this check, someone
-    // who already has an account gets told "check your email to confirm" for an
-    // account that was never actually created, which is actively misleading.
-    if(data.user.identities && data.user.identities.length===0){setBusy(false);return setError('An account with this email already exists. Sign in at the login page, or use "Forgot password" there if you don’t remember your password.');}
+    capture('signup_started',{route:'/portal/access',account_type:selected?.key||'unknown',channel:selected?.channel||undefined});
+    captureSentryEvent('started',{account_type:selected?.key||'unknown',channel:selected?.channel||undefined,route:'/portal/access'});
+    try{
+    await submitInner();
+    }catch(e){
+    // Guarantees the button never gets stuck on "Creating account..." forever.
+    // Without this, any unexpected exception below (a network drop, a
+    // malformed response, anything not already returned as a normal
+    // Supabase {error} object) would leave busy=true with no visible error --
+    // exactly the "it's not letting me create account" symptom a real
+    // provider hit signing up, traced back to repeated attempts colliding
+    // with Supabase Auth's own signup rate limit (confirmed in project logs:
+    // consecutive 429s on /auth/v1/signup within seconds of each other).
+    setBusy(false);
+    capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',channel:selected?.channel||undefined,error_type:'unexpected'});
+    const message = e?.message ? String(e.message) : '';
+    setError(message || 'We could not complete account creation. Please try again once; if the problem persists, contact DANI DECLARES with the exact message shown here.');
+    }
+  };
+  const isRateLimitError=(message)=>/rate limit|too many requests|429/i.test(String(message||''));
+  const submitInner=async()=>{
+    capture('provider_application_submitted',{route:'/portal/access'});
+    const normalizedEmail=form.email.trim().toLowerCase();
 
     const identityPayload={portal_role:portalRole,is_active:true};
     if(selected.key==='apartment_resident') {
       identityPayload.organization_id=propertyInvite.client_organization_id;
       identityPayload.entity_id=propertyInvite.property_id;
     }
-    const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:form.organization?'BUSINESS':'INDIVIDUAL',legal_name:form.organization||`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString()}:null;
+    const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:providerApplicantType,legal_name:providerApplicantType==='BUSINESS'?(form.organization||`${form.firstName} ${form.lastName}`):`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_radius_miles:Number(form.serviceRadiusMiles),service_zip_codes:form.zip?[form.zip.trim()]:[],service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString(),rate_expectation:form.rateExpectation||null}:null;
     // Expand each selected category into its real underlying services. A service
     // whose SKU carries a real LICENSE_SERVICE/CERT_SERVICE/AUTO_MOBILE requirement
     // (from dd_service_capability_requirements -- notary, wedding officiant, and every
@@ -197,68 +258,84 @@ export default function PortalAccessPage() {
     // existing "Approve & Activate" action (dd_approve_provider_application) already
     // refuses to approve the application at all until ID, tax form, agreement and
     // background check are cleared, so this never skips those baseline checks.
-    const activeCategories=selected.key==='provider'?categories.filter(c=>selectedCategories[c.category_key]?.checked):[];
-    const capabilityPayloads=activeCategories.flatMap(category=>{
-      const answer=selectedCategories[category.category_key]?.equipmentAnswer||'';
-      return servicesForCategory(category).map(s=>{
-        const isGated=licenseGatedSkus.has(s.sku);
-        return {
-          canonical_service_id:s.id,
-          canonical_sku:s.sku,
-          capability_key:category.capability_key,
-          capability_description:s.name,
-          applicant_experience:answer||null,
-          requires_license:isGated,
-          ...(isGated?{}:{authorization_status:'AUTHORIZED',evidence_status:'VERIFIED',requirement_status:'NOT_REQUIRED'}),
-        };
-      });
+    const selectedServices = selected.key==='provider' ? selectedServicesPreview : [];
+    const capabilityPayloads=selectedServices.map(s=>{
+      const category=serviceCategoryById.get(s.id);
+      const answer=category ? (selectedCategories[category.category_key]?.equipmentAnswer||'') : '';
+      const isGated=licenseGatedSkus.has(s.sku);
+      return {
+        canonical_service_id:s.id,
+        canonical_sku:s.sku,
+        capability_key:category?.capability_key || null,
+        capability_description:s.name,
+        applicant_experience:answer||null,
+        requires_license:isGated,
+        ...(isGated?{}:{authorization_status:'AUTHORIZED',evidence_status:'VERIFIED',requirement_status:'NOT_REQUIRED'}),
+      };
     });
     const intakePayload=selected.key!=='provider'?{portal_role:portalRole,relationship_type:selected.relationship,channel_code:selected.channel,organization_name:selected.key==='apartment_resident'?(propertyInvite.client_display_name||form.organization||null):(form.organization||null),first_name:form.firstName,last_name:form.lastName,email:form.email,phone:form.phone,address:form.address||propertyInvite?.property_address||null,city:form.city||propertyInvite?.city||null,state_code:form.state||propertyInvite?.state_code||null,zip_code:form.zip||propertyInvite?.zip_code||null,service_area:form.city&&form.state?`${form.city}, ${form.state}`:null,requested_services:form.services.split(',').map(s=>s.trim()).filter(Boolean),client_organization_id:selected.key==='apartment_resident'?propertyInvite.client_organization_id:null,client_property_id:selected.key==='apartment_resident'?propertyInvite.property_id:null,property_resident_invite_id:selected.key==='apartment_resident'?propertyInvite.invite_id:null,intake_data:{entry_type:selected.key,portal_label:selected.portal,access_model:selected.key==='apartment_resident'?'CLIENT_PROPERTY_INVITATION':'PUBLIC_SELF_SERVICE',client_property:selected.key==='apartment_resident'?{id:propertyInvite.property_id,name:propertyInvite.property_name}:null},status:'SUBMITTED'}:null;
 
-    if(!data.session){
-      // No session yet -- email confirmation is required, so any insert right now would be
-      // sent unauthenticated and RLS would correctly reject it. Defer the writes until the
-      // user actually confirms their email and logs in (see completePendingOnboarding).
-      savePendingOnboarding({
-        kind: selected.key==='provider'?'provider':selected.key,
-        email: form.email.trim(),
+    // Durable intake boundary is now BEFORE auth.signUp(), not after email
+    // confirmation: this row exists in public.dd_provider_intake_staging the
+    // moment the applicant submits, regardless of whether they ever confirm
+    // their email in the same browser. See dd_create_provider_intake_staging
+    // in the accompanying migration.
+    const {stagingId,error:stagingError}=await createProviderIntakeStaging(supabase,{
+      email:normalizedEmail,
+      kind:selected.key==='provider'?'provider':selected.key,
+      payload:{
         identityPayload,
         providerPayload,
         capabilityPayloads,
         intakePayload,
-        inviteTokenHash: selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
-      });
+        inviteTokenHash:selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
+      },
+    });
+    if(stagingError){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'staging'});captureSentryEvent('staging_failed',{account_type:selected?.key||'unknown',error_type:'staging'});captureSentryException(stagingError,{stage:'staging'});return setError(`Something interrupted account creation: ${stagingError}`);}
+
+    const {data,error:authError}=await supabase.auth.signUp({email:normalizedEmail,password:form.password,options:{emailRedirectTo:`${SITE_URL}/portal/login?intake=${encodeURIComponent(stagingId)}`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
+    // A staging row can be left behind here (signup failed, or the email
+    // already belongs to a confirmed account below) -- it simply expires
+    // unconsumed per its retention window; nothing reads it without a valid
+    // session for that same email, so it's inert, not a leak. Resubmitting
+    // the form reuses/refreshes the same pending row (see the partial unique
+    // index in the migration) rather than piling up duplicates.
+    if(authError){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'auth',error_code:isRateLimitError(authError.message)?'RATE_LIMIT':'AUTH_ERROR'});return setError(isRateLimitError(authError.message)?'Too many signup attempts in a short time. Please wait about a minute before trying again -- clicking repeatedly makes this take longer, not shorter.':authError.message);} if(!data.user){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'no_user'});return setError('Account could not be created.');}
+    // Supabase deliberately returns a fake success with no error and no new
+    // identity when signUp() is called with an email that already belongs to
+    // a confirmed account, to prevent account enumeration. data.user.identities
+    // is the documented way to detect that case -- without this check, someone
+    // who already has an account gets told "check your email to confirm" for an
+    // account that was never actually created, which is actively misleading.
+    if(data.user.identities && data.user.identities.length===0){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'existing_account'});return setError('An account with this email already exists. Sign in at the login page, or use "Forgot password" there if you don’t remember your password.');}
+
+    if(!data.session){
+      // No session yet -- email confirmation is required. The intake payload
+      // is already durable server-side; dd_consume_provider_intake_staging
+      // finishes the writes once the applicant confirms and a real session
+      // exists, in whichever browser that happens to be (see
+      // PortalLoginPage.jsx reading the ?intake= query param).
+      capture('signup_completed',{route:'/portal/access',account_type:selected?.key||'unknown',signup_mode:'email_confirmation'});
+      captureSentryEvent('account_created_waiting_verification',{account_type:selected?.key||'unknown',signup_mode:'email_confirmation'});
+      capture('provider_application_submitted',{route:'/portal/access'});
       setBusy(false);setDone('Your account is created. Check your email to confirm it, then sign in — the rest of your onboarding will finish automatically.');setMode('done');
       return;
     }
 
-    // Session already exists (email confirmation disabled) -- complete the writes now, same as before.
-    const {data:identity,error:identityError}=await supabase.from('dd_portal_identities').insert({...identityPayload,auth_user_id:data.user.id}).select('id').single();
-    if(identityError){setBusy(false);return setError(`Account created, but portal setup needs attention: ${identityError.message}`);}
-
-    if(selected.key==='apartment_resident') {
-      const tokenHash=await hashInviteToken(inviteToken);
-      const {data:consumed,error:consumeError}=await supabase.rpc('dd_consume_apartment_resident_invite',{p_token_hash:tokenHash,p_portal_identity_id:identity.id,p_auth_user_id:data.user.id});
-      if(consumeError || !consumed){setBusy(false);return setError('Your account was created, but the property invitation could not be attached. Please contact your property management team for a new resident invitation.');}
-    }
-
-    if(selected.key==='provider'){
-      const {data:application,error:providerError}=await supabase.from('dd_provider_applications').insert({...providerPayload,applicant_user_id:data.user.id}).select('id').single();
-      if(providerError){setBusy(false);return setError(`Account created, but provider application needs attention: ${providerError.message}`);}
-      const {error:capabilityError}=await supabase.from('dd_provider_application_capabilities').insert(capabilityPayloads.map(cap=>({...cap,application_id:application.id})));
-      if(capabilityError){setBusy(false);return setError(`Account created, but provider capabilities need attention: ${capabilityError.message}`);}
-    } else {
-      const {error:intakeError}=await supabase.from('dd_portal_onboarding_intakes').insert({...intakePayload,auth_user_id:data.user.id});
-      if(intakeError){setBusy(false);return setError(`Account created, but onboarding data needs attention: ${intakeError.message}`);}
-    }
-    setBusy(false);setDone('Your account is ready.');setMode('done');
+    // Session already exists (email confirmation disabled) -- finish the
+    // staged writes immediately, through the same RPC PortalLoginPage uses,
+    // instead of duplicating the insert logic here.
+    const {data:result,error:completeError}=await supabase.rpc('dd_consume_provider_intake_staging',{p_staging_id:stagingId});
+    if(completeError || !result?.success){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'portal_setup'});return setError(`Account created, but ${(completeError?.message||result?.error||'portal setup needs attention.').replace(/^Account created, but /i,'')}`);}
+    capture('signup_completed',{route:'/portal/access',account_type:selected?.key||'unknown',signup_mode:'immediate_session'});
+    captureSentryEvent('completed',{account_type:selected?.key||'unknown',signup_mode:'immediate_session'});setBusy(false);setDone('Your account is ready.');setMode('done');
   };
 
   if(inviteChecking)return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">VERIFYING RESIDENT ACCESS</p><h1>Connecting you to your property</h1><p>Please wait while we verify the invitation from your property management team.</p></div></main>;
 
   if(mode==='choose')return <main className="portal-access"><div className="portal-access-inner"><p className="portal-kicker">DANI DECLARES PLATFORM</p><h1>{audience==='provider'?'Join DANI DECLARES Provider':audience==='partners'?'Create your DANI DECLARES account':'Choose your DANI DECLARES access'}</h1><p className="portal-lede">{audience==='provider'?'Tell us what you can do, where you work, and what capabilities you bring. Your application enters the provider qualification pipeline; creating an account does not authorize work.':audience==='partners'?'Organizations can create their DANI DECLARES customer account and establish the relationship that applies to their business.':'Customers use DANI DECLARES for services, projects, memberships, requests, approvals, documents and payments. Service providers use DANI DECLARES Provider for qualification and fulfillment. Apartment Resident access is available only through an active DANI DECLARES property-management client.'}</p><div className="portal-option-grid">{visibleOptions.map(o=><button key={o.key} className="portal-option" onClick={()=>choose(o)}><span className="portal-option-title">{o.title}</span><span>{o.desc}</span><small>{o.key==='apartment_resident'?'Invitation required':o.key==='provider'?'DANI DECLARES Provider':'DANI DECLARES'}</small></button>)}</div>{error&&<div className="portal-error">{error}</div>}<p className="portal-existing">Already have an account? <Link to="/portal/login">Sign in to DANI DECLARES</Link></p></div></main>;
 
-  if(mode==='done')return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">WELCOME TO DANI DECLARES</p><h1>{selected.portal}</h1>{selected.key==='apartment_resident'&&propertyInvite&&<p><strong>{propertyInvite.property_name}</strong><br/>{propertyInvite.client_display_name}</p>}<p>{done}</p>{isCompanyRelationship&&<p>Have company-specific vendor onboarding paperwork? You can submit the packet, supplier agreement, insurance requirements, W-9/ACH instructions and other required pages now.</p>}{selected.key==='provider'&&<p>Your application enters the qualification pipeline once you sign in. Upload your tax form, insurance, ID and any other requested documents — DANI DECLARES reviews everything before your account becomes dispatch-eligible.</p>}<div className="portal-success-actions"><Link className="portal-primary" to="/portal/login">Sign in</Link>{isCompanyRelationship&&<Link className="portal-secondary" to="/portal/vendor-onboarding">Upload vendor paperwork</Link>}{selected.key==='provider'&&<Link className="portal-secondary" to="/portal/vendor-onboarding">Upload provider documents</Link>}<Link className="portal-secondary" to="/">Return to website</Link></div></div></main>;
+  if(mode==='done')return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">{selected.key==='provider'?'ACCOUNT CREATED':'WELCOME TO DANI DECLARES'}</p><h1>{selected.key==='provider'?'Check your email':selected.portal}</h1>{selected.key==='apartment_resident'&&propertyInvite&&<p><strong>{propertyInvite.property_name}</strong><br/>{propertyInvite.client_display_name}</p>}{selected.key==='provider'?<><p>We created your DANI DECLARES account. Before you can sign in, confirm your email address.</p><div className="portal-row"><div><strong>Confirmation email</strong><small>{form.email}</small></div></div><ol style={{textAlign:'left',maxWidth:520,margin:'20px auto',lineHeight:1.7}}><li>Open the confirmation email.</li><li>Click the confirmation link.</li><li>Return here and sign in.</li></ol><p className="portal-privacy">Your application is safely staged while you confirm your email. Creating an account does not authorize work; qualification and dispatch approval happen separately.</p></>:<p>{done}</p>}{isCompanyRelationship&&<p>Have company-specific vendor onboarding paperwork? You can submit the packet after signing in.</p>}<div className="portal-success-actions"><Link className="portal-primary" to="/portal/login">Sign In</Link>{isCompanyRelationship&&<Link className="portal-secondary" to="/portal/vendor-onboarding">Upload vendor paperwork</Link>}<Link className="portal-secondary" to="/">Return to website</Link></div></div></main>;
 
   const providerForm = <form onSubmit={submit} onKeyDown={e=>{if(providerStep<4&&e.key==='Enter'){e.preventDefault();nextProviderStep();}}}>
     <div className="portal-wizard-steps">{PROVIDER_STEPS.map((label,index)=>{const stepNumber=index+1;return <div key={label} className={`portal-wizard-step${providerStep===stepNumber?' active':''}${providerStep>stepNumber?' done':''}`}><span>{stepNumber}</span>{label}</div>;})}</div>
@@ -271,24 +348,47 @@ export default function PortalAccessPage() {
       <label>Confirm password<input type="password" name="confirm" minLength="8" required value={form.confirm} onChange={update} autoComplete="new-password"/></label>
     </div>}
     {providerStep===2&&<div className="portal-form-grid">
-      <label className="portal-wide">Business / organization name (optional)<input name="organization" value={form.organization} onChange={update}/></label>
-      <label className="portal-wide">Address<input name="address" value={form.address} onChange={update}/></label>
-      <label>City<input name="city" value={form.city} onChange={update}/></label>
-      <label>State<input name="state" maxLength="2" value={form.state} onChange={update}/></label>
-      <label>ZIP<input name="zip" value={form.zip} onChange={update}/></label>
+      <div className="portal-wide">
+        <strong>How are you signing up?</strong>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:12,marginTop:10}}>
+          <label className="portal-capability-item"><input type="radio" name="providerApplicantType" value="INDIVIDUAL" checked={providerApplicantType==='INDIVIDUAL'} onChange={e=>setProviderApplicantType(e.target.value)}/> Individual provider</label>
+          <label className="portal-capability-item"><input type="radio" name="providerApplicantType" value="BUSINESS" checked={providerApplicantType==='BUSINESS'} onChange={e=>setProviderApplicantType(e.target.value)}/> Business / company provider</label>
+        </div>
+        <small>{providerApplicantType==='BUSINESS'?'Business providers must submit their own current price sheet before the application can be approved.':'Individual providers may submit their own price sheet if they want DANI DECLARES to consider their preferred rates; it is optional.'}</small>
+      </div>
+      <label className="portal-wide">Business / organization name {providerApplicantType==='BUSINESS'?'(required)':'(optional)'}<input name="organization" required={providerApplicantType==='BUSINESS'} value={form.organization} onChange={update}/></label>
+      <label className="portal-wide">Dispatch origin address<input name="address" required value={form.address} onChange={update}/><small>Use the address you normally travel from for DANI assignments. It is used privately for routing and mileage economics.</small></label>
+      <label>City<input name="city" required value={form.city} onChange={update}/></label>
+      <label>State<input name="state" required maxLength="2" value={form.state} onChange={update}/></label>
+      <label>ZIP<input name="zip" required value={form.zip} onChange={update}/></label>
+      <label>Service radius (miles)<input name="serviceRadiusMiles" required type="number" min="1" max="250" step="1" value={form.serviceRadiusMiles} onChange={update}/><small>You may still receive an outside-radius offer if you later choose to allow it and the travel economics work.</small></label>
     </div>}
     {providerStep===3&&<div className="portal-wide portal-capability-picker">
-      <p>Pick every category of work you can do. For each one, you'll answer a quick question about your equipment or credentials — by the end, we'll know exactly which specific jobs you're eligible for.</p>
-      <span className="portal-capability-count">{selectedCategoryCount} categor{selectedCategoryCount===1?'y':'ies'} selected · {selectedServicesPreview.length} service{selectedServicesPreview.length===1?'':'s'} covered</span>
-      {catalogLoading?<p>Loading service categories…</p>:<div className="portal-capability-groups">{categories.map(category=>{
-        const isChecked=Boolean(selectedCategories[category.category_key]?.checked);
-        const serviceCount=servicesForCategory(category).length;
-        return <div key={category.category_key} className="portal-capability-group">
-          <label className="portal-capability-item"><input type="checkbox" checked={isChecked} onChange={()=>toggleCategory(category.category_key)}/><strong>{category.label}</strong><small> — {serviceCount} service{serviceCount===1?'':'s'}</small></label>
-          {category.description&&<small className="portal-capability-desc">{category.description}</small>}
-          {isChecked&&<div className="portal-capability-followup">
-            {category.requires_credential&&<div className="portal-capability-credential-note">⚠ {category.credential_prompt}</div>}
-            <label>{category.equipment_prompt}<input type="text" value={selectedCategories[category.category_key]?.equipmentAnswer||''} onChange={e=>setCategoryAnswer(category.category_key,e.target.value)} placeholder="Describe briefly…"/></label>
+      <p>Choose the specific DANI DECLARES services you can fulfill. The groups below match the same customer-facing service doors used across the public catalog. Selecting a group does not claim every service in it.</p>
+      <span className="portal-capability-count">{selectedServiceCount} specific service{selectedServiceCount===1?'':'s'} selected</span>
+      {catalogLoading?<p>Loading service catalog…</p>:<div className="portal-capability-groups">{providerDoorGroups.map(({door,services})=>{
+        const isOpen=Boolean(expandedDoors[door.key]);
+        const selectedInDoor=services.filter(s=>selectedServiceIds[s.id]).length;
+        const selectedCategoriesInDoor=categories.filter(c=>services.some(s=>selectedServiceIds[s.id]&&serviceCategoryById.get(s.id)?.category_key===c.category_key));
+        return <div key={door.key} className="portal-capability-group">
+          <button type="button" className="portal-capability-item" onClick={()=>toggleDoor(door.key)} aria-expanded={isOpen}>
+            <strong>{door.label}</strong><small>{selectedInDoor ? ' — '+selectedInDoor+' selected' : ' — Choose services'}</small>
+          </button>
+          {door.tagline&&<small className="portal-capability-desc">{door.tagline}</small>}
+          {isOpen&&<div className="portal-capability-followup">
+            <div style={{display:'grid',gap:8}}>
+              {services.map(service=>{
+                const category=serviceCategoryById.get(service.id);
+                return <label key={service.id} className="portal-capability-item">
+                  <input type="checkbox" checked={Boolean(selectedServiceIds[service.id])} onChange={()=>toggleService(service,category)}/>
+                  <span><strong>{service.name}</strong>{service.sku&&<small> · {service.sku}</small>}</span>
+                </label>;
+              })}
+            </div>
+            {selectedCategoriesInDoor.map(category=><div key={'followup-'+category.category_key} style={{marginTop:14}}>
+              <label>{category.equipment_prompt||'Tell us about your experience in this service area.'}<input type="text" value={selectedCategories[category.category_key]?.equipmentAnswer||''} onChange={e=>setCategoryAnswer(category.category_key,e.target.value)} placeholder="Describe briefly…"/></label>
+              {category.requires_credential&&<small className="portal-capability-credential-note">⚠ We will request and verify the required credential before authorization.</small>}
+            </div>)}
           </div>}
         </div>;
       })}</div>}
@@ -296,8 +396,9 @@ export default function PortalAccessPage() {
     {providerStep===4&&<div className="portal-review">
       <h2 className="portal-review-title">Review your application</h2>
       <div className="portal-row"><div><strong>{form.firstName} {form.lastName}</strong><small>{form.email} · {form.phone||'No phone provided'}</small></div></div>
-      {form.organization&&<div className="portal-row"><div><strong>{form.organization}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')||'No address provided'}</small></div></div>}
-      <div className="portal-row"><div><strong>{selectedCategoryCount} categor{selectedCategoryCount===1?'y':'ies'} selected · {selectedServicesPreview.length} service{selectedServicesPreview.length===1?'':'s'} covered</strong><small>{categories.filter(c=>selectedCategories[c.category_key]?.checked).map(c=>c.label).join(', ')||'None'}</small></div></div>
+      <div className="portal-row"><div><strong>{form.organization||'Individual provider'}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')} · {form.serviceRadiusMiles} mile service radius</small></div></div>
+      <div className="portal-row"><div><strong>{selectedServiceCount} specific service{selectedServiceCount===1?'':'s'} selected</strong><small>{selectedServicesPreview.map(s=>s.name).join(', ')||'None selected'}</small></div></div>
+      <label className="portal-wide">Rate expectations (optional)<input name="rateExpectation" value={form.rateExpectation} onChange={update} placeholder="Example: $35/hr, $125 minimum, or 'see attached price sheet'."/><small>These are provider-submitted expectations, not DANI DECLARES customer pricing.</small></label>
       <label className="portal-wide">Additional notes about your experience (optional)<textarea name="services" rows="4" value={form.services} onChange={update} placeholder="Certifications, equipment, years of experience, anything else worth knowing."/></label>
     </div>}
     {error&&<div className="portal-error">{error}</div>}
