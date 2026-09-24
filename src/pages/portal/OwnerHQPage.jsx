@@ -64,7 +64,7 @@ function OwnerHq({ session }) {
     }
   };
 
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); const timer = window.setInterval(load, 30000); return () => window.clearInterval(timer); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const metrics = useMemo(() => {
     const requests = data?.requests || [];
