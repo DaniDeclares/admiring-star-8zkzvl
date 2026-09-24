@@ -101,7 +101,7 @@ async function processResearchSources() {
     try {
       await prisma.$executeRaw`
         update public.dd_research_sources
-        set next_check_at = now() + make_interval(mins => ${Number(source.check_interval_minutes || 360)}),
+        set next_check_at = now() + make_interval(mins => (${Number(source.check_interval_minutes || 360)})::integer),
             updated_at = now()
         where id = ${source.id}::uuid
       `;
