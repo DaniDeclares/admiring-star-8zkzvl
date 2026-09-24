@@ -203,9 +203,9 @@ async function getStaffSnapshot(supabase) {
 // migration hasn't been applied to this environment yet. That's expected in
 // production until the operator runs it, so those queries degrade to an
 // empty/null result instead of taking down the whole Owner HQ snapshot.
-const UNDEFINED_TABLE = '42P01';
+const MISSING_TABLE_CODES = new Set(['42P01', 'PGRST205']);
 function tolerateMissingTable(result) {
-  if (result.error && result.error.code === UNDEFINED_TABLE) return { data: null, error: null };
+  if (result.error && MISSING_TABLE_CODES.has(result.error.code)) return { data: null, error: null };
   return result;
 }
 
@@ -241,7 +241,9 @@ async function getOwnerControlSnapshot(supabase) {
     supabase.from('dd_revenue_agent_registry').select('agent_key,agent_name,responsibility,is_active,updated_at').order('agent_key', { ascending: true }),
     supabase.from('dd_owner_attention_queue').select('*').neq('status', 'RESOLVED').order('created_at', { ascending: false }).limit(100),
   ]);
-  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue, revenueAgents, ownerAttention].filter(item => item.error);
+  const optional = [actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue].map(tolerateMissingTable);
+  const [safeActionOutbox, safeResearchPrograms, safeResearchWork, safeResearchEvidence, safeResearchSources, safeResearchSnapshots, safeGreenRuns, safePricingResearch, safePlatformAudit, safeSoftwareBuildRuns, safeSoftwareBuildQueue] = optional;
+  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, ...optional, revenueAgents, ownerAttention].filter(item => item.error);
   if (errors.length) throw errors[0].error;
 
   // Company Controller / Morning Brief objects are additive and may not exist
@@ -271,17 +273,17 @@ async function getOwnerControlSnapshot(supabase) {
       });
     })(),
     agentRuns: agentRuns.data || [],
-    actionOutbox: actionOutbox.data || [],
-    researchPrograms: researchPrograms.data || [],
-    researchWork: researchWork.data || [],
-    researchEvidence: researchEvidence.data || [],
-    researchSources: researchSources.data || [],
-    researchSnapshots: researchSnapshots.data || [],
+    actionOutbox: safeActionOutbox.data || [],
+    researchPrograms: safeResearchPrograms.data || [],
+    researchWork: safeResearchWork.data || [],
+    researchEvidence: safeResearchEvidence.data || [],
+    researchSources: safeResearchSources.data || [],
+    researchSnapshots: safeResearchSnapshots.data || [],
     unattendedGreenRuns: greenRuns.data || [],
-    pricingResearch: pricingResearch.data || [],
-    platformAudit: platformAudit.data || [],
-    softwareBuildRuns: softwareBuildRuns.data || [],
-    softwareBuildQueue: softwareBuildQueue.data || [],
+    pricingResearch: safePricingResearch.data || [],
+    platformAudit: safePlatformAudit.data || [],
+    softwareBuildRuns: safeSoftwareBuildRuns.data || [],
+    softwareBuildQueue: safeSoftwareBuildQueue.data || [],
     revenueAgents: revenueAgents.data || [],
     ownerAttention: ownerAttention.data || [],
     morningBrief: morningBrief.data || null,
