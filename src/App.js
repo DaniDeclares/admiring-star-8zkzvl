@@ -54,6 +54,7 @@ import PortalAccessPage from "./pages/PortalAccessPage.jsx";
 import PortalLoginPage from "./pages/PortalLoginPage.jsx";
 import PortalForgotPasswordPage from "./pages/PortalForgotPasswordPage.jsx";
 import PortalResetPasswordPage from "./pages/PortalResetPasswordPage.jsx";
+import PortalSupportRecoveryPage from "./pages/PortalSupportRecoveryPage.jsx";
 import AppointmentResponsePage from "./pages/AppointmentResponsePage.jsx";
 import ChangePasswordPage from "./pages/portal/ChangePasswordPage.jsx";
 import NotificationSettingsPage from "./pages/portal/NotificationSettingsPage.jsx";
