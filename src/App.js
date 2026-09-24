@@ -54,6 +54,7 @@ import PortalAccessPage from "./pages/PortalAccessPage.jsx";
 import PortalLoginPage from "./pages/PortalLoginPage.jsx";
 import PortalForgotPasswordPage from "./pages/PortalForgotPasswordPage.jsx";
 import PortalResetPasswordPage from "./pages/PortalResetPasswordPage.jsx";
+import PortalSupportRecoveryPage from "./pages/PortalSupportRecoveryPage.jsx";
 import AppointmentResponsePage from "./pages/AppointmentResponsePage.jsx";
 import ChangePasswordPage from "./pages/portal/ChangePasswordPage.jsx";
 import NotificationSettingsPage from "./pages/portal/NotificationSettingsPage.jsx";
@@ -123,6 +124,7 @@ export default function App() {
         <Route path="/portal/login" element={<PortalLoginPage />} />
         <Route path="/portal/forgot-password" element={<PortalForgotPasswordPage />} />
         <Route path="/portal/reset-password" element={<PortalResetPasswordPage />} />
+        <Route path="/portal/support-recovery" element={<PortalSupportRecoveryPage />} />
         <Route path="/appointment/respond" element={<AppointmentResponsePage />} />
         <Route path="/portal/change-password" element={<ChangePasswordPage />} />
         <Route path="/portal/settings" element={<NotificationSettingsPage />} />
