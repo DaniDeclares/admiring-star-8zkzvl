@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { buildPricingProposal, summarizeMarketEvidence } from './pricingResearch2026.js';
 
 describe('pricingResearch2026', () => {
