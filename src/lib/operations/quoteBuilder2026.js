@@ -125,11 +125,11 @@ export async function getQuoteCatalog(supabase) {
   if (error) throw error;
 
   const ids = (offers || []).map(o => o.runtime_service_id).filter(Boolean);
-  const { data: servicesById, error: serviceIdError } = ids.length ? await supabase.from('services').select('id,sku,name,service_family,pricing_type,billing_cycle,starting_price,base_price_cents,price_note,public_price_low,public_price_high,public_price_display,quote_input_schema,commercial_status,commercial_intent_status,resident_discount_eligible,is_active').in('id', ids) : { data: [], error: null };
+  const { data: servicesById, error: serviceIdError } = ids.length ? await supabase.from('services').select('id,sku,name,service_family,pricing_type,billing_cycle,starting_price,base_price_cents,price_note,public_price_low,public_price_high,public_price_display,quote_input_schema,commercial_status,commercial_intent_status,resident_discount_eligible,is_active,intake_keywords').in('id', ids) : { data: [], error: null };
   if (serviceIdError) throw serviceIdError;
   const resolvedIds = new Set((servicesById || []).map(s => s.id));
   const missingSkus = (offers || []).filter(o => o.runtime_service_id && !resolvedIds.has(o.runtime_service_id)).map(o => o.canonical_sku).concat((offers || []).filter(o => !o.runtime_service_id).map(o => o.canonical_sku)).filter(Boolean);
-  const { data: servicesBySku, error: skuError } = missingSkus.length ? await supabase.from('services').select('id,sku,name,service_family,pricing_type,billing_cycle,starting_price,base_price_cents,price_note,public_price_low,public_price_high,public_price_display,quote_input_schema,commercial_status,commercial_intent_status,resident_discount_eligible,is_active').in('sku', [...new Set(missingSkus)]) : { data: [], error: null };
+  const { data: servicesBySku, error: skuError } = missingSkus.length ? await supabase.from('services').select('id,sku,name,service_family,pricing_type,billing_cycle,starting_price,base_price_cents,price_note,public_price_low,public_price_high,public_price_display,quote_input_schema,commercial_status,commercial_intent_status,resident_discount_eligible,is_active,intake_keywords').in('sku', [...new Set(missingSkus)]) : { data: [], error: null };
   if (skuError) throw skuError;
   const byId = new Map((servicesById || []).map(s => [s.id, s]));
   const bySku = new Map((servicesBySku || []).map(s => [s.sku, s]));
@@ -153,6 +153,18 @@ async function loadRules(supabase, serviceId, channelCode) {
   const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').order('effective_date',{ascending:false});
   if (error) throw error;
   return data || [];
+}
+
+// A canonical service can be SELL_NOW standalone AND separately eligible as an add-on
+// with its own, typically lower, governed price -- same service identity, distinct
+// commercial role. Only consulted when the line item is explicitly marked ADD_ON;
+// PRIMARY/COMPANION lines always price at the service's normal standalone rate.
+async function loadAddonRule(supabase, canonicalSku) {
+  const { data, error } = await supabase.from('dd_service_addon_rules')
+    .select('id,canonical_sku,addon_price_cents,status,eligible_parent_skus')
+    .eq('canonical_sku', canonicalSku).eq('status', 'SELL_NOW').maybeSingle();
+  if (error) throw error;
+  return data || null;
 }
 async function resolveQuoteMarket(supabase, { state, city } = {}) {
   const stateCode=String(state||'').trim().toUpperCase();
@@ -315,7 +327,7 @@ export function calculate(service, rule, answers) {
   return { baseSubtotal:money(base), residentDiscount:money(discount), travelFee:money(travelFee), rushFee:money(rushFee), materials:money(materials), sourcingFee:money(sourcingFee), passThrough:money(passThrough), tax:money(tax), taxRate, estimatedTotal:money(total), depositDue:money(deposit), reviewFlags, needsReview:reviewFlags.length>0, isHourly:hourly, ratePerUnit:money(ruleBase) };
 }
 
-async function resolveQuoteLine(supabase, serviceSku, channelCode, marketContext = null) {
+async function resolveQuoteLine(supabase, serviceSku, channelCode, marketContext = null, componentRole = 'PRIMARY') {
   const sku = String(serviceSku || '').trim();
   if (!sku) throw new Error('Choose a service.');
 
@@ -362,10 +374,18 @@ async function resolveQuoteLine(supabase, serviceSku, channelCode, marketContext
   const rules = await loadRules(supabase, governedService.id, channelCode);
   const baseRule=rules.find(r=>r.base_price_cents!=null)||rules[0]||null;
   const marketRule=marketContext?.market?.id ? await loadMarketRule(supabase,{marketId:marketContext.market.id,serviceId:governedService.id,channelCode}) : null;
-  const rule=marketRule?.price_override_cents!=null
+  let rule=marketRule?.price_override_cents!=null
     ? {...(baseRule||{}),base_price_cents:marketRule.price_override_cents,market_rule_id:marketRule.id,market_code:marketContext.market.market_code,market_pricing_status:marketRule.status}
     : baseRule;
-  return { offer:governedOffer, service:governedService, rule, marketRule };
+  let addonPricingApplied=false;
+  if (componentRole==='ADD_ON') {
+    const addonRule=await loadAddonRule(supabase, canonicalSku);
+    if (addonRule) {
+      rule={...(rule||{}),base_price_cents:addonRule.addon_price_cents,pricing_source:'ADD_ON_RULE',addon_rule_id:addonRule.id};
+      addonPricingApplied=true;
+    }
+  }
+  return { offer:governedOffer, service:governedService, rule, marketRule, addonPricingApplied };
 }
 export function aggregateQuoteCalculations(lineItems) {
   const totals = lineItems.reduce((acc, item) => {
@@ -420,7 +440,8 @@ export async function createEstimate(supabase, body) {
     const itemSku = String(item?.serviceSku || '').trim();
     if (!itemSku) throw new Error('Every package component must have a service.');
     const itemAnswers = { ...(item.answers || {}), apply_resident_discount:false, apartment_resident:clientType==='apartment_resident' };
-    const resolved = await resolveQuoteLine(supabase, itemSku, channelCode, marketContext);
+    const itemComponentRole=String(item?.componentRole||'PRIMARY');
+    const resolved = await resolveQuoteLine(supabase, itemSku, channelCode, marketContext, itemComponentRole);
     item.__resolvedService=resolved.service;
     const calcService = {
       ...resolved.service,
@@ -436,6 +457,13 @@ export async function createEstimate(supabase, body) {
       calculation.needsReview=true;
     } else if(marketContext.market && !resolved.marketRule) {
       calculation.reviewFlags=[...new Set([...(calculation.reviewFlags||[]),'MARKET_BASELINE_USED'])];
+      calculation.needsReview=true;
+    }
+    if (itemComponentRole==='ADD_ON' && !resolved.addonPricingApplied) {
+      // Asked to price this as an add-on, but no governed add-on rule exists yet for
+      // this SKU -- fall back to its standalone price (already computed above) rather
+      // than inventing a discount, and make that fallback visible for review.
+      calculation.reviewFlags=[...new Set([...(calculation.reviewFlags||[]),'ADD_ON_PRICE_NOT_GOVERNED_USED_STANDALONE'])];
       calculation.needsReview=true;
     }
     resolvedLineItems.push({
@@ -466,6 +494,46 @@ export async function createEstimate(supabase, body) {
   }
   const primary = resolvedLineItems[0];
   const calculation = aggregateQuoteCalculations(resolvedLineItems);
+
+  // Package pricing is re-resolved and re-validated here, server-side, against
+  // dd_governed_packages -- never trusted from the client. Quote Builder may suggest a
+  // package match client-side, but the price that lands on the frozen estimate always
+  // comes from this authoritative lookup.
+  const packageCode = String(body.packageCode || '').trim();
+  if (packageCode) {
+    const { data: pkg, error: pkgError } = await supabase.from('dd_governed_packages')
+      .select('id,package_code,package_name,commercial_offer_status,package_price_cents,pricing_type,dd_governed_package_components(canonical_sku,is_required)')
+      .eq('package_code', packageCode).maybeSingle();
+    if (pkgError) throw pkgError;
+    if (!pkg || pkg.commercial_offer_status !== 'SELL_NOW') throw new Error('That package is not currently authorized for sale.');
+    const requiredSkus = (pkg.dd_governed_package_components || []).filter(c => c.is_required).map(c => c.canonical_sku);
+    const selectedSkus = new Set(resolvedLineItems.map(li => li.canonicalSku));
+    const missing = requiredSkus.filter(sku => !selectedSkus.has(sku));
+    if (missing.length) throw new Error(`This package requires ${missing.join(', ')} to be included before it can be applied.`);
+    if (pkg.pricing_type === 'FIXED_PACKAGE') {
+      if (pkg.package_price_cents == null) throw new Error('This package has no governed price set yet.');
+      // Package economics are the package's own governed price, not the arithmetic sum
+      // of its components -- the delta is recorded as an explicit, itemized adjustment
+      // rather than silently changing any component's own price.
+      const packagePrice = money(pkg.package_price_cents / 100);
+      const componentSum = calculation.baseSubtotal;
+      const delta = money(packagePrice - componentSum);
+      calculation.packageCode = pkg.package_code;
+      calculation.packageName = pkg.package_name;
+      calculation.packagePriceAdjustment = delta;
+      calculation.baseSubtotal = packagePrice;
+      calculation.estimatedTotal = money(calculation.estimatedTotal + delta);
+      calculation.reviewFlags = [...new Set([...(calculation.reviewFlags || []), 'PACKAGE_PRICE_OVERRIDE_APPLIED'])];
+      calculation.needsReview = true;
+    } else {
+      // SUM_OF_COMPONENTS: the package's own pricing rule says to use the sum of its
+      // governed component prices, so no override is applied -- just record which
+      // package this was sold under, for provenance.
+      calculation.packageCode = pkg.package_code;
+      calculation.packageName = pkg.package_name;
+    }
+  }
+
   if (!requestId && !updateEstimateId) {
     const channelType = clientType === 'property_manager' ? 'B2B_APT' : clientType === 'realtor' ? 'B2B_RE' : clientType === 'government' ? 'B2G' : clientType === 'business' ? 'B2B' : 'B2C';
     const { data: lead, error: leadError } = await supabase.from('leads').insert({
