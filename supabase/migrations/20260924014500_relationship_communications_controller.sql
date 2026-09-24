@@ -82,7 +82,7 @@ begin
       v_priority,'OPEN',
       case when v_provider_id is not null then 'Open provider communication and respond or route it.' else 'Triage inbound business communication and attach it to the correct relationship.' end,
       jsonb_build_object('channel','GMAIL','external_message_id',p_external_message_id,'external_thread_id',p_external_thread_id,'provider_id',v_provider_id,'sender_address',p_sender_address,'subject',p_subject)
-    where not exists (select 1 from public.dd_owner_attention_queue where source_table='dd_communication_events' and source_record_id=v_id::text and status='OPEN');
+    where not exists (select 1 from public.dd_owner_attention_queue where source_table='dd_communication_events' and source_record_id=v_id::text);
   end if;
   return v_id;
 end $$;
