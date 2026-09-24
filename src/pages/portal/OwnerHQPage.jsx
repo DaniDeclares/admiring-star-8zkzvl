@@ -97,6 +97,8 @@ function OwnerHq({ session }) {
     const researchPrograms = data?.researchPrograms || [];
     const researchWork = data?.researchWork || [];
     const researchEvidence = data?.researchEvidence || [];
+    const researchSources = data?.researchSources || [];
+    const researchSnapshots = data?.researchSnapshots || [];
 
     const openRequests = requests.filter(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()));
     const activeJobs = jobs.filter(j => !['COMPLETED','CANCELLED'].includes(String(j.job_status || '').toUpperCase()));
@@ -143,6 +145,9 @@ function OwnerHq({ session }) {
       researchOpen: researchWork.filter(item => !['GREEN'].includes(String(item.status || '').toUpperCase())).length,
       researchReady: researchWork.filter(item => ['EVIDENCE_READY','REVIEW_READY','GREEN'].includes(String(item.status || '').toUpperCase())).length,
       researchConfirmed: researchEvidence.filter(item => String(item.evidence_status || '').toUpperCase() === 'CONFIRMED').length,
+      researchSources: researchSources.length,
+      researchChanged: researchSnapshots.filter(item => item.changed).length,
+      researchFailures: researchSources.filter(item => item.last_error || (item.last_http_status && Number(item.last_http_status) >= 400)).length,
     };
   }, [data]);
 
@@ -241,6 +246,9 @@ function OwnerHq({ session }) {
         <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchOpen}</strong><span>Open research gates</span></a>
         <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchReady}</strong><span>Evidence / review ready</span></a>
         <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchConfirmed}</strong><span>Confirmed evidence claims</span></a>
+        <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchSources}</strong><span>Watched authority sources</span></a>
+        <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchChanged}</strong><span>Changed source snapshots</span></a>
+        <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchFailures}</strong><span>Source check failures</span></a>
       </div>
       <div style={{ marginTop: 14 }}>
         {(data?.researchPrograms || []).map(program => <div className="portal-row" key={program.program_key}>
@@ -251,6 +259,17 @@ function OwnerHq({ session }) {
           <div><strong>{item.question}</strong><small>{item.priority} · {item.status} · {item.metadata?.partner || item.metadata?.jurisdiction || item.metadata?.gate || 'DANI'}</small><small>Next: {item.next_action || 'Continue evidence collection'}</small></div>
           <span className="portal-pill">{item.status}</span>
         </div>)}
+        <div style={{ marginTop: 14 }}>
+          <p className="portal-eyebrow">Latest source checks</p>
+          {(data?.researchSources || []).slice(0, 10).map(source => <div className="portal-row" key={source.id}>
+            <div>
+              <strong>{source.source_title}</strong>
+              <small>{source.authority_level} · {source.temporal_class} · HTTP {source.last_http_status ?? '—'}</small>
+              <small>{source.last_checked_at ? 'Checked ' + new Date(source.last_checked_at).toLocaleString() : 'Waiting for first scheduled check'}{source.last_error ? ' · ' + source.last_error : ''}</small>
+            </div>
+            <span className="portal-pill">{source.last_error ? 'ERROR' : (source.last_changed_at ? 'WATCHING' : 'ACTIVE')}</span>
+          </div>)}
+        </div>
       </div>
     </section>
 
