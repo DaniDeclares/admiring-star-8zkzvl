@@ -94,6 +94,9 @@ function OwnerHq({ session }) {
     const communicationAttention = data?.communicationAttention || [];
     const agentRuns = data?.agentRuns || [];
     const actionOutbox = data?.actionOutbox || [];
+    const researchPrograms = data?.researchPrograms || [];
+    const researchWork = data?.researchWork || [];
+    const researchEvidence = data?.researchEvidence || [];
 
     const openRequests = requests.filter(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()));
     const activeJobs = jobs.filter(j => !['COMPLETED','CANCELLED'].includes(String(j.job_status || '').toUpperCase()));
@@ -136,6 +139,10 @@ function OwnerHq({ session }) {
       communicationAttention: communicationAttention.length,
       agentFailures: agentRuns.filter(run => ['FAILED','BLOCKED','PAUSED'].includes(String(run.status || '').toUpperCase())).length,
       outboxExceptions: actionOutbox.filter(item => !['SUCCEEDED','COMPLETED'].includes(String(item.status || '').toUpperCase())).length,
+      researchPrograms: researchPrograms.length,
+      researchOpen: researchWork.filter(item => !['GREEN'].includes(String(item.status || '').toUpperCase())).length,
+      researchReady: researchWork.filter(item => ['EVIDENCE_READY','REVIEW_READY','GREEN'].includes(String(item.status || '').toUpperCase())).length,
+      researchConfirmed: researchEvidence.filter(item => String(item.evidence_status || '').toUpperCase() === 'CONFIRMED').length,
     };
   }, [data]);
 
@@ -221,6 +228,29 @@ function OwnerHq({ session }) {
           <span className="portal-pill">DUE</span>
         </div>)}
         {!metrics.salesDue && <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No sales actions are due.</div>}
+      </div>
+    </section>
+
+    <section className="portal-card" id="research-engine">
+      <div>
+        <p className="portal-eyebrow">Research → green engine</p>
+        <h2 style={{ margin: '5px 0 0' }}>Protection & Benefits Research</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>Evidence is persisted here before anything regulated can reach quoting, checkout or customer-facing sales. Historical contracts stay labeled historical until current terms are verified.</p>
+      </div>
+      <div className="portal-summary-grid" style={{ marginTop: 14 }}>
+        <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchOpen}</strong><span>Open research gates</span></a>
+        <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchReady}</strong><span>Evidence / review ready</span></a>
+        <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchConfirmed}</strong><span>Confirmed evidence claims</span></a>
+      </div>
+      <div style={{ marginTop: 14 }}>
+        {(data?.researchPrograms || []).map(program => <div className="portal-row" key={program.program_key}>
+          <div><strong>{program.program_name}</strong><small>{program.domain} · {program.objective}</small><small>Green rule: {program.green_rule}</small></div>
+          <span className="portal-pill">{program.release_blocked ? 'RELEASE BLOCKED' : program.status}</span>
+        </div>)}
+        {(data?.researchWork || []).slice(0, 12).map(item => <div className="portal-row" key={item.id}>
+          <div><strong>{item.question}</strong><small>{item.priority} · {item.status} · {item.metadata?.partner || item.metadata?.jurisdiction || item.metadata?.gate || 'DANI'}</small><small>Next: {item.next_action || 'Continue evidence collection'}</small></div>
+          <span className="portal-pill">{item.status}</span>
+        </div>)}
       </div>
     </section>
 
