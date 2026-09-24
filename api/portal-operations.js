@@ -201,7 +201,7 @@ async function getStaffSnapshot(supabase) {
 }
 async function getOwnerControlSnapshot(supabase) {
   const base = await getStaffSnapshot(supabase);
-  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit] = await Promise.all([
+  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue] = await Promise.all([
     supabase.from('dd_sales_queue')
       .select('id,contact_name,company_name,role_title,phone,email,lane,source,source_account,disposition,next_action,next_action_date,campaign_status,intent_tier,salesperson_name,updated_at')
       .order('updated_at', { ascending: false }).limit(250),
@@ -226,8 +226,10 @@ async function getOwnerControlSnapshot(supabase) {
     supabase.from('dd_unattended_green_runs').select('*').order('started_at', { ascending: false }).limit(25),
     supabase.from('dd_service_pricing_research_queue').select('canonical_sku,service_family,research_status,priority,evidence_count,evidence_target,economics_ready,current_price_cents,proposed_price_cents,minimum_viable_price_cents,expected_contribution_cents,expected_margin_percent,economics_evidence_status,blocking_reason,last_researched_at,updated_at').order('priority', { ascending: true }).order('updated_at', { ascending: false }).limit(250),
     supabase.from('dd_platform_release_audit_10_pass').select('channel_code,pass_number,pass_name,lifecycle_stage,status,current_state,blocking_gap,green_exit_criteria,required_build,priority,updated_at').order('channel_code', { ascending: true }).order('pass_number', { ascending: true }),
+    supabase.from('dd_software_build_runs').select('*').order('started_at', { ascending: false }).limit(25),
+    supabase.from('dd_software_build_work_queue').select('id,work_key,channel_code,pass_number,pass_name,lifecycle_stage,priority,source_status,work_type,execution_mode,status,blocking_gap,acceptance_criteria,required_build,target_environment,attempts,last_attempt_at,last_result,owner_decision_required,updated_at').order('priority', { ascending: true }).order('updated_at', { ascending: false }).limit(250),
   ]);
-  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit].filter(item => item.error);
+  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue].filter(item => item.error);
   if (errors.length) throw errors[0].error;
   return {
     ...base,
@@ -253,6 +255,8 @@ async function getOwnerControlSnapshot(supabase) {
     unattendedGreenRuns: greenRuns.data || [],
     pricingResearch: pricingResearch.data || [],
     platformAudit: platformAudit.data || [],
+    softwareBuildRuns: softwareBuildRuns.data || [],
+    softwareBuildQueue: softwareBuildQueue.data || [],
   };
 }
 
