@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
+import SeoRouteMetadata from "./components/SeoRouteMetadata.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
@@ -38,6 +39,7 @@ import ProviderChecklistPage from "./pages/portal/ProviderChecklistPage.jsx";
 import ProviderAgreementPage from "./pages/portal/ProviderAgreementPage.jsx";
 import ProviderEvidencePage from "./pages/portal/ProviderEvidencePage.jsx";
 import ProviderPayoutsPage from "./pages/portal/ProviderPayoutsPage.jsx";
+import ProviderAccountingPage from "./pages/portal/ProviderAccountingPage.jsx";
 import ProviderProfilePage from "./pages/portal/ProviderProfilePage.jsx";
 import ProviderServicesPage from "./pages/portal/ProviderServicesPage.jsx";
 import ProviderW9Page from "./pages/portal/ProviderW9Page.jsx";
@@ -52,6 +54,8 @@ import PortalAccessPage from "./pages/PortalAccessPage.jsx";
 import PortalLoginPage from "./pages/PortalLoginPage.jsx";
 import PortalForgotPasswordPage from "./pages/PortalForgotPasswordPage.jsx";
 import PortalResetPasswordPage from "./pages/PortalResetPasswordPage.jsx";
+import PortalSupportRecoveryPage from "./pages/PortalSupportRecoveryPage.jsx";
+import AppointmentResponsePage from "./pages/AppointmentResponsePage.jsx";
 import ChangePasswordPage from "./pages/portal/ChangePasswordPage.jsx";
 import NotificationSettingsPage from "./pages/portal/NotificationSettingsPage.jsx";
 import VendorOnboardingUploadPage from "./pages/VendorOnboardingUploadPage.jsx";
@@ -75,6 +79,7 @@ function BookRedirect() {
 export default function App() {
   return (
     <Layout>
+      <SeoRouteMetadata />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/solutions" element={<PortfolioPage />} />
@@ -104,6 +109,9 @@ export default function App() {
         {/* One platform, three role-based experiences. */}
         <Route path="/portal" element={<PortalWorkspacePage />} />
         <Route path="/portal/customer" element={<Navigate to="/portal" replace />} />
+        <Route path="/portal/customer/orders" element={<PortalWorkspacePage />} />
+        <Route path="/portal/customer/messages" element={<PortalWorkspacePage />} />
+        <Route path="/portal/customer/payments" element={<PortalWorkspacePage />} />
         <Route path="/portal/provider" element={<Navigate to="/portal" replace />} />
         <Route path="/portal/my-portal" element={<Navigate to="/portal" replace />} />
         <Route path="/my-portal" element={<Navigate to="/portal" replace />} />
@@ -116,6 +124,8 @@ export default function App() {
         <Route path="/portal/login" element={<PortalLoginPage />} />
         <Route path="/portal/forgot-password" element={<PortalForgotPasswordPage />} />
         <Route path="/portal/reset-password" element={<PortalResetPasswordPage />} />
+        <Route path="/portal/support-recovery" element={<PortalSupportRecoveryPage />} />
+        <Route path="/appointment/respond" element={<AppointmentResponsePage />} />
         <Route path="/portal/change-password" element={<ChangePasswordPage />} />
         <Route path="/portal/settings" element={<NotificationSettingsPage />} />
         <Route path="/portal/provider-agreement" element={<ProviderAgreementPage />} />
@@ -126,6 +136,7 @@ export default function App() {
         <Route path="/portal/checklist" element={<ProviderChecklistPage />} />
         <Route path="/portal/evidence" element={<ProviderEvidencePage />} />
         <Route path="/portal/payouts" element={<ProviderPayoutsPage />} />
+        <Route path="/portal/accounting" element={<ProviderAccountingPage />} />
         <Route path="/portal/profile" element={<ProviderProfilePage />} />
         <Route path="/portal/services" element={<ProviderServicesPage />} />
         <Route path="/portal/w9" element={<ProviderW9Page />} />

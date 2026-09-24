@@ -1,10 +1,11 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
-import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
+import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin } from './_w9Crypto.js';
+import { mintAppointmentToken } from './_appointmentTokens.js';
 import Stripe from 'stripe';
 
 // Verbatim from Form W-9 (Rev. March 2024), Part II Certification -- the IRS's
@@ -106,8 +107,52 @@ function sanitizeProviderAssignment(assignment) {
   if (!assignment) return null;
   return { id: assignment.id, job_id: assignment.job_id, provider_id: assignment.provider_id, assignment_status: assignment.assignment_status, provider_notes: assignment.provider_notes, offered_at: assignment.offered_at, accepted_at: assignment.accepted_at, rejected_at: assignment.rejected_at, cancelled_at: assignment.cancelled_at, offer_expires_at: assignment.offer_expires_at, response_at: assignment.response_at, offer_sequence: assignment.offer_sequence, job: sanitizeProviderJob(assignment.job) };
 }
+async function enqueueAppointmentConfirmation(supabase, appointment) {
+  const { rawToken, tokenHash, expiresAt } = mintAppointmentToken(appointment.id);
+  const { error: tokenError } = await supabase.from('dd_job_appointments').update({ confirmation_token_hash: tokenHash, confirmation_token_expires_at: expiresAt.toISOString() }).eq('id', appointment.id);
+  if (tokenError) throw tokenError;
+
+  const { data: job } = await supabase.from('dd_jobs').select('id, location_address, scope_summary, service_request_id').eq('id', appointment.job_id).maybeSingle();
+  if (!job) return;
+  let customerEmail = null;
+  if (job.service_request_id) {
+    const { data: request } = await supabase.from('service_requests').select('lead_id').eq('id', job.service_request_id).maybeSingle();
+    if (request?.lead_id) {
+      const { data: lead } = await supabase.from('leads').select('email, full_name').eq('id', request.lead_id).maybeSingle();
+      customerEmail = lead?.email || null;
+    }
+  }
+  if (!customerEmail) return;
+
+  const siteUrl = process.env.SITE_URL || 'https://danideclares.com';
+  const { data: saleRow } = await supabase.from('dd_sales_queue').select('quoted_amount').eq('job_id', appointment.job_id).maybeSingle();
+  const { data: depositEvent } = await supabase.from('dd_payment_events').select('amount_received, payment_status').eq('job_id', appointment.job_id).eq('event_type', 'DEPOSIT_RECEIVED').order('created_at', { ascending: false }).limit(1).maybeSingle();
+
+  await supabase.from('dd_event_outbox').insert({
+    event_key: `appointment-confirmation-${appointment.id}`,
+    event_type: 'APPOINTMENT_SCHEDULED',
+    channel: 'EMAIL',
+    aggregate_type: 'dd_job_appointments',
+    aggregate_id: appointment.id,
+    payload: {
+      to: customerEmail,
+      subject: 'Your DANI DECLARES appointment',
+      template: 'appointment-confirmation',
+      templateData: {
+        startsAt: appointment.starts_at,
+        address: job.location_address,
+        scope: job.scope_summary,
+        total: saleRow?.quoted_amount != null ? Number(saleRow.quoted_amount) : null,
+        depositAmount: depositEvent ? Number(depositEvent.amount_received) : null,
+        depositCleared: depositEvent?.payment_status === 'succeeded' || depositEvent?.payment_status === 'cleared',
+        confirmUrl: `${siteUrl}/appointment/respond?action=confirm&token=${encodeURIComponent(rawToken)}`,
+        changeUrl: `${siteUrl}/appointment/respond?action=change&token=${encodeURIComponent(rawToken)}`,
+      },
+    },
+  });
+}
 async function getStaffSnapshot(supabase) {
-  const [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions] = await Promise.all([
+  const [requests, jobs, appointments, providers, changes, evidence, payments, invoices, estimates, pendingCapabilities, w9Submissions, ownerAttention] = await Promise.all([
     supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_jobs').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_job_appointments').select('*').order('starts_at', { ascending: true }).limit(100),
@@ -116,6 +161,7 @@ async function getStaffSnapshot(supabase) {
     supabase.from('dd_job_evidence').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_payment_events').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_invoices').select('id,public_reference,estimate_id,job_id,invoice_status,total_amount,deposit_due,balance_due,stripe_payment_link,hosted_invoice_url,updated_at').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_estimates').select('id,public_reference,estimate_status,estimated_total,deposit_due,service_request_id,created_at,updated_at').order('created_at', { ascending: false }).limit(100),
     // Self-requested additions from the provider "My Services" page (add_service_request
     // source) sit here as is_authorized:false until staff reviews them -- same as every
     // other capability, no self-service action ever sets is_authorized:true.
@@ -124,9 +170,14 @@ async function getStaffSnapshot(supabase) {
     // list to verify/reject, and only reach for decrypt_provider_w9_tin (which
     // is separately logged) when a real number is actually needed.
     supabase.from('dd_provider_w9_submissions').select('id, provider_application_id, provider_org_id, line1_name, classification, tin_type, tin_last_four, status, created_at, dd_provider_organizations(name)').eq('status', 'SUBMITTED').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_owner_attention_queue').select('id,domain,source_table,source_record_id,reason,priority,status,recommended_action,metadata,created_at,resolved_at').eq('status','OPEN').order('created_at',{ascending:false}).limit(100),
   ]);
-  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions].filter(item => item.error);
+  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, invoices, estimates, pendingCapabilities, w9Submissions, ownerAttention].filter(item => item.error);
   if (errors.length) throw errors[0].error;
+  const appointmentChangeRequestsResult = await supabase.from('dd_appointment_change_requests').select('*').eq('status', 'OPEN').order('created_at', { ascending: false }).limit(50);
+  const appointmentChangeRequests = { data: appointmentChangeRequestsResult.error ? [] : (appointmentChangeRequestsResult.data || []) };
+  const financialTargetsResult = await supabase.from('dd_financial_target_authority').select('metric_key, target_amount, currency, effective_from');
+  const financialTargets = { data: financialTargetsResult.error ? [] : (financialTargetsResult.data || []) };
   const requestRows = requests.data || [];
   const leadIds = [...new Set(requestRows.map(row => row.lead_id).filter(Boolean))];
   let leadById = new Map();
@@ -146,12 +197,90 @@ async function getStaffSnapshot(supabase) {
     };
   });
   const estimateAssignments = await getOwnerEstimateAssignments(supabase);
-  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], estimateAssignments };
+  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], estimates: estimates.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], ownerAttention: ownerAttention.data || [], estimateAssignments, appointmentChangeRequests: appointmentChangeRequests.data || [], weeklyCollectedTarget: ((financialTargets.data || []).find(row => row.metric_key === 'WEEKLY_COLLECTED_TARGET')?.target_amount ?? null) };
 }
+// Tables Postgres reports as missing (undefined_table) mean the underlying
+// migration hasn't been applied to this environment yet. That's expected in
+// production until the operator runs it, so those queries degrade to an
+// empty/null result instead of taking down the whole Owner HQ snapshot.
+const UNDEFINED_TABLE = '42P01';
+function tolerateMissingTable(result) {
+  if (result.error && result.error.code === UNDEFINED_TABLE) return { data: null, error: null };
+  return result;
+}
+
+async function getOwnerControlSnapshot(supabase) {
+  const base = await getStaffSnapshot(supabase);
+  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots] = await Promise.all([
+    supabase.from('dd_sales_queue')
+      .select('id,contact_name,company_name,role_title,phone,email,lane,source,source_account,disposition,next_action,next_action_date,campaign_status,intent_tier,salesperson_name,updated_at')
+      .order('updated_at', { ascending: false }).limit(250),
+    supabase.from('dd_research_leads').select('*').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_accounting_exception_queue')
+      .select('id,exception_type,source_system,description,assigned_lane,status,requires_owner_decision,resolution,created_at,updated_at')
+      .not('status','in','("RESOLVED","CLOSED")').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_communication_events')
+      .select('id,direction,external_message_id,external_thread_id,sender_address,subject,relationship_type,provider_id,priority,requires_attention,attention_reason,received_at,created_at')
+      .eq('requires_attention', true).order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_agent_run_control')
+      .select('id,agent_key,stage_key,status,turns_used,tool_calls_used,retries_used,estimated_cost_usd,breaker_reason,fallback_used,started_at,last_activity_at,completed_at')
+      .order('started_at', { ascending: false }).limit(50),
+    supabase.from('dd_external_action_outbox')
+      .select('id,action_key,action_type,destination_system,status,attempt_count,max_attempts,next_attempt_at,last_error_code,last_error,created_at,updated_at')
+      .order('created_at', { ascending: false }).limit(50),
+    supabase.from('dd_research_programs').select('*').order('updated_at', { ascending: false }).limit(25),
+    supabase.from('dd_research_work_queue').select('*').order('updated_at', { ascending: false }).limit(100),
+    supabase.from('dd_research_evidence').select('*').order('updated_at', { ascending: false }).limit(100),
+    supabase.from('dd_research_sources').select('*').order('last_checked_at', { ascending: false, nullsFirst: false }).limit(100),
+    supabase.from('dd_research_source_snapshots').select('id,source_id,fetched_at,http_status,changed,matched_signals,excerpt,error,metadata').order('fetched_at', { ascending: false }).limit(100),
+  ]);
+  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots].filter(item => item.error);
+  if (errors.length) throw errors[0].error;
+
+  // Company Controller / Morning Brief objects are additive and may not exist
+  // yet in every environment (see supabase/migrations/20260924133000_company_controller_morning_brief_production.sql).
+  // Missing tables here must never break the rest of Owner HQ.
+  const [morningBrief, companyDomains, companyRuns, soakReceipts] = (await Promise.all([
+    supabase.from('dd_company_morning_briefs').select('*').order('generated_at', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('dd_company_controller_dashboard_v1').select('*'),
+    supabase.from('dd_company_controller_runs').select('*').order('started_at', { ascending: false }).limit(10),
+    supabase.from('dd_overnight_soak_receipts').select('*').order('run_at', { ascending: false }).limit(12),
+  ])).map(tolerateMissingTable);
+  const companyControllerErrors = [morningBrief, companyDomains, companyRuns, soakReceipts].filter(item => item.error);
+  if (companyControllerErrors.length) throw companyControllerErrors[0].error;
+
+  return {
+    ...base,
+    salesQueue: salesQueue.data || [],
+    researchLeads: researchLeads.data || [],
+    accountingExceptions: (accountingExceptions.data || []).filter(item => String(item.exception_type || '').toUpperCase() !== 'QBO_VERIFICATION_BLOCKER'),
+    communicationAttention: (() => {
+      const seen = new Set();
+      return (communicationEvents.data || []).filter(item => {
+        const key = item.external_thread_id || item.external_message_id || item.id;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    })(),
+    agentRuns: agentRuns.data || [],
+    actionOutbox: actionOutbox.data || [],
+    researchPrograms: researchPrograms.data || [],
+    researchWork: researchWork.data || [],
+    researchEvidence: researchEvidence.data || [],
+    researchSources: researchSources.data || [],
+    researchSnapshots: researchSnapshots.data || [],
+    morningBrief: morningBrief.data || null,
+    companyDomains: companyDomains.data || [],
+    companyRuns: companyRuns.data || [],
+    soakReceipts: soakReceipts.data || [],
+  };
+}
+
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
     .from('dd_provider_applications')
-    .select('id, application_status, tax_form_status, insurance_status, identity_status, agreement_status, background_check_status, compliance_status, legal_name, applicant_type, contact_first_name, contact_last_name, contact_email, contact_phone, physical_address, service_area, service_notes, submitted_at, reviewed_at')
+    .select('id, application_status, tax_form_status, insurance_status, identity_status, agreement_status, background_check_status, compliance_status, legal_name, applicant_type, contact_first_name, contact_last_name, contact_email, contact_phone, physical_address, service_area, service_radius_miles, service_zip_codes, dispatch_location_verified_at, service_notes, submitted_at, reviewed_at')
     .eq('applicant_user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -245,7 +374,7 @@ async function getW9Status(supabase, userId) {
   if (error) throw error;
   return data || null;
 }
-async function getProviderSnapshot(supabase, providerId, userId) {
+async function getProviderSnapshot(supabase, providerId, userId, userSupabase = supabase) {
   let applicationSnapshot = await getProviderApplicationSnapshot(supabase, userId);
   if (!applicationSnapshot.application && providerId) {
     const directSnapshot = await getDirectProviderAuthorizationSnapshot(supabase, providerId);
@@ -253,12 +382,19 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   }
   const w9 = await getW9Status(supabase, userId);
   applicationSnapshot = { ...applicationSnapshot, w9 };
-  if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
+  if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], financials: { earnings: [], payables: [], payouts: [] }, payouts: [], messages: [] };
+
+  // Financials are read through the provider-bound projection. The Worker App
+  // can display governed earning/payable/payout state but cannot approve,
+  // process, reconcile, or mutate accounting records.
+  const { data: financialsData, error: financialsError } = await userSupabase.rpc('dd_get_my_provider_financials');
+  if (financialsError) throw financialsError;
+  const financials = financialsData || { earnings: [], payables: [], payouts: [] };
   const quoteAssignments = await getProviderEstimateAssignments(supabase, providerId);
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
   const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
-  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], quoteAssignments, tasks: [], evidence: [], appointments: [], payouts: [], messages: [] };
+  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], quoteAssignments, tasks: [], evidence: [], appointments: [], financials, payouts: financials.payouts || [], messages: [] };
   const [jobsResult, tasks, evidence, appointments, payouts, messages] = await Promise.all([
     supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, sla_due_at, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
@@ -274,7 +410,7 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   if (payouts.error) throw payouts.error;
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
-  return { ...applicationSnapshot, assignments: safeAssignments, quoteAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], payouts: payouts.data || [], messages };
+  return { ...applicationSnapshot, assignments: safeAssignments, quoteAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], financials, payouts: financials.payouts || payouts.data || [], messages };
 }
 // A resident's own dd_portal_identities.organization_id is only ever set by
 // dd_consume_apartment_resident_invite_impl (see the property-invite RPCs),
@@ -357,19 +493,32 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const notificationPreferences = await getNotificationPreferences(context.supabase, context.user.id);
       if (!context.isStaff) {
-        if (context.role === 'provider') return ok(res, { role: context.role, notificationPreferences, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id) });
+        if (context.role === 'provider') return ok(res, { role: context.role, notificationPreferences, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id, context.userSupabase) });
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
+      }
+      if (req.query?.ownerDashboard === '1') {
+        const isMasterOwner = String(context.user?.email || '').toLowerCase() === DANI_MASTER_OWNER_EMAIL;
+        if (context.role !== 'owner' && !isMasterOwner) return fail(res, 'Owner access required.', 403);
+        return ok(res, { role: context.role, ownerAccess: true, notificationPreferences, ...await getOwnerControlSnapshot(context.supabase) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
       if (req.query?.quoteEconomics === '1') {
-        const [componentsResult, providersResult] = await Promise.all([
+        const [componentsResult, providersResult, governedPackagesResult] = await Promise.all([
           context.supabase.from('dd_service_package_components').select('id,service_id,component_id,component_role,included_quantity,quantity_input_key,is_required,is_optional,fulfillment_mode,sort_order,dd_service_components(id,component_code,component_name,unit_type,cost_category,tax_classification,default_fulfillment_mode)').eq('is_active',true).order('sort_order',{ascending:true}),
-          context.supabase.from('dd_providers').select('id,first_name,last_name,role_title,is_active,dd_provider_organizations(name,accepts_new_work,is_active)').eq('is_active',true).order('first_name',{ascending:true})
+          context.supabase.from('dd_providers').select('id,first_name,last_name,role_title,is_active,dd_provider_organizations(name,accepts_new_work,is_active)').eq('is_active',true).order('first_name',{ascending:true}),
+          // Live Discovery package-match support (slice 1 of the commercial composition
+          // engine -- see /mnt/project-files/quote-builder/quote-builder-audit-2026-09-23.md).
+          // Distinct from dd_service_package_components above, which is fulfillment BOM, not
+          // customer pricing. Returns every package regardless of status so staff can see
+          // near-misses too; matchPackages() in scopeComposer2026.js filters to SELL_NOW.
+          context.supabase.from('dd_governed_packages').select('id,package_code,package_name,division,commercial_offer_status,package_price_cents,pricing_type,dd_governed_package_components(canonical_sku,quantity,is_required,sort_order)').order('package_name',{ascending:true})
         ]);
         if (componentsResult.error) throw componentsResult.error;
         if (providersResult.error) throw providersResult.error;
+        if (governedPackagesResult.error) throw governedPackagesResult.error;
         const providers=(providersResult.data||[]).filter(p=>p.dd_provider_organizations?.is_active&&p.dd_provider_organizations?.accepts_new_work);
-        return ok(res,{role:context.role,ownerUserId:context.user.id,packageComponents:componentsResult.data||[],providers});
+        const governedPackages=(governedPackagesResult.data||[]).map(p=>({id:p.id,package_code:p.package_code,package_name:p.package_name,division:p.division,commercial_offer_status:p.commercial_offer_status,package_price_cents:p.package_price_cents,pricing_type:p.pricing_type,components:(p.dd_governed_package_components||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))}));
+        return ok(res,{role:context.role,ownerUserId:context.user.id,packageComponents:componentsResult.data||[],providers,governedPackages});
       }
       if (req.query?.clientOrganizations === '1') {
         const { data: organizations, error } = await context.supabase.from('dd_client_organizations')
@@ -680,7 +829,7 @@ export default async function handler(req, res) {
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
       if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'Only READY_TO_SEND estimates can be delivered.', 409);
       if (estimate.economics_status !== 'PASS') return fail(res, 'Quote economics must PASS before delivery.', 409);
-      if (estimate.assignment_readiness_status !== 'READY') return fail(res, 'Required owner/provider assignments must be accepted before delivery.', 409);
+      if (!['PENDING_PAYMENT','READY'].includes(String(estimate.assignment_readiness_status || '').toUpperCase())) return fail(res, 'Quote fulfillment must be commercially resolved before delivery.', 409);
       if (!estimate.client_email) return fail(res, 'A customer email is required to deliver this quote.', 422);
       const identityGate = customerIdentityGate(estimate, context.user?.email);
       if (!identityGate.ok) return identityFailure(res, identityGate);
@@ -904,20 +1053,61 @@ export default async function handler(req, res) {
       });
       return ok(res, { assignment });
     }
+    if (action === 'finalize_manual_provider_route') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const miles = Number(payload.routeDistanceMiles);
+      const sourceNote = String(payload.sourceNote || '').trim();
+      const verificationMethod = String(payload.verificationMethod || 'MANUAL_MAP_CHECK');
+      if (!payload.assignmentId || !Number.isFinite(miles) || miles < 0 || !sourceNote) return fail(res, 'assignmentId, non-negative routeDistanceMiles, and sourceNote are required.');
+      const { data, error } = await context.supabase.rpc('dd_finalize_manual_provider_route_offer', {
+        p_assignment_id: payload.assignmentId,
+        p_route_distance_miles: miles,
+        p_source_note: sourceNote,
+        p_verified_by: context.user.id,
+        p_verification_method: verificationMethod
+      });
+      if (error) throw error;
+      return ok(res, { routeResult: data });
+    }
     if (action === 'estimate_assignment_response') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
-      const providerId = context.isStaff ? payload.providerId : context.identity?.entity_id;
-      if (!providerId) return fail(res, 'Provider identity required.', 403);
-      const assignment = await respondToEstimateAssignment(context.supabase, {
+      if (context.isStaff) return fail(res, 'Provider-bound offer responses must be performed from a provider session.', 403);
+      if (!payload.assignmentId) return fail(res, 'assignmentId is required.');
+
+      // Provider responses intentionally cross the hardened provider-safe RPC boundary.
+      // The RPC resolves provider identity from the authenticated JWT and binds the
+      // assignment server-side; the browser/API payload never gets to choose provider_id.
+      const decision = String(payload.decision || '').toUpperCase();
+      if (decision === 'COUNTEROFFER') {
+        const amount = Number(payload.counterCompensation);
+        const reason = String(payload.reason || '').trim();
+        if (!Number.isFinite(amount) || amount <= 0 || !reason) return fail(res, 'A positive counteroffer amount and reason are required.');
+        const { data, error } = await context.supabase.rpc('dd_submit_my_provider_counteroffer', {
+          p_offer_id: payload.assignmentId,
+          p_counter_compensation: amount,
+          p_counter_reason: reason,
+          p_counter_basis: payload.counterBasis || {}
+        });
+        if (error) return fail(res, error.message || 'Counteroffer could not be submitted.', 400);
+        return ok(res, { assignment: data });
+      }
+      if (!['ACCEPT','DECLINE'].includes(decision)) return fail(res, 'Decision must be ACCEPT, DECLINE, or COUNTEROFFER.');
+      const { data, error } = await context.supabase.rpc('dd_respond_to_my_offer', {
+        p_assignment_id: payload.assignmentId,
+        p_accept: decision === 'ACCEPT',
+        p_reason: payload.reason || null
+      });
+      if (error) return fail(res, error.message || 'Offer response could not be submitted.', 400);
+      return ok(res, { assignment: data });
+    }
+    if (action === 'owner_estimate_assignment_response') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const result = await respondToOwnerEstimateAssignment(context.supabase, {
         assignmentId: payload.assignmentId,
-        providerId,
         decision: payload.decision,
-        counterCompensation: payload.counterCompensation,
-        counterBasis: payload.counterBasis || null,
-        reason: payload.reason || null,
         actorUserId: context.user.id
       });
-      return ok(res, { assignment });
+      return ok(res, result);
     }
     if (action === 'resolve_estimate_counteroffer') {
       const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
@@ -935,7 +1125,16 @@ export default async function handler(req, res) {
       const { data: appointment, error } = await context.supabase.from('dd_job_appointments').insert({ job_id: jobId, provider_id: providerId, starts_at: startsAt, ends_at: endsAt, customer_notes: customerNotes || null, internal_notes: internalNotes || null, created_by: context.user.id }).select().single();
       if (error) throw error;
       await context.supabase.from('dd_jobs').update({ job_status: 'SCHEDULED', scheduled_start: startsAt, scheduled_end: endsAt, assigned_to: providerId }).eq('id', jobId);
+      await enqueueAppointmentConfirmation(context.supabase, appointment).catch(err => captureServerException(err, { route: 'portal-operations', stage: 'schedule_appointment_confirmation_email' }));
       return ok(res, { appointment });
+    }
+    if (action === 'resolve_appointment_change_request') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const { changeRequestId, resolutionNote } = payload;
+      if (!changeRequestId) return fail(res, 'changeRequestId is required.');
+      const { error } = await context.supabase.from('dd_appointment_change_requests').update({ status: 'RESOLVED', resolved_at: new Date().toISOString(), resolved_by: context.user.id, resolution_note: resolutionNote || null, updated_at: new Date().toISOString() }).eq('id', changeRequestId).eq('status', 'OPEN');
+      if (error) throw error;
+      return ok(res, { resolved: true });
     }
     if (action === 'sign_provider_agreement') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
@@ -987,6 +1186,15 @@ export default async function handler(req, res) {
       const { data, error } = await context.supabase.rpc('dd_list_property_resident_invites', { p_property_id: propertyId });
       if (error) return fail(res, error.message || 'Could not load resident invitations.', 400);
       return ok(res, { invites: data || [] });
+    }
+    if (action === 'start_my_job' || action === 'complete_my_job') {
+      const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      if (context.isStaff) return fail(res, 'Provider job execution must be performed from a provider session.', 403);
+      if (!payload.jobId) return fail(res, 'jobId is required.');
+      const rpc = action === 'start_my_job' ? 'dd_start_job' : 'dd_complete_job';
+      const { data, error } = await context.supabase.rpc(rpc, { p_job_id: payload.jobId });
+      if (error) return fail(res, error.message || 'Job state could not be updated.', 400);
+      return ok(res, { job: data });
     }
     if (action === 'field_event') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);

@@ -60,7 +60,7 @@ describe('DDOS intake routing', () => {
     expect(routeIntake({ channelType: 'B2B2C' })).toEqual(
       expect.objectContaining({
         channel: null,
-        source: 'unresolved',
+        source: 'invalid_commercial_model_as_channel',
         workflow: INTAKE_WORKFLOWS.MANUAL_REVIEW,
         initialState: REQUEST_STATES.NEW,
       })

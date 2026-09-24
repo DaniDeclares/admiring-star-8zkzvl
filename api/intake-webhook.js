@@ -33,11 +33,43 @@ async function resolvePortalOrganization(req) {
   return identity?.organization_id || null;
 }
 
+function intakeErrorCode(error){
+ const message=String(error?.message||'');
+ if(message.includes('REQUESTED_TIME_UNAVAILABLE')) return 'INTAKE_TIME_UNAVAILABLE';
+ if(message.includes('CH01_')) return 'INTAKE_CH01_GOVERNANCE';
+ if(error instanceof SyntaxError) return 'INTAKE_MODULE_OR_PAYLOAD_SYNTAX';
+ if(/prisma\.\$queryRaw/i.test(message)) return 'INTAKE_DB_ADAPTER';
+ if(/unique constraint|P2002/i.test(message)) return 'INTAKE_DUPLICATE_CONSTRAINT';
+ if(/foreign key|P2003/i.test(message)) return 'INTAKE_RELATION_CONSTRAINT';
+ return 'INTAKE_PERSISTENCE_FAILED';
+}
+async function recordIntakeFailure(req,error,stage='request_persistence'){
+ const traceId=crypto.randomUUID();
+ const code=intakeErrorCode(error);
+ try{
+  const url=process.env.SUPABASE_URL||process.env.REACT_APP_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if(url&&key){
+   const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+   const b=req.body||{};
+   await admin.from('dd_public_intake_failures').insert({trace_id:traceId,route:'/api/intake-webhook',stage,error_code:code,error_name:error?.name||null,error_message:String(error?.message||'').slice(0,2000),service_id:b.pricingServiceId||b.serviceId||b.commercialIntent?.serviceId||null,front_door_code:b.frontDoorCode||null,channel_type:b.channelType||null,customer_email:b.email||null,request_context:{requestedStartAt:b.requestedStartAt||null,locationState:b.locationState||null,locationZip:b.locationZip||null}});
+  }
+ }catch(diagError){console.error('Intake diagnostic persistence error:',diagError)}
+ console.error('Intake failure diagnostic',{traceId,code,stage,error:error?.stack||String(error)});
+ return {traceId,code};
+}
+
 export default async function handler(req,res){
  if(req.method!=='POST')return res.status(405).json({error:'This action is not available.'});
  try{
-  const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,organizationName,locationAddress,timeline,budgetRange,requestedStartAt,commercialModel,subchannelCode,requestedTimezone='America/New_York',frontDoorCode}=req.body||{};
+  const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,organizationName,locationAddress,locationCity,locationState,locationZip,timeline,budgetRange,requestedStartAt,commercialModel,subchannelCode,requestedTimezone='America/New_York',frontDoorCode}=req.body||{};
   if(!name||(!email&&!phone))return res.status(400).json({error:'Please provide your name and at least one way to contact you.'});
+  const normalizedState=String(locationState||'').trim().toUpperCase();
+  const normalizedCity=String(locationCity||'').trim();
+  const normalizedZip=String(locationZip||'').trim();
+  const normalizedStreet=String(locationAddress||'').trim();
+  if(!normalizedStreet||!normalizedCity||!['GA','SC'].includes(normalizedState)||!/^[0-9]{5}(?:-[0-9]{4})?$/.test(normalizedZip))return res.status(400).json({error:'Please provide the complete Georgia or South Carolina service address, including city, state, and ZIP.'});
+  const fullServiceAddress=[normalizedStreet,normalizedCity,normalizedState,normalizedZip].join(', ');
+
   const routing=routeIntake({channelType,category,commercialModel});
   const channelToCode={B2C:'CH01',B2B_APT:'CH02',B2B_RE:'CH03',B2B:'CH04',B2G:'CH05'};
   const governedChannelCode=channelToCode[channelType]||null;
@@ -83,9 +115,9 @@ export default async function handler(req,res){
   let booking=null;
   const result=await prisma.$transaction(async tx=>{
    const lead=await tx.lead.create({data:{full_name:name,email:email||null,phone:phone||null,organization_name:organizationName||null,status:'new',notes:null}});
-   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:locationAddress||null,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:{...routingContext,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null},pricingServiceId:serviceRef,commercialIntent:serverCommercialIntent,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode},status:requestState,priority:'normal',channelType:channelType||null,officialChannel:governedChannelCode,commercialModel:routingContext.commercialModel||null,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null}});
-   if(portalOrganizationId) await tx.$executeRawUnsafe(`UPDATE public.service_requests SET organization_id=$1::uuid WHERE id=$2::uuid`, portalOrganizationId, request.id);
-   if(paymentEligible){await tx.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:locationAddress||null,timeline:timeline||null,intake_answers:{serviceId:serviceRef,commercialIntent:serverCommercialIntent},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});}
+   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:fullServiceAddress,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:{...routingContext,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null},pricingServiceId:serviceRef,commercialIntent:serverCommercialIntent,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode,serviceAddress:{street:normalizedStreet,city:normalizedCity,state:normalizedState,zip:normalizedZip}},status:requestState,priority:'normal',channelType:channelType||null,officialChannel:governedChannelCode,commercialModel:routingContext.commercialModel||null,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null,jurisdictionState:normalizedState,organizationId:portalOrganizationId||null}});
+   
+   if(paymentEligible){await tx.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:fullServiceAddress,timeline:timeline||null,state:normalizedState,zip_code:normalizedZip,intake_answers:{serviceId:serviceRef,commercialIntent:serverCommercialIntent,serviceAddress:{street:normalizedStreet,city:normalizedCity,state:normalizedState,zip:normalizedZip}},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});}
    if(requestedStartAt){
     const start=new Date(requestedStartAt); if(Number.isNaN(start.valueOf())) throw new Error('INVALID_REQUESTED_DATE_TIME');
     const special=serviceRef?await tx.$queryRawUnsafe(`SELECT service_name AS name,unit,price FROM public.danis_specials_offers WHERE service_id=$1 AND active=true AND market='GA' LIMIT 1`,serviceRef):[];
@@ -95,7 +127,7 @@ export default async function handler(req,res){
     const protectedEnd=new Date(end.getTime()+30*60000);
     await tx.$executeRawUnsafe(`UPDATE public.dd_owner_booking_requests SET status='EXPIRED',updated_at=now() WHERE status='HOLD' AND hold_expires_at IS NOT NULL AND hold_expires_at < now()`);
     try{
-      const rows=await tx.$queryRawUnsafe(`INSERT INTO public.dd_owner_booking_requests (service_request_id,service_id,service_name,customer_name,customer_email,customer_phone,location_address,starts_at,ends_at,requested_start_at,requested_end_at,timezone,duration_minutes,buffer_before_minutes,buffer_after_minutes,status,hold_expires_at,notes) VALUES ($1::uuid,$2,$3,$4,$5,$6,$7,$8::timestamptz,$9::timestamptz,$10::timestamptz,$11::timestamptz,$12,$13,30,30,'HOLD',now()+interval '30 minutes',$14) RETURNING id,requested_start_at,requested_end_at,starts_at,ends_at,hold_expires_at,duration_minutes`,request.id,serviceRef,serviceType||'Service request',name,email||null,phone||null,locationAddress||null,protectedStart.toISOString(),protectedEnd.toISOString(),start.toISOString(),end.toISOString(),requestedTimezone,duration,details||null);
+      const rows=await tx.$queryRawUnsafe(`INSERT INTO public.dd_owner_booking_requests (service_request_id,service_id,service_name,customer_name,customer_email,customer_phone,location_address,starts_at,ends_at,requested_start_at,requested_end_at,timezone,duration_minutes,buffer_before_minutes,buffer_after_minutes,status,hold_expires_at,notes) VALUES ($1::uuid,$2,$3,$4,$5,$6,$7,$8::timestamptz,$9::timestamptz,$10::timestamptz,$11::timestamptz,$12,$13,30,30,'HOLD',now()+interval '30 minutes',$14) RETURNING id,requested_start_at,requested_end_at,starts_at,ends_at,hold_expires_at,duration_minutes`,request.id,serviceRef,serviceType||'Service request',name,email||null,phone||null,fullServiceAddress,protectedStart.toISOString(),protectedEnd.toISOString(),start.toISOString(),end.toISOString(),requestedTimezone,duration,details||null);
       booking=rows[0]||null;
     }catch(error){
       const text=String(error?.message||'');
@@ -106,7 +138,7 @@ export default async function handler(req,res){
    return {lead,request};
   });
   const request=result.request;
-  const notificationText=['New DANI DECLARES service request',`Name: ${name}`,`Email: ${email||'not provided'}`,`Phone: ${phone||'not provided'}`,`Customer type: ${channelType||'not specified'}`,`Starting point: ${frontDoorCode||'not specified'}`,`Service: ${serviceType||category||'not specified'}`,`Service reference: ${serviceRef||'not specified'}`,`Location: ${locationAddress||'not provided'}`,`Requested date/time: ${requestedStartAt||'not provided'}`,`Timeline: ${timeline||'not provided'}`,`Budget: ${budgetRange||'not provided'}`,`Request ID: ${request.id}`,`Booking hold: ${booking?.id||'none'}`].join('\n');
+  const notificationText=['New DANI DECLARES service request',`Name: ${name}`,`Email: ${email||'not provided'}`,`Phone: ${phone||'not provided'}`,`Customer type: ${channelType||'not specified'}`,`Starting point: ${frontDoorCode||'not specified'}`,`Service: ${serviceType||category||'not specified'}`,`Service reference: ${serviceRef||'not specified'}`,`Location: ${fullServiceAddress}`,`Requested date/time: ${requestedStartAt||'not provided'}`,`Timeline: ${timeline||'not provided'}`,`Budget: ${budgetRange||'not provided'}`,`Request ID: ${request.id}`,`Booking hold: ${booking?.id||'none'}`].join('\n');
   try{
    if(process.env.NOTIFICATION_EMAIL)await publishOperationalEvent({
     eventType:'LEAD_CREATED',
@@ -146,7 +178,7 @@ export default async function handler(req,res){
      `Request ID: ${request.id}`,
      `Service: ${serviceType||category||'Request received'}`,
      `Requested date/time: ${requestedStartAt||'Not specified'}`,
-     `Location: ${locationAddress||'Not specified'}`,
+     `Location: ${fullServiceAddress}`,
      '',
      'Your requested time is not a final appointment until DANI DECLARES confirms scope, availability and scheduling.',
      'We will follow up with the next step for your request.',
@@ -187,8 +219,8 @@ export default async function handler(req,res){
  }catch(error){
   captureServerException(error,{route:'/api/intake-webhook',stage:'request_persistence'});
   await flushServerSentry();
-  console.error('Intake persistence error:',error);
-  if(String(error?.message||'').includes('REQUESTED_TIME_UNAVAILABLE'))return res.status(409).json({error:'That requested time is no longer available. Please choose another date or time.'});
-  return res.status(500).json({error:'We could not save your request right now. Please try again or contact DANI DECLARES.'});
+  const diagnostic=await recordIntakeFailure(req,error);
+  if(String(error?.message||'').includes('REQUESTED_TIME_UNAVAILABLE'))return res.status(409).json({error:'That requested time is no longer available. Please choose another date or time.',errorCode:diagnostic.code,reference:diagnostic.traceId});
+  return res.status(500).json({error:'We could not save your request right now. Please try again or contact DANI DECLARES.',errorCode:diagnostic.code,reference:diagnostic.traceId});
  }
 }

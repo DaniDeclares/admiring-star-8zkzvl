@@ -90,7 +90,7 @@ export function useProviderWorkspace() {
     };
   }, [session, load]);
 
-  const actionEventName = (action) => ({ assignment_response: 'job_assigned', field_event: 'job_started', task_update: 'job_started', change_order_decision: 'estimate_accepted', completion_review: 'job_completed' }[action] || null);
+  const actionEventName = (action) => ({ assignment_response: 'job_assigned', estimate_assignment_response: 'job_assigned', start_my_job: 'job_started', complete_my_job: 'job_submitted', field_event: 'job_started', task_update: 'job_started', change_order_decision: 'estimate_accepted', completion_review: 'job_completed' }[action] || null);
   const act = async (action, payload) => {
     setMessage(''); setError(''); if (!session) return;
     try {
