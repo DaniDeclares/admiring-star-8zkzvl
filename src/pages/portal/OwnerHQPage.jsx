@@ -107,6 +107,14 @@ function OwnerHq({ session }) {
       return !Number.isNaN(d.getTime()) && d >= today && d < new Date(today.getTime() + 86400000);
     });
     const quoteValue = quotes.reduce((sum, q) => sum + Number(q.estimated_total || 0), 0);
+    const now = new Date(); now.setHours(23,59,59,999);
+    const salesDueRows = salesQueue.filter(item => {
+      if (String(item.disposition || '').toUpperCase() === 'PAYMENT_SUCCEEDED') return false;
+      if (!item.next_action_date) return false;
+      const due = new Date(item.next_action_date + 'T23:59:59');
+      return !Number.isNaN(due.getTime()) && due <= now;
+    }).sort((a,b) => Number(b.priority_score || 0) - Number(a.priority_score || 0));
+    const paidServiceRows = salesQueue.filter(item => String(item.disposition || '').toUpperCase() === 'PAYMENT_SUCCEEDED');
     return {
       openRequests: openRequests.length,
       activeJobs: activeJobs.length,
@@ -118,6 +126,10 @@ function OwnerHq({ session }) {
       quoteValue,
       ownerAttention: ownerAttention.length,
       salesQueue: salesQueue.length,
+      salesDue: salesDueRows.length,
+      salesDueRows,
+      paidServices: paidServiceRows.length,
+      paidServiceRows,
       researchLeads: researchLeads.length,
       ownerAccounting: accountingExceptions.filter(item => item.requires_owner_decision).length,
       accountingExceptions: accountingExceptions.length,
@@ -163,19 +175,14 @@ function OwnerHq({ session }) {
     </section>
 
     <div className="portal-summary-grid">
-      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.openRequests}</strong><span>Open requests</span></Link>
+      <a className="portal-summary-tile" href="#owner-attention"><strong>{metrics.ownerAttention}</strong><span>Needs Danielle</span></a>
+      <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Sales due / overdue</span></Link>
       <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.activeJobs}</strong><span>Active jobs</span></Link>
-      <Link className="portal-summary-tile" to="/portal/provider-approval"><strong>{metrics.providers}</strong><span>Provider records</span></Link>
-      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.todayAppointments}</strong><span>Appointments today</span></Link>
-      <Link className="portal-summary-tile" to="/portal/evidence"><strong>{metrics.pendingEvidence}</strong><span>Evidence pending QA</span></Link>
-      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.atRisk}</strong><span>At-risk / payment exceptions</span></Link>
-      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.pendingChanges}</strong><span>Change orders pending</span></Link>
-      <Link className="portal-summary-tile" to="/portal/quotes"><strong>{money(metrics.quoteValue)}</strong><span>Quote value currently in DANI</span></Link>
-      <a className="portal-summary-tile" href="#owner-attention"><strong>{metrics.ownerAttention}</strong><span>Needs your attention</span></a>
-      <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesQueue}</strong><span>Sales queue</span></Link>
-      <a className="portal-summary-tile" href="#owner-accounting"><strong>{metrics.ownerAccounting}</strong><span>Owner accounting decisions</span></a>
-      <a className="portal-summary-tile" href="#owner-comms"><strong>{metrics.communicationAttention}</strong><span>Communications requiring attention</span></a>
-      <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.researchLeads}</strong><span>Research leads awaiting promotion</span></Link>
+      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.paidServices}</strong><span>Paid services to fulfill</span></Link>
+      <a className="portal-summary-tile" href="#owner-accounting"><strong>{metrics.ownerAccounting}</strong><span>Money decisions</span></a>
+      <a className="portal-summary-tile" href="#owner-comms"><strong>{metrics.communicationAttention}</strong><span>Replies needing action</span></a>
+      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.atRisk}</strong><span>Operational exceptions</span></Link>
+      <Link className="portal-summary-tile" to="/portal/quotes"><strong>{money(metrics.quoteValue)}</strong><span>Open quote value</span></Link>
     </div>
 
     <section className="portal-card" id="owner-attention" style={{ border: (data?.ownerAttention || []).some(item => item.priority === 'URGENT') ? '2px solid #9b3346' : undefined }}>
@@ -200,24 +207,20 @@ function OwnerHq({ session }) {
     <section className="portal-card" id="owner-revenue">
       <div>
         <p className="portal-eyebrow">Revenue control</p>
-        <h2 style={{ margin: '5px 0 0' }}>Sales & Acquisition</h2>
-        <p className="portal-note" style={{ marginTop: 8 }}>Live sales workload from DANI's governed queue, with research leads kept separate until promoted.</p>
+        <h2 style={{ margin: '5px 0 0' }}>Sales Due Now</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>Only dated sales actions that are due or overdue appear here. The full CRM stays in the sales workspace.</p>
       </div>
       <div className="portal-summary-grid" style={{ marginTop: 14 }}>
-        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesQueue}</strong><span>Sales queue records</span></Link>
-        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{(data?.salesQueue || []).filter(x => String(x.disposition || '').toUpperCase() === 'NOT_CONTACTED').length}</strong><span>Not contacted</span></Link>
-        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{(data?.salesQueue || []).filter(x => ['INTERESTED','NEEDS_INFO','VOICEMAIL'].includes(String(x.disposition || '').toUpperCase())).length}</strong><span>Active follow-up</span></Link>
+        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Due / overdue actions</span></Link>
+        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesQueue}</strong><span>Total CRM records</span></Link>
         <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.researchLeads}</strong><span>Research-only leads</span></Link>
       </div>
       <div style={{ marginTop: 14 }}>
-        {(data?.salesQueue || []).slice(0, 5).map(item => <div className="portal-row" key={item.id}>
-          <div>
-            <strong>{item.company_name || item.contact_name || 'Sales lead'}</strong>
-            <small>{item.contact_name || 'Contact pending'} · {item.source || 'DANI'} · {item.disposition || 'UNSET'}</small>
-            {item.next_action && <small>Next: {item.next_action}{item.next_action_date ? ' · ' + new Date(item.next_action_date).toLocaleDateString() : ''}</small>}
-          </div>
-          <span className="portal-pill">{item.intent_tier || item.campaign_status || 'QUEUE'}</span>
+        {(metrics.salesDueRows || []).slice(0, 8).map(item => <div className="portal-row" key={item.id}>
+          <div><strong>{item.company_name || item.contact_name || 'Sales lead'}</strong><small>{item.contact_name || 'Contact pending'} · Priority {item.priority_score ?? '—'} · {item.disposition || 'UNSET'}</small><small>Next: {item.next_action || 'Follow up'} · due {item.next_action_date}</small></div>
+          <span className="portal-pill">DUE</span>
         </div>)}
+        {!metrics.salesDue && <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No sales actions are due.</div>}
       </div>
     </section>
 
