@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import { createProviderIntakeStaging } from '../lib/pendingOnboarding.js';
-import { capture, captureServiceLifecycle } from '../lib/posthogAnalytics.js';
+import { capture } from '../lib/posthogAnalytics.js';
 import { captureSentryEvent, captureSentryException } from '../lib/sentry.js';
 import { SITE_URL } from '../data/siteConfig.js';
 import { BUCKETS, bucketForFamily } from '../data/serviceCatalogFamilies.js';
