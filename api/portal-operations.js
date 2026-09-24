@@ -5,6 +5,7 @@ import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwner
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin } from './_w9Crypto.js';
+import { mintAppointmentToken } from './_appointmentTokens.js';
 import Stripe from 'stripe';
 
 // Verbatim from Form W-9 (Rev. March 2024), Part II Certification -- the IRS's
@@ -106,6 +107,50 @@ function sanitizeProviderAssignment(assignment) {
   if (!assignment) return null;
   return { id: assignment.id, job_id: assignment.job_id, provider_id: assignment.provider_id, assignment_status: assignment.assignment_status, provider_notes: assignment.provider_notes, offered_at: assignment.offered_at, accepted_at: assignment.accepted_at, rejected_at: assignment.rejected_at, cancelled_at: assignment.cancelled_at, offer_expires_at: assignment.offer_expires_at, response_at: assignment.response_at, offer_sequence: assignment.offer_sequence, job: sanitizeProviderJob(assignment.job) };
 }
+async function enqueueAppointmentConfirmation(supabase, appointment) {
+  const { rawToken, tokenHash, expiresAt } = mintAppointmentToken(appointment.id);
+  const { error: tokenError } = await supabase.from('dd_job_appointments').update({ confirmation_token_hash: tokenHash, confirmation_token_expires_at: expiresAt.toISOString() }).eq('id', appointment.id);
+  if (tokenError) throw tokenError;
+
+  const { data: job } = await supabase.from('dd_jobs').select('id, location_address, scope_summary, service_request_id').eq('id', appointment.job_id).maybeSingle();
+  if (!job) return;
+  let customerEmail = null;
+  if (job.service_request_id) {
+    const { data: request } = await supabase.from('service_requests').select('lead_id').eq('id', job.service_request_id).maybeSingle();
+    if (request?.lead_id) {
+      const { data: lead } = await supabase.from('leads').select('email, full_name').eq('id', request.lead_id).maybeSingle();
+      customerEmail = lead?.email || null;
+    }
+  }
+  if (!customerEmail) return;
+
+  const siteUrl = process.env.SITE_URL || 'https://danideclares.com';
+  const { data: saleRow } = await supabase.from('dd_sales_queue').select('quoted_amount').eq('job_id', appointment.job_id).maybeSingle();
+  const { data: depositEvent } = await supabase.from('dd_payment_events').select('amount_received, payment_status').eq('job_id', appointment.job_id).eq('event_type', 'DEPOSIT_RECEIVED').order('created_at', { ascending: false }).limit(1).maybeSingle();
+
+  await supabase.from('dd_event_outbox').insert({
+    event_key: `appointment-confirmation-${appointment.id}`,
+    event_type: 'APPOINTMENT_SCHEDULED',
+    channel: 'EMAIL',
+    aggregate_type: 'dd_job_appointments',
+    aggregate_id: appointment.id,
+    payload: {
+      to: customerEmail,
+      subject: 'Your DANI DECLARES appointment',
+      template: 'appointment-confirmation',
+      templateData: {
+        startsAt: appointment.starts_at,
+        address: job.location_address,
+        scope: job.scope_summary,
+        total: saleRow?.quoted_amount != null ? Number(saleRow.quoted_amount) : null,
+        depositAmount: depositEvent ? Number(depositEvent.amount_received) : null,
+        depositCleared: depositEvent?.payment_status === 'succeeded' || depositEvent?.payment_status === 'cleared',
+        confirmUrl: `${siteUrl}/appointment/respond?action=confirm&token=${encodeURIComponent(rawToken)}`,
+        changeUrl: `${siteUrl}/appointment/respond?action=change&token=${encodeURIComponent(rawToken)}`,
+      },
+    },
+  });
+}
 async function getStaffSnapshot(supabase) {
   const [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions, ownerAttention] = await Promise.all([
     supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100),
@@ -128,6 +173,10 @@ async function getStaffSnapshot(supabase) {
   ]);
   const errors = [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions, ownerAttention].filter(item => item.error);
   if (errors.length) throw errors[0].error;
+  const appointmentChangeRequestsResult = await supabase.from('dd_appointment_change_requests').select('*').eq('status', 'OPEN').order('created_at', { ascending: false }).limit(50);
+  const appointmentChangeRequests = { data: appointmentChangeRequestsResult.error ? [] : (appointmentChangeRequestsResult.data || []) };
+  const financialTargetsResult = await supabase.from('dd_financial_target_authority').select('metric_key, target_amount, currency, effective_from');
+  const financialTargets = { data: financialTargetsResult.error ? [] : (financialTargetsResult.data || []) };
   const requestRows = requests.data || [];
   const leadIds = [...new Set(requestRows.map(row => row.lead_id).filter(Boolean))];
   let leadById = new Map();
@@ -147,7 +196,7 @@ async function getStaffSnapshot(supabase) {
     };
   });
   const estimateAssignments = await getOwnerEstimateAssignments(supabase);
-  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], ownerAttention: ownerAttention.data || [], estimateAssignments };
+  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], ownerAttention: ownerAttention.data || [], estimateAssignments, appointmentChangeRequests: appointmentChangeRequests.data || [], weeklyCollectedTarget: ((financialTargets.data || []).find(row => row.metric_key === 'WEEKLY_COLLECTED_TARGET')?.target_amount ?? null) };
 }
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
@@ -992,7 +1041,16 @@ export default async function handler(req, res) {
       const { data: appointment, error } = await context.supabase.from('dd_job_appointments').insert({ job_id: jobId, provider_id: providerId, starts_at: startsAt, ends_at: endsAt, customer_notes: customerNotes || null, internal_notes: internalNotes || null, created_by: context.user.id }).select().single();
       if (error) throw error;
       await context.supabase.from('dd_jobs').update({ job_status: 'SCHEDULED', scheduled_start: startsAt, scheduled_end: endsAt, assigned_to: providerId }).eq('id', jobId);
+      await enqueueAppointmentConfirmation(context.supabase, appointment).catch(err => captureServerException(err, { route: 'portal-operations', stage: 'schedule_appointment_confirmation_email' }));
       return ok(res, { appointment });
+    }
+    if (action === 'resolve_appointment_change_request') {
+      const guard = requireRole(context, STAFF_ROLES); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      const { changeRequestId, resolutionNote } = payload;
+      if (!changeRequestId) return fail(res, 'changeRequestId is required.');
+      const { error } = await context.supabase.from('dd_appointment_change_requests').update({ status: 'RESOLVED', resolved_at: new Date().toISOString(), resolved_by: context.user.id, resolution_note: resolutionNote || null, updated_at: new Date().toISOString() }).eq('id', changeRequestId).eq('status', 'OPEN');
+      if (error) throw error;
+      return ok(res, { resolved: true });
     }
     if (action === 'sign_provider_agreement') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
