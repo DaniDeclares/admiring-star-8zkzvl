@@ -198,6 +198,39 @@ async function getStaffSnapshot(supabase) {
   const estimateAssignments = await getOwnerEstimateAssignments(supabase);
   return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], ownerAttention: ownerAttention.data || [], estimateAssignments, appointmentChangeRequests: appointmentChangeRequests.data || [], weeklyCollectedTarget: ((financialTargets.data || []).find(row => row.metric_key === 'WEEKLY_COLLECTED_TARGET')?.target_amount ?? null) };
 }
+async function getOwnerControlSnapshot(supabase) {
+  const base = await getStaffSnapshot(supabase);
+  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox] = await Promise.all([
+    supabase.from('dd_sales_queue')
+      .select('id,contact_name,company_name,role_title,phone,email,lane,source,source_account,disposition,next_action,next_action_date,campaign_status,intent_tier,salesperson_name,updated_at')
+      .order('updated_at', { ascending: false }).limit(250),
+    supabase.from('dd_research_leads').select('*').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_accounting_exception_queue')
+      .select('id,exception_type,source_system,description,assigned_lane,status,requires_owner_decision,resolution,created_at,updated_at')
+      .not('status','in','("RESOLVED","CLOSED")').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_communication_events')
+      .select('id,direction,sender_address,subject,relationship_type,provider_id,priority,requires_attention,attention_reason,received_at,created_at')
+      .eq('requires_attention', true).order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_agent_run_control')
+      .select('id,agent_key,stage_key,status,turns_used,tool_calls_used,retries_used,estimated_cost_usd,breaker_reason,fallback_used,started_at,last_activity_at,completed_at')
+      .order('started_at', { ascending: false }).limit(50),
+    supabase.from('dd_external_action_outbox')
+      .select('id,action_key,action_type,destination_system,status,attempt_count,max_attempts,next_attempt_at,last_error_code,last_error,created_at,updated_at')
+      .order('created_at', { ascending: false }).limit(50),
+  ]);
+  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox].filter(item => item.error);
+  if (errors.length) throw errors[0].error;
+  return {
+    ...base,
+    salesQueue: salesQueue.data || [],
+    researchLeads: researchLeads.data || [],
+    accountingExceptions: accountingExceptions.data || [],
+    communicationAttention: communicationEvents.data || [],
+    agentRuns: agentRuns.data || [],
+    actionOutbox: actionOutbox.data || [],
+  };
+}
+
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
     .from('dd_provider_applications')
@@ -416,6 +449,11 @@ export default async function handler(req, res) {
       if (!context.isStaff) {
         if (context.role === 'provider') return ok(res, { role: context.role, notificationPreferences, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id, context.userSupabase) });
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
+      }
+      if (req.query?.ownerDashboard === '1') {
+        const isMasterOwner = String(context.user?.email || '').toLowerCase() === DANI_MASTER_OWNER_EMAIL;
+        if (context.role !== 'owner' && !isMasterOwner) return fail(res, 'Owner access required.', 403);
+        return ok(res, { role: context.role, ownerAccess: true, notificationPreferences, ...await getOwnerControlSnapshot(context.supabase) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
       if (req.query?.quoteEconomics === '1') {
