@@ -5,7 +5,6 @@ import { createProviderIntakeStaging } from '../lib/pendingOnboarding.js';
 import { capture } from '../lib/posthogAnalytics.js';
 import { captureSentryEvent, captureSentryException } from '../lib/sentry.js';
 import { SITE_URL } from '../data/siteConfig.js';
-import { BUCKETS, bucketForFamily } from '../data/serviceCatalogFamilies.js';
 import './PortalAccessPage.css';
 
 const OPTIONS = [
@@ -43,7 +42,6 @@ export default function PortalAccessPage() {
   const [licenseGatedSkus,setLicenseGatedSkus]=useState(() => new Set());
   const [categories,setCategories]=useState([]);
   const [selectedServiceIds,setSelectedServiceIds]=useState(() => ({}));
-  const [expandedDoors,setExpandedDoors]=useState(() => ({}));
   const [catalogLoading,setCatalogLoading]=useState(false);
   // Keyed by category_key -> { checked, equipmentAnswer }. Applicants pick a parent
   // skill category (Cleaning, Notary, Courier, etc.) instead of hand-picking from the
@@ -170,28 +168,6 @@ export default function PortalAccessPage() {
       return next;
     });
   };
-
-  const selectedServicesPreview = useMemo(() => catalogServices.filter(s => selectedServiceIds[s.id]), [catalogServices, selectedServiceIds]);
-  const selectedServiceCount = selectedServicesPreview.length;
-
-  const serviceCategoryById = useMemo(() => {
-    const map = new Map();
-    categories.forEach(category => servicesForCategory(category).forEach(service => {
-      if (!map.has(service.id)) map.set(service.id, category);
-    }));
-    return map;
-  }, [categories, catalogServices]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const providerDoorGroups = useMemo(() => {
-    const grouped = new Map(BUCKETS.map(door => [door.key, { door, services: [] }]));
-    catalogServices.forEach(service => {
-      if (!service.service_family) return;
-      const door = bucketForFamily(service.service_family);
-      if (!door || door.key === 'other-services' || !serviceCategoryById.has(service.id)) return;
-      grouped.get(door.key)?.services.push(service);
-    });
-    return BUCKETS.map(door => grouped.get(door.key)).filter(group => group?.services.length);
-  }, [catalogServices, serviceCategoryById]);
 
   const update=(e)=>setForm({...form,[e.target.name]:e.target.value});
   const choose=(option)=>{
