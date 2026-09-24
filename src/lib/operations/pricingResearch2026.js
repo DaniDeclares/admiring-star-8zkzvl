@@ -43,7 +43,7 @@ export function buildPricingProposal({ currentPriceCents, minimumViablePriceCent
 
 export async function loadPricingResearchQueue(supabase, { family, limit = 50 } = {}) {
   let query = supabase.from('dd_service_pricing_research_queue')
-    .select('id,service_id,canonical_sku,service_family,research_status,priority,pricing_model,geography_scope,evidence_target,evidence_count,economics_ready,current_price_cents,proposed_price_cents,minimum_viable_price_cents,confidence,blocking_reason')
+    .select('id,service_id,canonical_sku,service_family,research_status,priority,pricing_model,geography_scope,evidence_target,evidence_count,economics_ready,current_price_cents,proposed_price_cents,minimum_viable_price_cents,modeled_direct_cost_cents,expected_contribution_cents,expected_margin_percent,economics_evidence_status,confidence,blocking_reason')
     .in('research_status',['QUEUED','RESEARCHING','EVIDENCE_READY','ECONOMICS_READY','REVIEW_READY'])
     .order('priority').order('canonical_sku').limit(limit);
   if (family) query = query.eq('service_family', family);
@@ -69,10 +69,25 @@ export async function recordServiceMarketEvidence(supabase, evidence) {
   return data;
 }
 
+export async function loadAuditedEconomics(supabase, serviceId) {
+  const { data, error } = await supabase.from('dd_service_economic_baselines')
+    .select('runtime_service_id,evidence_status,estimated_duration_hours,labor_rate,materials_cost,travel_cost,other_direct_cost,source_type,source_reference,source_date,notes')
+    .eq('runtime_service_id', serviceId).maybeSingle();
+  if (error) throw error;
+  if (!data || !['AUDITED','VERIFIED','GOVERNED'].includes(data.evidence_status)) return null;
+  const directCostCents = Math.round(100 * (
+    Number(data.estimated_duration_hours || 0) * Number(data.labor_rate || 0) +
+    Number(data.materials_cost || 0) + Number(data.travel_cost || 0) + Number(data.other_direct_cost || 0)
+  ));
+  return { ...data, directCostCents, minimumViablePriceCents: Math.ceil(directCostCents / 0.60) };
+}
+
 export async function refreshPricingResearchItem(supabase, queueRow, minimumViablePriceCents = null) {
   if (!queueRow?.service_id) throw new Error('Missing queue service_id.');
   if (!ALLOWED_RESEARCH_STATES.has(queueRow.research_status)) throw new Error('Invalid pricing research state.');
   const evidence = await loadServiceMarketEvidence(supabase, queueRow.service_id);
+  const economics = await loadAuditedEconomics(supabase, queueRow.service_id);
+  if (minimumViablePriceCents == null) minimumViablePriceCents = economics?.minimumViablePriceCents ?? null;
   const proposal = buildPricingProposal({
     currentPriceCents: queueRow.current_price_cents,
     minimumViablePriceCents,
@@ -81,6 +96,10 @@ export async function refreshPricingResearchItem(supabase, queueRow, minimumViab
   const update = {
     evidence_count: evidence.length,
     economics_ready: minimumViablePriceCents != null,
+    modeled_direct_cost_cents: economics?.directCostCents ?? null,
+    economics_evidence_status: economics?.evidence_status ?? null,
+    expected_contribution_cents: economics && queueRow.current_price_cents != null ? Number(queueRow.current_price_cents) - economics.directCostCents : null,
+    expected_margin_percent: economics && Number(queueRow.current_price_cents) > 0 ? Number((((Number(queueRow.current_price_cents)-economics.directCostCents)/Number(queueRow.current_price_cents))*100).toFixed(2)) : null,
     minimum_viable_price_cents: minimumViablePriceCents,
     proposed_price_cents: proposal.proposedPriceCents,
     confidence: proposal.market.confidence,
