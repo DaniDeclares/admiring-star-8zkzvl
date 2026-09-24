@@ -155,8 +155,37 @@ export function renderOperatorServiceRequestEmail(data = {}) {
   });
 }
 
+export function renderAppointmentConfirmationEmail(data = {}) {
+  const details =
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #DED5C8;border-radius:12px;border-collapse:separate;overflow:hidden;background:#FFFEFB;">' +
+      detailRow('Appointment', formatDateTime(data.startsAt)) +
+      detailRow('Address', data.address) +
+      detailRow('Scope', data.scope) +
+      (data.total != null ? detailRow('Total', '$' + Number(data.total).toFixed(2)) : '') +
+      (data.depositAmount != null ? detailRow('Deposit', '$' + Number(data.depositAmount).toFixed(2) + (data.depositCleared ? ' -- received' : ' -- pending, not yet cleared')) : '') +
+    '</table>' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:26px;"><tr>' +
+      '<td width="50%" style="padding:0 8px 0 0;">' +
+        '<a href="' + esc(data.confirmUrl) + '" style="display:block;text-align:center;padding:14px 12px;background:' + BRAND.burgundy + ';color:#FFFFFF;text-decoration:none;border-radius:7px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;">Confirm Appointment</a>' +
+      '</td>' +
+      '<td width="50%" style="padding:0 0 0 8px;">' +
+        '<a href="' + esc(data.changeUrl) + '" style="display:block;text-align:center;padding:14px 12px;background:#FFFFFF;color:' + BRAND.burgundy + ';border:1px solid ' + BRAND.burgundy + ';text-decoration:none;border-radius:7px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;">Request a Change</a>' +
+      '</td>' +
+    '</tr></table>' +
+    '<div style="margin-top:22px;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;color:#514847;">Questions before then? Call or text <a href="tel:+14704857173" style="color:' + BRAND.burgundy + ';">(470) 485-7173</a>.</div>';
+
+  return shell({
+    eyebrow: 'Appointment scheduled',
+    title: 'You’re on the schedule.',
+    intro: 'Here are the details for your upcoming appointment. Please confirm, or let us know if anything needs to change.',
+    body: details,
+    footerNote: 'WE HANDLE THE EXECUTION.',
+  });
+}
+
 export function renderTransactionalEmail({ template, data, fallbackText = '' } = {}) {
   if (template === 'customer-request-received') return renderCustomerRequestReceivedEmail(data);
   if (template === 'operator-service-request') return renderOperatorServiceRequestEmail(data);
+  if (template === 'appointment-confirmation') return renderAppointmentConfirmationEmail(data);
   return '<!doctype html><html><body style="font-family:Arial,sans-serif;color:#21191A;background:#F6F0E4;padding:24px;"><p>' + nl2br(fallbackText) + '</p></body></html>';
 }

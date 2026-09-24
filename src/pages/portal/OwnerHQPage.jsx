@@ -1,8 +1,9 @@
 /* eslint-disable */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import RequireStaffAuth from '../../components/auth/RequireStaffAuth.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
+import { capture } from '../../lib/posthogAnalytics.js';
 import { OWNER_CONNECTED_SYSTEMS, OWNER_PRIORITY_LINKS } from '../../config/ownerConnectedSystems.js';
 import './PortalWorkspacePage.css';
 
@@ -46,25 +47,36 @@ function OwnerHq({ session }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const didTrackLoad = useRef(false);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async ({ background = false } = {}) => {
+    if (!background) setLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/portal-operations', {
+      const response = await fetch('/api/portal-operations?ownerDashboard=1', {
         headers: { Authorization: 'Bearer ' + session.access_token },
       });
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.error || 'Could not load DANI HQ.');
       setData(body);
+      if (!didTrackLoad.current) {
+        didTrackLoad.current = true;
+        capture('owner_hq_loaded', {
+          sales_queue_count: (body.salesQueue || []).length,
+          research_lead_count: (body.researchLeads || []).length,
+          owner_accounting_decision_count: (body.accountingExceptions || []).filter(item => item.requires_owner_decision).length,
+          communication_attention_count: (body.communicationAttention || []).length,
+          owner_attention_count: (body.ownerAttention || []).length,
+        });
+      }
     } catch (e) {
       setError(e.message || 'Could not load DANI HQ.');
     } finally {
-      setLoading(false);
+      if (!background) setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); const timer = window.setInterval(() => load({ background: true }), 30000); return () => window.clearInterval(timer); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const metrics = useMemo(() => {
     const requests = data?.requests || [];
@@ -75,6 +87,13 @@ function OwnerHq({ session }) {
     const changes = data?.changes || [];
     const appointments = data?.appointments || [];
     const quotes = data?.estimates || [];
+    const ownerAttention = data?.ownerAttention || [];
+    const salesQueue = data?.salesQueue || [];
+    const researchLeads = data?.researchLeads || [];
+    const accountingExceptions = data?.accountingExceptions || [];
+    const communicationAttention = data?.communicationAttention || [];
+    const agentRuns = data?.agentRuns || [];
+    const actionOutbox = data?.actionOutbox || [];
 
     const openRequests = requests.filter(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()));
     const activeJobs = jobs.filter(j => !['COMPLETED','CANCELLED'].includes(String(j.job_status || '').toUpperCase()));
@@ -88,6 +107,14 @@ function OwnerHq({ session }) {
       return !Number.isNaN(d.getTime()) && d >= today && d < new Date(today.getTime() + 86400000);
     });
     const quoteValue = quotes.reduce((sum, q) => sum + Number(q.estimated_total || 0), 0);
+    const now = new Date(); now.setHours(23,59,59,999);
+    const salesDueRows = salesQueue.filter(item => {
+      if (String(item.disposition || '').toUpperCase() === 'PAYMENT_SUCCEEDED') return false;
+      if (!item.next_action_date) return false;
+      const due = new Date(item.next_action_date + 'T23:59:59');
+      return !Number.isNaN(due.getTime()) && due <= now;
+    }).sort((a,b) => Number(b.priority_score || 0) - Number(a.priority_score || 0));
+    const paidServiceRows = salesQueue.filter(item => String(item.disposition || '').toUpperCase() === 'PAYMENT_SUCCEEDED');
     return {
       openRequests: openRequests.length,
       activeJobs: activeJobs.length,
@@ -97,6 +124,18 @@ function OwnerHq({ session }) {
       pendingChanges: pendingChanges.length,
       todayAppointments: todayAppointments.length,
       quoteValue,
+      ownerAttention: ownerAttention.length,
+      salesQueue: salesQueue.length,
+      salesDue: salesDueRows.length,
+      salesDueRows,
+      paidServices: paidServiceRows.length,
+      paidServiceRows,
+      researchLeads: researchLeads.length,
+      ownerAccounting: accountingExceptions.filter(item => item.requires_owner_decision).length,
+      accountingExceptions: accountingExceptions.length,
+      communicationAttention: communicationAttention.length,
+      agentFailures: agentRuns.filter(run => ['FAILED','BLOCKED','PAUSED'].includes(String(run.status || '').toUpperCase())).length,
+      outboxExceptions: actionOutbox.filter(item => !['SUCCEEDED','COMPLETED'].includes(String(item.status || '').toUpperCase())).length,
     };
   }, [data]);
 
@@ -132,19 +171,104 @@ function OwnerHq({ session }) {
           launchpad; the linked systems stay the authority where DANI has not replaced them.
         </p>
       </div>
-      <span className="portal-pill">Live from DANI data</span>
+      <span className="portal-pill">Live DANI data · refreshes quietly every 30s</span>
     </section>
 
     <div className="portal-summary-grid">
-      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.openRequests}</strong><span>Open requests</span></Link>
+      <a className="portal-summary-tile" href="#owner-attention"><strong>{metrics.ownerAttention}</strong><span>Needs Danielle</span></a>
+      <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Sales due / overdue</span></Link>
       <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.activeJobs}</strong><span>Active jobs</span></Link>
-      <Link className="portal-summary-tile" to="/portal/provider-approval"><strong>{metrics.providers}</strong><span>Provider records</span></Link>
-      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.todayAppointments}</strong><span>Appointments today</span></Link>
-      <Link className="portal-summary-tile" to="/portal/evidence"><strong>{metrics.pendingEvidence}</strong><span>Evidence pending QA</span></Link>
-      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.atRisk}</strong><span>At-risk / payment exceptions</span></Link>
-      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.pendingChanges}</strong><span>Change orders pending</span></Link>
-      <Link className="portal-summary-tile" to="/portal/quotes"><strong>{money(metrics.quoteValue)}</strong><span>Quote value currently in DANI</span></Link>
+      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.paidServices}</strong><span>Paid services to fulfill</span></Link>
+      <a className="portal-summary-tile" href="#owner-accounting"><strong>{metrics.ownerAccounting}</strong><span>Money decisions</span></a>
+      <a className="portal-summary-tile" href="#owner-comms"><strong>{metrics.communicationAttention}</strong><span>Replies needing action</span></a>
+      <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.atRisk}</strong><span>Operational exceptions</span></Link>
+      <Link className="portal-summary-tile" to="/portal/quotes"><strong>{money(metrics.quoteValue)}</strong><span>Open quote value</span></Link>
     </div>
+
+    <section className="portal-card" id="owner-attention" style={{ border: (data?.ownerAttention || []).some(item => item.priority === 'URGENT') ? '2px solid #9b3346' : undefined }}>
+      <div>
+        <p className="portal-eyebrow">Needs your attention</p>
+        <h2 style={{ margin: '5px 0 0' }}>Owner Attention Queue</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>Urgent inbound communications and governed exceptions surface here instead of staying buried in external systems.</p>
+      </div>
+      <div style={{ marginTop: 14 }}>
+        {(data?.ownerAttention || []).length ? (data.ownerAttention || []).map(item => <div className="portal-row" key={item.id}>
+          <div>
+            <strong>{item.priority === 'URGENT' ? '🚨 ' : ''}{item.reason}</strong>
+            <small>{item.domain} · {item.priority} · {item.metadata?.subject || item.source_table} · {item.created_at ? new Date(item.created_at).toLocaleString() : ''}</small>
+            {item.metadata?.sender_address && <small>From: {item.metadata.sender_address}</small>}
+            {item.recommended_action && <small>Next: {item.recommended_action}</small>}
+          </div>
+          <span className="portal-pill">{item.priority}</span>
+        </div>) : <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No open owner-attention items.</div>}
+      </div>
+    </section>
+
+    <section className="portal-card" id="owner-revenue">
+      <div>
+        <p className="portal-eyebrow">Revenue control</p>
+        <h2 style={{ margin: '5px 0 0' }}>Sales Due Now</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>Only dated sales actions that are due or overdue appear here. The full CRM stays in the sales workspace.</p>
+      </div>
+      <div className="portal-summary-grid" style={{ marginTop: 14 }}>
+        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Due / overdue actions</span></Link>
+        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesQueue}</strong><span>Total CRM records</span></Link>
+        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.researchLeads}</strong><span>Research-only leads</span></Link>
+      </div>
+      <div style={{ marginTop: 14 }}>
+        {(metrics.salesDueRows || []).slice(0, 8).map(item => <div className="portal-row" key={item.id}>
+          <div><strong>{item.company_name || item.contact_name || 'Sales lead'}</strong><small>{item.contact_name || 'Contact pending'} · Priority {item.priority_score ?? '—'} · {item.disposition || 'UNSET'}</small><small>Next: {item.next_action || 'Follow up'} · due {item.next_action_date}</small></div>
+          <span className="portal-pill">DUE</span>
+        </div>)}
+        {!metrics.salesDue && <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No sales actions are due.</div>}
+      </div>
+    </section>
+
+    <section className="portal-card" id="owner-accounting" style={{ border: metrics.ownerAccounting ? '2px solid #9b3346' : undefined }}>
+      <div>
+        <p className="portal-eyebrow">Money & accounting</p>
+        <h2 style={{ margin: '5px 0 0' }}>Owner Decisions + Accounting Airlock</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>Owner-required classifications stay with you; accounting-lane exceptions stay visible without giving the accounting workspace owner authority.</p>
+      </div>
+      <div className="portal-summary-grid" style={{ marginTop: 14 }}>
+        <a className="portal-summary-tile" href="#owner-accounting"><strong>{metrics.ownerAccounting}</strong><span>Require your decision</span></a>
+        <a className="portal-summary-tile" href="#owner-accounting"><strong>{metrics.accountingExceptions}</strong><span>Total open accounting exceptions</span></a>
+      </div>
+      <div style={{ marginTop: 14 }}>
+        {(data?.accountingExceptions || []).map(item => <div className="portal-row" key={item.id}>
+          <div>
+            <strong>{item.requires_owner_decision ? '🚨 ' : ''}{item.exception_type}</strong>
+            <small>{item.assigned_lane} · {item.status} · {item.source_system || 'DANI'}</small>
+            <small>{item.description}</small>
+          </div>
+          <span className="portal-pill">{item.requires_owner_decision ? 'OWNER' : 'ACCOUNTING'}</span>
+        </div>)}
+      </div>
+    </section>
+
+    <section className="portal-card" id="owner-comms">
+      <div>
+        <p className="portal-eyebrow">Communications + runtime</p>
+        <h2 style={{ margin: '5px 0 0' }}>Inbox Attention & System Health</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>Inbound business replies and governed automation exceptions surface here instead of being left inside external apps.</p>
+      </div>
+      <div className="portal-summary-grid" style={{ marginTop: 14 }}>
+        <a className="portal-summary-tile" href="#owner-comms"><strong>{metrics.communicationAttention}</strong><span>Inbound communications flagged</span></a>
+        <a className="portal-summary-tile" href="#owner-comms"><strong>{metrics.agentFailures}</strong><span>Agent runs failed / paused</span></a>
+        <a className="portal-summary-tile" href="#owner-comms"><strong>{metrics.outboxExceptions}</strong><span>External actions not complete</span></a>
+      </div>
+      <div style={{ marginTop: 14 }}>
+        {(data?.communicationAttention || []).slice(0, 8).map(item => <div className="portal-row" key={item.id}>
+          <div>
+            <strong>{item.priority === 'URGENT' ? '🚨 ' : ''}{item.subject || 'Inbound business communication'}</strong>
+            <small>{item.sender_address || 'Unknown sender'} · {item.relationship_type || 'UNMATCHED'} · {item.priority}</small>
+            {item.attention_reason && <small>{item.attention_reason}</small>}
+          </div>
+          <span className="portal-pill">{item.priority}</span>
+        </div>)}
+        {!metrics.communicationAttention && !metrics.agentFailures && !metrics.outboxExceptions && <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>Communications and governed runtime queues are clear.</div>}
+      </div>
+    </section>
 
     <section className="portal-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'flex-end', flexWrap: 'wrap' }}>
@@ -188,7 +312,7 @@ function OwnerHq({ session }) {
       <h2 style={{ margin: '5px 0 0' }}>Use DANI HQ as the starting screen.</h2>
       <div className="portal-row"><div><strong>1. Check DANI HQ</strong><small>See what needs attention across sales, operations, field work, customers and cash.</small></div><span className="portal-pill">DANI</span></div>
       <div className="portal-row"><div><strong>2. Work the DANI-native transaction</strong><small>Requests, scope, quotes, jobs, providers, evidence and payment stay under DANI control.</small></div><span className="portal-pill">SYSTEM OF RECORD</span></div>
-      <div className="portal-row"><div><strong>3. Open external systems only where their authority matters</strong><small>Asana for execution tasks, Notion for controlled documentation, QuickBooks for accounting, Stripe for payment authority, and so on.</small></div><span className="portal-pill">CONNECTED</span></div>
+      <div className="portal-row"><div><strong>3. Open external systems only where their authority matters</strong><small>Asana for execution tasks, Notion for controlled documentation, DANI Financial Operations for accounting review, Stripe for payment authority, and so on.</small></div><span className="portal-pill">CONNECTED</span></div>
       <div className="portal-row"><div><strong>4. Add API synchronization in controlled phases</strong><small>True in-portal synchronization requires the relevant external API credentials/permissions in DANI's server environment. The architecture is ready for that phase without forcing a redesign.</small></div><span className="portal-pill">PHASE 2</span></div>
     </section>
 
