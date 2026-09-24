@@ -25,7 +25,7 @@ test.describe('DANI DECLARES production critical journeys', () => {
     await page.goto('/portal/login');
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
-    await expect(page.locator('button[type="submit"]')).toContainText(/sign in/i);
+    await expect(page.locator('button[type="submit"]')).toContainText(/continue/i);
   });
 
   test('@critical catalog API is available', async ({ request }) => {
