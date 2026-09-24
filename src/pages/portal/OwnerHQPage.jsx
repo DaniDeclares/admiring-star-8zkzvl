@@ -64,7 +64,7 @@ function OwnerHq({ session }) {
     }
   };
 
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); const timer = window.setInterval(load, 30000); return () => window.clearInterval(timer); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const metrics = useMemo(() => {
     const requests = data?.requests || [];
@@ -75,6 +75,7 @@ function OwnerHq({ session }) {
     const changes = data?.changes || [];
     const appointments = data?.appointments || [];
     const quotes = data?.estimates || [];
+    const ownerAttention = data?.ownerAttention || [];
 
     const openRequests = requests.filter(r => !['completed','cancelled','closed','job_created'].includes(String(r.status || '').toLowerCase()));
     const activeJobs = jobs.filter(j => !['COMPLETED','CANCELLED'].includes(String(j.job_status || '').toUpperCase()));
@@ -97,6 +98,7 @@ function OwnerHq({ session }) {
       pendingChanges: pendingChanges.length,
       todayAppointments: todayAppointments.length,
       quoteValue,
+      ownerAttention: ownerAttention.length,
     };
   }, [data]);
 
@@ -144,7 +146,27 @@ function OwnerHq({ session }) {
       <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.atRisk}</strong><span>At-risk / payment exceptions</span></Link>
       <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.pendingChanges}</strong><span>Change orders pending</span></Link>
       <Link className="portal-summary-tile" to="/portal/quotes"><strong>{money(metrics.quoteValue)}</strong><span>Quote value currently in DANI</span></Link>
+      <a className="portal-summary-tile" href="#owner-attention"><strong>{metrics.ownerAttention}</strong><span>Needs your attention</span></a>
     </div>
+
+    <section className="portal-card" id="owner-attention" style={{ border: (data?.ownerAttention || []).some(item => item.priority === 'URGENT') ? '2px solid #9b3346' : undefined }}>
+      <div>
+        <p className="portal-eyebrow">Needs your attention</p>
+        <h2 style={{ margin: '5px 0 0' }}>Owner Attention Queue</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>Urgent inbound communications and governed exceptions surface here instead of staying buried in external systems.</p>
+      </div>
+      <div style={{ marginTop: 14 }}>
+        {(data?.ownerAttention || []).length ? (data.ownerAttention || []).map(item => <div className="portal-row" key={item.id}>
+          <div>
+            <strong>{item.priority === 'URGENT' ? '🚨 ' : ''}{item.reason}</strong>
+            <small>{item.domain} · {item.priority} · {item.metadata?.subject || item.source_table} · {item.created_at ? new Date(item.created_at).toLocaleString() : ''}</small>
+            {item.metadata?.sender_address && <small>From: {item.metadata.sender_address}</small>}
+            {item.recommended_action && <small>Next: {item.recommended_action}</small>}
+          </div>
+          <span className="portal-pill">{item.priority}</span>
+        </div>) : <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No open owner-attention items.</div>}
+      </div>
+    </section>
 
     <section className="portal-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'flex-end', flexWrap: 'wrap' }}>
