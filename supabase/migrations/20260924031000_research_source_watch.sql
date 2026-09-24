@@ -87,3 +87,24 @@ on conflict(source_key) do update set
  metadata=public.dd_research_sources.metadata || excluded.metadata,
  status='ACTIVE',
  updated_at=now();
+
+
+-- Competitor discovery seeded from 2026-09-24 market research. Vendor claims are
+-- watch inputs, not contract conclusions; book ownership and exit terms remain contract-gated.
+insert into public.dd_research_sources
+(program_key,work_key,source_key,source_title,source_url,authority_level,temporal_class,check_interval_minutes,expected_signals,metadata)
+values
+('PROTECTION_BENEFITS','FC_COMPETITORS','SMART_CHOICE_AGENT_PROGRAM','Smart Choice Agents Program','https://www.smartchoiceagents.com/agent-services/agents-program','VENDOR','CURRENT',720,
+ '[{"signal":"no_fees","all":["No start-up","maintenance","exit"]},{"signal":"book_ownership","all":["100% ownership","book of business"]},{"signal":"carrier_access","any":["100+ carriers","top-rated markets"]}]'::jsonb,
+ '{"partner":"Smart Choice","comparison_role":"aggregator_alternative","contract_required":true}'::jsonb),
+('PROTECTION_BENEFITS','FC_COMPETITORS','AGENTERO_HOME','Agentero Independent Insurance Agency Network','https://www.agentero.com/','VENDOR','CURRENT',720,
+ '[{"signal":"carrier_access","all":["carrier","access"]},{"signal":"pc_focus","any":["P&C","personal lines","commercial"]}]'::jsonb,
+ '{"partner":"Agentero","comparison_role":"aggregator_alternative","contract_required":true}'::jsonb),
+('PROTECTION_BENEFITS','FC_COMPETITORS','AGENTERO_OWNERSHIP','Agentero - Captive vs Independent Agent','https://www.agentero.com/blog/captive-vs-independent-insurance-agent','VENDOR','CURRENT',720,
+ '[{"signal":"book_ownership_claim","all":["full book ownership"]},{"signal":"no_fee_claim","all":["no fees"]},{"signal":"carrier_count_claim","any":["40+ carriers","40 carriers"]}]'::jsonb,
+ '{"partner":"Agentero","comparison_role":"aggregator_alternative","contract_required":true}'::jsonb)
+on conflict(source_key) do update set
+ source_title=excluded.source_title,source_url=excluded.source_url,authority_level=excluded.authority_level,
+ temporal_class=excluded.temporal_class,check_interval_minutes=excluded.check_interval_minutes,
+ expected_signals=excluded.expected_signals,metadata=public.dd_research_sources.metadata||excluded.metadata,
+ status='ACTIVE',updated_at=now();
