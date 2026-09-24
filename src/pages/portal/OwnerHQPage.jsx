@@ -49,8 +49,8 @@ function OwnerHq({ session }) {
   const [error, setError] = useState('');
   const didTrackLoad = useRef(false);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async ({ background = false } = {}) => {
+    if (!background) setLoading(true);
     setError('');
     try {
       const response = await fetch('/api/portal-operations?ownerDashboard=1', {
@@ -72,11 +72,11 @@ function OwnerHq({ session }) {
     } catch (e) {
       setError(e.message || 'Could not load DANI HQ.');
     } finally {
-      setLoading(false);
+      if (!background) setLoading(false);
     }
   };
 
-  useEffect(() => { load(); const timer = window.setInterval(load, 30000); return () => window.clearInterval(timer); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); const timer = window.setInterval(() => load({ background: true }), 30000); return () => window.clearInterval(timer); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const metrics = useMemo(() => {
     const requests = data?.requests || [];
@@ -159,7 +159,7 @@ function OwnerHq({ session }) {
           launchpad; the linked systems stay the authority where DANI has not replaced them.
         </p>
       </div>
-      <span className="portal-pill">Live from DANI data</span>
+      <span className="portal-pill">Live DANI data · refreshes quietly every 30s</span>
     </section>
 
     <div className="portal-summary-grid">
