@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import { createProviderIntakeStaging } from '../lib/pendingOnboarding.js';
 import { capture, captureServiceLifecycle } from '../lib/posthogAnalytics.js';
+import { captureSentryEvent, captureSentryException } from '../lib/sentry.js';
 import { SITE_URL } from '../data/siteConfig.js';
 import { BUCKETS, bucketForFamily } from '../data/serviceCatalogFamilies.js';
 import './PortalAccessPage.css';
@@ -29,13 +30,14 @@ export default function PortalAccessPage() {
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get('property_invite') || '';
   const requestedRole = searchParams.get('role') || '';
+  const resumeProvider = searchParams.get('resume') === '1';
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/portal/access';
   const audience = pathname.endsWith('/providers') ? 'provider' : pathname.endsWith('/partners') ? 'partners' : requestedRole;
   const [mode,setMode]=useState('choose');
   const [selected,setSelected]=useState(null);
   const [propertyInvite,setPropertyInvite]=useState(null);
   const [inviteChecking,setInviteChecking]=useState(false);
-  const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',rateExpectation:'',address:'',city:'',state:'GA',zip:'',services:'',password:'',confirm:''});
+  const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',rateExpectation:'',address:'',city:'',state:'GA',zip:'',serviceRadiusMiles:'25',services:'',password:'',confirm:''});
   const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [done,setDone]=useState('');
   const [catalogServices,setCatalogServices]=useState([]);
   const [licenseGatedSkus,setLicenseGatedSkus]=useState(() => new Set());
@@ -51,6 +53,21 @@ export default function PortalAccessPage() {
   const [selectedCategories,setSelectedCategories]=useState(() => ({}));
   const [providerStep,setProviderStep]=useState(1);
   const [providerApplicantType,setProviderApplicantType]=useState('INDIVIDUAL');
+  const [resumeSession,setResumeSession]=useState(null);
+
+  useEffect(()=>{
+    if(!resumeProvider) return;
+    supabase.auth.getSession().then(({data})=>{
+      const session=data?.session||null;
+      setResumeSession(session);
+      if(session?.user){
+        const meta=session.user.user_metadata||{};
+        setForm(prev=>({...prev,firstName:prev.firstName||meta.first_name||'',lastName:prev.lastName||meta.last_name||'',email:session.user.email||prev.email,password:'RESUME_EXISTING_ACCOUNT',confirm:'RESUME_EXISTING_ACCOUNT'}));
+        setSelected(OPTIONS.find(o=>o.key==='provider'));
+        setMode('form');
+      }
+    });
+  },[resumeProvider]);
 
   const visibleOptions = useMemo(() => {
     if (audience === 'provider') return OPTIONS.filter(o => o.key === 'provider');
@@ -186,16 +203,21 @@ export default function PortalAccessPage() {
       return;
     }
     setSelected(option);setMode('form');setProviderStep(1);
-    if(option.key==='provider') capture('provider_application_started',{route:'/portal/access'});
+    if(option.key==='provider') { capture('provider_application_started',{route:'/portal/access'}); captureSentryEvent('account_form_started',{account_type:'provider',route:'/portal/access'}); }
   };
 
   const providerStepValid=()=>{
-    if(providerStep===1){
+    if(providerStep===1 && !resumeProvider){
       if(!form.firstName.trim()||!form.lastName.trim()||!form.email.trim()){setError('Fill in your name and email to continue.');return false;}
       if(form.password.length<8){setError('Use a password with at least 8 characters.');return false;}
       if(form.password!==form.confirm){setError('Passwords do not match.');return false;}
     }
-    if(providerStep===2&&providerApplicantType==='BUSINESS'&&!form.organization.trim()){setError('Enter the business or organization name for a business provider application.');return false;}
+    if(providerStep===2){
+      if(providerApplicantType==='BUSINESS'&&!form.organization.trim()){setError('Enter the business or organization name for a business provider application.');return false;}
+      if(!form.address.trim()||!form.city.trim()||!form.state.trim()||!form.zip.trim()){setError('Enter the dispatch address you will normally travel from. DANI uses it to determine service area and job mileage.');return false;}
+      const radius=Number(form.serviceRadiusMiles);
+      if(!Number.isFinite(radius)||radius<=0||radius>250){setError('Enter a service radius between 1 and 250 miles.');return false;}
+    }
     if(providerStep===3&&!selectedServiceCount){setError('Select at least one specific service you can fulfill.');return false;}
     setError('');return true;
   };
@@ -212,6 +234,8 @@ export default function PortalAccessPage() {
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
     if(selected?.key==='provider' && !selectedServiceCount)return setError('Select at least one specific service you can fulfill.');
     setBusy(true);
+    capture('signup_started',{route:'/portal/access',account_type:selected?.key||'unknown',channel:selected?.channel||undefined});
+    captureSentryEvent('started',{account_type:selected?.key||'unknown',channel:selected?.channel||undefined,route:'/portal/access'});
     try{
     await submitInner();
     }catch(e){
@@ -224,6 +248,7 @@ export default function PortalAccessPage() {
     // with Supabase Auth's own signup rate limit (confirmed in project logs:
     // consecutive 429s on /auth/v1/signup within seconds of each other).
     setBusy(false);
+    capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',channel:selected?.channel||undefined,error_type:'unexpected'});
     const message = e?.message ? String(e.message) : '';
     setError(message || 'We could not complete account creation. Please try again once; if the problem persists, contact DANI DECLARES with the exact message shown here.');
     }
@@ -238,7 +263,7 @@ export default function PortalAccessPage() {
       identityPayload.organization_id=propertyInvite.client_organization_id;
       identityPayload.entity_id=propertyInvite.property_id;
     }
-    const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:providerApplicantType,legal_name:providerApplicantType==='BUSINESS'?(form.organization||`${form.firstName} ${form.lastName}`):`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString(),rate_expectation:form.rateExpectation||null}:null;
+    const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:providerApplicantType,legal_name:providerApplicantType==='BUSINESS'?(form.organization||`${form.firstName} ${form.lastName}`):`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_radius_miles:Number(form.serviceRadiusMiles),service_zip_codes:form.zip?[form.zip.trim()]:[],service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString(),rate_expectation:form.rateExpectation||null}:null;
     // Expand each selected category into its real underlying services. A service
     // whose SKU carries a real LICENSE_SERVICE/CERT_SERVICE/AUTO_MOBILE requirement
     // (from dd_service_capability_requirements -- notary, wedding officiant, and every
@@ -282,7 +307,14 @@ export default function PortalAccessPage() {
         inviteTokenHash:selected.key==='apartment_resident'?await hashInviteToken(inviteToken):null,
       },
     });
-    if(stagingError){setBusy(false);return setError(`Something interrupted account creation: ${stagingError}`);}
+    if(stagingError){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'staging'});captureSentryEvent('staging_failed',{account_type:selected?.key||'unknown',error_type:'staging'});captureSentryException(stagingError,{stage:'staging'});return setError(`Something interrupted account creation: ${stagingError}`);}
+
+    if(resumeProvider){
+      if(!resumeSession?.user){setBusy(false);return setError('Sign in to your existing provider account before resuming the application.');}
+      const {data:result,error:completeError}=await supabase.rpc('dd_consume_provider_intake_staging',{p_staging_id:stagingId});
+      if(completeError || !result?.success){setBusy(false);return setError(completeError?.message||result?.error||'We could not restore the provider application.');}
+      setBusy(false);setDone('Your provider application has been restored and submitted for review.');setMode('done');return;
+    }
 
     const {data,error:authError}=await supabase.auth.signUp({email:normalizedEmail,password:form.password,options:{emailRedirectTo:`${SITE_URL}/portal/login?intake=${encodeURIComponent(stagingId)}`,data:{first_name:form.firstName,last_name:form.lastName,relationship_type:selected.relationship,channel_code:selected.channel}}});
     // A staging row can be left behind here (signup failed, or the email
@@ -291,14 +323,14 @@ export default function PortalAccessPage() {
     // session for that same email, so it's inert, not a leak. Resubmitting
     // the form reuses/refreshes the same pending row (see the partial unique
     // index in the migration) rather than piling up duplicates.
-    if(authError){setBusy(false);return setError(isRateLimitError(authError.message)?'Too many signup attempts in a short time. Please wait about a minute before trying again -- clicking repeatedly makes this take longer, not shorter.':authError.message);} if(!data.user){setBusy(false);return setError('Account could not be created.');}
+    if(authError){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'auth',error_code:isRateLimitError(authError.message)?'RATE_LIMIT':'AUTH_ERROR'});return setError(isRateLimitError(authError.message)?'Too many signup attempts in a short time. Please wait about a minute before trying again -- clicking repeatedly makes this take longer, not shorter.':authError.message);} if(!data.user){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'no_user'});return setError('Account could not be created.');}
     // Supabase deliberately returns a fake success with no error and no new
     // identity when signUp() is called with an email that already belongs to
     // a confirmed account, to prevent account enumeration. data.user.identities
     // is the documented way to detect that case -- without this check, someone
     // who already has an account gets told "check your email to confirm" for an
     // account that was never actually created, which is actively misleading.
-    if(data.user.identities && data.user.identities.length===0){setBusy(false);return setError('An account with this email already exists. Sign in at the login page, or use "Forgot password" there if you don’t remember your password.');}
+    if(data.user.identities && data.user.identities.length===0){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'existing_account'});return setError('An account with this email already exists. Sign in at the login page, or use "Forgot password" there if you don’t remember your password.');}
 
     if(!data.session){
       // No session yet -- email confirmation is required. The intake payload
@@ -306,6 +338,8 @@ export default function PortalAccessPage() {
       // finishes the writes once the applicant confirms and a real session
       // exists, in whichever browser that happens to be (see
       // PortalLoginPage.jsx reading the ?intake= query param).
+      capture('signup_completed',{route:'/portal/access',account_type:selected?.key||'unknown',signup_mode:'email_confirmation'});
+      captureSentryEvent('account_created_waiting_verification',{account_type:selected?.key||'unknown',signup_mode:'email_confirmation'});
       capture('provider_application_submitted',{route:'/portal/access'});
       setBusy(false);setDone('Your account is created. Check your email to confirm it, then sign in — the rest of your onboarding will finish automatically.');setMode('done');
       return;
@@ -315,8 +349,9 @@ export default function PortalAccessPage() {
     // staged writes immediately, through the same RPC PortalLoginPage uses,
     // instead of duplicating the insert logic here.
     const {data:result,error:completeError}=await supabase.rpc('dd_consume_provider_intake_staging',{p_staging_id:stagingId});
-    if(completeError || !result?.success){setBusy(false);return setError(`Account created, but ${(completeError?.message||result?.error||'portal setup needs attention.').replace(/^Account created, but /i,'')}`);}
-    setBusy(false);setDone('Your account is ready.');setMode('done');
+    if(completeError || !result?.success){setBusy(false);capture('signup_failed',{route:'/portal/access',account_type:selected?.key||'unknown',error_type:'portal_setup'});return setError(`Account created, but ${(completeError?.message||result?.error||'portal setup needs attention.').replace(/^Account created, but /i,'')}`);}
+    capture('signup_completed',{route:'/portal/access',account_type:selected?.key||'unknown',signup_mode:'immediate_session'});
+    captureSentryEvent('completed',{account_type:selected?.key||'unknown',signup_mode:'immediate_session'});setBusy(false);setDone('Your account is ready.');setMode('done');
   };
 
   if(inviteChecking)return <main className="portal-access"><div className="portal-success-card"><p className="portal-kicker">VERIFYING RESIDENT ACCESS</p><h1>Connecting you to your property</h1><p>Please wait while we verify the invitation from your property management team.</p></div></main>;
@@ -327,7 +362,7 @@ export default function PortalAccessPage() {
 
   const providerForm = <form onSubmit={submit} onKeyDown={e=>{if(providerStep<4&&e.key==='Enter'){e.preventDefault();nextProviderStep();}}}>
     <div className="portal-wizard-steps">{PROVIDER_STEPS.map((label,index)=>{const stepNumber=index+1;return <div key={label} className={`portal-wizard-step${providerStep===stepNumber?' active':''}${providerStep>stepNumber?' done':''}`}><span>{stepNumber}</span>{label}</div>;})}</div>
-    {providerStep===1&&<div className="portal-form-grid">
+    {providerStep===1&&resumeProvider&&<div className="portal-form-grid"><div className="portal-wide"><strong>Existing provider account</strong><p>You are signed in as {form.email}. Your login is being kept; continue to restore only the missing provider application.</p></div><label>First name<input name="firstName" required value={form.firstName} onChange={update}/></label><label>Last name<input name="lastName" required value={form.lastName} onChange={update}/></label><label>Email<input type="email" readOnly value={form.email}/></label><label>Phone<input name="phone" value={form.phone} onChange={update}/></label></div>}{providerStep===1&&!resumeProvider&&<div className="portal-form-grid">
       <label>First name<input name="firstName" required value={form.firstName} onChange={update}/></label>
       <label>Last name<input name="lastName" required value={form.lastName} onChange={update}/></label>
       <label>Email<input type="email" name="email" required value={form.email} onChange={update}/></label>
@@ -345,10 +380,11 @@ export default function PortalAccessPage() {
         <small>{providerApplicantType==='BUSINESS'?'Business providers must submit their own current price sheet before the application can be approved.':'Individual providers may submit their own price sheet if they want DANI DECLARES to consider their preferred rates; it is optional.'}</small>
       </div>
       <label className="portal-wide">Business / organization name {providerApplicantType==='BUSINESS'?'(required)':'(optional)'}<input name="organization" required={providerApplicantType==='BUSINESS'} value={form.organization} onChange={update}/></label>
-      <label className="portal-wide">Address<input name="address" value={form.address} onChange={update}/></label>
-      <label>City<input name="city" value={form.city} onChange={update}/></label>
-      <label>State<input name="state" maxLength="2" value={form.state} onChange={update}/></label>
-      <label>ZIP<input name="zip" value={form.zip} onChange={update}/></label>
+      <label className="portal-wide">Dispatch origin address<input name="address" required value={form.address} onChange={update}/><small>Use the address you normally travel from for DANI assignments. It is used privately for routing and mileage economics.</small></label>
+      <label>City<input name="city" required value={form.city} onChange={update}/></label>
+      <label>State<input name="state" required maxLength="2" value={form.state} onChange={update}/></label>
+      <label>ZIP<input name="zip" required value={form.zip} onChange={update}/></label>
+      <label>Service radius (miles)<input name="serviceRadiusMiles" required type="number" min="1" max="250" step="1" value={form.serviceRadiusMiles} onChange={update}/><small>You may still receive an outside-radius offer if you later choose to allow it and the travel economics work.</small></label>
     </div>}
     {providerStep===3&&<div className="portal-wide portal-capability-picker">
       <p>Choose the specific DANI DECLARES services you can fulfill. The groups below match the same customer-facing service doors used across the public catalog. Selecting a group does not claim every service in it.</p>
@@ -383,7 +419,7 @@ export default function PortalAccessPage() {
     {providerStep===4&&<div className="portal-review">
       <h2 className="portal-review-title">Review your application</h2>
       <div className="portal-row"><div><strong>{form.firstName} {form.lastName}</strong><small>{form.email} · {form.phone||'No phone provided'}</small></div></div>
-      {form.organization&&<div className="portal-row"><div><strong>{form.organization}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')||'No address provided'}</small></div></div>}
+      <div className="portal-row"><div><strong>{form.organization||'Individual provider'}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')} · {form.serviceRadiusMiles} mile service radius</small></div></div>
       <div className="portal-row"><div><strong>{selectedServiceCount} specific service{selectedServiceCount===1?'':'s'} selected</strong><small>{selectedServicesPreview.map(s=>s.name).join(', ')||'None selected'}</small></div></div>
       <label className="portal-wide">Rate expectations (optional)<input name="rateExpectation" value={form.rateExpectation} onChange={update} placeholder="Example: $35/hr, $125 minimum, or 'see attached price sheet'."/><small>These are provider-submitted expectations, not DANI DECLARES customer pricing.</small></label>
       <label className="portal-wide">Additional notes about your experience (optional)<textarea name="services" rows="4" value={form.services} onChange={update} placeholder="Certifications, equipment, years of experience, anything else worth knowing."/></label>

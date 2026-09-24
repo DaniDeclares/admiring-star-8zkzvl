@@ -1,0 +1,43 @@
+{
+  "name": "DANI Customer App",
+  "short_name": "DANI",
+  "description": "Book, manage and pay for DANI DECLARES services from one customer app.",
+  "id": "/portal?app=customer",
+  "start_url": "/portal?app=customer",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#6B1F2B",
+  "background_color": "#F6F0E4",
+  "icons": [
+    {
+      "src": "/dani-declares-favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/dani-declares-favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Book Service",
+      "short_name": "Book",
+      "url": "/request-service"
+    },
+    {
+      "name": "My Services",
+      "short_name": "Services",
+      "url": "/portal/customer/orders"
+    },
+    {
+      "name": "Payments",
+      "short_name": "Payments",
+      "url": "/portal/customer/payments"
+    }
+  ]
+}

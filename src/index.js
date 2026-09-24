@@ -19,6 +19,19 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('Uncaught React Error:', error, errorInfo);
+    if (typeof window !== 'undefined' && window.Sentry?.captureException) {
+      window.Sentry.captureException(error, {
+        contexts: {
+          react: {
+            componentStack: errorInfo?.componentStack || '',
+          },
+        },
+        tags: {
+          surface: 'react-error-boundary',
+          route: window.location.pathname,
+        },
+      });
+    }
     this.setState({ errorInfo });
   }
 
@@ -70,4 +83,13 @@ if (rootElement) {
       </HelmetProvider>
     </React.StrictMode>
   );
+}
+
+
+// Install the provider Worker App shell. Authenticated/API data remains network-governed;
+// the service worker is for launchability and resilient static navigation, not offline mutations.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(error => console.warn('Worker App service worker registration failed', error));
+  });
 }

@@ -26,18 +26,10 @@ export default function PartnerNetwork() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("/api/intake-webhook", {
+      const response = await fetch("/api/partner-inquiry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          channelType: "B2B",
-          category: "PARTNER_INQUIRY",
-          serviceType: `Partner inquiry: ${SERVICE_LABELS[form.service] || "General"}`,
-          details: `PARTNER/VENDOR NETWORK INQUIRY (not a customer service request).\nInterest area: ${SERVICE_LABELS[form.service] || "Not specified"}\n\n${form.message}`,
-        }),
+        body: JSON.stringify({name: form.name,email: form.email,phone: form.phone,service: SERVICE_LABELS[form.service] || form.service || "General",message: form.message}),
       });
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.error || "We could not submit your inquiry.");
