@@ -1,8 +1,9 @@
 /* eslint-disable */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import RequireStaffAuth from '../../components/auth/RequireStaffAuth.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
+import { capture } from '../../lib/posthogAnalytics.js';
 import { OWNER_CONNECTED_SYSTEMS, OWNER_PRIORITY_LINKS } from '../../config/ownerConnectedSystems.js';
 import './PortalWorkspacePage.css';
 
@@ -46,6 +47,7 @@ function OwnerHq({ session }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const didTrackLoad = useRef(false);
 
   const load = async () => {
     setLoading(true);
@@ -57,6 +59,16 @@ function OwnerHq({ session }) {
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.error || 'Could not load DANI HQ.');
       setData(body);
+      if (!didTrackLoad.current) {
+        didTrackLoad.current = true;
+        capture('owner_hq_loaded', {
+          sales_queue_count: (body.salesQueue || []).length,
+          research_lead_count: (body.researchLeads || []).length,
+          owner_accounting_decision_count: (body.accountingExceptions || []).filter(item => item.requires_owner_decision).length,
+          communication_attention_count: (body.communicationAttention || []).length,
+          owner_attention_count: (body.ownerAttention || []).length,
+        });
+      }
     } catch (e) {
       setError(e.message || 'Could not load DANI HQ.');
     } finally {
