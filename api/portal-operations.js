@@ -152,7 +152,7 @@ async function enqueueAppointmentConfirmation(supabase, appointment) {
   });
 }
 async function getStaffSnapshot(supabase) {
-  const [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions, ownerAttention] = await Promise.all([
+  const [requests, jobs, appointments, providers, changes, evidence, payments, invoices, estimates, pendingCapabilities, w9Submissions, ownerAttention] = await Promise.all([
     supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_jobs').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_job_appointments').select('*').order('starts_at', { ascending: true }).limit(100),
@@ -161,6 +161,7 @@ async function getStaffSnapshot(supabase) {
     supabase.from('dd_job_evidence').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_payment_events').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_invoices').select('id,public_reference,estimate_id,job_id,invoice_status,total_amount,deposit_due,balance_due,stripe_payment_link,hosted_invoice_url,updated_at').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_estimates').select('id,public_reference,estimate_status,estimated_total,deposit_due,service_request_id,created_at,updated_at').order('created_at', { ascending: false }).limit(100),
     // Self-requested additions from the provider "My Services" page (add_service_request
     // source) sit here as is_authorized:false until staff reviews them -- same as every
     // other capability, no self-service action ever sets is_authorized:true.
@@ -171,7 +172,7 @@ async function getStaffSnapshot(supabase) {
     supabase.from('dd_provider_w9_submissions').select('id, provider_application_id, provider_org_id, line1_name, classification, tin_type, tin_last_four, status, created_at, dd_provider_organizations(name)').eq('status', 'SUBMITTED').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_owner_attention_queue').select('id,domain,source_table,source_record_id,reason,priority,status,recommended_action,metadata,created_at,resolved_at').eq('status','OPEN').order('created_at',{ascending:false}).limit(100),
   ]);
-  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions, ownerAttention].filter(item => item.error);
+  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, invoices, estimates, pendingCapabilities, w9Submissions, ownerAttention].filter(item => item.error);
   if (errors.length) throw errors[0].error;
   const appointmentChangeRequestsResult = await supabase.from('dd_appointment_change_requests').select('*').eq('status', 'OPEN').order('created_at', { ascending: false }).limit(50);
   const appointmentChangeRequests = { data: appointmentChangeRequestsResult.error ? [] : (appointmentChangeRequestsResult.data || []) };
@@ -196,7 +197,7 @@ async function getStaffSnapshot(supabase) {
     };
   });
   const estimateAssignments = await getOwnerEstimateAssignments(supabase);
-  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], ownerAttention: ownerAttention.data || [], estimateAssignments, appointmentChangeRequests: appointmentChangeRequests.data || [], weeklyCollectedTarget: ((financialTargets.data || []).find(row => row.metric_key === 'WEEKLY_COLLECTED_TARGET')?.target_amount ?? null) };
+  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], estimates: estimates.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], ownerAttention: ownerAttention.data || [], estimateAssignments, appointmentChangeRequests: appointmentChangeRequests.data || [], weeklyCollectedTarget: ((financialTargets.data || []).find(row => row.metric_key === 'WEEKLY_COLLECTED_TARGET')?.target_amount ?? null) };
 }
 async function getOwnerControlSnapshot(supabase) {
   const base = await getStaffSnapshot(supabase);
