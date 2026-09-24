@@ -163,5 +163,11 @@
       "destination": "https://danideclares.com/:path*",
       "permanent": true
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/integrations/gmail/sync",
+      "schedule": "* * * * *"
+    }
   ]
 }
