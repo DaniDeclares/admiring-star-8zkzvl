@@ -25,4 +25,15 @@ describe('Gmail mailbox governance', () => {
     const result = classifyGmailMessage({accountEmail:'vendors@danideclares.com',subject:'Partnership proposal for your integration'});
     expect(result.leadScoutEligible).toBe(true);
   });
+  it('keeps useful newsletters as intelligence without making them leads', () => {
+    const result = classifyGmailMessage({
+      accountEmail:'vendors@danideclares.com',
+      from:'newsletter@example.com',
+      subject:'Field service pricing and customer retention trends',
+      snippet:'Automated newsletter about operations, pricing, and customer acquisition.'
+    });
+    expect(result.intelligenceEligible).toBe(true);
+    expect(result.intelligenceSignals.length).toBeGreaterThan(0);
+    expect(result.intelligenceReviewRequired).toBe(true);
+  });
 });
