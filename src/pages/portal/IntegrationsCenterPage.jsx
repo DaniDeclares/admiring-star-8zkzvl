@@ -9,10 +9,11 @@ const systems = [
   { key:'ASANA', name:'Asana', role:'Tasks & release execution', auth:'OAuth 2.0', callback:'https://danideclares.com/api/integrations/asana/callback', provider:'https://app.asana.com/0/my-apps' },
   { key:'NOTION', name:'Notion', role:'SOPs, manuals & institutional knowledge', auth:'Internal connection token (preferred for the DANI workspace) or public OAuth', callback:'https://danideclares.com/api/integrations/notion/callback', provider:'https://www.notion.so/my-integrations' },
   { key:'QUICKBOOKS_ONLINE', name:'QuickBooks Online', role:'Accounting authority', auth:'OAuth 2.0', callback:'https://danideclares.com/api/integrations/quickbooks/callback', provider:'https://developer.intuit.com/' },
-  { key:'GMAIL', name:'Gmail', role:'Business communications rail', auth:'Google OAuth 2.0', callback:'Production OAuth build required', provider:'https://mail.google.com/' },
-  { key:'GOOGLE_CALENDAR', name:'Google Calendar', role:'Appointment projection & availability', auth:'Google OAuth 2.0', callback:'Production OAuth build required', provider:'https://calendar.google.com/' },
-  { key:'GOOGLE_DRIVE', name:'Google Drive', role:'Documents, evidence & Google-native files', auth:'Google OAuth 2.0', callback:'Production OAuth build required', provider:'https://drive.google.com/' },
-  { key:'HUBSPOT', name:'HubSpot', role:'CRM & marketing engagement', auth:'OAuth 2.0 / private app', callback:'Production OAuth build required', provider:'https://app.hubspot.com/' },
+  { key:'GMAIL', name:'Gmail', role:'Business communications rail', auth:'Google OAuth 2.0', callback:'https://danideclares.com/api/integrations/google/callback', provider:'https://mail.google.com/' },
+  { key:'GOOGLE_CALENDAR', name:'Google Calendar', role:'Appointment projection & availability', auth:'Google OAuth 2.0', callback:'https://danideclares.com/api/integrations/google/callback', provider:'https://calendar.google.com/' },
+  { key:'GOOGLE_DRIVE', name:'Google Drive', role:'Documents, evidence & Google-native files', auth:'Google OAuth 2.0', callback:'https://danideclares.com/api/integrations/google/callback', provider:'https://drive.google.com/' },
+  { key:'GOOGLE_MAPS_ROUTING', name:'Google Maps Routing', role:'Private address geocoding, road mileage & dispatch economics', auth:'Restricted server API key', callback:'Server-side only', provider:'https://console.cloud.google.com/google/maps-apis/credentials' },
+  { key:'HUBSPOT', name:'HubSpot', role:'CRM & marketing engagement', auth:'OAuth 2.0 / private app', callback:'https://danideclares.com/api/integrations/hubspot/callback', provider:'https://app.hubspot.com/' },
   { key:'AIRTABLE', name:'Airtable', role:'Planning, review & flexible workspaces', auth:'OAuth / scoped token', callback:'Production OAuth build required', provider:'https://airtable.com/' },
   { key:'GITHUB', name:'GitHub', role:'Application source & version authority', auth:'GitHub App / OAuth', callback:'Managed developer connection', provider:'https://github.com/DaniDeclares/admiring-star-8zkzvl' },
   { key:'VERCEL', name:'Vercel', role:'Deployment & runtime hosting authority', auth:'Vercel authorization', callback:'Managed deployment connection', provider:'https://vercel.com/' },
@@ -21,15 +22,19 @@ const systems = [
 ];
 
 function IntegrationCard({ system, state, env, session, onRefresh }) {
-  const configured = system.key === 'ASANA'
+  const googleWorkspace = ['GMAIL','GOOGLE_CALENDAR','GOOGLE_DRIVE'].includes(system.key);
+  const configured = system.key === 'GOOGLE_MAPS_ROUTING' ? env.GOOGLE_MAPS_ROUTING : googleWorkspace ? env.GOOGLE : system.key === 'ASANA'
     ? env.ASANA
     : system.key === 'NOTION'
       ? (env.NOTION_INTERNAL || env.NOTION_PUBLIC)
       : system.key === 'QUICKBOOKS_ONLINE'
         ? env.QUICKBOOKS
-        : false;
+        : system.key === 'HUBSPOT'
+          ? env.HUBSPOT
+          : false;
   const managed = ['GITHUB','VERCEL'].includes(system.key);
-  const externalOnly = ['GMAIL','GOOGLE_CALENDAR','GOOGLE_DRIVE','HUBSPOT','AIRTABLE','POSTHOG'].includes(system.key);
+  const manualCredential = system.key === 'GOOGLE_MAPS_ROUTING';
+  const externalOnly = ['AIRTABLE','POSTHOG'].includes(system.key);
   const connected = (state?.connections || []).some(c => c.adapter_code === system.key && c.connection_status === 'CONNECTED');
   const notionInternalHealthy = system.key === 'NOTION' && Boolean(state?.notionInternalValid);
 
@@ -39,11 +44,15 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
       return;
     }
     if (system.key === 'NOTION' && env.NOTION_INTERNAL) { await onRefresh(); return; }
-    const endpoint = system.key === 'QUICKBOOKS_ONLINE'
+    const endpoint = googleWorkspace
+      ? '/api/integrations/google/start'
+      : system.key === 'QUICKBOOKS_ONLINE'
       ? '/api/integrations/quickbooks/start'
       : system.key === 'NOTION'
         ? '/api/integrations/notion/start'
-        : '/api/integrations/asana/start';
+        : system.key === 'HUBSPOT'
+          ? '/api/integrations/hubspot/start'
+          : '/api/integrations/asana/start';
     const response = await fetch(endpoint, { headers:{ Authorization:'Bearer '+session.access_token } });
     const body = await response.json();
     if (!response.ok || !body.success || !body.authorization_url) throw new Error(body.error || 'Connection could not be started.');
@@ -53,13 +62,13 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
   return <div style={{border:'1px solid #e6d9c8',borderRadius:16,padding:18,background:'#fff'}}>
     <div style={{display:'flex',justifyContent:'space-between',gap:10,alignItems:'flex-start'}}>
       <strong style={{fontSize:18,color:'#6b1f2b'}}>{system.name}</strong>
-      <span className='portal-pill'>{connected || notionInternalHealthy ? 'DANI CONNECTED' : managed ? 'MANAGED CONNECTION' : configured ? 'READY TO CONNECT' : externalOnly ? 'PRODUCTION OAUTH REQUIRED' : 'CREDENTIALS REQUIRED'}</span>
+      <span className='portal-pill'>{connected || notionInternalHealthy || (manualCredential && configured) ? 'DANI CONNECTED' : managed ? 'MANAGED CONNECTION' : manualCredential ? 'CREDENTIAL REQUIRED' : configured ? 'READY TO CONNECT' : externalOnly ? 'PRODUCTION OAUTH REQUIRED' : 'CREDENTIALS REQUIRED'}</span>
     </div>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5}}><strong>DANI role:</strong> {system.role}</p>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5}}><strong>Auth:</strong> {system.auth}</p>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5,wordBreak:'break-word'}}><strong>Callback:</strong> {system.callback}</p>
-    {!externalOnly && !managed && system.key !== 'GOOGLE_VOICE' && <button className='portal-primary' style={{border:0,cursor:'pointer'}} disabled={!configured} onClick={connect}>{system.key === 'NOTION' && env.NOTION_INTERNAL ? 'Validate token' : connected ? 'Reconnect' : 'Connect'} ↗</button>}
-    {(externalOnly || managed || system.key === 'GOOGLE_VOICE') && <a className='portal-primary' href={system.provider} target='_blank' rel='noreferrer'>Open {system.name} ↗</a>}
+    {!externalOnly && !managed && !manualCredential && system.key !== 'GOOGLE_VOICE' && <button className='portal-primary' style={{border:0,cursor:'pointer'}} disabled={!configured} onClick={connect}>{system.key === 'NOTION' && env.NOTION_INTERNAL ? 'Validate token' : connected ? 'Reconnect' : 'Connect'} ↗</button>}
+    {(externalOnly || managed || manualCredential || system.key === 'GOOGLE_VOICE') && <a className='portal-primary' href={system.provider} target='_blank' rel='noreferrer'>Open {system.name} ↗</a>}
     {externalOnly && <p className='portal-note' style={{marginTop:10}}>Available to ChatGPT does not mean the deployed DANI application has OAuth access. DANI will show this as connected only after its own server-side credentials and consent flow are configured.</p>}
     {(connected || notionInternalHealthy) && <p className='portal-note' style={{marginTop:10}}>{notionInternalHealthy && !connected ? 'The DANI Notion internal connection token is valid. Share the required parent pages/databases with that Notion connection before expecting page reads/writes.' : 'DANI has a stored, encrypted connection record. External IDs remain references; DANI retains its own runtime authority.'}</p>}
   </div>;
@@ -113,7 +122,7 @@ NOTION_OAUTH_REDIRECT_URI
 QUICKBOOKS_CLIENT_ID
 QUICKBOOKS_CLIENT_SECRET
 QUICKBOOKS_REDIRECT_URI
-QUICKBOOKS_ENVIRONMENT</pre>
+QUICKBOOKS_ENVIRONMENT\n\nGOOGLE_CLIENT_ID\nGOOGLE_CLIENT_SECRET\nGOOGLE_REDIRECT_URI\nGOOGLE_MAPS_SERVER_API_KEY\n\nHUBSPOT_CLIENT_ID\nHUBSPOT_CLIENT_SECRET\nHUBSPOT_REDIRECT_URI</pre>
    <p className='portal-note'>Only set these in the server-side deployment secret store. The browser never receives the client secret or OAuth refresh token.</p>
   </section>
   <section className='portal-card'><p className='portal-eyebrow'>Google Voice / 7173</p><h2 style={{margin:'5px 0 0'}}>Keep the number unchanged while we establish the programmable call path</h2>

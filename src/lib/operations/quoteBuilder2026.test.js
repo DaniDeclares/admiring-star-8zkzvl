@@ -1,4 +1,4 @@
-import { resolveCanonicalOffers } from './quoteBuilder2026.js';
+import { calculate, resolveCanonicalOffers } from './quoteBuilder2026.js';
 
 const governed = [
   { sku:'DNI-01F-001', name:'Holiday & Seasonal Home Decorating', base_price_cents:10000, sourceType:'GOVERNED' },
@@ -54,4 +54,23 @@ test('drops canonical specials when every governed counterpart is DO_NOT_SELL', 
     new Map([['DNI-02A-002',[{commercial_offer_status:'DO_NOT_SELL'}]]])
   );
   expect(result.find(x=>x.sku==='DSS-CAN-DNI02A002')).toBeUndefined();
+});
+
+
+test('keeps D11 apparel under review until an authoritative total-price formula exists', () => {
+  const service = {
+    sku:'DNI-11A-017',
+    pricing_type:'VARIABLE_QUOTE',
+    starting_price:25,
+    commercial_intent_status:'SELL_NOW',
+    quote_input_schema:{ ui_mode:'APPAREL_PRODUCTION' }
+  };
+  const rule = { pricing_type:'VARIABLE_QUOTE', base_price_cents:2500, resident_discount_eligible:false };
+
+  for (const quantity of [1,12,13,24,50]) {
+    const result = calculate(service, rule, { quantity });
+    expect(result.baseSubtotal).toBe(25);
+    expect(result.reviewFlags).toContain('APPAREL_TOTAL_PRICE_REVIEW');
+    expect(result.needsReview).toBe(true);
+  }
 });

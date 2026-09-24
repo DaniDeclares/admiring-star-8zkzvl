@@ -17,11 +17,6 @@ export const OWNER_CONNECTED_SYSTEMS = [
     external: true,
   },
   {
-    key: 'quickbooks', name: 'QuickBooks', type: 'CONNECTED FINANCE', status: 'WEB ACCESS',
-    description: 'Accounting source for actual business revenue, expenses, profit, receivables, payables and reconciliations.',
-    href: 'https://qbo.intuit.com/', cta: 'Open QuickBooks', external: true,
-  },
-  {
     key: 'hubspot', name: 'HubSpot', type: 'CONNECTED CRM', status: 'WEB ACCESS',
     description: 'Commercial account, contact, deal and relationship management.',
     href: 'https://app.hubspot.com/', cta: 'Open HubSpot', external: true,
@@ -76,7 +71,7 @@ export const OWNER_CONNECTED_SYSTEMS = [
 export const OWNER_PRIORITY_LINKS = [
   {
     label: 'Integrations & Connections',
-    description: 'Configure and audit Asana, Notion, QuickBooks Online and the Google Voice/telephony boundary.',
+    description: 'Configure and audit DANI-connected work, knowledge, communications, payment, CRM and telephony boundaries.',
     href: '/portal/integrations',
   },
   {

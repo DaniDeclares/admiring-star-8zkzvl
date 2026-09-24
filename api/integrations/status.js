@@ -19,6 +19,9 @@ export default async function handler(req,res){
    NOTION_INTERNAL:Boolean(process.env.NOTION_TOKEN),
    NOTION_PUBLIC:Boolean(process.env.NOTION_OAUTH_CLIENT_ID&&process.env.NOTION_OAUTH_CLIENT_SECRET),
    QUICKBOOKS:Boolean(process.env.QUICKBOOKS_CLIENT_ID&&process.env.QUICKBOOKS_CLIENT_SECRET),
+   GOOGLE:Boolean(process.env.GOOGLE_CLIENT_ID&&process.env.GOOGLE_CLIENT_SECRET),
+   GOOGLE_MAPS_ROUTING:Boolean(process.env.GOOGLE_MAPS_SERVER_API_KEY),
+   HUBSPOT:Boolean(process.env.HUBSPOT_CLIENT_ID&&process.env.HUBSPOT_CLIENT_SECRET),
    INTEGRATION_ENCRYPTION_KEY:Boolean(process.env.INTEGRATION_TOKEN_ENCRYPTION_KEY),
   };
   return res.status(200).json({success:true,environment:ENVIRONMENT,env,notionInternalValid,connections:connections||[]});
@@ -26,4 +29,3 @@ export default async function handler(req,res){
   return res.status(error.status||500).json({success:false,error:error.message||'INTEGRATION_STATUS_FAILED'});
  }
 }
-

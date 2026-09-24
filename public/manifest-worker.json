@@ -1,0 +1,43 @@
+{
+  "name": "DANI Worker App",
+  "short_name": "DANI Worker",
+  "description": "Provider work app for DANI DECLARES — offers, jobs, tasks, evidence, messages and earnings.",
+  "id": "/portal?app=worker",
+  "start_url": "/portal?app=worker",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#6B1F2B",
+  "background_color": "#F6F0E4",
+  "icons": [
+    {
+      "src": "/dani-declares-favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/dani-declares-favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Work",
+      "short_name": "Work",
+      "url": "/portal/field"
+    },
+    {
+      "name": "Offers",
+      "short_name": "Offers",
+      "url": "/portal/assignments"
+    },
+    {
+      "name": "Earnings",
+      "short_name": "Earnings",
+      "url": "/portal/payouts"
+    }
+  ]
+}

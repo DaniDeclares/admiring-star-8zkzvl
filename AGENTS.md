@@ -10,7 +10,7 @@ This repository is the production application for DANI DECLARES LLC. Multiple AI
 5. Do not overwrite another agent's work. If the target file has changed since the branch started, reconcile with the latest main first.
 6. Open PR overlap rule. If another open PR changes the same file, stop and reconcile the two changes before modifying that file.
 7. Database-first rule. Locate the authoritative record and owning system before creating or changing runtime/business data.
-8. External-system authority. Supabase owns DANI runtime state; GitHub owns source/migrations/tests/config; Vercel owns deployment/runtime; Stripe owns payment/invoice/payment events; HubSpot owns CRM accounts/contacts/deals; Airtable owns governance/economics/reference analysis; Notion owns operating documentation/control knowledge; Asana owns human execution/release tasks.
+8. External-system authority. Supabase owns DANI runtime state and `dd_jobs` is current production dispatch authority; GitHub owns source/migrations/tests/config; Vercel owns deployment/runtime; Stripe owns payment/invoice/payment events; HubSpot owns CRM relationship/engagement records without owning DANI service/quote/job truth; Airtable owns only explicitly assigned planning/governance/economics/reference datasets; Notion owns operating documentation/control knowledge; Asana owns human execution/release tasks; Google Drive owns collaborative file bytes, Google Calendar owns the human calendar surface, Gmail owns mailbox content/delivery state, and PostHog owns analytics telemetry.
 9. API credentials are secrets. Never commit client secrets, refresh tokens, access tokens, private keys, webhook signing secrets, or passwords. Use Vercel/server environment variables or an approved secret store. Never ask the owner to paste a secret into chat when a secure entry point is available.
 10. Production verification is mandatory. After a production-affecting change, verify CI, Vercel deployment state, and relevant runtime behavior before declaring green.
 
@@ -21,7 +21,7 @@ This repository is the production application for DANI DECLARES LLC. Multiple AI
 - Do not silently change pricing, legal/compliance language, procurement eligibility, certifications, or government-facing claims. Surface these for review.
 
 ## Agent handoff standard
-Every non-trivial change should leave a durable trail in the PR and, where useful, in the DANI Notion authority matrix. State what changed, files/subsystems touched, assumptions, tests/deployments observed, and any permissions still required.
+Every non-trivial change should register its branch/scope in `dd_agent_change_ledger` when database access is available and leave a durable trail in the PR and, where useful, in the DANI Notion authority matrix. State what changed, files/subsystems touched, assumptions, tests/deployments observed, and any permissions still required.
 
 ## Claude
 Claude is an authorized engineering collaborator, not a separate source of truth. Claude must follow this file and CLAUDE.md and consult the DANI Notion authority matrix before creating a new integration, database, project, or documentation system.

@@ -23,10 +23,10 @@ const ACTIONS = {
   ACCEPTED: [
     { label: 'On my way', event: 'EN_ROUTE' },
     { label: 'Arrived', event: 'ARRIVED' },
-    { label: 'Start work', event: 'WORK_STARTED' },
+    { label: 'Start work', event: 'WORK_STARTED', governedAction: 'start_my_job' },
     { label: 'Pause', event: 'WORK_PAUSED' },
     { label: 'Resume', event: 'WORK_RESUMED' },
-    { label: 'Complete work', event: 'WORK_COMPLETED' }
+    { label: 'Submit completed work', event: 'WORK_COMPLETED', governedAction: 'complete_my_job' }
   ]
 };
 
@@ -51,12 +51,17 @@ export default function ProviderFieldPage() {
     setLocalError('');
     try {
       const location = await getLocation();
-      await act('field_event', {
-        jobId: assignment.job_id,
-        assignmentId: assignment.id,
-        eventType,
-        ...location
-      });
+      const governedAction = eventType === 'WORK_STARTED' ? 'start_my_job' : eventType === 'WORK_COMPLETED' ? 'complete_my_job' : null;
+      if (governedAction) {
+        await act(governedAction, { jobId: assignment.job_id });
+      } else {
+        await act('field_event', {
+          jobId: assignment.job_id,
+          assignmentId: assignment.id,
+          eventType,
+          ...location
+        });
+      }
     } finally {
       setBusy(prev => ({ ...prev, [key]: false }));
     }
@@ -116,7 +121,7 @@ export default function ProviderFieldPage() {
       }) : <Card title="Today"><Empty>No dispatched work is waiting for you.</Empty></Card>}
 
       <Card title="Field operating standard">
-        <p className="portal-note">Use DANI FIELD for every dispatch event, arrival/status update, required checklist item, evidence upload and completion handoff. Location is optional evidence and requires your device permission; DANI does not require continuous tracking to perform the workflow.</p>
+        <p className="portal-note">Use DANI FIELD for every dispatch event, arrival/status update, required checklist item, evidence upload and completion handoff. “Submit completed work” sends the job to DANI for QA; it does not approve QA, earnings, or payout. Location is optional evidence and requires your device permission; DANI does not require continuous tracking to perform the workflow.</p>
       </Card>
     </>}
   </main>;
