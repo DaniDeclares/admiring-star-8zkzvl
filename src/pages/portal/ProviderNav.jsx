@@ -40,7 +40,8 @@ export default function ProviderNav({ isApprovedProvider, agreementSigned, showA
     const isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     window.alert(isiOS ? 'On iPhone/iPad: tap Share, then “Add to Home Screen,” then Add.' : 'Open your browser menu and choose “Install app” or “Add to Home screen.”');
   };
-  const tabs = showAccounting ? [...TABS.slice(0, 5), { to: '/portal/accounting', label: 'Financial Ops', locked: true, needsAgreement: true }, ...TABS.slice(5)] : TABS;\n  return <><nav className="portal-tabs">{tabs.map(tab => {
+  const tabs = showAccounting ? [...TABS.slice(0, 5), { to: '/portal/accounting', label: 'Financial Ops', locked: true, needsAgreement: true }, ...TABS.slice(5)] : TABS;
+  return <><nav className="portal-tabs">{tabs.map(tab => {
     const active = location.pathname === tab.to;
     const lockedForAgreement = tab.needsAgreement && !agreementSigned;
     const lockedForApproval = tab.locked && !isApprovedProvider;
