@@ -199,9 +199,19 @@ async function getStaffSnapshot(supabase) {
   const estimateAssignments = await getOwnerEstimateAssignments(supabase);
   return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], estimates: estimates.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], ownerAttention: ownerAttention.data || [], estimateAssignments, appointmentChangeRequests: appointmentChangeRequests.data || [], weeklyCollectedTarget: ((financialTargets.data || []).find(row => row.metric_key === 'WEEKLY_COLLECTED_TARGET')?.target_amount ?? null) };
 }
+// Tables Postgres reports as missing (undefined_table) mean the underlying
+// migration hasn't been applied to this environment yet. That's expected in
+// production until the operator runs it, so those queries degrade to an
+// empty/null result instead of taking down the whole Owner HQ snapshot.
+const UNDEFINED_TABLE = '42P01';
+function tolerateMissingTable(result) {
+  if (result.error && result.error.code === UNDEFINED_TABLE) return { data: null, error: null };
+  return result;
+}
+
 async function getOwnerControlSnapshot(supabase) {
   const base = await getStaffSnapshot(supabase);
-  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, morningBrief, companyDomains, companyRuns, soakReceipts] = await Promise.all([
+  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots] = await Promise.all([
     supabase.from('dd_sales_queue')
       .select('id,contact_name,company_name,role_title,phone,email,lane,source,source_account,disposition,next_action,next_action_date,campaign_status,intent_tier,salesperson_name,updated_at')
       .order('updated_at', { ascending: false }).limit(250),
@@ -223,13 +233,22 @@ async function getOwnerControlSnapshot(supabase) {
     supabase.from('dd_research_evidence').select('*').order('updated_at', { ascending: false }).limit(100),
     supabase.from('dd_research_sources').select('*').order('last_checked_at', { ascending: false, nullsFirst: false }).limit(100),
     supabase.from('dd_research_source_snapshots').select('id,source_id,fetched_at,http_status,changed,matched_signals,excerpt,error,metadata').order('fetched_at', { ascending: false }).limit(100),
+  ]);
+  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots].filter(item => item.error);
+  if (errors.length) throw errors[0].error;
+
+  // Company Controller / Morning Brief objects are additive and may not exist
+  // yet in every environment (see supabase/migrations/20260924133000_company_controller_morning_brief_production.sql).
+  // Missing tables here must never break the rest of Owner HQ.
+  const [morningBrief, companyDomains, companyRuns, soakReceipts] = (await Promise.all([
     supabase.from('dd_company_morning_briefs').select('*').order('generated_at', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('dd_company_controller_dashboard_v1').select('*'),
     supabase.from('dd_company_controller_runs').select('*').order('started_at', { ascending: false }).limit(10),
     supabase.from('dd_overnight_soak_receipts').select('*').order('run_at', { ascending: false }).limit(12),
-  ]);
-  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, morningBrief, companyDomains, companyRuns, soakReceipts].filter(item => item.error);
-  if (errors.length) throw errors[0].error;
+  ])).map(tolerateMissingTable);
+  const companyControllerErrors = [morningBrief, companyDomains, companyRuns, soakReceipts].filter(item => item.error);
+  if (companyControllerErrors.length) throw companyControllerErrors[0].error;
+
   return {
     ...base,
     salesQueue: salesQueue.data || [],
