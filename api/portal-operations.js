@@ -201,7 +201,7 @@ async function getStaffSnapshot(supabase) {
 }
 async function getOwnerControlSnapshot(supabase) {
   const base = await getStaffSnapshot(supabase);
-  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox] = await Promise.all([
+  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence] = await Promise.all([
     supabase.from('dd_sales_queue')
       .select('id,contact_name,company_name,role_title,phone,email,lane,source,source_account,disposition,next_action,next_action_date,campaign_status,intent_tier,salesperson_name,updated_at')
       .order('updated_at', { ascending: false }).limit(250),
@@ -218,8 +218,11 @@ async function getOwnerControlSnapshot(supabase) {
     supabase.from('dd_external_action_outbox')
       .select('id,action_key,action_type,destination_system,status,attempt_count,max_attempts,next_attempt_at,last_error_code,last_error,created_at,updated_at')
       .order('created_at', { ascending: false }).limit(50),
+    supabase.from('dd_research_programs').select('*').order('updated_at', { ascending: false }).limit(25),
+    supabase.from('dd_research_work_queue').select('*').order('updated_at', { ascending: false }).limit(100),
+    supabase.from('dd_research_evidence').select('*').order('updated_at', { ascending: false }).limit(100),
   ]);
-  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox].filter(item => item.error);
+  const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence].filter(item => item.error);
   if (errors.length) throw errors[0].error;
   return {
     ...base,
@@ -237,6 +240,9 @@ async function getOwnerControlSnapshot(supabase) {
     })(),
     agentRuns: agentRuns.data || [],
     actionOutbox: actionOutbox.data || [],
+    researchPrograms: researchPrograms.data || [],
+    researchWork: researchWork.data || [],
+    researchEvidence: researchEvidence.data || [],
   };
 }
 
