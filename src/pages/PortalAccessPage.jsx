@@ -157,18 +157,6 @@ export default function PortalAccessPage() {
     return catalogServices.filter(s => s.division_id === category.division_id && (!category.canonical_sku_prefix || (s.sku || '').startsWith(`DNI-${category.canonical_sku_prefix}-`)));
   };
 
-  const toggleService = (service, category) => {
-    setSelectedServiceIds(prev => {
-      const next = { ...prev };
-      if (next[service.id]) delete next[service.id];
-      else {
-        next[service.id] = true;
-        captureServiceLifecycle('provider_service_selected',{service_id:service.id,sku:service.sku,capability_key:category?.category_key||null,route:'/portal/access'});
-      }
-      return next;
-    });
-  };
-  const toggleDoor = (doorKey) => setExpandedDoors(prev => ({ ...prev, [doorKey]: !prev[doorKey] }));
   const setCategoryAnswer = (categoryKey, value) => {
     setSelectedCategories(prev => ({ ...prev, [categoryKey]: { ...prev[categoryKey], equipmentAnswer: value } }));
   };
