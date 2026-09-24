@@ -7,15 +7,16 @@ import './PortalAccessPage.css';
 const OWNER_EMAIL = 'vendors@danideclares.com';
 const STAFF_APP_ROLES = new Set(['admin', 'owner', 'staff_admin', 'staff']);
 const OWNER_GOVERNED_ROLES = new Set(['OWNER_OPERATOR']);
+const SALES_GOVERNED_ROLES = new Set(['SALESPERSON']);
 
 async function resolvePortalDestination(user) {
  const appRole = user?.app_metadata?.portal_role || user?.app_metadata?.role;
  if (STAFF_APP_ROLES.has(appRole)) return '/portal/hq';
 
  const { data: governedRoles, error: governedRoleError } = await supabase.rpc('dd_get_my_portal_roles');
- if (!governedRoleError && Array.isArray(governedRoles) && governedRoles.some(row =>
-   OWNER_GOVERNED_ROLES.has(row?.role || row?.portal_role || row)
- )) return '/portal/hq';
+ const roles = (!governedRoleError && Array.isArray(governedRoles)) ? governedRoles : [];
+ if (roles.some(row => OWNER_GOVERNED_ROLES.has(row?.role || row?.portal_role || row))) return '/portal/hq';
+ if (roles.some(row => SALES_GOVERNED_ROLES.has(row?.role || row?.portal_role || row))) return '/portal/sales';
 
  const { data: identity, error: identityError } = await supabase
    .from('dd_portal_identities')
