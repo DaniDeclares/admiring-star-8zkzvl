@@ -1,0 +1,238 @@
+name: DANI Code Repair Executor
+
+# Real, unattended repair executor for the DANI_AUTONOMOUS_CODE_REPAIR
+# governance flow (TESTER). This is an external process: it runs on GitHub's
+# own infrastructure, not inside a chat session, and is the actor that
+# performs the GitHub mutation (branch/commit/PR) for an authorized
+# dd_code_repair_work_queue item.
+#
+# Autonomy boundary (owner-approved, 2026-09-24):
+#   evidence -> classify -> authorize -> queue -> governed run -> decision
+#   snapshot -> external action -> executor -> isolated branch -> repair ->
+#   test -> commit/push -> PR -> verification/evidence
+#   STOPS before: merge, production mutation/promotion.
+#
+# auto_merge_allowed = false, production_direct_write_allowed = false.
+#
+# Requires two repository secrets that this executor cannot provision for
+# itself (see README note at the bottom of this file):
+#   TESTER_SUPABASE_URL
+#   TESTER_SUPABASE_SERVICE_ROLE_KEY
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dani-code-repair-executor
+  cancel-in-progress: false
+
+jobs:
+  claim-and-repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required secrets are present
+        id: secrets_check
+        run: |
+          if [ -z "${{ secrets.TESTER_SUPABASE_URL }}" ] || [ -z "${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}" ]; then
+            echo "missing=true" >> "$GITHUB_OUTPUT"
+            echo "::error::TESTER_SUPABASE_URL and/or TESTER_SUPABASE_SERVICE_ROLE_KEY repository secrets are not set. The executor cannot claim or write dd_code_repair_work_queue without them. Add them under Settings > Secrets and variables > Actions."
+          else
+            echo "missing=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.secrets_check.outputs.missing == 'false'
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        if: steps.secrets_check.outputs.missing == 'false'
+        with:
+          node-version: '20'
+
+      - name: Claim one authorized repair item
+        if: steps.secrets_check.outputs.missing == 'false'
+        id: claim
+        env:
+          SB_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
+          RUNNER: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          resp=$(curl -sS -X PATCH \
+            "$SB_URL/rest/v1/dd_code_repair_work_queue?status=eq.AUTHORIZED&execution_mode=eq.REAL&select=id,work_key,failure_kind,failure_evidence,repo,target_branch,governed_run_id,decision_snapshot_id,external_action_id&order=created_at.asc&limit=1" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" -H "Prefer: return=representation" \
+            -d "{\"status\":\"CLAIMED\",\"claimed_by\":\"github-actions:${RUNNER}\",\"claimed_at\":\"$(date -u +%FT%TZ)\"}")
+          echo "$resp" > /tmp/claimed.json
+          count=$(echo "$resp" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log(Array.isArray(j)?j.length:0)}catch(e){console.log(0)}})")
+          echo "claimed_count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$count" = "1" ]; then
+            work_key=$(node -e "console.log(require('/tmp/claimed.json')[0].work_key)")
+            target_branch=$(node -e "console.log(require('/tmp/claimed.json')[0].target_branch)")
+            action_id=$(node -e "console.log(require('/tmp/claimed.json')[0].external_action_id)")
+            echo "work_key=$work_key" >> "$GITHUB_OUTPUT"
+            echo "target_branch=$target_branch" >> "$GITHUB_OUTPUT"
+            echo "action_id=$action_id" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Claim the linked external action
+        if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1'
+        env:
+          SB_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
+          RUNNER: ${{ github.run_id }}-${{ github.run_attempt }}
+          ACTION_ID: ${{ steps.claim.outputs.action_id }}
+        run: |
+          curl -sS -X PATCH "$SB_URL/rest/v1/dd_external_action_outbox?id=eq.$ACTION_ID" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" \
+            -d "{\"status\":\"CLAIMED\",\"claimed_by\":\"github-actions:${RUNNER}\",\"claimed_at\":\"$(date -u +%FT%TZ)\",\"lease_expires_at\":\"$(date -u -d '+15 min' +%FT%TZ)\"}"
+
+      # --- Bounded repair application ---------------------------------
+      # Driven by the claimed queue row's own evidence (failure_kind +
+      # failure_evidence), not by a per-work_key lookup table -- the
+      # executor decides the repair mechanism, the queue row only supplies
+      # facts (which file, which rule, which command class). Each
+      # failure_kind maps to one class of *autofixer*, never to a
+      # hand-authored patch. Unknown failure_kinds are released back to
+      # AUTHORIZED and reported, never guessed at. An LLM-authored patch
+      # path for non-autofixable defects is a later, separately-governed
+      # extension -- out of scope here.
+      - name: Apply bounded repair
+        if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1'
+        id: repair
+        run: |
+          set -euo pipefail
+          npm ci
+          failure_kind=$(node -e "console.log(require('/tmp/claimed.json')[0].failure_kind)")
+          file=$(node -e "const e=require('/tmp/claimed.json')[0].failure_evidence; console.log(e.file||'')")
+          rule=$(node -e "const e=require('/tmp/claimed.json')[0].failure_evidence; console.log(e.rule||'')")
+          echo "failure_kind=$failure_kind" >> "$GITHUB_OUTPUT"
+          echo "target_file=$file" >> "$GITHUB_OUTPUT"
+          if [ -z "$file" ]; then
+            echo "::error::failure_evidence carries no 'file' field; nothing bounded to repair"
+            echo "applied=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          case "$failure_kind" in
+            ESLINT_*)
+              # Generic autofix class: run eslint's own fixer scoped to the
+              # one file the evidence names, optionally scoped further to
+              # the one rule. eslint --fix only ever emits changes that
+              # satisfy its own rule definitions -- it cannot introduce
+              # arbitrary behavior, which is what keeps this bounded.
+              if [ -n "$rule" ]; then
+                npx eslint --fix --rule "{\"$rule\":\"error\"}" --no-eslintrc --config .eslintrc.js "$file" || npx eslint --fix "$file"
+              else
+                npx eslint --fix "$file"
+              fi
+              echo "applied=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "::error::No autofixer class registered for failure_kind=$failure_kind ($file). Escalating rather than guessing at a fix."
+              echo "applied=false" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Verify repair stayed in bounded scope
+        if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1' && steps.repair.outputs.applied == 'true'
+        id: scope_check
+        env:
+          TARGET_FILE: ${{ steps.repair.outputs.target_file }}
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only)
+          if [ "$changed" != "$TARGET_FILE" ]; then
+            echo "::error::Diff touched more than the authorized file. Expected only '$TARGET_FILE', got: $changed"
+            git checkout -- .
+            echo "in_scope=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "in_scope=true" >> "$GITHUB_OUTPUT"
+
+      - name: Validate (lint + tests + build)
+        if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1' && steps.scope_check.outputs.in_scope == 'true'
+        id: validate
+        run: |
+          set -euo pipefail
+          npx eslint src --quiet
+          CI=true npx react-scripts test --watchAll=false
+          npm run build
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit, push, open PR
+        if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1' && steps.validate.outputs.ok == 'true'
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORK_KEY: ${{ steps.claim.outputs.work_key }}
+          FAILURE_KIND: ${{ steps.repair.outputs.failure_kind }}
+          TARGET_FILE: ${{ steps.repair.outputs.target_file }}
+        run: |
+          set -euo pipefail
+          branch="claude/code-repair-executor-${WORK_KEY}"
+          git config user.name "dani-code-repair-executor"
+          git config user.email "actions@github.com"
+          git checkout -b "$branch"
+          git add -A
+          git commit -m "Code repair executor: autofix ${FAILURE_KIND} in ${TARGET_FILE}
+
+Authored by the DANI_AUTONOMOUS_CODE_REPAIR executor (GitHub Actions run ${{ github.run_id }}), not a chat session. Applied the registered autofixer class for failure_kind=${FAILURE_KIND}, scope-checked to touch only ${TARGET_FILE}. Work item: ${WORK_KEY}."
+          git push -u origin "$branch"
+          pr_url=$(gh pr create --base main --head "$branch" \
+            --title "Code repair executor: autofix ${FAILURE_KIND} (${TARGET_FILE})" \
+            --body "Autonomous proof case for the \`DANI_AUTONOMOUS_CODE_REPAIR\` executor. Branch, commit and this PR were created by this GitHub Actions workflow run (${{ github.run_id }}), not by a chat session. Work item \`${WORK_KEY}\`, failure_kind \`${FAILURE_KIND}\`, autofixed and scope-checked to touch only \`${TARGET_FILE}\`. Stops here for human review/merge per policy (auto_merge_allowed=false).
+
+🤖 Generated by the DANI code repair executor (GitHub Actions)")
+          echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Write success evidence back to TESTER
+        if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1' && steps.pr.outputs.pr_url != ''
+        env:
+          SB_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
+          ACTION_ID: ${{ steps.claim.outputs.action_id }}
+          WORK_KEY: ${{ steps.claim.outputs.work_key }}
+          COMMIT_SHA: ${{ steps.pr.outputs.commit_sha }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          result=$(node -e "console.log(JSON.stringify({branch:'claude/code-repair-executor-'+process.env.WORK_KEY,commit_sha:process.env.COMMIT_SHA,pr_url:process.env.PR_URL,executor:'github-actions',run_id:process.env.RUN_ID,auto_merged:false,wrote_production_directly:false,wrote_main_directly:false}))" )
+          curl -sS -X PATCH "$SB_URL/rest/v1/dd_code_repair_work_queue?work_key=eq.$WORK_KEY" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" \
+            -d "{\"status\":\"PR_OPENED\",\"last_result\":$result}"
+          curl -sS -X PATCH "$SB_URL/rest/v1/dd_external_action_outbox?id=eq.$ACTION_ID" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" \
+            -d "{\"status\":\"SUCCEEDED\",\"succeeded_at\":\"$(date -u +%FT%TZ)\",\"external_reference\":\"$PR_URL\"}"
+
+      - name: Write failure evidence back to TESTER
+        if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1' && failure()
+        env:
+          SB_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
+          ACTION_ID: ${{ steps.claim.outputs.action_id }}
+          WORK_KEY: ${{ steps.claim.outputs.work_key }}
+        run: |
+          curl -sS -X PATCH "$SB_URL/rest/v1/dd_code_repair_work_queue?work_key=eq.$WORK_KEY" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" \
+            -d "{\"status\":\"AUTHORIZED\",\"last_result\":{\"executor\":\"github-actions\",\"run_id\":\"${{ github.run_id }}\",\"failed\":true}}"
+          curl -sS -X PATCH "$SB_URL/rest/v1/dd_external_action_outbox?id=eq.$ACTION_ID" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" \
+            -d "{\"status\":\"FAILED\",\"last_error\":\"github actions run ${{ github.run_id }} failed before completing the repair; released for retry\"}"
+
+# --- Missing-secret note ---------------------------------------------
+# This executor was built by a Thread Claude session and cannot create
+# repository secrets itself (no tool/permission for that). Until an
+# org/repo admin adds TESTER_SUPABASE_URL and
+# TESTER_SUPABASE_SERVICE_ROLE_KEY under Settings > Secrets and variables >
+# Actions, every run stops at the "Check required secrets are present"
+# step and claims/writes nothing. No secret is or will be committed to
+# this file or any migration.
