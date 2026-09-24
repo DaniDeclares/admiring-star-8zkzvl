@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import RequireSalesAuth from '../../components/auth/RequireSalesAuth.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 import '../../pages/portal/OperationsConsolePage.css';
@@ -9,17 +10,18 @@ const COMMISSION_LABELS = { ACCRUING: 'Accruing', EARNED: 'Earned', HELD_FOR_REV
 function money(n) { return `$${Number(n || 0).toFixed(2)}`; }
 function isToday(d) { if (!d) return false; return d <= new Date().toISOString().slice(0, 10); }
 
-function LeadRow({ row, onSave }) {
+// Minimal work-queue row, not a mini-CRM: nothing here is required before a call. "Log outcome"
+// is an optional, collapsed, after-the-call note -- the same fields the Operations Console sales
+// tab already edits, just not pre-call typing gating anything.
+function LeadRow({ row, isOwner, onSave, onFlagForQuote }) {
+  const [open, setOpen] = useState(false);
   const [disposition, setDisposition] = useState(row.disposition);
   const [nextAction, setNextAction] = useState(row.next_action || '');
   const [nextActionDate, setNextActionDate] = useState(row.next_action_date || '');
-  const [quotedAmount, setQuotedAmount] = useState(row.quoted_amount == null ? '' : row.quoted_amount);
-  const [amountCollected, setAmountCollected] = useState(row.amount_collected || 0);
   const [painPoint, setPainPoint] = useState(row.pain_point || '');
   const [impact, setImpact] = useState(row.impact_statement || '');
   const [nextStep, setNextStep] = useState(row.next_step_commitment || '');
   const dirty = disposition !== row.disposition || nextAction !== (row.next_action || '') || nextActionDate !== (row.next_action_date || '') ||
-    String(quotedAmount) !== String(row.quoted_amount == null ? '' : row.quoted_amount) || String(amountCollected) !== String(row.amount_collected || 0) ||
     painPoint !== (row.pain_point || '') || impact !== (row.impact_statement || '') || nextStep !== (row.next_step_commitment || '');
 
   return (
@@ -27,25 +29,32 @@ function LeadRow({ row, onSave }) {
       <div>
         <strong>{row.contact_name}</strong>{row.company_name && <small> · {row.company_name}</small>}
         <br /><small>{row.phone || ''}{row.phone && row.email ? ' · ' : ''}{row.email || ''}</small>
-        <div style={{ fontSize: 12, marginTop: 5 }}><strong>Priority {row.priority_score ?? '—'}</strong> · {String(row.sales_stage || '').replaceAll('_', ' ')} · {String(row.timing_signal || '').replaceAll('_', ' ')}</div>
+        <div style={{ fontSize: 12, marginTop: 5 }}><strong>Priority {row.priority_score ?? '—'}</strong> · {String(row.sales_stage || '').replaceAll('_', ' ')} · {String(row.disposition || '').replaceAll('_', ' ')}</div>
         <div style={{ fontSize: 12, color: '#6d5b60' }}>{row.recommended_action || ''}</div>
-        {!row.salesperson_user_id && <div style={{ fontSize: 11, color: '#a15c00', marginTop: 3 }}>Unassigned pool lead — editing it assigns it to you</div>}
+        {!row.salesperson_user_id && <div style={{ fontSize: 11, color: '#a15c00', marginTop: 3 }}>Unassigned pool lead — logging an outcome assigns it to you</div>}
       </div>
       <div className="ops-actions" style={{ flexWrap: 'wrap', gap: 8 }}>
-        <select value={disposition} onChange={e => setDisposition(e.target.value)}>{SALES_DISPOSITIONS.map(d => <option key={d} value={d}>{d.replaceAll('_', ' ')}</option>)}</select>
-        <input type="text" placeholder="Next action" value={nextAction} onChange={e => setNextAction(e.target.value)} style={{ minWidth: 160 }} />
-        <input type="date" value={nextActionDate || ''} onChange={e => setNextActionDate(e.target.value)} />
-        <input type="number" placeholder="Quoted $" value={quotedAmount} onChange={e => setQuotedAmount(e.target.value)} style={{ width: 90 }} />
-        <input type="number" placeholder="Collected $" value={amountCollected} onChange={e => setAmountCollected(e.target.value)} style={{ width: 100 }} />
-        <input type="text" placeholder="Pain" value={painPoint} onChange={e => setPainPoint(e.target.value)} style={{ minWidth: 140 }} />
-        <input type="text" placeholder="Impact" value={impact} onChange={e => setImpact(e.target.value)} style={{ minWidth: 140 }} />
-        <input type="text" placeholder="Committed next step" value={nextStep} onChange={e => setNextStep(e.target.value)} style={{ minWidth: 160 }} />
-        {dirty && <button onClick={() => onSave(row.id, {
-          p_disposition: disposition, p_next_action: nextAction || null, p_next_action_date: nextActionDate || null,
-          p_quoted_amount: quotedAmount === '' ? null : Number(quotedAmount), p_amount_collected: Number(amountCollected || 0),
-          p_pain_point: painPoint || null, p_impact_statement: impact || null, p_next_step_commitment: nextStep || null,
-        })}>Save</button>}
+        <button className="secondary" onClick={() => setOpen(o => !o)}>{open ? 'Hide' : 'Log outcome'}</button>
+        {isOwner
+          ? <Link className="ops-primary" to="/portal/quotes">Open Quote Builder</Link>
+          : <button className="secondary" onClick={() => onFlagForQuote(row.id)} disabled={row.next_action === 'Build & send quote (flagged by salesperson)'}>
+              {row.next_action === 'Build & send quote (flagged by salesperson)' ? 'Flagged for quote' : 'Flag for quote'}
+            </button>}
       </div>
+      {open && (
+        <div className="ops-actions" style={{ flexWrap: 'wrap', gap: 8, paddingTop: 4, borderTop: '1px solid #eee' }}>
+          <select value={disposition} onChange={e => setDisposition(e.target.value)}>{SALES_DISPOSITIONS.map(d => <option key={d} value={d}>{d.replaceAll('_', ' ')}</option>)}</select>
+          <input type="text" placeholder="Next action" value={nextAction} onChange={e => setNextAction(e.target.value)} style={{ minWidth: 160 }} />
+          <input type="date" value={nextActionDate || ''} onChange={e => setNextActionDate(e.target.value)} />
+          <input type="text" placeholder="Pain" value={painPoint} onChange={e => setPainPoint(e.target.value)} style={{ minWidth: 140 }} />
+          <input type="text" placeholder="Impact" value={impact} onChange={e => setImpact(e.target.value)} style={{ minWidth: 140 }} />
+          <input type="text" placeholder="Committed next step" value={nextStep} onChange={e => setNextStep(e.target.value)} style={{ minWidth: 160 }} />
+          {dirty && <button onClick={() => onSave(row.id, {
+            p_disposition: disposition, p_next_action: nextAction || null, p_next_action_date: nextActionDate || null,
+            p_pain_point: painPoint || null, p_impact_statement: impact || null, p_next_step_commitment: nextStep || null,
+          })}>Save outcome</button>}
+        </div>
+      )}
     </div>
   );
 }
@@ -74,7 +83,10 @@ function SalesWorkspace({ isOwner }) {
   const saveLead = async (id, patch) => {
     setMessage(''); setError('');
     const { error: e } = await supabase.rpc('dd_update_my_sales_lead', { p_id: id, ...patch });
-    if (e) setError(e.message); else { setMessage('Lead updated.'); await load(); }
+    if (e) setError(e.message); else { setMessage('Outcome logged.'); await load(); }
+  };
+  const flagForQuote = async (id) => {
+    await saveLead(id, { p_next_action: 'Build & send quote (flagged by salesperson)', p_disposition: 'QUOTE_REQUESTED' });
   };
 
   const metrics = useMemo(() => {
@@ -104,7 +116,7 @@ function SalesWorkspace({ isOwner }) {
         <div>
           <p className="ops-eyebrow">DANI DECLARES SALES</p>
           <h1>{isOwner ? 'Sales Workspace (owner view — all agents)' : 'My Sales Workspace'}</h1>
-          <p>Your assigned leads, today's follow-ups, and what you've earned. Pricing and eligibility stay governed elsewhere — this is where you work the conversation.</p>
+          <p>Your assigned leads, today's follow-ups, and what you've earned. Nothing here is required before a call — log the outcome after.</p>
         </div>
       </header>
       {error && <div className="ops-alert">{error}</div>}
@@ -122,12 +134,12 @@ function SalesWorkspace({ isOwner }) {
       <section className="ops-workspace">
         <div className="ops-card">
           <h3>Today's follow-ups ({followUps.length})</h3>
-          {followUps.map(row => <LeadRow key={row.id} row={row} onSave={saveLead} />)}
+          {followUps.map(row => <LeadRow key={row.id} row={row} isOwner={isOwner} onSave={saveLead} onFlagForQuote={flagForQuote} />)}
           {!followUps.length && <p className="ops-note">Nothing due today.</p>}
         </div>
         <div className="ops-card">
           <h3>{isOwner ? 'All leads' : 'My leads & pool'} ({rest.length})</h3>
-          {rest.map(row => <LeadRow key={row.id} row={row} onSave={saveLead} />)}
+          {rest.map(row => <LeadRow key={row.id} row={row} isOwner={isOwner} onSave={saveLead} onFlagForQuote={flagForQuote} />)}
           {!rest.length && !loading && <p className="ops-note">No other leads right now.</p>}
         </div>
         <div className="ops-card">
