@@ -37,4 +37,16 @@ describe('pricingResearch2026', () => {
     expect(proposal.status).toBe('REVIEW_READY');
     expect(proposal.market.confidence).toBe('HIGH');
   });
+  it('requires economics before market evidence becomes review-ready', () => {
+    const proposal = buildPricingProposal({
+      currentPriceCents: 4500,
+      evidence: [
+        { verification_status:'VERIFIED', comparability:'DIRECT', observed_price_low_cents:4000 },
+        { verification_status:'VERIFIED', comparability:'DIRECT', observed_price_low_cents:5000 },
+        { verification_status:'VERIFIED', comparability:'DIRECT', observed_price_low_cents:4800 }
+      ]
+    });
+    expect(proposal.status).toBe('EVIDENCE_READY');
+    expect(proposal.reason).toBe('ECONOMICS_REQUIRED');
+  });
 });
