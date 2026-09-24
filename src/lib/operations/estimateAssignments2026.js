@@ -27,6 +27,12 @@ function matchPlan(plan, line, component) {
   }) || null;
 }
 
+export function resolveOwnerFirstComponentMode(ownerAuthorized, componentMode) {
+  // Owner authorization describes who performs the in-house work. Procured
+  // supplies and subcontracted work retain their own economic treatment.
+  return ownerAuthorized && componentMode === 'IN_HOUSE' ? 'OWNER' : null;
+}
+
 export async function createEstimateEconomicsSnapshot(supabase, { estimateId, resolvedLineItems, calculation, fulfillmentPlan = [], actorUserId = null, channelCode = null }) {
   const serviceIds = [...new Set((resolvedLineItems || []).map(x => x.runtimeServiceId).filter(Boolean))];
   const { data: existing, error: versionError } = await supabase.from('dd_estimate_economics_snapshots').select('version').eq('estimate_id', estimateId).order('version',{ascending:false}).limit(1).maybeSingle();
@@ -111,8 +117,12 @@ export async function createEstimateEconomicsSnapshot(supabase, { estimateId, re
     const answerQuantity = row.quantity_input_key ? Number(line.answers?.[row.quantity_input_key]) : NaN;
     const quantity = Number.isFinite(answerQuantity) && answerQuantity >= 0 ? answerQuantity : Number(row.included_quantity || 1);
     const plan = matchPlan(fulfillmentPlan, line, row);
-    const ownerFirst = ownerAuthorizedServiceIds.has(row.service_id);
-    const fulfillmentMode = ownerFirst ? 'IN_HOUSE' : (plan?.fulfillmentMode || row.fulfillment_mode || component.default_fulfillment_mode);
+    // Owner authorization covers the work, not every component of its package.
+    // Preserve procured supplies and other vendor components as costs; otherwise
+    // they become OWNER assignments with no labor compensation rule.
+    const componentMode = plan?.fulfillmentMode || row.fulfillment_mode || component.default_fulfillment_mode;
+    const ownerFirst = resolveOwnerFirstComponentMode(ownerAuthorizedServiceIds.has(row.service_id), componentMode) === 'OWNER';
+    const fulfillmentMode = ownerFirst ? 'IN_HOUSE' : componentMode;
     const fulfillerType = ownerFirst ? 'OWNER' : (plan?.fulfillerType || (fulfillmentMode === 'PROVIDER' ? 'UNASSIGNED' : fulfillmentMode === 'IN_HOUSE' ? 'UNASSIGNED' : fulfillmentMode === 'PROCURED' ? 'VENDOR' : fulfillmentMode === 'SUBCONTRACTED' ? 'SUBCONTRACTOR' : 'UNASSIGNED'));
     const providerId = ownerFirst ? null : (plan?.providerId || null);
     const ownerUserId = ownerFirst ? DANI_OWNER_USER_ID : (plan?.ownerUserId || null);
