@@ -107,7 +107,7 @@ function sanitizeProviderAssignment(assignment) {
   return { id: assignment.id, job_id: assignment.job_id, provider_id: assignment.provider_id, assignment_status: assignment.assignment_status, provider_notes: assignment.provider_notes, offered_at: assignment.offered_at, accepted_at: assignment.accepted_at, rejected_at: assignment.rejected_at, cancelled_at: assignment.cancelled_at, offer_expires_at: assignment.offer_expires_at, response_at: assignment.response_at, offer_sequence: assignment.offer_sequence, job: sanitizeProviderJob(assignment.job) };
 }
 async function getStaffSnapshot(supabase) {
-  const [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions] = await Promise.all([
+  const [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions, ownerAttention] = await Promise.all([
     supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_jobs').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_job_appointments').select('*').order('starts_at', { ascending: true }).limit(100),
@@ -124,8 +124,9 @@ async function getStaffSnapshot(supabase) {
     // list to verify/reject, and only reach for decrypt_provider_w9_tin (which
     // is separately logged) when a real number is actually needed.
     supabase.from('dd_provider_w9_submissions').select('id, provider_application_id, provider_org_id, line1_name, classification, tin_type, tin_last_four, status, created_at, dd_provider_organizations(name)').eq('status', 'SUBMITTED').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_owner_attention_queue').select('id,domain,source_table,source_record_id,reason,priority,status,recommended_action,metadata,created_at,resolved_at').eq('status','OPEN').order('created_at',{ascending:false}).limit(100),
   ]);
-  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions].filter(item => item.error);
+  const errors = [requests, jobs, appointments, providers, changes, evidence, payments, invoices, pendingCapabilities, w9Submissions, ownerAttention].filter(item => item.error);
   if (errors.length) throw errors[0].error;
   const requestRows = requests.data || [];
   const leadIds = [...new Set(requestRows.map(row => row.lead_id).filter(Boolean))];
@@ -146,7 +147,7 @@ async function getStaffSnapshot(supabase) {
     };
   });
   const estimateAssignments = await getOwnerEstimateAssignments(supabase);
-  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], estimateAssignments };
+  return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], ownerAttention: ownerAttention.data || [], estimateAssignments };
 }
 async function getProviderApplicationSnapshot(supabase, userId) {
   const { data: application, error: applicationError } = await supabase
@@ -245,7 +246,7 @@ async function getW9Status(supabase, userId) {
   if (error) throw error;
   return data || null;
 }
-async function getProviderSnapshot(supabase, providerId, userId) {
+async function getProviderSnapshot(supabase, providerId, userId, userSupabase = supabase) {
   let applicationSnapshot = await getProviderApplicationSnapshot(supabase, userId);
   if (!applicationSnapshot.application && providerId) {
     const directSnapshot = await getDirectProviderAuthorizationSnapshot(supabase, providerId);
@@ -258,7 +259,7 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   // Financials are read through the provider-bound projection. The Worker App
   // can display governed earning/payable/payout state but cannot approve,
   // process, reconcile, or mutate accounting records.
-  const { data: financialsData, error: financialsError } = await supabase.rpc('dd_get_my_provider_financials');
+  const { data: financialsData, error: financialsError } = await userSupabase.rpc('dd_get_my_provider_financials');
   if (financialsError) throw financialsError;
   const financials = financialsData || { earnings: [], payables: [], payouts: [] };
   const quoteAssignments = await getProviderEstimateAssignments(supabase, providerId);
@@ -364,7 +365,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const notificationPreferences = await getNotificationPreferences(context.supabase, context.user.id);
       if (!context.isStaff) {
-        if (context.role === 'provider') return ok(res, { role: context.role, notificationPreferences, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id) });
+        if (context.role === 'provider') return ok(res, { role: context.role, notificationPreferences, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id, context.userSupabase) });
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
