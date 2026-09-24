@@ -34,7 +34,7 @@ jobs:
       - name: Critical public smoke
         env:
           PRODUCTION_BASE_URL: https://www.danideclares.com
-        run: npx playwright test checks/production-critical.spec.ts --project=chromium
+        run: npx playwright test checks/production-critical.spec.ts
       - name: Preserve failure evidence
         if: failure()
         uses: actions/upload-artifact@v4
