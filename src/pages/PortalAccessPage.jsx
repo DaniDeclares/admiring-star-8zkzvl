@@ -37,7 +37,7 @@ export default function PortalAccessPage() {
   const [selected,setSelected]=useState(null);
   const [propertyInvite,setPropertyInvite]=useState(null);
   const [inviteChecking,setInviteChecking]=useState(false);
-  const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',rateExpectation:'',address:'',city:'',state:'GA',zip:'',serviceRadiusMiles:'25',services:'',password:'',confirm:''});
+  const [form,setForm]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',rateExpectation:'',address:'',city:'',state:'GA',zip:'',serviceRadiusMiles:'25',yearsExperience:'',availability:'',transportation:'',willingOutsideRadius:false,services:'',password:'',confirm:''});
   const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [done,setDone]=useState('');
   const [catalogServices,setCatalogServices]=useState([]);
   const [licenseGatedSkus,setLicenseGatedSkus]=useState(() => new Set());
@@ -172,6 +172,16 @@ export default function PortalAccessPage() {
   const setCategoryAnswer = (categoryKey, value) => {
     setSelectedCategories(prev => ({ ...prev, [categoryKey]: { ...prev[categoryKey], equipmentAnswer: value } }));
   };
+  const toggleCategory = (category) => {
+    const services = servicesForCategory(category);
+    const checked = !selectedCategories[category.category_key]?.checked;
+    setSelectedCategories(prev => ({ ...prev, [category.category_key]: { ...prev[category.category_key], checked } }));
+    setSelectedServiceIds(prev => {
+      const next = { ...prev };
+      services.forEach(service => { if (checked) next[service.id] = true; else delete next[service.id]; });
+      return next;
+    });
+  };
 
   const selectedServicesPreview = useMemo(() => catalogServices.filter(s => selectedServiceIds[s.id]), [catalogServices, selectedServiceIds]);
   const selectedServiceCount = selectedServicesPreview.length;
@@ -218,7 +228,7 @@ export default function PortalAccessPage() {
       const radius=Number(form.serviceRadiusMiles);
       if(!Number.isFinite(radius)||radius<=0||radius>250){setError('Enter a service radius between 1 and 250 miles.');return false;}
     }
-    if(providerStep===3&&!selectedServiceCount){setError('Select at least one specific service you can fulfill.');return false;}
+    if(providerStep===3&&!Object.values(selectedCategories).some(v=>v?.checked)){setError('Select at least one service category you can fulfill.');return false;}
     setError('');return true;
   };
   const nextProviderStep=()=>{if(providerStepValid())setProviderStep(s=>Math.min(s+1,4));};
@@ -232,7 +242,7 @@ export default function PortalAccessPage() {
     if(form.password.length<8)return setError('Use a password with at least 8 characters.');
     if(form.password!==form.confirm)return setError('Passwords do not match.');
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
-    if(selected?.key==='provider' && !selectedServiceCount)return setError('Select at least one specific service you can fulfill.');
+    if(selected?.key==='provider' && !Object.values(selectedCategories).some(v=>v?.checked))return setError('Select at least one service category you can fulfill.');
     setBusy(true);
     capture('signup_started',{route:'/portal/access',account_type:selected?.key||'unknown',channel:selected?.channel||undefined});
     captureSentryEvent('started',{account_type:selected?.key||'unknown',channel:selected?.channel||undefined,route:'/portal/access'});
@@ -263,7 +273,7 @@ export default function PortalAccessPage() {
       identityPayload.organization_id=propertyInvite.client_organization_id;
       identityPayload.entity_id=propertyInvite.property_id;
     }
-    const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:providerApplicantType,legal_name:providerApplicantType==='BUSINESS'?(form.organization||`${form.firstName} ${form.lastName}`):`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_radius_miles:Number(form.serviceRadiusMiles),service_zip_codes:form.zip?[form.zip.trim()]:[],service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString(),rate_expectation:form.rateExpectation||null}:null;
+    const providerPayload=selected.key==='provider'?{application_status:'SUBMITTED',applicant_type:providerApplicantType,legal_name:providerApplicantType==='BUSINESS'?(form.organization||`${form.firstName} ${form.lastName}`):`${form.firstName} ${form.lastName}`,contact_first_name:form.firstName,contact_last_name:form.lastName,contact_email:form.email,contact_phone:form.phone,physical_address:form.address,service_area:form.city&&form.state?`${form.city}, ${form.state}`:form.state,service_radius_miles:Number(form.serviceRadiusMiles),service_zip_codes:form.zip?[form.zip.trim()]:[],years_experience:form.yearsExperience?Number(form.yearsExperience):null,availability:form.availability||null,vehicle_equipment:form.transportation||null,willing_outside_radius:Boolean(form.willingOutsideRadius),service_notes:form.services,source:'PUBLIC_APPLICATION',referral_source:'WEBSITE_PORTAL',consent_at:new Date().toISOString(),submitted_at:new Date().toISOString(),rate_expectation:form.rateExpectation||null}:null;
     // Expand each selected category into its real underlying services. A service
     // whose SKU carries a real LICENSE_SERVICE/CERT_SERVICE/AUTO_MOBILE requirement
     // (from dd_service_capability_requirements -- notary, wedding officiant, and every
@@ -371,56 +381,35 @@ export default function PortalAccessPage() {
       <label>Confirm password<input type="password" name="confirm" minLength="8" required value={form.confirm} onChange={update} autoComplete="new-password"/></label>
     </div>}
     {providerStep===2&&<div className="portal-form-grid">
-      <div className="portal-wide">
-        <strong>How are you signing up?</strong>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:12,marginTop:10}}>
-          <label className="portal-capability-item"><input type="radio" name="providerApplicantType" value="INDIVIDUAL" checked={providerApplicantType==='INDIVIDUAL'} onChange={e=>setProviderApplicantType(e.target.value)}/> Individual provider</label>
-          <label className="portal-capability-item"><input type="radio" name="providerApplicantType" value="BUSINESS" checked={providerApplicantType==='BUSINESS'} onChange={e=>setProviderApplicantType(e.target.value)}/> Business / company provider</label>
-        </div>
-        <small>{providerApplicantType==='BUSINESS'?'Business providers must submit their own current price sheet before the application can be approved.':'Individual providers may submit their own price sheet if they want DANI DECLARES to consider their preferred rates; it is optional.'}</small>
-      </div>
+      <div className="portal-wide"><strong>How are you signing up?</strong><div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:12,marginTop:10}}>
+        <label className="portal-capability-item"><input type="radio" name="providerApplicantType" value="INDIVIDUAL" checked={providerApplicantType==='INDIVIDUAL'} onChange={e=>setProviderApplicantType(e.target.value)}/> Individual provider</label>
+        <label className="portal-capability-item"><input type="radio" name="providerApplicantType" value="BUSINESS" checked={providerApplicantType==='BUSINESS'} onChange={e=>setProviderApplicantType(e.target.value)}/> Business / company provider</label>
+      </div></div>
       <label className="portal-wide">Business / organization name {providerApplicantType==='BUSINESS'?'(required)':'(optional)'}<input name="organization" required={providerApplicantType==='BUSINESS'} value={form.organization} onChange={update}/></label>
-      <label className="portal-wide">Dispatch origin address<input name="address" required value={form.address} onChange={update}/><small>Use the address you normally travel from for DANI assignments. It is used privately for routing and mileage economics.</small></label>
-      <label>City<input name="city" required value={form.city} onChange={update}/></label>
-      <label>State<input name="state" required maxLength="2" value={form.state} onChange={update}/></label>
-      <label>ZIP<input name="zip" required value={form.zip} onChange={update}/></label>
-      <label>Service radius (miles)<input name="serviceRadiusMiles" required type="number" min="1" max="250" step="1" value={form.serviceRadiusMiles} onChange={update}/><small>You may still receive an outside-radius offer if you later choose to allow it and the travel economics work.</small></label>
+      <label className="portal-wide">Where will you normally travel from?<input name="address" required value={form.address} onChange={update}/><small>This stays private and is used to match you with assignments you can realistically reach.</small></label>
+      <label>City<input name="city" required value={form.city} onChange={update}/></label><label>State<input name="state" required maxLength="2" value={form.state} onChange={update}/></label><label>ZIP<input name="zip" required value={form.zip} onChange={update}/></label>
+      <label>Normal service radius (miles)<input name="serviceRadiusMiles" required type="number" min="1" max="250" step="1" value={form.serviceRadiusMiles} onChange={update}/></label>
+      <label>Years of experience (optional)<input name="yearsExperience" type="number" min="0" step="0.5" value={form.yearsExperience} onChange={update}/></label>
+      <label className="portal-wide">How do you reliably get to assignments?<input name="transportation" value={form.transportation} onChange={update} placeholder="Example: personal vehicle, MARTA/bus/rail, rideshare, bicycle, or a combination"/><small>Owning a car is not required for every service. Tell us how you travel so we only match you with appropriate work.</small></label>
+      <label className="portal-wide">General availability (optional)<input name="availability" value={form.availability} onChange={update} placeholder="Example: weekdays after 8 AM; weekends; 24-hour notice preferred"/></label>
+      <label className="portal-wide portal-capability-item"><input type="checkbox" checked={Boolean(form.willingOutsideRadius)} onChange={e=>setForm({...form,willingOutsideRadius:e.target.checked})}/> I may consider assignments outside my normal radius when the job and travel make sense.</label>
     </div>}
     {providerStep===3&&<div className="portal-wide portal-capability-picker">
-      <p>Choose the specific DANI DECLARES services you can fulfill. The groups below match the same customer-facing service doors used across the public catalog. Selecting a group does not claim every service in it.</p>
-      <span className="portal-capability-count">{selectedServiceCount} specific service{selectedServiceCount===1?'':'s'} selected</span>
-      {catalogLoading?<p>Loading service catalog…</p>:<div className="portal-capability-groups">{providerDoorGroups.map(({door,services})=>{
-        const isOpen=Boolean(expandedDoors[door.key]);
-        const selectedInDoor=services.filter(s=>selectedServiceIds[s.id]).length;
-        const selectedCategoriesInDoor=categories.filter(c=>services.some(s=>selectedServiceIds[s.id]&&serviceCategoryById.get(s.id)?.category_key===c.category_key));
-        return <div key={door.key} className="portal-capability-group">
-          <button type="button" className="portal-capability-item" onClick={()=>toggleDoor(door.key)} aria-expanded={isOpen}>
-            <strong>{door.label}</strong><small>{selectedInDoor ? ' — '+selectedInDoor+' selected' : ' — Choose services'}</small>
-          </button>
-          {door.tagline&&<small className="portal-capability-desc">{door.tagline}</small>}
-          {isOpen&&<div className="portal-capability-followup">
-            <div style={{display:'grid',gap:8}}>
-              {services.map(service=>{
-                const category=serviceCategoryById.get(service.id);
-                return <label key={service.id} className="portal-capability-item">
-                  <input type="checkbox" checked={Boolean(selectedServiceIds[service.id])} onChange={()=>toggleService(service,category)}/>
-                  <span><strong>{service.name}</strong>{service.sku&&<small> · {service.sku}</small>}</span>
-                </label>;
-              })}
-            </div>
-            {selectedCategoriesInDoor.map(category=><div key={'followup-'+category.category_key} style={{marginTop:14}}>
-              <label>{category.equipment_prompt||'Tell us about your experience in this service area.'}<input type="text" value={selectedCategories[category.category_key]?.equipmentAnswer||''} onChange={e=>setCategoryAnswer(category.category_key,e.target.value)} placeholder="Describe briefly…"/></label>
-              {category.requires_credential&&<small className="portal-capability-credential-note">⚠ We will request and verify the required credential before authorization.</small>}
-            </div>)}
-          </div>}
+      <p>Choose the kinds of work you can perform. You do not need to search through DANI DECLARES' entire service catalog.</p>
+      {catalogLoading?<p>Loading service categories…</p>:<div className="portal-capability-groups">{categories.map(category=>{
+        const checked=Boolean(selectedCategories[category.category_key]?.checked);
+        return <div key={category.category_key} className="portal-capability-group">
+          <label className="portal-capability-item"><input type="checkbox" checked={checked} onChange={()=>toggleCategory(category)}/><span><strong>{category.label}</strong>{category.description&&<small> · {category.description}</small>}</span></label>
+          {checked&&<div className="portal-capability-followup"><label>{category.equipment_prompt||'Tell us briefly about your experience in this area.'}<input type="text" value={selectedCategories[category.category_key]?.equipmentAnswer||''} onChange={e=>setCategoryAnswer(category.category_key,e.target.value)} placeholder="Describe briefly…"/></label>{category.requires_credential&&<small className="portal-capability-credential-note">Required credentials will be verified before you are authorized for regulated work.</small>}</div>}
         </div>;
       })}</div>}
     </div>}
     {providerStep===4&&<div className="portal-review">
       <h2 className="portal-review-title">Review your application</h2>
       <div className="portal-row"><div><strong>{form.firstName} {form.lastName}</strong><small>{form.email} · {form.phone||'No phone provided'}</small></div></div>
-      <div className="portal-row"><div><strong>{form.organization||'Individual provider'}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')} · {form.serviceRadiusMiles} mile service radius</small></div></div>
-      <div className="portal-row"><div><strong>{selectedServiceCount} specific service{selectedServiceCount===1?'':'s'} selected</strong><small>{selectedServicesPreview.map(s=>s.name).join(', ')||'None selected'}</small></div></div>
+      <div className="portal-row"><div><strong>{form.organization||'Individual provider'}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')} · {form.serviceRadiusMiles} mile normal radius</small></div></div>
+      <div className="portal-row"><div><strong>Travel & availability</strong><small>{form.transportation||'Not specified'} · {form.availability||'Availability not specified'}{form.willingOutsideRadius?' · May consider outside-radius work':''}</small></div></div>
+      <div className="portal-row"><div><strong>{Object.values(selectedCategories).filter(v=>v?.checked).length} service categor{Object.values(selectedCategories).filter(v=>v?.checked).length===1?'y':'ies'} selected</strong><small>{categories.filter(cat=>selectedCategories[cat.category_key]?.checked).map(cat=>cat.label).join(', ')||'None selected'}</small></div></div>
       <label className="portal-wide">Rate expectations (optional)<input name="rateExpectation" value={form.rateExpectation} onChange={update} placeholder="Example: $35/hr, $125 minimum, or 'see attached price sheet'."/><small>These are provider-submitted expectations, not DANI DECLARES customer pricing.</small></label>
       <label className="portal-wide">Additional notes about your experience (optional)<textarea name="services" rows="4" value={form.services} onChange={update} placeholder="Certifications, equipment, years of experience, anything else worth knowing."/></label>
     </div>}
