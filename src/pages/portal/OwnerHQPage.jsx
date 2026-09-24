@@ -106,7 +106,7 @@ function OwnerHq({ session }) {
       const d = new Date(a.starts_at);
       return !Number.isNaN(d.getTime()) && d >= today && d < new Date(today.getTime() + 86400000);
     });
-    const quoteValue = quotes.reduce((sum, q) => sum + Number(q.estimated_total || 0), 0);
+    const quoteValue = quotes.filter(q => !['cancelled','declined','expired','superseded'].includes(String(q.estimate_status || '').toLowerCase())).reduce((sum, q) => sum + Number(q.estimated_total || 0), 0);
     const now = new Date(); now.setHours(23,59,59,999);
     const salesDueRows = salesQueue.filter(item => {
       if (String(item.disposition || '').toUpperCase() === 'PAYMENT_SUCCEEDED') return false;
