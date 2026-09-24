@@ -1,0 +1,1 @@
+UPDATE public.dd_integration_webhook_credentials SET secret_sha256 = '767c93f507d1ad313be7214bf78afe9fe41e57949c2116523b0b7ea9e3b99120', header_name = 'x-dani-webhook-secret', is_active = true, updated_at = now() WHERE provider = 'THUMBTACK';

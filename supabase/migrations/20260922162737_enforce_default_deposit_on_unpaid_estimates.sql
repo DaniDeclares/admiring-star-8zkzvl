@@ -1,0 +1,36 @@
+
+create or replace function public.dd_apply_default_estimate_deposit()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_percent numeric;
+begin
+  if new.estimated_total is null or new.estimated_total <= 0 then
+    return new;
+  end if;
+
+  select initial_payment_percent into v_percent
+  from public.dd_service_payment_policy
+  where policy_key='DEFAULT' and is_active=true
+  limit 1;
+
+  if v_percent is null or v_percent <= 0 or v_percent >= 100 then
+    raise exception 'Active DEFAULT payment policy must define initial_payment_percent between 0 and 100';
+  end if;
+
+  if lower(coalesce(new.estimate_status,'')) not in ('paid','completed','closed') then
+    new.deposit_due := round(new.estimated_total * (v_percent / 100.0), 2);
+  end if;
+
+  return new;
+end;
+$$;
+
+update public.dd_estimates
+set deposit_due = round(estimated_total * 0.535, 2)
+where estimated_total > 0
+  and lower(coalesce(estimate_status,'')) not in ('paid','completed','closed')
+  and deposit_due is distinct from round(estimated_total * 0.535, 2);
