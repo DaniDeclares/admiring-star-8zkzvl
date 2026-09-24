@@ -18,7 +18,7 @@ const TABS = [
   { to: '/portal/settings', label: 'Notifications', locked: false, needsAgreement: true },
 ];
 
-export default function ProviderNav({ isApprovedProvider, agreementSigned }) {
+export default function ProviderNav({ isApprovedProvider, agreementSigned, showAccounting = false }) {
   const location = useLocation();
   const [installPrompt, setInstallPrompt] = useState(null);
   const [standalone, setStandalone] = useState(false);
@@ -40,7 +40,8 @@ export default function ProviderNav({ isApprovedProvider, agreementSigned }) {
     const isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     window.alert(isiOS ? 'On iPhone/iPad: tap Share, then “Add to Home Screen,” then Add.' : 'Open your browser menu and choose “Install app” or “Add to Home screen.”');
   };
-  return <><nav className="portal-tabs">{TABS.map(tab => {
+  const tabs = showAccounting ? [...TABS.slice(0, 5), { to: '/portal/accounting', label: 'Financial Ops', locked: true, needsAgreement: true }, ...TABS.slice(5)] : TABS;
+  return <><nav className="portal-tabs">{tabs.map(tab => {
     const active = location.pathname === tab.to;
     const lockedForAgreement = tab.needsAgreement && !agreementSigned;
     const lockedForApproval = tab.locked && !isApprovedProvider;

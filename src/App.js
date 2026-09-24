@@ -39,6 +39,7 @@ import ProviderChecklistPage from "./pages/portal/ProviderChecklistPage.jsx";
 import ProviderAgreementPage from "./pages/portal/ProviderAgreementPage.jsx";
 import ProviderEvidencePage from "./pages/portal/ProviderEvidencePage.jsx";
 import ProviderPayoutsPage from "./pages/portal/ProviderPayoutsPage.jsx";
+import ProviderAccountingPage from "./pages/portal/ProviderAccountingPage.jsx";
 import ProviderProfilePage from "./pages/portal/ProviderProfilePage.jsx";
 import ProviderServicesPage from "./pages/portal/ProviderServicesPage.jsx";
 import ProviderW9Page from "./pages/portal/ProviderW9Page.jsx";
@@ -131,6 +132,7 @@ export default function App() {
         <Route path="/portal/checklist" element={<ProviderChecklistPage />} />
         <Route path="/portal/evidence" element={<ProviderEvidencePage />} />
         <Route path="/portal/payouts" element={<ProviderPayoutsPage />} />
+        <Route path="/portal/accounting" element={<ProviderAccountingPage />} />
         <Route path="/portal/profile" element={<ProviderProfilePage />} />
         <Route path="/portal/services" element={<ProviderServicesPage />} />
         <Route path="/portal/w9" element={<ProviderW9Page />} />
