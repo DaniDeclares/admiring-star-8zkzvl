@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     if (context.role !== 'provider') return fail(res, 'Provider account required.', 403);
 
     if (req.method === 'GET') {
-      const { data, error } = await context.supabase.rpc('dd_get_my_accounting_workspace');
+      const { data, error } = await context.userSupabase.rpc('dd_get_my_accounting_workspace');
       if (error) {
         const status = /ACCOUNTING_CAPABILITY_REQUIRED/.test(error.message || '') ? 403 : 400;
         return fail(res, error.message || 'Could not load accounting workspace.', status);
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const { sourceType, sourceId, reviewStatus, reviewerNote, proposedTreatment } = req.body || {};
       if (!sourceType || !sourceId || !reviewStatus) return fail(res, 'sourceType, sourceId and reviewStatus are required.', 422);
-      const { data, error } = await context.supabase.rpc('dd_review_my_accounting_item', {
+      const { data, error } = await context.userSupabase.rpc('dd_review_my_accounting_item', {
         p_source_type: sourceType,
         p_source_id: String(sourceId),
         p_review_status: reviewStatus,
