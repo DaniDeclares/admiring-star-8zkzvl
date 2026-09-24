@@ -9,17 +9,28 @@ function getServerClient() {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
+function getUserScopedClient(token) {
+  const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
+  if (!url || !key) throw new Error('Server user-scoped Supabase configuration is missing.');
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+}
+
 export async function authenticatePortalRequest(req) {
   const authorization = req.headers.authorization || '';
   const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : null;
   if (!token) return { error: 'Authentication required', status: 401 };
 
   const supabase = getServerClient();
+  const userSupabase = getUserScopedClient(token);
   const { data: { user }, error } = await supabase.auth.getUser(token);
   if (error || !user) return { error: 'Invalid or expired session', status: 401 };
 
   const role = user.app_metadata?.portal_role || user.app_metadata?.role;
-  if (STAFF_ROLES.has(role)) return { supabase, user, role, isStaff: true };
+  if (STAFF_ROLES.has(role)) return { supabase, userSupabase, user, role, isStaff: true };
 
   const { data: identity, error: identityError } = await supabase
     .from('dd_portal_identities')
@@ -30,7 +41,7 @@ export async function authenticatePortalRequest(req) {
 
   if (identityError) throw identityError;
   if (!identity) return { error: 'No active Dani Declares portal identity is assigned to this account.', status: 403 };
-  return { supabase, user, role: identity.portal_role, identity, isStaff: false };
+  return { supabase, userSupabase, user, role: identity.portal_role, identity, isStaff: false };
 }
 
 export function requireRole(context, roles) {
