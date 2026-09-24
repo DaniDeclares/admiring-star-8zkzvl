@@ -13,6 +13,25 @@ function money(value) {
   return '$' + Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+const STATUS_TONES = {
+  RED: { background: '#fbe4e2', color: '#9b3346' },
+  URGENT: { background: '#fbe4e2', color: '#9b3346' },
+  BLOCKED: { background: '#fbe4e2', color: '#9b3346' },
+  FAILED: { background: '#fbe4e2', color: '#9b3346' },
+  YELLOW: { background: '#fbedd2', color: '#8a5a12' },
+  HIGH: { background: '#fbedd2', color: '#8a5a12' },
+  DUE: { background: '#fbedd2', color: '#8a5a12' },
+  PENDING: { background: '#fbedd2', color: '#8a5a12' },
+  GREEN: { background: '#e0f3e5', color: '#2d6a4f' },
+  OK: { background: '#e0f3e5', color: '#2d6a4f' },
+  RESOLVED: { background: '#e0f3e5', color: '#2d6a4f' },
+  AUDITABLE: { background: '#e5eefb', color: '#2b5a9e' },
+  UNKNOWN: { background: '#eee5d9', color: '#4d4243' },
+};
+function statusPillStyle(status) {
+  return STATUS_TONES[String(status || '').toUpperCase()] || null;
+}
+
 function SystemCard({ system }) {
   const body = (
     <div style={{
@@ -186,23 +205,35 @@ function OwnerHq({ session }) {
       <span className="portal-pill">Live DANI data · refreshes quietly every 30s</span>
     </section>
 
-    {data?.morningBrief && <section className="portal-card" id="morning-brief" style={{ border: data.morningBrief.company_status === 'RED' ? '2px solid #9b3346' : undefined }}>
+    {data?.morningBrief && <section
+      className="portal-card"
+      id="morning-brief"
+      style={{
+        background: 'linear-gradient(135deg, #6b1f2b 0%, #4a1620 100%)',
+        color: '#fff',
+        border: data.morningBrief.company_status === 'RED' ? '2px solid #f0a9a9' : '1px solid #4a1620',
+      }}
+    >
       <div>
-        <p className="portal-eyebrow">Morning Brief · verified state only</p>
-        <h2 style={{ margin: '5px 0 0' }}>DANI worked while you were away</h2>
-        <p className="portal-note" style={{ marginTop: 8 }}>{data.morningBrief.headline}</p>
+        <p className="portal-eyebrow" style={{ color: '#f0cf78' }}>Morning Brief · verified state only</p>
+        <h2 style={{ margin: '5px 0 0', color: '#fff' }}>DANI worked while you were away</h2>
+        <p style={{ marginTop: 8, color: '#f0e2e4', lineHeight: 1.55 }}>{data.morningBrief.headline}</p>
       </div>
       <div className="portal-summary-grid" style={{ marginTop: 14 }}>
-        <a className="portal-summary-tile" href="#company-health"><strong>{data.morningBrief.company_status}</strong><span>Company state</span></a>
+        <a className="portal-summary-tile" href="#company-health" style={{ borderColor: statusPillStyle(data.morningBrief.company_status)?.color }}><strong style={{ color: statusPillStyle(data.morningBrief.company_status)?.color }}>{data.morningBrief.company_status}</strong><span>Company state</span></a>
         <a className="portal-summary-tile" href="#owner-attention"><strong>{data.morningBrief.owner_attention?.open_count ?? 0}</strong><span>Needs Danielle</span></a>
         <a className="portal-summary-tile" href="#company-health"><strong>{data.morningBrief.overnight_verified?.research_queued ?? 0}</strong><span>Research queued</span></a>
         <a className="portal-summary-tile" href="#company-health"><strong>{data.morningBrief.overnight_verified?.support_ready ?? 0}/{data.morningBrief.overnight_verified?.services_total ?? 0}</strong><span>Support-ready services</span></a>
         <a className="portal-summary-tile" href="#software-platform"><strong>{data.morningBrief.software_platform?.status || 'UNKNOWN'}</strong><span>Software & platform</span></a>
         <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{data.morningBrief.revenue_sales?.sales_queue ?? metrics.salesQueue}</strong><span>Sales queue</span></Link>
       </div>
-      <div style={{ marginTop: 14 }} className="portal-row">
-        <div><strong>Baseline evidence</strong><small>Soak receipt {data.morningBrief.baseline_soak_receipt_id || data.morningBrief.overnight_verified?.latest_soak_receipt || 'not yet captured'}</small><small>Generated {data.morningBrief.generated_at ? new Date(data.morningBrief.generated_at).toLocaleString() : '—'} · Tester evidence does not imply production mutation.</small></div>
-        <span className="portal-pill">AUDITABLE</span>
+      <div style={{ marginTop: 14, borderTop: '1px solid rgba(255,255,255,.2)', paddingTop: 14, display: 'flex', justifyContent: 'space-between', gap: 15, alignItems: 'center' }}>
+        <div>
+          <strong style={{ color: '#fff' }}>Baseline evidence</strong>
+          <small style={{ display: 'block', marginTop: 5, color: '#e0c9cd' }}>Soak receipt {data.morningBrief.baseline_soak_receipt_id || data.morningBrief.overnight_verified?.latest_soak_receipt || 'not yet captured'}</small>
+          <small style={{ display: 'block', marginTop: 5, color: '#e0c9cd' }}>Generated {data.morningBrief.generated_at ? new Date(data.morningBrief.generated_at).toLocaleString() : '—'} · Tester evidence does not imply production mutation.</small>
+        </div>
+        <span className="portal-pill" style={statusPillStyle('AUDITABLE')}>AUDITABLE</span>
       </div>
     </section>}
 
@@ -213,9 +244,9 @@ function OwnerHq({ session }) {
         <p className="portal-note" style={{ marginTop: 8 }}>GREEN is never inferred. RED, YELLOW and UNKNOWN stay visible until their evidence gates are actually satisfied.</p>
       </div>
       <div style={{ marginTop: 14 }}>
-        {(data?.companyDomains || []).map(item => <div className="portal-row" key={item.domain} id={item.domain === 'SOFTWARE_PLATFORM' ? 'software-platform' : undefined}>
+        {(data?.companyDomains || []).map(item => <div className="portal-row" key={item.domain} id={item.domain === 'SOFTWARE_PLATFORM' ? 'software-platform' : undefined} style={{ borderLeft: `4px solid ${statusPillStyle(item.status)?.color || '#e6d9c8'}`, paddingLeft: 12, marginLeft: -4 }}>
           <div><strong>{item.domain.replaceAll('_',' ')}</strong><small>{item.summary}</small><small>Next: {item.next_autonomous_action || 'Await verified evidence'}</small></div>
-          <span className="portal-pill">{item.status}</span>
+          <span className="portal-pill" style={statusPillStyle(item.status)}>{item.status}</span>
         </div>)}
       </div>
     </section>
@@ -245,7 +276,7 @@ function OwnerHq({ session }) {
             {item.metadata?.sender_address && <small>From: {item.metadata.sender_address}</small>}
             {item.recommended_action && <small>Next: {item.recommended_action}</small>}
           </div>
-          <span className="portal-pill">{item.priority}</span>
+          <span className="portal-pill" style={statusPillStyle(item.priority)}>{item.priority}</span>
         </div>) : <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No open owner-attention items.</div>}
       </div>
     </section>
@@ -264,7 +295,7 @@ function OwnerHq({ session }) {
       <div style={{ marginTop: 14 }}>
         {(metrics.salesDueRows || []).slice(0, 8).map(item => <div className="portal-row" key={item.id}>
           <div><strong>{item.company_name || item.contact_name || 'Sales lead'}</strong><small>{item.contact_name || 'Contact pending'} · Priority {item.priority_score ?? '—'} · {item.disposition || 'UNSET'}</small><small>Next: {item.next_action || 'Follow up'} · due {item.next_action_date}</small></div>
-          <span className="portal-pill">DUE</span>
+          <span className="portal-pill" style={statusPillStyle('DUE')}>DUE</span>
         </div>)}
         {!metrics.salesDue && <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No sales actions are due.</div>}
       </div>
@@ -347,7 +378,7 @@ function OwnerHq({ session }) {
             <small>{item.sender_address || 'Unknown sender'} · {item.relationship_type || 'UNMATCHED'} · {item.priority}</small>
             {item.attention_reason && <small>{item.attention_reason}</small>}
           </div>
-          <span className="portal-pill">{item.priority}</span>
+          <span className="portal-pill" style={statusPillStyle(item.priority)}>{item.priority}</span>
         </div>)}
         {!metrics.communicationAttention && !metrics.agentFailures && !metrics.outboxExceptions && <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>Communications and governed runtime queues are clear.</div>}
       </div>
