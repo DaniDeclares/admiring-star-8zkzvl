@@ -1,0 +1,36 @@
+name: Checkly Production Monitoring
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'checks/**'
+      - 'checkly.config.ts'
+      - 'playwright.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/checkly-production.yml'
+  workflow_dispatch:
+
+jobs:
+  checkly:
+    runs-on: ubuntu-latest
+    env:
+      CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
+      CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
+      PRODUCTION_BASE_URL: https://www.danideclares.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run Checkly checks locally
+        run: npx checkly test
+      - name: Deploy checks to Checkly
+        if: env.CHECKLY_ACCOUNT_ID != '' && env.CHECKLY_API_KEY != ''
+        run: npx checkly deploy --force
+      - name: Verify cloud deployment prerequisites
+        if: env.CHECKLY_ACCOUNT_ID == '' || env.CHECKLY_API_KEY == ''
+        run: echo "Checkly cloud deploy skipped because CHECKLY_ACCOUNT_ID and/or CHECKLY_API_KEY is not configured."

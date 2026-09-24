@@ -1,6 +1,4 @@
-jest.mock('../../../lib/prisma.js', () => ({ __esModule: true, default: {} }));
-
-import { economicGateFromOffer, checkoutEligibility } from './governedCommercialGate2026';
+import { economicGateFromOffer, checkoutEligibility, resolveCH01CommercialSelection } from './governedCommercialGate2026.mjs';
 
 describe('economic checkout gate', () => {
   test('blocks missing economics', () => {
@@ -52,6 +50,7 @@ describe('LIVE_READY checkout release gate', () => {
     internalCost: 'AUDITED: $50.00',
     marginEconomics: 'AUDITED: price $140 - cost $50 = $90 (64.3%)',
     ch01APriced: true,
+    ch01LockedActivePricing: true,
     channelAvailabilityCount: 1,
     pricedChannelCount: 1,
     authorizedProviderCapabilityCount: 1,
@@ -73,3 +72,16 @@ describe('LIVE_READY checkout release gate', () => {
 });
 
 // CI release-contract verification pass.
+
+
+describe('CH01 canonical resolver controls', () => {
+ test('requires a canonical service and front door before commercial resolution', async () => {
+  expect((await resolveCH01CommercialSelection({})).reason).toBe('CH01_SERVICE_REQUIRED');
+  expect((await resolveCH01CommercialSelection({serviceId:'DNI-01A-001'})).reason).toBe('CH01_FRONT_DOOR_REQUIRED');
+ });
+ test('rejects a caller-supplied resident subchannel that conflicts with verified status', async () => {
+  const result=await resolveCH01CommercialSelection({serviceId:'DNI-01A-001',frontDoorCode:'CH01-F01',subchannelCode:'CH01-B',isVerifiedCommunityResident:false});
+  expect(result.allowed).toBe(false);
+  expect(result.reason).toBe('CH01_SUBCHANNEL_MISMATCH');
+ });
+});

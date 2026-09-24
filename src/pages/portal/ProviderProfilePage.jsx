@@ -21,7 +21,7 @@ export default function ProviderProfilePage() {
     <Card title="Contact & Business Details">
       <div className="portal-row"><div><strong>{application?.legal_name || 'Not provided'}</strong><small>{statusLabel(application?.applicant_type)}</small></div></div>
       <div className="portal-row"><div><strong>{[application?.contact_first_name, application?.contact_last_name].filter(Boolean).join(' ') || 'Not provided'}</strong><small>{application?.contact_email || 'No email on file'} · {application?.contact_phone || 'No phone on file'}</small></div></div>
-      <div className="portal-row"><div><strong>{application?.service_area || 'Service area not provided'}</strong><small>{application?.physical_address || 'No address on file'}</small></div></div>
+      <div className="portal-row"><div><strong>{application?.service_area || 'Service area not provided'}</strong><small>{application?.physical_address || 'No dispatch origin on file'}{application?.service_radius_miles ? ` · ${application.service_radius_miles} mile radius` : ''}{application?.service_zip_codes?.length ? ` · ZIP coverage: ${application.service_zip_codes.join(', ')}` : ''}</small><small>{application?.dispatch_location_verified_at ? 'Routing location verified' : 'Routing location awaiting verification/geocoding'}</small></div></div>
       {application?.service_notes && <div className="portal-row"><div><strong>Notes</strong><small>{application.service_notes}</small></div></div>}
       <p className="portal-note" style={{ marginTop: 14 }}>To correct any of this information, contact DANI DECLARES — the portal does not yet support self-service profile edits.</p>
     </Card>

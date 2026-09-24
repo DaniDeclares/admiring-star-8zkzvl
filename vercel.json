@@ -1,9 +1,173 @@
 {
   "version": 2,
+  "buildCommand": "REACT_APP_SENTRY_DSN=\"$NEXT_PUBLIC_SENTRY_DSN\" REACT_APP_VERCEL_ENV=\"$VERCEL_ENV\" REACT_APP_VERCEL_GIT_COMMIT_SHA=\"$VERCEL_GIT_COMMIT_SHA\" npm run build",
   "rewrites": [
-    { "source": "/api/portal-dispatch", "destination": "/api/portal-fulfillment-dispatch" },
-    { "source": "/api/portal-fulfillment", "destination": "/api/portal-fulfillment-dispatch" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/",
+      "destination": "/seo/home.html"
+    },
+    {
+      "source": "/services",
+      "destination": "/seo/services.html"
+    },
+    {
+      "source": "/resident-concierge",
+      "destination": "/seo/resident-concierge.html"
+    },
+    {
+      "source": "/services/property",
+      "destination": "/seo/services--property.html"
+    },
+    {
+      "source": "/real-estate",
+      "destination": "/seo/real-estate.html"
+    },
+    {
+      "source": "/services/business-solutions",
+      "destination": "/seo/services--business-solutions.html"
+    },
+    {
+      "source": "/industries/government",
+      "destination": "/seo/industries--government.html"
+    },
+    {
+      "source": "/services/federal",
+      "destination": "/seo/services--federal.html"
+    },
+    {
+      "source": "/services/facility-visits",
+      "destination": "/seo/services--facility-visits.html"
+    },
+    {
+      "source": "/services/events",
+      "destination": "/seo/services--events.html"
+    },
+    {
+      "source": "/services/print-studio",
+      "destination": "/seo/services--print-studio.html"
+    },
+    {
+      "source": "/request-service",
+      "destination": "/seo/request-service.html"
+    },
+    {
+      "source": "/packages",
+      "destination": "/seo/packages.html"
+    },
+    {
+      "source": "/membership",
+      "destination": "/seo/membership.html"
+    },
+    {
+      "source": "/partner-network",
+      "destination": "/seo/partner-network.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/seo/about.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/seo/contact.html"
+    },
+    {
+      "source": "/blog",
+      "destination": "/seo/blog.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/seo/terms.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/seo/privacy.html"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/portal/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/signup",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/forgot-password",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/accept-invite",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/providers",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/provider/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/internal/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/pay",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/pay/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/service/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/blog/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/staff/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/government/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.danideclares.com"
+        }
+      ],
+      "destination": "https://danideclares.com/:path*",
+      "permanent": true
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/integrations/gmail/sync",
+      "schedule": "* * * * *"
+    }
   ]
 }

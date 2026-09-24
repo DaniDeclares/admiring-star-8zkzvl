@@ -84,3 +84,12 @@ if (rootElement) {
     </React.StrictMode>
   );
 }
+
+
+// Install the provider Worker App shell. Authenticated/API data remains network-governed;
+// the service worker is for launchability and resilient static navigation, not offline mutations.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(error => console.warn('Worker App service worker registration failed', error));
+  });
+}
