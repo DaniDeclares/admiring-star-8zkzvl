@@ -30,6 +30,17 @@ const RULES = [
 ];
 
 const SYSTEM_NOISE = /\b(verification code|one-time code|otp|password reset|sign-in alert|security alert|automated message|do not reply|noreply|no-reply)\b/i;
+const INTELLIGENCE_SIGNALS = [
+  { key:'COMPETITOR', re:/\b(competitor|pricing|price increase|new service|launch|offer|package|bundle)\b/i },
+  { key:'MARKETING', re:/\b(marketing|campaign|conversion|seo|social media|email strategy|customer acquisition|retention)\b/i },
+  { key:'OPERATIONS', re:/\b(workflow|automation|operations|dispatch|field service|sop|productivity|process)\b/i },
+  { key:'PROCUREMENT', re:/\b(procurement|rfp|rfq|solicitation|government contract|supplier|vendor program)\b/i },
+  { key:'FUNDING', re:/\b(grant|funding|capital|loan|credit|financial readiness)\b/i },
+  { key:'TECHNOLOGY', re:/\b(ai|artificial intelligence|software|api|integration|automation|platform|technology)\b/i },
+  { key:'WORKFORCE', re:/\b(contractor|provider|hiring|workforce|labor|training|onboarding)\b/i },
+  { key:'CUSTOMER_INSIGHT', re:/\b(customer|consumer|buyer|resident|property manager|broker|client experience|pain point)\b/i },
+];
+
 const INTEGRATION_ONLY = /\b(connect(ed|ion)?|oauth|authorize|integration|plugin|workspace connected|account linked)\b/i;
 
 export function mailboxRole(email) {
@@ -43,6 +54,7 @@ export function classifyGmailMessage({ accountEmail, subject='', snippet='', fro
 
   const matches = RULES.filter(rule => rule.re.test(text)).map(rule => ({ key:rule.key, label:rule.label }));
   const systemNoise = SYSTEM_NOISE.test(text);
+  const intelligenceSignals = INTELLIGENCE_SIGNALS.filter(rule => rule.re.test(text)).map(rule => rule.key);
   const integrationOnly = INTEGRATION_ONLY.test(text) && !/\b(proposal|quote|customer|service inquiry|partnership|contract)\b/i.test(text);
 
   return {
@@ -53,6 +65,9 @@ export function classifyGmailMessage({ accountEmail, subject='', snippet='', fro
     internalOnly,
     leadScoutEligible: !internalOnly && !systemNoise && !integrationOnly,
     productionMetricsEligible: !internalOnly,
+    intelligenceEligible: intelligenceSignals.length > 0,
+    intelligenceSignals,
+    intelligenceReviewRequired: intelligenceSignals.length > 0,
     suppressionReason: internalOnly ? 'INTERNAL_OPS_TESTING'
       : systemNoise ? 'SYSTEM_AUTH_NOISE'
       : integrationOnly ? 'USER_INITIATED_INTEGRATION_ACTIVITY'
