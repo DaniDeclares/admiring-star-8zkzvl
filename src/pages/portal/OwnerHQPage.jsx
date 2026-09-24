@@ -186,6 +186,40 @@ function OwnerHq({ session }) {
       <span className="portal-pill">Live DANI data · refreshes quietly every 30s</span>
     </section>
 
+    {data?.morningBrief && <section className="portal-card" id="morning-brief" style={{ border: data.morningBrief.company_status === 'RED' ? '2px solid #9b3346' : undefined }}>
+      <div>
+        <p className="portal-eyebrow">Morning Brief · verified state only</p>
+        <h2 style={{ margin: '5px 0 0' }}>DANI worked while you were away</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>{data.morningBrief.headline}</p>
+      </div>
+      <div className="portal-summary-grid" style={{ marginTop: 14 }}>
+        <a className="portal-summary-tile" href="#company-health"><strong>{data.morningBrief.company_status}</strong><span>Company state</span></a>
+        <a className="portal-summary-tile" href="#owner-attention"><strong>{data.morningBrief.owner_attention?.open_count ?? 0}</strong><span>Needs Danielle</span></a>
+        <a className="portal-summary-tile" href="#company-health"><strong>{data.morningBrief.overnight_verified?.research_queued ?? 0}</strong><span>Research queued</span></a>
+        <a className="portal-summary-tile" href="#company-health"><strong>{data.morningBrief.overnight_verified?.support_ready ?? 0}/{data.morningBrief.overnight_verified?.services_total ?? 0}</strong><span>Support-ready services</span></a>
+        <a className="portal-summary-tile" href="#software-platform"><strong>{data.morningBrief.software_platform?.status || 'UNKNOWN'}</strong><span>Software & platform</span></a>
+        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{data.morningBrief.revenue_sales?.sales_queue ?? metrics.salesQueue}</strong><span>Sales queue</span></Link>
+      </div>
+      <div style={{ marginTop: 14 }} className="portal-row">
+        <div><strong>Baseline evidence</strong><small>Soak receipt {data.morningBrief.baseline_soak_receipt_id || data.morningBrief.overnight_verified?.latest_soak_receipt || 'not yet captured'}</small><small>Generated {data.morningBrief.generated_at ? new Date(data.morningBrief.generated_at).toLocaleString() : '—'} · Tester evidence does not imply production mutation.</small></div>
+        <span className="portal-pill">AUDITABLE</span>
+      </div>
+    </section>}
+
+    <section className="portal-card" id="company-health">
+      <div>
+        <p className="portal-eyebrow">Company controller</p>
+        <h2 style={{ margin: '5px 0 0' }}>Business + software health</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>GREEN is never inferred. RED, YELLOW and UNKNOWN stay visible until their evidence gates are actually satisfied.</p>
+      </div>
+      <div style={{ marginTop: 14 }}>
+        {(data?.companyDomains || []).map(item => <div className="portal-row" key={item.domain} id={item.domain === 'SOFTWARE_PLATFORM' ? 'software-platform' : undefined}>
+          <div><strong>{item.domain.replaceAll('_',' ')}</strong><small>{item.summary}</small><small>Next: {item.next_autonomous_action || 'Await verified evidence'}</small></div>
+          <span className="portal-pill">{item.status}</span>
+        </div>)}
+      </div>
+    </section>
+
     <div className="portal-summary-grid">
       <a className="portal-summary-tile" href="#owner-attention"><strong>{metrics.ownerAttention}</strong><span>Needs Danielle</span></a>
       <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Sales due / overdue</span></Link>
