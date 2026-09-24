@@ -14,6 +14,31 @@ export const config={api:{bodyParser:false}};
 async function getRawBody(req){const chunks=[];for await(const chunk of req)chunks.push(typeof chunk==='string'?Buffer.from(chunk):chunk);return Buffer.concat(chunks);}
 function readChannel(propertyDetails){return propertyDetails?.operationsRouting?.channelType||propertyDetails?.operationsRouting?.channel||null;}
 function money(value){return Number(Number(value||0).toFixed(2));}
+const GOOGLE_ROUTES_ENDPOINT='https://routes.googleapis.com/directions/v2:computeRoutes';
+async function finalizeProposedProviderRoutes(db,estimateId){
+ const key=process.env.GOOGLE_MAPS_ROUTES_API_KEY;
+ if(!estimateId)return {resolved:0,held:'ESTIMATE_REQUIRED'};
+ if(!key){console.warn('Provider route offers held: GOOGLE_MAPS_ROUTES_API_KEY is not configured.');return {resolved:0,held:'ROUTES_API_KEY_MISSING'};}
+ const offers=await db.$queryRaw`
+  select ao.id,pa.dispatch_latitude origin_lat,pa.dispatch_longitude origin_lng,sr.service_latitude destination_lat,sr.service_longitude destination_lng
+  from public.dd_estimate_assignment_offers ao join public.dd_estimates e on e.id=ao.estimate_id join public.service_requests sr on sr.id=e.service_request_id
+  join lateral (select dispatch_latitude,dispatch_longitude from public.dd_provider_applications where provider_id=ao.provider_id and dispatch_location_verified_at is not null order by case when application_status='APPROVED' then 0 else 1 end,updated_at desc limit 1) pa on true
+  where ao.estimate_id=${estimateId}::uuid and ao.assignment_type='PROVIDER' and ao.status='PROPOSED' and sr.service_latitude is not null and sr.service_longitude is not null and sr.jurisdiction_verified_at is not null
+ `;
+ let resolved=0,held=0;
+ for(const offer of offers){
+  try{
+   const response=await fetch(GOOGLE_ROUTES_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':key,'X-Goog-FieldMask':'routes.distanceMeters,routes.duration'},body:JSON.stringify({origin:{location:{latLng:{latitude:Number(offer.origin_lat),longitude:Number(offer.origin_lng)}}},destination:{location:{latLng:{latitude:Number(offer.destination_lat),longitude:Number(offer.destination_lng)}}},travelMode:'DRIVE',routingPreference:'TRAFFIC_AWARE',computeAlternativeRoutes:false,units:'IMPERIAL'})});
+   if(!response.ok){held++;console.error('Google Routes provider routing failed',response.status,await response.text());continue;}
+   const body=await response.json(),meters=Number(body?.routes?.[0]?.distanceMeters);
+   if(!Number.isFinite(meters)||meters<0){held++;continue;}
+   const miles=Math.round((meters/1609.344)*100)/100;
+   await db.$queryRaw`select public.dd_finalize_provider_route_offer(${offer.id}::uuid,${miles}::numeric,'GOOGLE_ROUTES_API') as result`;
+   resolved++;
+  }catch(error){held++;console.error('Provider route finalization held:',error.message);}
+ }
+ return {resolved,held};
+}
 
 export default async function handler(req,res){
  if(req.method!=='POST')return res.status(405).json({error:'Method not allowed'});
@@ -78,7 +103,7 @@ export default async function handler(req,res){
        values(${event.id},${invoice.payment_intent||invoice.id},${paidRequest.id}::uuid,${job.id}::uuid,${event.type},'SUCCEEDED',${received},${invoice.currency||'usd'},${JSON.stringify(invoice.metadata||{})}::jsonb)
        on conflict(provider_event_id) do nothing
       `;
-      if(paidEstimate.economics_status==='PASS'&&paidEstimate.active_economics_snapshot_id) await prisma.$queryRaw`select public.dd_activate_paid_estimate_assignments(${paidEstimate.id}::uuid) as routing`;
+      if(paidEstimate.economics_status==='PASS'&&paidEstimate.active_economics_snapshot_id){ await prisma.$queryRaw`select public.dd_activate_paid_estimate_assignments(${paidEstimate.id}::uuid) as routing`; await finalizeProposedProviderRoutes(prisma,paidEstimate.id); }
      }
      return res.status(200).json({received:true,subscriptionInvoice:true,status:event.type});
     }
@@ -169,6 +194,7 @@ export default async function handler(req,res){
       }
     }
    });
+   if(event.type==='invoice.paid'&&row.estimate_id) await finalizeProposedProviderRoutes(prisma,row.estimate_id);
    return res.status(200).json({received:true,reconciled:true,invoiceId:row.id,status:nextStatus});
   }catch(error){
    console.error('Failed to reconcile Stripe invoice event:',error.message);
@@ -302,9 +328,10 @@ export default async function handler(req,res){
     // together, or a failure here rolls back the job/status/reconciliation too, so a Stripe
     // retry starts clean instead of silently losing the notification behind an idempotent replay.
     await publishPaymentReconciled(reconciliation,tx);
-    return {status:'RECONCILED',job,reconciliation};
+    return {status:'RECONCILED',job,reconciliation,estimateId:estimate.id};
    });
    if(result.status==='IDEMPOTENT_REPLAY')return res.status(200).json({received:true,idempotent:true});
+   await finalizeProposedProviderRoutes(prisma,result.estimateId);
    await captureServer('payment_completed',{request_id:requestId,service_id:serviceId,payment_state:'completed',transaction_status:result.status,job_reference:result.job?.public_reference||undefined,route:'/api/stripe-webhook'});
    console.log(`B2C payment accepted; request ${requestId} -> job ${result.job.public_reference}.`);
   }catch(error){await captureServer('payment_reconciliation_failed',{request_id:requestId,service_id:String(session.metadata?.service_id||'').trim()||undefined,error_type:'operational_transition',route:'/api/stripe-webhook'});console.error('Failed to transition/reconcile paid B2C request:',error.message);return res.status(500).json({error:'Payment received but operational/accounting transition failed'});}

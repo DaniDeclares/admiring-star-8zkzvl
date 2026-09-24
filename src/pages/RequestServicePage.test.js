@@ -3,7 +3,6 @@ import path from 'path';
 
 describe('public request front door regressions',()=>{
  const source=fs.readFileSync(path.join(__dirname,'RequestServicePage.jsx'),'utf8');
-
  test('routing helper remains optional and never disables submit',()=>{
   expect(source).toContain('(optional)');
   expect(source).toContain('disabled={loading}');

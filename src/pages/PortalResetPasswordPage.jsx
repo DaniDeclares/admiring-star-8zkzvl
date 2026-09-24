@@ -17,6 +17,16 @@ export default function PortalResetPasswordPage() {
     const finish = async () => {
       try {
         const params = new URLSearchParams(window.location.search);
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        const hashError = hash.get('error_description') || hash.get('error');
+        if (hashError) throw new Error(hashError);
+        const accessToken = hash.get('access_token');
+        const refreshToken = hash.get('refresh_token');
+        if (accessToken && refreshToken) {
+          const { error: sessionSetError } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          if (sessionSetError) throw sessionSetError;
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
         const code = params.get('code');
         if (code) {
           const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
