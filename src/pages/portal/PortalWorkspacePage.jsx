@@ -63,7 +63,7 @@ export default function PortalWorkspacePage() {
   if (['admin','owner','staff_admin','staff'].includes(role)) return <OwnerHQPage />;
   const isProvider = role === 'provider'; const isCommercial = ['property_manager', 'procurement'].includes(role);
   const application = snapshot?.application || null;
-  const capabilities = snapshot?.capabilities || [];
+  const capabilities = snapshot?.capabilities || [];\n  const hasAccountingWorkspace = capabilities.some(item => /bookkeeping|financial|AP\/AR|cash flow/i.test(String(item.capability_description || '')) && String(item.authorization_status || '').toUpperCase() === 'AUTHORIZED');
   const isApprovedProvider = application?.application_status === 'APPROVED';
   const isSignedProvider = application?.agreement_status === 'EXECUTED';
   const requirements = isProvider ? buildProviderRequirements(application, capabilities) : [];
@@ -76,7 +76,7 @@ export default function PortalWorkspacePage() {
   const messageCount = snapshot?.messages?.length || 0;
   return <main className="portal-shell">
     <header className="portal-hero"><div><p className="portal-eyebrow">{isProvider ? 'DANI DECLARES PROVIDER' : 'DANI DECLARES'}</p><h1>{ROLE_LABELS[role] || 'DANI DECLARES'}</h1><p>{isProvider ? 'Assignments, dispatch instructions, field checklists, evidence and completion records — connected to the DANI DECLARES fulfillment system.' : 'Requests, services, projects, approvals, documents and financial records — connected to the same DANI DECLARES operating system.'}</p></div><div className="portal-hero-actions"><AccountBadge session={session} /><button className="portal-refresh" onClick={load}>Refresh</button></div></header>
-    {isProvider ? <ProviderNav isApprovedProvider={isApprovedProvider} agreementSigned={isSignedProvider} /> : <CustomerNav />}
+    {isProvider ? <ProviderNav isApprovedProvider={isApprovedProvider} agreementSigned={isSignedProvider} showAccounting={hasAccountingWorkspace} /> : <CustomerNav />}
     {error && <div className="portal-alert" role="alert">{error}</div>}{message && <div className="portal-success" role="status">{message}</div>}
     {isProvider ? (isApprovedProvider ? <>
       <div className="portal-summary-grid">
@@ -85,7 +85,7 @@ export default function PortalWorkspacePage() {
         <Link className="portal-summary-tile" to="/portal/schedule"><strong>{nextAppointment ? formatDate(nextAppointment.starts_at) : 'None scheduled'}</strong><span>Next appointment</span></Link>
         <Link className="portal-summary-tile" to="/portal/checklist"><strong>{openTasks}</strong><span>Open checklist item{openTasks === 1 ? '' : 's'}</span></Link>
         <Link className="portal-summary-tile" to="/portal/evidence"><strong>{pendingEvidence}</strong><span>Evidence pending verification</span></Link>
-        <Link className="portal-summary-tile" to="/portal/payouts"><strong>{lastPayout ? `$${Number(lastPayout.amount || 0).toFixed(2)}` : 'None yet'}</strong><span>Most recent payout</span></Link>
+        <Link className="portal-summary-tile" to="/portal/payouts"><strong>{lastPayout ? `${Number(lastPayout.amount || 0).toFixed(2)}` : 'None yet'}</strong><span>Most recent payout</span></Link>\n        {hasAccountingWorkspace && <Link className="portal-summary-tile" to="/portal/accounting"><strong>Open Financial Ops</strong><span>Accounting Agent review & reconciliation</span></Link>}
         <Link className="portal-summary-tile" to="/portal/messages"><strong>{messageCount}</strong><span>Message{messageCount === 1 ? '' : 's'} on your jobs</span></Link>
         <Link className="portal-summary-tile" to="/portal/profile"><strong>View profile</strong><span>Contact details & documents</span></Link>
       </div>
