@@ -61,8 +61,20 @@ describe('DDOS intake routing', () => {
       expect.objectContaining({
         channel: null,
         source: 'invalid_commercial_model_as_channel',
+        reason: 'COMMERCIAL_MODEL_IS_NOT_CHANNEL',
         workflow: INTAKE_WORKFLOWS.MANUAL_REVIEW,
         initialState: REQUEST_STATES.NEW,
+      })
+    );
+  });
+
+  test('B2B2C never falls through to CH02 category fallback', () => {
+    expect(routeIntake({ channelType: 'B2B2C', category: 'PROPERTY_OPERATIONS' })).toEqual(
+      expect.objectContaining({
+        channel: null,
+        source: 'invalid_commercial_model_as_channel',
+        reason: 'COMMERCIAL_MODEL_IS_NOT_CHANNEL',
+        workflow: INTAKE_WORKFLOWS.MANUAL_REVIEW,
       })
     );
   });
@@ -104,7 +116,7 @@ describe('DDOS intake routing', () => {
 
   test('routing context is safe to persist alongside a request', () => {
     expect(
-      buildIntakeRoutingContext({ channelType: OPERATIONS_CHANNELS.B2B_RE })
+      buildIntakeRoutingContext({ channelType: OPERATIONS_CHANNELS.B2B_RE, subchannelCode: 'CH01-B' })
     ).toEqual({
       channel: OPERATIONS_CHANNELS.B2B_RE,
       channelSource: 'explicit',
@@ -115,6 +127,7 @@ describe('DDOS intake routing', () => {
       requiresProposal: true,
       requiresSowReview: false,
       commercialModel: null,
+      subchannel: 'CH01-B',
     });
   });
 });
