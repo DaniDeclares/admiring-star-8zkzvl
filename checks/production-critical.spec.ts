@@ -14,6 +14,14 @@ test.describe('DANI DECLARES production critical journeys', () => {
     await expect(page.locator('button[type="submit"]')).toContainText(/request service/i);
   });
 
+  test('@critical provider application deep link opens provider form', async ({ page }) => {
+    await page.goto('/provider/apply');
+    await expect(page).toHaveURL(/\/portal\/access\?role=provider/);
+    await expect(page.locator('body')).toContainText('Service Provider');
+    await expect(page.getByLabel('First name')).toBeVisible();
+    await expect(page.getByLabel('Email')).toBeVisible();
+  });
+
   test('@critical signup validation surface is reachable', async ({ page }) => {
     await page.goto('/portal/access');
     await expect(page.locator('body')).toContainText('Service Provider');
