@@ -246,7 +246,7 @@ async function getW9Status(supabase, userId) {
   if (error) throw error;
   return data || null;
 }
-async function getProviderSnapshot(supabase, providerId, userId) {
+async function getProviderSnapshot(supabase, providerId, userId, userSupabase = supabase) {
   let applicationSnapshot = await getProviderApplicationSnapshot(supabase, userId);
   if (!applicationSnapshot.application && providerId) {
     const directSnapshot = await getDirectProviderAuthorizationSnapshot(supabase, providerId);
@@ -259,7 +259,7 @@ async function getProviderSnapshot(supabase, providerId, userId) {
   // Financials are read through the provider-bound projection. The Worker App
   // can display governed earning/payable/payout state but cannot approve,
   // process, reconcile, or mutate accounting records.
-  const { data: financialsData, error: financialsError } = await supabase.rpc('dd_get_my_provider_financials');
+  const { data: financialsData, error: financialsError } = await userSupabase.rpc('dd_get_my_provider_financials');
   if (financialsError) throw financialsError;
   const financials = financialsData || { earnings: [], payables: [], payouts: [] };
   const quoteAssignments = await getProviderEstimateAssignments(supabase, providerId);
@@ -365,7 +365,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const notificationPreferences = await getNotificationPreferences(context.supabase, context.user.id);
       if (!context.isStaff) {
-        if (context.role === 'provider') return ok(res, { role: context.role, notificationPreferences, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id) });
+        if (context.role === 'provider') return ok(res, { role: context.role, notificationPreferences, ...await getProviderSnapshot(context.supabase, context.identity.entity_id, context.user.id, context.userSupabase) });
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
