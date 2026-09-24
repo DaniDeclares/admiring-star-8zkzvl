@@ -63,7 +63,8 @@ export default function PortalWorkspacePage() {
   if (['admin','owner','staff_admin','staff'].includes(role)) return <OwnerHQPage />;
   const isProvider = role === 'provider'; const isCommercial = ['property_manager', 'procurement'].includes(role);
   const application = snapshot?.application || null;
-  const capabilities = snapshot?.capabilities || [];\n  const hasAccountingWorkspace = capabilities.some(item => /bookkeeping|financial|AP\/AR|cash flow/i.test(String(item.capability_description || '')) && String(item.authorization_status || '').toUpperCase() === 'AUTHORIZED');
+  const capabilities = snapshot?.capabilities || [];
+  const hasAccountingWorkspace = capabilities.some(item => /bookkeeping|financial|AP\/AR|cash flow/i.test(String(item.capability_description || '')) && String(item.authorization_status || '').toUpperCase() === 'AUTHORIZED');
   const isApprovedProvider = application?.application_status === 'APPROVED';
   const isSignedProvider = application?.agreement_status === 'EXECUTED';
   const requirements = isProvider ? buildProviderRequirements(application, capabilities) : [];
@@ -85,7 +86,8 @@ export default function PortalWorkspacePage() {
         <Link className="portal-summary-tile" to="/portal/schedule"><strong>{nextAppointment ? formatDate(nextAppointment.starts_at) : 'None scheduled'}</strong><span>Next appointment</span></Link>
         <Link className="portal-summary-tile" to="/portal/checklist"><strong>{openTasks}</strong><span>Open checklist item{openTasks === 1 ? '' : 's'}</span></Link>
         <Link className="portal-summary-tile" to="/portal/evidence"><strong>{pendingEvidence}</strong><span>Evidence pending verification</span></Link>
-        <Link className="portal-summary-tile" to="/portal/payouts"><strong>{lastPayout ? `${Number(lastPayout.amount || 0).toFixed(2)}` : 'None yet'}</strong><span>Most recent payout</span></Link>\n        {hasAccountingWorkspace && <Link className="portal-summary-tile" to="/portal/accounting"><strong>Open Financial Ops</strong><span>Accounting Agent review & reconciliation</span></Link>}
+        <Link className="portal-summary-tile" to="/portal/payouts"><strong>{lastPayout ? `${Number(lastPayout.amount || 0).toFixed(2)}` : 'None yet'}</strong><span>Most recent payout</span></Link>
+        {hasAccountingWorkspace && <Link className="portal-summary-tile" to="/portal/accounting"><strong>Open Financial Ops</strong><span>Accounting Agent review & reconciliation</span></Link>}
         <Link className="portal-summary-tile" to="/portal/messages"><strong>{messageCount}</strong><span>Message{messageCount === 1 ? '' : 's'} on your jobs</span></Link>
         <Link className="portal-summary-tile" to="/portal/profile"><strong>View profile</strong><span>Contact details & documents</span></Link>
       </div>
