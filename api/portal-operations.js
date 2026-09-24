@@ -199,19 +199,27 @@ async function getStaffSnapshot(supabase) {
   const estimateAssignments = await getOwnerEstimateAssignments(supabase);
   return { requests: enrichedRequests, jobs: jobs.data || [], appointments: appointments.data || [], providers: providers.data || [], changes: changes.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), payments: payments.data || [], invoices: invoices.data || [], estimates: estimates.data || [], pendingCapabilities: pendingCapabilities.data || [], pendingW9Submissions: w9Submissions.data || [], ownerAttention: ownerAttention.data || [], estimateAssignments, appointmentChangeRequests: appointmentChangeRequests.data || [], weeklyCollectedTarget: ((financialTargets.data || []).find(row => row.metric_key === 'WEEKLY_COLLECTED_TARGET')?.target_amount ?? null) };
 }
-// Tables Postgres reports as missing (undefined_table) mean the underlying
-// migration hasn't been applied to this environment yet. That's expected in
-// production until the operator runs it, so those queries degrade to an
-// empty/null result instead of taking down the whole Owner HQ snapshot.
-const UNDEFINED_TABLE = '42P01';
+// Tables reported as missing mean the underlying migration hasn't been
+// applied to this environment yet. That's expected in production until the
+// operator runs it, so those queries degrade to an empty/null result instead
+// of taking down the whole Owner HQ snapshot. Two distinct error shapes mean
+// "table missing" here: a raw Postgres connection reports undefined_table
+// (42P01), but Supabase's PostgREST layer (which every call in this file
+// actually goes through) instead reports PGRST205 ("Could not find the
+// table ... in the schema cache") -- confirmed live in production runtime
+// logs (292 occurrences on dd_service_pricing_research_queue /
+// dd_unattended_green_runs between 2026-09-19 and 2026-09-24) taking down
+// every Owner HQ load with the generic "Operational request failed." Both
+// codes must be tolerated.
+const UNDEFINED_TABLE_CODES = new Set(['42P01', 'PGRST205']);
 function tolerateMissingTable(result) {
-  if (result.error && result.error.code === UNDEFINED_TABLE) return { data: null, error: null };
+  if (result.error && UNDEFINED_TABLE_CODES.has(result.error.code)) return { data: null, error: null };
   return result;
 }
 
 async function getOwnerControlSnapshot(supabase) {
   const base = await getStaffSnapshot(supabase);
-  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue, revenueAgents, ownerAttention] = await Promise.all([
+  const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue, revenueAgents, ownerAttention] = (await Promise.all([
     supabase.from('dd_sales_queue')
       .select('id,contact_name,company_name,role_title,phone,email,lane,source,source_account,disposition,next_action,next_action_date,campaign_status,intent_tier,salesperson_name,updated_at')
       .order('updated_at', { ascending: false }).limit(250),
@@ -240,7 +248,7 @@ async function getOwnerControlSnapshot(supabase) {
     supabase.from('dd_software_build_work_queue').select('id,work_key,channel_code,pass_number,pass_name,lifecycle_stage,priority,source_status,work_type,execution_mode,status,blocking_gap,acceptance_criteria,required_build,target_environment,attempts,last_attempt_at,last_result,owner_decision_required,updated_at').order('priority', { ascending: true }).order('updated_at', { ascending: false }).limit(250),
     supabase.from('dd_revenue_agent_registry').select('agent_key,agent_name,responsibility,is_active,updated_at').order('agent_key', { ascending: true }),
     supabase.from('dd_owner_attention_queue').select('*').neq('status', 'RESOLVED').order('created_at', { ascending: false }).limit(100),
-  ]);
+  ])).map(tolerateMissingTable);
   const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue, revenueAgents, ownerAttention].filter(item => item.error);
   if (errors.length) throw errors[0].error;
 
