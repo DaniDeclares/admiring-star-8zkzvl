@@ -66,6 +66,8 @@ const legacySpecial=async(serviceId)=>{
 
 export default async function handler(req,res){try{
  if(req.method==='GET'&&req.query?.catalog==='1'){
+   const requestedChannel=normalizeChannel(String(req.query?.channelType||'').trim(),req.query?.channel);
+   const requestedSubchannel=String(req.query?.subchannel||'').trim();
    const [rows,specials,frontDoors]=await Promise.all([
      governedCatalog(),
      specialRows(),
@@ -73,7 +75,7 @@ export default async function handler(req,res){try{
    ]);
    const byCanonical=new Map(),unmapped=[];
    for(const s of specials){if(s.canonicalSku){if(!byCanonical.has(s.canonicalSku))byCanonical.set(s.canonicalSku,[]);byCanonical.get(s.canonicalSku).push(s);}else unmapped.push(s);}
-   const services=rows.map(s=>{const gate=checkoutEligibility(s,{channel:'CH01',subchannel:'CH01-A'});return {...s,market:'GA',checkoutEligible:gate.eligible,intakeAvailable:true,approvedSpecialOfferCount:(byCanonical.get(s.serviceId)||[]).length,approvedSpecialOffers:(byCanonical.get(s.serviceId)||[])};});
+   const services=rows.map(s=>{const gate=checkoutEligibility(s,{channel:requestedChannel,subchannel:requestedSubchannel});return {...s,market:'GA',checkoutEligible:gate.eligible,checkoutGateReason:gate.reason,intakeAvailable:true,approvedSpecialOfferCount:(byCanonical.get(s.serviceId)||[]).length,approvedSpecialOffers:(byCanonical.get(s.serviceId)||[])};});
    return json(res,200,{success:true,count:services.length,services,frontDoors,approvedLegacyOfferCount:unmapped.length,approvedLegacyOffers:unmapped});
  }
  if(req.method!=='POST')return json(res,405,{error:'This action is not available.'});
