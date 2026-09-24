@@ -41,7 +41,6 @@ export default function PortalAccessPage() {
   const [catalogServices,setCatalogServices]=useState([]);
   const [licenseGatedSkus,setLicenseGatedSkus]=useState(() => new Set());
   const [categories,setCategories]=useState([]);
-  const [selectedServiceIds,setSelectedServiceIds]=useState(() => ({}));
   const [catalogLoading,setCatalogLoading]=useState(false);
   // Keyed by category_key -> { checked, equipmentAnswer }. Applicants pick a parent
   // skill category (Cleaning, Notary, Courier, etc.) instead of hand-picking from the
@@ -159,14 +158,8 @@ export default function PortalAccessPage() {
     setSelectedCategories(prev => ({ ...prev, [categoryKey]: { ...prev[categoryKey], equipmentAnswer: value } }));
   };
   const toggleCategory = (category) => {
-    const services = servicesForCategory(category);
     const checked = !selectedCategories[category.category_key]?.checked;
     setSelectedCategories(prev => ({ ...prev, [category.category_key]: { ...prev[category.category_key], checked } }));
-    setSelectedServiceIds(prev => {
-      const next = { ...prev };
-      services.forEach(service => { if (checked) next[service.id] = true; else delete next[service.id]; });
-      return next;
-    });
   };
 
   const update=(e)=>setForm({...form,[e.target.name]:e.target.value});
@@ -248,9 +241,17 @@ export default function PortalAccessPage() {
     // existing "Approve & Activate" action (dd_approve_provider_application) already
     // refuses to approve the application at all until ID, tax form, agreement and
     // background check are cleared, so this never skips those baseline checks.
-    const selectedServices = selected.key==='provider' ? selectedServicesPreview : [];
-    const capabilityPayloads=selectedServices.map(s=>{
-      const category=serviceCategoryById.get(s.id);
+    const selectedServiceEntries = selected.key==='provider'
+      ? categories
+          .filter(category => selectedCategories[category.category_key]?.checked)
+          .flatMap(category => servicesForCategory(category).map(service => ({ service, category })))
+      : [];
+    const seenServiceIds = new Set();
+    const capabilityPayloads=selectedServiceEntries.filter(({service:s}) => {
+      if (seenServiceIds.has(s.id)) return false;
+      seenServiceIds.add(s.id);
+      return true;
+    }).map(({service:s,category})=>{
       const answer=category ? (selectedCategories[category.category_key]?.equipmentAnswer||'') : '';
       const isGated=licenseGatedSkus.has(s.sku);
       return {
