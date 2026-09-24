@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { decryptSecret, encryptSecret, ENVIRONMENT, logIntegrationEvent, requireStaff } from '../../_integrationOAuth.js';
+import { classifyGmailMessage } from '../../../src/lib/operations/gmailMailboxPolicy2026.js';
 
 function adminClient() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
@@ -88,20 +89,29 @@ async function syncConnection(supabase, connection) {
     const from = emailOnly(fromRaw);
     const direction = ownEmail && from === ownEmail ? 'OUTBOUND' : 'INBOUND';
     const receivedAt = message.internalDate ? new Date(Number(message.internalDate)).toISOString() : new Date().toISOString();
+    const subject = header(headers, 'Subject') || null;
+    const sorting = classifyGmailMessage({
+      accountEmail: ownEmail,
+      subject: subject || '',
+      snippet: message.snippet || '',
+      from,
+    });
     const { error } = await supabase.rpc('dd_ingest_email_communication', {
       p_external_message_id: message.id,
       p_external_thread_id: message.threadId || null,
       p_direction: direction,
       p_sender_address: from,
       p_recipient_addresses: addresses(toRaw),
-      p_subject: header(headers, 'Subject') || null,
+      p_subject: subject,
       p_body_excerpt: message.snippet || null,
       p_received_at: receivedAt,
       p_raw_metadata: {
         history_id: message.historyId || null,
         label_ids: message.labelIds || [],
         gmail_connection_id: connection.id,
-        account_email: ownEmail || null
+        account_email: ownEmail || null,
+        mailbox_role: sorting.role,
+        sorter: sorting
       }
     });
     if (error) throw error;
