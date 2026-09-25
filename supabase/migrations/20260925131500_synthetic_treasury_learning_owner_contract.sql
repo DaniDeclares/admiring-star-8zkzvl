@@ -1,0 +1,13 @@
+-- Tester-first contract for DANI synthetic treasury, capital goals, optional workforce learning, governed content drafts, dashboard UX research, and synthetic owner behavior.
+-- Live tester implementation is intentionally synthetic-only and production_authority=false.
+-- Promotion requirements:
+-- 1. stateful financial scenarios populate dd_synthetic_financial_scenario_results and dd_synthetic_treasury_ledger;
+-- 2. owner-first accept/decline journeys pass;
+-- 3. owner contribution remains equity/capital (not revenue/profit);
+-- 4. owner distribution remains separate from job expense and respects governed reserves;
+-- 5. capital-goal amounts come from Airtable/verified authority; unknown amounts remain unknown;
+-- 6. DANI LLC and future nonprofit/entity funds never silently commingle;
+-- 7. workforce learning is optional unless separately governed as required training;
+-- 8. research-generated blog/help content requires review and cannot auto-publish;
+-- 9. role-specific dashboard research covers OWNER, STAFF, PROVIDER, W2_EMPLOYEE, CUSTOMER, PROPERTY_MANAGER, SALES and ACCOUNTING;
+-- 10. browser Owner HQ E2E requires a legitimate tester Supabase Auth owner account, not a fabricated auth.users row.
