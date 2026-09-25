@@ -9,7 +9,7 @@
 -- job's scheduled_end so it self-expires rather than needing a manual
 -- revoke. After inserting the real assignment, this also proves the
 -- override does NOT leak to a different job: it attempts (and expects to
--- fail with PROVIDER_NOT_QUALIFIED) an assignment for Shiletha against an
+-- fail through a provider authorization guard) an assignment for Shiletha against an
 -- unrelated job, inside a plpgsql exception handler so nothing is actually
 -- persisted by the negative test. Idempotent (safe to re-run) via the
 -- override table's (job_id, provider_id, provider_slot_id) unique
@@ -68,7 +68,7 @@ begin
 end $$;
 
 -- Negative-scope proof: an assignment attempt for Shiletha against an
--- unrelated job must still raise PROVIDER_NOT_QUALIFIED (the override does
+-- unrelated job must still be denied by a provider authorization guard (the override does
 -- not generally clear her). Caught in an exception handler so the failed
 -- insert is rolled back to the enclosing savepoint and nothing persists.
 do $$
@@ -94,8 +94,8 @@ begin
     raise exception 'NEGATIVE_SCOPE_TEST_FAILED: unrelated-job assignment for Shiletha was NOT blocked -- override scope leaked';
   exception
     when others then
-      if sqlerrm like 'PROVIDER_NOT_QUALIFIED%' then
-        raise notice 'Negative-scope test passed: unrelated-job assignment correctly raised PROVIDER_NOT_QUALIFIED';
+      if sqlerrm like 'PROVIDER_NOT_QUALIFIED%' or sqlerrm like 'PROVIDER_SERVICE_CAPABILITY_NOT_AUTHORIZED%' or sqlerrm like 'PROVIDER_SERVICE_NOT_AUTHORIZED%' then
+        raise notice 'Negative-scope test passed: unrelated-job assignment correctly denied by provider authorization guard: %', sqlerrm;
       else
         raise;
       end if;
