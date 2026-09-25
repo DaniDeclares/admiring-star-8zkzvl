@@ -27,6 +27,8 @@ jobs:
       - run: npm ci
       - name: Unit and integration tests
         run: npm test -- --watchAll=false
+      - name: Netlify continuity preflight
+        run: npm run audit:netlify-continuity
       - name: Production build
         run: npm run build
       - name: Install Playwright browser
