@@ -5,6 +5,7 @@
 [build]
   command = "npm run audit:netlify-continuity && npm run build"
   publish = "build"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20"
@@ -35,7 +36,14 @@
   to = "/seo/blog.html"
   status = 200
 
-# API is deliberately NOT rewritten yet. A static build succeeding is not API parity.
+# Only API routes with audited Netlify compatibility adapters are enabled.
+# All other /api/* routes remain unavailable until individually classified and proven.
+[[redirects]]
+  from = "/api/portal-operations"
+  to = "/.netlify/functions/portal-operations"
+  status = 200
+  force = true
+
 # Portal/application routes fall back to React.
 [[redirects]]
   from = "/portal/*"
