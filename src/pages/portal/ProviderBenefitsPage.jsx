@@ -1,6 +1,6 @@
 import React from 'react';
 import ProviderNav from './ProviderNav.jsx';
-import { useProviderWorkspace } from './ProviderWorkspaceContext.jsx';
+import { useProviderWorkspace } from './providerWorkspaceShared.jsx';
 
 const money = value => value == null ? 'Not set' : '$' + Number(value).toFixed(2);
 
