@@ -10,6 +10,26 @@
   force = true
 
 [[redirects]]
+  from = "/api/verify-commercial-intent"
+  to = "/.netlify/functions/verify-commercial-intent"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/intake-webhook"
+  to = "/.netlify/functions/intake-webhook"
+  status = 200
+  force = true
+
+# Backward-compatible API alias used by the release smoke test.
+# It reaches the same canonical intake handler; it is not a second intake authority.
+[[redirects]]
+  from = "/api/service-request"
+  to = "/.netlify/functions/intake-webhook"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
