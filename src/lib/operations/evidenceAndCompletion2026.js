@@ -20,14 +20,23 @@ export async function recordJobEvidence({ prisma, jobId, taskId = null, provider
 
   return prisma.$transaction(async (tx) => {
     const rows = await tx.$queryRaw`
-      select id, assigned_to, job_status
+      select id, job_status
       from public.dd_jobs
       where id = ${jobId}::uuid
       for update
     `;
     const job = rows[0];
     if (!job) throw new Error('JOB_NOT_FOUND');
-    if (String(job.assigned_to || '') !== String(providerId)) throw new Error('EVIDENCE_PROVIDER_UNAUTHORIZED');
+
+    const acceptedAssignments = await tx.$queryRaw`
+      select id
+      from public.dd_job_assignments
+      where job_id = ${jobId}::uuid
+        and provider_id = ${providerId}::uuid
+        and upper(coalesce(assignment_status, '')) = 'ACCEPTED'
+      limit 1
+    `;
+    if (!acceptedAssignments[0]) throw new Error('EVIDENCE_PROVIDER_UNAUTHORIZED');
     if (String(job.job_status || '').toUpperCase() === 'CANCELLED') throw new Error('JOB_CANCELLED');
 
     if (taskId) {
@@ -80,7 +89,7 @@ export async function verifyJobCompletion({ prisma, jobId, reviewerId = null, ch
 
   return prisma.$transaction(async (tx) => {
     const jobs = await tx.$queryRaw`
-      select id, job_status, assigned_to
+      select id, job_status
       from public.dd_jobs
       where id = ${jobId}::uuid
       for update
@@ -93,7 +102,7 @@ export async function verifyJobCompletion({ prisma, jobId, reviewerId = null, ch
       from public.dd_job_tasks
       where job_id = ${jobId}::uuid
         and is_required = true
-        and status <> 'COMPLETED'
+        and lower(coalesce(status, '')) <> 'done'
       order by sort_order, task_name
     `;
     if (incomplete.length) throw new Error(`REQUIRED_TASKS_INCOMPLETE:${incomplete.map((task) => task.id).join(',')}`);
@@ -101,7 +110,9 @@ export async function verifyJobCompletion({ prisma, jobId, reviewerId = null, ch
     const requiresReview = requiresSupervisorReview(channelType);
     if (requiresReview && !reviewerId) throw new Error('SUPERVISOR_REVIEW_REQUIRED');
 
-    const status = requiresReview ? COMPLETION_REVIEW.APPROVED : COMPLETION_REVIEW.APPROVED;
+    // This function is the verification action itself. Supervisor-review channels only reach this
+    // point with an explicit reviewer; B2C reaches it through the auto-verification policy.
+    const status = COMPLETION_REVIEW.APPROVED;
     const review = await tx.$queryRaw`
       insert into public.dd_completion_reviews
         (job_id, reviewer_id, review_type, status, notes, reviewed_at)
