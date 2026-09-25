@@ -437,19 +437,19 @@ async function getProviderSnapshot(supabase, providerId, userId, userSupabase = 
   }
   const w9 = await getW9Status(supabase, userId);
   applicationSnapshot = { ...applicationSnapshot, w9 };
-  if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], financials: { earnings: [], payables: [], payouts: [] }, payouts: [], messages: [] };
+  if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], financials: { earnings: [], payables: [], payouts: [] }, benefits: { programs: [], rewards: [], counts: { earned: 0, pending: 0, paid: 0, expired: 0 } }, payouts: [], messages: [] };
 
   // Financials are read through the provider-bound projection. The Worker App
   // can display governed earning/payable/payout state but cannot approve,
   // process, reconcile, or mutate accounting records.
   const { data: financialsData, error: financialsError } = await userSupabase.rpc('dd_get_my_provider_financials');
   if (financialsError) throw financialsError;
-  const financials = financialsData || { earnings: [], payables: [], payouts: [] };
+  const financials = financialsData || { earnings: [], payables: [], payouts: [] };\n  const { data: benefitsData, error: benefitsError } = await userSupabase.rpc('dd_get_my_provider_benefits');\n  if (benefitsError) throw benefitsError;\n  const benefits = benefitsData || { programs: [], rewards: [], counts: { earned: 0, pending: 0, paid: 0, expired: 0 } };
   const quoteAssignments = await getProviderEstimateAssignments(supabase, providerId);
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
   const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
-  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], quoteAssignments, tasks: [], evidence: [], appointments: [], financials, payouts: financials.payouts || [], messages: [] };
+  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], quoteAssignments, tasks: [], evidence: [], appointments: [], financials, benefits, payouts: financials.payouts || [], messages: [] };
   const [jobsResult, tasks, evidence, appointments, payouts, messages] = await Promise.all([
     supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, sla_due_at, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
@@ -465,7 +465,7 @@ async function getProviderSnapshot(supabase, providerId, userId, userSupabase = 
   if (payouts.error) throw payouts.error;
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
-  return { ...applicationSnapshot, assignments: safeAssignments, quoteAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], financials, payouts: financials.payouts || payouts.data || [], messages };
+  return { ...applicationSnapshot, assignments: safeAssignments, quoteAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], financials, benefits, payouts: financials.payouts || payouts.data || [], messages };
 }
 // A resident's own dd_portal_identities.organization_id is only ever set by
 // dd_consume_apartment_resident_invite_impl (see the property-invite RPCs),
