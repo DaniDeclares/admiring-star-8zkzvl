@@ -13,7 +13,7 @@ export default async function handler(req,res){
   const resource=event.resource||{}; const externalInvoiceId=resource.invoice_id||resource.id||null;
   const {data:mappings}=externalInvoiceId?await db.from('dd_integration_event_log').select('dani_record_id').eq('adapter_code',ADAPTER_CODE).eq('external_event_id',externalInvoiceId).eq('dani_entity_type','INVOICE').limit(1):{data:[]};
   const daniInvoiceId=mappings?.[0]?.dani_record_id||null;
-  await db.from('dd_integration_event_log').insert({adapter_code:ADAPTER_CODE,direction:'INBOUND',event_type:event.event_type,external_event_id:event.id,dani_entity_type:daniInvoiceId?'INVOICE':null,dani_record_id:daniInvoiceId,status:daniInvoiceId?'PROCESSED':'REVIEW_REQUIRED',payload:event,processed_at:daniInvoiceId?new Date().toISOString():null});
+  await db.from('dd_integration_event_log').insert({adapter_code:ADAPTER_CODE,direction:'INBOUND',event_type:event.event_type,external_event_id:event.id,dani_entity_type:daniInvoiceId?'INVOICE':null,dani_record_id:daniInvoiceId,status:daniInvoiceId?'PROCESSED':'RECEIVED',payload:event,error_message:daniInvoiceId?null:'Canonical DANI invoice mapping required before payment reconciliation.',processed_at:daniInvoiceId?new Date().toISOString():null});
   if(!daniInvoiceId) return res.status(202).json({received:true,reconciliation:'REVIEW_REQUIRED'});
   if(event.event_type==='INVOICING.INVOICE.PAID'){
    const amount=Number(resource?.payments?.paid_amount?.value||resource?.amount?.value||0);
