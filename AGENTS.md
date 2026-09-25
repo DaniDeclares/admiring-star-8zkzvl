@@ -10,9 +10,9 @@ This repository is the production application for DANI DECLARES LLC. Multiple AI
 5. Do not overwrite another agent's work. If the target file has changed since the branch started, reconcile with the latest main first.
 6. Open PR overlap rule. If another open PR changes the same file, stop and reconcile the two changes before modifying that file.
 7. Database-first rule. Locate the authoritative record and owning system before creating or changing runtime/business data.
-8. External-system authority. Supabase owns DANI runtime state and `dd_jobs` is current production dispatch authority; GitHub owns source/migrations/tests/config; Vercel owns deployment/runtime; Stripe owns payment/invoice/payment events; HubSpot owns CRM relationship/engagement records without owning DANI service/quote/job truth; Airtable owns only explicitly assigned planning/governance/economics/reference datasets; Notion owns operating documentation/control knowledge; Asana owns human execution/release tasks; Google Drive owns collaborative file bytes, Google Calendar owns the human calendar surface, Gmail owns mailbox content/delivery state, and PostHog owns analytics telemetry.
-9. API credentials are secrets. Never commit client secrets, refresh tokens, access tokens, private keys, webhook signing secrets, or passwords. Use Vercel/server environment variables or an approved secret store. Never ask the owner to paste a secret into chat when a secure entry point is available.
-10. Production verification is mandatory. After a production-affecting change, verify CI, Vercel deployment state, and relevant runtime behavior before declaring green.
+8. External-system authority. Supabase owns DANI runtime state and `dd_jobs` is current production dispatch authority; GitHub owns source/migrations/tests/config; Netlify owns temporary production deployment/runtime while Vercel is parked; Vercel is not a release gate during this continuity period; Stripe owns payment/invoice/payment events; HubSpot owns CRM relationship/engagement records without owning DANI service/quote/job truth; Airtable owns only explicitly assigned planning/governance/economics/reference datasets; Notion owns operating documentation/control knowledge; Asana owns human execution/release tasks; Google Drive owns collaborative file bytes, Google Calendar owns the human calendar surface, Gmail owns mailbox content/delivery state, and PostHog owns analytics telemetry.
+9. API credentials are secrets. Never commit client secrets, refresh tokens, access tokens, private keys, webhook signing secrets, or passwords. Use Netlify/server environment variables or an approved secret store during the temporary Netlify production period. Never ask the owner to paste a secret into chat when a secure entry point is available.
+10. Production verification is mandatory. After a production-affecting change, verify CI, the active Netlify deployment state, and relevant runtime behavior before declaring green.
 
 ## DANI business rules
 - A capability is not automatically a sellable service.
@@ -25,3 +25,10 @@ Every non-trivial change should register its branch/scope in `dd_agent_change_le
 
 ## Claude
 Claude is an authorized engineering collaborator, not a separate source of truth. Claude must follow this file and CLAUDE.md and consult the DANI Notion authority matrix before creating a new integration, database, project, or documentation system.
+
+
+## Temporary hosting continuity — 2026-09-25
+- Vercel is intentionally unavailable/parked for an expected 2–3 week period. Do not reopen Vercel recovery as a launch blocker unless the owner explicitly changes this decision.
+- Netlify project `sparkling-croissant-829102` is the temporary production host candidate. Hosting work must follow `docs/NETLIFY_CONTINUITY_RELEASE_CONTRACT.md`.
+- Never bulk-copy Vercel handlers/secrets. Audit each API/runtime dependency, repair known lifecycle/security defects, prove against tester Supabase, then configure production.
+- Notion is operating/decision knowledge; Asana is execution/release work; Supabase is live runtime authority; GitHub is source/config authority. Reconcile conflicts by system ownership before changing production.
