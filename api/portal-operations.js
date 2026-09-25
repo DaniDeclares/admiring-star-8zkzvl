@@ -71,12 +71,20 @@ function identityFailure(res, gate) {
 // requiring a second round trip per thumbnail.
 async function signEvidenceUrls(supabase, evidenceRows) {
   const rows = evidenceRows || [];
-  const paths = rows.map(row => row.storage_url).filter(Boolean);
-  if (!paths.length) return rows;
-  const { data, error } = await supabase.storage.from('dd-job-evidence').createSignedUrls(paths, 3600);
-  if (error) return rows.map(row => ({ ...row, signed_url: null }));
+  const isExternalUrl = value => /^https?:\/\//i.test(String(value || ''));
+  const storagePaths = rows.map(row => row.storage_url).filter(value => value && !isExternalUrl(value));
+  if (!storagePaths.length) {
+    return rows.map(row => ({ ...row, signed_url: isExternalUrl(row.storage_url) ? row.storage_url : null }));
+  }
+  const { data, error } = await supabase.storage.from('dd-job-evidence').createSignedUrls(storagePaths, 3600);
+  if (error) {
+    return rows.map(row => ({ ...row, signed_url: isExternalUrl(row.storage_url) ? row.storage_url : null }));
+  }
   const urlByPath = new Map((data || []).map(entry => [entry.path, entry.signedUrl]));
-  return rows.map(row => ({ ...row, signed_url: row.storage_url ? urlByPath.get(row.storage_url) || null : null }));
+  return rows.map(row => ({
+    ...row,
+    signed_url: isExternalUrl(row.storage_url) ? row.storage_url : (row.storage_url ? urlByPath.get(row.storage_url) || null : null),
+  }));
 }
 
 // dd-vendor-onboarding is also private -- provider application documents
