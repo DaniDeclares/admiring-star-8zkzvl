@@ -37,9 +37,7 @@ export const OWNER_CONNECTED_SYSTEMS = [
     href: 'https://github.com/DaniDeclares/admiring-star-8zkzvl', cta: 'Open repository', external: true,
   },
   {
-    key: 'vercel', name: 'Vercel', type: 'DEPLOYMENT', status: 'WEB ACCESS',
-    description: 'Production deployments, runtime and hosting.',
-    href: 'https://vercel.com/danideclares-projects', cta: 'Open Vercel', external: true,
+    key: 'netlify', name: 'Netlify', type: 'DEPLOYMENT', status: 'TEMP PRODUCTION',\n    description: 'Temporary production deployments, runtime and hosting while Vercel is parked.',\n    href: 'https://app.netlify.com/projects/sparkling-croissant-829102', cta: 'Open Netlify', external: true,
   },
   {
     key: 'resend', name: 'Resend', type: 'CUSTOMER EMAIL', status: 'WEB ACCESS',
