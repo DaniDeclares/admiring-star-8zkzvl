@@ -1,4 +1,4 @@
-import handler from '../../api/portal-operations.js';
+import portalHandler from '../../api/portal-operations.js';
 
 function makeReq(event) {
   const headers = Object.fromEntries(Object.entries(event.headers || {}).map(([k,v]) => [k.toLowerCase(), v]));
@@ -23,6 +23,6 @@ function makeRes() {
 }
 export async function handler(event) {
   const req=makeReq(event),res=makeRes();
-  await handler(req,res);
+  await portalHandler(req,res);
   return res.result();
 }
