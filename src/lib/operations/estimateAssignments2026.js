@@ -2,6 +2,24 @@ import { summarizeEconomics, evaluateCounteroffer, calculateCompensation } from 
 
 const VERIFIED = new Set(['RESEARCH_BENCHMARK','OWNER_CONFIRMED','DOCUMENT_EVIDENCE','SYSTEM_VERIFIED','EXTERNAL_VERIFIED']);
 const money = value => Math.round(Number(value || 0) * 100) / 100;
+
+export function resolveAcceptedAssignmentAuthority(offer, { acceptedCounter = false, acceptedAt = null } = {}) {
+  const authorizedProviderCompensation = money(
+    acceptedCounter ? offer?.counter_compensation : offer?.proposed_compensation
+  );
+  const compensationBasisSnapshot = acceptedCounter
+    ? {
+        ...(offer?.proposed_basis || {}),
+        ...(offer?.counter_basis || {}),
+        authority: 'OWNER_ACCEPTED_PROVIDER_COUNTER',
+        originalProposedCompensation: money(offer?.proposed_compensation),
+        acceptedCounterCompensation: authorizedProviderCompensation,
+        acceptedCounterAt: acceptedAt || null
+      }
+    : { ...(offer?.proposed_basis || {}) };
+  return { authorizedProviderCompensation, compensationBasisSnapshot };
+}
+
 export const DANI_OWNER_USER_ID = 'f88a5b79-ac5a-4690-ac28-62312328cb73';
 
 function isEffective(row, now = Date.now()) {
@@ -388,8 +406,13 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
         const {error:jobAssignmentError}=await supabase.from('dd_job_assignments').insert({
           job_id:job.id,provider_id:providerId,provider_org_id:provider?.org_id||null,
           source_assignment_offer_id:offer.id,economics_snapshot_id:offer.economics_snapshot_id,
-          authorized_provider_compensation:offer.proposed_compensation,
-          compensation_basis_snapshot:offer.proposed_basis||{},
+          ...(() => {
+            const authority=resolveAcceptedAssignmentAuthority(offer);
+            return {
+              authorized_provider_compensation:authority.authorizedProviderCompensation,
+              compensation_basis_snapshot:authority.compensationBasisSnapshot
+            };
+          })(),
           assignment_status:'ACCEPTED',provider_notes:'Accepted paid quote assignment.',
           offered_at:offer.offered_at||now,accepted_at:now,response_at:now
         });
@@ -502,15 +525,9 @@ export async function resolveEstimateCounteroffer(supabase, { assignmentId, deci
       const {data:provider,error:providerError}=await supabase.from('dd_providers')
         .select('id,org_id').eq('id',offer.provider_id).single();
       if(providerError) throw providerError;
-      const acceptedCompensation=money(offer.counter_compensation);
-      const basis={
-        ...(offer.proposed_basis||{}),
-        ...(offer.counter_basis||{}),
-        authority:'OWNER_ACCEPTED_PROVIDER_COUNTER',
-        originalProposedCompensation:money(offer.proposed_compensation),
-        acceptedCounterCompensation:acceptedCompensation,
-        acceptedCounterAt:now
-      };
+      const authority=resolveAcceptedAssignmentAuthority(offer,{acceptedCounter:true,acceptedAt:now});
+      const acceptedCompensation=authority.authorizedProviderCompensation;
+      const basis=authority.compensationBasisSnapshot;
       const {data:existingAssignment,error:existingAssignmentError}=await supabase.from('dd_job_assignments')
         .select('id').eq('source_assignment_offer_id',offer.id).limit(1).maybeSingle();
       if(existingAssignmentError) throw existingAssignmentError;
