@@ -890,8 +890,7 @@ export default async function handler(req, res) {
       const allUnresolved = [...unresolved, ...identityUnresolved];
       const nextStatus = allUnresolved.length === 0 ? 'ready_to_send' : 'needs_review';
       const note = allUnresolved.length === 0 ? 'Commercial review completed; estimate is READY_TO_SEND.' : 'Commercial review updated; unresolved gates: ' + (allUnresolved.join(', ') || 'none') + '.';
-      const internalNotes = [estimate.internal_notes, note].filter(Boolean).join('
-');
+      const internalNotes = [estimate.internal_notes, note].filter(Boolean).join('\\n');
       const { data: updated, error: updateError } = await context.supabase.from('dd_estimates').update({ estimate_status: nextStatus, intake_answers: { ...(estimate.intake_answers || {}), answers: mergedAnswers, review: nextReview }, internal_notes: internalNotes, updated_at: new Date().toISOString() }).eq('id', estimateId).eq('estimate_status', estimate.estimate_status).select('id,public_reference,estimate_status,estimated_total,deposit_due,intake_answers').maybeSingle();
       if (updateError) throw updateError;
       if (!updated) return fail(res, 'Estimate changed while being reviewed. Reload and retry.', 409);
@@ -913,8 +912,7 @@ export default async function handler(req, res) {
       const portalAccount = await provisionCustomerPortalAccount({ req, supabase: context.supabase, estimate });
       if (!['PROVISIONED','EXISTING'].includes(portalAccount.status)) return fail(res, 'Customer portal access could not be established.', 422);
       const { data: updated, error: updateError } = await context.supabase.from('dd_estimates')
-        .update({ estimate_status: 'sent', internal_notes: [estimate.internal_notes, 'Quote delivered to customer portal; customer decision required.'].filter(Boolean).join('
-'), updated_at: new Date().toISOString() })
+        .update({ estimate_status: 'sent', internal_notes: [estimate.internal_notes, 'Quote delivered to customer portal; customer decision required.'].filter(Boolean).join('\\n'), updated_at: new Date().toISOString() })
         .eq('id', estimate.id).eq('estimate_status', 'ready_to_send')
         .select('id,public_reference,estimate_status,estimated_total,deposit_due').maybeSingle();
       if (updateError) throw updateError;
