@@ -387,6 +387,9 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
       if(!existingAssignment){
         const {error:jobAssignmentError}=await supabase.from('dd_job_assignments').insert({
           job_id:job.id,provider_id:providerId,provider_org_id:provider?.org_id||null,
+          source_assignment_offer_id:offer.id,economics_snapshot_id:offer.economics_snapshot_id,
+          authorized_provider_compensation:offer.proposed_compensation,
+          compensation_basis_snapshot:offer.proposed_basis||{},
           assignment_status:'ACCEPTED',provider_notes:'Accepted paid quote assignment.',
           offered_at:offer.offered_at||now,accepted_at:now,response_at:now
         });
