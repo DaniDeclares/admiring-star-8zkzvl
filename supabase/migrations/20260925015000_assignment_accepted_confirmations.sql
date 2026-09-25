@@ -1,7 +1,8 @@
--- Emit idempotent assignment-accepted confirmations through the existing notification/outbox architecture.
+-- Emit idempotent provider-side assignment acceptance confirmations through the existing notification/outbox architecture.
+-- Customer schedule confirmation is intentionally NOT emitted here. Appointment authority owns customer schedule confirmation.
 -- No historical backfill: only new transitions into ACCEPTED emit automatically.
 
-create or replace function public.dd_emit_assignment_accepted_confirmations()
+create or replace function public.dd_emit_assignment_accepted_provider_confirmations()
 returns trigger
 language plpgsql
 security definer
@@ -11,14 +12,12 @@ declare
   j public.dd_jobs;
   l public.leads;
   pa public.dd_provider_applications;
-  provider_name text;
   provider_email text;
   provider_phone text;
   provider_user uuid;
   customer_name text;
   appointment_text text;
   provider_body text;
-  customer_body text;
 begin
   if upper(coalesce(new.assignment_status,'')) <> 'ACCEPTED'
      or (tg_op='UPDATE' and upper(coalesce(old.assignment_status,''))='ACCEPTED') then
@@ -35,9 +34,6 @@ begin
   order by submitted_at desc nulls last, created_at desc
   limit 1;
 
-  select coalesce(nullif(trim(contact_name),''),nullif(trim(first_name||' '||last_name),''),provider_code)
-  into provider_name from public.dd_providers where id=new.provider_id;
-
   provider_email := nullif(trim(pa.contact_email),'');
   provider_phone := nullif(trim(pa.contact_phone),'');
   provider_user := pa.applicant_user_id;
@@ -47,9 +43,6 @@ begin
   provider_body := format('Confirmed: %s — %s. Scope: %s. Job reference: %s. Provider compensation: $%s.',
     customer_name,appointment_text,coalesce(j.scope_summary,'See job details'),j.public_reference,
     trim(to_char(coalesce((select total_provider_offer from public.dd_work_package_provider_slots where id=new.provider_slot_id),0),'FM999999990.00')));
-
-  customer_body := format('Your DANI DECLARES service is confirmed for %s. Assigned provider: %s. Scope: %s. Job reference: %s.',
-    appointment_text,coalesce(provider_name,'Confirmed provider'),coalesce(j.scope_summary,'See service details'),j.public_reference);
 
   insert into public.dd_provider_notifications(provider_id,auth_user_id,job_id,assignment_id,notification_type,channel,title,body,payload)
   values(new.provider_id,provider_user,j.id,new.id,'ASSIGNMENT_CONFIRMED','IN_APP','Job confirmed',provider_body,
@@ -62,22 +55,11 @@ begin
       jsonb_build_object('to',provider_email,'subject','DANI DECLARES — Job confirmed: '||j.public_reference,'text',provider_body),'PENDING')
     on conflict(event_key) do nothing;
   end if;
+
   if provider_phone is not null then
     insert into public.dd_event_outbox(event_key,event_type,channel,aggregate_type,aggregate_id,payload,status)
     values('assignment:'||new.id||':provider:sms','ASSIGNMENT_CONFIRMED_PROVIDER','SMS','JOB_ASSIGNMENT',new.id,
       jsonb_build_object('to',provider_phone,'text',provider_body),'PENDING')
-    on conflict(event_key) do nothing;
-  end if;
-  if nullif(trim(l.email),'') is not null then
-    insert into public.dd_event_outbox(event_key,event_type,channel,aggregate_type,aggregate_id,payload,status)
-    values('assignment:'||new.id||':customer:email','ASSIGNMENT_CONFIRMED_CUSTOMER','EMAIL','JOB_ASSIGNMENT',new.id,
-      jsonb_build_object('to',trim(l.email),'subject','DANI DECLARES — Your service is confirmed','text',customer_body),'PENDING')
-    on conflict(event_key) do nothing;
-  end if;
-  if nullif(trim(l.phone),'') is not null then
-    insert into public.dd_event_outbox(event_key,event_type,channel,aggregate_type,aggregate_id,payload,status)
-    values('assignment:'||new.id||':customer:sms','ASSIGNMENT_CONFIRMED_CUSTOMER','SMS','JOB_ASSIGNMENT',new.id,
-      jsonb_build_object('to',trim(l.phone),'text',customer_body),'PENDING')
     on conflict(event_key) do nothing;
   end if;
 
@@ -85,9 +67,12 @@ begin
 end;$function$;
 
 drop trigger if exists dd_emit_assignment_accepted_confirmations on public.dd_job_assignments;
-create trigger dd_emit_assignment_accepted_confirmations
+drop trigger if exists dd_emit_assignment_accepted_provider_confirmations on public.dd_job_assignments;
+create trigger dd_emit_assignment_accepted_provider_confirmations
 after insert or update of assignment_status on public.dd_job_assignments
-for each row execute function public.dd_emit_assignment_accepted_confirmations();
+for each row execute function public.dd_emit_assignment_accepted_provider_confirmations();
 
-revoke all on function public.dd_emit_assignment_accepted_confirmations() from public,anon,authenticated;
-grant execute on function public.dd_emit_assignment_accepted_confirmations() to service_role;
+drop function if exists public.dd_emit_assignment_accepted_confirmations();
+
+revoke all on function public.dd_emit_assignment_accepted_provider_confirmations() from public,anon,authenticated;
+grant execute on function public.dd_emit_assignment_accepted_provider_confirmations() to service_role;
