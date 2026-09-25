@@ -87,7 +87,8 @@ export default function PortalWorkspacePage() {
         <Link className="portal-summary-tile" to="/portal/schedule"><strong>{nextAppointment ? formatDate(nextAppointment.starts_at) : 'None scheduled'}</strong><span>Next appointment</span></Link>
         <Link className="portal-summary-tile" to="/portal/checklist"><strong>{openTasks}</strong><span>Open checklist item{openTasks === 1 ? '' : 's'}</span></Link>
         <Link className="portal-summary-tile" to="/portal/evidence"><strong>{pendingEvidence}</strong><span>Evidence pending verification</span></Link>
-        <Link className="portal-summary-tile" to="/portal/payouts"><strong>{lastPayout ? "$" + Number(lastPayout.amount || 0).toFixed(2) : "None yet"}</strong><span>Most recent payout</span></Link>\n        <Link className="portal-summary-tile" to="/portal/benefits"><strong>{snapshot?.benefits?.counts?.pending || 0}</strong><span>Pending referral rewards</span></Link>
+        <Link className="portal-summary-tile" to="/portal/payouts"><strong>{lastPayout ? "$" + Number(lastPayout.amount || 0).toFixed(2) : "None yet"}</strong><span>Most recent payout</span></Link>
+        <Link className="portal-summary-tile" to="/portal/benefits"><strong>{snapshot?.benefits?.counts?.pending || 0}</strong><span>Pending referral rewards</span></Link>
         {hasAccountingWorkspace && <Link className="portal-summary-tile" to="/portal/accounting"><strong>Open Financial Ops</strong><span>Accounting Agent review & reconciliation</span></Link>}
         <Link className="portal-summary-tile" to="/portal/messages"><strong>{messageCount}</strong><span>Message{messageCount === 1 ? '' : 's'} on your jobs</span></Link>
         <Link className="portal-summary-tile" to="/portal/profile"><strong>View profile</strong><span>Contact details & documents</span></Link>
