@@ -50,11 +50,17 @@ export async function priceChangeOrder({ prisma, jobId, requestedBy, requestedBy
     : CHANGE_ORDER_PRICING_STATUS.RESOLVED;
   if (resolution.isValid === false) throw new Error('CHANGE_ORDER_PRICING_INVALID');
 
+  const providerPayDelta = money(resolution.providerPayDelta ?? resolution.provider_pay_delta);
+  const assignmentId = resolution.assignmentId || resolution.assignment_id || pricingContext.assignmentId || pricingContext.assignment_id || null;
+  if (providerPayDelta < 0) throw new Error('CHANGE_ORDER_PROVIDER_PAY_DELTA_INVALID');
+  if (providerPayDelta > 0 && !assignmentId) throw new Error('CHANGE_ORDER_ASSIGNMENT_REQUIRED_FOR_PROVIDER_PAY');
+
   return prisma.$queryRaw`
     insert into public.dd_change_orders
       (job_id, requested_by, requested_by_id, reason, status, pricing_status,
        resolved_channel, resolved_offer_id, catalog_version, disclaimer_id,
-       pricing_context, delta_base_subtotal, delta_addon_subtotal, delta_travel,
+       pricing_context, assignment_id, provider_pay_delta,
+       delta_base_subtotal, delta_addon_subtotal, delta_travel,
        delta_rush, delta_supplies, delta_tax, delta_estimated_total,
        frozen_delta_modifiers)
     values
@@ -63,6 +69,7 @@ export async function priceChangeOrder({ prisma, jobId, requestedBy, requestedBy
        ${pricingContext.channelType || pricingContext.channel || null},
        ${resolution.offerId || null}, ${resolution.version || resolution.catalogVersion || null},
        ${resolution.disclaimerId || null}, ${JSON.stringify(pricingContext)}::jsonb,
+       ${nullableUuid(assignmentId)}::uuid, ${providerPayDelta},
        ${money(resolution.baseAmount ?? resolution.baseSubtotal)},
        ${money(resolution.addonAmount ?? resolution.addonSubtotal)},
        ${money(resolution.travel)}, ${money(resolution.rush ?? resolution.rushFee)},
@@ -101,7 +108,7 @@ export async function approveChangeOrder({ prisma, changeOrderId, actorId, appro
       insert into public.dd_task_events (job_id, actor_id, event_type, description, metadata)
       values (${order.job_id}::uuid, ${actorId}::uuid, 'CHANGE_ORDER_APPROVED',
         'Approved change order; downstream scope hydration may proceed.',
-        ${JSON.stringify({ changeOrderId, deltaTotal: money(order.delta_estimated_total), approvalReference })}::jsonb)
+        ${JSON.stringify({ changeOrderId, deltaTotal: money(order.delta_estimated_total), providerPayDelta: money(order.provider_pay_delta), assignmentId: order.assignment_id || null, approvalReference })}::jsonb)
     `;
     return updated[0];
   });
