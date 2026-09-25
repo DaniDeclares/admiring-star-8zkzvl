@@ -17,7 +17,11 @@ export function resolveAcceptedAssignmentAuthority(offer, { acceptedCounter = fa
         acceptedCounterAt: acceptedAt || null
       }
     : { ...(offer?.proposed_basis || {}) };
-  return { authorizedProviderCompensation, compensationBasisSnapshot };
+  return {
+    authorizedProviderCompensation,
+    compensationBasisSnapshot,
+    travelAllowanceSnapshot: money(offer?.travel_cost_snapshot)
+  };
 }
 
 export const DANI_OWNER_USER_ID = 'f88a5b79-ac5a-4690-ac28-62312328cb73';
@@ -410,7 +414,8 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
             const authority=resolveAcceptedAssignmentAuthority(offer);
             return {
               authorized_provider_compensation:authority.authorizedProviderCompensation,
-              compensation_basis_snapshot:authority.compensationBasisSnapshot
+              compensation_basis_snapshot:authority.compensationBasisSnapshot,
+              travel_allowance_snapshot:authority.travelAllowanceSnapshot
             };
           })(),
           assignment_status:'ACCEPTED',provider_notes:'Accepted paid quote assignment.',
@@ -537,6 +542,7 @@ export async function resolveEstimateCounteroffer(supabase, { assignmentId, deci
           economics_snapshot_id:offer.economics_snapshot_id,
           authorized_provider_compensation:acceptedCompensation,
           compensation_basis_snapshot:basis,
+          travel_allowance_snapshot:authority.travelAllowanceSnapshot,
           assignment_status:'ACCEPTED',
           provider_notes:'Owner accepted provider counteroffer.',
           accepted_at:now,response_at:offer.responded_at||now
@@ -548,6 +554,7 @@ export async function resolveEstimateCounteroffer(supabase, { assignmentId, deci
           source_assignment_offer_id:offer.id,economics_snapshot_id:offer.economics_snapshot_id,
           authorized_provider_compensation:acceptedCompensation,
           compensation_basis_snapshot:basis,
+          travel_allowance_snapshot:authority.travelAllowanceSnapshot,
           assignment_status:'ACCEPTED',provider_notes:'Owner accepted provider counteroffer.',
           offered_at:offer.offered_at||now,accepted_at:now,response_at:offer.responded_at||now
         });
