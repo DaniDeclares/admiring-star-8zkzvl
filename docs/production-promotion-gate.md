@@ -1,0 +1,19 @@
+-- Governed tester -> production promotion gate.
+-- Promotion is fail-closed and never mutates production by itself.
+-- Canonical tester migration installed as add_governed_production_promotion_gate.
+-- See tester schema for dd_promotion_candidates, dd_promotion_gate_v1,
+-- and dd_refresh_promotion_owner_attention().
+--
+-- Required gates:
+-- classification PROMOTE_NOW
+-- proof PASSED
+-- dependencies PASSED
+-- security PASSED
+-- production diff CLEAN
+-- rollback DEFINED/VERIFIED
+-- explicit owner approval APPROVED
+--
+-- Seed policy:
+-- completion/QA guard = PROMOTE_AFTER_FIX pending prod preflight
+-- current lifecycle bridge = PROMOTE_AFTER_FIX pending fresh evidence/payment proof
+-- enterprise control plane = TESTER_ONLY
