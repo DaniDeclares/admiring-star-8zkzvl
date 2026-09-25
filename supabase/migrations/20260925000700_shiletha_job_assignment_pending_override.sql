@@ -43,7 +43,7 @@ begin
     'Scope authorized: DD-KRYSTAL-20260924 / WP-KRYSTAL-CLEANING-20260925 slot only (two bathrooms deep clean/sanitize + vacuum two carpeted bedrooms, 390 17th St NW). This authorization does not constitute general provider clearance and self-expires at the job''s scheduled end.',
     jsonb_build_object('background_check', 'PENDING', 'w9', 'PENDING', 'agreement', 'PENDING', 'identity', 'PENDING'),
     60.00,
-    coalesce(v_expires_at, now()) + interval '1 day'
+    coalesce(v_expires_at, now() + interval '2 hours')
   )
   on conflict (job_id, provider_id, provider_slot_id) do nothing;
 
