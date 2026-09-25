@@ -1,0 +1,75 @@
+# DANI continuity candidate configuration.
+# This file intentionally configures BUILD/STATIC ROUTING ONLY.
+# API/function routing is blocked until compatibility adapters pass tester parity.
+
+[build]
+  command = "npm run audit:netlify-continuity && npm run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Preserve generated SEO shells used by current Vercel production.
+[[redirects]]
+  from = "/"
+  to = "/seo/home.html"
+  status = 200
+[[redirects]]
+  from = "/services"
+  to = "/seo/services.html"
+  status = 200
+[[redirects]]
+  from = "/resident-concierge"
+  to = "/seo/resident-concierge.html"
+  status = 200
+[[redirects]]
+  from = "/about"
+  to = "/seo/about.html"
+  status = 200
+[[redirects]]
+  from = "/contact"
+  to = "/seo/contact.html"
+  status = 200
+[[redirects]]
+  from = "/blog"
+  to = "/seo/blog.html"
+  status = 200
+
+# API is deliberately NOT rewritten yet. A static build succeeding is not API parity.
+# Portal/application routes fall back to React.
+[[redirects]]
+  from = "/portal/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/provider/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/internal/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/staff/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/government/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/pay/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/service/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/blog/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
