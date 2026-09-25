@@ -1,0 +1,43 @@
+-- Expands DANI's existing research/evidence control plane from narrow operational research
+-- to whole-enterprise continuous intelligence. Research remains evidence, never direct authority.
+-- Live tester migration of the same contract was applied as expand_enterprise_research_intelligence_domains_v1.
+--
+-- Programs added:
+-- BRAND_CREATIVE_INTELLIGENCE
+-- DIGITAL_EXPERIENCE_INTELLIGENCE
+-- WEB_CONTENT_DISCOVERY
+-- SUPPORT_CONVERSATION_INTELLIGENCE
+-- GROWTH_MEDIA_INTELLIGENCE
+-- ENTERPRISE_RISK_INTELLIGENCE
+-- CUSTOMER_MARKET_INTELLIGENCE
+-- SERVICE_QUALITY_INTELLIGENCE
+-- PROCUREMENT_CAPITAL_INTELLIGENCE
+-- VENDOR_TECH_INTELLIGENCE
+--
+-- Domain controls added:
+-- BRAND_VISUAL_CREATIVE
+-- PRODUCT_UX_EXPERIENCE
+-- WEBSITE_INFORMATION_ARCHITECTURE
+-- SUPPORT_BOT_KNOWLEDGE
+-- CREATIVE_MEDIA_ADVERTISING
+-- ACCESSIBILITY_PRIVACY_TRUST
+-- REPUTATION_SOCIAL_PROOF
+-- SERVICE_QUALITY_STANDARDS
+-- PROCUREMENT_FUNDING_READINESS
+-- VENDOR_INTEGRATION_LIFECYCLE
+--
+-- Seed P0/P1 work covers visual system, photo/video assets, Owner HQ, customer/provider portals,
+-- public site IA, SEO/local discovery, contact/help bots, commercials/video campaigns, buyer journeys,
+-- service quality, accessibility/privacy/trust, B2G/capital discovery, and build-vs-buy/vendor research.
+--
+-- Guardrails:
+-- 1. Multimodal/public creative evidence may inform principles and requirements but protected creative
+--    expression must not be copied.
+-- 2. Research cannot publish pages/assets, authorize providers, change canonical prices, move money,
+--    submit procurement/funding applications, adopt vendors, or promote production.
+-- 3. Every program must hand off through evidence -> reconciliation -> governance -> consuming engine.
+-- 4. Production outcomes/analytics feed back into research so the system learns from DANI itself.
+--
+-- Canonical SQL is intentionally maintained in the applied tester migration history; this source marker
+-- documents the umbrella integration boundary and prevents the enterprise research expansion from being
+-- mistaken for a new competing authority.
