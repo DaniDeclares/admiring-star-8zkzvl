@@ -159,7 +159,7 @@ end $$;
 revoke execute on function public.dd_run_research_synthesis_worker() from public,anon,authenticated;
 grant execute on function public.dd_run_research_synthesis_worker() to service_role;
 
-create or replace function public.dd_run_balanced_research_dispatch()
+create or replace function public.dd_run_balanced_research_dispatch_v2()
 returns uuid
 language plpgsql
 set search_path = ''
@@ -206,8 +206,8 @@ begin
   return v_id;
 end $$;
 
-revoke execute on function public.dd_run_balanced_research_dispatch() from public,anon,authenticated;
-grant execute on function public.dd_run_balanced_research_dispatch() to service_role;
+revoke execute on function public.dd_run_balanced_research_dispatch_v2() from public,anon,authenticated;
+grant execute on function public.dd_run_balanced_research_dispatch_v2() to service_role;
 
 create or replace function public.dd_refresh_capability_gaps()
 returns integer
