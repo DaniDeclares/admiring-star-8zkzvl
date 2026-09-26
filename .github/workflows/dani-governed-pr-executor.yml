@@ -55,7 +55,7 @@ jobs:
           set -euo pipefail
           now=$(date -u +%FT%TZ)
           expiry=$(date -u -d '+20 min' +%FT%TZ)
-          resp=$(curl -fsS -X PATCH             "$SB_URL/rest/v1/dd_autobuild_candidates?status=in.(READY,QUEUED_FOR_BUILD,NEEDS_MANIFEST)&risk_tier=eq.LOW&permission_class=in.(CODE_BUILD,AUTO_PR_BUILD)&executor_state=eq.PENDING&select=id,candidate_key,title,proposed_build,evidence,acceptance_criteria&order=created_at.asc&limit=1"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY"             -H "Content-Type: application/json" -H "Prefer: return=representation"             -d "{\"executor_state\":\"LEASED\",\"lease_owner\":\"$RUNNER\",\"leased_at\":\"$now\",\"lease_expires_at\":\"$expiry\"}")
+          resp=$(curl -fsS -X PATCH             "$SB_URL/rest/v1/dd_autobuild_candidates?status=in.(READY,QUEUED_FOR_BUILD)&risk_tier=eq.LOW&permission_class=in.(CODE_BUILD,AUTO_PR_BUILD)&executor_state=eq.PENDING&select=id,candidate_key,title,proposed_build,evidence,acceptance_criteria&order=created_at.asc&limit=1"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY"             -H "Content-Type: application/json" -H "Prefer: return=representation"             -d "{\"executor_state\":\"LEASED\",\"lease_owner\":\"$RUNNER\",\"leased_at\":\"$now\",\"lease_expires_at\":\"$expiry\"}")
           printf '%s' "$resp" > /tmp/candidate.json
           count=$(node -e "const x=require('/tmp/candidate.json');console.log(Array.isArray(x)?x.length:0)")
           echo "count=$count" >> "$GITHUB_OUTPUT"
