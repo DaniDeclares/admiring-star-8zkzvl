@@ -41,3 +41,5 @@
   to = "/index.html"
   status = 200
 
+
+# redeploy marker: post-a11y-plugin-removal 2026-09-26
