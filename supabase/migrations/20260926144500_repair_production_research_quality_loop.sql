@@ -252,7 +252,7 @@ grant execute on function public.dd_refresh_capability_gaps() to service_role;
 
 create or replace view public.dd_operating_model_pattern_summary_v1
 with (security_invoker=true) as
-select f.target_id,t.target_name,
+select f.target_id,t.company_name,
   f.finding_type,
   count(*)::int finding_count,
   count(distinct u.url)::int distinct_evidence_urls,
@@ -262,7 +262,7 @@ select f.target_id,t.target_name,
 from public.dd_research_operating_model_findings f
 left join public.dd_research_discovery_targets t on t.id=f.target_id
 left join lateral jsonb_array_elements_text(coalesce(f.evidence_urls,'[]'::jsonb)) u(url) on true
-group by f.target_id,t.target_name,f.finding_type;
+group by f.target_id,t.company_name,f.finding_type;
 
 revoke all on public.dd_operating_model_pattern_summary_v1 from public,anon,authenticated;
 grant select on public.dd_operating_model_pattern_summary_v1 to service_role;
