@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { decryptSecret, encryptSecret, ENVIRONMENT, logIntegrationEvent, requireStaff } from '../../_integrationOAuth.js';
 import { classifyGmailMessage } from '../../../src/lib/operations/gmailMailboxPolicy2026.js';
-import { normalizeGmailMessage, uniqueHistoryMessageIds, gmailSyncMode, gmailBackfillState, shouldIngestCommunication, completeGmailBackfillMetadata, nextGmailSyncMetadata } from './gmailIntelligenceIngestion.js';
+import { normalizeGmailMessage, uniqueHistoryMessageIds, gmailSyncMode, gmailBackfillState, shouldIngestCommunication, completeGmailBackfillMetadata, nextGmailSyncMetadata, attachmentEvidenceKey, isTextLikeAttachment, boundedAttachmentText } from './gmailIntelligenceIngestion.js';
 
 function adminClient() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
@@ -144,6 +144,30 @@ async function syncConnection(supabase, connection) {
       const { error: intelligenceError } = await supabase.from('dd_learning_evidence_intake').upsert({ evidence_key: `GMAIL:${connection.id}:${message.id}`, evidence_origin: 'RESEARCH', domain: 'SUPPORT_CONVERSATION', source_system: 'GMAIL', source_reference: message.id, observation, evidence_payload: normalized, authority_class: 'EVIDENCE', requires_new_test: true, status: 'NEW', updated_at: new Date().toISOString() }, { onConflict: 'evidence_key' });
       if (intelligenceError) throw intelligenceError;
       intelligenceQueued += 1;
+      for (const part of normalized.attachments || []) {
+        let attachmentData = part.inlineData || null;
+        if (!attachmentData && part.attachmentId) {
+          const fetched = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(message.id) + '/attachments/' + encodeURIComponent(part.attachmentId), accessToken);
+          attachmentData = fetched.data || null;
+        }
+        const extractedText = isTextLikeAttachment(part) ? boundedAttachmentText(attachmentData) : null;
+        const attachmentPayload = {
+          sourceType: 'EMAIL_ATTACHMENT', sourceSystem: 'GMAIL', parentEvidenceKey: `GMAIL:${connection.id}:${message.id}`,
+          externalMessageId: message.id, externalThreadId: message.threadId || null, accountEmail: ownEmail || null,
+          partId: part.partId || null, attachmentId: part.attachmentId || null, filename: part.filename || null,
+          mimeType: part.mimeType || null, size: part.size || 0, extractedText,
+          extractionStatus: extractedText ? 'EXTRACTED_BOUNDED_TEXT' : 'METADATA_ONLY_NEEDS_EXTRACTION',
+          authorityStatus: 'OBSERVATION_ONLY'
+        };
+        const { error: attachmentError } = await supabase.from('dd_learning_evidence_intake').upsert({
+          evidence_key: attachmentEvidenceKey(connection.id, message.id, part), evidence_origin: 'RESEARCH',
+          domain: 'SUPPORT_CONVERSATION', source_system: 'GMAIL', source_reference: message.id,
+          observation: extractedText ? extractedText.slice(0, 12000) : `Gmail attachment: ${part.filename || part.mimeType || part.partId || 'attachment'}`,
+          evidence_payload: attachmentPayload, authority_class: 'EVIDENCE', requires_new_test: true, status: 'NEW', updated_at: new Date().toISOString()
+        }, { onConflict: 'evidence_key' });
+        if (attachmentError) throw attachmentError;
+        intelligenceQueued += 1;
+      }
     }
     ingested += 1;
   }
