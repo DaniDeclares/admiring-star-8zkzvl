@@ -57,7 +57,7 @@ alter table public.dd_research_cross_signal_queue enable row level security;
 revoke all on public.dd_research_cross_signal_queue from public,anon,authenticated;
 grant select,insert,update on public.dd_research_cross_signal_queue to service_role;
 
-insert into public.dd_research_programs(program_key,name,domain,objective,release_blocked,status,metadata)
+insert into public.dd_research_programs(program_key,program_name,domain,objective,release_blocked,status,metadata)
 values
 ('MERCH_PRODUCT_INTELLIGENCE','Merchandise & Product Intelligence','MERCH_COMMERCE',
  'Continuously identify and validate products DANI can sell to customers, property/real-estate/business buyers, and providers; evaluate demand, use case, production method, sourcing, unit economics, fulfillment, safety/compliance, inventory risk, personalization, bundles, and cross-sell fit.',
@@ -68,7 +68,7 @@ values
 ('OWNER_RESEARCH_MEMORY','Owner Research Memory & Opportunity Revalidation','RECORDS_KNOWLEDGE_INTELLIGENCE',
  'Recover ideas, business plans, equipment research, product concepts, service concepts, prior market research, old proposals and operational hypotheses from authorized Gmail and Drive; preserve provenance, revalidate current relevance and profitability, and route viable opportunities through fresh research, tester proof and governed approval.',
  true,'RESEARCHING',jsonb_build_object('first_class',true,'historical_not_discarded',true,'historical_not_current_authority',true,'approval_gate','OPPORTUNITY_ACTIVATION'))
-on conflict(program_key) do update set name=excluded.name,domain=excluded.domain,objective=excluded.objective,release_blocked=true,status='RESEARCHING',metadata=coalesce(public.dd_research_programs.metadata,'{}'::jsonb)||excluded.metadata,updated_at=now();
+on conflict(program_key) do update set program_name=excluded.program_name,domain=excluded.domain,objective=excluded.objective,release_blocked=true,status='RESEARCHING',metadata=coalesce(public.dd_research_programs.metadata,'{}'::jsonb)||excluded.metadata,updated_at=now();
 
 insert into public.dd_intelligence_miners(miner_key,name,purpose,inputs,outputs,routes,authority_boundary,status)
 values
@@ -84,7 +84,7 @@ values
  'Extract evidence-backed reusable patterns for owner dashboards, provider apps and customer portals from authoritative product documentation, user workflow evidence and DANI operational friction.',
  array['WEB_RESEARCH','GITHUB','POSTHOG','SUPPORT_SIGNAL','GMAIL'],array['UX_PATTERN','WORKFLOW_GAP','TEST_HYPOTHESIS'],array['DIGITAL_EXPERIENCE_INTELLIGENCE','SOFTWARE'],
  'Research/test only; cannot deploy production UX or weaken permissions.', 'ACTIVE')
-on conflict(miner_key) do update set name=excluded.name,purpose=excluded.purpose,inputs=excluded.inputs,outputs=excluded.outputs,routes=excluded.routes,authority_boundary=excluded.authority_boundary,status='ACTIVE',updated_at=now();
+on conflict(miner_key) do update set program_name=excluded.program_name,purpose=excluded.purpose,inputs=excluded.inputs,outputs=excluded.outputs,routes=excluded.routes,authority_boundary=excluded.authority_boundary,status='ACTIVE',updated_at=now();
 
 create or replace function public.dd_queue_cross_signal_research()
 returns jsonb
@@ -94,11 +94,11 @@ as $$
 declare v_candidates int:=0; v_cross int:=0; v_work int:=0;
 begin
  insert into public.dd_research_memory_candidates(candidate_key,source_system,source_reference,source_date,candidate_type,title,summary,raw_claims,buyer_segments,channel_scope,research_program_keys,evidence_payload)
- select 'DRIVE_MEMORY:'||d.file_id||':'||coalesce(d.version::text,'0'),'GOOGLE_DRIVE',d.file_id,d.modified_time,
+ select 'DRIVE_MEMORY:'||d.drive_file_id||':'||coalesce(coalesce(d.metadata->>'version','0'),'0'),'GOOGLE_DRIVE',d.drive_file_id,d.modified_at,
    case when lower(coalesce(d.file_name,'')) ~ '(merch|xtool|print|apparel|nfc|gift|kit|sign)' then 'PRODUCT_OR_EQUIPMENT_IDEA'
         when lower(coalesce(d.file_name,'')) ~ '(business plan|overview|strategy|research)' then 'BUSINESS_RESEARCH'
         else 'OWNER_RESEARCH_ARTIFACT' end,
-   d.file_name,coalesce(d.extracted_summary,'Historical Drive research artifact requiring current revalidation.'),
+   d.file_name,coalesce(d.metadata->>'extracted_summary','Historical Drive research artifact requiring current revalidation.'),
    jsonb_build_array(jsonb_build_object('classification',d.classification,'authority_status',d.authority_status)),
    '{}','{}',
    case when lower(coalesce(d.file_name,'')) ~ '(merch|xtool|print|apparel|nfc|gift|kit|sign)' then array['OWNER_RESEARCH_MEMORY','MERCH_PRODUCT_INTELLIGENCE']
@@ -119,14 +119,15 @@ begin
  get diagnostics v_cross=row_count;
 
  insert into public.dd_research_work_queue(program_key,work_key,question,required_evidence,priority,status,next_action,owner_decision_required,metadata)
- select unnest(case when cardinality(q.matched_programs)>0 then q.matched_programs else array['OWNER_RESEARCH_MEMORY'] end),
-   'cross-signal-'||lower(regexp_replace(q.signal_key,'[^a-zA-Z0-9]+','-','g')),
+ select p.program_key,
+   'cross-signal-'||lower(regexp_replace(q.signal_key,'[^a-zA-Z0-9]+','-','g'))||'-'||lower(p.program_key),
    'Revalidate owner-originated opportunity: '||coalesce(q.signal_payload->>'title',q.candidate_key),
    'Current external demand evidence + DANI historical provenance + duplicate/service/product reconciliation + economics/capability/compliance/fulfillment checks + tester acceptance criteria.',
    'P1','QUEUED','Run fresh corroboration and tester proof; do not activate automatically.',false,
    jsonb_build_object('cross_signal_id',q.id,'candidate_key',q.candidate_key,'implementation_action_class','REVERIFY',
      'approval_gate','OWNER_APPROVAL_AFTER_TESTER_PROOF','historical_not_discarded',true,'historical_not_current_authority',true)
  from public.dd_research_cross_signal_queue q
+ cross join lateral unnest(case when cardinality(q.matched_programs)>0 then q.matched_programs else array['OWNER_RESEARCH_MEMORY'] end) p(program_key)
  where q.status='QUEUED'
  on conflict(work_key) do nothing;
  get diagnostics v_work=row_count;
