@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import prisma from '../lib/prisma.js';
 import { checkoutEligibility, getChannelGovernanceDecision, resolveGovernedChannelPrice, getGovernedCommercialOffer, normalizeChannel, resolveGovernedPrice, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
 
 const CHANNELS_BY_DIVISION=Object.freeze({'01':['B2C','B2B_APT'],'02':['B2B_APT','B2B_RE','B2B','B2G'],'03':['B2B_RE','B2B_APT','B2B'],'04':['B2B','B2B_RE','B2B_APT','B2G'],'05':['B2C','B2B_APT','B2B_RE','B2G'],'06':['B2B','B2B_RE','B2G'],'07':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'08':['B2B_RE','B2B','B2G'],'09':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'10':['B2C','B2B_APT','B2B_RE','B2B'],'11':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'12':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'13':['B2B_APT','B2B_RE','B2B','B2G']});
@@ -39,17 +38,10 @@ const governedCatalog=async()=>{
 const governedService=async(serviceId)=>getGovernedCommercialOffer(serviceId);
 
 const legacySpecial=async(serviceId)=>{
- const rows=await prisma.$queryRawUnsafe(`
-   SELECT s.service_id AS "legacyServiceId", s.service_name AS "legacyName", s.family, s.unit, s.price, s.market, m.canonical_sku AS "canonicalSku"
-   FROM public.danis_specials_offers s
-   LEFT JOIN LATERAL (
-     SELECT m.canonical_sku FROM public.dd_master_service_universe m
-     WHERE m.lifecycle_status='CANONICAL_ACTIVE'
-       AND (EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id)
-         OR lower(trim(s.service_name))=lower(trim(m.service_name)))
-     ORDER BY CASE WHEN EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id) THEN 0 ELSE 1 END, m.updated_at DESC LIMIT 1
-   ) m ON true WHERE s.service_id=$1 AND s.active=true LIMIT 1`,serviceId);
- return rows[0]||null;
+ const rows=await specialRows();
+ const match=rows.find(s=>s.legacyServiceId===serviceId);
+ if(!match)return null;
+ return {legacyServiceId:match.legacyServiceId,legacyName:match.legacyName,family:match.family,unit:match.unit,price:match.price,market:match.market,canonicalSku:match.canonicalSku};
 };
 
 export default async function handler(req,res){try{
