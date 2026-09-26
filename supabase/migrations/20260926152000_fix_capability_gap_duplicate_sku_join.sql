@@ -6,7 +6,7 @@ set search_path = ''
 as $$
 declare n int:=0;
 begin
- with pricing_scope as (
+ with master_scope as (select distinct on (canonical_sku) m.*,count(*) over(partition by canonical_sku)::int duplicate_sku_rows from public.dd_master_service_universe m where canonical_sku is not null order by canonical_sku,updated_at desc,created_at desc), pricing_scope as (
    select canonical_sku,array_agg(distinct ch) filter(where ch is not null) channel_scope
    from public.dd_service_pricing_research_queue q
    left join lateral unnest(coalesce(q.channel_scope,'{}'::text[])) ch on true
@@ -27,9 +27,9 @@ begin
    jsonb_build_object('capability',m.capability,'fulfillment_lane',m.fulfillment_lane,
      'master_assigned_provider',m.assigned_provider,'provider_qualifications',m.provider_qualifications,
      'compliance_boundary',m.compliance_legal_boundaries,'provider_registry_exact_service_matches',pm.authorized_matches,
-     'provider_registry_match_rule','AUTHORIZED_EXACT_SERVICE_LINE','requires_provider_registry_reconciliation',false),
+     'provider_registry_match_rule','AUTHORIZED_EXACT_SERVICE_LINE','master_duplicate_sku_rows',m.duplicate_sku_rows,'requires_provider_registry_reconciliation',false),
    false
- from public.dd_master_service_universe m
+ from master_scope m
  left join pricing_scope q on q.canonical_sku=m.canonical_sku
  cross join lateral (
    select count(*)::int authorized_matches from public.dd_provider_capabilities pc
