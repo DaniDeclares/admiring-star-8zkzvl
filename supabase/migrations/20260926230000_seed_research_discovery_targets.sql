@@ -39,3 +39,9 @@ begin
     'candidate_only',true,'auto_activate_source',false);
 end
 $function$;
+
+
+revoke all on function public.dd_seed_research_discovery_targets() from public;
+revoke all on function public.dd_seed_research_discovery_targets() from anon;
+revoke all on function public.dd_seed_research_discovery_targets() from authenticated;
+grant execute on function public.dd_seed_research_discovery_targets() to service_role;
