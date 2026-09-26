@@ -184,12 +184,19 @@ end $$;
 revoke execute on function public.dd_queue_learning_evidence_cross_signals() from public,anon,authenticated;
 grant execute on function public.dd_queue_learning_evidence_cross_signals() to service_role;
 
+insert into public.dd_intelligence_sources(source_key,source_name,source_family,access_mode,public_source,terms_review_required,robots_respect_required,pii_minimization_required,allowed_collection_scope,default_miner_keys,status,terms_gate_status,rate_limit_per_hour,provenance_required,collector_execution_allowed,metadata)
+values('GITHUB_PUBLIC_ECOSYSTEM','GitHub Public Ecosystem','TECHNOLOGY','PUBLIC_API',true,true,true,true,
+ jsonb_build_object('scope','public repository metadata, releases, advisories and documentation relevant to DANI architecture; no private repositories unless separately authorized'),
+ array['GITHUB_ECOSYSTEM_MINER','PLATFORM_CHANGE_MINER','SECURITY_THREAT_MINER'],'ACTIVE','PENDING',20,true,false,
+ jsonb_build_object('reason','Source registered now; automated collector remains fail-closed until API terms/auth/rate-limit execution proof is recorded.'))
+on conflict(source_key) do update set allowed_collection_scope=excluded.allowed_collection_scope,default_miner_keys=excluded.default_miner_keys,status='ACTIVE',metadata=excluded.metadata,updated_at=now();
+
 insert into public.dd_intelligence_collection_queue(collection_key,source_key,collector_kind,query_profile,requested_miner_keys,priority,status,external_contact_allowed,money_action_allowed,production_mutation_allowed,terms_gate_required,next_run_at,metadata)
 values('GITHUB_ECOSYSTEM_CONTINUOUS','GITHUB_PUBLIC_ECOSYSTEM','PUBLIC_API',
  jsonb_build_object('scope','relevant repositories/releases/security advisories/agent-memory-orchestration/dependency patterns','repository_authority','DaniDeclares/admiring-star-8zkzvl','discovery_terms',array['agent memory','agent orchestration','field service software','dashboard portal UX','Supabase security','React accessibility'],'public_only',true),
- array['GITHUB_ECOSYSTEM_MINER','PLATFORM_CHANGE_MINER','SECURITY_THREAT_MINER'],'P1','READY',false,false,false,false,now(),
- jsonb_build_object('observation_only',true,'copy_code_automatically',false,'install_dependency',false,'requires_architecture_comparison',true))
-on conflict(collection_key) do update set query_profile=excluded.query_profile,requested_miner_keys=excluded.requested_miner_keys,status='READY',next_run_at=now(),metadata=excluded.metadata,updated_at=now();
+ array['GITHUB_ECOSYSTEM_MINER','PLATFORM_CHANGE_MINER','SECURITY_THREAT_MINER'],'P1','BLOCKED',false,false,false,true,now(),
+ jsonb_build_object('observation_only',true,'copy_code_automatically',false,'install_dependency',false,'requires_architecture_comparison',true,'blocker','TERMS_AND_EXECUTION_PROOF_REQUIRED'))
+on conflict(collection_key) do update set query_profile=excluded.query_profile,requested_miner_keys=excluded.requested_miner_keys,status='BLOCKED',terms_gate_required=true,blocker='TERMS_AND_EXECUTION_PROOF_REQUIRED',next_run_at=now(),metadata=excluded.metadata,updated_at=now();
 
 select cron.unschedule(jobid) from cron.job where jobname='dd-research-cross-signal-memory';
 select cron.schedule('dd-research-cross-signal-memory','9,24,39,54 * * * *',
