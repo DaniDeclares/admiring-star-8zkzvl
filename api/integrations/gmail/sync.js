@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { decryptSecret, encryptSecret, ENVIRONMENT, logIntegrationEvent, requireStaff } from '../../_integrationOAuth.js';
+import { classifyGmailMessage } from '../../../src/lib/operations/gmailMailboxPolicy2026.js';
+import { normalizeGmailMessage } from './gmailIntelligenceIngestion.js';
 
 function adminClient() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
@@ -77,9 +79,10 @@ async function syncConnection(supabase, connection) {
   }
 
   let ingested = 0;
+  let intelligenceQueued = 0;
   for (const item of list.messages || []) {
     const message = await gmailJson(
-      'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(item.id) + '?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date',
+      'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(item.id) + '?format=full',
       accessToken
     );
     const headers = message.payload?.headers || [];
@@ -105,6 +108,14 @@ async function syncConnection(supabase, connection) {
       }
     });
     if (error) throw error;
+    const sorting = classifyGmailMessage({ accountEmail: ownEmail, subject: header(headers, 'Subject'), snippet: message.snippet || '', from });
+    if (!sorting.internalOnly && (sorting.intelligenceEligible || sorting.needsReview)) {
+      const normalized = normalizeGmailMessage({ message, accountEmail: ownEmail, sorting });
+      const observation = [normalized.subject, normalized.snippet, ...normalized.bodies.filter(b => b.mimeType === 'text/plain').map(b => b.text)].filter(Boolean).join(' — ').slice(0, 12000) || 'Gmail message collected for intelligence review';
+      const { error: intelligenceError } = await supabase.from('dd_learning_evidence_intake').upsert({ evidence_key: `GMAIL:${connection.id}:${message.id}`, evidence_origin: 'RESEARCH', domain: 'SUPPORT_CONVERSATION', source_system: 'GMAIL', source_reference: message.id, observation, evidence_payload: normalized, authority_class: 'EVIDENCE', requires_new_test: true, status: 'NEW', updated_at: new Date().toISOString() }, { onConflict: 'evidence_key' });
+      if (intelligenceError) throw intelligenceError;
+      intelligenceQueued += 1;
+    }
     ingested += 1;
   }
 
@@ -117,9 +128,9 @@ async function syncConnection(supabase, connection) {
   if (updateError) throw updateError;
   await logIntegrationEvent({
     supabase, adapterCode: 'GMAIL', connectionId: connection.id, direction: 'INBOUND',
-    eventType: 'MAILBOX_SYNC', status: 'PROCESSED', payload: { messages_scanned: ingested }
+    eventType: 'MAILBOX_SYNC', status: 'PROCESSED', payload: { messages_scanned: ingested, intelligence_items_queued: intelligenceQueued }
   });
-  return ingested;
+  return { ingested, intelligenceQueued };
 }
 
 export default async function handler(req, res) {
@@ -138,9 +149,12 @@ export default async function handler(req, res) {
     if (!connections?.length) return res.status(200).json({ success: true, connected: false, ingested: 0 });
 
     let total = 0;
+    let intelligenceQueued = 0;
     for (const connection of connections) {
       try {
-        total += await syncConnection(supabase, connection);
+        const result = await syncConnection(supabase, connection);
+        total += result.ingested;
+        intelligenceQueued += result.intelligenceQueued;
       } catch (error) {
         await supabase.from('dd_integration_connections').update({
           last_error: error.message || 'GMAIL_SYNC_FAILED',
@@ -153,7 +167,7 @@ export default async function handler(req, res) {
         throw error;
       }
     }
-    return res.status(200).json({ success: true, connected: true, ingested: total });
+    return res.status(200).json({ success: true, connected: true, ingested: total, intelligence_queued: intelligenceQueued });
   } catch (error) {
     return res.status(error.status || 500).json({ success: false, error: error.message || 'GMAIL_SYNC_FAILED' });
   }
