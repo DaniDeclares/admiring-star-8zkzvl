@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { decryptSecret, encryptSecret, ENVIRONMENT, logIntegrationEvent, requireStaff } from '../../_integrationOAuth.js';
 import { classifyGmailMessage } from '../../../src/lib/operations/gmailMailboxPolicy2026.js';
-import { normalizeGmailMessage, uniqueHistoryMessageIds, gmailSyncMode, nextGmailSyncMetadata } from './gmailIntelligenceIngestion.js';
+import { normalizeGmailMessage, uniqueHistoryMessageIds, gmailSyncMode, gmailBackfillState, shouldIngestCommunication, completeGmailBackfillMetadata, nextGmailSyncMetadata } from './gmailIntelligenceIngestion.js';
 
 function adminClient() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
@@ -72,6 +72,8 @@ async function syncConnection(supabase, connection) {
   let messageIds = [];
   let newestHistoryId = syncMode.historyId || null;
   let syncModeUsed = syncMode.mode;
+  let backfillNextPageToken = null;
+  let backfillCompleted = false;
   if (syncMode.mode === 'INCREMENTAL') {
     try {
       const history = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/history?maxResults=500&historyTypes=messageAdded&startHistoryId=' + encodeURIComponent(syncMode.historyId), accessToken);
@@ -83,16 +85,24 @@ async function syncConnection(supabase, connection) {
     }
   }
   if (syncModeUsed !== 'INCREMENTAL') {
-    const query = encodeURIComponent('newer_than:2d -in:spam -in:trash');
+    const backfill = gmailBackfillState(connection);
+    const query = encodeURIComponent('-in:spam -in:trash');
+    const page = backfill.pageToken ? '&pageToken=' + encodeURIComponent(backfill.pageToken) : '';
     let list;
     try {
-      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
+      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query + page, accessToken);
     } catch (error) {
       if (error.status !== 401) throw error;
       accessToken = await refreshAccessToken(supabase, connection);
-      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
+      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query + page, accessToken);
     }
     messageIds = (list.messages || []).map(item => item.id).filter(Boolean);
+    backfillNextPageToken = list.nextPageToken || null;
+    backfillCompleted = !backfillNextPageToken;
+    if (backfillCompleted) {
+      const profile = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/profile', accessToken);
+      newestHistoryId = profile.historyId || newestHistoryId;
+    }
   }
 
   let ingested = 0;
@@ -108,23 +118,25 @@ async function syncConnection(supabase, connection) {
     const from = emailOnly(fromRaw);
     const direction = ownEmail && from === ownEmail ? 'OUTBOUND' : 'INBOUND';
     const receivedAt = message.internalDate ? new Date(Number(message.internalDate)).toISOString() : new Date().toISOString();
-    const { error } = await supabase.rpc('dd_ingest_email_communication', {
-      p_external_message_id: message.id,
-      p_external_thread_id: message.threadId || null,
-      p_direction: direction,
-      p_sender_address: from,
-      p_recipient_addresses: addresses(toRaw),
-      p_subject: header(headers, 'Subject') || null,
-      p_body_excerpt: message.snippet || null,
-      p_received_at: receivedAt,
-      p_raw_metadata: {
-        history_id: message.historyId || null,
-        label_ids: message.labelIds || [],
-        gmail_connection_id: connection.id,
-        account_email: ownEmail || null
-      }
-    });
-    if (error) throw error;
+    if (shouldIngestCommunication(syncModeUsed)) {
+      const { error } = await supabase.rpc('dd_ingest_email_communication', {
+        p_external_message_id: message.id,
+        p_external_thread_id: message.threadId || null,
+        p_direction: direction,
+        p_sender_address: from,
+        p_recipient_addresses: addresses(toRaw),
+        p_subject: header(headers, 'Subject') || null,
+        p_body_excerpt: message.snippet || null,
+        p_received_at: receivedAt,
+        p_raw_metadata: {
+          history_id: message.historyId || null,
+          label_ids: message.labelIds || [],
+          gmail_connection_id: connection.id,
+          account_email: ownEmail || null
+        }
+      });
+      if (error) throw error;
+    }
     const sorting = classifyGmailMessage({ accountEmail: ownEmail, subject: header(headers, 'Subject'), snippet: message.snippet || '', from });
     if (!sorting.internalOnly && (sorting.intelligenceEligible || sorting.needsReview)) {
       const normalized = normalizeGmailMessage({ message, accountEmail: ownEmail, sorting });
@@ -137,11 +149,17 @@ async function syncConnection(supabase, connection) {
   }
 
   const now = new Date().toISOString();
-  const metadata = nextGmailSyncMetadata(connection.metadata || {}, {
-    gmail_history_id: newestHistoryId,
+  let metadata = nextGmailSyncMetadata(connection.metadata || {}, {
     gmail_last_sync_mode: syncModeUsed,
     gmail_last_sync_at: now
   });
+  if (syncModeUsed === 'BOUNDED_BACKFILL' || syncModeUsed === 'STALE_CURSOR_RECOVERY') {
+    metadata = backfillCompleted
+      ? completeGmailBackfillMetadata(metadata, newestHistoryId)
+      : nextGmailSyncMetadata(metadata, { gmail_intelligence_backfill_page_token: backfillNextPageToken, gmail_intelligence_backfill_complete: false });
+  } else {
+    metadata = nextGmailSyncMetadata(metadata, { gmail_history_id: newestHistoryId });
+  }
   const { error: updateError } = await supabase.from('dd_integration_connections').update({
     last_sync_at: now,
     last_error: null,
