@@ -213,11 +213,11 @@ create or replace function public.dd_refresh_capability_gaps()
 returns integer
 language plpgsql
 security definer
-set search_path = 'public'
+set search_path = ''
 as $$
 declare n int:=0;
 begin
- insert into dd_capability_gap_queue(gap_key,canonical_sku,service_name,division,channel_scope,gap_type,status,
+ insert into public.dd_capability_gap_queue(gap_key,canonical_sku,service_name,division,channel_scope,gap_type,status,
    existing_provider_matches,recruiting_required,licensing_or_credential_gate,research_evidence,owner_approval_required)
  select 'SERVICE_CAPABILITY:'||m.canonical_sku,m.canonical_sku,m.service_name,m.division,coalesce(q.channel_scope,'{}'::text[]),
    'FULFILLMENT_CAPABILITY_UNPROVEN',
@@ -233,10 +233,10 @@ begin
      'compliance_boundary',m.compliance_legal_boundaries,'provider_registry_exact_service_matches',pm.authorized_matches,
      'provider_registry_match_rule','AUTHORIZED_EXACT_SERVICE_LINE','requires_provider_registry_reconciliation',false),
    false
- from dd_master_service_universe m
- left join dd_service_pricing_research_queue q on q.canonical_sku=m.canonical_sku
+ from public.dd_master_service_universe m
+ left join public.dd_service_pricing_research_queue q on q.canonical_sku=m.canonical_sku
  cross join lateral (
-   select count(*)::int authorized_matches from dd_provider_capabilities pc
+   select count(*)::int authorized_matches from public.dd_provider_capabilities pc
    where pc.is_authorized is true and lower(trim(pc.service_line))=lower(trim(m.service_name))
  ) pm
  where m.canonical_sku is not null
