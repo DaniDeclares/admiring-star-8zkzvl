@@ -169,6 +169,20 @@ jobs:
           number=$(echo "$PR_URL" | sed -E 's#^.*/pull/([0-9]+)$#\1#')
           curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json"             -d "{\"status\":\"PR_OPENED\",\"executor_state\":\"PR_OPENED\",\"branch_name\":\"$BRANCH\",\"pull_request_number\":$number,\"pull_request_url\":\"$PR_URL\",\"head_sha\":\"$SHA\",\"built_at\":\"$(date -u +%FT%TZ)\",\"proof\":{\"executor\":\"github-actions\",\"run_id\":\"${{ github.run_id }}\",\"build_passed\":true,\"auto_merge\":false,\"production_direct_write\":false}}"
 
+      - name: Record governed build handoff
+        if: steps.pr.outputs.url != ''
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          ID: ${{ steps.claim.outputs.id }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          SHA: ${{ steps.pr.outputs.sha }}
+          CANDIDATE_KEY: ${{ steps.claim.outputs.key }}
+        run: |
+          set -euo pipefail
+          payload=$(node -e 'console.log(JSON.stringify({source_stage:"software_build_candidate",target_stage:"isolated_pull_request",authoritative_record_id:process.env.ID,authoritative_table:"dd_autobuild_candidates",handoff_reason:"Governed low-risk candidate compiled, validated, and opened as an isolated pull request.",actor_key:"governed_pr_executor",status:"RECORDED",metadata:{candidate_key:process.env.CANDIDATE_KEY,pull_request_url:process.env.PR_URL,head_sha:process.env.SHA,auto_merge:false,production_direct_write:false}}))')
+          curl -fsS -X POST "$SB_URL/rest/v1/dd_execution_handoff_ledger" -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" -d "$payload"
+
       - name: Release unsupported or failed candidate
         if: always() && steps.claim.outputs.count == '1' && steps.pr.outputs.url == ''
         env:
