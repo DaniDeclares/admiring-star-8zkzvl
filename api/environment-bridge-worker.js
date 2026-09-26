@@ -5,8 +5,8 @@ const clean = (v) => typeof v === 'string' ? v.trim() : '';
 const json = (res,status,body) => res.status(status).json(body);
 
 function clients() {
-  const productionUrl = clean(process.env.PRODUCTION_SUPABASE_URL || process.env.SUPABASE_URL);
-  const productionKey = clean(process.env.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const productionUrl = clean(process.env.PRODUCTION_SUPABASE_URL);
+  const productionKey = clean(process.env.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY);
   const testerUrl = clean(process.env.TESTER_SUPABASE_URL);
   const testerKey = clean(process.env.TESTER_SUPABASE_SERVICE_ROLE_KEY);
   if (!productionUrl || !productionKey || !testerUrl || !testerKey) {
