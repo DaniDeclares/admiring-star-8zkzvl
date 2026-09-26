@@ -102,7 +102,7 @@ async function resolveCH01CommercialSelection(...args) {
   return (await implementation()).resolveCH01CommercialSelection(...args);
 }
 
-module.exports = {
+export {
   economicGateFromOffer,
   checkoutEligibility,
   normalizeChannel,
