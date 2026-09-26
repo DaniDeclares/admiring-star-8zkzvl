@@ -1,4 +1,4 @@
-import {describe,expect,it} from 'vitest'; import {classifyGmailMessage,mailboxRole,CREDIT_LABEL} from './gmailMailboxPolicy2026.js';
+import {classifyGmailMessage,mailboxRole,CREDIT_LABEL} from './gmailMailboxPolicy2026.js';
 describe('Gmail mailbox governance',()=>{it('keeps test mailbox internal',()=>{const r=classifyGmailMessage({accountEmail:'testingdd63@gmail.com',subject:'Test customer quote'});expect(mailboxRole('testingdd63@gmail.com')).toBe('INTERNAL_OPS_TESTING');expect(r.leadScoutEligible).toBe(false);expect(r.productionMetricsEligible).toBe(false);});
 it('routes credit evidence',()=>{expect(classifyGmailMessage({accountEmail:'danijfong20@gmail.com',subject:'Experian credit report'}).labels.some(x=>x.label===CREDIT_LABEL)).toBe(true);});
 it('suppresses integration noise',()=>{const r=classifyGmailMessage({accountEmail:'vendors@danideclares.com',subject:'Plugin connection ready',snippet:'Authorize account integration'});expect(r.leadScoutEligible).toBe(false);expect(r.suppressionReason).toBe('USER_INITIATED_INTEGRATION_ACTIVITY');});
