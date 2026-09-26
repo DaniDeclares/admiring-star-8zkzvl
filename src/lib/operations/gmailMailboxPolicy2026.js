@@ -35,5 +35,24 @@ const INTELLIGENCE_SIGNALS=[
 {key:'WORKFORCE',re:/\b(contractor|provider|hiring|workforce|labor|training|onboarding)\b/i},
 {key:'CUSTOMER_INSIGHT',re:/\b(customer|consumer|buyer|resident|property manager|broker|client experience|pain point)\b/i}];
 const INTEGRATION_ONLY=/\b(connect(ed|ion)?|oauth|authorize|integration|plugin|workspace connected|account linked)\b/i;
+
+const INTELLIGENCE_DOMAIN_MAP=Object.freeze({
+ COMPETITOR:['CUSTOMER_MARKET_INTELLIGENCE','SERVICE_DISCOVERY'],
+ MARKETING:['GROWTH_MEDIA_INTELLIGENCE','CUSTOMER_MARKET_INTELLIGENCE'],
+ OPERATIONS:['OPERATING_MODEL_INTELLIGENCE','SERVICE_QUALITY_INTELLIGENCE'],
+ PROCUREMENT:['PROCUREMENT_CAPITAL_INTELLIGENCE'],
+ FUNDING:['PROCUREMENT_CAPITAL_INTELLIGENCE','COMPANY_FINANCIAL_INTELLIGENCE'],
+ TECHNOLOGY:['VENDOR_TECH_INTELLIGENCE','AI_DATA_GOVERNANCE_INTELLIGENCE'],
+ WORKFORCE:['WORKFORCE_ECONOMICS','PEOPLE_ORG_INTELLIGENCE'],
+ CUSTOMER_INSIGHT:['CUSTOMER_MARKET_INTELLIGENCE','SUPPORT_CONVERSATION_INTELLIGENCE']
+});
+const LABEL_DOMAIN_MAP=Object.freeze({
+ DD_01:['LEGAL_CONTRACT_INTELLIGENCE'],DD_02:['PROCUREMENT_CAPITAL_INTELLIGENCE'],DD_05:['PROCUREMENT_CAPITAL_INTELLIGENCE','COMPANY_FINANCIAL_INTELLIGENCE'],
+ DD_06:['COMPANY_FINANCIAL_INTELLIGENCE'],DD_07:['ENTERPRISE_RISK_INTELLIGENCE'],DD_08:['OWNER_RESEARCH_MEMORY'],DD_09:['CUSTOMER_MARKET_INTELLIGENCE'],
+ DD_10:['SERVICE_QUALITY_INTELLIGENCE'],DD_11:['WORKFORCE_ECONOMICS','PEOPLE_ORG_INTELLIGENCE'],DD_12:['GROWTH_MEDIA_INTELLIGENCE','WEB_CONTENT_DISCOVERY'],
+ DD_13:['VENDOR_TECH_INTELLIGENCE','AI_DATA_GOVERNANCE_INTELLIGENCE'],DD_15:['PROCUREMENT_CAPITAL_INTELLIGENCE']
+});
+export function gmailResearchDomains(sorting={}){const out=new Set();for(const s of sorting.intelligenceSignals||[])for(const d of INTELLIGENCE_DOMAIN_MAP[s]||[])out.add(d);for(const l of sorting.labels||[])for(const d of LABEL_DOMAIN_MAP[l.key]||[])out.add(d);if(!out.size)out.add('OWNER_RESEARCH_MEMORY');return [...out];}
+
 export function mailboxRole(email){return GMAIL_ACCOUNT_ROLES[String(email||'').trim().toLowerCase()]||'UNMANAGED';}
 export function classifyGmailMessage({accountEmail,subject='',snippet='',from=''}){const role=mailboxRole(accountEmail);const text=[subject,snippet,from].filter(Boolean).join(' ');const internalOnly=role==='INTERNAL_OPS_TESTING';const matches=RULES.filter(r=>r.re.test(text)).map(r=>({key:r.key,label:r.label}));const systemNoise=SYSTEM_NOISE.test(text);const intelligenceSignals=INTELLIGENCE_SIGNALS.filter(r=>r.re.test(text)).map(r=>r.key);const integrationOnly=INTEGRATION_ONLY.test(text)&&!/\b(proposal|quote|customer|service inquiry|partnership|contract)\b/i.test(text);return{role,labels:matches,confidence:matches.length===1?'HIGH':matches.length>1?'MEDIUM':'LOW',needsReview:!systemNoise&&matches.length===0,internalOnly,leadScoutEligible:!internalOnly&&!systemNoise&&!integrationOnly,productionMetricsEligible:!internalOnly,intelligenceEligible:intelligenceSignals.length>0,intelligenceSignals,intelligenceReviewRequired:intelligenceSignals.length>0,suppressionReason:internalOnly?'INTERNAL_OPS_TESTING':systemNoise?'SYSTEM_AUTH_NOISE':integrationOnly?'USER_INITIATED_INTEGRATION_ACTIVITY':null};}
