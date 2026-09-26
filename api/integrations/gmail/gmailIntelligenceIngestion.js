@@ -9,3 +9,7 @@ export function gmailBackfillState(connection){const metadata=connection?.metada
 export function shouldIngestCommunication(syncModeUsed){return syncModeUsed==='INCREMENTAL'||syncModeUsed==='STALE_CURSOR_RECOVERY';}
 export function completeGmailBackfillMetadata(existing={},profileHistoryId=null){return nextGmailSyncMetadata(existing,{gmail_intelligence_backfill_page_token:null,gmail_intelligence_backfill_complete:true,gmail_history_id:profileHistoryId?String(profileHistoryId):(existing||{}).gmail_history_id||null,gmail_backfill_completed_at:new Date().toISOString()});}
 export function nextGmailSyncMetadata(existing={},patch={}){return {...(existing||{}),...patch,gmail_intelligence_sync_version:2};}
+
+export function attachmentEvidenceKey(connectionId,messageId,part){return `GMAIL_ATTACHMENT:${connectionId}:${messageId}:${part?.partId||part?.attachmentId||'unknown'}`;}
+export function isTextLikeAttachment(part){const mime=String(part?.mimeType||'').toLowerCase();const name=String(part?.filename||'').toLowerCase();return mime.startsWith('text/')||mime==='application/json'||mime==='application/xml'||mime==='text/csv'||name.endsWith('.txt')||name.endsWith('.csv')||name.endsWith('.json')||name.endsWith('.xml')||name.endsWith('.md');}
+export function boundedAttachmentText(base64UrlData,maxBytes=262144){if(!base64UrlData)return null;const normalized=String(base64UrlData).replace(/-/g,'+').replace(/_/g,'/');try{const buf=Buffer.from(normalized,'base64');if(buf.length>maxBytes)return null;return buf.toString('utf8').slice(0,maxBytes);}catch{return null;}}
