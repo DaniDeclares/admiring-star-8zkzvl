@@ -1,0 +1,32 @@
+[build]
+  command = "npm run build"
+  publish = "build"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/industries/government"
+  to = "/seo/industries--government.html"
+  status = 200
+
+[[redirects]]
+  from = "/request-service"
+  to = "/seo/request-service.html"
+  status = 200
+
+[[redirects]]
+  from = "/portal/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/provider/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
