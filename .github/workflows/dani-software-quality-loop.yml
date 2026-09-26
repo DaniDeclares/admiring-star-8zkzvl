@@ -31,9 +31,30 @@ jobs:
         run: npm run build
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
+      - name: Resolve active QA URL
+        id: qa_url
+        env:
+          NETLIFY_SITE: sparkling-croissant-829102
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "url=https://deploy-preview-${{ github.event.pull_request.number }}--$NETLIFY_SITE.netlify.app" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://$NETLIFY_SITE.netlify.app" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Wait for active QA rail
+        env:
+          QA_URL: ${{ steps.qa_url.outputs.url }}
+        run: |
+          for i in {1..30}; do
+            code=$(curl -L -s -o /dev/null -w "%{http_code}" "$QA_URL" || true)
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "QA rail did not become ready: $QA_URL" >&2
+          exit 1
       - name: Critical public smoke
         env:
-          PRODUCTION_BASE_URL: https://sparkling-croissant-829102.netlify.app
+          PRODUCTION_BASE_URL: ${{ steps.qa_url.outputs.url }}
         run: npx playwright test checks/production-critical.spec.ts
       - name: Preserve failure evidence
         if: failure()
