@@ -93,8 +93,23 @@ export default async function handler(req,res) {
   if(!expected || supplied!==expected) return res.status(401).json({success:false,error:'Unauthorized'});
   try {
     const {production,tester}=clients();
+    const preflight = req.query?.preflight === '1' || req.body?.preflight === true;
+    if (preflight) {
+      const [prodProbe,testProbe] = await Promise.all([
+        production.from('dd_environment_bridge_receipts').select('id',{count:'exact',head:true}).limit(1),
+        tester.from('dd_environment_bridge_receipts').select('id',{count:'exact',head:true}).limit(1)
+      ]);
+      if (prodProbe.error) throw prodProbe.error;
+      if (testProbe.error) throw testProbe.error;
+      return res.status(200).json({
+        success:true,mode:'PREFLIGHT',productionReachable:true,testerReachable:true,
+        productionReceiptCount:prodProbe.count,testerReceiptCount:testProbe.count,
+        transported:0,productionRuntimeMutation:false,pricingMutation:false,
+        providerAuthorizationMutation:false,moneyMovement:false,externalContact:false
+      });
+    }
     return res.status(200).json({
-      success:true,
+      success:true,mode:'TRANSPORT',
       productionToTester:await productionToTester(production,tester),
       testerToProduction:await testerToProduction(tester,production),
       productionRuntimeMutation:false,pricingMutation:false,providerAuthorizationMutation:false,
