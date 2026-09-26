@@ -64,7 +64,7 @@ jobs:
             echo "key=$(node -e "console.log(require('/tmp/candidate.json')[0].candidate_key)")" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Validate executable manifest
+      - name: Compile or validate executable manifest
         if: steps.claim.outputs.count == '1'
         id: manifest
         run: |
@@ -72,15 +72,42 @@ jobs:
           node <<'NODE'
           const fs=require('fs');
           const c=require('/tmp/candidate.json')[0];
-          let m;
-          try { m=JSON.parse(c.proposed_build); } catch { m=null; }
-          const bad = !m || m.kind!=='PATCH_MANIFEST_V1' || !Array.isArray(m.files) || !m.files.length ||
-            m.files.some(f=>!f.path || typeof f.content!=='string' || f.path.startsWith('/') || f.path.includes('..') ||
-              /(^|\/)(\.env|\.github\/workflows)(\/|$)/.test(f.path));
-          if (bad) process.exit(42);
-          fs.writeFileSync('/tmp/manifest.json',JSON.stringify(m));
+          let m; try { m=JSON.parse(c.proposed_build); } catch { m=null; }
+          if(m?.kind==='PATCH_MANIFEST_V1') fs.writeFileSync('/tmp/manifest.json',JSON.stringify(m));
+          NODE
+          if [ ! -f /tmp/manifest.json ]; then
+            set +e
+            node scripts/compileBuildBrief.mjs /tmp/candidate.json /tmp/manifest.json /tmp/compiler-result.json
+            code=$?
+            set -e
+            if [ "$code" != 0 ]; then
+              echo "valid=false" >> "$GITHUB_OUTPUT"
+              echo "compiler_status=$(node -e "console.log(require('/tmp/compiler-result.json').status)")" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          node <<'NODE'
+          const fs=require('fs'); const m=require('/tmp/manifest.json');
+          const bad=!m||m.kind!=='PATCH_MANIFEST_V1'||!Array.isArray(m.files)||!m.files.length||
+            m.files.some(f=>!f.path||typeof f.content!=='string'||f.path.startsWith('/')||f.path.includes('..')||
+              /(^|\/)(\.env|\.github\/workflows)(\/|$)/.test(f.path)||
+              /(^|\/)(prisma\/schema\.prisma|supabase\/migrations)(\/|$)/.test(f.path));
+          if(bad) process.exit(42);
           NODE
           echo "valid=true" >> "$GITHUB_OUTPUT"
+
+      - name: Record compiler enrichment requirement
+        if: steps.claim.outputs.count == '1' && steps.manifest.outputs.valid != 'true'
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          ID: ${{ steps.claim.outputs.id }}
+        run: |
+          set -euo pipefail
+          reason=$(node -e "const x=require('/tmp/compiler-result.json');process.stdout.write(x.reason||x.status||'MANIFEST_COMPILATION_FAILED')")
+          curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" \
+            -d "{\"status\":\"NEEDS_MANIFEST\",\"executor_state\":\"PENDING\",\"lease_owner\":null,\"leased_at\":null,\"lease_expires_at\":null,\"last_error\":\"Manifest compiler: $reason. Requires bounded edit enrichment; no code or production mutation occurred.\"}"
 
       - name: Apply bounded manifest
         if: steps.manifest.outputs.valid == 'true'
@@ -141,6 +168,20 @@ jobs:
           set -euo pipefail
           number=$(echo "$PR_URL" | sed -E 's#^.*/pull/([0-9]+)$#\1#')
           curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json"             -d "{\"status\":\"PR_OPENED\",\"executor_state\":\"PR_OPENED\",\"branch_name\":\"$BRANCH\",\"pull_request_number\":$number,\"pull_request_url\":\"$PR_URL\",\"head_sha\":\"$SHA\",\"built_at\":\"$(date -u +%FT%TZ)\",\"proof\":{\"executor\":\"github-actions\",\"run_id\":\"${{ github.run_id }}\",\"build_passed\":true,\"auto_merge\":false,\"production_direct_write\":false}}"
+
+      - name: Record governed build handoff
+        if: steps.pr.outputs.url != ''
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          ID: ${{ steps.claim.outputs.id }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          SHA: ${{ steps.pr.outputs.sha }}
+          CANDIDATE_KEY: ${{ steps.claim.outputs.key }}
+        run: |
+          set -euo pipefail
+          payload=$(node -e 'console.log(JSON.stringify({source_stage:"software_build_candidate",target_stage:"isolated_pull_request",authoritative_record_id:process.env.ID,authoritative_table:"dd_autobuild_candidates",handoff_reason:"Governed low-risk candidate compiled, validated, and opened as an isolated pull request.",actor_key:"governed_pr_executor",status:"RECORDED",metadata:{candidate_key:process.env.CANDIDATE_KEY,pull_request_url:process.env.PR_URL,head_sha:process.env.SHA,auto_merge:false,production_direct_write:false}}))')
+          curl -fsS -X POST "$SB_URL/rest/v1/dd_execution_handoff_ledger" -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" -d "$payload"
 
       - name: Release unsupported or failed candidate
         if: always() && steps.claim.outputs.count == '1' && steps.pr.outputs.url == ''
