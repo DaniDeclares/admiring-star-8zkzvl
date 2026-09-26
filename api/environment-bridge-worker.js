@@ -5,11 +5,11 @@ const clean = (v) => typeof v === 'string' ? v.trim() : '';
 
 function clients() {
   const productionUrl = clean(process.env.PRODUCTION_SUPABASE_URL);
-  const productionKey = clean(process.env.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY);
+  const productionKey = clean(process.env.PRODUCTION_SUPABASE_SECRET_KEY);
   const testerUrl = clean(process.env.TESTER_SUPABASE_URL);
-  const testerKey = clean(process.env.TESTER_SUPABASE_SERVICE_ROLE_KEY);
+  const testerKey = clean(process.env.TESTER_SUPABASE_SECRET_KEY);
   if (!productionUrl || !productionKey || !testerUrl || !testerKey) {
-    throw new Error('Cross-environment Supabase credentials are incomplete');
+    throw new Error('Cross-environment Supabase secret credentials are incomplete');
   }
   if (productionUrl === testerUrl) throw new Error('Production and Tester URLs must be different');
   return {
