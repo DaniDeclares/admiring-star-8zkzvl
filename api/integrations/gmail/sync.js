@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { decryptSecret, encryptSecret, ENVIRONMENT, logIntegrationEvent, requireStaff } from '../../_integrationOAuth.js';
 import { classifyGmailMessage } from '../../../src/lib/operations/gmailMailboxPolicy2026.js';
-import { normalizeGmailMessage } from './gmailIntelligenceIngestion.js';
+import { normalizeGmailMessage, uniqueHistoryMessageIds, gmailSyncMode, nextGmailSyncMetadata } from './gmailIntelligenceIngestion.js';
 
 function adminClient() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
@@ -68,21 +68,38 @@ async function syncConnection(supabase, connection) {
   if (!accessToken || expiring) accessToken = await refreshAccessToken(supabase, connection);
 
   const ownEmail = String(connection.token_metadata?.email || '').toLowerCase();
-  const query = encodeURIComponent('newer_than:2d -in:spam -in:trash');
-  let list;
-  try {
-    list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
-  } catch (error) {
-    if (error.status !== 401) throw error;
-    accessToken = await refreshAccessToken(supabase, connection);
-    list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
+  const syncMode = gmailSyncMode(connection);
+  let messageIds = [];
+  let newestHistoryId = syncMode.historyId || null;
+  let syncModeUsed = syncMode.mode;
+  if (syncMode.mode === 'INCREMENTAL') {
+    try {
+      const history = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/history?maxResults=500&historyTypes=messageAdded&startHistoryId=' + encodeURIComponent(syncMode.historyId), accessToken);
+      messageIds = uniqueHistoryMessageIds(history.history || []);
+      newestHistoryId = history.historyId || newestHistoryId;
+    } catch (error) {
+      if (error.status !== 404) throw error;
+      syncModeUsed = 'STALE_CURSOR_RECOVERY';
+    }
+  }
+  if (syncModeUsed !== 'INCREMENTAL') {
+    const query = encodeURIComponent('newer_than:2d -in:spam -in:trash');
+    let list;
+    try {
+      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
+    } catch (error) {
+      if (error.status !== 401) throw error;
+      accessToken = await refreshAccessToken(supabase, connection);
+      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
+    }
+    messageIds = (list.messages || []).map(item => item.id).filter(Boolean);
   }
 
   let ingested = 0;
   let intelligenceQueued = 0;
-  for (const item of list.messages || []) {
+  for (const messageId of messageIds) {
     const message = await gmailJson(
-      'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(item.id) + '?format=full',
+      'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(messageId) + '?format=full',
       accessToken
     );
     const headers = message.payload?.headers || [];
@@ -120,15 +137,21 @@ async function syncConnection(supabase, connection) {
   }
 
   const now = new Date().toISOString();
+  const metadata = nextGmailSyncMetadata(connection.metadata || {}, {
+    gmail_history_id: newestHistoryId,
+    gmail_last_sync_mode: syncModeUsed,
+    gmail_last_sync_at: now
+  });
   const { error: updateError } = await supabase.from('dd_integration_connections').update({
     last_sync_at: now,
     last_error: null,
+    metadata,
     updated_at: now
   }).eq('id', connection.id);
   if (updateError) throw updateError;
   await logIntegrationEvent({
     supabase, adapterCode: 'GMAIL', connectionId: connection.id, direction: 'INBOUND',
-    eventType: 'MAILBOX_SYNC', status: 'PROCESSED', payload: { messages_scanned: ingested, intelligence_items_queued: intelligenceQueued }
+    eventType: 'MAILBOX_SYNC', status: 'PROCESSED', payload: { messages_scanned: ingested, intelligence_items_queued: intelligenceQueued, sync_mode: syncModeUsed, history_id: newestHistoryId }
   });
   return { ingested, intelligenceQueued };
 }
