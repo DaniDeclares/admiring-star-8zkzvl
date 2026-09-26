@@ -84,7 +84,7 @@ export async function provisionCustomerPortalAccount({ req, supabase, estimate }
     first_name: name.firstName,
     last_name: name.lastName,
     relationship_type: 'customer',
-    channel_code: String(estimate.client_type || '').toUpperCase() === 'B2B_APT' ? 'CH02' : 'CH04',
+    channel_code: String(estimate.client_type || '').toUpperCase() === 'B2B_APT' ? 'CH02' : (String(estimate.client_type || '').toUpperCase() === 'B2B_RE' ? 'CH04' : 'CH01'),
     provisioned_from: 'COMMERCIAL_HANDOFF',
     provisioned_estimate_id: estimate.id,
     provisioned_lead_id: leadId,
