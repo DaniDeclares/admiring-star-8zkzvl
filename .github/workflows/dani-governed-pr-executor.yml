@@ -1,0 +1,153 @@
+name: DANI Governed PR Executor
+
+# Production executor boundary:
+# approved candidate -> lease -> bounded patch manifest -> test/build -> branch -> PR -> evidence
+# NEVER merges, deploys production, changes secrets, or performs money/external-contact actions.
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dani-governed-pr-executor-production
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require production control-plane secrets
+        id: guard
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$SB_URL" ] || [ -z "$SB_KEY" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::error::Add PRODUCTION_SUPABASE_URL and PRODUCTION_SUPABASE_SERVICE_ROLE_KEY as GitHub Actions repository secrets."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          node-version: '20'
+
+      - name: Claim one low-risk approved build
+        if: steps.guard.outputs.ready == 'true'
+        id: claim
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          RUNNER: github-actions:${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          now=$(date -u +%FT%TZ)
+          expiry=$(date -u -d '+20 min' +%FT%TZ)
+          resp=$(curl -fsS -X PATCH             "$SB_URL/rest/v1/dd_autobuild_candidates?status=in.(READY,QUEUED_FOR_BUILD)&risk_tier=eq.LOW&permission_class=in.(CODE_BUILD,AUTO_PR_BUILD)&executor_state=eq.PENDING&select=id,candidate_key,title,proposed_build,evidence,acceptance_criteria&order=created_at.asc&limit=1"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY"             -H "Content-Type: application/json" -H "Prefer: return=representation"             -d "{\"executor_state\":\"LEASED\",\"lease_owner\":\"$RUNNER\",\"leased_at\":\"$now\",\"lease_expires_at\":\"$expiry\"}")
+          printf '%s' "$resp" > /tmp/candidate.json
+          count=$(node -e "const x=require('/tmp/candidate.json');console.log(Array.isArray(x)?x.length:0)")
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$count" = 1 ]; then
+            echo "id=$(node -e "console.log(require('/tmp/candidate.json')[0].id)")" >> "$GITHUB_OUTPUT"
+            echo "key=$(node -e "console.log(require('/tmp/candidate.json')[0].candidate_key)")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate executable manifest
+        if: steps.claim.outputs.count == '1'
+        id: manifest
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const c=require('/tmp/candidate.json')[0];
+          let m;
+          try { m=JSON.parse(c.proposed_build); } catch { m=null; }
+          const bad = !m || m.kind!=='PATCH_MANIFEST_V1' || !Array.isArray(m.files) || !m.files.length ||
+            m.files.some(f=>!f.path || typeof f.content!=='string' || f.path.startsWith('/') || f.path.includes('..') ||
+              /(^|\/)(\.env|\.github\/workflows)(\/|$)/.test(f.path));
+          if (bad) process.exit(42);
+          fs.writeFileSync('/tmp/manifest.json',JSON.stringify(m));
+          NODE
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+
+      - name: Apply bounded manifest
+        if: steps.manifest.outputs.valid == 'true'
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const m=require('/tmp/manifest.json');
+          for(const f of m.files){
+            fs.mkdirSync(path.dirname(f.path),{recursive:true});
+            fs.writeFileSync(f.path,f.content);
+          }
+          NODE
+          git diff --check
+          test -n "$(git status --porcelain)"
+
+      - name: Validate application
+        if: steps.manifest.outputs.valid == 'true'
+        id: validate
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          if npm run | grep -qE '^  test'; then CI=true npm test -- --watchAll=false; fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Open isolated PR
+        if: steps.validate.outputs.ok == 'true'
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_KEY: ${{ steps.claim.outputs.key }}
+        run: |
+          set -euo pipefail
+          slug=$(echo "$CANDIDATE_KEY" | tr -cs 'A-Za-z0-9._-' '-')
+          branch="dani/autobuild-$slug-${{ github.run_id }}"
+          git config user.name "dani-governed-pr-executor"
+          git config user.email "actions@github.com"
+          git checkout -b "$branch"
+          git add -A
+          git commit -m "autobuild: $CANDIDATE_KEY"
+          git push -u origin "$branch"
+          url=$(gh pr create --base main --head "$branch"             --title "DANI autobuild: $CANDIDATE_KEY"             --body "Governed production autobuild. Low-risk approved candidate; bounded PATCH_MANIFEST_V1; build/tests required. This executor does not merge or deploy production.")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Record PR evidence
+        if: steps.pr.outputs.url != ''
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          ID: ${{ steps.claim.outputs.id }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          SHA: ${{ steps.pr.outputs.sha }}
+          BRANCH: ${{ steps.pr.outputs.branch }}
+        run: |
+          set -euo pipefail
+          number=$(echo "$PR_URL" | sed -E 's#^.*/pull/([0-9]+)$#\1#')
+          curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json"             -d "{\"status\":\"PR_OPENED\",\"executor_state\":\"PR_OPENED\",\"branch_name\":\"$BRANCH\",\"pull_request_number\":$number,\"pull_request_url\":\"$PR_URL\",\"head_sha\":\"$SHA\",\"built_at\":\"$(date -u +%FT%TZ)\",\"proof\":{\"executor\":\"github-actions\",\"run_id\":\"${{ github.run_id }}\",\"build_passed\":true,\"auto_merge\":false,\"production_direct_write\":false}}"
+
+      - name: Release unsupported or failed candidate
+        if: always() && steps.claim.outputs.count == '1' && steps.pr.outputs.url == ''
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          ID: ${{ steps.claim.outputs.id }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json"             -d "{\"executor_state\":\"PENDING\",\"lease_owner\":null,\"leased_at\":null,\"lease_expires_at\":null,\"attempt_count\":1,\"last_error\":\"Executor run ${{ github.run_id }} did not produce a PR. Candidate remains pending; no production mutation occurred.\"}"
