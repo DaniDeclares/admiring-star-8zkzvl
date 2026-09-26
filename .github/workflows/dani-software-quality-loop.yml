@@ -33,7 +33,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Critical public smoke
         env:
-          PRODUCTION_BASE_URL: https://www.danideclares.com
+          PRODUCTION_BASE_URL: https://sparkling-croissant-829102.netlify.app
         run: npx playwright test checks/production-critical.spec.ts
       - name: Preserve failure evidence
         if: failure()
