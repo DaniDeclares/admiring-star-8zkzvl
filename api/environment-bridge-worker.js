@@ -4,7 +4,7 @@ const LIMIT = 50;
 const clean = (v) => typeof v === 'string' ? v.trim() : '';
 
 function clients() {
-  const productionUrl = 'https://ajxezpczaemunlcmqlgl.supabase.co';
+  const productionUrl = clean(process.env.SUPABASE_URL);
   const productionKey = clean(process.env.PRODUCTION_SUPABASE_SECRET_KEY);
   const testerUrl = 'https://okvepooyxurujcwgfoju.supabase.co';
   const testerKey = clean(process.env.TESTER_SUPABASE_SECRET_KEY);
