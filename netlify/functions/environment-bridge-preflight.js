@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const PROD_URL = 'https://ajxezpczaemunlcmqlgl.supabase.co';
+const PROD_URL = Netlify.env.get('SUPABASE_URL');
 const TEST_URL = 'https://okvepooyxurujcwgfoju.supabase.co';
 const clean = (v) => typeof v === 'string' ? v.trim() : '';
 
