@@ -1,4 +1,4 @@
-function parseBody(request, rawBody) {
+function parseBody(rawBody) {
   if (!rawBody) return {};
   try { return JSON.parse(rawBody); } catch { return {}; }
 }
@@ -18,7 +18,7 @@ async function runLegacyHandler(handler, request) {
   let payload = null;
   const headers = {};
   const rawBody = ['GET','HEAD'].includes(request.method) ? '' : await request.text();
-  const req = toLegacyRequest(request, parseBody(request, rawBody));
+  const req = toLegacyRequest(request, parseBody(rawBody));
   const res = {
     status(code) { statusCode = code; return res; },
     setHeader(name, value) { headers[name] = String(value); return res; },
