@@ -57,18 +57,18 @@ alter table public.dd_research_cross_signal_queue enable row level security;
 revoke all on public.dd_research_cross_signal_queue from public,anon,authenticated;
 grant select,insert,update on public.dd_research_cross_signal_queue to service_role;
 
-insert into public.dd_research_programs(program_key,program_name,domain,objective,release_blocked,status,metadata)
+insert into public.dd_research_programs(program_key,program_name,domain,objective,release_blocked,status,green_rule,metadata)
 values
 ('MERCH_PRODUCT_INTELLIGENCE','Merchandise & Product Intelligence','MERCH_COMMERCE',
  'Continuously identify and validate products DANI can sell to customers, property/real-estate/business buyers, and providers; evaluate demand, use case, production method, sourcing, unit economics, fulfillment, safety/compliance, inventory risk, personalization, bundles, and cross-sell fit.',
- true,'RESEARCHING',jsonb_build_object('first_class',true,'audiences',array['CUSTOMER','B2B_BUYER','PROVIDER'],'approval_gate','PRODUCT_ACTIVATION')),
+ true,'RESEARCHING','Current demand + unit economics + fulfillment/capability + compliance/safety evidence are corroborated; tester acceptance criteria pass; protected activation/pricing remains owner-gated.',jsonb_build_object('first_class',true,'audiences',array['CUSTOMER','B2B_BUYER','PROVIDER'],'approval_gate','PRODUCT_ACTIVATION')),
 ('PORTAL_UX_INTELLIGENCE','Portal, Dashboard & App UX Intelligence','DIGITAL_EXPERIENCE_INTELLIGENCE',
  'Continuously study owner dashboards, provider/technician apps, customer portals, sales/dispatch/QA/accounting workflows, permissions, navigation, actionable home screens, evidence capture, alerts, self-service, accessibility, mobile/offline patterns, and role-specific information architecture.',
- true,'RESEARCHING',jsonb_build_object('first_class',true,'surfaces',array['OWNER_HQ','PROVIDER_APP','CUSTOMER_PORTAL','SALES','DISPATCH','QA','ACCOUNTING'],'approval_gate','PRODUCTION_UX_CHANGE')),
+ true,'RESEARCHING','At least two evidence-backed workflow patterns are reconciled with DANI operational evidence; accessibility/permission impacts are assessed; tester workflow proof passes before production UX change.',jsonb_build_object('first_class',true,'surfaces',array['OWNER_HQ','PROVIDER_APP','CUSTOMER_PORTAL','SALES','DISPATCH','QA','ACCOUNTING'],'approval_gate','PRODUCTION_UX_CHANGE')),
 ('OWNER_RESEARCH_MEMORY','Owner Research Memory & Opportunity Revalidation','RECORDS_KNOWLEDGE_INTELLIGENCE',
  'Recover ideas, business plans, equipment research, product concepts, service concepts, prior market research, old proposals and operational hypotheses from authorized Gmail and Drive; preserve provenance, revalidate current relevance and profitability, and route viable opportunities through fresh research, tester proof and governed approval.',
- true,'RESEARCHING',jsonb_build_object('first_class',true,'historical_not_discarded',true,'historical_not_current_authority',true,'approval_gate','OPPORTUNITY_ACTIVATION'))
-on conflict(program_key) do update set program_name=excluded.program_name,domain=excluded.domain,objective=excluded.objective,release_blocked=true,status='RESEARCHING',metadata=coalesce(public.dd_research_programs.metadata,'{}'::jsonb)||excluded.metadata,updated_at=now();
+ true,'RESEARCHING','Historical provenance is preserved; material claims are freshly corroborated or explicitly rejected/superseded; duplicates/current service-product-provider links are reconciled; viable candidates pass tester proof before approval.',jsonb_build_object('first_class',true,'historical_not_discarded',true,'historical_not_current_authority',true,'approval_gate','OPPORTUNITY_ACTIVATION'))
+on conflict(program_key) do update set program_name=excluded.program_name,domain=excluded.domain,objective=excluded.objective,release_blocked=true,status='RESEARCHING',green_rule=excluded.green_rule,metadata=coalesce(public.dd_research_programs.metadata,'{}'::jsonb)||excluded.metadata,updated_at=now();
 
 insert into public.dd_intelligence_miners(miner_key,name,purpose,inputs,outputs,routes,authority_boundary,status)
 values
