@@ -1,4 +1,4 @@
-import { walkGmailParts, gmailTextBodies, normalizeGmailMessage, uniqueHistoryMessageIds, isStaleHistoryResponse, gmailSyncMode, nextGmailSyncMetadata } from './gmailIntelligenceIngestion.js';
+import { walkGmailParts, gmailTextBodies, normalizeGmailMessage, uniqueHistoryMessageIds, isStaleHistoryResponse, gmailSyncMode, gmailBackfillState, shouldIngestCommunication, completeGmailBackfillMetadata, nextGmailSyncMetadata } from './gmailIntelligenceIngestion.js';
 
 const enc = s => Buffer.from(s).toString('base64url');
 
@@ -31,6 +31,16 @@ describe('Gmail intelligence normalization', () => {
   });
 
   it('preserves unrelated connection metadata while updating sync state', () => {
-    expect(nextGmailSyncMetadata({ email: 'x' }, { gmail_history_id: '9' })).toMatchObject({ email: 'x', gmail_history_id: '9', gmail_intelligence_sync_version: 1 });
+    expect(nextGmailSyncMetadata({ email: 'x' }, { gmail_history_id: '9' })).toMatchObject({ email: 'x', gmail_history_id: '9', gmail_intelligence_sync_version: 2 });
+  });
+  it('tracks historical pagination separately from live communication ingestion', () => {
+    expect(gmailBackfillState({ metadata: { gmail_intelligence_backfill_page_token: 'p2' } })).toEqual({ pageToken: 'p2', complete: false });
+    expect(shouldIngestCommunication('BOUNDED_BACKFILL')).toBe(false);
+    expect(shouldIngestCommunication('INCREMENTAL')).toBe(true);
+  });
+
+  it('marks backfill complete and anchors a Gmail history cursor', () => {
+    const result = completeGmailBackfillMetadata({ unrelated: true, gmail_intelligence_backfill_page_token: 'p2' }, '777');
+    expect(result).toMatchObject({ unrelated: true, gmail_intelligence_backfill_page_token: null, gmail_intelligence_backfill_complete: true, gmail_history_id: '777', gmail_intelligence_sync_version: 2 });
   });
 });
