@@ -4,14 +4,13 @@ const LIMIT = 50;
 const clean = (v) => typeof v === 'string' ? v.trim() : '';
 
 function clients() {
-  const productionUrl = clean(process.env.PRODUCTION_SUPABASE_URL || 'https://ajxezpczaemunlcmqlgl.supabase.co');
+  const productionUrl = 'https://ajxezpczaemunlcmqlgl.supabase.co';
   const productionKey = clean(process.env.PRODUCTION_SUPABASE_SECRET_KEY);
-  const testerUrl = clean(process.env.TESTER_SUPABASE_URL || 'https://okvepooyxurujcwgfoju.supabase.co');
+  const testerUrl = 'https://okvepooyxurujcwgfoju.supabase.co';
   const testerKey = clean(process.env.TESTER_SUPABASE_SECRET_KEY);
   if (!productionUrl || !productionKey || !testerUrl || !testerKey) {
     throw new Error('Cross-environment Supabase secret credentials are incomplete');
   }
-  if (productionUrl === testerUrl) throw new Error('Production and Tester URLs must be different');
   return {
     production: createClient(productionUrl, productionKey, { auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false} }),
     tester: createClient(testerUrl, testerKey, { auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false} })
@@ -74,7 +73,7 @@ async function testerToProduction(tester,production) {
       blocking_reason:s.blocking_reason||null,
       evidence:{...(s.evidence||{}),bridge_key:r.bridge_key,tester_authority_over_production:false,transported_from_tester:true}
     };
-    const up=await production.from('dd_promotion_candidates').upsert(payload,{onConflict:'candidate_key'});
+    const up=await production.from('dd_promotion_candidates').upsert(payload,{onConflict:'candidate_key',ignoreDuplicates:true});
     if(up.error) throw up.error;
     const ack=await tester.from('dd_environment_bridge_receipts').update({
       bridge_status:'DELIVERED',reconciled_at:new Date().toISOString(),
