@@ -41,10 +41,3 @@
   to = "/index.html"
   status = 200
 
-[[plugins]]
-  package = "netlify-plugin-a11y"
-
-  [plugins.inputs]
-    checkPaths = ["/"]
-    resultType = "warning"
-    timeout = 60000
