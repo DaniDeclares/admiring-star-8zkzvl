@@ -4,9 +4,9 @@ const LIMIT = 50;
 const clean = (v) => typeof v === 'string' ? v.trim() : '';
 
 function clients() {
-  const productionUrl = clean(process.env.PRODUCTION_SUPABASE_URL);
+  const productionUrl = clean(process.env.PRODUCTION_SUPABASE_URL || 'https://ajxezpczaemunlcmqlgl.supabase.co');
   const productionKey = clean(process.env.PRODUCTION_SUPABASE_SECRET_KEY);
-  const testerUrl = clean(process.env.TESTER_SUPABASE_URL);
+  const testerUrl = clean(process.env.TESTER_SUPABASE_URL || 'https://okvepooyxurujcwgfoju.supabase.co');
   const testerKey = clean(process.env.TESTER_SUPABASE_SECRET_KEY);
   if (!productionUrl || !productionKey || !testerUrl || !testerKey) {
     throw new Error('Cross-environment Supabase secret credentials are incomplete');
