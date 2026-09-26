@@ -71,12 +71,20 @@ function identityFailure(res, gate) {
 // requiring a second round trip per thumbnail.
 async function signEvidenceUrls(supabase, evidenceRows) {
   const rows = evidenceRows || [];
-  const paths = rows.map(row => row.storage_url).filter(Boolean);
-  if (!paths.length) return rows;
-  const { data, error } = await supabase.storage.from('dd-job-evidence').createSignedUrls(paths, 3600);
-  if (error) return rows.map(row => ({ ...row, signed_url: null }));
+  const isExternalUrl = value => /^https?:\/\//i.test(String(value || ''));
+  const storagePaths = rows.map(row => row.storage_url).filter(value => value && !isExternalUrl(value));
+  if (!storagePaths.length) {
+    return rows.map(row => ({ ...row, signed_url: isExternalUrl(row.storage_url) ? row.storage_url : null }));
+  }
+  const { data, error } = await supabase.storage.from('dd-job-evidence').createSignedUrls(storagePaths, 3600);
+  if (error) {
+    return rows.map(row => ({ ...row, signed_url: isExternalUrl(row.storage_url) ? row.storage_url : null }));
+  }
   const urlByPath = new Map((data || []).map(entry => [entry.path, entry.signedUrl]));
-  return rows.map(row => ({ ...row, signed_url: row.storage_url ? urlByPath.get(row.storage_url) || null : null }));
+  return rows.map(row => ({
+    ...row,
+    signed_url: isExternalUrl(row.storage_url) ? row.storage_url : (row.storage_url ? urlByPath.get(row.storage_url) || null : null),
+  }));
 }
 
 // dd-vendor-onboarding is also private -- provider application documents
@@ -437,7 +445,7 @@ async function getProviderSnapshot(supabase, providerId, userId, userSupabase = 
   }
   const w9 = await getW9Status(supabase, userId);
   applicationSnapshot = { ...applicationSnapshot, w9 };
-  if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], financials: { earnings: [], payables: [], payouts: [] }, payouts: [], messages: [] };
+  if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], financials: { earnings: [], payables: [], payouts: [] }, benefits: { programs: [], rewards: [], counts: { earned: 0, pending: 0, paid: 0, expired: 0 } }, payouts: [], messages: [] };
 
   // Financials are read through the provider-bound projection. The Worker App
   // can display governed earning/payable/payout state but cannot approve,
@@ -445,11 +453,14 @@ async function getProviderSnapshot(supabase, providerId, userId, userSupabase = 
   const { data: financialsData, error: financialsError } = await userSupabase.rpc('dd_get_my_provider_financials');
   if (financialsError) throw financialsError;
   const financials = financialsData || { earnings: [], payables: [], payouts: [] };
+  const { data: benefitsData, error: benefitsError } = await userSupabase.rpc('dd_get_my_provider_benefits');
+  if (benefitsError) throw benefitsError;
+  const benefits = benefitsData || { programs: [], rewards: [], counts: { earned: 0, pending: 0, paid: 0, expired: 0 } };
   const quoteAssignments = await getProviderEstimateAssignments(supabase, providerId);
   const { data: assignments, error } = await supabase.from('dd_job_assignments').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
   const jobIds = (assignments || []).map(row => row.job_id).filter(Boolean);
-  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], quoteAssignments, tasks: [], evidence: [], appointments: [], financials, payouts: financials.payouts || [], messages: [] };
+  if (!jobIds.length) return { ...applicationSnapshot, assignments: [], quoteAssignments, tasks: [], evidence: [], appointments: [], financials, benefits, payouts: financials.payouts || [], messages: [] };
   const [jobsResult, tasks, evidence, appointments, payouts, messages] = await Promise.all([
     supabase.from('dd_jobs').select('id, public_reference, division_slug, job_title, job_status, scheduled_start, scheduled_end, location_address, assigned_to, scope_summary, sla_due_at, created_at, updated_at').in('id', jobIds),
     supabase.from('dd_job_tasks').select('*').in('job_id', jobIds).order('created_at', { ascending: true }),
@@ -465,7 +476,7 @@ async function getProviderSnapshot(supabase, providerId, userId, userSupabase = 
   if (payouts.error) throw payouts.error;
   const jobsById = new Map((jobsResult.data || []).map(job => [job.id, sanitizeProviderJob(job)]));
   const safeAssignments = (assignments || []).map(assignment => sanitizeProviderAssignment({ ...assignment, job: jobsById.get(assignment.job_id) || null }));
-  return { ...applicationSnapshot, assignments: safeAssignments, quoteAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], financials, payouts: financials.payouts || payouts.data || [], messages };
+  return { ...applicationSnapshot, assignments: safeAssignments, quoteAssignments, tasks: tasks.data || [], evidence: await signEvidenceUrls(supabase, evidence.data), appointments: appointments.data || [], financials, benefits, payouts: financials.payouts || payouts.data || [], messages };
 }
 // A resident's own dd_portal_identities.organization_id is only ever set by
 // dd_consume_apartment_resident_invite_impl (see the property-invite RPCs),
@@ -879,7 +890,7 @@ export default async function handler(req, res) {
       const allUnresolved = [...unresolved, ...identityUnresolved];
       const nextStatus = allUnresolved.length === 0 ? 'ready_to_send' : 'needs_review';
       const note = allUnresolved.length === 0 ? 'Commercial review completed; estimate is READY_TO_SEND.' : 'Commercial review updated; unresolved gates: ' + (allUnresolved.join(', ') || 'none') + '.';
-      const internalNotes = [estimate.internal_notes, note].filter(Boolean).join('\n');
+      const internalNotes = [estimate.internal_notes, note].filter(Boolean).join('\\n');
       const { data: updated, error: updateError } = await context.supabase.from('dd_estimates').update({ estimate_status: nextStatus, intake_answers: { ...(estimate.intake_answers || {}), answers: mergedAnswers, review: nextReview }, internal_notes: internalNotes, updated_at: new Date().toISOString() }).eq('id', estimateId).eq('estimate_status', estimate.estimate_status).select('id,public_reference,estimate_status,estimated_total,deposit_due,intake_answers').maybeSingle();
       if (updateError) throw updateError;
       if (!updated) return fail(res, 'Estimate changed while being reviewed. Reload and retry.', 409);
@@ -901,7 +912,7 @@ export default async function handler(req, res) {
       const portalAccount = await provisionCustomerPortalAccount({ req, supabase: context.supabase, estimate });
       if (!['PROVISIONED','EXISTING'].includes(portalAccount.status)) return fail(res, 'Customer portal access could not be established.', 422);
       const { data: updated, error: updateError } = await context.supabase.from('dd_estimates')
-        .update({ estimate_status: 'sent', internal_notes: [estimate.internal_notes, 'Quote delivered to customer portal; customer decision required.'].filter(Boolean).join('\n'), updated_at: new Date().toISOString() })
+        .update({ estimate_status: 'sent', internal_notes: [estimate.internal_notes, 'Quote delivered to customer portal; customer decision required.'].filter(Boolean).join('\\n'), updated_at: new Date().toISOString() })
         .eq('id', estimate.id).eq('estimate_status', 'ready_to_send')
         .select('id,public_reference,estimate_status,estimated_total,deposit_due').maybeSingle();
       if (updateError) throw updateError;

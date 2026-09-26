@@ -27,13 +27,18 @@ jobs:
       - run: npm ci
       - name: Unit and integration tests
         run: npm test -- --watchAll=false
+      - name: Netlify continuity preflight
+        run: npm run audit:netlify-continuity
       - name: Production build
         run: npm run build
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: Critical public smoke
+      - name: Critical release-candidate smoke
         env:
-          PRODUCTION_BASE_URL: https://www.danideclares.com
+          # During the temporary Netlify continuity period, PR validation must
+          # exercise the Netlify release candidate rather than parked Vercel.
+          # The public domain remains the post-cutover production smoke target.
+          PRODUCTION_BASE_URL: ${{ github.event_name == 'pull_request' && 'https://deploy-preview-435--sparkling-croissant-829102.netlify.app' || 'https://www.danideclares.com' }}
         run: npx playwright test checks/production-critical.spec.ts
       - name: Preserve failure evidence
         if: failure()

@@ -24,8 +24,12 @@ Follow AGENTS.md first. This repository is shared with other AI agents and the o
 
 ## Release policy
 - Do not merge or declare production-ready merely because a page renders.
-- Run relevant tests/build and inspect the Vercel deployment for the exact commit.
+- Run relevant tests/build and inspect the active Netlify deployment for the exact commit.
 - If a change alters pricing, legal/compliance, procurement, certification, or other business rules, stop and flag it for owner review.
 
 ## Shared workspaces
 Asana = execution/release tasks. Notion = operating documentation/control knowledge. Supabase = runtime/business data and `dd_jobs` = current production dispatch authority. Airtable = explicitly assigned planning/governance/economics/reference datasets. HubSpot = CRM relationship/engagement layer. Stripe = payment authority. Google Drive = collaborative file bytes. Google Calendar = human calendar surface. Gmail = mailbox content/delivery state. PostHog = analytics telemetry. DANI HQ is the operator front door, not a replacement authority for those systems.
+
+
+## Temporary hosting continuity — 2026-09-25
+Vercel is parked for an expected 2–3 weeks and is not a release blocker. Netlify is the temporary production runtime. Read `docs/NETLIFY_CONTINUITY_RELEASE_CONTRACT.md` before hosting/API changes. Cross-check Notion decisions, Asana P0 work, Supabase runtime authority, and current GitHub source before promotion; do not import Vercel-era code merely because it exists.
