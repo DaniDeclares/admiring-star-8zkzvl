@@ -55,7 +55,7 @@ jobs:
           set -euo pipefail
           now=$(date -u +%FT%TZ)
           expiry=$(date -u -d '+20 min' +%FT%TZ)
-          resp=$(curl -fsS -X PATCH             "$SB_URL/rest/v1/dd_autobuild_candidates?status=in.(READY,QUEUED_FOR_BUILD)&risk_tier=eq.LOW&permission_class=in.(CODE_BUILD,AUTO_PR_BUILD)&executor_state=eq.PENDING&select=id,candidate_key,title,proposed_build,evidence,acceptance_criteria&order=created_at.asc&limit=1"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY"             -H "Content-Type: application/json" -H "Prefer: return=representation"             -d "{\"executor_state\":\"LEASED\",\"lease_owner\":\"$RUNNER\",\"leased_at\":\"$now\",\"lease_expires_at\":\"$expiry\"}")
+          resp=$(curl -fsS -X PATCH             "$SB_URL/rest/v1/dd_autobuild_candidates?status=in.(READY,QUEUED_FOR_BUILD,NEEDS_MANIFEST)&risk_tier=eq.LOW&permission_class=in.(CODE_BUILD,AUTO_PR_BUILD)&executor_state=eq.PENDING&select=id,candidate_key,title,proposed_build,evidence,acceptance_criteria&order=created_at.asc&limit=1"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY"             -H "Content-Type: application/json" -H "Prefer: return=representation"             -d "{\"executor_state\":\"LEASED\",\"lease_owner\":\"$RUNNER\",\"leased_at\":\"$now\",\"lease_expires_at\":\"$expiry\"}")
           printf '%s' "$resp" > /tmp/candidate.json
           count=$(node -e "const x=require('/tmp/candidate.json');console.log(Array.isArray(x)?x.length:0)")
           echo "count=$count" >> "$GITHUB_OUTPUT"
@@ -64,7 +64,7 @@ jobs:
             echo "key=$(node -e "console.log(require('/tmp/candidate.json')[0].candidate_key)")" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Validate executable manifest
+      - name: Compile or validate executable manifest
         if: steps.claim.outputs.count == '1'
         id: manifest
         run: |
@@ -72,15 +72,42 @@ jobs:
           node <<'NODE'
           const fs=require('fs');
           const c=require('/tmp/candidate.json')[0];
-          let m;
-          try { m=JSON.parse(c.proposed_build); } catch { m=null; }
-          const bad = !m || m.kind!=='PATCH_MANIFEST_V1' || !Array.isArray(m.files) || !m.files.length ||
-            m.files.some(f=>!f.path || typeof f.content!=='string' || f.path.startsWith('/') || f.path.includes('..') ||
-              /(^|\/)(\.env|\.github\/workflows)(\/|$)/.test(f.path));
-          if (bad) process.exit(42);
-          fs.writeFileSync('/tmp/manifest.json',JSON.stringify(m));
+          let m; try { m=JSON.parse(c.proposed_build); } catch { m=null; }
+          if(m?.kind==='PATCH_MANIFEST_V1') fs.writeFileSync('/tmp/manifest.json',JSON.stringify(m));
+          NODE
+          if [ ! -f /tmp/manifest.json ]; then
+            set +e
+            node scripts/compileBuildBrief.mjs /tmp/candidate.json /tmp/manifest.json /tmp/compiler-result.json
+            code=$?
+            set -e
+            if [ "$code" != 0 ]; then
+              echo "valid=false" >> "$GITHUB_OUTPUT"
+              echo "compiler_status=$(node -e "console.log(require('/tmp/compiler-result.json').status)")" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          node <<'NODE'
+          const fs=require('fs'); const m=require('/tmp/manifest.json');
+          const bad=!m||m.kind!=='PATCH_MANIFEST_V1'||!Array.isArray(m.files)||!m.files.length||
+            m.files.some(f=>!f.path||typeof f.content!=='string'||f.path.startsWith('/')||f.path.includes('..')||
+              /(^|\/)(\.env|\.github\/workflows)(\/|$)/.test(f.path)||
+              /(^|\/)(prisma\/schema\.prisma|supabase\/migrations)(\/|$)/.test(f.path));
+          if(bad) process.exit(42);
           NODE
           echo "valid=true" >> "$GITHUB_OUTPUT"
+
+      - name: Record compiler enrichment requirement
+        if: steps.claim.outputs.count == '1' && steps.manifest.outputs.valid != 'true'
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          ID: ${{ steps.claim.outputs.id }}
+        run: |
+          set -euo pipefail
+          reason=$(node -e "const x=require('/tmp/compiler-result.json');process.stdout.write(x.reason||x.status||'MANIFEST_COMPILATION_FAILED')")
+          curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" \
+            -d "{\"status\":\"NEEDS_MANIFEST\",\"executor_state\":\"PENDING\",\"lease_owner\":null,\"leased_at\":null,\"lease_expires_at\":null,\"last_error\":\"Manifest compiler: $reason. Requires bounded edit enrichment; no code or production mutation occurred.\"}"
 
       - name: Apply bounded manifest
         if: steps.manifest.outputs.valid == 'true'
