@@ -70,21 +70,13 @@ values
  true,'RESEARCHING','Historical provenance is preserved; material claims are freshly corroborated or explicitly rejected/superseded; duplicates/current service-product-provider links are reconciled; viable candidates pass tester proof before approval.',jsonb_build_object('first_class',true,'historical_not_discarded',true,'historical_not_current_authority',true,'approval_gate','OPPORTUNITY_ACTIVATION'))
 on conflict(program_key) do update set program_name=excluded.program_name,domain=excluded.domain,objective=excluded.objective,release_blocked=true,status='RESEARCHING',green_rule=excluded.green_rule,metadata=coalesce(public.dd_research_programs.metadata,'{}'::jsonb)||excluded.metadata,updated_at=now();
 
-insert into public.dd_intelligence_miners(miner_key,name,purpose,inputs,outputs,routes,authority_boundary,status)
+insert into public.dd_intelligence_miners(miner_key,miner_family,miner_name,purpose,output_class,default_route,authority_boundary,status)
 values
-('OWNER_RESEARCH_MEMORY_MINER','Owner Research Memory Miner',
- 'Extract owner-originated ideas, products, services, equipment, buyer hypotheses and operating concepts from authorized historical Gmail/Drive without treating age as irrelevance or owner authorship as current authority.',
- array['GMAIL','GOOGLE_DRIVE','ATTACHMENTS'],array['OPPORTUNITY_CANDIDATE','HISTORICAL_CLAIM','CROSS_SIGNAL'],array['RESEARCH','SERVICE_DISCOVERY','MERCH_COMMERCE','DIGITAL_EXPERIENCE_INTELLIGENCE'],
- 'Observation/evidence only. Preserve provenance. Fresh corroboration and tester proof required before activation.', 'ACTIVE'),
-('MERCH_OPPORTUNITY_MINER','Merch Opportunity Miner',
- 'Identify customer-facing, B2B and provider-facing merchandise/product opportunities and required demand, economics, production, sourcing, safety and fulfillment research.',
- array['GMAIL','GOOGLE_DRIVE','WEB_RESEARCH','CUSTOMER_SIGNAL','PROVIDER_SIGNAL'],array['PRODUCT_CANDIDATE','BUNDLE_CANDIDATE','ECONOMICS_QUESTION'],array['MERCH_COMMERCE','RESEARCH'],
- 'Research only; cannot publish products/prices, buy equipment/inventory, or contact suppliers/customers.', 'ACTIVE'),
-('PORTAL_UX_PATTERN_MINER','Portal UX Pattern Miner',
- 'Extract evidence-backed reusable patterns for owner dashboards, provider apps and customer portals from authoritative product documentation, user workflow evidence and DANI operational friction.',
- array['WEB_RESEARCH','GITHUB','POSTHOG','SUPPORT_SIGNAL','GMAIL'],array['UX_PATTERN','WORKFLOW_GAP','TEST_HYPOTHESIS'],array['DIGITAL_EXPERIENCE_INTELLIGENCE','SOFTWARE'],
- 'Research/test only; cannot deploy production UX or weaken permissions.', 'ACTIVE')
-on conflict(miner_key) do update set program_name=excluded.program_name,purpose=excluded.purpose,inputs=excluded.inputs,outputs=excluded.outputs,routes=excluded.routes,authority_boundary=excluded.authority_boundary,status='ACTIVE',updated_at=now();
+('OWNER_RESEARCH_MEMORY_MINER','RESEARCH_MEMORY','Owner Research Memory Miner','Extract owner-originated ideas, products, services, equipment, buyer hypotheses and operating concepts from authorized historical Gmail/Drive without treating age as irrelevance or owner authorship as current authority.',array['OPPORTUNITY_CANDIDATE','HISTORICAL_CLAIM','CROSS_SIGNAL'],array['RESEARCH','SERVICE_DISCOVERY','MERCH_COMMERCE','DIGITAL_EXPERIENCE_INTELLIGENCE'],jsonb_build_object('mode','OBSERVATION_ONLY','preserve_provenance',true,'fresh_corroboration_required',true,'tester_proof_required',true,'external_contact',false,'money_action',false,'activation',false),'ACTIVE'),
+('MERCH_OPPORTUNITY_MINER','MERCH_COMMERCE','Merch Opportunity Miner','Identify customer-facing, B2B and provider-facing merchandise/product opportunities and required demand, economics, production, sourcing, safety and fulfillment research.',array['PRODUCT_CANDIDATE','BUNDLE_CANDIDATE','ECONOMICS_QUESTION'],array['MERCH_COMMERCE','RESEARCH'],jsonb_build_object('mode','RESEARCH_ONLY','publish_product',false,'publish_price',false,'buy_equipment_inventory',false,'external_contact',false),'ACTIVE'),
+('PORTAL_UX_PATTERN_MINER','DIGITAL_EXPERIENCE','Portal UX Pattern Miner','Extract evidence-backed reusable patterns for owner dashboards, provider apps and customer portals from authoritative product documentation, user workflow evidence and DANI operational friction.',array['UX_PATTERN','WORKFLOW_GAP','TEST_HYPOTHESIS'],array['DIGITAL_EXPERIENCE_INTELLIGENCE','SOFTWARE'],jsonb_build_object('mode','RESEARCH_TEST_ONLY','deploy_production',false,'weaken_permissions',false),'ACTIVE'),
+('GITHUB_ECOSYSTEM_MINER','TECHNOLOGY','GitHub Ecosystem Intelligence Miner','Track relevant repositories, releases, security advisories, agent-memory/orchestration patterns, dependencies and reusable open-source techniques; compare them to DANI architecture before proposing tests.',array['TECH_PATTERN','SECURITY_SIGNAL','DEPENDENCY_SIGNAL','TEST_HYPOTHESIS'],array['VENDOR_TECH_INTELLIGENCE','AI_DATA_GOVERNANCE_INTELLIGENCE','SOFTWARE'],jsonb_build_object('mode','OBSERVATION_ONLY','copy_code_automatically',false,'install_dependency',false,'merge',false,'deploy',false),'ACTIVE')
+on conflict(miner_key) do update set miner_family=excluded.miner_family,miner_name=excluded.miner_name,purpose=excluded.purpose,output_class=excluded.output_class,default_route=excluded.default_route,authority_boundary=excluded.authority_boundary,status='ACTIVE',updated_at=now();
 
 create or replace function public.dd_queue_cross_signal_research()
 returns jsonb
