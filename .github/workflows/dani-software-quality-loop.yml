@@ -31,10 +31,26 @@ jobs:
         run: npm run build
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
+      - name: Resolve smoke target
+        id: smoke-target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ] && [ -n "$PR_NUMBER" ]; then
+            echo "base_url=https://deploy-preview-${PR_NUMBER}--sparkling-croissant-829102.netlify.app" >> "$GITHUB_OUTPUT"
+            echo "scope=deploy-preview" >> "$GITHUB_OUTPUT"
+          else
+            echo "base_url=https://www.danideclares.com" >> "$GITHUB_OUTPUT"
+            echo "scope=production" >> "$GITHUB_OUTPUT"
+          fi
       - name: Critical public smoke
         env:
-          PRODUCTION_BASE_URL: https://www.danideclares.com
-        run: npx playwright test checks/production-critical.spec.ts
+          PRODUCTION_BASE_URL: ${{ steps.smoke-target.outputs.base_url }}
+          DANI_SMOKE_SCOPE: ${{ steps.smoke-target.outputs.scope }}
+        run: |
+          echo "Running critical smoke against $DANI_SMOKE_SCOPE: $PRODUCTION_BASE_URL"
+          npx playwright test checks/production-critical.spec.ts
       - name: Preserve failure evidence
         if: failure()
         uses: actions/upload-artifact@v4
