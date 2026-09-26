@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import prisma from '../lib/prisma.js';
 import { checkoutEligibility, getChannelGovernanceDecision, resolveGovernedChannelPrice, getGovernedCommercialOffer, normalizeChannel, resolveGovernedPrice, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
 
 const CHANNELS_BY_DIVISION=Object.freeze({'01':['B2C','B2B_APT'],'02':['B2B_APT','B2B_RE','B2B','B2G'],'03':['B2B_RE','B2B_APT','B2B'],'04':['B2B','B2B_RE','B2B_APT','B2G'],'05':['B2C','B2B_APT','B2B_RE','B2G'],'06':['B2B','B2B_RE','B2G'],'07':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'08':['B2B_RE','B2B','B2G'],'09':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'10':['B2C','B2B_APT','B2B_RE','B2B'],'11':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'12':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'13':['B2B_APT','B2B_RE','B2B','B2G']});
@@ -7,61 +6,42 @@ const json=(res,status,payload)=>res.status(status).json(payload);
 const adminClient=()=>{const url=process.env.SUPABASE_URL||process.env.REACT_APP_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)throw new Error('COMMERCIAL_DATABASE_UNAVAILABLE');return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});};
 
 
-const specialRows=async()=>prisma.$queryRawUnsafe(`
- SELECT s.service_id AS "legacyServiceId", s.service_name AS "legacyName", s.family,
-        s.unit, s.price, s.market, s.active,
-        m.canonical_sku AS "canonicalSku", m.service_name AS "canonicalName"
- FROM public.danis_specials_offers s
- LEFT JOIN LATERAL (
-   SELECT m.canonical_sku, m.service_name
-   FROM public.dd_master_service_universe m
-   WHERE m.lifecycle_status='CANONICAL_ACTIVE'
-     AND (EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id)
-       OR lower(trim(s.service_name))=lower(trim(m.service_name)))
-   ORDER BY CASE WHEN EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id) THEN 0 ELSE 1 END, m.updated_at DESC
-   LIMIT 1
- ) m ON true
- WHERE s.active=true ORDER BY s.service_id`);
+const specialRows=async()=>{
+ const db=adminClient();
+ const [{data:specials,error:se},{data:masters,error:me}]=await Promise.all([
+  db.from('danis_specials_offers').select('service_id,service_name,family,unit,price,market,active').eq('active',true).order('service_id'),
+  db.from('dd_master_service_universe').select('canonical_sku,service_name,legacy_ids_aliases,updated_at').eq('lifecycle_status','CANONICAL_ACTIVE').order('updated_at',{ascending:false})
+ ]);
+ if(se)throw se;if(me)throw me;
+ const ms=masters||[];
+ return (specials||[]).map(s=>{const m=ms.find(x=>(x.legacy_ids_aliases||'').split(/[;,]/).map(v=>v.trim()).includes(s.service_id))||ms.find(x=>(x.service_name||'').trim().toLowerCase()===(s.service_name||'').trim().toLowerCase());return {legacyServiceId:s.service_id,legacyName:s.service_name,family:s.family,unit:s.unit,price:s.price,market:s.market,active:s.active,canonicalSku:m?.canonical_sku||null,canonicalName:m?.service_name||null};});
+};
 
-const governedCatalog=async()=>prisma.$queryRawUnsafe(`
- SELECT o.canonical_sku AS "serviceId", o.service_name AS name, LPAD(o.division::text,2,'0') AS division,
-        o.commercial_offer_status AS "commercialOfferStatus", o.fulfillment_gate_status AS "fulfillmentGateStatus",
-        o.pricing_rule_count AS "pricingRuleCount", o.market_rule_count AS "marketRuleCount",
-        o.channel_availability_count AS "channelAvailabilityCount", o.authorized_provider_capability_count AS "authorizedProviderCapabilityCount",
-        o.priced_channel_count AS "pricedChannelCount", o.ch01_a_priced AS "ch01APriced", o.ch01_b_priced AS "ch01BPriced",
-        s.service_family AS family, s.description, s.starting_price AS "baseCustomerPrice", s.public_price_low AS "publicPriceLow",
-        s.public_price_high AS "publicPriceHigh", s.public_price_display AS "publicPriceDisplay", s.pricing_type AS model,
-        s.billing_cycle AS "billingCycle", s.resident_discount_eligible AS "residentDiscountEligible", s.commercial_status AS status,
-        s.id AS "runtimeServiceId",
-        rc.release_state AS "releaseState", rc.blocking_gate AS "blockingGate",
-        m.internal_cost AS "internalCost", m.margin_economics AS "marginEconomics",
-        o.ch01_a_priced AS "ch01LockedActivePricing"
- FROM public.dd_governed_service_offers o JOIN public.services s ON s.id=o.runtime_service_id
- LEFT JOIN public.dd_service_release_contract_v1 rc ON rc.canonical_sku=o.canonical_sku
- LEFT JOIN LATERAL (
-   SELECT m.internal_cost, m.margin_economics
-   FROM public.dd_master_service_universe m
-   WHERE m.canonical_sku=o.canonical_sku
-     AND m.lifecycle_status='CANONICAL_ACTIVE'
-   ORDER BY m.updated_at DESC
-   LIMIT 1
- ) m ON true
- WHERE o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY') ORDER BY o.division, o.service_name`);
+const governedCatalog=async()=>{
+ const db=adminClient();
+ const {data:offers,error:oe}=await db.from('dd_governed_service_offers').select('canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,pricing_rule_count,market_rule_count,channel_availability_count,authorized_provider_capability_count,priced_channel_count,ch01_a_priced,ch01_b_priced,runtime_service_id').in('commercial_offer_status',['SELL_NOW','INTAKE_ONLY']).order('division').order('service_name');
+ if(oe)throw oe;
+ const runtimeIds=[...new Set((offers||[]).map(x=>x.runtime_service_id).filter(Boolean))];
+ const skus=[...new Set((offers||[]).map(x=>x.canonical_sku).filter(Boolean))];
+ const [servicesQ,releasesQ,mastersQ]=await Promise.all([
+  runtimeIds.length?db.from('services').select('id,service_family,description,starting_price,public_price_low,public_price_high,public_price_display,pricing_type,billing_cycle,resident_discount_eligible,commercial_status').in('id',runtimeIds):Promise.resolve({data:[],error:null}),
+  skus.length?db.from('dd_service_release_contract_v1').select('canonical_sku,release_state,blocking_gate').in('canonical_sku',skus):Promise.resolve({data:[],error:null}),
+  skus.length?db.from('dd_master_service_universe').select('canonical_sku,internal_cost,margin_economics,updated_at').in('canonical_sku',skus).eq('lifecycle_status','CANONICAL_ACTIVE').order('updated_at',{ascending:false}):Promise.resolve({data:[],error:null})
+ ]);
+ for(const q of [servicesQ,releasesQ,mastersQ])if(q.error)throw q.error;
+ const byService=new Map((servicesQ.data||[]).map(x=>[x.id,x]));
+ const byRelease=new Map((releasesQ.data||[]).map(x=>[x.canonical_sku,x]));
+ const byMaster=new Map();for(const x of mastersQ.data||[])if(!byMaster.has(x.canonical_sku))byMaster.set(x.canonical_sku,x);
+ return (offers||[]).filter(o=>o.runtime_service_id&&byService.has(o.runtime_service_id)).map(o=>{const s=byService.get(o.runtime_service_id),rc=byRelease.get(o.canonical_sku)||{},m=byMaster.get(o.canonical_sku)||{};return {serviceId:o.canonical_sku,name:o.service_name,division:String(o.division||'').padStart(2,'0'),commercialOfferStatus:o.commercial_offer_status,fulfillmentGateStatus:o.fulfillment_gate_status,pricingRuleCount:o.pricing_rule_count,marketRuleCount:o.market_rule_count,channelAvailabilityCount:o.channel_availability_count,authorizedProviderCapabilityCount:o.authorized_provider_capability_count,pricedChannelCount:o.priced_channel_count,ch01APriced:o.ch01_a_priced,ch01BPriced:o.ch01_b_priced,family:s.service_family,description:s.description,baseCustomerPrice:s.starting_price,publicPriceLow:s.public_price_low,publicPriceHigh:s.public_price_high,publicPriceDisplay:s.public_price_display,model:s.pricing_type,billingCycle:s.billing_cycle,residentDiscountEligible:s.resident_discount_eligible,status:s.commercial_status,runtimeServiceId:o.runtime_service_id,releaseState:rc.release_state,blockingGate:rc.blocking_gate,internalCost:m.internal_cost,marginEconomics:m.margin_economics,ch01LockedActivePricing:o.ch01_a_priced};});
+};
 
 const governedService=async(serviceId)=>getGovernedCommercialOffer(serviceId);
 
 const legacySpecial=async(serviceId)=>{
- const rows=await prisma.$queryRawUnsafe(`
-   SELECT s.service_id AS "legacyServiceId", s.service_name AS "legacyName", s.family, s.unit, s.price, s.market, m.canonical_sku AS "canonicalSku"
-   FROM public.danis_specials_offers s
-   LEFT JOIN LATERAL (
-     SELECT m.canonical_sku FROM public.dd_master_service_universe m
-     WHERE m.lifecycle_status='CANONICAL_ACTIVE'
-       AND (EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id)
-         OR lower(trim(s.service_name))=lower(trim(m.service_name)))
-     ORDER BY CASE WHEN EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id) THEN 0 ELSE 1 END, m.updated_at DESC LIMIT 1
-   ) m ON true WHERE s.service_id=$1 AND s.active=true LIMIT 1`,serviceId);
- return rows[0]||null;
+ const rows=await specialRows();
+ const match=rows.find(s=>s.legacyServiceId===serviceId);
+ if(!match)return null;
+ return {legacyServiceId:match.legacyServiceId,legacyName:match.legacyName,family:match.family,unit:match.unit,price:match.price,market:match.market,canonicalSku:match.canonicalSku};
 };
 
 export default async function handler(req,res){try{
@@ -114,4 +94,4 @@ export default async function handler(req,res){try{
  const expectedPrice=canonicalSelection?.price ?? await resolveGovernedChannelPrice(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident});
  if(!gate.eligible)return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frontDoorCode:canonicalSelection?.frontDoorCode||requestedFrontDoor||null,subchannelCode:subchannel||null,frozenPriceSnapshot:gate.reason==='QUOTE_REQUIRED'?null:expectedPrice,checkoutEligible:false,intakeAvailable:true,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.',gateReason:gate.reason});
  return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frontDoorCode:canonicalSelection?.frontDoorCode||requestedFrontDoor||null,subchannelCode:subchannel||null,frozenPriceSnapshot:expectedPrice,checkoutEligible:true,intakeAvailable:true,message:'Price confirmed for this request.'});
-}catch(error){console.error('Service verification failed:',error);return json(res,400,{error:'We could not confirm this service right now. Please try again or contact DANI DECLARES.'});}}
+}catch(error){console.error('Service verification failed:',error);const diagnosticCode=String(error?.code||error?.name||'UNKNOWN_RUNTIME_ERROR').replace(/[^A-Za-z0-9_-]/g,'').slice(0,64);return json(res,400,{error:'We could not confirm this service right now. Please try again or contact DANI DECLARES.',diagnosticCode});}}
