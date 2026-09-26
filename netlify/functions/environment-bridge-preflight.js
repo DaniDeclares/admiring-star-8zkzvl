@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const PROD_URL = Netlify.env.get('SUPABASE_URL');
+const productionUrl = () => Netlify.env.get('SUPABASE_URL');
 const TEST_URL = 'https://okvepooyxurujcwgfoju.supabase.co';
 const clean = (v) => typeof v === 'string' ? v.trim() : '';
 
@@ -41,7 +41,7 @@ export default async (req, context) => {
   }
 
   try {
-    const production = client(PROD_URL, productionKey);
+    const production = client(productionUrl(), productionKey);
     const tester = client(TEST_URL, testerKey);
     const [prodProbe,testProbe] = await Promise.all([
       production.from('dd_environment_bridge_receipts').select('id',{count:'exact',head:true}).limit(1),
