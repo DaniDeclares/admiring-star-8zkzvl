@@ -27,7 +27,7 @@ begin
       'production_direct_write',false)
   from public.dd_research_coverage_gaps g
   join public.dd_research_programs p on p.program_key=g.program_key
-  where g.gap_status='OPEN' and coalesce(g.active_sources,0)=0
+  where g.gap_status in ('OPEN','BLOCKED') and coalesce(g.active_sources,0)=0
   on conflict(target_key) do update set
     status=case when public.dd_research_discovery_targets.status='COMPLETED'
       then public.dd_research_discovery_targets.status else 'QUEUED' end,
