@@ -1,4 +1,4 @@
-import { walkGmailParts, gmailTextBodies, normalizeGmailMessage, uniqueHistoryMessageIds, isStaleHistoryResponse, gmailSyncMode, gmailBackfillState, shouldIngestCommunication, completeGmailBackfillMetadata, nextGmailSyncMetadata, attachmentEvidenceKey, isTextLikeAttachment, boundedAttachmentText } from './gmailIntelligenceIngestion.js';
+import { walkGmailParts, gmailTextBodies, normalizeGmailMessage, uniqueHistoryMessageIds, isStaleHistoryResponse, gmailSyncMode, gmailBackfillState, shouldIngestCommunication, completeGmailBackfillMetadata, nextGmailSyncMetadata, attachmentEvidenceKey, isTextLikeAttachment, boundedAttachmentText, attachmentFingerprint, historyPageToken } from './gmailIntelligenceIngestion.js';
 
 const enc = s => Buffer.from(s).toString('base64url');
 
@@ -51,4 +51,6 @@ describe('Gmail intelligence normalization', () => {
     expect(isTextLikeAttachment(pdfPart)).toBe(false);
     expect(boundedAttachmentText(enc('a,b\\n1,2'))).toBe('a,b\\n1,2');
   });
+it('keeps incremental history pagination state deterministic',()=>{expect(historyPageToken({gmail_history_page_token:'next'})).toBe('next');expect(historyPageToken({})).toBe(null);});
+  it('fingerprints attachment lineage deterministically',()=>{const p={partId:'2',attachmentId:'a',filename:'x.txt',mimeType:'text/plain',size:4};expect(attachmentFingerprint('c','m',p,enc('data'))).toBe(attachmentFingerprint('c','m',p,enc('data')));expect(attachmentFingerprint('c','m',p,enc('data'))).not.toBe(attachmentFingerprint('c','m',p,enc('other')));});
 });
