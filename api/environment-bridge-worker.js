@@ -13,8 +13,8 @@ function clients() {
   }
   if (productionUrl === testerUrl) throw new Error('Production and Tester URLs must be different');
   return {
-    production: createClient(productionUrl, productionKey, { auth:{persistSession:false,autoRefreshToken:false} }),
-    tester: createClient(testerUrl, testerKey, { auth:{persistSession:false,autoRefreshToken:false} })
+    production: createClient(productionUrl, productionKey, { auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false} }),
+    tester: createClient(testerUrl, testerKey, { auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false} })
   };
 }
 
