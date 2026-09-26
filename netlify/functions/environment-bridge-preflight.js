@@ -10,7 +10,17 @@ function client(url, key) {
   });
 }
 
-export default async (req) => {
+export default async (req, context) => {
+  const deployContext = context?.deploy?.context || 'unknown';
+  const published = context?.deploy?.published === true;
+  if (deployContext !== 'production' || !published) {
+    return Response.json({
+      success:false, mode:'PREFLIGHT', ready:false,
+      error:'Privileged bridge execution is restricted to a published production deploy.',
+      deployContext, published, transported:0
+    }, { status:403 });
+  }
+
   if (req.method !== 'POST') return Response.json({ success:false, error:'Method not allowed' }, { status:405 });
 
   const expected = clean(Netlify.env.get('CRON_SECRET'));
