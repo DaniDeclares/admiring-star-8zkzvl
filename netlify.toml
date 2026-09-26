@@ -1,0 +1,199 @@
+[build]
+  command = "npm run build"
+  publish = "build"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/"
+  to = "/seo/home.html"
+  status = 200
+
+[[redirects]]
+  from = "/services"
+  to = "/seo/services.html"
+  status = 200
+
+[[redirects]]
+  from = "/resident-concierge"
+  to = "/seo/resident-concierge.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/property"
+  to = "/seo/services--property.html"
+  status = 200
+
+[[redirects]]
+  from = "/real-estate"
+  to = "/seo/real-estate.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/business-solutions"
+  to = "/seo/services--business-solutions.html"
+  status = 200
+
+[[redirects]]
+  from = "/industries/government"
+  to = "/seo/industries--government.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/federal"
+  to = "/seo/services--federal.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/facility-visits"
+  to = "/seo/services--facility-visits.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/events"
+  to = "/seo/services--events.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/print-studio"
+  to = "/seo/services--print-studio.html"
+  status = 200
+
+[[redirects]]
+  from = "/request-service"
+  to = "/seo/request-service.html"
+  status = 200
+
+[[redirects]]
+  from = "/packages"
+  to = "/seo/packages.html"
+  status = 200
+
+[[redirects]]
+  from = "/membership"
+  to = "/seo/membership.html"
+  status = 200
+
+[[redirects]]
+  from = "/partner-network"
+  to = "/seo/partner-network.html"
+  status = 200
+
+[[redirects]]
+  from = "/about"
+  to = "/seo/about.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/seo/contact.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog"
+  to = "/seo/blog.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms"
+  to = "/seo/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy"
+  to = "/seo/privacy.html"
+  status = 200
+
+# Netlify Functions own /api/*.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# SPA/private routes
+[[redirects]]
+  from = "/portal/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/provider/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/internal/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/pay/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/service/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/staff/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/government/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/signup"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/forgot-password"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/reset-password"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/accept-invite"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/providers"
+  to = "/index.html"
+  status = 200
+
+# Fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[context.production.environment]
+  DANI_DEPLOY_PLATFORM = "NETLIFY"
