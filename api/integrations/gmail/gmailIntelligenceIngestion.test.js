@@ -1,4 +1,4 @@
-import { walkGmailParts, gmailTextBodies, normalizeGmailMessage, uniqueHistoryMessageIds, isStaleHistoryResponse, gmailSyncMode, gmailBackfillState, shouldIngestCommunication, completeGmailBackfillMetadata, nextGmailSyncMetadata } from './gmailIntelligenceIngestion.js';
+import { walkGmailParts, gmailTextBodies, normalizeGmailMessage, uniqueHistoryMessageIds, isStaleHistoryResponse, gmailSyncMode, gmailBackfillState, shouldIngestCommunication, completeGmailBackfillMetadata, nextGmailSyncMetadata, attachmentEvidenceKey, isTextLikeAttachment, boundedAttachmentText } from './gmailIntelligenceIngestion.js';
 
 const enc = s => Buffer.from(s).toString('base64url');
 
@@ -42,5 +42,13 @@ describe('Gmail intelligence normalization', () => {
   it('marks backfill complete and anchors a Gmail history cursor', () => {
     const result = completeGmailBackfillMetadata({ unrelated: true, gmail_intelligence_backfill_page_token: 'p2' }, '777');
     expect(result).toMatchObject({ unrelated: true, gmail_intelligence_backfill_page_token: null, gmail_intelligence_backfill_complete: true, gmail_history_id: '777', gmail_intelligence_sync_version: 2 });
+  });
+  it('creates first-class attachment lineage without treating binary files as text', () => {
+    const textPart = { partId: '3', attachmentId: 'a3', filename: 'notes.csv', mimeType: 'text/csv' };
+    const pdfPart = { partId: '4', attachmentId: 'a4', filename: 'guide.pdf', mimeType: 'application/pdf' };
+    expect(attachmentEvidenceKey('c1', 'm1', textPart)).toBe('GMAIL_ATTACHMENT:c1:m1:3');
+    expect(isTextLikeAttachment(textPart)).toBe(true);
+    expect(isTextLikeAttachment(pdfPart)).toBe(false);
+    expect(boundedAttachmentText(enc('a,b\\n1,2'))).toBe('a,b\\n1,2');
   });
 });
