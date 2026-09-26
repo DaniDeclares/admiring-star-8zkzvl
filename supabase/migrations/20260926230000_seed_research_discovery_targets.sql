@@ -16,8 +16,8 @@ begin
   end if;
 
   insert into public.dd_research_discovery_targets(
-    program_key,target_key,company_name,target_type,status,discovery_interval_minutes,next_discovery_at,metadata)
-  select g.program_key,'COVERAGE_DISCOVERY:'||g.program_key,p.program_name,
+    program_key,target_key,company_name,homepage_url,target_type,status,discovery_interval_minutes,next_discovery_at,metadata)
+  select g.program_key,'COVERAGE_DISCOVERY:'||g.program_key,p.program_name,'about:blank',
     'RESEARCH_PROGRAM_COVERAGE','QUEUED',1440,now(),
     jsonb_build_object(
       'objective',p.objective,'domain',p.domain,'green_rule',p.green_rule,
