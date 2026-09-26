@@ -12,6 +12,9 @@ on:
       - '.github/workflows/visual-quality.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   visual-quality:
     runs-on: ubuntu-latest
