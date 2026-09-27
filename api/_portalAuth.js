@@ -20,8 +20,9 @@ function getUserScopedClient(token) {
 }
 
 export async function authenticatePortalRequest(req) {
-  const authorization = req.headers.authorization || '';
-  const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : null;
+  const authorization = req.headers.authorization || req.headers.Authorization || '';
+  const forwardedToken = req.headers['x-dani-portal-token'] || req.headers['X-Dani-Portal-Token'] || '';
+  const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : (forwardedToken || null);
   if (!token) return { error: 'Authentication required', status: 401 };
 
   const supabase = getServerClient();
