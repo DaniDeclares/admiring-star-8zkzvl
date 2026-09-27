@@ -5,7 +5,7 @@ import {getServiceVisuals} from '../data/serviceVisuals2026.js';
 import {supabase} from '../lib/supabaseClient.js';
 import {captureServiceLifecycle} from '../lib/posthogAnalytics.js';
 const CHANNEL_OPTIONS=[{value:OPERATIONS_CHANNELS.B2C,label:'Resident / Household'},{value:OPERATIONS_CHANNELS.B2B_APT,label:'Property Management / Apartment Community'},{value:OPERATIONS_CHANNELS.B2B_RE,label:'Real Estate Professional / Brokerage'},{value:OPERATIONS_CHANNELS.B2B,label:'Business / Commercial'},{value:OPERATIONS_CHANNELS.B2G,label:'Government / Institution'}];
-const CHANNEL_TO_FRONT_DOOR_PREFIX={[OPERATIONS_CHANNELS.B2C]:'CH01',[OPERATIONS_CHANNELS.B2B_APT]:'CH02',[OPERATIONS_CHANNELS.B2B_RE]:'CH03',[OPERATIONS_CHANNELS.B2B]:'CH04',[OPERATIONS_CHANNELS.B2G]:'CH05'};
+const CHANNEL_TO_FRONT_DOOR_PREFIX={[OPERATIONS_CHANNELS.B2C]:'CH01',[OPERATIONS_CHANNELS.B2B_APT]:'CH03',[OPERATIONS_CHANNELS.B2B_RE]:'CH04',[OPERATIONS_CHANNELS.B2B]:'CH05',[OPERATIONS_CHANNELS.B2G]:'CH06'};
 const today=new Date().toISOString().slice(0,10);
 const baseServiceName=(name='')=>name.replace(/\s+(1BR|2BR|3BR|4BR)$/i,'').replace(/\s+—\s+(30|60)\s*min$/i,'').replace(/\s+—\s+(7|14|30)\s*Days$/i,'');
 const pickVisual=(visuals,id='')=>visuals?.length?visuals[[...id].reduce((n,c)=>n+c.charCodeAt(0),0)%visuals.length]:null;
