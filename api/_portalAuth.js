@@ -11,7 +11,10 @@ function getServerClient() {
 
 function getUserScopedClient(token) {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
+  // Keep server-side user-scoped validation on the same public key contract as the browser.
+  // REACT_APP_SUPABASE_ANON_KEY is the deployed browser key and avoids stale legacy
+  // SUPABASE_ANON_KEY values silently breaking an otherwise-valid owner session.
+  const key = process.env.REACT_APP_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error('Server user-scoped Supabase configuration is missing.');
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
