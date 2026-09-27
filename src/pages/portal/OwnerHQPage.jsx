@@ -75,6 +75,10 @@ function OwnerHq({ session }) {
       const response = await fetch('/api/portal-operations?ownerDashboard=1', {
         headers: { Authorization: 'Bearer ' + session.access_token },
       });
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error(`DANI HQ API returned ${response.status} ${contentType || 'non-JSON'} instead of JSON.`);
+      }
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.error || 'Could not load DANI HQ.');
       setData(body);
