@@ -4,6 +4,10 @@ name: DANI External Action Executor
 # Never executes arbitrary SQL, money movement, external contact, permission changes, merge, or deploy.
 on:
   workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/dani-external-action-executor.yml'
   schedule:
     - cron: '*/10 * * * *'
 
