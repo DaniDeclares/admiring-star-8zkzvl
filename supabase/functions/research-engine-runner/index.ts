@@ -102,7 +102,7 @@ Deno.serve(async (req:Request)=>{
           authority_level:source.authority_level,
           effective_as_of:new Date().toISOString().slice(0,10),
           notes:"Deterministic source watcher signal; parent work gate still requires its full evidence contract.",
-          metadata:{sourceKey:source.source_key,signal:hit.signal,automated:true},
+          metadata:{sourceKey:source.source_key,signal:hit.signal,automated:true,work_key:source.work_key||null,lineage_method:"RESEARCH_SOURCE_WORK_KEY"},
           updated_at:now
         },{onConflict:"program_key,claim_key,source_title"});
       }
