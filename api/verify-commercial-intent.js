@@ -24,9 +24,9 @@ const governedCatalog=async()=>{
  const runtimeIds=[...new Set((offers||[]).map(x=>x.runtime_service_id).filter(Boolean))];
  const skus=[...new Set((offers||[]).map(x=>x.canonical_sku).filter(Boolean))];
  const [servicesQ,releasesQ,mastersQ]=await Promise.all([
-  runtimeIds.length?db.from('services').select('id,service_family,description,starting_price,public_price_low,public_price_high,public_price_display,pricing_type,billing_cycle,resident_discount_eligible,commercial_status').in('id',runtimeIds):Promise.resolve({data:[],error:null}),
-  skus.length?db.from('dd_service_release_contract_v1').select('canonical_sku,release_state,blocking_gate').in('canonical_sku',skus):Promise.resolve({data:[],error:null}),
-  skus.length?db.from('dd_master_service_universe').select('canonical_sku,internal_cost,margin_economics,updated_at').in('canonical_sku',skus).eq('lifecycle_status','CANONICAL_ACTIVE').order('updated_at',{ascending:false}):Promise.resolve({data:[],error:null})
+  db.from('services').select('id,service_family,description,starting_price,public_price_low,public_price_high,public_price_display,pricing_type,billing_cycle,resident_discount_eligible,commercial_status'),
+  db.from('dd_service_release_contract_v1').select('canonical_sku,release_state,blocking_gate'),
+  db.from('dd_master_service_universe').select('canonical_sku,internal_cost,margin_economics,updated_at').eq('lifecycle_status','CANONICAL_ACTIVE').order('updated_at',{ascending:false})
  ]);
  for(const q of [servicesQ,releasesQ,mastersQ])if(q.error)throw q.error;
  const byService=new Map((servicesQ.data||[]).map(x=>[x.id,x]));
