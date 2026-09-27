@@ -94,3 +94,11 @@ begin
     'auto_activate',false
   );
 end $$;
+
+
+-- Bridge ingestion is an internal cross-environment transport contract.
+-- Only the server-side bridge worker may invoke it.
+revoke all on function public.dd_ingest_production_bridge_learning(jsonb) from public;
+revoke all on function public.dd_ingest_production_bridge_learning(jsonb) from anon;
+revoke all on function public.dd_ingest_production_bridge_learning(jsonb) from authenticated;
+grant execute on function public.dd_ingest_production_bridge_learning(jsonb) to service_role;
