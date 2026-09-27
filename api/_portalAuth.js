@@ -32,6 +32,22 @@ export async function authenticatePortalRequest(req) {
   const role = user.app_metadata?.portal_role || user.app_metadata?.role;
   if (STAFF_ROLES.has(role)) return { supabase, userSupabase, user, role, isStaff: true };
 
+  // Keep server authorization aligned with the governed role used by
+  // PortalLoginPage and RequireStaffAuth. Authorization is read from the
+  // protected role table, never from user-controlled metadata.
+  const { data: governedRole, error: governedRoleError } = await supabase
+    .from('dd_portal_user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .eq('role', 'OWNER_OPERATOR')
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (governedRoleError) throw governedRoleError;
+  if (governedRole?.role === 'OWNER_OPERATOR') {
+    return { supabase, userSupabase, user, role: 'OWNER_OPERATOR', isStaff: true };
+  }
+
   const { data: identity, error: identityError } = await supabase
     .from('dd_portal_identities')
     .select('*')
