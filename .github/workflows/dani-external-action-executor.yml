@@ -50,27 +50,8 @@ jobs:
                 result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_reconcile_tester_promotion_feedback',{method:'POST',body:JSON.stringify({p_candidate_key:candidate,p_production_state:a.payload})});
                 externalReference='tester:'+candidate;
               }else{
-                const source=a.payload?.source_state||{};
-                const artifact=a.payload?.artifact_key;
-                if(!artifact||!source.observation) throw Object.assign(new Error('MISSING_LEARNING_ARTIFACT_OR_OBSERVATION'),{code:'INVALID_PAYLOAD'});
-                const evidenceKey='PRODUCTION_BRIDGE:'+artifact;
-                const allowedOrigins=new Set(['RESEARCH','PRODUCTION','TESTER','ACCOUNTING','CUSTOMER','PROVIDER','SECURITY','MARKET']);
-                const allowedAuthority=new Set(['EVIDENCE','GOVERNANCE','RUNTIME','PAYMENT','CRM','ANALYTICS','ACCOUNTING']);
-                const intake={
-                  evidence_key:evidenceKey,
-                  evidence_origin:allowedOrigins.has(source.evidence_origin)?source.evidence_origin:'PRODUCTION',
-                  domain:source.domain||'AI_DATA_GOVERNANCE_INTELLIGENCE',
-                  source_system:'PRODUCTION_BRIDGE',
-                  source_reference:source.source_reference||a.payload?.bridge_key||artifact,
-                  observation:source.observation,
-                  evidence_payload:{...(source.evidence_payload||{}),bridge_receipt_id:a.payload?.bridge_receipt_id,bridge_key:a.payload?.bridge_key,original_source_system:source.source_system,production_authority:false},
-                  authority_class:allowedAuthority.has(source.authority_class)?source.authority_class:'EVIDENCE',
-                  requires_new_test:source.requires_new_test!==false,
-                  status:'NEW'
-                };
-                const intakeResult=await req(TESTER_URL,TESTER_KEY,'dd_learning_evidence_intake?on_conflict=evidence_key',{method:'POST',prefer:'resolution=merge-duplicates,return=representation',body:JSON.stringify(intake)});
-                const routeResult=await req(TESTER_URL,TESTER_KEY,'rpc/dd_queue_universal_learning_evidence_cross_signals',{method:'POST',body:'{}'});
-                result={intake:intakeResult,route:routeResult};
+                result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_ingest_production_bridge_learning',{method:'POST',body:JSON.stringify({p_payload:a.payload})});
+                const evidenceKey=result?.evidence_key||('PRODUCTION_BRIDGE:'+(a.payload?.artifact_key||'UNKNOWN'));
                 externalReference='tester:learning:'+evidenceKey;
                 if(a.authoritative_record_id){
                   await req(PROD_URL,PROD_KEY,'dd_environment_bridge_receipts?id=eq.'+encodeURIComponent(a.authoritative_record_id),{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({bridge_status:'RECONCILED',reconciled_at:new Date().toISOString(),updated_at:new Date().toISOString()})});
