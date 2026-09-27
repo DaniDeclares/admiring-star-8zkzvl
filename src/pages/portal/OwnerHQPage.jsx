@@ -73,7 +73,7 @@ function OwnerHq({ session }) {
     setError('');
     try {
       const response = await fetch('/api/portal-operations?ownerDashboard=1', {
-        headers: { Authorization: 'Bearer ' + session.access_token },
+        headers: { Authorization: 'Bearer ' + session.access_token, 'X-Dani-Portal-Token': session.access_token },
       });
       const contentType = response.headers.get('content-type') || '';
       if (!contentType.includes('application/json')) {
