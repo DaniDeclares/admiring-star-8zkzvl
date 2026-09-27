@@ -30,7 +30,7 @@
     <!-- Sentry browser monitoring. The DSN is a public client identifier; no secret token is embedded. -->
     <script src="https://browser.sentry-cdn.com/10.75.0/bundle.tracing.min.js" crossorigin="anonymous"></script>
     <script>
-      const sentryDsn = "%REACT_APP_SENTRY_DSN%";\n      if (window.Sentry && sentryDsn && !sentryDsn.startsWith("%")) {
+      const sentryDsn = "%REACT_APP_SENTRY_DSN%"; if (window.Sentry && sentryDsn && !sentryDsn.startsWith("%")) {
         window.Sentry.init({
           dsn: sentryDsn,
           environment: ("%REACT_APP_VERCEL_ENV%".startsWith("%") ? "production" : "%REACT_APP_VERCEL_ENV%"),
