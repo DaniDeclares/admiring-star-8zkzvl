@@ -68,7 +68,7 @@ describe('DDOS intake routing', () => {
     );
   });
 
-  test('B2B2C never falls through to CH02 category fallback', () => {
+  test('B2B2C never falls through to property-management category fallback', () => {
     expect(routeIntake({ channelType: 'B2B2C', category: 'PROPERTY_OPERATIONS' })).toEqual(
       expect.objectContaining({
         channel: null,
@@ -129,5 +129,27 @@ describe('DDOS intake routing', () => {
       commercialModel: null,
       subchannel: 'CH01-B',
     });
+  });
+});
+
+
+describe('canonical five-channel governance', () => {
+  test('semantic operational channels remain distinct', () => {
+    expect(new Set(Object.values(OPERATIONS_CHANNELS)).size).toBe(5);
+    expect(OPERATIONS_CHANNELS.B2C).not.toBe(OPERATIONS_CHANNELS.B2B_APT);
+    expect(OPERATIONS_CHANNELS.B2B_APT).not.toBe(OPERATIONS_CHANNELS.B2B_RE);
+    expect(OPERATIONS_CHANNELS.B2B_RE).not.toBe(OPERATIONS_CHANNELS.B2B);
+    expect(OPERATIONS_CHANNELS.B2B).not.toBe(OPERATIONS_CHANNELS.B2G);
+  });
+
+  test('CH01-B remains relationship metadata rather than a sixth top-level channel', () => {
+    const context = buildIntakeRoutingContext({
+      channelType: OPERATIONS_CHANNELS.B2C,
+      commercialModel: COMMERCIAL_RELATIONSHIP_MODELS.B2B2C,
+      subchannelCode: 'CH01-B',
+    });
+    expect(context.channel).toBe(OPERATIONS_CHANNELS.B2C);
+    expect(context.commercialModel).toBe(COMMERCIAL_RELATIONSHIP_MODELS.B2B2C);
+    expect(context.subchannel).toBe('CH01-B');
   });
 });

@@ -35,7 +35,7 @@ export default function BusinessSolutionsPage() {
         </div>
         <div className="text-center flex flex-col sm:flex-row gap-3 justify-center">
           <Link to="/catalog" className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-all">Browse Services <ArrowRight className="ml-2 w-5 h-5" /></Link>
-          <Link to="/request-service" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-amber-500 text-amber-300 font-bold text-base transition-all">Request Business Support</Link>
+          <Link to="/request-service?channelType=B2B&utm_source=business_solutions&utm_medium=owned_site&utm_campaign=business_support_entry&audience=business" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-amber-500 text-amber-300 font-bold text-base transition-all">Request Business Support</Link>
         </div>
       </div>
     </div>
