@@ -10,13 +10,6 @@ describe('master commercial registry', () => {
     expect(() => resolveB2CCustomerPrice({ baseServiceId: 'B2C-CLEAN-DEEP-LEGACY-H' })).toThrow(/Commercial Block/);
   });
 
-  // DNI-01A-009 is deliberately fail-closed (status: FULFILLMENT_GATED) in the
-  // live static registry as of 4014b6b "fail closed on static commercial
-  // registry authority" -- that file is legacy compatibility metadata only,
-  // not the runtime commercial authority (Supabase is). The tests below exist
-  // to exercise resolveB2CCustomerPrice/resolveCommercialPrice's own
-  // subchannel/pricing/modifier branching, not the registry's current
-  // activation flag, so they stub activation rather than depending on it.
   describe('resolver behavior for an active B2C launch offer', () => {
     let isCanonicalActiveSpy;
     beforeEach(() => {
@@ -36,11 +29,11 @@ describe('master commercial registry', () => {
 });
 
 function runResolverBehaviorTests() {
-  test('requires an explicit CH01 resident subchannel', () => {
+  test('keeps CH01-A at regular/direct resident pricing even when a resident identity is verified', () => {
     expect(resolveB2CCustomerPrice({
       baseServiceId: 'DNI-01A-009',
       residentSubchannel: 'CH01-A',
-      isVerifiedResident: false,
+      isVerifiedResident: true,
       hasHeavySoilTier2: false,
     })).toBe(59);
 
@@ -50,10 +43,19 @@ function runResolverBehaviorTests() {
     })).toThrow(/resident subchannel/);
   });
 
-  test('fails closed when CH01-B has no governed apartment-resident price', () => {
+  test('requires verified property-resident identity before CH01-B pricing', () => {
     expect(() => resolveB2CCustomerPrice({
       baseServiceId: 'DNI-01A-009',
       residentSubchannel: 'CH01-B',
+      isVerifiedResident: false,
+    })).toThrow(/verified apartment\/property resident relationship/);
+  });
+
+  test('fails closed when verified CH01-B has no governed apartment-resident price', () => {
+    expect(() => resolveB2CCustomerPrice({
+      baseServiceId: 'DNI-01A-009',
+      residentSubchannel: 'CH01-B',
+      isVerifiedResident: true,
     })).toThrow(/apartment resident price is not governed/);
   });
 
@@ -67,9 +69,6 @@ function runResolverBehaviorTests() {
   });
 
   test('resolves the current fixed-flat launch offer through the commercial resolver', () => {
-    // resolveCommercialPrice checks record.status directly rather than going
-    // through isCanonicalActive, so this one test also needs
-    // getCommercialRecord stubbed to report CANONICAL_ACTIVE.
     const realRecord = jest.requireActual('../../config/commercialRegistry').getCommercialRecord('DNI-01A-009');
     const getCommercialRecordSpy = jest
       .spyOn(commercialRegistry, 'getCommercialRecord')
