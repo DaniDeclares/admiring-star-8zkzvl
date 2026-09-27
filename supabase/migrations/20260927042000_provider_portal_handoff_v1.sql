@@ -42,3 +42,24 @@ drop trigger if exists trg_dd_provider_approval_portal_handoff on public.dd_prov
 create trigger trg_dd_provider_approval_portal_handoff
 after update of application_status,provider_id on public.dd_provider_applications
 for each row execute function public.dd_provider_approval_portal_handoff();
+
+create or replace function public.dd_audit_provider_portal_handoffs()
+returns table(application_id uuid, application_status text, applicant_user_id uuid, provider_id uuid, portal_identity_id uuid, identity_provider_id uuid, provider_role_active boolean, provider_org_id uuid, handoff_state text)
+language sql security invoker set search_path='public' as $$
+ select a.id,a.application_status,a.applicant_user_id,a.provider_id,i.id,i.entity_id,
+   coalesce(r.is_active,false),p.org_id,
+   case
+    when a.applicant_user_id is null then 'BLOCKED_AUTH'
+    when a.provider_id is null then 'BLOCKED_PROVIDER_ACTIVATION'
+    when i.id is null or i.portal_role<>'provider' or i.entity_id is distinct from a.provider_id then 'ROLE_DRIFT'
+    when r.user_id is null or not r.is_active or r.provider_org_id is distinct from p.org_id then 'ROLE_DRIFT'
+    else 'READY'
+   end
+ from public.dd_provider_applications a
+ left join public.dd_providers p on p.id=a.provider_id
+ left join public.dd_portal_identities i on i.auth_user_id=a.applicant_user_id
+ left join public.dd_portal_user_roles r on r.user_id=a.applicant_user_id and r.role='PROVIDER'::public.dd_portal_role
+ order by a.created_at;
+$$;
+revoke execute on function public.dd_audit_provider_portal_handoffs() from public,anon,authenticated;
+grant execute on function public.dd_audit_provider_portal_handoffs() to postgres,service_role;
