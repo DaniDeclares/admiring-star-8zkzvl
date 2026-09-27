@@ -17,3 +17,5 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Secret scanning remains enabled; server-only runtime keys are omitted by site config.
