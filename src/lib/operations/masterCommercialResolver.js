@@ -20,6 +20,9 @@ export function resolveB2CCustomerPrice({
 
   let calculatedPrice;
   if (residentSubchannel === 'CH01-B') {
+    if (!isVerifiedResident) {
+      throw new Error('Commercial Block: CH01-B requires a verified apartment/property resident relationship.');
+    }
     const apartmentPrice = record.apartmentResidentPrice;
     if (!Number.isFinite(apartmentPrice)) {
       throw new Error('Commercial Block: CH01-B apartment resident price is not governed for this service.');
@@ -27,7 +30,6 @@ export function resolveB2CCustomerPrice({
     calculatedPrice = apartmentPrice;
   } else {
     calculatedPrice = record.baseCustomerPrice;
-    if (isVerifiedResident && record.residentDiscountEligible) calculatedPrice *= 0.85;
   }
 
   if (hasHeavySoilTier2) {
