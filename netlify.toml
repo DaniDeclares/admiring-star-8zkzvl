@@ -23,4 +23,4 @@
   to = "/index.html"
   status = 200
 
-# Secret scanning remains enabled; server-only runtime keys and SUPABASE_URL are omitted by site config.
+# Secret scanning remains enabled; server-only runtime keys and SUPABASE_URL are omitted by site config.\n# Production deploy sync marker: owner portal API adapter + governed owner auth.
