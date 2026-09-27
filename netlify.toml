@@ -23,4 +23,4 @@
   to = "/index.html"
   status = 200
 
-# Secret scanning remains enabled; server-only runtime keys and SUPABASE_URL are omitted by site config.\n# Production deploy sync marker: owner portal API adapter + governed owner auth + explicit session forwarding.
+# Secret scanning remains enabled; server-only runtime keys and SUPABASE_URL are omitted by site config.\n# Production deploy sync marker: owner portal API adapter + governed owner auth + explicit session forwarding. Rebuild after Production Supabase environment alignment.
