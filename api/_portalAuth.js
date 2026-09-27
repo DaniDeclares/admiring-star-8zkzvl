@@ -32,6 +32,16 @@ export async function authenticatePortalRequest(req) {
   const role = user.app_metadata?.portal_role || user.app_metadata?.role;
   if (STAFF_ROLES.has(role)) return { supabase, userSupabase, user, role, isStaff: true };
 
+  const { data: portalRoles, error: portalRolesError } = await supabase
+    .from('dd_portal_user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .eq('is_active', true);
+  if (portalRolesError) throw portalRolesError;
+  if ((portalRoles || []).some(row => String(row.role || '').toUpperCase() === 'OWNER_OPERATOR')) {
+    return { supabase, userSupabase, user, role: 'OWNER_OPERATOR', isStaff: true };
+  }
+
   const { data: identity, error: identityError } = await supabase
     .from('dd_portal_identities')
     .select('*')
