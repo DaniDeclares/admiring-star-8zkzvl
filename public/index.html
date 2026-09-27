@@ -21,7 +21,7 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/dani-declares-favicon.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <meta name="application-name" content="DANI Worker App" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />\n    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="DANI Worker" />
 
@@ -30,11 +30,11 @@
     <!-- Sentry browser monitoring. The DSN is a public client identifier; no secret token is embedded. -->
     <script src="https://browser.sentry-cdn.com/10.75.0/bundle.tracing.min.js" crossorigin="anonymous"></script>
     <script>
-      if (window.Sentry && "%REACT_APP_SENTRY_DSN%") {
+      const sentryDsn = "%REACT_APP_SENTRY_DSN%";\n      if (window.Sentry && sentryDsn && !sentryDsn.startsWith("%")) {
         window.Sentry.init({
-          dsn: "%REACT_APP_SENTRY_DSN%",
-          environment: "%REACT_APP_VERCEL_ENV%" || "production",
-          release: "%REACT_APP_VERCEL_GIT_COMMIT_SHA%",
+          dsn: sentryDsn,
+          environment: ("%REACT_APP_VERCEL_ENV%".startsWith("%") ? "production" : "%REACT_APP_VERCEL_ENV%"),
+          release: ("%REACT_APP_VERCEL_GIT_COMMIT_SHA%".startsWith("%") ? undefined : "%REACT_APP_VERCEL_GIT_COMMIT_SHA%"),
           tracesSampleRate: 0.1,
         });
       }
