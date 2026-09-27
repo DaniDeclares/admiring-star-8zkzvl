@@ -9,14 +9,7 @@
   "orientation": "portrait-primary",
   "theme_color": "#6B1F2B",
   "background_color": "#F6F0E4",
-  "icons": [
-    {
-      "src": "/dani-declares-logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
-  ],
+  "icons": [],
   "shortcuts": [
     {
       "name": "Work",
