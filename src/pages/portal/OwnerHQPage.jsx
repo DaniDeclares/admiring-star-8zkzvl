@@ -321,7 +321,7 @@ function OwnerHq({ session }) {
             <strong>{item.company_name || item.contact_name || 'Sales lead'}</strong>
             <small>{item.contact_name || 'Contact pending'} · Priority {item.priority_score ?? '—'} · {item.sales_stage || 'UNSTAGED'} · {item.disposition || 'UNSET'}</small>
             <small>Next: {item.next_action || 'Follow up'} · due {item.next_action_date}</small>
-            {(Number(item.quoted_amount || 0) > 0 || Number(item.amount_collected || 0) > 0) && <small>{Number(item.quoted_amount || 0) > 0 ? `Quoted ${money(item.quoted_amount)}` : 'No quote yet'} · Collected {money(item.amount_collected)}</small>}
+            {(Number(item.quoted_amount || 0) > 0 || Number(item.amount_collected || 0) > 0) && <small>Sales-note amounts (not ledger authority): {Number(item.quoted_amount || 0) > 0 ? `quote ${money(item.quoted_amount)}` : 'no quote noted'} · collection note {money(item.amount_collected)}. Canonical estimate/payment ledgers control revenue.</small>}
           </div>
           <span className="portal-pill" style={statusPillStyle('DUE')}>DUE</span>
         </div>)}
