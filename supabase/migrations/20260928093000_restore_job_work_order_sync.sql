@@ -51,6 +51,8 @@ begin
     target_rank := 3; target_status := 'SCHEDULED';
   elsif lower(coalesce(j.job_status,'')) = 'in_progress' then
     target_rank := 5; target_status := 'IN_PROGRESS';
+  elsif lower(coalesce(j.job_status,'')) = 'submitted' then
+    target_rank := 6; target_status := 'SUBMITTED';
   elsif lower(coalesce(j.job_status,'')) = 'completed' then
     -- COMPLETED is protected by dd_guard_job_completion; reaching it means
     -- required tasks/evidence and approved completion review already passed.
@@ -63,6 +65,8 @@ begin
 
   update public.dd_work_orders
      set status = target_status,
+         qa_status = case when target_status='QA_PASS' then 'PASSED' else qa_status end,
+         completed_at = case when target_status='QA_PASS' then coalesce(completed_at,now()) else completed_at end,
          updated_at = now()
    where id = wo.id;
 end;
