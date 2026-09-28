@@ -353,3 +353,35 @@ end;
 $function$;
 comment on function public.dd_emit_assignment_accepted_confirmations()
 is 'Stages provider confirmation after assignment acceptance. Uses current leads.full_name schema; customer confirmation remains appointment-authoritative.';
+
+
+-- Evidence bridge: expose latest runtime proof beside authoritative channel/pass audit.
+-- This does not auto-promote a release pass; it makes the missing promotion/coverage explicit.
+create or replace view public.dd_release_pass_proof_coverage_v1
+with (security_invoker=true) as
+with latest as (
+  select r.*,row_number() over(partition by r.work_key,r.proof_key order by r.created_at desc,r.id desc) rn
+  from public.dd_audit_proof_receipts r
+),
+mapped as (
+  select 'CH03'::text channel_code,8 pass_number,l.* from latest l
+   where l.rn=1 and l.work_key='CH03-PASS-08-09' and l.status='PASS'
+  union all
+  select 'CH03'::text,9,l.* from latest l
+   where l.rn=1 and l.work_key='CH03-PASS-08-09' and l.status='PASS'
+)
+select a.channel_code,a.pass_number,a.pass_name,a.status as audit_status,a.priority,a.blocking_gap,a.green_exit_criteria,
+       m.proof_key,m.proof_version,m.status as proof_status,m.assertions_total,m.assertions_passed,m.assertions_failed,
+       m.evidence as proof_evidence,m.created_at as proof_created_at,
+       case
+         when m.status='PASS' and a.status<>'GREEN' then 'PROOF_PASS_AUDIT_NOT_ADVANCED'
+         when a.status='GREEN' then 'AUTHORITATIVE_GREEN'
+         when m.status='FAIL' then 'PROOF_FAILED'
+         else 'PROOF_NOT_PRESENT'
+       end as transition_state
+from public.dd_platform_release_audit_10_pass a
+left join mapped m on m.channel_code=a.channel_code and m.pass_number=a.pass_number;
+
+grant select on public.dd_release_pass_proof_coverage_v1 to authenticated,service_role;
+comment on view public.dd_release_pass_proof_coverage_v1 is
+'Read-only evidence bridge. A PASS receipt never auto-promotes channel release authority; it exposes proof/audit drift for governed promotion.';
