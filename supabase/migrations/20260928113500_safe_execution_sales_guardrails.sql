@@ -9,7 +9,7 @@ begin
  where coalesce(s.do_not_contact,false)=false and s.disposition='NOT_CONTACTED'
    and (s.phone is not null or s.email is not null)
    and coalesce(s.source_occurred_at,s.created_at)<now()-interval '30 minutes'
-   and (s.next_action_date is null or s.next_action_date<=current_date)
+   and (coalesce(s.next_action,'')='' or s.next_action_date is null or s.next_action_date<current_date)
    and coalesce(s.lane,'')<>'PARTNER'
    and coalesce(s.source,'') not in ('GMAIL_SENT','WEB_SOURCED','LINKEDIN_MESSAGE','LINKEDIN_MARKETPLACE','LINKEDIN_INVITE','HUBSPOT_DEAL')
    and lower(coalesce(s.contact_name,'')) not like '%test%'
