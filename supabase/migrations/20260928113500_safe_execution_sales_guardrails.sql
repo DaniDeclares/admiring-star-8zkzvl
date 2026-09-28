@@ -62,3 +62,6 @@ begin
  values(v_run,'safe_execution_prod_v1','COMPLETED',v_total,v_total,jsonb_build_object('customer_messages_sent',0,'payments_moved',0,'provider_payouts_moved',0,'prices_changed',0,'dispatch_actions',0,'environment','PRODUCTION','sales_guardrails',true),now());
  return v_run;
 end$$;
+
+revoke all on function public.dd_run_safe_execution_recipes() from public, anon, authenticated;
+grant execute on function public.dd_run_safe_execution_recipes() to service_role;
