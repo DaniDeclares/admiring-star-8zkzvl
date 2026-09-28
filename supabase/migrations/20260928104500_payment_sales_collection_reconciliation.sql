@@ -10,14 +10,26 @@ as $$
 declare
   v_updated integer := 0;
 begin
-  with request_totals as (
+  if p_request_id is not null then
+    perform pg_advisory_xact_lock(hashtextextended(p_request_id::text,0));
+  end if;
+
+  with resolved_events as (
     select
-      r.id as request_id,
-      coalesce(sum(p.amount_received) filter (where lower(coalesce(p.payment_status,''))='succeeded'),0)::numeric(12,2) as succeeded_total
-    from public.service_requests r
-    left join public.dd_payment_events p on p.request_id=r.id
-    where p_request_id is null or r.id=p_request_id
-    group by r.id
+      coalesce(p.request_id,j.service_request_id) as request_id,
+      p.payment_status,
+      p.amount_received
+    from public.dd_payment_events p
+    left join public.dd_jobs j on j.id=p.job_id
+    where coalesce(p.request_id,j.service_request_id) is not null
+      and (p_request_id is null or coalesce(p.request_id,j.service_request_id)=p_request_id)
+  ),
+  request_totals as (
+    select
+      request_id,
+      coalesce(sum(amount_received) filter (where lower(coalesce(payment_status,''))='succeeded'),0)::numeric(12,2) as succeeded_total
+    from resolved_events
+    group by request_id
   ),
   matched_sales as (
     select
@@ -52,17 +64,28 @@ language plpgsql
 security invoker
 set search_path='public'
 as $$
+declare
+  v_old_request uuid;
+  v_new_request uuid;
 begin
-  -- Reconcile both identities when a payment is corrected, moved, failed, or refunded.
-  if tg_op='UPDATE' and old.request_id is not null
-     and old.request_id is distinct from new.request_id then
-    perform public.dd_reconcile_sales_collection_from_payments(old.request_id);
+  if tg_op='UPDATE' then
+    v_old_request:=old.request_id;
+    if v_old_request is null and old.job_id is not null then
+      select service_request_id into v_old_request from public.dd_jobs where id=old.job_id;
+    end if;
   end if;
 
-  if new.request_id is not null then
-    perform public.dd_reconcile_sales_collection_from_payments(new.request_id);
+  v_new_request:=new.request_id;
+  if v_new_request is null and new.job_id is not null then
+    select service_request_id into v_new_request from public.dd_jobs where id=new.job_id;
   end if;
 
+  if v_old_request is not null and v_old_request is distinct from v_new_request then
+    perform public.dd_reconcile_sales_collection_from_payments(v_old_request);
+  end if;
+  if v_new_request is not null then
+    perform public.dd_reconcile_sales_collection_from_payments(v_new_request);
+  end if;
   return new;
 end;
 $$;
@@ -71,10 +94,10 @@ revoke all on function public.dd_reconcile_sales_collection_payment_trigger() fr
 
 drop trigger if exists trg_dd_reconcile_sales_collection_payment on public.dd_payment_events;
 create trigger trg_dd_reconcile_sales_collection_payment
-after insert or update of payment_status,amount_received,request_id
+after insert or update of payment_status,amount_received,request_id,job_id
 on public.dd_payment_events
 for each row
 execute function public.dd_reconcile_sales_collection_payment_trigger();
 
 comment on function public.dd_reconcile_sales_collection_from_payments(uuid)
-is 'Idempotently reconciles dd_sales_queue.amount_collected from canonical dd_payment_events through dd_sales_queue.job_id -> dd_jobs.service_request_id. Handles success revocation and request reassignment without using email as transaction identity. Never moves money.';
+is 'Idempotently reconciles dd_sales_queue.amount_collected from canonical dd_payment_events using explicit request_id or job->service_request identity. Serializes per request to prevent concurrent stale totals. Handles success revocation and reassignment. Never moves money.';
