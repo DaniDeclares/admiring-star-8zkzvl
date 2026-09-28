@@ -5,6 +5,10 @@ name: DANI Governed PR Executor
 # NEVER merges, deploys production, changes secrets, or performs money/external-contact actions.
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/dani-governed-pr-executor.yml'
   workflow_dispatch: {}
   schedule:
     - cron: '*/15 * * * *'
