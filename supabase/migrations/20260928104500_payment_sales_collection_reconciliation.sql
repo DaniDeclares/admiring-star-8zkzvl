@@ -26,10 +26,12 @@ begin
   ),
   request_totals as (
     select
-      request_id,
-      coalesce(sum(amount_received) filter (where lower(coalesce(payment_status,''))='succeeded'),0)::numeric(12,2) as succeeded_total
-    from resolved_events
-    group by request_id
+      r.id as request_id,
+      coalesce(sum(e.amount_received) filter (where lower(coalesce(e.payment_status,''))='succeeded'),0)::numeric(12,2) as succeeded_total
+    from public.service_requests r
+    left join resolved_events e on e.request_id=r.id
+    where p_request_id is null or r.id=p_request_id
+    group by r.id
   ),
   matched_sales as (
     select
