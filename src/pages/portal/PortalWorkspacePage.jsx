@@ -67,6 +67,7 @@ export default function PortalWorkspacePage() {
   const hasAccountingWorkspace = capabilities.some(item => /bookkeeping|financial|AP\/AR|cash flow/i.test(String(item.capability_description || '')) && String(item.authorization_status || '').toUpperCase() === 'AUTHORIZED');
   const isApprovedProvider = application?.application_status === 'APPROVED';
   const isSignedProvider = application?.agreement_status === 'EXECUTED';
+  const w9Status = String(snapshot?.w9?.status || application?.tax_form_status || '').toUpperCase();
   const requirements = isProvider ? buildProviderRequirements(application, capabilities) : [];
   const completeCount = requirements.filter(r => r.ok).length;
   const openAssignments = snapshot?.assignments?.filter(a => a.assignment_status === 'OFFERED').length || 0;
@@ -100,7 +101,7 @@ export default function PortalWorkspacePage() {
         {requirements.map(item => <Requirement key={item.label} {...item} />)}
         <div className="portal-actions" style={{ marginTop: 14, flexWrap: 'wrap' }}>
           {application?.agreement_status !== 'EXECUTED' && <Link className="portal-primary" to="/portal/provider-agreement">Complete agreement</Link>}
-          {application?.agreement_status === 'EXECUTED' && !['RECEIVED','SUBMITTED','VERIFIED','NOT_REQUIRED'].includes(String(application?.tax_form_status || '').toUpperCase()) && <Link className="portal-primary" to="/portal/w9">Complete W-9</Link>}
+          {application?.agreement_status === 'EXECUTED' && !['RECEIVED','SUBMITTED','VERIFIED','APPROVED','NOT_REQUIRED'].includes(w9Status) && <Link className="portal-primary" to="/portal/w9">Complete W-9</Link>}
           {application?.agreement_status === 'EXECUTED' && <Link className="portal-primary" to="/portal/vendor-onboarding">Upload required documents</Link>}
           {application?.agreement_status === 'EXECUTED' && <Link className="portal-primary" to="/portal/profile">Review profile</Link>}
         </div>
