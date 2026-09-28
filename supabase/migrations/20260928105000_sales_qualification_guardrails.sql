@@ -206,3 +206,44 @@ where coalesce(s.amount_collected,0)>0 or s.job_id is not null;
 
 grant select on public.dd_commercial_transition_health_v1 to authenticated,service_role;
 comment on view public.dd_commercial_transition_health_v1 is 'Read-only end-to-end guard from collected sales through job/work-order/QA. Detects lifecycle leaks without fabricating estimates, QA completion, payables, or payments.';
+
+
+-- QA -> payable -> AP -> payout consistency. Read-only and fail-closed around money movement.
+create or replace view public.dd_fulfillment_finance_health_v1
+with (security_invoker=true) as
+select
+ j.id as job_id,j.public_reference,j.job_status,j.work_order_id,
+ w.status as work_order_status,w.qa_status,
+ pp.id as provider_payable_id,pp.status as provider_payable_status,pp.total_amount as provider_payable_amount,
+ ap.id as ap_ledger_id,ap.total_final_payable,ap.is_cleared_for_payout,ap.settled_at,
+ pol.clearance_mode,pol.owner_approved as payout_policy_owner_approved,
+ pol.external_payout_authorized,
+ case
+   when lower(coalesce(j.job_status,'')) in ('cancelled','canceled') then 'GREEN_CANCELLED_NO_PAYOUT_EXPECTED'
+   when lower(coalesce(j.job_status,'')) in ('completed','closed') and coalesce(w.qa_status,'NOT_STARTED')='NOT_STARTED'
+        and pp.id is not null and pp.status in ('APPROVED','PAID') then 'RED_PAYABLE_AHEAD_OF_QA'
+   when pp.id is not null and pp.status in ('APPROVED','PAID') and ap.id is null then 'RED_APPROVED_PAYABLE_WITHOUT_AP_ACCRUAL'
+   when pp.status='PAID' and (ap.settled_at is null) then 'RED_PAID_WITHOUT_LEDGER_SETTLEMENT'
+   when coalesce(ap.is_cleared_for_payout,false)=true
+        and not (coalesce(pol.owner_approved,false) and coalesce(pol.external_payout_authorized,false)) then 'RED_CLEARANCE_CONFLICT'
+   when lower(coalesce(j.job_status,'')) in ('completed','closed') and coalesce(w.qa_status,'NOT_STARTED')<>'NOT_STARTED'
+        and pp.id is not null and ap.id is not null then 'GREEN_QA_TO_AP_LINKED'
+   else 'YELLOW_IN_PROGRESS_OR_HELD'
+ end as finance_transition_health,
+ case
+   when lower(coalesce(j.job_status,'')) in ('completed','closed') and coalesce(w.qa_status,'NOT_STARTED')='NOT_STARTED'
+        and pp.id is not null and pp.status in ('APPROVED','PAID') then 'RECONCILE_QA_BEFORE_PAYOUT'
+   when pp.id is not null and pp.status in ('APPROVED','PAID') and ap.id is null then 'ACCRUE_AP_THROUGH_GOVERNED_ACCOUNTING_RAIL'
+   when pp.status='PAID' and ap.settled_at is null then 'RECONCILE_SETTLEMENT_EVIDENCE'
+   when coalesce(ap.is_cleared_for_payout,false)=true
+        and not (coalesce(pol.owner_approved,false) and coalesce(pol.external_payout_authorized,false)) then 'HOLD_PAYOUT_AND_RECONCILE_CLEARANCE'
+   else 'CONTINUE_OR_HOLD_PER_POLICY'
+ end as next_finance_action
+from public.dd_jobs j
+left join public.dd_work_orders w on w.id=j.work_order_id
+left join public.dd_provider_payables pp on pp.job_id=j.id
+left join public.dd_accounts_payable_ledger ap on ap.work_order_id=j.work_order_id
+left join public.dd_provider_payout_clearance_policy pol on pol.policy_key='DEFAULT';
+
+grant select on public.dd_fulfillment_finance_health_v1 to authenticated,service_role;
+comment on view public.dd_fulfillment_finance_health_v1 is 'Read-only QA/payable/AP/payout consistency guard. Never authorizes or executes payout; payout policy remains authoritative and fail-closed.';
