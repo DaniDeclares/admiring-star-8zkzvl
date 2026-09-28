@@ -13,23 +13,19 @@ begin
   with request_totals as (
     select
       r.id as request_id,
-      l.email as customer_email,
       coalesce(sum(p.amount_received) filter (where lower(coalesce(p.payment_status,''))='succeeded'),0)::numeric(12,2) as succeeded_total
     from public.service_requests r
-    left join public.leads l on l.id=r.lead_id
     left join public.dd_payment_events p on p.request_id=r.id
     where p_request_id is null or r.id=p_request_id
-    group by r.id,l.email
+    group by r.id
   ),
   matched_sales as (
     select
       s.id,
       least(coalesce(s.quoted_amount,rt.succeeded_total),rt.succeeded_total)::numeric(12,2) as reconciled_total
     from public.dd_sales_queue s
-    join request_totals rt
-      on rt.customer_email is not null
-     and s.email is not null
-     and lower(trim(rt.customer_email))=lower(trim(s.email))
+    join public.dd_jobs j on j.id=s.job_id
+    join request_totals rt on rt.request_id=j.service_request_id
     where s.amount_collected is distinct from least(coalesce(s.quoted_amount,rt.succeeded_total),rt.succeeded_total)
   ),
   updated as (
@@ -81,4 +77,4 @@ for each row
 execute function public.dd_reconcile_sales_collection_payment_trigger();
 
 comment on function public.dd_reconcile_sales_collection_from_payments(uuid)
-is 'Idempotently reconciles dd_sales_queue.amount_collected from canonical dd_payment_events through service_requests -> leads. Handles success revocation and request reassignment. Never moves money.';
+is 'Idempotently reconciles dd_sales_queue.amount_collected from canonical dd_payment_events through dd_sales_queue.job_id -> dd_jobs.service_request_id. Handles success revocation and request reassignment without using email as transaction identity. Never moves money.';
