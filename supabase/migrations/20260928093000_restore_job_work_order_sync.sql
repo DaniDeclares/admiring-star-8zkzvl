@@ -35,8 +35,8 @@ begin
     update public.dd_work_orders
        set provider_pay_amount = coalesce(a.authorized_provider_compensation, provider_pay_amount),
            travel_amount = coalesce(a.travel_allowance_snapshot, travel_amount, 0),
-           scheduled_start = coalesce(j.scheduled_start, scheduled_start),
-           scheduled_end = coalesce(j.scheduled_end, scheduled_end),
+           scheduled_start = j.scheduled_start,
+           scheduled_end = j.scheduled_end,
            updated_at = now()
      where id = wo.id;
   end if;
