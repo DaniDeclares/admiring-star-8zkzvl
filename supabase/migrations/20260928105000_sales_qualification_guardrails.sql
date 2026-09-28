@@ -112,8 +112,20 @@ begin
  on conflict do nothing;
  get diagnostics n=row_count; t:=t+n;
 
+ insert into dd_owner_attention_queue(domain,source_table,source_record_id,reason,priority,recommended_action,metadata)
+ select 'ACCOUNTING','dd_provider_payables',p.id::text,'Provider payable is approved ahead of QA/AP accrual','P0',
+        'Hold payout; reconcile QA and governed AP accrual before any settlement.',
+        jsonb_build_object('job_id',p.job_id,'work_order_id',j.work_order_id,'payable_status',p.status,'work_order_status',w.status,'qa_status',w.qa_status,'total_amount',p.total_amount)
+ from dd_provider_payables p
+ join dd_jobs j on j.id=p.job_id
+ left join dd_work_orders w on w.id=j.work_order_id
+ where p.status='APPROVED'
+   and (w.id is null or coalesce(w.qa_status,'NOT_STARTED') not in ('PASS','APPROVED') or coalesce(w.status,'') not in ('QA_PASS','CUSTOMER_CLOSED','PAYABLE','PAID'))
+ on conflict do nothing;
+ get diagnostics n=row_count; t:=t+n;
+
  insert into dd_automation_recipe_runs(id,recipe_key,status,matched_count,actioned_count,evidence,completed_at)
- values(r,'safe_automation_sweep','COMPLETED',t,t,jsonb_build_object('mode','detect_and_queue','external_side_effects',false,'sales_sla_guardrails',true),now());
+ values(r,'safe_automation_sweep','COMPLETED',t,t,jsonb_build_object('mode','detect_and_queue','external_side_effects',false,'sales_sla_guardrails',true,'qa_payable_guard',true),now());
  update dd_automation_recipes set last_run_at=now() where is_active;
  return r;
 end$$;
