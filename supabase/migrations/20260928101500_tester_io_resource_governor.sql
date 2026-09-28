@@ -30,8 +30,8 @@ as $$
 declare
   v_mode text := upper(coalesce(p_mode,''));
 begin
-  if v_mode not in ('NORMAL','CONSERVATION','CRITICAL') then
-    raise exception 'INVALID_RESOURCE_MODE';
+  if v_mode not in ('CONSERVATION','CRITICAL') then
+    raise exception 'RESOURCE_MODE_REQUIRES_GOVERNED_RESTORATION';
   end if;
 
   -- Fail closed if this does not look like the Tester schedule.
