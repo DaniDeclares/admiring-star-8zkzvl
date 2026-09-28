@@ -36,11 +36,11 @@ begin
   matched_sales as (
     select
       s.id,
-      least(coalesce(s.quoted_amount,rt.succeeded_total),rt.succeeded_total)::numeric(12,2) as reconciled_total
+      rt.succeeded_total::numeric(12,2) as reconciled_total
     from public.dd_sales_queue s
     join public.dd_jobs j on j.id=s.job_id
     join request_totals rt on rt.request_id=j.service_request_id
-    where s.amount_collected is distinct from least(coalesce(s.quoted_amount,rt.succeeded_total),rt.succeeded_total)
+    where s.amount_collected is distinct from rt.succeeded_total
   ),
   updated as (
     update public.dd_sales_queue s
@@ -103,3 +103,32 @@ execute function public.dd_reconcile_sales_collection_payment_trigger();
 
 comment on function public.dd_reconcile_sales_collection_from_payments(uuid)
 is 'Idempotently reconciles dd_sales_queue.amount_collected from canonical dd_payment_events using explicit request_id or job->service_request identity. Serializes per request to prevent concurrent stale totals. Handles success revocation and reassignment. Never moves money.';
+
+
+create or replace function public.dd_reconcile_sales_collection_sales_trigger()
+returns trigger
+language plpgsql
+security definer
+set search_path='public'
+as $$
+declare
+  v_request_id uuid;
+begin
+  if new.job_id is null then return new; end if;
+  select service_request_id into v_request_id from public.dd_jobs where id=new.job_id;
+  if v_request_id is not null then
+    perform public.dd_reconcile_sales_collection_from_payments(v_request_id);
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.dd_reconcile_sales_collection_sales_trigger() from public,anon,authenticated;
+drop trigger if exists trg_dd_reconcile_sales_collection_sales_link on public.dd_sales_queue;
+create trigger trg_dd_reconcile_sales_collection_sales_link
+after insert or update of job_id on public.dd_sales_queue
+for each row
+when (new.job_id is not null)
+execute function public.dd_reconcile_sales_collection_sales_trigger();
+
+comment on function public.dd_reconcile_sales_collection_sales_trigger()
+is 'Reconciles canonical collections when a sales row receives its job/request identity after payment already exists. No money movement.';
