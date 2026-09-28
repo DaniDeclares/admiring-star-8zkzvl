@@ -14,7 +14,7 @@ select p.id provider_id,p.provider_code,p.org_id,o.vendor_type,o.agreement_statu
  end reconciliation_action
 from public.dd_providers p
 left join public.dd_provider_organizations o on o.id=p.org_id
-left join public.dd_provider_capabilities c on c.provider_id=p.id
+left join public.dd_provider_capabilities c on c.provider_id=p.id or (p.org_id is not null and c.provider_org_id=p.org_id)
 left join public.dd_provider_assignment_readiness_v1 r on r.provider_id=p.id
 group by p.id,p.provider_code,p.org_id,o.vendor_type,o.agreement_status,o.compliance_status,r.application_id,r.onboarding_next_action;
 revoke all on public.dd_provider_reconciliation_triage_v1 from anon,authenticated;
