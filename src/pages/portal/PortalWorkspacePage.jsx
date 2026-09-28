@@ -68,6 +68,7 @@ export default function PortalWorkspacePage() {
   const isApprovedProvider = application?.application_status === 'APPROVED';
   const isSignedProvider = application?.agreement_status === 'EXECUTED';
   const w9Status = String(snapshot?.w9?.status || application?.tax_form_status || '').toUpperCase();
+  const canResumeProviderApplication = ['DRAFT','SUBMITTED','UNDER_REVIEW','NEEDS_INFO'].includes(String(application?.application_status || '').toUpperCase());
   const requirements = isProvider ? buildProviderRequirements(application, capabilities) : [];
   const completeCount = requirements.filter(r => r.ok).length;
   const openAssignments = snapshot?.assignments?.filter(a => a.assignment_status === 'OFFERED').length || 0;
@@ -107,7 +108,7 @@ export default function PortalWorkspacePage() {
         </div>
         <p className="portal-note" style={{ marginTop: 12 }}>Identity, background-check, compliance, capability, and document verification remain staff-reviewed. Completing applicant actions does not approve or activate the account.</p>
       </Card>
-      <Card title="Selected Services">{capabilities.length ? capabilities.map(item => <div className="portal-row" key={item.id}><div><strong>{item.capability_description || item.canonical_sku}</strong><small>{statusLabel(item.authorization_status)} · evidence {statusLabel(item.evidence_status)} · requirement {statusLabel(item.requirement_status)}</small></div></div>) : <><Empty>No services selected yet. Your application cannot be approved or dispatched until at least one service/capability is selected and reviewed.</Empty><div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/providers?resume=1">Select services / resume application</Link></div></>}</Card>
+      <Card title="Selected Services">{capabilities.length ? capabilities.map(item => <div className="portal-row" key={item.id}><div><strong>{item.capability_description || item.canonical_sku}</strong><small>{statusLabel(item.authorization_status)} · evidence {statusLabel(item.evidence_status)} · requirement {statusLabel(item.requirement_status)}</small></div></div>) : <><Empty>No services selected yet. Your application cannot be approved or dispatched until at least one service/capability is selected and reviewed.</Empty>{canResumeProviderApplication ? <div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/providers?resume=1">Select services / resume application</Link></div> : <p className="portal-note" style={{ marginTop: 12 }}>This application cannot be reopened through self-service. Contact DANI DECLARES Provider Operations for the governed next step.</p>}</>}</Card>
       <Card title="Submitted Documents">{(snapshot?.documents || []).length ? snapshot.documents.map(item => <div className="portal-row" key={item.id}><div><strong>{item.document_type.replaceAll('_', ' ')}</strong><small>{statusLabel(item.verification_status)} · Uploaded {formatDate(item.uploaded_at)}</small></div></div>) : <Empty>No documents uploaded yet.</Empty>}<div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/vendor-onboarding">Upload documents</Link></div></Card>
     </>) : <>
       <div className="portal-summary-grid">
