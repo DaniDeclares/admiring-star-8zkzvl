@@ -96,7 +96,16 @@ export default function PortalWorkspacePage() {
     </> : <>
       <div className="portal-status-banner"><div><strong>Application status: {statusLabel(application?.application_status)}</strong><p style={{ margin: '6px 0 0', color: '#6d6263' }}>DANI DECLARES reviews every requirement below before your account becomes dispatch-eligible. This is not yet an active provider account — nothing here can be assigned work until it's approved.</p></div><span className="portal-pill">{completeCount}/{requirements.length} complete</span></div>
       {application?.agreement_status !== 'EXECUTED' && <Card title="Sign your Provider Agreement"><p>Signing your Provider Agreement is the first step — it must be completed before you can upload documents or view your profile.</p><Link className="portal-primary" to="/portal/provider-agreement">Sign Provider Agreement →</Link></Card>}
-      <Card title="Requirements">{requirements.map(item => <Requirement key={item.label} {...item} />)}<div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/vendor-onboarding">Upload documents</Link></div></Card>
+      <Card title="Requirements">
+        {requirements.map(item => <Requirement key={item.label} {...item} />)}
+        <div className="portal-actions" style={{ marginTop: 14, flexWrap: 'wrap' }}>
+          {application?.agreement_status !== 'EXECUTED' && <Link className="portal-primary" to="/portal/provider-agreement">Complete agreement</Link>}
+          {application?.agreement_status === 'EXECUTED' && !['VERIFIED','NOT_REQUIRED'].includes(application?.tax_form_status) && <Link className="portal-primary" to="/portal/w9">Complete W-9</Link>}
+          {application?.agreement_status === 'EXECUTED' && <Link className="portal-primary" to="/portal/vendor-onboarding">Upload required documents</Link>}
+          {application?.agreement_status === 'EXECUTED' && <Link className="portal-primary" to="/portal/profile">Review profile</Link>}
+        </div>
+        <p className="portal-note" style={{ marginTop: 12 }}>Identity, background-check, compliance, capability, and document verification remain staff-reviewed. Completing applicant actions does not approve or activate the account.</p>
+      </Card>
       <Card title="Selected Services">{capabilities.length ? capabilities.map(item => <div className="portal-row" key={item.id}><div><strong>{item.capability_description || item.canonical_sku}</strong><small>{statusLabel(item.authorization_status)}</small></div></div>) : <Empty>No services selected.</Empty>}</Card>
       <Card title="Submitted Documents">{(snapshot?.documents || []).length ? snapshot.documents.map(item => <div className="portal-row" key={item.id}><div><strong>{item.document_type.replaceAll('_', ' ')}</strong><small>{statusLabel(item.verification_status)} · Uploaded {formatDate(item.uploaded_at)}</small></div></div>) : <Empty>No documents uploaded yet.</Empty>}<div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/vendor-onboarding">Upload documents</Link></div></Card>
     </>) : <>
