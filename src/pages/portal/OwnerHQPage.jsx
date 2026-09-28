@@ -317,7 +317,12 @@ function OwnerHq({ session }) {
       </div>
       <div style={{ marginTop: 14 }}>
         {(metrics.salesDueRows || []).slice(0, 8).map(item => <div className="portal-row" key={item.id}>
-          <div><strong>{item.company_name || item.contact_name || 'Sales lead'}</strong><small>{item.contact_name || 'Contact pending'} · Priority {item.priority_score ?? '—'} · {item.disposition || 'UNSET'}</small><small>Next: {item.next_action || 'Follow up'} · due {item.next_action_date}</small></div>
+          <div>
+            <strong>{item.company_name || item.contact_name || 'Sales lead'}</strong>
+            <small>{item.contact_name || 'Contact pending'} · Priority {item.priority_score ?? '—'} · {item.sales_stage || 'UNSTAGED'} · {item.disposition || 'UNSET'}</small>
+            <small>Next: {item.next_action || 'Follow up'} · due {item.next_action_date}</small>
+            {(Number(item.quoted_amount || 0) > 0 || Number(item.amount_collected || 0) > 0) && <small>{Number(item.quoted_amount || 0) > 0 ? `Quoted ${money(item.quoted_amount)}` : 'No quote yet'} · Collected {money(item.amount_collected)}</small>}
+          </div>
           <span className="portal-pill" style={statusPillStyle('DUE')}>DUE</span>
         </div>)}
         {!metrics.salesDue && <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No sales actions are due.</div>}
