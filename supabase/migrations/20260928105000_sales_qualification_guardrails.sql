@@ -59,6 +59,26 @@ create or replace function public.dd_run_safe_automation_recipes()
 returns uuid language plpgsql security definer set search_path='public' as $$
 declare r uuid:=gen_random_uuid(); n int:=0; t int:=0;
 begin
+ -- Reconcile historical SLA attention against current authoritative sales state.
+ -- This only supersedes alerts that are now provably non-sales/suppressed; it never sends outreach.
+ update dd_owner_attention_queue a
+ set status='SUPERSEDED',resolved_at=coalesce(a.resolved_at,now()),
+     recommended_action='Superseded by current governed sales classification; retain history only.'
+ from dd_sales_queue s
+ where a.status='OPEN' and a.domain='SALES' and a.reason='Speed-to-lead SLA exceeded'
+   and a.source_record_id=s.id::text
+   and (
+     coalesce(s.do_not_contact,false)=true or s.disposition='DO_NOT_CONTACT'
+     or lower(coalesce(s.contact_name,'')) like '%test%'
+     or coalesce(s.lane,'')='PARTNER'
+     or upper(coalesce(s.next_action,'')) like '%RELATIONSHIP RECOVERY HOLD%'
+     or coalesce(s.source,'') in ('GMAIL_SENT','WEB_SOURCED','LINKEDIN_MESSAGE','LINKEDIN_MARKETPLACE','LINKEDIN_INVITE','HUBSPOT_DEAL')
+     or lower(coalesce(s.sales_metadata->>'relationship_type','')) like '%partnership%'
+     or lower(coalesce(s.sales_metadata->>'relationship_type','')) like '%coaching%'
+     or lower(coalesce(s.buyer_type,'')) like 'government%'
+     or lower(coalesce(s.sales_metadata->>'relationship_type',''))='unknown_inbound_caller'
+   );
+
  insert into dd_owner_attention_queue(domain,source_table,source_record_id,reason,priority,recommended_action,metadata)
  select 'SALES','dd_sales_queue',s.id::text,'Speed-to-lead SLA exceeded','P1','Review and respond through Sales.',
    jsonb_build_object('source',s.source,'age_minutes',round(extract(epoch from(now()-coalesce(s.source_occurred_at,s.created_at)))/60))
@@ -71,6 +91,10 @@ begin
    and coalesce(s.lane,'') not in ('PARTNER')
    and coalesce(s.source,'') not in ('GMAIL_SENT','WEB_SOURCED','LINKEDIN_MESSAGE','LINKEDIN_MARKETPLACE','LINKEDIN_INVITE','HUBSPOT_DEAL')
    and lower(coalesce(s.contact_name,'')) not like '%test%'
+   and lower(coalesce(s.sales_metadata->>'relationship_type','')) not like '%partnership%'
+   and lower(coalesce(s.sales_metadata->>'relationship_type','')) not like '%coaching%'
+   and lower(coalesce(s.buyer_type,'')) not like 'government%'
+   and lower(coalesce(s.sales_metadata->>'relationship_type','')) <> 'unknown_inbound_caller'
  on conflict do nothing;
  get diagnostics n=row_count; t:=t+n;
 
