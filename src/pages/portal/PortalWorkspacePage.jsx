@@ -100,7 +100,7 @@ export default function PortalWorkspacePage() {
         {requirements.map(item => <Requirement key={item.label} {...item} />)}
         <div className="portal-actions" style={{ marginTop: 14, flexWrap: 'wrap' }}>
           {application?.agreement_status !== 'EXECUTED' && <Link className="portal-primary" to="/portal/provider-agreement">Complete agreement</Link>}
-          {application?.agreement_status === 'EXECUTED' && !['VERIFIED','NOT_REQUIRED'].includes(application?.tax_form_status) && <Link className="portal-primary" to="/portal/w9">Complete W-9</Link>}
+          {application?.agreement_status === 'EXECUTED' && !['RECEIVED','SUBMITTED','VERIFIED','NOT_REQUIRED'].includes(String(application?.tax_form_status || '').toUpperCase()) && <Link className="portal-primary" to="/portal/w9">Complete W-9</Link>}
           {application?.agreement_status === 'EXECUTED' && <Link className="portal-primary" to="/portal/vendor-onboarding">Upload required documents</Link>}
           {application?.agreement_status === 'EXECUTED' && <Link className="portal-primary" to="/portal/profile">Review profile</Link>}
         </div>
