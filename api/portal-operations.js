@@ -241,8 +241,8 @@ async function getOwnerControlSnapshot(supabase) {
   const base = await getStaffSnapshot(supabase);
   const degradedSources = [];
   const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue, revenueAgents, ownerAttention] = await Promise.all([
-    supabase.from('dd_sales_queue')
-      .select('id,contact_name,company_name,role_title,phone,email,lane,source,source_account,disposition,next_action,next_action_date,campaign_status,intent_tier,salesperson_name,updated_at')
+    supabase.from('dd_sales_engine_v1')
+      .select('id,contact_name,company_name,role_title,phone,email,lane,source,disposition,sales_stage,priority_score,next_action,next_action_date,quoted_amount,amount_collected,updated_at')
       .order('updated_at', { ascending: false }).limit(250),
     supabase.from('dd_research_leads').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_accounting_exception_queue')
