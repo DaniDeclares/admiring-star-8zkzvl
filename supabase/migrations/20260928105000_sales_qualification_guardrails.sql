@@ -3,7 +3,12 @@
 
 create or replace view public.dd_sales_engine_v1
 with (security_invoker=true) as
-select q.*,
+select
+ q.id,q.contact_name,q.company_name,q.role_title,q.phone,q.email,q.lane,q.source,q.source_confidence,
+ q.disposition,q.next_action,q.next_action_date,q.suggested_sku,q.quoted_amount,q.amount_collected,q.job_id,
+ q.notes,q.created_at,q.updated_at,q.created_by,q.buyer_type,q.pain_point,q.impact_statement,q.solution_statement,
+ q.deliverables,q.investment_position,q.next_step_commitment,q.trigger_type,q.campaign_hypothesis,q.contact_attempts,
+ q.last_contacted_at,q.last_contact_channel,q.decision_maker_confirmed,q.objection_code,q.objection_notes,q.do_not_contact,q.sales_metadata,
  case
    when q.do_not_contact or q.disposition='DO_NOT_CONTACT'
      or upper(coalesce(q.next_action,'')) like '%RELATIONSHIP RECOVERY HOLD%'
@@ -49,7 +54,12 @@ select q.*,
    when extract(isodow from now() at time zone 'America/New_York') in (2,3) and extract(hour from now() at time zone 'America/New_York') between 9 and 11 then 'EMPIRICAL_CALL_WINDOW'
    when extract(isodow from now() at time zone 'America/New_York') in (3,4) and extract(hour from now() at time zone 'America/New_York') in (11,16) then 'EMPIRICAL_CALL_WINDOW'
    else 'STANDARD_OUTREACH'
- end as timing_signal
+ end as timing_signal,
+ q.front_door_code,q.front_door_notes,q.source_account,q.source_message_id,q.source_thread_id,q.source_occurred_at,
+ q.source_direction,q.campaign_eligible,q.campaign_status,q.campaign_suppression_reason,q.campaign_name,
+ q.campaign_last_contacted_at,q.intent_score,q.intent_tier,q.capture_offer_code,q.capture_page,
+ q.preferred_contact_channel,q.consent_email,q.consent_sms,q.consent_phone,q.consent_marketing,q.consent_captured_at,
+ q.next_permitted_contact_at,q.contact_pressure_state,q.salesperson_user_id,q.salesperson_name,q.lead_origin_class,q.commission_policy_code
 from public.dd_sales_queue q;
 
 grant select on public.dd_sales_engine_v1 to authenticated,service_role;
