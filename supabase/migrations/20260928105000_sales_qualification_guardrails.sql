@@ -288,7 +288,7 @@ select
 from public.dd_jobs j
 left join public.dd_work_orders w on w.id=j.work_order_id
 left join public.dd_provider_payables pp on pp.job_id=j.id
-left join public.dd_accounts_payable_ledger ap on ap.work_order_id=j.work_order_id
+left join public.dd_accounts_payable_ledger ap on ap.work_order_id=j.work_order_id and ap.provider_id=pp.provider_id
 left join public.dd_provider_payout_clearance_policy pol on pol.policy_key='DEFAULT';
 
 revoke all on public.dd_fulfillment_finance_health_v1 from anon,authenticated; grant select on public.dd_fulfillment_finance_health_v1 to service_role;
@@ -387,10 +387,10 @@ with latest as (
 ),
 mapped as (
   select 'CH03'::text channel_code,8 pass_number,l.* from latest l
-   where l.rn=1 and l.work_key='CH03-PASS-08-09' and l.status='PASS'
+   where l.rn=1 and l.work_key='CH03-PASS-08-09'
   union all
   select 'CH03'::text,9,l.* from latest l
-   where l.rn=1 and l.work_key='CH03-PASS-08-09' and l.status='PASS'
+   where l.rn=1 and l.work_key='CH03-PASS-08-09'
 )
 select a.channel_code,a.pass_number,a.pass_name,a.status as audit_status,a.priority,a.blocking_gap,a.green_exit_criteria,
        m.proof_key,m.proof_version,m.status as proof_status,m.assertions_total,m.assertions_passed,m.assertions_failed,
