@@ -93,3 +93,33 @@ begin
  update dd_automation_recipes set last_run_at=now() where is_active;
  return r;
 end$$;
+
+
+-- Account-level worklist: one actionable primary row per company/account, while preserving every contact in dd_sales_queue.
+-- Individual/no-company leads remain independent opportunities.
+create or replace view public.dd_sales_account_worklist_v1
+with (security_invoker=true) as
+with ranked as (
+ select e.*,
+   coalesce(nullif(lower(trim(e.company_name)),''),'__individual__:'||e.id::text) as account_key,
+   row_number() over (
+     partition by coalesce(nullif(lower(trim(e.company_name)),''),'__individual__:'||e.id::text)
+     order by
+       case when e.sales_stage in ('DO_NOT_CONTACT','RECOVERY_HOLD','FULFILLMENT','PARTNERSHIP') then 1 else 0 end,
+       e.decision_maker_confirmed desc,
+       e.priority_score desc,
+       case e.source_confidence when 'VERIFIED' then 0 when 'SINGLE_SOURCE' then 1 else 2 end,
+       e.updated_at desc,
+       e.id
+   ) as account_rank,
+   count(*) over (
+     partition by coalesce(nullif(lower(trim(e.company_name)),''),'__individual__:'||e.id::text)
+   ) as account_contact_count
+ from public.dd_sales_engine_v1 e
+)
+select *
+from ranked
+where account_rank=1;
+
+grant select on public.dd_sales_account_worklist_v1 to authenticated,service_role;
+comment on view public.dd_sales_account_worklist_v1 is 'One primary actionable sales row per company/account. Preserves alternate contacts in dd_sales_queue while preventing duplicate-company inflation and multi-contact pressure.';
