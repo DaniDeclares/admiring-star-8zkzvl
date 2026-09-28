@@ -170,3 +170,39 @@ left join public.dd_service_initial_payment_links p on p.canonical_sku=e.suggest
 
 grant select on public.dd_sales_closeability_v1 to authenticated,service_role;
 comment on view public.dd_sales_closeability_v1 is 'Fail-closed discovery-to-money transition. A lead is money_path_ready only with captured need, an explicit canonical SKU, LIVE_READY Production sellability, and a verified initial-payment contract. Does not infer SKU or pricing.';
+
+
+-- End-to-end commercial transition health: detect leaks without mutating lifecycle state.
+create or replace view public.dd_commercial_transition_health_v1
+with (security_invoker=true) as
+select
+ s.id as sales_queue_id,s.contact_name,s.company_name,s.disposition,
+ s.amount_collected,s.job_id,
+ j.service_request_id,j.work_order_id,j.job_status,
+ w.status as work_order_status,w.qa_status,
+ case
+   when coalesce(s.amount_collected,0)>0 and s.job_id is null then 'RED_PAID_WITHOUT_JOB'
+   when s.job_id is not null and j.id is null then 'RED_BROKEN_JOB_LINK'
+   when j.id is not null and j.service_request_id is null then 'RED_JOB_WITHOUT_REQUEST'
+   when j.id is not null and j.work_order_id is null then 'RED_JOB_WITHOUT_WORK_ORDER'
+   when j.work_order_id is not null and w.id is null then 'RED_BROKEN_WORK_ORDER_LINK'
+   when j.job_status in ('COMPLETED','CLOSED') and coalesce(w.qa_status,'NOT_STARTED')='NOT_STARTED' then 'RED_COMPLETED_WITHOUT_QA'
+   when coalesce(s.amount_collected,0)>0 and j.id is not null and w.id is not null then 'GREEN_MONEY_TO_FULFILLMENT_LINKED'
+   else 'YELLOW_IN_PROGRESS'
+ end as transition_health,
+ case
+   when coalesce(s.amount_collected,0)>0 and s.job_id is null then 'CREATE_OR_LINK_JOB_THROUGH_GOVERNED_RAIL'
+   when s.job_id is not null and j.id is null then 'REPAIR_BROKEN_JOB_REFERENCE'
+   when j.id is not null and j.service_request_id is null then 'RECONCILE_SERVICE_REQUEST'
+   when j.id is not null and j.work_order_id is null then 'CREATE_OR_LINK_WORK_ORDER_THROUGH_GOVERNED_RAIL'
+   when j.work_order_id is not null and w.id is null then 'REPAIR_BROKEN_WORK_ORDER_REFERENCE'
+   when j.job_status in ('COMPLETED','CLOSED') and coalesce(w.qa_status,'NOT_STARTED')='NOT_STARTED' then 'START_QA_BEFORE_PAYABLE'
+   else 'CONTINUE_GOVERNED_LIFECYCLE'
+ end as next_transition_action
+from public.dd_sales_queue s
+left join public.dd_jobs j on j.id=s.job_id
+left join public.dd_work_orders w on w.id=j.work_order_id
+where coalesce(s.amount_collected,0)>0 or s.job_id is not null;
+
+grant select on public.dd_commercial_transition_health_v1 to authenticated,service_role;
+comment on view public.dd_commercial_transition_health_v1 is 'Read-only end-to-end guard from collected sales through job/work-order/QA. Detects lifecycle leaks without fabricating estimates, QA completion, payables, or payments.';
