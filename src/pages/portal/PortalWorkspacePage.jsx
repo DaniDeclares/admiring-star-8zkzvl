@@ -68,8 +68,9 @@ export default function PortalWorkspacePage() {
   const isApprovedProvider = application?.application_status === 'APPROVED';
   const isSignedProvider = application?.agreement_status === 'EXECUTED';
   const w9Status = String(snapshot?.w9?.status || application?.tax_form_status || '').toUpperCase();
-  const canResumeProviderApplication = ['DRAFT','SUBMITTED','UNDER_REVIEW','NEEDS_INFO'].includes(String(application?.application_status || '').toUpperCase());
-  const requirements = isProvider ? buildProviderRequirements(application, capabilities) : [];
+  const canResumeProviderApplication = ['NEEDS_INFO'].includes(String(application?.application_status || '').toUpperCase());
+  const requirementsApplication = application ? { ...application, tax_form_status: w9Status || application?.tax_form_status } : application;
+  const requirements = isProvider ? buildProviderRequirements(requirementsApplication, capabilities) : [];
   const completeCount = requirements.filter(r => r.ok).length;
   const openAssignments = snapshot?.assignments?.filter(a => a.assignment_status === 'OFFERED').length || 0;
   const nextAppointment = snapshot?.appointments?.filter(a => a.appointment_status !== 'CANCELLED').sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at))[0];
