@@ -1,9 +1,9 @@
+import { economicGateFromOffer, checkoutEligibility, resolveCH01CommercialSelection } from './governedCommercialGate2026.mjs';
+
 jest.mock('../../../lib/prisma.js', () => ({
   __esModule: true,
   default: { $queryRawUnsafe: jest.fn() },
 }));
-
-import { economicGateFromOffer, checkoutEligibility, resolveCH01CommercialSelection } from './governedCommercialGate2026.mjs';
 
 describe('economic checkout gate', () => {
   test('blocks missing economics', () => {

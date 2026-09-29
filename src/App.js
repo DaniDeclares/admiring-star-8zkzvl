@@ -116,6 +116,7 @@ export default function App() {
         <Route path="/portal/my-portal" element={<Navigate to="/portal" replace />} />
         <Route path="/my-portal" element={<Navigate to="/portal" replace />} />
         <Route path="/provider" element={<Navigate to="/portal/access?role=provider" replace />} />
+        <Route path="/provider/apply" element={<Navigate to="/portal/access?role=provider" replace />} />
         <Route path="/provider/login" element={<Navigate to="/portal/login?role=provider" replace />} />
         <Route path="/providers" element={<PortalAccessPage />} />
         <Route path="/portal/access" element={<PortalAccessPage />} />

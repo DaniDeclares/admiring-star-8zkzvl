@@ -204,13 +204,42 @@ async function getStaffSnapshot(supabase) {
 // production until the operator runs it, so those queries degrade to an
 // empty/null result instead of taking down the whole Owner HQ snapshot.
 const MISSING_TABLE_CODES = new Set(['42P01', 'PGRST205']);
-function tolerateMissingTable(result) {
-  if (result.error && MISSING_TABLE_CODES.has(result.error.code)) return { data: null, error: null };
+// Only this specific missing-table signature degrades silently -- RLS/permission
+// denials, malformed queries, and any other real error still fall through to the
+// `errors`/throw checks below exactly as before. This is never a broad swallow.
+function tolerateMissingTable(result, sourceLabel, degraded) {
+  if (result.error && MISSING_TABLE_CODES.has(result.error.code)) {
+    if (degraded) degraded.push({ source: sourceLabel, code: result.error.code, message: result.error.message });
+    return { data: null, error: null };
+  }
   return result;
+}
+
+// A degraded optional Owner HQ panel was otherwise invisible -- indistinguishable
+// from "genuinely no rows" -- which is exactly how 292 silent crashes on this same
+// endpoint went unnoticed for five days. One deduped OPEN dd_owner_attention_queue
+// row per degraded source makes it a real, owner-visible signal (surfaced in Owner
+// HQ's existing "Needs Danielle" panel) instead of requiring manual discovery.
+async function recordDegradedOwnerHqSources(supabase, degraded) {
+  for (const item of degraded) {
+    const { data: existing } = await supabase.from('dd_owner_attention_queue')
+      .select('id').eq('domain', 'SOFTWARE_PLATFORM').eq('source_table', item.source).eq('status', 'OPEN').limit(1).maybeSingle();
+    if (existing) continue;
+    await supabase.from('dd_owner_attention_queue').insert({
+      domain: 'SOFTWARE_PLATFORM',
+      source_table: item.source,
+      reason: `Owner HQ panel "${item.source}" is degraded: ${item.message} (${item.code}).`,
+      priority: 'MEDIUM',
+      status: 'OPEN',
+      recommended_action: 'Apply the missing migration for this table (or confirm it was intentionally removed) so this panel shows real data again.',
+      metadata: { error_code: item.code, detected_at: new Date().toISOString() },
+    });
+  }
 }
 
 async function getOwnerControlSnapshot(supabase) {
   const base = await getStaffSnapshot(supabase);
+  const degradedSources = [];
   const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue, revenueAgents, ownerAttention] = await Promise.all([
     supabase.from('dd_sales_queue')
       .select('id,contact_name,company_name,role_title,phone,email,lane,source,source_account,disposition,next_action,next_action_date,campaign_status,intent_tier,salesperson_name,updated_at')
@@ -241,7 +270,8 @@ async function getOwnerControlSnapshot(supabase) {
     supabase.from('dd_revenue_agent_registry').select('agent_key,agent_name,responsibility,is_active,updated_at').order('agent_key', { ascending: true }),
     supabase.from('dd_owner_attention_queue').select('*').neq('status', 'RESOLVED').order('created_at', { ascending: false }).limit(100),
   ]);
-  const optional = [actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue].map(tolerateMissingTable);
+  const optionalLabels = ['dd_external_action_outbox','dd_research_programs','dd_research_work_queue','dd_research_evidence','dd_research_sources','dd_research_source_snapshots','dd_unattended_green_runs','dd_service_pricing_research_queue','dd_platform_release_audit_10_pass','dd_software_build_runs','dd_software_build_work_queue'];
+  const optional = [actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue].map((result, i) => tolerateMissingTable(result, optionalLabels[i], degradedSources));
   const [safeActionOutbox, safeResearchPrograms, safeResearchWork, safeResearchEvidence, safeResearchSources, safeResearchSnapshots, safeGreenRuns, safePricingResearch, safePlatformAudit, safeSoftwareBuildRuns, safeSoftwareBuildQueue] = optional;
   const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, ...optional, revenueAgents, ownerAttention].filter(item => item.error);
   if (errors.length) throw errors[0].error;
@@ -249,16 +279,24 @@ async function getOwnerControlSnapshot(supabase) {
   // Company Controller / Morning Brief objects are additive and may not exist
   // yet in every environment (see supabase/migrations/20260924133000_company_controller_morning_brief_production.sql).
   // Missing tables here must never break the rest of Owner HQ.
+  const companyControllerLabels = ['dd_company_morning_briefs','dd_company_controller_dashboard_v1','dd_company_controller_runs','dd_overnight_soak_receipts'];
   const [morningBrief, companyDomains, companyRuns, soakReceipts] = (await Promise.all([
     supabase.from('dd_company_morning_briefs').select('*').order('generated_at', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('dd_company_controller_dashboard_v1').select('*'),
     supabase.from('dd_company_controller_runs').select('*').order('started_at', { ascending: false }).limit(10),
     supabase.from('dd_overnight_soak_receipts').select('*').order('run_at', { ascending: false }).limit(12),
-  ])).map(tolerateMissingTable);
+  ])).map((result, i) => tolerateMissingTable(result, companyControllerLabels[i], degradedSources));
   const companyControllerErrors = [morningBrief, companyDomains, companyRuns, soakReceipts].filter(item => item.error);
   if (companyControllerErrors.length) throw companyControllerErrors[0].error;
 
+  if (degradedSources.length) {
+    // Best-effort: a failure recording the diagnostic must never itself break
+    // Owner HQ, which is exactly the bug this whole fix targets.
+    try { await recordDegradedOwnerHqSources(supabase, degradedSources); } catch (e) { /* platformDiagnostics below still carries it */ }
+  }
+
   return {
+    platformDiagnostics: { degradedSources },
     ...base,
     salesQueue: salesQueue.data || [],
     researchLeads: researchLeads.data || [],
