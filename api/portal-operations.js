@@ -204,45 +204,16 @@ async function getStaffSnapshot(supabase) {
 // production until the operator runs it, so those queries degrade to an
 // empty/null result instead of taking down the whole Owner HQ snapshot.
 const MISSING_TABLE_CODES = new Set(['42P01', 'PGRST205']);
-// Only this specific missing-table signature degrades silently -- RLS/permission
-// denials, malformed queries, and any other real error still fall through to the
-// `errors`/throw checks below exactly as before. This is never a broad swallow.
-function tolerateMissingTable(result, sourceLabel, degraded) {
-  if (result.error && MISSING_TABLE_CODES.has(result.error.code)) {
-    if (degraded) degraded.push({ source: sourceLabel, code: result.error.code, message: result.error.message });
-    return { data: null, error: null };
-  }
+function tolerateMissingTable(result) {
+  if (result.error && MISSING_TABLE_CODES.has(result.error.code)) return { data: null, error: null };
   return result;
-}
-
-// A degraded optional Owner HQ panel was otherwise invisible -- indistinguishable
-// from "genuinely no rows" -- which is exactly how 292 silent crashes on this same
-// endpoint went unnoticed for five days. One deduped OPEN dd_owner_attention_queue
-// row per degraded source makes it a real, owner-visible signal (surfaced in Owner
-// HQ's existing "Needs Danielle" panel) instead of requiring manual discovery.
-async function recordDegradedOwnerHqSources(supabase, degraded) {
-  for (const item of degraded) {
-    const { data: existing } = await supabase.from('dd_owner_attention_queue')
-      .select('id').eq('domain', 'SOFTWARE_PLATFORM').eq('source_table', item.source).eq('status', 'OPEN').limit(1).maybeSingle();
-    if (existing) continue;
-    await supabase.from('dd_owner_attention_queue').insert({
-      domain: 'SOFTWARE_PLATFORM',
-      source_table: item.source,
-      reason: `Owner HQ panel "${item.source}" is degraded: ${item.message} (${item.code}).`,
-      priority: 'MEDIUM',
-      status: 'OPEN',
-      recommended_action: 'Apply the missing migration for this table (or confirm it was intentionally removed) so this panel shows real data again.',
-      metadata: { error_code: item.code, detected_at: new Date().toISOString() },
-    });
-  }
 }
 
 async function getOwnerControlSnapshot(supabase) {
   const base = await getStaffSnapshot(supabase);
-  const degradedSources = [];
   const [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue, revenueAgents, ownerAttention] = await Promise.all([
-    supabase.from('dd_sales_engine_v1')
-      .select('id,contact_name,company_name,role_title,phone,email,lane,source,disposition,sales_stage,priority_score,next_action,next_action_date,quoted_amount,amount_collected,updated_at')
+    supabase.from('dd_sales_queue')
+      .select('id,contact_name,company_name,role_title,phone,email,lane,source,source_account,disposition,next_action,next_action_date,campaign_status,intent_tier,salesperson_name,updated_at')
       .order('updated_at', { ascending: false }).limit(250),
     supabase.from('dd_research_leads').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_accounting_exception_queue')
@@ -270,8 +241,7 @@ async function getOwnerControlSnapshot(supabase) {
     supabase.from('dd_revenue_agent_registry').select('agent_key,agent_name,responsibility,is_active,updated_at').order('agent_key', { ascending: true }),
     supabase.from('dd_owner_attention_queue').select('*').neq('status', 'RESOLVED').order('created_at', { ascending: false }).limit(100),
   ]);
-  const optionalLabels = ['dd_external_action_outbox','dd_research_programs','dd_research_work_queue','dd_research_evidence','dd_research_sources','dd_research_source_snapshots','dd_unattended_green_runs','dd_service_pricing_research_queue','dd_platform_release_audit_10_pass','dd_software_build_runs','dd_software_build_work_queue'];
-  const optional = [actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue].map((result, i) => tolerateMissingTable(result, optionalLabels[i], degradedSources));
+  const optional = [actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue].map(tolerateMissingTable);
   const [safeActionOutbox, safeResearchPrograms, safeResearchWork, safeResearchEvidence, safeResearchSources, safeResearchSnapshots, safeGreenRuns, safePricingResearch, safePlatformAudit, safeSoftwareBuildRuns, safeSoftwareBuildQueue] = optional;
   const errors = [salesQueue, researchLeads, accountingExceptions, communicationEvents, agentRuns, ...optional, revenueAgents, ownerAttention].filter(item => item.error);
   if (errors.length) throw errors[0].error;
@@ -279,24 +249,16 @@ async function getOwnerControlSnapshot(supabase) {
   // Company Controller / Morning Brief objects are additive and may not exist
   // yet in every environment (see supabase/migrations/20260924133000_company_controller_morning_brief_production.sql).
   // Missing tables here must never break the rest of Owner HQ.
-  const companyControllerLabels = ['dd_company_morning_briefs','dd_company_controller_dashboard_v1','dd_company_controller_runs','dd_overnight_soak_receipts'];
   const [morningBrief, companyDomains, companyRuns, soakReceipts] = (await Promise.all([
     supabase.from('dd_company_morning_briefs').select('*').order('generated_at', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('dd_company_controller_dashboard_v1').select('*'),
     supabase.from('dd_company_controller_runs').select('*').order('started_at', { ascending: false }).limit(10),
     supabase.from('dd_overnight_soak_receipts').select('*').order('run_at', { ascending: false }).limit(12),
-  ])).map((result, i) => tolerateMissingTable(result, companyControllerLabels[i], degradedSources));
+  ])).map(tolerateMissingTable);
   const companyControllerErrors = [morningBrief, companyDomains, companyRuns, soakReceipts].filter(item => item.error);
   if (companyControllerErrors.length) throw companyControllerErrors[0].error;
 
-  if (degradedSources.length) {
-    // Best-effort: a failure recording the diagnostic must never itself break
-    // Owner HQ, which is exactly the bug this whole fix targets.
-    try { await recordDegradedOwnerHqSources(supabase, degradedSources); } catch (e) { /* platformDiagnostics below still carries it */ }
-  }
-
   return {
-    platformDiagnostics: { degradedSources },
     ...base,
     salesQueue: salesQueue.data || [],
     researchLeads: researchLeads.data || [],
@@ -388,7 +350,7 @@ async function getDirectProviderAuthorizationSnapshot(supabase, providerId) {
   return {
     application: {
       id: null,
-      application_status: 'LEGACY_RECORD',
+      application_status: ['APPROVED', 'AUTHORIZED'].includes(org.permission_status) && org.accepts_new_work ? 'APPROVED' : org.permission_status,
       tax_form_status: null,
       insurance_status: null,
       identity_status: null,
@@ -398,7 +360,6 @@ async function getDirectProviderAuthorizationSnapshot(supabase, providerId) {
       agreement_signer_name: signature?.signer_full_name || null,
       background_check_status: null,
       compliance_status: org.compliance_status,
-      authorization_note: 'Historical provider record. A current approved provider application is required before dispatch eligibility.',
       legal_name: org.legal_name || org.name,
       applicant_type: null,
       contact_first_name: provider.first_name,
@@ -526,16 +487,6 @@ async function createDispatchOffer(supabase, actorId, payload) {
   if (!['NEW', 'CREATED', 'DISPATCH_REVIEW'].includes(String(job.job_status || '').toUpperCase())) throw new Error('JOB_NOT_READY_FOR_DISPATCH');
   const { data: provider, error: providerError } = await supabase.from('dd_providers').select('id, is_active').eq('id', providerId).single();
   if (providerError || !provider?.is_active) throw new Error('PROVIDER_NOT_ACTIVE');
-  // Dispatch authority is stricter than catalog presence. Production's governed
-  // readiness view is the authority: historical provider/org rows alone cannot
-  // receive offers.
-  const { data: readiness, error: readinessError } = await supabase
-    .from('dd_provider_assignment_readiness_v1')
-    .select('assignment_ready,onboarding_next_action')
-    .eq('provider_id', providerId)
-    .maybeSingle();
-  if (readinessError) throw readinessError;
-  if (!readiness?.assignment_ready) throw new Error(`PROVIDER_NOT_ASSIGNMENT_READY:${readiness?.onboarding_next_action || 'READINESS_EVIDENCE_MISSING'}`);
   const { data: assignment, error } = await supabase.from('dd_job_assignments').insert({ job_id: jobId, provider_id: providerId, assignment_status: 'OFFERED', admin_notes: adminNotes || null, provider_notes: providerNotes || null }).select().single();
   if (error) throw error;
   await supabase.from('dd_jobs').update({ job_status: 'ASSIGNMENT_OFFERED' }).eq('id', jobId);

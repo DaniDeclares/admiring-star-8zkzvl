@@ -7,17 +7,17 @@
 import { createClient } from '@supabase/supabase-js';
 import { COMPANY_WIDE_CATALOG } from '../src/config/canonicalCatalogRegistry.js';
 
-const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required. Refusing to run without explicit credentials.');
-}
+const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || 'https://ajxezpczaemunlcmqlgl.supabase.co';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'YOUR_SERVICE_ROLE_KEY';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 async function seedDatabase() {
   console.log('🌱 Seeding canonical Phase 0 catalog identities only...');
+
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is required. Refusing to run without explicit credentials.');
+  }
 
   for (const item of COMPANY_WIDE_CATALOG) {
     const { error } = await supabase.from('services').upsert({

@@ -1,5 +1,3 @@
-jest.mock('../../lib/supabaseClient.js', () => ({ supabase: {} }));
-
 import { hasStaffRole } from '../residentDispatchService.js';
 
 describe('residentDispatchService authorization boundary', () => {

@@ -29,30 +29,17 @@ jobs:
         run: npm test -- --watchAll=false
       - name: Production build
         run: npm run build
-
-  critical-production-smoke:
-    if: github.event_name != 'pull_request'
-    needs: deterministic-quality
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          cache: npm
-      - run: npm ci
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
       - name: Critical public smoke
         env:
           PRODUCTION_BASE_URL: https://www.danideclares.com
         run: npx playwright test checks/production-critical.spec.ts
-      - name: Preserve Production failure evidence
+      - name: Preserve failure evidence
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: dani-production-smoke-evidence-${{ github.run_id }}
+          name: dani-software-quality-evidence-${{ github.run_id }}
           path: |
             playwright-report/
             test-results/

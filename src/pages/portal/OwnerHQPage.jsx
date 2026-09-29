@@ -73,12 +73,8 @@ function OwnerHq({ session }) {
     setError('');
     try {
       const response = await fetch('/api/portal-operations?ownerDashboard=1', {
-        headers: { Authorization: 'Bearer ' + session.access_token, 'X-Dani-Portal-Token': session.access_token },
+        headers: { Authorization: 'Bearer ' + session.access_token },
       });
-      const contentType = response.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) {
-        throw new Error(`DANI HQ API returned ${response.status} ${contentType || 'non-JSON'} instead of JSON.`);
-      }
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.error || 'Could not load DANI HQ.');
       setData(body);
@@ -134,22 +130,7 @@ function OwnerHq({ session }) {
       const d = new Date(a.starts_at);
       return !Number.isNaN(d.getTime()) && d >= today && d < new Date(today.getTime() + 86400000);
     });
-    // Owner KPIs are evidence-conservative: an estimate is live pipeline only when
-    // it has positive customer-demand provenance. Admin/test/unknown quotes remain
-    // available in the quote workspace but cannot inflate owner revenue metrics.
-    const livePipelineQuotes = quotes.filter(q => {
-      const status = String(q.estimate_status || '').toLowerCase();
-      const source = String(q.source_slug || '').toLowerCase();
-      return source === 'thumbtack' && !['converted','approved','cancelled','declined','expired','superseded'].includes(status);
-    });
-    const quoteValue = livePipelineQuotes.reduce((sum, q) => sum + Number(q.estimated_total || 0), 0);
-    const unresolvedQuoteCount = quotes.filter(q => {
-      const source = String(q.source_slug || '').toLowerCase();
-      return ['admin_quote_builder','danis_specials_owner_quote'].includes(source);
-    }).length;
-    const falseInboundSla = item => item?.domain === 'SALES' && item?.source_table === 'dd_sales_queue' && item?.reason === 'Speed-to-lead SLA exceeded'
-      && ['GMAIL_SENT','WEB_SOURCED','LINKEDIN_MESSAGE','LINKEDIN_MARKETPLACE','LINKEDIN_INVITE','HUBSPOT_DEAL'].includes(String(item?.metadata?.source || '').toUpperCase());
-    const businessOwnerAttention = ownerAttention.filter(item => item?.domain !== 'SOFTWARE_PLATFORM' && !falseInboundSla(item));
+    const quoteValue = quotes.filter(q => !['cancelled','declined','expired','superseded'].includes(String(q.estimate_status || '').toLowerCase())).reduce((sum, q) => sum + Number(q.estimated_total || 0), 0);
     const now = new Date(); now.setHours(23,59,59,999);
     const salesDueRows = salesQueue.filter(item => {
       if (String(item.disposition || '').toUpperCase() === 'PAYMENT_SUCCEEDED') return false;
@@ -167,11 +148,7 @@ function OwnerHq({ session }) {
       pendingChanges: pendingChanges.length,
       todayAppointments: todayAppointments.length,
       quoteValue,
-      livePipelineQuotes: livePipelineQuotes.length,
-      unresolvedQuoteCount,
-      ownerAttention: businessOwnerAttention.length,
-      ownerAttentionRows: businessOwnerAttention,
-      systemHealthAttention: ownerAttention.filter(item => item?.domain === 'SOFTWARE_PLATFORM'),
+      ownerAttention: ownerAttention.length,
       salesQueue: salesQueue.length,
       salesDue: salesDueRows.length,
       salesDueRows,
@@ -244,11 +221,11 @@ function OwnerHq({ session }) {
       </div>
       <div className="portal-summary-grid" style={{ marginTop: 14 }}>
         <a className="portal-summary-tile" href="#company-health" style={{ borderColor: statusPillStyle(data.morningBrief.company_status)?.color }}><strong style={{ color: statusPillStyle(data.morningBrief.company_status)?.color }}>{data.morningBrief.company_status}</strong><span>Company state</span></a>
-        <a className="portal-summary-tile" href="#owner-attention"><strong>{metrics.ownerAttention}</strong><span>Needs Danielle</span></a>
+        <a className="portal-summary-tile" href="#owner-attention"><strong>{data.morningBrief.owner_attention?.open_count ?? 0}</strong><span>Needs Danielle</span></a>
         <a className="portal-summary-tile" href="#company-health"><strong>{data.morningBrief.overnight_verified?.research_queued ?? 0}</strong><span>Research queued</span></a>
         <a className="portal-summary-tile" href="#company-health"><strong>{data.morningBrief.overnight_verified?.support_ready ?? 0}/{data.morningBrief.overnight_verified?.services_total ?? 0}</strong><span>Support-ready services</span></a>
         <a className="portal-summary-tile" href="#software-platform"><strong>{data.morningBrief.software_platform?.status || 'UNKNOWN'}</strong><span>Software & platform</span></a>
-        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesQueue}</strong><span>CRM / prospect records</span></Link>
+        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{data.morningBrief.revenue_sales?.sales_queue ?? metrics.salesQueue}</strong><span>Sales queue</span></Link>
       </div>
       <div style={{ marginTop: 14, borderTop: '1px solid rgba(255,255,255,.2)', paddingTop: 14, display: 'flex', justifyContent: 'space-between', gap: 15, alignItems: 'center' }}>
         <div>
@@ -276,23 +253,23 @@ function OwnerHq({ session }) {
 
     <div className="portal-summary-grid">
       <a className="portal-summary-tile" href="#owner-attention"><strong>{metrics.ownerAttention}</strong><span>Needs Danielle</span></a>
-      <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Prospecting due / overdue</span></Link>
+      <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Sales due / overdue</span></Link>
       <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.activeJobs}</strong><span>Active jobs</span></Link>
       <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.paidServices}</strong><span>Paid services to fulfill</span></Link>
       <a className="portal-summary-tile" href="#owner-accounting"><strong>{metrics.ownerAccounting}</strong><span>Money decisions</span></a>
       <a className="portal-summary-tile" href="#owner-comms"><strong>{metrics.communicationAttention}</strong><span>Replies needing action</span></a>
       <Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.atRisk}</strong><span>Operational exceptions</span></Link>
-      <Link className="portal-summary-tile" to="/portal/quotes"><strong>{money(metrics.quoteValue)}</strong><span>Verified open quote value</span></Link>
+      <Link className="portal-summary-tile" to="/portal/quotes"><strong>{money(metrics.quoteValue)}</strong><span>Open quote value</span></Link>
     </div>
 
-    <section className="portal-card" id="owner-attention" style={{ border: (metrics.ownerAttentionRows || []).some(item => item.priority === 'URGENT') ? '2px solid #9b3346' : undefined }}>
+    <section className="portal-card" id="owner-attention" style={{ border: (data?.ownerAttention || []).some(item => item.priority === 'URGENT') ? '2px solid #9b3346' : undefined }}>
       <div>
         <p className="portal-eyebrow">Needs your attention</p>
         <h2 style={{ margin: '5px 0 0' }}>Owner Attention Queue</h2>
         <p className="portal-note" style={{ marginTop: 8 }}>Urgent inbound communications and governed exceptions surface here instead of staying buried in external systems.</p>
       </div>
       <div style={{ marginTop: 14 }}>
-        {(metrics.ownerAttentionRows || []).length ? (metrics.ownerAttentionRows || []).map(item => <div className="portal-row" key={item.id}>
+        {(data?.ownerAttention || []).length ? (data.ownerAttention || []).map(item => <div className="portal-row" key={item.id}>
           <div>
             <strong>{item.priority === 'URGENT' ? '🚨 ' : ''}{item.reason}</strong>
             <small>{item.domain} · {item.priority} · {item.metadata?.subject || item.source_table} · {item.created_at ? new Date(item.created_at).toLocaleString() : ''}</small>
@@ -307,22 +284,17 @@ function OwnerHq({ session }) {
     <section className="portal-card" id="owner-revenue">
       <div>
         <p className="portal-eyebrow">Revenue control</p>
-        <h2 style={{ margin: '5px 0 0' }}>Prospecting & Sales Follow-up</h2>
-        <p className="portal-note" style={{ marginTop: 8 }}>Dated outbound prospecting and verified customer follow-ups appear here. Inbound response SLA is tracked separately and only applies to verified inbound demand.</p>
+        <h2 style={{ margin: '5px 0 0' }}>Sales Due Now</h2>
+        <p className="portal-note" style={{ marginTop: 8 }}>Only dated sales actions that are due or overdue appear here. The full CRM stays in the sales workspace.</p>
       </div>
       <div className="portal-summary-grid" style={{ marginTop: 14 }}>
         <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Due / overdue actions</span></Link>
-        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesQueue}</strong><span>CRM / prospect records</span></Link>
+        <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesQueue}</strong><span>Total CRM records</span></Link>
         <Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.researchLeads}</strong><span>Research-only leads</span></Link>
       </div>
       <div style={{ marginTop: 14 }}>
         {(metrics.salesDueRows || []).slice(0, 8).map(item => <div className="portal-row" key={item.id}>
-          <div>
-            <strong>{item.company_name || item.contact_name || 'Sales lead'}</strong>
-            <small>{item.contact_name || 'Contact pending'} · Priority {item.priority_score ?? '—'} · {item.sales_stage || 'UNSTAGED'} · {item.disposition || 'UNSET'}</small>
-            <small>Next: {item.next_action || 'Follow up'} · due {item.next_action_date}</small>
-            {(Number(item.quoted_amount || 0) > 0 || Number(item.amount_collected || 0) > 0) && <small>Sales-note amounts (not ledger authority): {Number(item.quoted_amount || 0) > 0 ? `quote ${money(item.quoted_amount)}` : 'no quote noted'} · collection note {money(item.amount_collected)}. Canonical estimate/payment ledgers control revenue.</small>}
-          </div>
+          <div><strong>{item.company_name || item.contact_name || 'Sales lead'}</strong><small>{item.contact_name || 'Contact pending'} · Priority {item.priority_score ?? '—'} · {item.disposition || 'UNSET'}</small><small>Next: {item.next_action || 'Follow up'} · due {item.next_action_date}</small></div>
           <span className="portal-pill" style={statusPillStyle('DUE')}>DUE</span>
         </div>)}
         {!metrics.salesDue && <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No sales actions are due.</div>}

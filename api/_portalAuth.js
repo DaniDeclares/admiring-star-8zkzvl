@@ -11,10 +11,7 @@ function getServerClient() {
 
 function getUserScopedClient(token) {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
-  // Keep server-side user-scoped validation on the same public key contract as the browser.
-  // REACT_APP_SUPABASE_ANON_KEY is the deployed browser key and avoids stale legacy
-  // SUPABASE_ANON_KEY values silently breaking an otherwise-valid owner session.
-  const key = process.env.REACT_APP_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  const key = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error('Server user-scoped Supabase configuration is missing.');
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -23,9 +20,8 @@ function getUserScopedClient(token) {
 }
 
 export async function authenticatePortalRequest(req) {
-  const authorization = req.headers.authorization || req.headers.Authorization || '';
-  const forwardedToken = req.headers['x-dani-portal-token'] || req.headers['X-Dani-Portal-Token'] || '';
-  const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : (forwardedToken || null);
+  const authorization = req.headers.authorization || '';
+  const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : null;
   if (!token) return { error: 'Authentication required', status: 401 };
 
   const supabase = getServerClient();
@@ -35,16 +31,6 @@ export async function authenticatePortalRequest(req) {
 
   const role = user.app_metadata?.portal_role || user.app_metadata?.role;
   if (STAFF_ROLES.has(role)) return { supabase, userSupabase, user, role, isStaff: true };
-
-  const { data: portalRoles, error: portalRolesError } = await supabase
-    .from('dd_portal_user_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('is_active', true);
-  if (portalRolesError) throw portalRolesError;
-  if ((portalRoles || []).some(row => String(row.role || '').toUpperCase() === 'OWNER_OPERATOR')) {
-    return { supabase, userSupabase, user, role: 'OWNER_OPERATOR', isStaff: true };
-  }
 
   const { data: identity, error: identityError } = await supabase
     .from('dd_portal_identities')
