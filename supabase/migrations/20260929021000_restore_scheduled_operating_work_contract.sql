@@ -17,10 +17,12 @@ declare w public.dd_scheduled_operating_work%rowtype;
 begin
   select * into w from public.dd_scheduled_operating_work where id=p_id for update;
   if not found then raise exception 'WORK_NOT_FOUND'; end if;
+  if nullif(btrim(p_worker_key),'') is null then raise exception 'WORKER_KEY_REQUIRED'; end if;
+  if p_success is null then raise exception 'SUCCESS_DECISION_REQUIRED'; end if;
   if w.status<>'IN_PROGRESS' or coalesce(w.payload->>'claimed_by','')<>p_worker_key then
     raise exception 'LEASE_NOT_OWNED';
   end if;
-  if p_success and coalesce(p_receipt,'{}'::jsonb)='{}'::jsonb then
+  if p_success and (p_receipt is null or jsonb_typeof(p_receipt)<>'object' or p_receipt='{}'::jsonb) then
     raise exception 'DURABLE_EXECUTION_RECEIPT_REQUIRED';
   end if;
   if not p_success and nullif(btrim(p_blocker),'') is null then
