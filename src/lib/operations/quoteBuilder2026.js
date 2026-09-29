@@ -238,7 +238,7 @@ function configuredBasePrice(service, rule, answers) {
 
 function validateQuoteLineContract(service, answers, lineItem, requestedLineItems) {
   const schema=service?.quote_input_schema;
-  if(!schema?.ui_mode?.startsWith('SPECIALIZED_') && schema?.ui_mode !== 'CONFIGURED_QUOTE') return;
+  if(!schema?.ui_mode?.startsWith('SPECIALIZED_')) return;
   const fields=[...(schema.fields||[]),...(schema.commercial_inputs||[])];
   for(const field of fields){
     const value=answers?.[field.key];
