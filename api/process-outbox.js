@@ -29,11 +29,7 @@ async function sendEmail(payload) {
       }),
     }),
   });
-  if (!response.ok) {
-    const error = new Error(`RESEND_${response.status}`);
-    error.deliveryDisposition = response.status === 429 || response.status >= 500 ? 'RETRYABLE_REJECTION' : 'TERMINAL_REJECTION';
-    throw error;
-  }
+  if (!response.ok) throw new Error(`RESEND_${response.status}`);
 }
 
 async function sendSms(payload) {
@@ -53,11 +49,7 @@ async function sendSms(payload) {
     headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   });
-  if (!response.ok) {
-    const error = new Error(`TWILIO_${response.status}`);
-    error.deliveryDisposition = response.status === 429 || response.status >= 500 ? 'RETRYABLE_REJECTION' : 'TERMINAL_REJECTION';
-    throw error;
-  }
+  if (!response.ok) throw new Error(`TWILIO_${response.status}`);
 }
 
 async function deliver(item) {
@@ -250,19 +242,12 @@ export default async function handler(req, res) {
         results.push({ eventKey: item.event_key, status: 'PROCESSED' });
       } catch (error) {
         const attempts = Number(item.attempts || 0) + 1;
-        const disposition = error?.deliveryDisposition || 'AMBIGUOUS_TRANSPORT';
-        const retryable = disposition === 'RETRYABLE_REJECTION' && attempts < MAX_RETRIES;
-        const nextStatus = retryable ? 'FAILED' : (disposition === 'AMBIGUOUS_TRANSPORT' ? 'VERIFY_REQUIRED' : 'TERMINAL_FAILED');
+        const terminal = attempts >= MAX_RETRIES;
         const delayMinutes = Math.min(60, 2 ** Math.min(attempts, 5));
         await prisma.$executeRaw`
-          update public.dd_event_outbox
-          set status = ${nextStatus},
-              last_error = ${String(error.message || error)},
-              available_at = ${retryable ? new Date(Date.now() + delayMinutes * 60 * 1000) : new Date()},
-              updated_at = now()
-          where id = ${item.id}::uuid
+          update public.dd_event_outbox set status = 'FAILED', last_error = ${String(error.message || error)}, available_at = ${terminal ? new Date() : new Date(Date.now() + delayMinutes * 60 * 1000)}, updated_at = now() where id = ${item.id}::uuid
         `;
-        results.push({ eventKey: item.event_key, status: nextStatus, retryable, disposition, error: String(error.message || error) });
+        results.push({ eventKey: item.event_key, status: 'FAILED', terminal, error: String(error.message || error) });
       }
     }
     let researchResults = [];
