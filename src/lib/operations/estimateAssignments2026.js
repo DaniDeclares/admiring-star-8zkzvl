@@ -2,6 +2,28 @@ import { summarizeEconomics, evaluateCounteroffer, calculateCompensation } from 
 
 const VERIFIED = new Set(['RESEARCH_BENCHMARK','OWNER_CONFIRMED','DOCUMENT_EVIDENCE','SYSTEM_VERIFIED','EXTERNAL_VERIFIED']);
 const money = value => Math.round(Number(value || 0) * 100) / 100;
+
+export function resolveAcceptedAssignmentAuthority(offer, { acceptedCounter = false, acceptedAt = null } = {}) {
+  const authorizedProviderCompensation = money(
+    acceptedCounter ? offer?.counter_compensation : offer?.proposed_compensation
+  );
+  const compensationBasisSnapshot = acceptedCounter
+    ? {
+        ...(offer?.proposed_basis || {}),
+        ...(offer?.counter_basis || {}),
+        authority: 'OWNER_ACCEPTED_PROVIDER_COUNTER',
+        originalProposedCompensation: money(offer?.proposed_compensation),
+        acceptedCounterCompensation: authorizedProviderCompensation,
+        acceptedCounterAt: acceptedAt || null
+      }
+    : { ...(offer?.proposed_basis || {}) };
+  return {
+    authorizedProviderCompensation,
+    compensationBasisSnapshot,
+    travelAllowanceSnapshot: money(offer?.travel_cost_snapshot)
+  };
+}
+
 export const DANI_OWNER_USER_ID = 'f88a5b79-ac5a-4690-ac28-62312328cb73';
 
 function isEffective(row, now = Date.now()) {
@@ -387,6 +409,15 @@ export async function respondToEstimateAssignment(supabase, { assignmentId, prov
       if(!existingAssignment){
         const {error:jobAssignmentError}=await supabase.from('dd_job_assignments').insert({
           job_id:job.id,provider_id:providerId,provider_org_id:provider?.org_id||null,
+          source_assignment_offer_id:offer.id,economics_snapshot_id:offer.economics_snapshot_id,
+          ...(() => {
+            const authority=resolveAcceptedAssignmentAuthority(offer);
+            return {
+              authorized_provider_compensation:authority.authorizedProviderCompensation,
+              compensation_basis_snapshot:authority.compensationBasisSnapshot,
+              travel_allowance_snapshot:authority.travelAllowanceSnapshot
+            };
+          })(),
           assignment_status:'ACCEPTED',provider_notes:'Accepted paid quote assignment.',
           offered_at:offer.offered_at||now,accepted_at:now,response_at:now
         });
@@ -487,6 +518,51 @@ export async function resolveEstimateCounteroffer(supabase, { assignmentId, deci
     const updates={assignment_readiness_status:impact.requiresCustomerReapproval?'NEEDS_REPRICE':'COUNTER_ACCEPTED'};
     if(estimateStatus) updates.estimate_status=estimateStatus;
     await supabase.from('dd_estimates').update(updates).eq('id',offer.estimate_id);
+
+    // Accepted counteroffers become the frozen assignment compensation authority.
+    // Do not carry the original proposed amount into AP/earnings after the owner
+    // explicitly accepts a provider's counter.
+    const {data:job,error:jobError}=await supabase.from('dd_jobs')
+      .select('id').eq('estimate_id',offer.estimate_id)
+      .order('created_at',{ascending:false}).limit(1).maybeSingle();
+    if(jobError) throw jobError;
+    if(job && !impact.requiresCustomerReapproval){
+      const {data:provider,error:providerError}=await supabase.from('dd_providers')
+        .select('id,org_id').eq('id',offer.provider_id).single();
+      if(providerError) throw providerError;
+      const authority=resolveAcceptedAssignmentAuthority(offer,{acceptedCounter:true,acceptedAt:now});
+      const acceptedCompensation=authority.authorizedProviderCompensation;
+      const basis=authority.compensationBasisSnapshot;
+      const {data:existingAssignment,error:existingAssignmentError}=await supabase.from('dd_job_assignments')
+        .select('id').eq('source_assignment_offer_id',offer.id).limit(1).maybeSingle();
+      if(existingAssignmentError) throw existingAssignmentError;
+      if(existingAssignment){
+        const {error:assignmentUpdateError}=await supabase.from('dd_job_assignments').update({
+          provider_id:offer.provider_id,provider_org_id:provider?.org_id||null,
+          economics_snapshot_id:offer.economics_snapshot_id,
+          authorized_provider_compensation:acceptedCompensation,
+          compensation_basis_snapshot:basis,
+          travel_allowance_snapshot:authority.travelAllowanceSnapshot,
+          assignment_status:'ACCEPTED',
+          provider_notes:'Owner accepted provider counteroffer.',
+          accepted_at:now,response_at:offer.responded_at||now
+        }).eq('id',existingAssignment.id);
+        if(assignmentUpdateError) throw assignmentUpdateError;
+      } else {
+        const {error:assignmentInsertError}=await supabase.from('dd_job_assignments').insert({
+          job_id:job.id,provider_id:offer.provider_id,provider_org_id:provider?.org_id||null,
+          source_assignment_offer_id:offer.id,economics_snapshot_id:offer.economics_snapshot_id,
+          authorized_provider_compensation:acceptedCompensation,
+          compensation_basis_snapshot:basis,
+          travel_allowance_snapshot:authority.travelAllowanceSnapshot,
+          assignment_status:'ACCEPTED',provider_notes:'Owner accepted provider counteroffer.',
+          offered_at:offer.offered_at||now,accepted_at:now,response_at:offer.responded_at||now
+        });
+        if(assignmentInsertError) throw assignmentInsertError;
+      }
+      const {error:jobUpdateError}=await supabase.from('dd_jobs').update({assigned_to:offer.provider_id,updated_at:now}).eq('id',job.id);
+      if(jobUpdateError) throw jobUpdateError;
+    }
   }
   await supabase.from('dd_estimate_assignment_events').insert({assignment_offer_id:assignmentId,event_type:`OWNER_${normalized}_COUNTEROFFER`,actor_user_id:actorUserId,from_status:'COUNTEROFFERED',to_status:status,compensation_before:offer.proposed_compensation,compensation_after:accepted?offer.counter_compensation:offer.proposed_compensation,payload:{impact}});
   await refreshEstimateAssignmentReadiness(supabase, offer.estimate_id);
