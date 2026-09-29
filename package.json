@@ -23,9 +23,7 @@
     "audit:stripe-crosswalk": "node scripts/auditStripeCanonicalCrosswalk.mjs",
     "postinstall": "prisma generate",
     "eject": "react-scripts eject",
-    "postbuild": "node scripts/generateSeoShells.mjs",
-    "test:visual": "playwright test checks/visual-quality.spec.ts",
-    "test:visual:update": "playwright test checks/visual-quality.spec.ts --update-snapshots"
+    "postbuild": "node scripts/generateSeoShells.mjs"
   },
   "eslintConfig": {
     "extends": [
