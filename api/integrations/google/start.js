@@ -4,7 +4,9 @@ const GOOGLE_SCOPES = [
   'openid','email','profile',
   'https://www.googleapis.com/auth/gmail.modify',
   'https://www.googleapis.com/auth/calendar',
-  'https://www.googleapis.com/auth/drive.file',
+  // Read-only full-Drive visibility is required by the Drive Intelligence Miner.
+  // No Drive write scope is requested.
+  'https://www.googleapis.com/auth/drive.readonly',
 ];
 
 export default async function handler(req,res){
@@ -16,8 +18,6 @@ export default async function handler(req,res){
   const redirectUri=process.env.GOOGLE_REDIRECT_URI || absoluteCallback('google');
   if(!clientId||!clientSecret) return res.status(503).json({success:false,error:'GOOGLE_CREDENTIALS_NOT_CONFIGURED'});
   const verifier=randomToken(48);
-  // Gmail is the controlling Google communications rail for this consent flow.
-  // Calendar/Drive connections may also be created from the granted scope set.
   const state=await createOAuthState({supabase:context.supabase,adapterCode:'GMAIL',authUserId:context.user.id,codeVerifier:verifier});
   const params=new URLSearchParams({
    client_id:clientId,redirect_uri:redirectUri,response_type:'code',state,

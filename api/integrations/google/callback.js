@@ -10,7 +10,7 @@ function adminClient(){
 const ADAPTER_SCOPES={
  GMAIL:['https://www.googleapis.com/auth/gmail.modify'],
  GOOGLE_CALENDAR:['https://www.googleapis.com/auth/calendar'],
- GOOGLE_DRIVE:['https://www.googleapis.com/auth/drive.file'],
+ GOOGLE_DRIVE:['https://www.googleapis.com/auth/drive.readonly'],
 };
 export default async function handler(req,res){
  if(req.method!=='GET') return res.status(405).send('Method not allowed');
