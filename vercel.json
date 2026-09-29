@@ -168,10 +168,6 @@
     {
       "path": "/api/integrations/gmail/sync",
       "schedule": "* * * * *"
-    },
-    {
-      "path": "/api/integrations/google/drive-mine",
-      "schedule": "7 * * * *"
     }
   ]
 }

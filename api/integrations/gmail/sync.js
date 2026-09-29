@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { decryptSecret, encryptSecret, ENVIRONMENT, logIntegrationEvent, requireStaff } from '../../_integrationOAuth.js';
+import { classifyGmailMessage, gmailResearchDomains } from '../../../src/lib/operations/gmailMailboxPolicy2026.js';
+import { normalizeGmailMessage, uniqueHistoryMessageIds, gmailSyncMode, gmailBackfillState, shouldIngestCommunication, completeGmailBackfillMetadata, nextGmailSyncMetadata, attachmentEvidenceKey, isTextLikeAttachment, boundedAttachmentText, attachmentFingerprint, historyPageToken } from './gmailIntelligenceIngestion.js';
 
 function adminClient() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
@@ -66,20 +68,51 @@ async function syncConnection(supabase, connection) {
   if (!accessToken || expiring) accessToken = await refreshAccessToken(supabase, connection);
 
   const ownEmail = String(connection.token_metadata?.email || '').toLowerCase();
-  const query = encodeURIComponent('newer_than:2d -in:spam -in:trash');
-  let list;
-  try {
-    list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
-  } catch (error) {
-    if (error.status !== 401) throw error;
-    accessToken = await refreshAccessToken(supabase, connection);
-    list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
+  const syncMode = gmailSyncMode(connection);
+  let messageIds = [];
+  let newestHistoryId = syncMode.historyId || null;
+  let syncModeUsed = syncMode.mode;
+  let backfillNextPageToken = null;
+  let backfillCompleted = false;
+  let historyNextPageToken = null;
+  if (syncMode.mode === 'INCREMENTAL') {
+    try {
+      const historyPage = historyPageToken(connection.metadata || {});
+      const history = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/history?maxResults=500&historyTypes=messageAdded&startHistoryId=' + encodeURIComponent(syncMode.historyId) + (historyPage ? '&pageToken=' + encodeURIComponent(historyPage) : ''), accessToken);
+      messageIds = uniqueHistoryMessageIds(history.history || []);
+      newestHistoryId = history.historyId || newestHistoryId;
+      historyNextPageToken = history.nextPageToken || null;
+    } catch (error) {
+      if (error.status !== 404) throw error;
+      syncModeUsed = 'STALE_CURSOR_RECOVERY';
+    }
+  }
+  if (syncModeUsed !== 'INCREMENTAL') {
+    const backfill = gmailBackfillState(connection);
+    const query = encodeURIComponent('-in:spam -in:trash');
+    const page = backfill.pageToken ? '&pageToken=' + encodeURIComponent(backfill.pageToken) : '';
+    let list;
+    try {
+      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query + page, accessToken);
+    } catch (error) {
+      if (error.status !== 401) throw error;
+      accessToken = await refreshAccessToken(supabase, connection);
+      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query + page, accessToken);
+    }
+    messageIds = (list.messages || []).map(item => item.id).filter(Boolean);
+    backfillNextPageToken = list.nextPageToken || null;
+    backfillCompleted = !backfillNextPageToken;
+    if (backfillCompleted) {
+      const profile = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/profile', accessToken);
+      newestHistoryId = profile.historyId || newestHistoryId;
+    }
   }
 
   let ingested = 0;
-  for (const item of list.messages || []) {
+  let intelligenceQueued = 0;
+  for (const messageId of messageIds) {
     const message = await gmailJson(
-      'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(item.id) + '?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date',
+      'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(messageId) + '?format=full',
       accessToken
     );
     const headers = message.payload?.headers || [];
@@ -88,38 +121,89 @@ async function syncConnection(supabase, connection) {
     const from = emailOnly(fromRaw);
     const direction = ownEmail && from === ownEmail ? 'OUTBOUND' : 'INBOUND';
     const receivedAt = message.internalDate ? new Date(Number(message.internalDate)).toISOString() : new Date().toISOString();
-    const { error } = await supabase.rpc('dd_ingest_email_communication', {
-      p_external_message_id: message.id,
-      p_external_thread_id: message.threadId || null,
-      p_direction: direction,
-      p_sender_address: from,
-      p_recipient_addresses: addresses(toRaw),
-      p_subject: header(headers, 'Subject') || null,
-      p_body_excerpt: message.snippet || null,
-      p_received_at: receivedAt,
-      p_raw_metadata: {
-        history_id: message.historyId || null,
-        label_ids: message.labelIds || [],
-        gmail_connection_id: connection.id,
-        account_email: ownEmail || null
+    if (shouldIngestCommunication(syncModeUsed)) {
+      const { error } = await supabase.rpc('dd_ingest_email_communication', {
+        p_external_message_id: message.id,
+        p_external_thread_id: message.threadId || null,
+        p_direction: direction,
+        p_sender_address: from,
+        p_recipient_addresses: addresses(toRaw),
+        p_subject: header(headers, 'Subject') || null,
+        p_body_excerpt: message.snippet || null,
+        p_received_at: receivedAt,
+        p_raw_metadata: {
+          history_id: message.historyId || null,
+          label_ids: message.labelIds || [],
+          gmail_connection_id: connection.id,
+          account_email: ownEmail || null
+        }
+      });
+      if (error) throw error;
+    }
+    const sorting = classifyGmailMessage({ accountEmail: ownEmail, subject: header(headers, 'Subject'), snippet: message.snippet || '', from });
+    if (!sorting.internalOnly && (sorting.intelligenceEligible || sorting.needsReview)) {
+      const normalized = normalizeGmailMessage({ message, accountEmail: ownEmail, sorting });
+      const observation = [normalized.subject, normalized.snippet, ...normalized.bodies.filter(b => b.mimeType === 'text/plain').map(b => b.text)].filter(Boolean).join(' — ').slice(0, 12000) || 'Gmail message collected for intelligence review';
+      const researchDomains = gmailResearchDomains(sorting);
+      for (const domain of researchDomains) {
+        const { error: intelligenceError } = await supabase.from('dd_learning_evidence_intake').upsert({ evidence_key: `GMAIL:${connection.id}:${message.id}:${domain}`, evidence_origin: 'RESEARCH', domain, source_system: 'GMAIL', source_reference: message.id, observation, evidence_payload: { ...normalized, researchDomains }, authority_class: 'EVIDENCE', requires_new_test: true, status: 'NEW', updated_at: new Date().toISOString() }, { onConflict: 'evidence_key' });
+        if (intelligenceError) throw intelligenceError;
+        intelligenceQueued += 1;
       }
-    });
-    if (error) throw error;
+      for (const part of normalized.attachments || []) {
+        let attachmentData = part.inlineData || null;
+        if (!attachmentData && part.attachmentId) {
+          const fetched = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(message.id) + '/attachments/' + encodeURIComponent(part.attachmentId), accessToken);
+          attachmentData = fetched.data || null;
+        }
+        const extractedText = isTextLikeAttachment(part) ? boundedAttachmentText(attachmentData) : null;
+        const attachmentPayload = {
+          sourceType: 'EMAIL_ATTACHMENT', sourceSystem: 'GMAIL', parentEvidenceKeys: researchDomains.map(domain => `GMAIL:${connection.id}:${message.id}:${domain}`),
+          externalMessageId: message.id, externalThreadId: message.threadId || null, accountEmail: ownEmail || null,
+          partId: part.partId || null, attachmentId: part.attachmentId || null, filename: part.filename || null,
+          mimeType: part.mimeType || null, size: part.size || 0, extractedText,
+          extractionStatus: extractedText ? 'EXTRACTED_BOUNDED_TEXT' : 'METADATA_ONLY_NEEDS_EXTRACTION',
+          fingerprint: attachmentFingerprint(connection.id, message.id, part, attachmentData), authorityStatus: 'OBSERVATION_ONLY'
+        };
+        const { error: attachmentError } = await supabase.from('dd_learning_evidence_intake').upsert({
+          evidence_key: attachmentEvidenceKey(connection.id, message.id, part), evidence_origin: 'RESEARCH',
+          domain: researchDomains[0] || 'OWNER_RESEARCH_MEMORY', source_system: 'GMAIL', source_reference: message.id,
+          observation: extractedText ? extractedText.slice(0, 12000) : `Gmail attachment: ${part.filename || part.mimeType || part.partId || 'attachment'}`,
+          evidence_payload: attachmentPayload, authority_class: 'EVIDENCE', requires_new_test: true, status: 'NEW', updated_at: new Date().toISOString()
+        }, { onConflict: 'evidence_key' });
+        if (attachmentError) throw attachmentError;
+        intelligenceQueued += 1;
+      }
+    }
     ingested += 1;
   }
 
   const now = new Date().toISOString();
+  let metadata = nextGmailSyncMetadata(connection.metadata || {}, {
+    gmail_last_sync_mode: syncModeUsed,
+    gmail_last_sync_at: now
+  });
+  if (syncModeUsed === 'BOUNDED_BACKFILL' || syncModeUsed === 'STALE_CURSOR_RECOVERY') {
+    metadata = backfillCompleted
+      ? completeGmailBackfillMetadata(metadata, newestHistoryId)
+      : nextGmailSyncMetadata(metadata, { gmail_intelligence_backfill_page_token: backfillNextPageToken, gmail_intelligence_backfill_complete: false });
+  } else {
+    metadata = nextGmailSyncMetadata(metadata, historyNextPageToken
+      ? { gmail_history_page_token: historyNextPageToken }
+      : { gmail_history_id: newestHistoryId, gmail_history_page_token: null });
+  }
   const { error: updateError } = await supabase.from('dd_integration_connections').update({
     last_sync_at: now,
     last_error: null,
+    metadata,
     updated_at: now
   }).eq('id', connection.id);
   if (updateError) throw updateError;
   await logIntegrationEvent({
     supabase, adapterCode: 'GMAIL', connectionId: connection.id, direction: 'INBOUND',
-    eventType: 'MAILBOX_SYNC', status: 'PROCESSED', payload: { messages_scanned: ingested }
+    eventType: 'MAILBOX_SYNC', status: 'PROCESSED', payload: { messages_scanned: ingested, intelligence_items_queued: intelligenceQueued, sync_mode: syncModeUsed, history_id: newestHistoryId }
   });
-  return ingested;
+  return { ingested, intelligenceQueued };
 }
 
 export default async function handler(req, res) {
@@ -138,9 +222,12 @@ export default async function handler(req, res) {
     if (!connections?.length) return res.status(200).json({ success: true, connected: false, ingested: 0 });
 
     let total = 0;
+    let intelligenceQueued = 0;
     for (const connection of connections) {
       try {
-        total += await syncConnection(supabase, connection);
+        const result = await syncConnection(supabase, connection);
+        total += result.ingested;
+        intelligenceQueued += result.intelligenceQueued;
       } catch (error) {
         await supabase.from('dd_integration_connections').update({
           last_error: error.message || 'GMAIL_SYNC_FAILED',
@@ -153,7 +240,7 @@ export default async function handler(req, res) {
         throw error;
       }
     }
-    return res.status(200).json({ success: true, connected: true, ingested: total });
+    return res.status(200).json({ success: true, connected: true, ingested: total, intelligence_queued: intelligenceQueued });
   } catch (error) {
     return res.status(error.status || 500).json({ success: false, error: error.message || 'GMAIL_SYNC_FAILED' });
   }
