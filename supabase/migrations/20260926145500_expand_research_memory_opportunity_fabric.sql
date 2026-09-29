@@ -196,7 +196,7 @@ values('GITHUB_ECOSYSTEM_CONTINUOUS','GITHUB_PUBLIC_ECOSYSTEM','PUBLIC_API',
  jsonb_build_object('scope','relevant repositories/releases/security advisories/agent-memory-orchestration/dependency patterns','repository_authority','DaniDeclares/admiring-star-8zkzvl','discovery_terms',array['agent memory','agent orchestration','field service software','dashboard portal UX','Supabase security','React accessibility'],'public_only',true),
  array['GITHUB_ECOSYSTEM_MINER','PLATFORM_CHANGE_MINER','SECURITY_THREAT_MINER'],'P1','BLOCKED',false,false,false,true,now(),
  jsonb_build_object('observation_only',true,'copy_code_automatically',false,'install_dependency',false,'requires_architecture_comparison',true,'blocker','TERMS_AND_EXECUTION_PROOF_REQUIRED'))
-on conflict(collection_key) do update set query_profile=excluded.query_profile,requested_miner_keys=excluded.requested_miner_keys,status='BLOCKED',terms_gate_required=true,blocker='TERMS_AND_EXECUTION_PROOF_REQUIRED',next_run_at=now(),metadata=excluded.metadata,updated_at=now();
+on conflict(collection_key) do update set query_profile=excluded.query_profile,requested_miner_keys=excluded.requested_miner_keys,status='BLOCKED',terms_gate_required=true,next_run_at=now(),metadata=excluded.metadata,updated_at=now();
 
 select cron.unschedule(jobid) from cron.job where jobname='dd-research-cross-signal-memory';
 select cron.schedule('dd-research-cross-signal-memory','9,24,39,54 * * * *',
