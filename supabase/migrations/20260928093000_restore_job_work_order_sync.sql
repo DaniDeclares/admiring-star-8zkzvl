@@ -42,7 +42,7 @@ begin
   end if;
 
   current_rank := case upper(coalesce(wo.status,''))
-    when 'INSTANTIATED' then 0 when 'OFFERED' then 1 when 'ACCEPTED' then 2
+    when 'DRAFT' then 0 when 'INSTANTIATED' then 0 when 'OFFERED' then 1 when 'ACCEPTED' then 2
     when 'SCHEDULED' then 3 when 'EN_ROUTE' then 4 when 'IN_PROGRESS' then 5
     when 'SUBMITTED' then 6 when 'QA_REVIEW' then 7 when 'QA_PASS' then 8
     when 'CUSTOMER_CLOSED' then 9 when 'PAYABLE' then 10 when 'PAID' then 11
@@ -80,3 +80,17 @@ grant execute on function public.dd_sync_work_order_from_job_current(uuid) to se
 
 comment on function public.dd_sync_work_order_from_job_current(uuid)
 is 'Canonical guarded job-to-work-order synchronization. Restored from Tester proof; service-role only.';
+
+
+-- Attach the existing trigger wrapper so canonical job/assignment changes invoke this repair.
+drop trigger if exists dd_sync_work_order_from_job_current_on_job on public.dd_jobs;
+create trigger dd_sync_work_order_from_job_current_on_job
+after insert or update of job_status, scheduled_start, scheduled_end, work_order_id
+on public.dd_jobs
+for each row execute function public.dd_sync_work_order_from_job_current_trigger();
+
+drop trigger if exists dd_sync_work_order_from_job_current_on_assignment on public.dd_job_assignments;
+create trigger dd_sync_work_order_from_job_current_on_assignment
+after insert or update of assignment_status, authorized_provider_compensation, travel_allowance_snapshot
+on public.dd_job_assignments
+for each row execute function public.dd_sync_work_order_from_job_current_trigger();
