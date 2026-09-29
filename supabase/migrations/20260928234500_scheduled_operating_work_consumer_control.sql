@@ -42,17 +42,18 @@ begin
 end $$;
 
 create or replace function private.dd_finish_scheduled_operating_work(
-  p_id uuid,p_worker_key text,p_success boolean,p_receipt jsonb,p_blocker text default null
+  p_id uuid,p_worker_key text,p_claim_token text,p_success boolean,p_receipt jsonb,p_blocker text default null
 ) returns jsonb language plpgsql security definer set search_path='public','private' as $$
 declare w public.dd_scheduled_operating_work%rowtype; attempts int;
 begin
   select * into w from public.dd_scheduled_operating_work where id=p_id for update;
   if not found then raise exception 'WORK_NOT_FOUND'; end if;
-  if w.status<>'IN_PROGRESS' or coalesce(w.payload->>'claimed_by','')<>p_worker_key then raise exception 'LEASE_NOT_OWNED'; end if;
+  if nullif(btrim(p_worker_key),'') is null or nullif(btrim(p_claim_token),'') is null then raise exception 'LEASE_IDENTITY_REQUIRED'; end if;
+  if w.status<>'IN_PROGRESS' or coalesce(w.payload->>'claimed_by','')<>p_worker_key or coalesce(w.payload->>'claim_token','')<>p_claim_token or nullif(w.payload->>'lease_expires_at','')::timestamptz<=now() then raise exception 'LEASE_NOT_OWNED'; end if;
   attempts:=coalesce((w.payload->>'attempt_count')::int,1);
   update public.dd_scheduled_operating_work
   set status=case when p_success then 'COMPLETED' else case when attempts>=3 then 'BLOCKED' else 'QUEUED' end end,
-      payload=(coalesce(payload,'{}'::jsonb)-'claimed_by'-'claimed_at'-'lease_expires_at')||
+      payload=(coalesce(payload,'{}'::jsonb)-'claimed_by'-'claim_token'-'claimed_at'-'lease_expires_at')||
         jsonb_build_object('execution_receipt',coalesce(p_receipt,'{}'::jsonb),'last_blocker',p_blocker,
           'completed_at',case when p_success then now() else null end,
           'next_attempt_at',case when p_success or attempts>=3 then null else now()+(interval '5 minutes'*power(2,attempts-1)) end),
@@ -78,18 +79,18 @@ end $$;
 create or replace function public.dd_claim_scheduled_operating_work(p_worker_key text,p_work_type text default null,p_limit integer default 10)
 returns setof public.dd_scheduled_operating_work language sql security definer set search_path='public','private'
 as $ select * from private.dd_claim_scheduled_operating_work(p_worker_key,p_work_type,p_limit) $;
-create or replace function public.dd_finish_scheduled_operating_work(p_id uuid,p_worker_key text,p_success boolean,p_receipt jsonb,p_blocker text default null)
+create or replace function public.dd_finish_scheduled_operating_work(p_id uuid,p_worker_key text,p_claim_token text,p_success boolean,p_receipt jsonb,p_blocker text default null)
 returns jsonb language sql security definer set search_path='public','private'
-as $ select private.dd_finish_scheduled_operating_work(p_id,p_worker_key,p_success,p_receipt,p_blocker) $;
+as $ select private.dd_finish_scheduled_operating_work(p_id,p_worker_key,p_claim_token,p_success,p_receipt,p_blocker) $;
 create or replace function public.dd_requeue_expired_scheduled_work_leases()
 returns integer language sql security definer set search_path='public','private'
 as $$ select private.dd_requeue_expired_scheduled_work_leases() $$;
 
 revoke all on function private.dd_claim_scheduled_operating_work(text,text,integer) from public,anon,authenticated;
-revoke all on function private.dd_finish_scheduled_operating_work(uuid,text,boolean,jsonb,text) from public,anon,authenticated;
+revoke all on function private.dd_finish_scheduled_operating_work(uuid,text,text,boolean,jsonb,text) from public,anon,authenticated;
 revoke all on function private.dd_requeue_expired_scheduled_work_leases() from public,anon,authenticated;
 revoke all on function public.dd_claim_scheduled_operating_work(text,text,integer) from public,anon,authenticated;
-revoke all on function public.dd_finish_scheduled_operating_work(uuid,text,boolean,jsonb,text) from public,anon,authenticated;
+revoke all on function public.dd_finish_scheduled_operating_work(uuid,text,text,boolean,jsonb,text) from public,anon,authenticated;
 revoke all on function public.dd_requeue_expired_scheduled_work_leases() from public,anon,authenticated;
 grant execute on function public.dd_claim_scheduled_operating_work(text,text,integer) to service_role;
 grant execute on function public.dd_finish_scheduled_operating_work(uuid,text,boolean,jsonb,text) to service_role;
