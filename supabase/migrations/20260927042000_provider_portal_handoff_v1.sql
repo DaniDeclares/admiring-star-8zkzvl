@@ -1,3 +1,5 @@
+alter type public.dd_portal_role add value if not exists 'PROVIDER';
+
 create or replace function public.dd_reconcile_provider_portal_handoff(p_application_id uuid)
 returns jsonb language plpgsql security invoker set search_path='public' as $$
 declare a public.dd_provider_applications%rowtype; v_org_id uuid; v_identity_id uuid; v_role_id uuid;
@@ -32,7 +34,11 @@ returns trigger language plpgsql security definer set search_path='public' as $$
 begin
  if new.application_status='APPROVED' and new.provider_id is not null and new.applicant_user_id is not null
     and (old.application_status is distinct from new.application_status or old.provider_id is distinct from new.provider_id) then
-   perform public.dd_reconcile_provider_portal_handoff(new.id);
+   begin
+     perform public.dd_reconcile_provider_portal_handoff(new.id);
+   exception when others then
+     raise warning 'dd_provider_approval_portal_handoff: reconcile failed for application % (SQLSTATE %): %',new.id,sqlstate,sqlerrm;
+   end;
  end if;
  return new;
 end $$;
@@ -63,3 +69,17 @@ language sql security invoker set search_path='public' as $$
 $$;
 revoke execute on function public.dd_audit_provider_portal_handoffs() from public,anon,authenticated;
 grant execute on function public.dd_audit_provider_portal_handoffs() to postgres,service_role;
+
+
+-- Reconcile providers approved before the trigger existed. Fail closed per row without aborting migration.
+do $$
+declare r record;
+begin
+ for r in select id from public.dd_provider_applications where application_status='APPROVED' and provider_id is not null and applicant_user_id is not null loop
+   begin
+     perform public.dd_reconcile_provider_portal_handoff(r.id);
+   exception when others then
+     raise warning 'provider portal backfill failed for application % (SQLSTATE %): %',r.id,sqlstate,sqlerrm;
+   end;
+ end loop;
+end $$;
