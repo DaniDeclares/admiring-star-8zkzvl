@@ -388,7 +388,7 @@ async function getDirectProviderAuthorizationSnapshot(supabase, providerId) {
   return {
     application: {
       id: null,
-      application_status: ['APPROVED', 'AUTHORIZED'].includes(org.permission_status) && org.accepts_new_work ? 'APPROVED' : org.permission_status,
+      application_status: 'LEGACY_RECORD',
       tax_form_status: null,
       insurance_status: null,
       identity_status: null,
@@ -398,6 +398,7 @@ async function getDirectProviderAuthorizationSnapshot(supabase, providerId) {
       agreement_signer_name: signature?.signer_full_name || null,
       background_check_status: null,
       compliance_status: org.compliance_status,
+      authorization_note: 'Historical provider record. A current approved provider application is required before dispatch eligibility.',
       legal_name: org.legal_name || org.name,
       applicant_type: null,
       contact_first_name: provider.first_name,
@@ -525,6 +526,16 @@ async function createDispatchOffer(supabase, actorId, payload) {
   if (!['NEW', 'CREATED', 'DISPATCH_REVIEW'].includes(String(job.job_status || '').toUpperCase())) throw new Error('JOB_NOT_READY_FOR_DISPATCH');
   const { data: provider, error: providerError } = await supabase.from('dd_providers').select('id, is_active').eq('id', providerId).single();
   if (providerError || !provider?.is_active) throw new Error('PROVIDER_NOT_ACTIVE');
+  // Dispatch authority is stricter than catalog presence. Production's governed
+  // readiness view is the authority: historical provider/org rows alone cannot
+  // receive offers.
+  const { data: readiness, error: readinessError } = await supabase
+    .from('dd_provider_assignment_readiness_v1')
+    .select('assignment_ready,onboarding_next_action')
+    .eq('provider_id', providerId)
+    .maybeSingle();
+  if (readinessError) throw readinessError;
+  if (!readiness?.assignment_ready) throw new Error(`PROVIDER_NOT_ASSIGNMENT_READY:${readiness?.onboarding_next_action || 'READINESS_EVIDENCE_MISSING'}`);
   const { data: assignment, error } = await supabase.from('dd_job_assignments').insert({ job_id: jobId, provider_id: providerId, assignment_status: 'OFFERED', admin_notes: adminNotes || null, provider_notes: providerNotes || null }).select().single();
   if (error) throw error;
   await supabase.from('dd_jobs').update({ job_status: 'ASSIGNMENT_OFFERED' }).eq('id', jobId);

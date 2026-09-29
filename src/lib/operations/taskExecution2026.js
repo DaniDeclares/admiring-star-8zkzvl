@@ -211,31 +211,27 @@ export async function completeJobFromTasks({ prisma, jobId, actorId } = {}) {
       from public.dd_job_tasks
       where job_id = ${jobId}::uuid
         and is_required = true
-        and status <> 'COMPLETED'
+        and upper(coalesce(status, '')) not in ('COMPLETED','DONE')
       order by sort_order, task_name
     `;
-    if (incomplete.length) {
-      throw new Error(`REQUIRED_TASKS_INCOMPLETE:${incomplete.map((task) => task.id).join(',')}`);
-    }
+    if (incomplete.length) throw new Error(`REQUIRED_TASKS_INCOMPLETE:${incomplete.map((task) => task.id).join(',')}`);
 
+    // Field completion is not QA approval. Move to the review state and let
+    // verifyJobCompletion() create the governed completion review before the
+    // database trigger permits COMPLETED.
     const updated = await tx.$queryRaw`
       update public.dd_jobs
-      set job_status = 'COMPLETED', updated_at = now()
+      set job_status = 'PENDING_COMPLETION_REVIEW', updated_at = now()
       where id = ${jobId}::uuid
       returning id, public_reference, job_status, updated_at
     `;
 
     await tx.$executeRaw`
       insert into public.dd_task_events (job_id, actor_id, event_type, description, metadata)
-      values (
-        ${jobId}::uuid,
-        ${actorId}::uuid,
-        'JOB_COMPLETED',
-        'Job completed after all required field tasks passed the completion gate.',
-        ${JSON.stringify({ requiredTasksVerified: true })}::jsonb
-      )
+      values (${jobId}::uuid, ${actorId}::uuid, 'FIELD_WORK_SUBMITTED',
+        'Required field tasks completed; job submitted for governed completion review.',
+        ${JSON.stringify({ requiredTasksVerified: true, completionAuthority: 'QA_REVIEW' })}::jsonb)
     `;
-
     return updated[0];
   });
 }
