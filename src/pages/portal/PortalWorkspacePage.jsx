@@ -67,7 +67,10 @@ export default function PortalWorkspacePage() {
   const hasAccountingWorkspace = capabilities.some(item => /bookkeeping|financial|AP\/AR|cash flow/i.test(String(item.capability_description || '')) && String(item.authorization_status || '').toUpperCase() === 'AUTHORIZED');
   const isApprovedProvider = application?.application_status === 'APPROVED';
   const isSignedProvider = application?.agreement_status === 'EXECUTED';
-  const requirements = isProvider ? buildProviderRequirements(application, capabilities) : [];
+  const w9Status = String(snapshot?.w9?.status || application?.tax_form_status || '').toUpperCase();
+  const canResumeProviderApplication = ['NEEDS_INFO'].includes(String(application?.application_status || '').toUpperCase());
+  const requirementsApplication = application ? { ...application, tax_form_status: w9Status || application?.tax_form_status } : application;
+  const requirements = isProvider ? buildProviderRequirements(requirementsApplication, capabilities) : [];
   const completeCount = requirements.filter(r => r.ok).length;
   const openAssignments = snapshot?.assignments?.filter(a => a.assignment_status === 'OFFERED').length || 0;
   const nextAppointment = snapshot?.appointments?.filter(a => a.appointment_status !== 'CANCELLED').sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at))[0];
@@ -96,8 +99,17 @@ export default function PortalWorkspacePage() {
     </> : <>
       <div className="portal-status-banner"><div><strong>Application status: {statusLabel(application?.application_status)}</strong><p style={{ margin: '6px 0 0', color: '#6d6263' }}>DANI DECLARES reviews every requirement below before your account becomes dispatch-eligible. This is not yet an active provider account — nothing here can be assigned work until it's approved.</p></div><span className="portal-pill">{completeCount}/{requirements.length} complete</span></div>
       {application?.agreement_status !== 'EXECUTED' && <Card title="Sign your Provider Agreement"><p>Signing your Provider Agreement is the first step — it must be completed before you can upload documents or view your profile.</p><Link className="portal-primary" to="/portal/provider-agreement">Sign Provider Agreement →</Link></Card>}
-      <Card title="Requirements">{requirements.map(item => <Requirement key={item.label} {...item} />)}<div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/vendor-onboarding">Upload documents</Link></div></Card>
-      <Card title="Selected Services">{capabilities.length ? capabilities.map(item => <div className="portal-row" key={item.id}><div><strong>{item.capability_description || item.canonical_sku}</strong><small>{statusLabel(item.authorization_status)}</small></div></div>) : <Empty>No services selected.</Empty>}</Card>
+      <Card title="Requirements">
+        {requirements.map(item => <Requirement key={item.label} {...item} />)}
+        <div className="portal-actions" style={{ marginTop: 14, flexWrap: 'wrap' }}>
+          {application?.agreement_status !== 'EXECUTED' && <Link className="portal-primary" to="/portal/provider-agreement">Complete agreement</Link>}
+          {application?.agreement_status === 'EXECUTED' && !['RECEIVED','SUBMITTED','VERIFIED','APPROVED','NOT_REQUIRED'].includes(w9Status) && <Link className="portal-primary" to="/portal/w9">Complete W-9</Link>}
+          {application?.agreement_status === 'EXECUTED' && <Link className="portal-primary" to="/portal/vendor-onboarding">Upload required documents</Link>}
+          {application?.agreement_status === 'EXECUTED' && <Link className="portal-primary" to="/portal/profile">Review profile</Link>}
+        </div>
+        <p className="portal-note" style={{ marginTop: 12 }}>Identity, background-check, compliance, capability, and document verification remain staff-reviewed. Completing applicant actions does not approve or activate the account.</p>
+      </Card>
+      <Card title="Selected Services">{capabilities.length ? capabilities.map(item => <div className="portal-row" key={item.id}><div><strong>{item.capability_description || item.canonical_sku}</strong><small>{statusLabel(item.authorization_status)} · evidence {statusLabel(item.evidence_status)} · requirement {statusLabel(item.requirement_status)}</small></div></div>) : <><Empty>No services selected yet. Your application cannot be approved or dispatched until at least one service/capability is selected and reviewed.</Empty>{canResumeProviderApplication ? <div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/providers?resume=1">Select services / resume application</Link></div> : <p className="portal-note" style={{ marginTop: 12 }}>This application cannot be reopened through self-service. Contact DANI DECLARES Provider Operations for the governed next step.</p>}</>}</Card>
       <Card title="Submitted Documents">{(snapshot?.documents || []).length ? snapshot.documents.map(item => <div className="portal-row" key={item.id}><div><strong>{item.document_type.replaceAll('_', ' ')}</strong><small>{statusLabel(item.verification_status)} · Uploaded {formatDate(item.uploaded_at)}</small></div></div>) : <Empty>No documents uploaded yet.</Empty>}<div className="portal-actions" style={{ marginTop: 14 }}><Link className="portal-primary" to="/portal/vendor-onboarding">Upload documents</Link></div></Card>
     </>) : <>
       <div className="portal-summary-grid">
