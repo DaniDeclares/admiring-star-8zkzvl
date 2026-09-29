@@ -72,8 +72,29 @@ begin
  and (has_table_privilege('anon',c.oid,'SELECT') or has_table_privilege('anon',c.oid,'INSERT') or has_table_privilege('anon',c.oid,'UPDATE') or has_table_privilege('anon',c.oid,'DELETE')
  or has_table_privilege('authenticated',c.oid,'SELECT') or has_table_privilege('authenticated',c.oid,'INSERT') or has_table_privilege('authenticated',c.oid,'UPDATE') or has_table_privilege('authenticated',c.oid,'DELETE')));
 
+
+ -- Internal contracts must never retain direct anon/authenticated table privileges, regardless of RLS/policy state.
+ insert into public.dd_security_findings(finding_key,severity,finding_type,object_schema,object_name,statement,evidence,status,last_seen_at,resolved_at)
+ select 'INTERNAL_CLIENT_GRANT:'||a.object_schema||'.'||a.object_name,'HIGH','SERVICE_ROLE_INTERNAL_CLIENT_GRANT',a.object_schema,a.object_name,
+   'SERVICE_ROLE_INTERNAL table retains direct anon/authenticated privileges.',
+   jsonb_build_object('anon_select',has_table_privilege('anon',c.oid,'SELECT'),'anon_insert',has_table_privilege('anon',c.oid,'INSERT'),'anon_update',has_table_privilege('anon',c.oid,'UPDATE'),'anon_delete',has_table_privilege('anon',c.oid,'DELETE'),'authenticated_select',has_table_privilege('authenticated',c.oid,'SELECT'),'authenticated_insert',has_table_privilege('authenticated',c.oid,'INSERT'),'authenticated_update',has_table_privilege('authenticated',c.oid,'UPDATE'),'authenticated_delete',has_table_privilege('authenticated',c.oid,'DELETE')),
+   'OPEN',now(),null
+ from public.dd_security_access_contracts a
+ join pg_namespace n on n.nspname=a.object_schema join pg_class c on c.relnamespace=n.oid and c.relname=a.object_name and c.relkind='r'
+ where a.access_class='SERVICE_ROLE_INTERNAL' and a.status='ACTIVE' and (
+   has_table_privilege('anon',c.oid,'SELECT') or has_table_privilege('anon',c.oid,'INSERT') or has_table_privilege('anon',c.oid,'UPDATE') or has_table_privilege('anon',c.oid,'DELETE') or
+   has_table_privilege('authenticated',c.oid,'SELECT') or has_table_privilege('authenticated',c.oid,'INSERT') or has_table_privilege('authenticated',c.oid,'UPDATE') or has_table_privilege('authenticated',c.oid,'DELETE'))
+ on conflict(finding_key) do update set evidence=excluded.evidence,status='OPEN',last_seen_at=now(),resolved_at=null;
+
+ update public.dd_security_findings f set status='RESOLVED',resolved_at=now(),last_seen_at=now()
+ where finding_type='SERVICE_ROLE_INTERNAL_CLIENT_GRANT' and status='OPEN' and not exists(
+   select 1 from public.dd_security_access_contracts a join pg_namespace n on n.nspname=a.object_schema join pg_class c on c.relnamespace=n.oid and c.relname=a.object_name and c.relkind='r'
+   where a.object_schema=f.object_schema and a.object_name=f.object_name and a.access_class='SERVICE_ROLE_INTERNAL' and a.status='ACTIVE' and (
+    has_table_privilege('anon',c.oid,'SELECT') or has_table_privilege('anon',c.oid,'INSERT') or has_table_privilege('anon',c.oid,'UPDATE') or has_table_privilege('anon',c.oid,'DELETE') or
+    has_table_privilege('authenticated',c.oid,'SELECT') or has_table_privilege('authenticated',c.oid,'INSERT') or has_table_privilege('authenticated',c.oid,'UPDATE') or has_table_privilege('authenticated',c.oid,'DELETE')));
+
  select count(*) into v_client_grants from public.dd_security_findings where finding_type='RLS_NO_POLICY_WITH_CLIENT_GRANT' and status='OPEN';
- select count(*) into v_internal_violations from public.dd_security_findings where finding_type='RLS_NO_POLICY_WITH_CLIENT_GRANT' and status='OPEN' and severity in('HIGH','CRITICAL');
+ select count(*) into v_internal_violations from public.dd_security_findings where finding_type in('RLS_NO_POLICY_WITH_CLIENT_GRANT','SERVICE_ROLE_INTERNAL_CLIENT_GRANT') and status='OPEN' and severity in('HIGH','CRITICAL');
  select count(*) into v_unclassified from public.dd_security_findings f where finding_type='RLS_NO_POLICY_WITH_CLIENT_GRANT' and status='OPEN'
  and not exists(select 1 from public.dd_security_access_contracts a where a.object_schema=f.object_schema and a.object_name=f.object_name and a.object_type='TABLE');
  return jsonb_build_object('status',case when v_internal_violations>0 then 'FAIL' when v_client_grants>0 then 'REVIEW_REQUIRED' else 'PASS' end,
