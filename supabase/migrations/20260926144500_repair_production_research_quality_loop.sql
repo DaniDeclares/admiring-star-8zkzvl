@@ -1,3 +1,43 @@
+-- Self-contained research-quality prerequisites. Private-by-default; service-role only.
+create table if not exists public.dd_research_synthesis_queue(
+ id uuid primary key default gen_random_uuid(), synthesis_key text not null unique, research_work_id uuid, program_key text, work_key text,
+ evidence_ids uuid[] not null default '{}', evidence_count integer not null default 0, confirmed_authority_levels text[] not null default '{}',
+ synthesis_state text not null default 'READY', permission_class text not null default 'REVIEW_REQUIRED', blocker text,
+ proposed_action_class text, proposed_build text, implementation_payload jsonb not null default '{}'::jsonb, acceptance_criteria text,
+ synthesized_at timestamptz, routed_at timestamptz, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table if not exists public.dd_research_capacity_policy(
+ id uuid primary key default gen_random_uuid(), max_total_sources_per_cycle integer not null default 8, max_sources_per_program_per_cycle integer not null default 2,
+ reserve_non_service_discovery_pct integer not null default 50, enabled boolean not null default true, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table if not exists public.dd_research_coverage_gaps(
+ program_key text primary key, priority text not null default 'P1', gap_status text not null default 'OPEN', created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table if not exists public.dd_research_dispatch_runs(
+ id uuid primary key default gen_random_uuid(), status text not null, selected_sources jsonb not null default '[]'::jsonb, coverage_gaps_open integer not null default 0,
+ service_discovery_selected integer not null default 0, non_service_selected integer not null default 0, summary jsonb not null default '{}'::jsonb, created_at timestamptz not null default now());
+create table if not exists public.dd_research_discovery_targets(
+ id uuid primary key default gen_random_uuid(), company_name text not null, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table if not exists public.dd_research_operating_model_findings(
+ id uuid primary key default gen_random_uuid(), target_id uuid references public.dd_research_discovery_targets(id) on delete cascade, finding_type text not null,
+ finding_text text not null, evidence_urls jsonb not null default '[]'::jsonb, confidence text, last_observed_at timestamptz, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+
+alter table public.dd_research_synthesis_queue enable row level security;
+alter table public.dd_research_capacity_policy enable row level security;
+alter table public.dd_research_coverage_gaps enable row level security;
+alter table public.dd_research_dispatch_runs enable row level security;
+alter table public.dd_research_discovery_targets enable row level security;
+alter table public.dd_research_operating_model_findings enable row level security;
+revoke all on public.dd_research_synthesis_queue, public.dd_research_capacity_policy, public.dd_research_coverage_gaps, public.dd_research_dispatch_runs, public.dd_research_discovery_targets, public.dd_research_operating_model_findings from public,anon,authenticated;
+grant select,insert,update on public.dd_research_synthesis_queue, public.dd_research_capacity_policy, public.dd_research_coverage_gaps, public.dd_research_dispatch_runs, public.dd_research_discovery_targets, public.dd_research_operating_model_findings to service_role;
+
+create or replace function public.dd_refresh_research_coverage_gaps() returns integer language plpgsql security definer set search_path='' as $$
+declare n integer:=0; begin
+ insert into public.dd_research_coverage_gaps(program_key,priority,gap_status,updated_at)
+ select p.program_key,'P1',case when exists(select 1 from public.dd_research_sources s where s.program_key=p.program_key and s.status='ACTIVE') then 'COVERED' else 'OPEN' end,now()
+ from public.dd_research_programs p
+ on conflict(program_key) do update set gap_status=excluded.gap_status,updated_at=now();
+ get diagnostics n=row_count; return n; end $$;
+revoke execute on function public.dd_refresh_research_coverage_gaps() from public,anon,authenticated;
+grant execute on function public.dd_refresh_research_coverage_gaps() to service_role;
+
 -- Production-bound research quality repair.
 -- Observation/research only. No pricing publication, provider authorization, external contact,
 -- money movement, production deployment, or autonomous merge authority is introduced.
