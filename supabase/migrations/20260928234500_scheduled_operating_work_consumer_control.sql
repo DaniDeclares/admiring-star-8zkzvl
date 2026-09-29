@@ -1,3 +1,15 @@
+-- Authoritative durable scheduled-work queue contract.
+create table if not exists public.dd_scheduled_operating_work (
+  id uuid primary key default gen_random_uuid(),
+  work_type text not null,
+  status text not null default 'QUEUED' check (status in ('QUEUED','IN_PROGRESS','COMPLETED','BLOCKED')),
+  payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists dd_scheduled_operating_work_claim_idx
+  on public.dd_scheduled_operating_work(status, work_type, created_at);
+
 -- Governed scheduled operating work consumer control-plane contract.
 -- Runtime external capabilities remain owned by their governed workers.
 -- This migration does not send email, move money, mutate protected pricing, or authorize providers.
@@ -23,7 +35,7 @@ begin
   update public.dd_scheduled_operating_work w
   set status='IN_PROGRESS',
       payload=coalesce(w.payload,'{}'::jsonb)||jsonb_build_object(
-        'claimed_by',p_worker_key,'claimed_at',now(),'lease_expires_at',now()+interval '30 minutes',
+        'claimed_by',p_worker_key,'claim_token',gen_random_uuid()::text,'claimed_at',now(),'lease_expires_at',now()+interval '30 minutes',
         'attempt_count',coalesce((w.payload->>'attempt_count')::int,0)+1),
       updated_at=now()
   from candidates c where w.id=c.id returning w.*;
@@ -63,16 +75,19 @@ begin
   get diagnostics n=row_count; return n;
 end $$;
 
-create or replace function public.dd_claim_scheduled_operating_work(text,text,integer)
+create or replace function public.dd_claim_scheduled_operating_work(p_worker_key text,p_work_type text default null,p_limit integer default 10)
 returns setof public.dd_scheduled_operating_work language sql security definer set search_path='public','private'
-as $$ select * from private.dd_claim_scheduled_operating_work($1,$2,$3) $$;
-create or replace function public.dd_finish_scheduled_operating_work(uuid,text,boolean,jsonb,text)
+as $ select * from private.dd_claim_scheduled_operating_work(p_worker_key,p_work_type,p_limit) $;
+create or replace function public.dd_finish_scheduled_operating_work(p_id uuid,p_worker_key text,p_success boolean,p_receipt jsonb,p_blocker text default null)
 returns jsonb language sql security definer set search_path='public','private'
-as $$ select private.dd_finish_scheduled_operating_work($1,$2,$3,$4,$5) $$;
+as $ select private.dd_finish_scheduled_operating_work(p_id,p_worker_key,p_success,p_receipt,p_blocker) $;
 create or replace function public.dd_requeue_expired_scheduled_work_leases()
 returns integer language sql security definer set search_path='public','private'
 as $$ select private.dd_requeue_expired_scheduled_work_leases() $$;
 
+revoke all on function private.dd_claim_scheduled_operating_work(text,text,integer) from public,anon,authenticated;
+revoke all on function private.dd_finish_scheduled_operating_work(uuid,text,boolean,jsonb,text) from public,anon,authenticated;
+revoke all on function private.dd_requeue_expired_scheduled_work_leases() from public,anon,authenticated;
 revoke all on function public.dd_claim_scheduled_operating_work(text,text,integer) from public,anon,authenticated;
 revoke all on function public.dd_finish_scheduled_operating_work(uuid,text,boolean,jsonb,text) from public,anon,authenticated;
 revoke all on function public.dd_requeue_expired_scheduled_work_leases() from public,anon,authenticated;
