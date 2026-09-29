@@ -1,0 +1,16 @@
+-- Tester-first workforce economics and continuous company-financial research.
+-- Production promotion requires stateful HYBRID_W2_PROVIDER_CAPACITY proof and owner approval.
+-- Runtime objects are created in tester first; this migration is the version-controlled contract.
+-- Required programs: WORKFORCE_ECONOMICS, COMPANY_FINANCIAL_INTELLIGENCE.
+-- Required candidate: HYBRID_WORKFORCE_ROUTING_V1.
+-- Required journey invariants:
+--  * W-2 compensable time is recorded, including applicable job-site travel/wait time.
+--  * Provider offer/counter workflow remains an independent-business lane.
+--  * Dispatch never changes worker classification.
+--  * Provider overflow requires assignment readiness.
+--  * Economics compare loaded employee cost and productive utilization, never base wage alone.
+--  * Georgia workers-comp threshold and current federal/state employment rules remain source-watched.
+-- Research engine source families:
+--  IRS Publication 15/15-A; DOL classification + hours-worked; Georgia SBWC;
+--  DoorDash, ABM Industries, Upwork, Angi official quarterly/SEC evidence.
+-- Existing tester pg_cron job dani-research-engine runs private.dd_trigger_research_engine() every 15 minutes.
