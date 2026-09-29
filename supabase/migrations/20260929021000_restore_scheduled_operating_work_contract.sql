@@ -1,12 +1,12 @@
 -- Harden the canonical six-argument scheduled-work completion contract from #475.
 -- Claim-token ownership remains mandatory; this migration only adds durable receipt/blocker requirements.
 
-drop function if exists private.dd_finish_scheduled_operating_work(uuid,text,boolean,jsonb,text);
+
 
 create or replace function private.dd_finish_scheduled_operating_work(
   p_id uuid,
   p_worker_key text,
-  p_claim_token uuid,
+  p_claim_token text,
   p_success boolean,
   p_receipt jsonb,
   p_blocker text default null
@@ -17,10 +17,10 @@ begin
  select * into w from public.dd_scheduled_operating_work where id=p_id for update;
  if not found then raise exception 'WORK_NOT_FOUND'; end if;
  if nullif(btrim(p_worker_key),'') is null then raise exception 'WORKER_KEY_REQUIRED'; end if;
- if p_claim_token is null then raise exception 'CLAIM_TOKEN_REQUIRED'; end if;
+ if nullif(btrim(p_claim_token),'') is null then raise exception 'CLAIM_TOKEN_REQUIRED'; end if;
  if p_success is null then raise exception 'SUCCESS_DECISION_REQUIRED'; end if;
  if w.status<>'IN_PROGRESS' or coalesce(w.payload->>'claimed_by','')<>p_worker_key
-    or nullif(w.payload->>'claim_token','') is null or (w.payload->>'claim_token')::uuid<>p_claim_token
+    or coalesce(w.payload->>'claim_token','')<>p_claim_token
     or coalesce((w.payload->>'lease_expires_at')::timestamptz,'epoch'::timestamptz)<=now() then
    raise exception 'LEASE_NOT_OWNED';
  end if;
@@ -32,6 +32,12 @@ begin
  where id=p_id;
  return jsonb_build_object('id',p_id,'status',case when p_success then 'COMPLETED' else 'BLOCKED' end);
 end $$;
-revoke all on function private.dd_finish_scheduled_operating_work(uuid,text,uuid,boolean,jsonb,text) from public,anon,authenticated;
-grant execute on function private.dd_finish_scheduled_operating_work(uuid,text,uuid,boolean,jsonb,text) to service_role;
-comment on function private.dd_finish_scheduled_operating_work(uuid,text,uuid,boolean,jsonb,text) is 'Canonical claim-token scheduled-work finisher. Requires live lease ownership and durable success evidence; failures require a specific blocker.';
+revoke all on function private.dd_finish_scheduled_operating_work(uuid,text,text,boolean,jsonb,text) from public,anon,authenticated;
+grant execute on function private.dd_finish_scheduled_operating_work(uuid,text,text,boolean,jsonb,text) to service_role;
+comment on function private.dd_finish_scheduled_operating_work(uuid,text,text,boolean,jsonb,text) is 'Canonical claim-token scheduled-work finisher. Requires live lease ownership and durable success evidence; failures require a specific blocker.';
+
+create or replace function public.dd_finish_scheduled_operating_work(p_id uuid,p_worker_key text,p_claim_token text,p_success boolean,p_receipt jsonb,p_blocker text default null)
+returns jsonb language sql security definer set search_path='public','private'
+as $ select private.dd_finish_scheduled_operating_work(p_id,p_worker_key,p_claim_token,p_success,p_receipt,p_blocker) $;
+revoke all on function public.dd_finish_scheduled_operating_work(uuid,text,text,boolean,jsonb,text) from public,anon,authenticated;
+grant execute on function public.dd_finish_scheduled_operating_work(uuid,text,text,boolean,jsonb,text) to service_role;
