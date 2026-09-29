@@ -114,7 +114,12 @@ as $$
 declare
   v_request_id uuid;
 begin
-  if new.job_id is null then return new; end if;
+  if new.job_id is null then
+    if tg_op='UPDATE' and old.job_id is not null then
+      update public.dd_sales_queue set amount_collected=0, updated_at=now() where id=new.id;
+    end if;
+    return new;
+  end if;
   select service_request_id into v_request_id from public.dd_jobs where id=new.job_id;
   if v_request_id is not null then
     perform public.dd_reconcile_sales_collection_from_payments(v_request_id);
@@ -125,10 +130,13 @@ $$;
 revoke all on function public.dd_reconcile_sales_collection_sales_trigger() from public,anon,authenticated;
 drop trigger if exists trg_dd_reconcile_sales_collection_sales_link on public.dd_sales_queue;
 create trigger trg_dd_reconcile_sales_collection_sales_link
-after insert or update of job_id on public.dd_sales_queue
+after insert or update of job_id,amount_collected on public.dd_sales_queue
 for each row
-when (new.job_id is not null)
 execute function public.dd_reconcile_sales_collection_sales_trigger();
 
 comment on function public.dd_reconcile_sales_collection_sales_trigger()
 is 'Reconciles canonical collections when a sales row receives its job/request identity after payment already exists. No money movement.';
+
+
+-- Establish canonical totals for rows that predate these triggers.
+select public.dd_reconcile_sales_collection_from_payments(null);
