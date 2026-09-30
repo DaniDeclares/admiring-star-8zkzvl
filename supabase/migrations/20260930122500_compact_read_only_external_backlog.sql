@@ -1,5 +1,5 @@
 -- Compact missed polling intervals for read-only connector work instead of replaying every stale snapshot.
--- Lookback begins at the original scheduled work generated_at, not delayed outbox insertion time.
+-- Lookback begins at original work generated_at. Delayed verified receipts recover BLOCKED or IN_PROGRESS work.
 CREATE OR REPLACE FUNCTION public.dd_compact_read_only_external_backlog()
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -69,7 +69,7 @@ begin
    select w.id,w.work_key,o.id action_id,o.external_reference
    from public.dd_scheduled_operating_work w
    join public.dd_external_action_outbox o on o.authoritative_table='dd_scheduled_operating_work' and o.authoritative_record_id=w.id::text
-   where w.status='IN_PROGRESS' and o.status='SUCCEEDED'
+   where w.status in ('IN_PROGRESS','BLOCKED') and o.status='SUCCEEDED'
      and exists(select 1 from public.dd_external_action_receipts er where er.action_id=o.id and er.verified=true)
  loop
    update public.dd_scheduled_operating_work set status='COMPLETED',completed_at=now(),updated_at=now(),lease_expires_at=null,last_error=null,
