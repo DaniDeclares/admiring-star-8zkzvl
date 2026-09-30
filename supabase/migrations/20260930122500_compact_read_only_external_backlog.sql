@@ -1,4 +1,5 @@
 -- Compact missed polling intervals for read-only connector work instead of replaying every stale snapshot.
+-- Lookback begins at the original scheduled work generated_at, not delayed outbox insertion time.
 CREATE OR REPLACE FUNCTION public.dd_compact_read_only_external_backlog()
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -20,7 +21,7 @@ begin
    where destination_system=r.destination_system and action_type=r.action_type and status='PENDING'
    order by created_at desc,id desc limit 1;
 
-   select min(created_at),count(*) into v_earliest,v_count
+   select min(coalesce((payload->'payload'->>'generated_at')::timestamptz,created_at)),count(*) into v_earliest,v_count
    from public.dd_external_action_outbox
    where destination_system=r.destination_system and action_type=r.action_type and status='PENDING';
 
