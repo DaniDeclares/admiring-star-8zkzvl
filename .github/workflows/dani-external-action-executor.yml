@@ -74,7 +74,7 @@ jobs:
             }catch(e){
               const terminal=e.code==='ACTION_NOT_ALLOWLISTED'||attempt>=(a.max_attempts||5);
               await req(PROD_URL,PROD_KEY,'dd_external_action_attempts?outbox_id=eq.'+a.id+'&attempt_no=eq.'+attempt,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({completed_at:new Date().toISOString(),outcome:'FAILED',error_code:e.code||'DELIVERY_FAILED',error_detail:String(e.message).slice(0,1000)})}).catch(()=>{});
-              await req(PROD_URL,PROD_KEY,'dd_external_action_outbox?id=eq.'+a.id,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({status:terminal?'DEAD_LETTER':'RETRY_WAIT',attempt_count:attempt,next_attempt_at:terminal?null:new Date(Date.now()+Math.min(60,2**attempt)*60000).toISOString(),lease_expires_at:null,last_error_code:e.code||'DELIVERY_FAILED',last_error:String(e.message).slice(0,1000)})});
+              await req(PROD_URL,PROD_KEY,'dd_external_action_outbox?id=eq.'+a.id,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({status:terminal?'DEAD_LETTER':'RETRY_WAIT',attempt_count:attempt,next_attempt_at:terminal?new Date().toISOString():new Date(Date.now()+Math.min(60,2**attempt)*60000).toISOString(),lease_expires_at:null,last_error_code:e.code||'DELIVERY_FAILED',last_error:String(e.message).slice(0,1000)})});
               if(terminal) await req(PROD_URL,PROD_KEY,'dd_external_action_dead_letters',{method:'POST',prefer:'return=minimal',body:JSON.stringify({outbox_id:a.id,destination_system:a.destination_system,action_type:a.action_type,failure_class:e.code||'DELIVERY_FAILED',final_error:String(e.message).slice(0,1000)})});
             }
           }
