@@ -51,7 +51,7 @@ jobs:
                 const artifact=a.payload?.artifact_key;
                 const sourceState=a.payload?.source_state;
                 if(!artifact || !sourceState) throw Object.assign(new Error('MISSING_LEARNING_PAYLOAD'),{code:'INVALID_PAYLOAD'});
-                result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_ingest_production_bridge_learning',{method:'POST',body:JSON.stringify({p_artifact_key:artifact,p_source_state:sourceState})});
+                result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_ingest_production_bridge_learning',{method:'POST',body:JSON.stringify({p_payload:a.payload})});
                 reference='tester:learning:'+artifact;
               }
               await req(PROD_URL,PROD_KEY,'dd_external_action_attempts?outbox_id=eq.'+a.id+'&attempt_no=eq.'+attempt,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({completed_at:new Date().toISOString(),outcome:'SUCCEEDED',response_code:'200',external_reference:reference})});
