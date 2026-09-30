@@ -16,6 +16,12 @@ if(!['AUTOMATION','MIXED'].includes(job.execution_lane)) throw new Error('EXECUT
 // governed envelope identifies such a platform until claim/verification/deadline/license
 // evidence has been captured by the scout/controller.
 if(job.bounty_platform){
+  // Platform terms may reserve claim/submission/KYC attestations to the human account holder.
+  // Standing owner approval never overrides those third-party restrictions.
+  if(job.platform_automation_policy==='HUMAN_CLAIM_AND_SUBMIT_REQUIRED'){
+    if(job.requested_external_action==='CLAIM' || job.requested_external_action==='SUBMIT') throw new Error('BOUNTY_PLATFORM_HUMAN_ACTION_REQUIRED');
+  }
+  if(job.kyc_required===true && job.kyc_state!=='VERIFIED') throw new Error('BOUNTY_KYC_REQUIRED_BEFORE_CLAIM_OR_SUBMIT');
   if(job.platform_verification_required!==false && job.platform_verification_state!=='VERIFIED') throw new Error('BOUNTY_PLATFORM_VERIFICATION_REQUIRED');
   if(job.platform_claim_required!==false && job.platform_claim_state!=='CLAIMED') throw new Error('BOUNTY_PLATFORM_CLAIM_REQUIRED');
   if(!job.reservation_expires_at && !job.submission_deadline_at) throw new Error('BOUNTY_DEADLINE_EVIDENCE_REQUIRED');
@@ -51,7 +57,10 @@ process.stdout.write(JSON.stringify({
    payout_requires_approval:job.payout_requires_approval!==false,
    payout_method:job.payout_method||null,
    kyc_required:job.kyc_required??null,
-   first_approved_submission_risk:job.first_approved_submission_risk??null
+   first_approved_submission_risk:job.first_approved_submission_risk??null,
+   engagement_checkpoint_at:job.engagement_checkpoint_at||null,
+   platform_automation_policy:job.platform_automation_policy||null,
+   human_actions_required:job.platform_automation_policy==='HUMAN_CLAIM_AND_SUBMIT_REQUIRED'?['CLAIM','SUBMIT','KYC_ATTESTATION']:[]
  }:null,
  prohibited:['SCOPE_EXPANSION','SPEND','SECRET_ACCESS','ACCOUNT_CREATION','UNAPPROVED_EXTERNAL_ACTION']
 }));
