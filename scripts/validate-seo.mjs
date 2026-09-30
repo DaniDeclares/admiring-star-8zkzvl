@@ -2,10 +2,18 @@ import fs from "node:fs";
 
 const sitemap = fs.readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
 const registry = fs.readFileSync(new URL("../src/data/seoLandingPagesData.js", import.meta.url), "utf8");
+const generated = fs.existsSync(new URL("../build", import.meta.url));
 const errors = [];
 
 const slugs = [...registry.matchAll(/slug:\s*"([^"]+)"/g)].map((m) => m[1]);
 const urls = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]));
+
+if (generated) {
+  for (const slug of slugs) {
+    const expected = new URL(`../build/service-areas/${slug}/index.html`, import.meta.url);
+    if (!fs.existsSync(expected)) errors.push(`Generated SEO route missing: /service-areas/${slug}/`);
+  }
+}
 
 for (const slug of slugs) {
   const url = `https://danideclares.com/service-areas/${slug}`;
