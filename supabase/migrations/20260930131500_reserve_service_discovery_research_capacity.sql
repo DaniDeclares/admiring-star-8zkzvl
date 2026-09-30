@@ -43,7 +43,13 @@ begin
    if v_status not in ('QUEUED','RESEARCHING') then continue; end if;
    if v_status='RESEARCHING' and exists(select 1 from public.dd_research_work_queue q where q.id=r.id and q.last_researched_at>now()-interval '2 hours') then continue; end if;
    v_attempt:=coalesce(v_attempt,0)+1;
-   select * into s from public.dd_research_sources where status='ACTIVE' and (work_key=r.work_key or program_key=r.program_key)
+   select * into s from public.dd_research_sources where status='ACTIVE'
+     and coalesce(last_http_status,200) < 400 and last_error is null
+     and (
+       (r.program_key='SERVICE_DISCOVERY' and r.work_key like 'candidate:%' and work_key=r.work_key)
+       or
+       (not (r.program_key='SERVICE_DISCOVERY' and r.work_key like 'candidate:%') and (work_key=r.work_key or program_key=r.program_key))
+     )
    order by case when work_key=r.work_key then 0 else 1 end,case authority_level when 'PRIMARY' then 0 when 'OFFICIAL' then 1 else 2 end,coalesce(next_check_at,now()) limit 1;
    if s.id is null then
      update public.dd_research_work_queue set attempts=v_attempt,last_researched_at=now(),status='BLOCKED',blocker='SOURCE_DISCOVERY_REQUIRED',
