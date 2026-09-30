@@ -64,7 +64,7 @@ for(const [route,[title,description,copy]] of Object.entries(routes)){
    .replace(new RegExp('<meta property="og:url" content="[^"]*"\\s*/>'), `<meta property="og:url" content="${canonical}"/>`)
   .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta name="robots" content="index,follow"/><script type="application/ld+json">${json(schema)}</script></head>`)
   .replace('<div id="root"></div>',`<div id="root"><main><h1>${esc(title.replace(/ \| DANI DECLARES$/,''))}</h1><p>${esc(copy)}</p><p><a href="/request-service">Request service</a></p></main></div>`);
- const outputDir=route==='/' ? 'build' : path.join('build', route.replace(/^\\//,''));
+ const outputDir=route==='/' ? 'build' : path.join('build', route.replace(/^\//,''));
  fs.mkdirSync(outputDir,{recursive:true});
  fs.writeFileSync(path.join(outputDir,'index.html'),html);
 }
