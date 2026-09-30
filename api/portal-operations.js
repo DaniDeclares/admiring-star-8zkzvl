@@ -562,8 +562,7 @@ export default async function handler(req, res) {
         return ok(res, { role: context.role, notificationPreferences, ...await getCustomerSnapshot(context.supabase, context.identity, context.role) });
       }
       if (req.query?.ownerDashboard === '1') {
-        const isMasterOwner = String(context.user?.email || '').toLowerCase() === DANI_MASTER_OWNER_EMAIL;
-        if (context.role !== 'owner' && !isMasterOwner) return fail(res, 'Owner access required.', 403);
+        if (context.role !== 'owner') return fail(res, 'Owner access required.', 403);
         return ok(res, { role: context.role, ownerAccess: true, notificationPreferences, ...await getOwnerControlSnapshot(context.supabase) });
       }
       if (req.query?.quoteCatalog === '1') return ok(res, { role: context.role, services: await getQuoteCatalog(context.supabase) });
