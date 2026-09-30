@@ -36,16 +36,27 @@ jobs:
           let rows=await req(PROD_URL,PROD_KEY,'rpc/dd_claim_external_actions',{method:'POST',body:JSON.stringify({p_worker_key:WORKER_KEY,p_limit:5})});
           for(const a of rows||[]){
             const attempt=(a.attempt_count||0)+1;
-            const allow=a.destination_system==='DANI_TESTER_SUPABASE'&&a.action_type==='RECONCILE_TESTER_PROMOTION_FEEDBACK';
+            const allowedActions=new Set(['RECONCILE_TESTER_PROMOTION_FEEDBACK','INGEST_DANI_PRODUCTION_BRIDGE_LEARNING']);
+            const allow=a.destination_system==='DANI_TESTER_SUPABASE'&&allowedActions.has(a.action_type);
             try{
               await req(PROD_URL,PROD_KEY,'dd_external_action_attempts',{method:'POST',prefer:'return=minimal',body:JSON.stringify({outbox_id:a.id,attempt_no:attempt,worker_key:WORKER_KEY,outcome:'STARTED'})});
               if(!allow) throw Object.assign(new Error('ACTION_NOT_ALLOWLISTED'),{code:'ACTION_NOT_ALLOWLISTED'});
-              const candidate=a.payload?.candidate_key;
-              if(!candidate) throw Object.assign(new Error('MISSING_CANDIDATE_KEY'),{code:'INVALID_PAYLOAD'});
-              const result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_reconcile_tester_promotion_feedback',{method:'POST',body:JSON.stringify({p_candidate_key:candidate,p_production_state:a.payload})});
-              await req(PROD_URL,PROD_KEY,'dd_external_action_attempts?outbox_id=eq.'+a.id+'&attempt_no=eq.'+attempt,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({completed_at:new Date().toISOString(),outcome:'SUCCEEDED',response_code:'200',external_reference:'tester:'+candidate})});
-              await req(PROD_URL,PROD_KEY,'dd_external_action_receipts?on_conflict=destination_system,idempotency_key',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify({destination_system:a.destination_system,idempotency_key:a.idempotency_key,external_reference:'tester:'+candidate,outcome:'SUCCEEDED',last_seen_at:new Date().toISOString(),metadata:{worker:WORKER_KEY,result}})});
-              await req(PROD_URL,PROD_KEY,'dd_external_action_outbox?id=eq.'+a.id,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({status:'SUCCEEDED',attempt_count:attempt,succeeded_at:new Date().toISOString(),lease_expires_at:null,last_error:null,last_error_code:null,external_reference:'tester:'+candidate})});
+              let result, reference;
+              if(a.action_type==='RECONCILE_TESTER_PROMOTION_FEEDBACK'){
+                const candidate=a.payload?.candidate_key;
+                if(!candidate) throw Object.assign(new Error('MISSING_CANDIDATE_KEY'),{code:'INVALID_PAYLOAD'});
+                result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_reconcile_tester_promotion_feedback',{method:'POST',body:JSON.stringify({p_candidate_key:candidate,p_production_state:a.payload})});
+                reference='tester:promotion:'+candidate;
+              } else {
+                const artifact=a.payload?.artifact_key;
+                const sourceState=a.payload?.source_state;
+                if(!artifact || !sourceState) throw Object.assign(new Error('MISSING_LEARNING_PAYLOAD'),{code:'INVALID_PAYLOAD'});
+                result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_ingest_production_bridge_learning',{method:'POST',body:JSON.stringify({p_artifact_key:artifact,p_source_state:sourceState})});
+                reference='tester:learning:'+artifact;
+              }
+              await req(PROD_URL,PROD_KEY,'dd_external_action_attempts?outbox_id=eq.'+a.id+'&attempt_no=eq.'+attempt,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({completed_at:new Date().toISOString(),outcome:'SUCCEEDED',response_code:'200',external_reference:reference})});
+              await req(PROD_URL,PROD_KEY,'dd_external_action_receipts?on_conflict=destination_system,idempotency_key',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify({destination_system:a.destination_system,idempotency_key:a.idempotency_key,external_reference:reference,outcome:'SUCCEEDED',last_seen_at:new Date().toISOString(),metadata:{worker:WORKER_KEY,result,action_type:a.action_type}})});
+              await req(PROD_URL,PROD_KEY,'dd_external_action_outbox?id=eq.'+a.id,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({status:'SUCCEEDED',attempt_count:attempt,succeeded_at:new Date().toISOString(),lease_expires_at:null,last_error:null,last_error_code:null,external_reference:reference})});
             }catch(e){
               const terminal=e.code==='ACTION_NOT_ALLOWLISTED'||attempt>=(a.max_attempts||5);
               await req(PROD_URL,PROD_KEY,'dd_external_action_attempts?outbox_id=eq.'+a.id+'&attempt_no=eq.'+attempt,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({completed_at:new Date().toISOString(),outcome:'FAILED',error_code:e.code||'DELIVERY_FAILED',error_detail:String(e.message).slice(0,1000)})}).catch(()=>{});
