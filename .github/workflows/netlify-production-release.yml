@@ -2,6 +2,9 @@ name: 🚀 Governed Netlify Production Release
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
