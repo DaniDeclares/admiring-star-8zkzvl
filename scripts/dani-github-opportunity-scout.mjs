@@ -19,6 +19,16 @@ const strong=/\b(paid|funded|bounty|reward|payment|payout|usd|usdc)\b/i;
 const agent=/\b(agent[- ]?ready|agents? welcome|ai[- ]?agent|automation)\b/i;
 const admin=/\b(documentation|docs|research|data|spreadsheet|directory|submission|listing|admin|operations|qa|testing|audit|content|article|marketing|outreach)\b/i;
 const code=/\b(typescript|javascript|python|react|node|api|bug|code|implementation|refactor|test|ci|cli)\b/i;
+const sourceUrl=/\bsource\s*url\s*[:=-]\s*(https?:\/\/[^\s)>\]]+)/i;
+const mirror=/\b(mirror(?:ed)?|cross[- ]?post(?:ed)?|copied from|original issue|source url)\b/i;
+const payoutRisk=/\b(payment not guaranteed|payout not guaranteed|creator pays|maintainer pays|sponsor pays|payment arranged|payment outside|subject to approval|discretionary payout)\b/i;
+const opire=/\bopire\b/i;
+const issuehunt=/\bissuehunt\b/i;
+const algora=/\balgora\b/i;
+const nonOpportunity=/\b(no bounty|not a bounty|not accepting submissions|not accepting prs|not accepting pull requests|informational only|discussion only)\b/i;
+const explicitlyUnfunded=/\b(unfunded|not funded|funding pending|seeking sponsor|waiting sponsor|proposed bounty|proposal only)\b/i;
+const asyncFriendly=/\b(async(?:hronous)?|remote|work from home|documentation|docs|research|data|spreadsheet|directory|admin|operations|qa|testing|audit|content|article|marketing|outreach)\b/i;
+const synchronousRequired=/\b(phone calls?|cold calls?|call clients?|appointment setting|live calls?|zoom|required meetings?|on[- ]?site|onsite|in[- ]person|driv(?:e|ing)|travel required)\b/i;
 async function gh(path){const r=await fetch(api+path,{headers});if(!r.ok)throw new Error(`GitHub ${r.status}: ${(await r.text()).slice(0,500)}`);return r.json();}
 const seen=new Map();
 for(const q of queries){
@@ -53,6 +63,10 @@ for(const i of seen.values()){
  if((i.assignees||[]).length>0) score-=20;
  if(mirror.test(text)) score-=25;
  if(payoutRisk.test(text)) score-=25;
+ if(nonOpportunity.test(text)) score-=50;
+ if(explicitlyUnfunded.test(text)) score-=60;
+ if(asyncFriendly.test(text) && !synchronousRequired.test(text)) score+=10;
+ if(synchronousRequired.test(text)) score-=35;
  if(opire.test(text)) score-=10; // Opire docs: creator reviews/arranges payment; platform does not guarantee payer performance.
  if(issuehunt.test(text) && /submitted pull requests?/i.test(text)) score-=20;
  if(agent.test(text)) score+=10;
@@ -68,8 +82,10 @@ for(const i of seen.values()){
   payment_signal:strong.test(text),agent_signal:agent.test(text),
   platform_hint:opire.test(text)?'OPIRE':issuehunt.test(text)?'ISSUEHUNT':algora.test(text)?'ALGORA':'DIRECT_OR_OTHER',
   payer_risk_state:payoutRisk.test(text)||opire.test(text)?'REQUIRES_PAYER_HISTORY_VERIFICATION':'UNKNOWN_OR_PLATFORM_DEPENDENT',
+  funding_state:explicitlyUnfunded.test(text)?'NOT_FUNDED':/\b(escrowed|fully funded|funds secured)\b/i.test(text)?'ESCROW_OR_FUNDED_SIGNAL':'UNVERIFIED',
+  work_mode_state:synchronousRequired.test(text)?'SYNCHRONOUS_OR_LOCATION_DEPENDENCY':asyncFriendly.test(text)?'REMOTE_ASYNC_SIGNAL':'UNVERIFIED',
   qualification_state:score>=55?'QUALIFIED_REVIEW':score>=35?'NEEDS_ENRICHMENT':'LOW_PRIORITY',
-  pursuit_disposition:(Number(i.comments||0)>=75||mirror.test(text))?'DO_NOT_ALLOCATE_BUILD_YET':(payoutRisk.test(text)||opire.test(text))?'VERIFY_PAYER_HISTORY_BEFORE_BUILD':score>=55?'VERIFY_FOR_PURSUIT':'RESEARCH_ONLY',
+  pursuit_disposition:(nonOpportunity.test(text)||explicitlyUnfunded.test(text))?'REJECT_NOT_CURRENTLY_PAYABLE':synchronousRequired.test(text)?'REJECT_CURRENT_WORK_MODE_CONSTRAINT':(Number(i.comments||0)>=75||mirror.test(text))?'DO_NOT_ALLOCATE_BUILD_YET':(payoutRisk.test(text)||opire.test(text))?'VERIFY_PAYER_HISTORY_BEFORE_BUILD':score>=55?'VERIFY_FOR_PURSUIT':'RESEARCH_ONLY',
   required_next_action:'VERIFY_FUNDING_CLAIM_STATE_ACCEPTANCE_PAYOUT_AND_DANI_CAPABILITY_BEFORE_PURSUIT',
   auto_claim_allowed:false,auto_contact_allowed:false,auto_crm_create_allowed:false
  });
