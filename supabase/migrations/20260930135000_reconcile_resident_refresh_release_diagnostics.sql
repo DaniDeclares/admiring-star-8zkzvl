@@ -1,5 +1,5 @@
 -- Make service-release diagnostics truthful for fulfillment-gated offers and structure existing audited Resident Refresh economics without authorizing labor compensation or release.
-create or replace view public.dd_service_release_contract_legacy_v1 as  WITH offer_rollup AS (
+create or replace view public.dd_service_release_contract_legacy_v1 with (security_invoker=true) as  WITH offer_rollup AS (
          SELECT o_1.canonical_sku,
             max(o_1.service_name) AS service_name,
             max(o_1.division) AS division,
@@ -168,7 +168,7 @@ create or replace view public.dd_service_release_contract_legacy_v1 as  WITH off
      LEFT JOIN sync_rollup ss ON ((ss.canonical_sku = o.canonical_sku)))
      LEFT JOIN dd_service_release_verifications v ON ((v.canonical_sku = o.canonical_sku)))
      LEFT JOIN dd_service_payment_policy pp ON (((pp.policy_key = 'DEFAULT'::text) AND pp.is_active)));;
-create or replace view public.dd_service_release_contract_v1 as  WITH base AS (
+create or replace view public.dd_service_release_contract_v1 with (security_invoker=true) as  WITH base AS (
          SELECT l_1.canonical_sku,
             l_1.service_name,
             l_1.division,
@@ -297,3 +297,8 @@ on conflict(policy_key) do update set service_id=excluded.service_id,minimum_mar
 insert into public.dd_owner_attention_queue(domain,source_table,source_record_id,reason,priority,status,recommended_action,metadata)
 select 'PRICING_ECONOMICS','services',s.id::text,'Resident Refresh structured economics are complete except labor-route authority; do not convert the $23.40 modeled burdened labor rate into owner compensation or provider payout without governed authority.','P0','OPEN','Reconcile Danielle legacy provider/owner fulfillment authority for DNI-01A-001, then explicitly establish the applicable owner compensation or provider payout rule before economics can become ready.',jsonb_build_object('canonical_sku','DNI-01A-001','current_economics_reason','FULFILLMENT_ECONOMIC_ROUTE_UNRESOLVED','modeled_labor_hours',2,'modeled_burdened_labor_rate',23.40,'pricing_change',false,'production_authority',false)
 from public.services s where s.sku='DNI-01A-001' and not exists(select 1 from public.dd_owner_attention_queue q where q.status='OPEN' and q.source_table='services' and q.source_record_id=s.id::text and q.reason ilike 'Resident Refresh structured economics%');
+
+revoke all on public.dd_service_release_contract_legacy_v1 from anon,authenticated;
+revoke all on public.dd_service_release_contract_v1 from anon,authenticated;
+grant select on public.dd_service_release_contract_legacy_v1 to authenticated,service_role;
+grant select on public.dd_service_release_contract_v1 to authenticated,service_role;
