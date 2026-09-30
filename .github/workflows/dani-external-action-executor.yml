@@ -34,15 +34,21 @@ jobs:
           WORKER_KEY: github-actions:external-action:${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           node <<'NODE'
+          const normalizeSupabaseUrl=value=>/^https?:\/\//i.test(value||'')
+            ? value.replace(/\/+$/,'')
+            : 'https://'+value+'.supabase.co';
           const req=async(url,key,path,opts={})=>{
             const r=await fetch(url+'/rest/v1/'+path,{...opts,headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',Prefer:opts.prefer||'',...(opts.headers||{})}});
             const t=await r.text(); if(!r.ok) throw new Error(r.status+':'+t); return t?JSON.parse(t):null;
           };
-          const {PROD_URL,PROD_KEY,TESTER_URL,TESTER_KEY,WORKER_KEY,GH_TOKEN}=process.env;
-          if(!PROD_URL||!PROD_KEY||!TESTER_URL||!TESTER_KEY) throw new Error('Required Production/Tester Supabase secrets are missing');
+          const runtimeEnv=process.env;
+          if(!runtimeEnv.PROD_URL||!runtimeEnv.PROD_KEY||!runtimeEnv.TESTER_URL||!runtimeEnv.TESTER_KEY) throw new Error('Required Production/Tester Supabase secrets are missing');
+          const PROD_URL=normalizeSupabaseUrl(runtimeEnv.PROD_URL), TESTER_URL=normalizeSupabaseUrl(runtimeEnv.TESTER_URL);
+          const {PROD_KEY,TESTER_KEY,WORKER_KEY,GH_TOKEN}=runtimeEnv;
           let rows=await req(PROD_URL,PROD_KEY,'rpc/dd_claim_external_actions',{method:'POST',body:JSON.stringify({p_worker_key:WORKER_KEY,p_limit:5})});
           for(const a of rows||[]){
-            const attempt=(a.attempt_count||0)+1;
+            const prior=await req(PROD_URL,PROD_KEY,'dd_external_action_attempts?outbox_id=eq.'+a.id+'&select=attempt_no&order=attempt_no.desc&limit=1');
+            const attempt=Math.max(a.attempt_count||0,prior?.[0]?.attempt_no||0)+1;
             const testerActions=new Set(['RECONCILE_TESTER_PROMOTION_FEEDBACK','INGEST_DANI_PRODUCTION_BRIDGE_LEARNING']);
             const allowTester=a.destination_system==='DANI_TESTER_SUPABASE'&&testerActions.has(a.action_type);
             const allowGitHub=a.destination_system==='GITHUB'&&a.action_type==='EXECUTE_APPROVED_GITHUB_WORK';
