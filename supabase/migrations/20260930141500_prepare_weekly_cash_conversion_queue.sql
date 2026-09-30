@@ -1,4 +1,4 @@
--- Prepare a bounded internal conversion queue aligned to OWNER DANI's weekly cash horizon. No external contact, money action, or release bypass.
+-- Prepare a bounded internal conversion queue aligned to OWNER DANI's weekly cash horizon. No external contact, money action, or release bypass. Idempotent: already-prepared untouched leads are not rewritten.
 CREATE OR REPLACE FUNCTION public.dd_prepare_weekly_cash_conversion_queue(p_limit integer DEFAULT 25)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -17,6 +17,7 @@ begin
   from public.dd_sales_queue
   where disposition='NOT_CONTACTED' and not coalesce(do_not_contact,false)
     and (next_permitted_contact_at is null or next_permitted_contact_at<=now())
+    and coalesce(sales_metadata->>'weekly_cash_priority','false')<>'true'
  ), upd as (
   update public.dd_sales_queue s
   set next_action=case
