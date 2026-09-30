@@ -41,3 +41,6 @@ jobs:
 
       - name: 🏗️ Build project
         run: npm run build
+
+      - name: 🔎 Validate generated SEO routes
+        run: node scripts/validate-seo.mjs
