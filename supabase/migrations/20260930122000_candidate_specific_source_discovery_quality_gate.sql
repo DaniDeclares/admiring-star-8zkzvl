@@ -88,3 +88,36 @@ revoke execute on function public.dd_queue_candidate_source_discovery_requests()
 grant execute on function public.dd_queue_candidate_source_discovery_requests() to service_role;
 revoke execute on function public.dd_validate_source_discovery_candidate(text,text,text,text,jsonb) from public, anon, authenticated;
 grant execute on function public.dd_validate_source_discovery_candidate(text,text,text,text,jsonb) to service_role;
+
+
+-- Wire candidate discovery into the existing zero-source controller.
+CREATE OR REPLACE FUNCTION public.dd_queue_zero_source_discovery_requests()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare v_created int:=0; v_refreshed int:=0; v_candidate jsonb;
+begin
+ perform public.dd_refresh_research_coverage_gaps();
+ insert into public.dd_research_source_discovery_requests
+ (request_key,program_key,gap_key,priority,request_status,discovery_question,source_requirements,metadata)
+ select 'SOURCE_DISCOVERY:'||g.program_key,g.program_key,g.gap_key,g.priority,'OPEN',
+ 'Find and validate authoritative current sources sufficient to research program '||g.program_key||' without inventing source authority.',
+ jsonb_build_object('authoritative_preferred',true,'current_preferred',true,'url_must_be_observed_not_invented',true,
+ 'validate_before_source_activation',true,'minimum_independent_sources_for_contested_claims',2),
+ jsonb_build_object('open_work_items',g.open_work_items,'p0_open',g.p0_open,'coverage_gap',true,'tester_only',true)
+ from public.dd_research_coverage_gaps g
+ where g.gap_status='OPEN' and g.active_sources=0
+ on conflict(request_key) do update set priority=excluded.priority,
+ request_status=case when dd_research_source_discovery_requests.validated_source_count>0 then 'VALIDATED' else 'OPEN' end,
+ source_requirements=excluded.source_requirements,metadata=excluded.metadata,updated_at=now();
+ get diagnostics v_created=row_count;
+ v_candidate:=public.dd_queue_candidate_source_discovery_requests();
+ select count(*) into v_refreshed from public.dd_research_source_discovery_requests where request_status='OPEN';
+ return jsonb_build_object('status','COMPLETED','requests_upserted',v_created,'open_requests',v_refreshed,
+ 'candidate_discovery',v_candidate,'invented_urls',false,'source_activation',false,'production_mutation',false);
+end $function$
+;
+revoke execute on function public.dd_queue_zero_source_discovery_requests() from public, anon, authenticated;
+grant execute on function public.dd_queue_zero_source_discovery_requests() to service_role;
