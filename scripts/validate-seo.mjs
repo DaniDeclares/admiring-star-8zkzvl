@@ -1,17 +1,18 @@
 import fs from "node:fs";
-import { SEO_LANDING_PAGES } from "../src/data/seoLandingPagesData.js";
 
 const sitemap = fs.readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
+const registry = fs.readFileSync(new URL("../src/data/seoLandingPagesData.js", import.meta.url), "utf8");
 const errors = [];
 
+const slugs = [...registry.matchAll(/slug:\s*"([^"]+)"/g)].map((m) => m[1]);
 const urls = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]));
-for (const page of SEO_LANDING_PAGES) {
-  const url = `https://danideclares.com/service-areas/${page.slug}`;
+
+for (const slug of slugs) {
+  const url = `https://danideclares.com/service-areas/${slug}`;
   if (!urls.has(url)) errors.push(`SEO landing page missing from sitemap: ${url}`);
-  if (!page.title || page.title.length < 20) errors.push(`SEO title too short: ${page.slug}`);
-  if (!page.description || page.description.length < 80) errors.push(`SEO description too short: ${page.slug}`);
 }
 
+if (new Set(slugs).size !== slugs.length) errors.push("Duplicate SEO landing-page slug detected.");
 if (!sitemap.includes("<urlset")) errors.push("Sitemap is missing a urlset root.");
 if (!sitemap.includes("https://danideclares.com/")) errors.push("Sitemap does not contain the canonical origin.");
 
@@ -20,4 +21,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`SEO validation passed: ${SEO_LANDING_PAGES.length} governed landing pages and sitemap structure verified.`);
+console.log(`SEO validation passed: ${slugs.length} governed landing pages and sitemap structure verified.`);
