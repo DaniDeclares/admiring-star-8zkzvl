@@ -1,0 +1,46 @@
+import React from "react";
+import { siteConfig } from "../data/siteConfig.js";
+
+const ORIGIN = siteConfig.SITE_URL || "https://danideclares.com";
+
+const areaServed = [
+  { "@type": "City", name: "Atlanta", addressCountry: "US" },
+  { "@type": "City", name: "Doraville", addressCountry: "US" },
+  { "@type": "City", name: "Dunwoody", addressCountry: "US" },
+  { "@type": "City", name: "Stone Mountain", addressCountry: "US" },
+  { "@type": "City", name: "Tucker", addressCountry: "US" },
+  { "@type": "AdministrativeArea", name: "Metro Atlanta", addressCountry: "US" },
+  { "@type": "AdministrativeArea", name: "Regional South Carolina", addressCountry: "US" }
+];
+
+export default function SeoStructuredData() {
+  const organization = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": `${ORIGIN}/#organization`,
+    name: "DANI DECLARES LLC",
+    url: ORIGIN,
+    logo: `${ORIGIN}/dani-declares-logo.svg`,
+    image: `${ORIGIN}/dani-declares-logo.svg`,
+    telephone: siteConfig.phoneNumbers.public.tel,
+    email: siteConfig.emails.admin,
+    areaServed,
+    sameAs: []
+  };
+
+  const website = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${ORIGIN}/#website`,
+    url: ORIGIN,
+    name: "DANI DECLARES LLC",
+    publisher: { "@id": `${ORIGIN}/#organization` }
+  };
+
+  return (
+    <>
+      <script type="application/ld+json">{JSON.stringify(organization)}</script>
+      <script type="application/ld+json">{JSON.stringify(website)}</script>
+    </>
+  );
+}
