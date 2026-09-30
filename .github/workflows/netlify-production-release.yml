@@ -57,10 +57,9 @@ jobs:
       - name: 🚀 Deploy verified artifact to existing Netlify site
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_SITE_ID: d4f8ce3d-7443-4b16-8753-99f772ac42e7
         run: |
           test -n "$NETLIFY_AUTH_TOKEN" || { echo "::error::NETLIFY_AUTH_TOKEN is not configured"; exit 1; }
-          test -n "$NETLIFY_SITE_ID" || { echo "::error::NETLIFY_SITE_ID is not configured"; exit 1; }
           npx netlify-cli deploy --prod --dir=build --site="$NETLIFY_SITE_ID" --auth="$NETLIFY_AUTH_TOKEN" --message="Governed production release"
 
       - name: 🌐 Smoke-test production
