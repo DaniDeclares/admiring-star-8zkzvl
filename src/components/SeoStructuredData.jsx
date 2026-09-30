@@ -16,7 +16,7 @@ const areaServed = [
 export default function SeoStructuredData() {
   const organization = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": ["LocalBusiness", "ProfessionalService"],
     "@id": `${ORIGIN}/#organization`,
     name: "DANI DECLARES LLC",
     url: ORIGIN,
@@ -25,7 +25,7 @@ export default function SeoStructuredData() {
     telephone: siteConfig.phoneNumbers.public.tel,
     email: siteConfig.emails.admin,
     areaServed,
-    sameAs: [\n      "https://www.google.com/maps/place/Dani+Declares+LLC/data=!4m2!3m1!1s0x0:0x89f6128572e1cc20"\n    ],\n    additionalType: "https://schema.org/ProfessionalService"
+    sameAs: [\n      "https://www.google.com/maps/place/Dani+Declares+LLC/data=!4m2!3m1!1s0x0:0x89f6128572e1cc20"\n    ]
   };
 
   const website = {
