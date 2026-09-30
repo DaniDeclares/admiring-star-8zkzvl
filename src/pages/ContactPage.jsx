@@ -143,7 +143,7 @@ export default function ContactPage() {
                   <Phone className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <strong className="text-white">Direct Dispatch Lines:</strong>
-                    <p>(470) 485-7173 | (470) 523-4892</p>
+                    <p>(470) 485-7173</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
