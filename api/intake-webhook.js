@@ -61,7 +61,7 @@ async function recordIntakeFailure(req,error,stage='request_persistence'){
 export default async function handler(req,res){
  if(req.method!=='POST')return res.status(405).json({error:'This action is not available.'});
  try{
-  const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,organizationName,locationAddress,locationCity,locationState,locationZip,timeline,budgetRange,requestedStartAt,commercialModel,subchannelCode,requestedTimezone='America/New_York',frontDoorCode}=req.body||{};
+  const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,organizationName,locationAddress,locationCity,locationState,locationZip,timeline,budgetRange,requestedStartAt,commercialModel,subchannelCode,requestedTimezone='America/New_York',frontDoorCode,referralCode}=req.body||{};
   if(!name||(!email&&!phone))return res.status(400).json({error:'Please provide your name and at least one way to contact you.'});
   const normalizedState=String(locationState||'').trim().toUpperCase();
   const normalizedCity=String(locationCity||'').trim();
@@ -112,12 +112,49 @@ export default async function handler(req,res){
   }
   const paymentEligible=channelType==='B2C'&&frozenPrice!=null;
   const requestState=paymentEligible?'payment_pending':routing.initialState.toLowerCase();
+  const normalizedReferralCode=/^[A-Za-z0-9_-]{4,64}$/.test(String(referralCode||'').trim())?String(referralCode).trim():null;
   let booking=null;
+  let referralAttribution=null;
   const result=await prisma.$transaction(async tx=>{
    const lead=await tx.lead.create({data:{full_name:name,email:email||null,phone:phone||null,organization_name:organizationName||null,status:'new',notes:null}});
    const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:fullServiceAddress,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:{...routingContext,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null},pricingServiceId:serviceRef,commercialIntent:serverCommercialIntent,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode,serviceAddress:{street:normalizedStreet,city:normalizedCity,state:normalizedState,zip:normalizedZip}},status:requestState,priority:'normal',channelType:channelType||null,officialChannel:governedChannelCode,commercialModel:routingContext.commercialModel||null,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null,jurisdictionState:normalizedState,organizationId:portalOrganizationId||null}});
    
    if(paymentEligible){await tx.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:fullServiceAddress,timeline:timeline||null,state:normalizedState,zip_code:normalizedZip,intake_answers:{serviceId:serviceRef,commercialIntent:serverCommercialIntent,serviceAddress:{street:normalizedStreet,city:normalizedCity,state:normalizedState,zip:normalizedZip}},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});}
+   if(normalizedReferralCode){
+    const identities=await tx.$queryRawUnsafe(
+      `SELECT ri.id,ri.program_id,ri.referrer_type,ri.referrer_provider_id,ri.referrer_user_id,ri.referrer_email,ip.program_status
+         FROM public.dd_referral_identities ri
+         JOIN public.dd_incentive_programs ip ON ip.id=ri.program_id
+        WHERE upper(ri.referral_code)=upper($1) AND ri.status='ACTIVE'
+        LIMIT 1`,
+      normalizedReferralCode
+    );
+    const identity=identities[0]||null;
+    const normalizedEmail=String(email||'').trim().toLowerCase()||null;
+    const selfReferral=Boolean(identity?.referrer_email&&normalizedEmail&&String(identity.referrer_email).trim().toLowerCase()===normalizedEmail);
+    if(identity&&identity.program_status==='ACTIVE'&&!selfReferral){
+      const existing=normalizedEmail?await tx.$queryRawUnsafe(
+        `SELECT id FROM public.dd_referrals WHERE program_id=$1::uuid AND lower(referred_email)=lower($2) LIMIT 1`,
+        identity.program_id,normalizedEmail
+      ):[];
+      if(!existing.length){
+        const rows=await tx.$queryRawUnsafe(
+          `INSERT INTO public.dd_referrals
+            (program_id,referrer_provider_id,referrer_user_id,referred_email,referred_phone,referred_party_type,referral_status,source_reference,metadata)
+           VALUES ($1::uuid,$2::uuid,$3::uuid,$4,$5,'CLIENT','REFERRED',$6,$7::jsonb)
+           RETURNING id`,
+          identity.program_id,
+          identity.referrer_provider_id||null,
+          identity.referrer_user_id||null,
+          normalizedEmail,
+          phone||null,
+          request.id,
+          JSON.stringify({referral_code:normalizedReferralCode,service_request_id:request.id,lead_id:lead.id,attributed_at:new Date().toISOString()})
+        );
+        referralAttribution=rows[0]?.id?{referralId:rows[0].id,referralCode:normalizedReferralCode}:null;
+      }
+    }
+   }
    if(requestedStartAt){
     const start=new Date(requestedStartAt); if(Number.isNaN(start.valueOf())) throw new Error('INVALID_REQUESTED_DATE_TIME');
     const special=serviceRef?await tx.$queryRawUnsafe(`SELECT service_name AS name,unit,price FROM public.danis_specials_offers WHERE service_id=$1 AND active=true AND market='GA' LIMIT 1`,serviceRef):[];
@@ -215,7 +252,7 @@ export default async function handler(req,res){
     payload:{to:process.env.NOTIFICATION_PHONE,text:`New DANI DECLARES request: ${name}; ${serviceType||category||'service'}; ${phone||email||''}; Request ${request.id}`}
    });
   }catch(notificationError){console.error('Lead notification queue error:',notificationError)}
-  return res.status(200).json({success:true,message:'We received your request.',requestId:request.id,paymentPending:paymentEligible,status:requestState,booking:booking?{id:booking.id,startsAt:booking.requested_start_at,endsAt:booking.requested_end_at,holdExpiresAt:booking.hold_expires_at,durationMinutes:booking.duration_minutes}:null});
+  return res.status(200).json({success:true,message:'We received your request.',requestId:request.id,paymentPending:paymentEligible,status:requestState,referralAttributed:Boolean(referralAttribution),booking:booking?{id:booking.id,startsAt:booking.requested_start_at,endsAt:booking.requested_end_at,holdExpiresAt:booking.hold_expires_at,durationMinutes:booking.duration_minutes}:null});
  }catch(error){
   captureServerException(error,{route:'/api/intake-webhook',stage:'request_persistence'});
   await flushServerSentry();
