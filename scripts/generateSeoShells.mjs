@@ -37,7 +37,25 @@ for(const [route,[title,description,copy]] of Object.entries(routes)){
  const canonical=origin+(route==='/'?'/':route);
  const isLanding=route.startsWith('/service-areas/');
  const business={"@context":"https://schema.org","@type":["LocalBusiness","ProfessionalService"],"@id":origin+"/#organization",name:"DANI DECLARES LLC",url:origin,telephone:"+14704857173",areaServed:["Metro Atlanta","Regional South Carolina"],sameAs:["https://www.google.com/maps/place/Dani+Declares+LLC/data=!4m2!3m1!1s0x0:0x89f6128572e1cc20"]};
- const schema=isLanding?{...business,"hasOfferCatalog":{"@type":"OfferCatalog","name":title.replace(" | DANI DECLARES",""),"itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":title.replace(" | DANI DECLARES",""),"areaServed":route.includes("tucker")?"Tucker, Georgia":"Metro Atlanta, Georgia"}}]}:business;
+ const schema=isLanding
+  ? {
+      ...business,
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: title.replace(" | DANI DECLARES", ""),
+        itemListElement: [
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: title.replace(" | DANI DECLARES", ""),
+              areaServed: route.includes("tucker") ? "Tucker, Georgia" : "Metro Atlanta, Georgia"
+            }
+          }
+        ]
+      }
+    }
+  : business;
  let html=source
   .replace(/<title>.*?<\/title>/, `<title>${esc(title)}</title>`)
    .replace(new RegExp('<meta name="description" content="[^"]*"\\s*/>'), `<meta name="description" content="${esc(description)}"/>`)
