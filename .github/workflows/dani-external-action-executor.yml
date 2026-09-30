@@ -39,7 +39,8 @@ jobs:
           let rows=await req(PROD_URL,PROD_KEY,'rpc/dd_claim_external_actions',{method:'POST',body:JSON.stringify({p_worker_key:WORKER_KEY,p_limit:5})});
           for(const a of rows||[]){
             const attempt=(a.attempt_count||0)+1;
-            const allowTester=a.destination_system==='DANI_TESTER_SUPABASE'&&a.action_type==='RECONCILE_TESTER_PROMOTION_FEEDBACK';
+            const testerActions=new Set(['RECONCILE_TESTER_PROMOTION_FEEDBACK','INGEST_DANI_PRODUCTION_BRIDGE_LEARNING']);
+            const allowTester=a.destination_system==='DANI_TESTER_SUPABASE'&&testerActions.has(a.action_type);
             const allowGitHub=a.destination_system==='GITHUB'&&a.action_type==='EXECUTE_APPROVED_GITHUB_WORK';
             const allow=allowTester||allowGitHub;
             try{
@@ -47,9 +48,16 @@ jobs:
               if(!allow) throw Object.assign(new Error('ACTION_NOT_ALLOWLISTED'),{code:'ACTION_NOT_ALLOWLISTED'});
               let candidate=a.payload?.candidate_key, result, externalRef;
               if(allowTester){
-                if(!candidate) throw Object.assign(new Error('MISSING_CANDIDATE_KEY'),{code:'INVALID_PAYLOAD'});
-                result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_reconcile_tester_promotion_feedback',{method:'POST',body:JSON.stringify({p_candidate_key:candidate,p_production_state:a.payload})});
-                externalRef='tester:'+candidate;
+                if(a.action_type==='RECONCILE_TESTER_PROMOTION_FEEDBACK'){
+                  if(!candidate) throw Object.assign(new Error('MISSING_CANDIDATE_KEY'),{code:'INVALID_PAYLOAD'});
+                  result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_reconcile_tester_promotion_feedback',{method:'POST',body:JSON.stringify({p_candidate_key:candidate,p_production_state:a.payload})});
+                  externalRef='tester:promotion:'+candidate;
+                } else {
+                  const artifact=a.payload?.artifact_key, sourceState=a.payload?.source_state;
+                  if(!artifact||!sourceState) throw Object.assign(new Error('MISSING_LEARNING_PAYLOAD'),{code:'INVALID_PAYLOAD'});
+                  result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_ingest_production_bridge_learning',{method:'POST',body:JSON.stringify({p_payload:a.payload})});
+                  externalRef='tester:learning:'+artifact;
+                }
               } else {
                 if(!GH_TOKEN) throw Object.assign(new Error('GITHUB_TOKEN_REQUIRED'),{code:'MISSING_RUNTIME_CREDENTIAL'});
                 const approvalId=a.payload?.approval_id;
