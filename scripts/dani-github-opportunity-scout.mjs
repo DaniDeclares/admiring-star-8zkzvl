@@ -55,6 +55,8 @@ for(const i of seen.values()){
  if(payoutRisk.test(text)) score-=25;
  if(opire.test(text)) score-=10; // Opire docs: creator reviews/arranges payment; platform does not guarantee payer performance.
  if(issuehunt.test(text) && /submitted pull requests?/i.test(text)) score-=20;
+ if(nonOpportunity.test(text)) score-=50;
+ if(explicitlyUnfunded.test(text)) score-=60;
  if(agent.test(text)) score+=10;
  if(admin.test(text)) score+=12;
  if(code.test(text)) score+=5;
@@ -68,8 +70,9 @@ for(const i of seen.values()){
   payment_signal:strong.test(text),agent_signal:agent.test(text),
   platform_hint:opire.test(text)?'OPIRE':issuehunt.test(text)?'ISSUEHUNT':algora.test(text)?'ALGORA':'DIRECT_OR_OTHER',
   payer_risk_state:payoutRisk.test(text)||opire.test(text)?'REQUIRES_PAYER_HISTORY_VERIFICATION':'UNKNOWN_OR_PLATFORM_DEPENDENT',
+  funding_state:explicitlyUnfunded.test(text)?'NOT_FUNDED':/payment state:\s*`?escrowed|fully funded/i.test(text)?'ESCROW_OR_FUNDED_SIGNAL':'UNVERIFIED',
   qualification_state:score>=55?'QUALIFIED_REVIEW':score>=35?'NEEDS_ENRICHMENT':'LOW_PRIORITY',
-  pursuit_disposition:(Number(i.comments||0)>=75||mirror.test(text))?'DO_NOT_ALLOCATE_BUILD_YET':(payoutRisk.test(text)||opire.test(text))?'VERIFY_PAYER_HISTORY_BEFORE_BUILD':score>=55?'VERIFY_FOR_PURSUIT':'RESEARCH_ONLY',
+  pursuit_disposition:(nonOpportunity.test(text)||explicitlyUnfunded.test(text))?'REJECT_NOT_CURRENTLY_PAYABLE':(Number(i.comments||0)>=75||mirror.test(text))?'DO_NOT_ALLOCATE_BUILD_YET':(payoutRisk.test(text)||opire.test(text))?'VERIFY_PAYER_HISTORY_BEFORE_BUILD':score>=55?'VERIFY_FOR_PURSUIT':'RESEARCH_ONLY',
   required_next_action:'VERIFY_FUNDING_CLAIM_STATE_ACCEPTANCE_PAYOUT_AND_DANI_CAPABILITY_BEFORE_PURSUIT',
   auto_claim_allowed:false,auto_contact_allowed:false,auto_crm_create_allowed:false
  });
