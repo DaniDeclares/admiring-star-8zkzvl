@@ -200,4 +200,44 @@ begin
 end
 $function$;
 
+
+create or replace function public.dd_run_catalog_release_reconciliation_cycle()
+returns jsonb
+language plpgsql
+security invoker
+set search_path=''
+as $function$
+declare
+  v_routes jsonb;
+  v_learning jsonb;
+begin
+  v_routes := public.dd_reconcile_unambiguous_fulfillment_routes();
+  v_learning := public.dd_run_revenue_readiness_learning_cycle();
+  return jsonb_build_object(
+    'status','COMPLETED',
+    'route_reconciliation',v_routes,
+    'revenue_readiness',v_learning,
+    'scheduler_reused',true,
+    'new_scheduler_created',false,
+    'money_action',false,
+    'external_contact',false
+  );
+end
+$function$;
+
+revoke all on function public.dd_run_catalog_release_reconciliation_cycle() from public,anon,authenticated;
+grant execute on function public.dd_run_catalog_release_reconciliation_cycle() to service_role;
+
+do $
+begin
+  if exists (select 1 from pg_namespace where nspname='cron') then
+    perform cron.schedule(
+      'dani-revenue-readiness-learning-cycle',
+      '1,21,41 * * * *',
+      'select public.dd_run_catalog_release_reconciliation_cycle();'
+    );
+  end if;
+end
+$;
+
 commit;
