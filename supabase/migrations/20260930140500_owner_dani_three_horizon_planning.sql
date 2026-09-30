@@ -19,6 +19,8 @@ create table if not exists public.dd_owner_problem_inbox(
 alter table public.dd_owner_problem_inbox enable row level security;
 revoke all on public.dd_owner_problem_inbox from public,anon,authenticated;
 grant select,insert,update,delete on public.dd_owner_problem_inbox to service_role;
+create policy dd_owner_horizon_objectives_service_role_all on public.dd_owner_horizon_objectives for all to service_role using (true) with check (true);
+create policy dd_owner_problem_inbox_service_role_all on public.dd_owner_problem_inbox for all to service_role using (true) with check (true);
 
 insert into public.dd_owner_horizon_objectives(horizon,objective_key,rank,rationale,metadata)
 select x.horizon,x.objective_key,x.rank,x.rationale,jsonb_build_object('source','OWNER_DANI_THREE_HORIZON_MODEL','preserve_entity_boundaries',true)
