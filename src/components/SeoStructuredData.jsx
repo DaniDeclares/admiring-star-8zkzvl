@@ -1,7 +1,7 @@
 import React from "react";
-import { siteConfig } from "../data/siteConfig.js";
+import { siteConfig, SITE_URL } from "../data/siteConfig.js";
 
-const ORIGIN = siteConfig.SITE_URL || "https://danideclares.com";
+const ORIGIN = SITE_URL;
 
 const areaServed = [
   { "@type": "City", name: "Atlanta", addressCountry: "US" },
