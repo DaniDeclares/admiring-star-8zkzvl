@@ -1,7 +1,7 @@
 -- Candidate-only payment projection reconciliation.
 -- This does NOT create Stripe objects and does NOT authorize activation.
 create table if not exists public.dd_payment_projection_candidates (
-  canonical_sku text primary key references public.services(sku) on update cascade on delete restrict,
+  canonical_sku text primary key,
   pricing_type text not null,
   starting_price numeric(12,2) not null,
   initial_payment_percent numeric(6,2) not null,
