@@ -5,15 +5,15 @@ import { SEO_LANDING_PAGES } from "../data/seoLandingPagesData.js";
 
 const ORIGIN = "https://danideclares.com";
 const DEFAULT = {
-  title: "DANI DECLARES LLC | Operations, Execution & Support",
-  description: "DANI DECLARES provides mobile resident, property, real estate, business, event, field and institutional support across Metro Atlanta and regional South Carolina."
+  title: "Home, Property & Business Support in Atlanta | DANI DECLARES",
+  description: "DANI DECLARES provides home cleaning, property, real estate, business, field and operational support across Metro Atlanta and regional South Carolina."
 };
 
 const ROUTES = {
   "/": DEFAULT,
-  "/services": { title: "Services | DANI DECLARES", description: "Explore DANI DECLARES services for residents, property teams, real estate professionals, businesses and institutional clients." },
-  "/resident-concierge": { title: "Resident Concierge | DANI DECLARES", description: "Mobile resident support for household resets, organization, document support and everyday execution needs." },
-  "/services/property": { title: "Property & Apartment Support | DANI DECLARES", description: "Unit turns, field documentation, punch support, inspections and resident-experience services for property teams." },
+  "/services": { title: "Services in Atlanta & Regional South Carolina | DANI DECLARES", description: "Explore home, property, real estate, business, event, field and operational services from DANI DECLARES." },
+  "/resident-concierge": { title: "Home Cleaning & Resident Concierge Services | DANI DECLARES", description: "Home cleaning, household resets, organization and concierge support across Metro Atlanta." },
+  "/services/property": { title: "Apartment Turnover & Property Support in Atlanta | DANI DECLARES", description: "Unit turns, make-ready cleaning, field documentation, punch support and property readiness services for Atlanta-area property teams." },
   "/real-estate": { title: "Real Estate Support | DANI DECLARES", description: "Listing preparation, open-house support, field execution and administrative support for real estate professionals." },
   "/services/business-solutions": { title: "Business Support | DANI DECLARES", description: "Administrative, field, print, event and operational execution support for businesses." },
   "/industries/government": { title: "Government & Institutional Support | DANI DECLARES", description: "Facilities, administrative, field documentation, courier and program-logistics support for government and institutional buyers." },
