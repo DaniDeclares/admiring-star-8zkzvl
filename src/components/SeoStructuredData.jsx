@@ -25,7 +25,9 @@ export default function SeoStructuredData() {
     telephone: siteConfig.phoneNumbers.public.tel,
     email: siteConfig.emails.admin,
     areaServed,
-    sameAs: [\n      "https://www.google.com/maps/place/Dani+Declares+LLC/data=!4m2!3m1!1s0x0:0x89f6128572e1cc20"\n    ]
+    sameAs: [
+      "https://www.google.com/maps/place/Dani+Declares+LLC/data=!4m2!3m1!1s0x0:0x89f6128572e1cc20"
+    ]
   };
 
   const website = {
