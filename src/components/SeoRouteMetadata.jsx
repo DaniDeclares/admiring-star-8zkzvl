@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
+import { SEO_LANDING_PAGES } from "../data/seoLandingPagesData.js";
 
 const ORIGIN = "https://danideclares.com";
 const DEFAULT = {
@@ -40,10 +41,11 @@ function normalizePath(pathname) {
 export default function SeoRouteMetadata() {
   const { pathname } = useLocation();
   const path = normalizePath(pathname);
-  const meta = ROUTES[path] || (path.startsWith("/blog/") ? {
+  const landing = path.startsWith("/service-areas/") ? SEO_LANDING_PAGES.find((entry) => `/service-areas/${entry.slug}` === path) : null;
+  const meta = landing ? { title: landing.title, description: landing.description } : (ROUTES[path] || (path.startsWith("/blog/") ? {
     title: "DANI DECLARES Blog",
     description: "Service information and operational insights from DANI DECLARES."
-  } : DEFAULT);
+  } : DEFAULT));
   const canonical = `${ORIGIN}${path === "/" ? "/" : path}`;
   const image = `${ORIGIN}/dani-declares-logo.svg`;
 
