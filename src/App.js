@@ -2,6 +2,8 @@ import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 import SeoRouteMetadata from "./components/SeoRouteMetadata.jsx";
+import SeoStructuredData from "./components/SeoStructuredData.jsx";
+import SeoLandingPage from "./pages/SeoLandingPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
@@ -80,6 +82,7 @@ export default function App() {
   return (
     <Layout>
       <SeoRouteMetadata />
+      <SeoStructuredData />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/solutions" element={<PortfolioPage />} />
@@ -88,6 +91,7 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/services" element={<ServicesPage />} />
+        <Route path="/service-areas/:slug" element={<SeoLandingPage />} />
         <Route path="/catalog" element={<CommercialCatalogPage />} />
         <Route path="/services/category/:slug" element={<ServiceCategoryPage />} />
         <Route path="/services/business" element={<BusinessSolutionsPage />} />
