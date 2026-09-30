@@ -23,7 +23,13 @@ async function gh(path){const r=await fetch(api+path,{headers});if(!r.ok)throw n
 const seen=new Map();
 for(const q of queries){
  const data=await gh('/search/issues?per_page=50&sort=updated&order=desc&q='+encodeURIComponent(q));
- for(const i of data.items||[]) seen.set(i.html_url,i);
+ for(const i of data.items||[]){
+   const t=`${i.title}\n${i.body||''}`;
+   const canonical=(t.match(sourceUrl)||[])[1]||i.html_url;
+   const existing=seen.get(canonical);
+   // Prefer the canonical/original issue over a mirror when both are present.
+   if(!existing || (existing.html_url!==canonical && i.html_url===canonical)) seen.set(canonical,i);
+ }
 }
 const now=Date.now();
 const out=[];
@@ -38,16 +44,27 @@ for(const i of seen.values()){
  if(usd>=100) score+=25; else if(usd>=50) score+=15; else if(usd>0) score+=5;
  score+=Math.max(0,15-Math.floor(ageDays));
  if((i.assignees||[]).length===0) score+=10;
+ const comments=Number(i.comments||0);
+ if(comments>=1000) score-=60;
+ else if(comments>=250) score-=45;
+ else if(comments>=75) score-=30;
+ else if(comments>=25) score-=15;
+ else if(comments>=10) score-=5;
+ if((i.assignees||[]).length>0) score-=20;
+ if(mirror.test(text)) score-=25;
  if(agent.test(text)) score+=10;
  if(admin.test(text)) score+=12;
  if(code.test(text)) score+=5;
  const lane=admin.test(text)?'DANI_SERVICE_OR_PROVIDER_FIT':code.test(text)?'TECH_PROVIDER_OR_AUTOMATION_FIT':'MANUAL_REVIEW';
  out.push({
-  source:'GITHUB',source_url:i.html_url,repo:i.repository_url?.split('/repos/')[1]||null,issue_number:i.number,
+  source:'GITHUB',source_url:i.html_url,canonical_source_url:(text.match(sourceUrl)||[])[1]||i.html_url,
+  is_mirror:mirror.test(text),repo:i.repository_url?.split('/repos/')[1]||null,issue_number:i.number,
   title:i.title,updated_at:i.updated_at,labels:(i.labels||[]).map(x=>typeof x==='string'?x:x.name),
-  assignee_count:(i.assignees||[]).length,explicit_usd_amount:usd||null,score,lane,
+  assignee_count:(i.assignees||[]).length,comment_count:Number(i.comments||0),explicit_usd_amount:usd||null,score,lane,
+  competition_state:Number(i.comments||0)>=75?'EXTREME':Number(i.comments||0)>=25?'HIGH':Number(i.comments||0)>=10?'MEDIUM':'LOW',
   payment_signal:strong.test(text),agent_signal:agent.test(text),
   qualification_state:score>=55?'QUALIFIED_REVIEW':score>=35?'NEEDS_ENRICHMENT':'LOW_PRIORITY',
+  pursuit_disposition:(Number(i.comments||0)>=75||mirror.test(text))?'DO_NOT_ALLOCATE_BUILD_YET':score>=55?'VERIFY_FOR_PURSUIT':'RESEARCH_ONLY',
   required_next_action:'VERIFY_FUNDING_CLAIM_STATE_ACCEPTANCE_PAYOUT_AND_DANI_CAPABILITY_BEFORE_PURSUIT',
   auto_claim_allowed:false,auto_contact_allowed:false,auto_crm_create_allowed:false
  });
