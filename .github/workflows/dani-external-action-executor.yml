@@ -8,7 +8,9 @@ on:
     - cron: '*/10 * * * *'
 
 permissions:
-  contents: read
+  contents: write
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: dani-external-action-executor-production
@@ -24,6 +26,7 @@ jobs:
           PROD_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
           TESTER_URL: ${{ secrets.TESTER_SUPABASE_URL }}
           TESTER_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
+          GH_TOKEN: ${{ github.token }}
           WORKER_KEY: github-actions:external-action:${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           node <<'NODE'
@@ -31,20 +34,34 @@ jobs:
             const r=await fetch(url+'/rest/v1/'+path,{...opts,headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',Prefer:opts.prefer||'',...(opts.headers||{})}});
             const t=await r.text(); if(!r.ok) throw new Error(r.status+':'+t); return t?JSON.parse(t):null;
           };
-          const {PROD_URL,PROD_KEY,TESTER_URL,TESTER_KEY,WORKER_KEY}=process.env;
+          const {PROD_URL,PROD_KEY,TESTER_URL,TESTER_KEY,WORKER_KEY,GH_TOKEN}=process.env;
           if(!PROD_URL||!PROD_KEY||!TESTER_URL||!TESTER_KEY) throw new Error('Required Production/Tester Supabase secrets are missing');
           let rows=await req(PROD_URL,PROD_KEY,'rpc/dd_claim_external_actions',{method:'POST',body:JSON.stringify({p_worker_key:WORKER_KEY,p_limit:5})});
           for(const a of rows||[]){
             const attempt=(a.attempt_count||0)+1;
-            const allow=a.destination_system==='DANI_TESTER_SUPABASE'&&a.action_type==='RECONCILE_TESTER_PROMOTION_FEEDBACK';
+            const allowTester=a.destination_system==='DANI_TESTER_SUPABASE'&&a.action_type==='RECONCILE_TESTER_PROMOTION_FEEDBACK';
+            const allowGitHub=a.destination_system==='GITHUB'&&a.action_type==='EXECUTE_APPROVED_GITHUB_WORK';
+            const allow=allowTester||allowGitHub;
             try{
               await req(PROD_URL,PROD_KEY,'dd_external_action_attempts',{method:'POST',prefer:'return=minimal',body:JSON.stringify({outbox_id:a.id,attempt_no:attempt,worker_key:WORKER_KEY,outcome:'STARTED'})});
               if(!allow) throw Object.assign(new Error('ACTION_NOT_ALLOWLISTED'),{code:'ACTION_NOT_ALLOWLISTED'});
-              const candidate=a.payload?.candidate_key;
-              if(!candidate) throw Object.assign(new Error('MISSING_CANDIDATE_KEY'),{code:'INVALID_PAYLOAD'});
-              const result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_reconcile_tester_promotion_feedback',{method:'POST',body:JSON.stringify({p_candidate_key:candidate,p_production_state:a.payload})});
-              await req(PROD_URL,PROD_KEY,'dd_external_action_attempts?outbox_id=eq.'+a.id+'&attempt_no=eq.'+attempt,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({completed_at:new Date().toISOString(),outcome:'SUCCEEDED',response_code:'200',external_reference:'tester:'+candidate})});
-              await req(PROD_URL,PROD_KEY,'dd_external_action_receipts?on_conflict=destination_system,idempotency_key',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify({destination_system:a.destination_system,idempotency_key:a.idempotency_key,external_reference:'tester:'+candidate,outcome:'SUCCEEDED',last_seen_at:new Date().toISOString(),metadata:{worker:WORKER_KEY,result}})});
+              let candidate=a.payload?.candidate_key, result, externalRef;
+              if(allowTester){
+                if(!candidate) throw Object.assign(new Error('MISSING_CANDIDATE_KEY'),{code:'INVALID_PAYLOAD'});
+                result=await req(TESTER_URL,TESTER_KEY,'rpc/dd_reconcile_tester_promotion_feedback',{method:'POST',body:JSON.stringify({p_candidate_key:candidate,p_production_state:a.payload})});
+                externalRef='tester:'+candidate;
+              } else {
+                if(!GH_TOKEN) throw Object.assign(new Error('GITHUB_TOKEN_REQUIRED'),{code:'MISSING_RUNTIME_CREDENTIAL'});
+                const approvalId=a.payload?.approval_id;
+                if(!approvalId) throw Object.assign(new Error('APPROVAL_ID_REQUIRED'),{code:'INVALID_PAYLOAD'});
+                const env=await req(PROD_URL,PROD_KEY,'rpc/dd_prepare_approved_github_work',{method:'POST',body:JSON.stringify({p_approval_id:approvalId})});
+                const {spawnSync}=require('child_process');
+                const ex=spawnSync('node',['scripts/dani-github-approved-work-executor.mjs'],{input:JSON.stringify(env),encoding:'utf8',env:{...process.env,GITHUB_TOKEN:GH_TOKEN}});
+                if(ex.status!==0) throw Object.assign(new Error((ex.stderr||'GITHUB_EXECUTOR_FAILED').slice(0,1000)),{code:'GITHUB_EXECUTOR_FAILED'});
+                result=JSON.parse(ex.stdout); externalRef='github:'+env.repository_full_name+'#'+env.issue_number;
+              }
+              await req(PROD_URL,PROD_KEY,'dd_external_action_attempts?outbox_id=eq.'+a.id+'&attempt_no=eq.'+attempt,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({completed_at:new Date().toISOString(),outcome:'SUCCEEDED',response_code:'200',external_reference:externalRef})});
+              await req(PROD_URL,PROD_KEY,'dd_external_action_receipts?on_conflict=destination_system,idempotency_key',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify({destination_system:a.destination_system,idempotency_key:a.idempotency_key,external_reference:externalRef,outcome:'SUCCEEDED',last_seen_at:new Date().toISOString(),metadata:{worker:WORKER_KEY,result}})});
               await req(PROD_URL,PROD_KEY,'dd_external_action_outbox?id=eq.'+a.id,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({status:'SUCCEEDED',attempt_count:attempt,succeeded_at:new Date().toISOString(),lease_expires_at:null,last_error:null,last_error_code:null,external_reference:'tester:'+candidate})});
             }catch(e){
               const terminal=e.code==='ACTION_NOT_ALLOWLISTED'||attempt>=(a.max_attempts||5);
