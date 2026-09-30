@@ -39,13 +39,13 @@ for(const [route,[title,description,copy]] of Object.entries(routes)){
  const business={"@context":"https://schema.org","@type":["LocalBusiness","ProfessionalService"],"@id":origin+"/#organization",name:"DANI DECLARES LLC",url:origin,telephone:"+14704857173",areaServed:["Metro Atlanta","Regional South Carolina"],sameAs:["https://www.google.com/maps/place/Dani+Declares+LLC/data=!4m2!3m1!1s0x0:0x89f6128572e1cc20"]};
  const schema=isLanding?{...business,"hasOfferCatalog":{"@type":"OfferCatalog","name":title.replace(" | DANI DECLARES",""),"itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":title.replace(" | DANI DECLARES",""),"areaServed":route.includes("tucker")?"Tucker, Georgia":"Metro Atlanta, Georgia"}}]}:business;
  let html=source
-  .replace(/<title>.*?<\\/title>/, `<title>${esc(title)}</title>`)
+  .replace(/<title>.*?<\/title>/, `<title>${esc(title)}</title>`)
   .replace(/<meta name="description" content="[^"]*"\\s*\\/>/, `<meta name="description" content="${esc(description)}"/>`)
   .replace(/<meta property="og:title" content="[^"]*"\\s*\\/>/, `<meta property="og:title" content="${esc(title)}"/>`)
   .replace(/<meta property="og:description" content="[^"]*"\\s*\\/>/, `<meta property="og:description" content="${esc(description)}"/>`)
   .replace(/<meta property="og:url" content="[^"]*"\\s*\\/>/, `<meta property="og:url" content="${canonical}"/>`)
   .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta name="robots" content="index,follow"/><script type="application/ld+json">${json(schema)}</script></head>`)
-  .replace('<div id="root"></div>',`<div id="root"><main><h1>${esc(title.replace(/ \\| DANI DECLARES$/,''))}</h1><p>${esc(copy)}</p><p><a href="/request-service">Request service</a></p></main></div>`);
+  .replace('<div id="root"></div>',`<div id="root"><main><h1>${esc(title.replace(/ \| DANI DECLARES$/,''))}</h1><p>${esc(copy)}</p><p><a href="/request-service">Request service</a></p></main></div>`);
  const name=route==='/'?'home':route.slice(1).replaceAll('/','--');
  fs.writeFileSync(path.join('build','seo',name+'.html'),html);
 }
