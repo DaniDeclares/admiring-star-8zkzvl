@@ -1,0 +1,71 @@
+name: 🚀 Governed Netlify Production Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-production-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://danideclares.com
+
+    steps:
+      - name: 📥 Checkout verified main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: ⚙️ Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: 🧬 Generate Prisma Client
+        run: npx prisma generate
+
+      - name: 🔎 Validate SEO surface
+        run: node scripts/validate-seo.mjs
+
+      - name: 🧪 Run regression tests
+        run: npm test -- --watchAll=false
+
+      - name: 🏗️ Build production artifact
+        run: npm run build
+
+      - name: 🔎 Verify SEO shells
+        run: |
+          test -f build/seo/home.html
+          test -f build/seo/service-areas--home-cleaning-atlanta-ga.html || true
+          grep -q "DANI DECLARES" build/index.html
+
+      - name: 🚀 Deploy verified artifact to existing Netlify site
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          test -n "$NETLIFY_AUTH_TOKEN" || { echo "::error::NETLIFY_AUTH_TOKEN is not configured"; exit 1; }
+          test -n "$NETLIFY_SITE_ID" || { echo "::error::NETLIFY_SITE_ID is not configured"; exit 1; }
+          npx netlify-cli deploy --prod --dir=build --site="$NETLIFY_SITE_ID" --auth="$NETLIFY_AUTH_TOKEN" --message="Governed production release"
+
+      - name: 🌐 Smoke-test production
+        run: |
+          set -e
+          curl -fsSL https://danideclares.com/ | grep -q "DANI DECLARES"
+          curl -fsSL https://danideclares.com/robots.txt >/dev/null
+          curl -fsSL https://danideclares.com/sitemap.xml >/dev/null
+
+      - name: 🧾 Release receipt
+        run: |
+          echo "Production release completed and public crawl endpoints responded successfully."
