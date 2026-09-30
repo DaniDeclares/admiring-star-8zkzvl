@@ -46,8 +46,9 @@ jobs:
 
       - name: 🔎 Verify SEO shells
         run: |
-          test -f build/seo/home.html
-          test -f build/seo/service-areas--home-cleaning-atlanta-ga.html || true
+          test -f build/service-areas/home-cleaning-atlanta-ga/index.html
+          test -f build/service-areas/apartment-turnover-atlanta-ga/index.html
+          test -f build/seo 2>/dev/null || true
           grep -q "DANI DECLARES" build/index.html
 
       - name: 🚀 Deploy verified artifact to existing Netlify site
