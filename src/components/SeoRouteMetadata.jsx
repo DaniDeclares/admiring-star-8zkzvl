@@ -5,7 +5,7 @@ import { SEO_LANDING_PAGES } from "../data/seoLandingPagesData.js";
 
 const ORIGIN = "https://danideclares.com";
 const DEFAULT = {
-  title: "Home, Property & Business Support in Atlanta | DANI DECLARES",
+  title: "DANI DECLARES LLC | Home, Property & Business Support in Atlanta",
   description: "DANI DECLARES provides home cleaning, property, real estate, business, field and operational support across Metro Atlanta and regional South Carolina."
 };
 
