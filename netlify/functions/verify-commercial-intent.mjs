@@ -3,7 +3,6 @@ import { adaptVercelHandler } from './_vercelAdapter.mjs';
 
 const adapted = adaptVercelHandler(handler);
 
-export default async function verifyCommercialIntent(request) {
-  const context = Netlify.env.get('CONTEXT');
-  return adapted(request, { netlifyContext: context });
+export default async function verifyCommercialIntent(request, context) {
+  return adapted(request, { netlifyContext: context?.deploy?.context || null });
 }
