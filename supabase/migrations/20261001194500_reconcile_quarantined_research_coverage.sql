@@ -20,7 +20,7 @@ begin
      where r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
        and not (
          r.status='BLOCKED'
-         and r.blocker in (
+         and coalesce(r.blocker,'') in (
            'RECURSIVE_SELF_SEED_QUARANTINE',
            'DUPLICATE_SYNTHETIC_CAREER_REVIEW_COLLAPSED',
            'FALSE_FANOUT_INGEST_CLASSIFICATION_DEFECT',
@@ -35,7 +35,7 @@ begin
        and r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
        and not (
          r.status='BLOCKED'
-         and r.blocker in (
+         and coalesce(r.blocker,'') in (
            'RECURSIVE_SELF_SEED_QUARANTINE',
            'DUPLICATE_SYNTHETIC_CAREER_REVIEW_COLLAPSED',
            'FALSE_FANOUT_INGEST_CLASSIFICATION_DEFECT',
@@ -50,7 +50,7 @@ begin
        and r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
        and not (
          r.status='BLOCKED'
-         and r.blocker in (
+         and coalesce(r.blocker,'') in (
            'RECURSIVE_SELF_SEED_QUARANTINE',
            'DUPLICATE_SYNTHETIC_CAREER_REVIEW_COLLAPSED',
            'FALSE_FANOUT_INGEST_CLASSIFICATION_DEFECT',
@@ -66,7 +66,7 @@ begin
        where r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
          and not (
            r.status='BLOCKED'
-           and r.blocker in (
+           and coalesce(r.blocker,'') in (
              'RECURSIVE_SELF_SEED_QUARANTINE',
              'DUPLICATE_SYNTHETIC_CAREER_REVIEW_COLLAPSED',
              'FALSE_FANOUT_INGEST_CLASSIFICATION_DEFECT',
@@ -85,7 +85,7 @@ begin
          and r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
          and not (
            r.status='BLOCKED'
-           and r.blocker in (
+           and coalesce(r.blocker,'') in (
              'RECURSIVE_SELF_SEED_QUARANTINE',
              'DUPLICATE_SYNTHETIC_CAREER_REVIEW_COLLAPSED',
              'FALSE_FANOUT_INGEST_CLASSIFICATION_DEFECT',
@@ -101,7 +101,7 @@ begin
        where r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
          and not (
            r.status='BLOCKED'
-           and r.blocker in (
+           and coalesce(r.blocker,'') in (
              'RECURSIVE_SELF_SEED_QUARANTINE',
              'DUPLICATE_SYNTHETIC_CAREER_REVIEW_COLLAPSED',
              'FALSE_FANOUT_INGEST_CLASSIFICATION_DEFECT',
