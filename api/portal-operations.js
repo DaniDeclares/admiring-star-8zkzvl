@@ -1156,8 +1156,8 @@ export default async function handler(req, res) {
         return ok(res, { assignment: data });
       }
       if (!['ACCEPT','DECLINE'].includes(decision)) return fail(res, 'Decision must be ACCEPT, DECLINE, or COUNTEROFFER.');
-      const { data, error } = await context.supabase.rpc('dd_respond_to_my_offer', {
-        p_assignment_id: payload.assignmentId,
+      const { data, error } = await context.supabase.rpc('dd_respond_to_my_estimate_offer', {
+        p_offer_id: payload.assignmentId,
         p_accept: decision === 'ACCEPT',
         p_reason: payload.reason || null
       });
