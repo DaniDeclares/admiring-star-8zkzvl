@@ -1,3 +1,8 @@
 import handler from '../../api/verify-commercial-intent.js';
 import { adaptVercelHandler } from './_vercelAdapter.mjs';
-export default adaptVercelHandler(handler);
+
+const adapted = adaptVercelHandler(handler);
+
+export default async function verifyCommercialIntent(request, context) {
+  return adapted(request, { netlifyContext: context?.deploy?.context || null });
+}
