@@ -1,0 +1,2 @@
+-- Production reconciliation: research promotion must use the canonical sales-queue campaign status UNASSESSED; no outreach consent is granted by promotion.
+-- Function definitions are applied by the matching production migration.
