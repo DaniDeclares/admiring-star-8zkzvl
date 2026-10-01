@@ -1,0 +1,59 @@
+name: Netlify Preview Runtime Proof
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-preview-runtime-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PRODUCTION_BASE_URL: https://deploy-preview-${{ github.event.pull_request.number }}--sparkling-croissant-829102.netlify.app
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for Netlify preview
+        run: |
+          for i in {1..30}; do
+            if curl -fsS "${PRODUCTION_BASE_URL}/api/verify-commercial-intent?catalog=1" > /tmp/catalog.json; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Netlify preview did not become reachable: ${PRODUCTION_BASE_URL}"
+          exit 1
+
+      - name: Run exact-commit runtime proof
+        run: npx playwright test checks/production-critical.spec.ts
+
+      - name: Preserve runtime proof evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-preview-runtime-proof-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
