@@ -7,47 +7,66 @@ const json=(res,status,payload)=>res.status(status).json(payload);
 const adminClient=()=>{const url=process.env.SUPABASE_URL||process.env.REACT_APP_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)throw new Error('COMMERCIAL_DATABASE_UNAVAILABLE');return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});};
 
 
-const specialRows=async()=>prisma.$queryRawUnsafe(`
- SELECT s.service_id AS "legacyServiceId", s.service_name AS "legacyName", s.family,
-        s.unit, s.price, s.market, s.active,
-        m.canonical_sku AS "canonicalSku", m.service_name AS "canonicalName"
- FROM public.danis_specials_offers s
- LEFT JOIN LATERAL (
-   SELECT m.canonical_sku, m.service_name
-   FROM public.dd_master_service_universe m
-   WHERE m.lifecycle_status='CANONICAL_ACTIVE'
-     AND (EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id)
-       OR lower(trim(s.service_name))=lower(trim(m.service_name)))
-   ORDER BY CASE WHEN EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id) THEN 0 ELSE 1 END, m.updated_at DESC
-   LIMIT 1
- ) m ON true
- WHERE s.active=true ORDER BY s.service_id`);
+const readPublicTable=async(table,select='*')=>{
+ const {data,error}=await adminClient().from(table).select(select);
+ if(error)throw error;
+ return data||[];
+};
 
-const governedCatalog=async()=>prisma.$queryRawUnsafe(`
- SELECT o.canonical_sku AS "serviceId", o.service_name AS name, LPAD(o.division::text,2,'0') AS division,
-        o.commercial_offer_status AS "commercialOfferStatus", o.fulfillment_gate_status AS "fulfillmentGateStatus",
-        o.pricing_rule_count AS "pricingRuleCount", o.market_rule_count AS "marketRuleCount",
-        o.channel_availability_count AS "channelAvailabilityCount", o.authorized_provider_capability_count AS "authorizedProviderCapabilityCount",
-        o.priced_channel_count AS "pricedChannelCount", o.ch01_a_priced AS "ch01APriced", o.ch01_b_priced AS "ch01BPriced",
-        s.service_family AS family, s.description, s.starting_price AS "baseCustomerPrice", s.public_price_low AS "publicPriceLow",
-        s.public_price_high AS "publicPriceHigh", s.public_price_display AS "publicPriceDisplay", s.pricing_type AS model,
-        s.billing_cycle AS "billingCycle", s.resident_discount_eligible AS "residentDiscountEligible", s.commercial_status AS status,
-        s.id AS "runtimeServiceId",
-        rc.release_state AS "releaseState", rc.blocking_gate AS "blockingGate",
-        m.internal_cost AS "internalCost", m.margin_economics AS "marginEconomics",
-        o.ch01_a_priced AS "ch01LockedActivePricing"
- FROM public.dd_governed_service_offers o JOIN public.services s ON s.id=o.runtime_service_id
- LEFT JOIN public.dd_service_release_contract_v1 rc ON rc.canonical_sku=o.canonical_sku
- LEFT JOIN LATERAL (
-   SELECT m.internal_cost, m.margin_economics
-   FROM public.dd_master_service_universe m
-   WHERE m.canonical_sku=o.canonical_sku
-     AND m.lifecycle_status='CANONICAL_ACTIVE'
-   ORDER BY m.updated_at DESC
-   LIMIT 1
- ) m ON true
- WHERE o.commercial_offer_status IN ('SELL_NOW','INTAKE_ONLY') ORDER BY o.division, o.service_name`);
+const specialRows=async()=>{
+ const [specials,masters]=await Promise.all([
+   readPublicTable('danis_specials_offers','service_id,service_name,family,unit,price,market,active'),
+   readPublicTable('dd_master_service_universe','canonical_sku,service_name,lifecycle_status,legacy_ids_aliases,updated_at')
+ ]);
+ const activeMasters=masters.filter(m=>m.lifecycle_status==='CANONICAL_ACTIVE');
+ return specials.filter(s=>s.active).map(s=>{
+   const aliases=activeMasters.filter(m=>String(m.legacy_ids_aliases||'').split(/[;,]/).map(v=>v.trim()).includes(s.service_id));
+   const names=activeMasters.filter(m=>String(m.service_name||'').trim().toLowerCase()===String(s.service_name||'').trim().toLowerCase());
+   const candidates=aliases.length?aliases:names;
+   candidates.sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
+   const m=candidates[0];
+   return {legacyServiceId:s.service_id,legacyName:s.service_name,family:s.family,unit:s.unit,price:s.price,market:s.market,active:s.active,canonicalSku:m?.canonical_sku||null,canonicalName:m?.service_name||null};
+ }).sort((a,b)=>String(a.legacyServiceId).localeCompare(String(b.legacyServiceId)));
+};
 
+const governedCatalog=async()=>{
+ const [offers,services,contracts,masters]=await Promise.all([
+   readPublicTable('dd_governed_service_offers','canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,pricing_rule_count,market_rule_count,channel_availability_count,authorized_provider_capability_count,priced_channel_count,ch01_a_priced,ch01_b_priced,runtime_service_id'),
+   readPublicTable('services','id,service_family,description,starting_price,public_price_low,public_price_high,public_price_display,pricing_type,billing_cycle,resident_discount_eligible,commercial_status'),
+   readPublicTable('dd_service_release_contract_v1','canonical_sku,release_state,blocking_gate'),
+   readPublicTable('dd_master_service_universe','canonical_sku,internal_cost,margin_economics,lifecycle_status,updated_at')
+ ]);
+ const servicesById=new Map(services.map(s=>[s.id,s]));
+ const contractsBySku=new Map(contracts.map(c=>[c.canonical_sku,c]));
+ const masterBySku=new Map();
+ for(const m of masters.filter(m=>m.lifecycle_status==='CANONICAL_ACTIVE')){
+   const current=masterBySku.get(m.canonical_sku);
+   if(!current||new Date(m.updated_at||0)>new Date(current.updated_at||0))masterBySku.set(m.canonical_sku,m);
+ }
+ return offers
+   .filter(o=>['SELL_NOW','INTAKE_ONLY'].includes(o.commercial_offer_status))
+   .map(o=>{
+     const s=servicesById.get(o.runtime_service_id)||{};
+     const rc=contractsBySku.get(o.canonical_sku)||{};
+     const m=masterBySku.get(o.canonical_sku)||{};
+     return {
+       serviceId:o.canonical_sku,name:o.service_name,division:String(o.division).padStart(2,'0'),
+       commercialOfferStatus:o.commercial_offer_status,fulfillmentGateStatus:o.fulfillment_gate_status,
+       pricingRuleCount:o.pricing_rule_count,marketRuleCount:o.market_rule_count,
+       channelAvailabilityCount:o.channel_availability_count,
+       authorizedProviderCapabilityCount:o.authorized_provider_capability_count,
+       pricedChannelCount:o.priced_channel_count,ch01APriced:o.ch01_a_priced,ch01BPriced:o.ch01_b_priced,
+       family:s.service_family,description:s.description,baseCustomerPrice:s.starting_price,
+       publicPriceLow:s.public_price_low,publicPriceHigh:s.public_price_high,publicPriceDisplay:s.public_price_display,
+       model:s.pricing_type,billingCycle:s.billing_cycle,residentDiscountEligible:s.resident_discount_eligible,
+       status:s.commercial_status,runtimeServiceId:o.runtime_service_id,
+       releaseState:rc.release_state||null,blockingGate:rc.blocking_gate||null,
+       internalCost:m.internal_cost||null,marginEconomics:m.margin_economics||null,
+       ch01LockedActivePricing:o.ch01_a_priced
+     };
+   })
+   .sort((a,b)=>a.division.localeCompare(b.division)||a.name.localeCompare(b.name));
+};
 const governedService=async(serviceId)=>getGovernedCommercialOffer(serviceId);
 
 const legacySpecial=async(serviceId)=>{
