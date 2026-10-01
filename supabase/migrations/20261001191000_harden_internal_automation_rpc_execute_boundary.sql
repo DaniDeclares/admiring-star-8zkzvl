@@ -158,3 +158,14 @@ begin
   end loop;
 end
 $$;
+
+
+-- Pin the three pure immutable helper functions flagged by the advisor. They
+-- reference no database objects, so pg_catalog is sufficient and removes
+-- caller-controlled search-path resolution without changing results.
+alter function private.dd_classify_platform_work(text, integer, text, text)
+  set search_path = pg_catalog;
+alter function public.dd_replay_sales_disposition_succeeded()
+  set search_path = pg_catalog;
+alter function public.dd_research_source_authority_rank(text)
+  set search_path = pg_catalog;
