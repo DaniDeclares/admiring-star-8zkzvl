@@ -80,7 +80,7 @@ const legacySpecial=async(serviceId)=>{
  const aliases=master.filter(m=>String(m.legacy_ids_aliases||'').split(/[;,]/).map(v=>v.trim()).includes(row.service_id));
  const names=master.filter(m=>String(m.service_name||'').trim().toLowerCase()===String(row.service_name||'').trim().toLowerCase());
  const candidates=(aliases.length?aliases:names).sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
- return {...row,canonicalSku:candidates[0]?.canonical_sku||null};
+ return {legacyServiceId:row.service_id,legacyName:row.service_name,family:row.family,unit:row.unit,price:row.price,market:row.market,active:row.active,canonicalSku:candidates[0]?.canonical_sku||null};
 };
 
 export default async function handler(req,res){let catalogStage='init';try{
