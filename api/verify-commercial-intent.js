@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import prisma from '../lib/prisma.js';
 import { checkoutEligibility, getChannelGovernanceDecision, resolveGovernedChannelPrice, getGovernedCommercialOffer, normalizeChannel, resolveGovernedPrice, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
 
 const CHANNELS_BY_DIVISION=Object.freeze({'01':['B2C','B2B_APT'],'02':['B2B_APT','B2B_RE','B2B','B2G'],'03':['B2B_RE','B2B_APT','B2B'],'04':['B2B','B2B_RE','B2B_APT','B2G'],'05':['B2C','B2B_APT','B2B_RE','B2G'],'06':['B2B','B2B_RE','B2G'],'07':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'08':['B2B_RE','B2B','B2G'],'09':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'10':['B2C','B2B_APT','B2B_RE','B2B'],'11':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'12':['B2C','B2B_APT','B2B_RE','B2B','B2G'],'13':['B2B_APT','B2B_RE','B2B','B2G']});
@@ -74,17 +73,18 @@ const withCatalogStage=async(stage,work)=>{
 };
 
 const legacySpecial=async(serviceId)=>{
- const rows=await prisma.$queryRawUnsafe(`
-   SELECT s.service_id AS "legacyServiceId", s.service_name AS "legacyName", s.family, s.unit, s.price, s.market, m.canonical_sku AS "canonicalSku"
-   FROM public.danis_specials_offers s
-   LEFT JOIN LATERAL (
-     SELECT m.canonical_sku FROM public.dd_master_service_universe m
-     WHERE m.lifecycle_status='CANONICAL_ACTIVE'
-       AND (EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id)
-         OR lower(trim(s.service_name))=lower(trim(m.service_name)))
-     ORDER BY CASE WHEN EXISTS (SELECT 1 FROM regexp_split_to_table(coalesce(m.legacy_ids_aliases,''),'[;,]') a WHERE trim(a)=s.service_id) THEN 0 ELSE 1 END, m.updated_at DESC LIMIT 1
-   ) m ON true WHERE s.service_id=$1 AND s.active=true LIMIT 1`,serviceId);
- return rows[0]||null;
+ const [specials,masters]=await Promise.all([
+   readPublicTable('danis_specials_offers','service_id,service_name,family,unit,price,market,active'),
+   readPublicTable('dd_master_service_universe','canonical_sku,service_name,lifecycle_status,legacy_ids_aliases,updated_at')
+ ]);
+ const active=specials.filter(x=>x.active&&x.service_id===serviceId);
+ const master=masters.filter(x=>x.lifecycle_status==='CANONICAL_ACTIVE');
+ const row=active[0];
+ if(!row)return null;
+ const aliases=master.filter(m=>String(m.legacy_ids_aliases||'').split(/[;,]/).map(v=>v.trim()).includes(row.service_id));
+ const names=master.filter(m=>String(m.service_name||'').trim().toLowerCase()===String(row.service_name||'').trim().toLowerCase());
+ const candidates=(aliases.length?aliases:names).sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
+ return {...row,canonicalSku:candidates[0]?.canonical_sku||null};
 };
 
 export default async function handler(req,res){try{
