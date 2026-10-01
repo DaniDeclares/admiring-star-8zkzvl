@@ -83,15 +83,12 @@ const legacySpecial=async(serviceId)=>{
  return {...row,canonicalSku:candidates[0]?.canonical_sku||null};
 };
 
-export default async function handler(req,res){let catalogStage='init';try{
+export default async function handler(req,res){try{
  if(req.method==='GET'&&req.query?.catalog==='1'){
    const requestedChannel=normalizeChannel(String(req.query?.channelType||'').trim(),req.query?.channel);
    const requestedSubchannel=String(req.query?.subchannel||'').trim();
-   catalogStage='governedCatalog';
    const rows=await governedCatalog();
-   catalogStage='specialRows';
    const specials=await specialRows();
-   catalogStage='frontDoors';
    const {data:frontDoorRows,error:frontDoorError}=await adminClient().from('dd_channel_front_doors').select('channel_code,front_door_code,front_door_name,audience,customer_promise,primary_triggers,required_context,public_navigation_order').eq('status','LOCKED').order('channel_code').order('public_navigation_order');
    if(frontDoorError)throw frontDoorError;
    const frontDoors=(frontDoorRows||[]).map(x=>({channelCode:x.channel_code,frontDoorCode:x.front_door_code,frontDoorName:x.front_door_name,audience:x.audience,customerPromise:x.customer_promise,primaryTriggers:x.primary_triggers,requiredContext:x.required_context,navigationOrder:x.public_navigation_order}));
@@ -136,4 +133,4 @@ export default async function handler(req,res){let catalogStage='init';try{
  const expectedPrice=canonicalSelection?.price ?? await resolveGovernedChannelPrice(db,{channel,subchannel,isVerifiedCommunityResident:isVerifiedResident});
  if(!gate.eligible)return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frontDoorCode:canonicalSelection?.frontDoorCode||requestedFrontDoor||null,subchannelCode:subchannel||null,frozenPriceSnapshot:gate.reason==='QUOTE_REQUIRED'?null:expectedPrice,checkoutEligible:false,intakeAvailable:true,message:'We can take the request now. A quote or verified fulfillment confirmation is required before payment.',gateReason:gate.reason});
  return json(res,200,{success:true,serviceId:db.serviceId,serviceName:db.name,legacySource:special?'DANI_SPECIALS_APPROVED':null,frontDoorCode:canonicalSelection?.frontDoorCode||requestedFrontDoor||null,subchannelCode:subchannel||null,frozenPriceSnapshot:expectedPrice,checkoutEligible:true,intakeAvailable:true,message:'Price confirmed for this request.'});
-}catch(error){console.error('Service verification failed:',error);const preview=req.method==='GET'&&req.query?.catalog==='1'&&process.env.CONTEXT==='deploy-preview';return json(res,400,{error:'We could not confirm this service right now. Please try again or contact DANI DECLARES.',...(preview?{debugStage:catalogStage,debugError:String(error?.message||error)}:{})});}}
+}catch(error){console.error('Service verification failed:',error);return json(res,400,{error:'We could not confirm this service right now. Please try again or contact DANI DECLARES.'});}}
