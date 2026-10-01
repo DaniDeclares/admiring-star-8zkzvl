@@ -16,7 +16,7 @@ begin
  select
    'RESEARCH_COVERAGE:'||p.program_key,
    p.program_key,
-   count(r.id) filter(
+   count(distinct r.id) filter(
      where r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
        and not (
          r.status='BLOCKED'
@@ -30,7 +30,7 @@ begin
          )
        )
    ),
-   count(r.id) filter(
+   count(distinct r.id) filter(
      where r.priority='P0'
        and r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
        and not (
@@ -45,7 +45,7 @@ begin
          )
        )
    ),
-   count(r.id) filter(
+   count(distinct r.id) filter(
      where r.priority='P1'
        and r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
        and not (
@@ -62,7 +62,7 @@ begin
    ),
    count(distinct s.id) filter(where s.status='ACTIVE'),
    case
-     when count(r.id) filter(
+     when count(distinct r.id) filter(
        where r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
          and not (
            r.status='BLOCKED'
@@ -80,7 +80,7 @@ begin
      else 'OPEN'
    end,
    case
-     when count(r.id) filter(
+     when count(distinct r.id) filter(
        where r.priority='P0'
          and r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
          and not (
@@ -97,7 +97,7 @@ begin
      )>0 then 'P0' else 'P1'
    end,
    case
-     when count(r.id) filter(
+     when count(distinct r.id) filter(
        where r.status not in ('GREEN','RESOLVED','CLOSED','DONE')
          and not (
            r.status='BLOCKED'
