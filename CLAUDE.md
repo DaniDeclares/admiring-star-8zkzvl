@@ -24,7 +24,7 @@ Follow AGENTS.md first. This repository is shared with other AI agents and the o
 
 ## Release policy
 - Do not merge or declare production-ready merely because a page renders.
-- Run relevant tests/build and inspect the Vercel deployment for the exact commit.
+- Run relevant tests/build and inspect the Netlify deployment for the exact commit.
 - If a change alters pricing, legal/compliance, procurement, certification, or other business rules, stop and flag it for owner review.
 
 ## Shared workspaces
