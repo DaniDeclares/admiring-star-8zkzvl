@@ -31,6 +31,9 @@ jobs:
       - name: Report CLI version
         run: supabase --version
 
+      - name: Initialize isolated local Supabase config
+        run: test -f supabase/config.toml || supabase init
+
       - name: Start isolated local Supabase and apply migrations
         run: supabase start
 
