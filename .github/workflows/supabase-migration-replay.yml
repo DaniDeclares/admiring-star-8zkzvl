@@ -1,0 +1,42 @@
+name: Supabase Migration Replay
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - '.github/workflows/supabase-migration-replay.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-migration-replay-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout candidate source
+        uses: actions/checkout@v4
+
+      - name: Install pinned Supabase CLI
+        uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359
+        with:
+          version: 2.119.0
+
+      - name: Report CLI version
+        run: supabase --version
+
+      - name: Start isolated local Supabase and apply migrations
+        run: supabase start
+
+      - name: Replay migrations from scratch without seed data
+        run: supabase db reset --no-seed
+
+      - name: Stop isolated local Supabase
+        if: always()
+        run: supabase stop --no-backup || true
