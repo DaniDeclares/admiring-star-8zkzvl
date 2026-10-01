@@ -40,7 +40,7 @@ jobs:
           files = list(Path("supabase/migrations").glob("*.sql"))
           versions = [p.name.split("_", 1)[0] for p in files]
           duplicates = sorted(v for v, n in Counter(versions).items() if n > 1)
-          malformed = sorted(p.name for p in files if not re.match(r"^\\d{14}_", p.name) and p.name != "20260820_activation_security_hardening.sql")
+          malformed = sorted(p.name for p in files if not re.match(r"^\d{14}_", p.name) and p.name != "20260820_activation_security_hardening.sql")
           if duplicates or malformed:
               raise SystemExit(f"migration version hygiene failed: duplicates={duplicates}, malformed={malformed}")
           print(f"migration version hygiene PASS: {len(files)} files; no duplicates; only allowlisted Production-owned 20260820 legacy key may be short")
