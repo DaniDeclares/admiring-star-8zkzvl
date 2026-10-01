@@ -1,15 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import prisma from '../../../lib/prisma.js';
-
-
-function queryRaw(strings, ...values) {
-  let sql = '';
-  for (let i = 0; i < strings.length; i += 1) {
-    sql += strings[i];
-    if (i < values.length) sql += `${i + 1}`;
-  }
-  return prisma.$queryRawUnsafe(sql, ...values);
-}
 
 const ECONOMIC_MARGIN_FLOOR_PERCENT = 50;
 
@@ -63,75 +52,21 @@ export function normalizeChannel(channelType, channel) {
 }
 
 export async function getGovernedCommercialOffer(serviceId) {
-  const rows = await queryRaw`
-    SELECT
-      o.canonical_sku AS "serviceId",
-      o.service_name AS name,
-      LPAD(o.division::text, 2, '0') AS division,
-      o.commercial_offer_status AS "commercialOfferStatus",
-      o.fulfillment_gate_status AS "fulfillmentGateStatus",
-      o.channel_availability_count AS "channelAvailabilityCount",
-      o.authorized_provider_capability_count AS "authorizedProviderCapabilityCount",
-      o.priced_channel_count AS "pricedChannelCount",
-      o.ch01_a_priced AS "ch01APriced",
-      o.ch01_b_priced AS "ch01BPriced",
-      c1p.base_price_cents AS "ch01LockedPricingCents",
-      (c1p.base_price_cents IS NOT NULL) AS "ch01LockedActivePricing",
-      c1b.price_override_cents AS "ch01BLockedPricingCents",
-      (c1b.price_override_cents IS NOT NULL AND c1b.price_override_cents > 0) AS "ch01LockedActiveSubchannelPricing",
-      m.internal_cost AS "internalCost",
-      m.margin_economics AS "marginEconomics",
-      s.id AS "runtimeServiceId",
-      s.pricing_type AS "pricingType",
-      s.billing_cycle AS "billingCycle",
-      s.starting_price AS "baseCustomerPrice",
-      s.public_price_low AS "publicPriceLow",
-      s.public_price_high AS "publicPriceHigh",
-      s.resident_discount_eligible AS "residentDiscountEligible",
-      rc.release_state AS "releaseState",
-      rc.blocking_gate AS "blockingGate"
-    FROM public.dd_governed_service_offers o
-    JOIN public.services s ON s.id = o.runtime_service_id
-    LEFT JOIN public.dd_service_release_contract_v1 rc ON rc.canonical_sku = o.canonical_sku
-    LEFT JOIN LATERAL (
-      SELECT m.internal_cost, m.margin_economics
-      FROM public.dd_master_service_universe m
-      WHERE m.canonical_sku = o.canonical_sku
-        AND m.lifecycle_status = 'CANONICAL_ACTIVE'
-      ORDER BY m.updated_at DESC
-      LIMIT 1
-    ) m ON true
-    LEFT JOIN LATERAL (
-      SELECT p.base_price_cents
-      FROM public.dd_service_pricing_rules p
-      WHERE p.service_id = o.runtime_service_id
-        AND p.channel_code = 'CH01'
-        AND p.status = 'ACTIVE'
-        AND p.lock_status = 'LOCKED'
-      ORDER BY p.effective_date DESC NULLS LAST, p.updated_at DESC, p.id DESC
-      LIMIT 1
-    ) c1p ON true
-    LEFT JOIN LATERAL (
-      SELECT mp.price_override_cents
-      FROM public.dd_service_market_pricing_rules mp
-      WHERE mp.service_id = o.runtime_service_id
-        AND mp.channel_code = 'CH01'
-        AND mp.subchannel_code = 'CH01-B'
-        AND mp.status = 'ACTIVE'
-        AND mp.price_override_cents IS NOT NULL
-        AND mp.price_override_cents > 0
-      ORDER BY mp.updated_at DESC, mp.id DESC
-      LIMIT 1
-    ) c1b ON true
-    WHERE o.canonical_sku = ${serviceId}
-      AND o.commercial_offer_status <> 'DO_NOT_SELL'
-    ORDER BY CASE o.commercial_offer_status WHEN 'SELL_NOW' THEN 0 WHEN 'INTAKE_ONLY' THEN 1 ELSE 2 END,
-             o.updated_at DESC, o.canonical_sku ASC
-    LIMIT 1
-  `;
-  return rows[0] || null;
+  const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  const admin = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data: offer } = await admin.from('dd_governed_service_offers').select('canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,channel_availability_count,authorized_provider_capability_count,priced_channel_count,ch01_a_priced,ch01_b_priced,runtime_service_id,updated_at').eq('canonical_sku',serviceId).neq('commercial_offer_status','DO_NOT_SELL').order('updated_at',{ascending:false}).limit(1).maybeSingle();
+  if (!offer) return null;
+  const [{ data: service }, { data: release }, { data: master }, { data: pricing }, { data: subPricing }] = await Promise.all([
+    admin.from('services').select('id,pricing_type,billing_cycle,starting_price,public_price_low,public_price_high,resident_discount_eligible').eq('id',offer.runtime_service_id).maybeSingle(),
+    admin.from('dd_service_release_contract_v1').select('release_state,blocking_gate').eq('canonical_sku',serviceId).maybeSingle(),
+    admin.from('dd_master_service_universe').select('internal_cost,margin_economics').eq('canonical_sku',serviceId).eq('lifecycle_status','CANONICAL_ACTIVE').order('updated_at',{ascending:false}).limit(1).maybeSingle(),
+    admin.from('dd_service_pricing_rules').select('base_price_cents').eq('service_id',offer.runtime_service_id).eq('channel_code','CH01').eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle(),
+    admin.from('dd_service_market_pricing_rules').select('price_override_cents').eq('service_id',offer.runtime_service_id).eq('channel_code','CH01').eq('subchannel_code','CH01-B').eq('status','ACTIVE').gt('price_override_cents',0).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle()
+  ]);
+  return { serviceId:offer.canonical_sku, name:offer.service_name, division:String(offer.division).padStart(2,'0'), commercialOfferStatus:offer.commercial_offer_status, fulfillmentGateStatus:offer.fulfillment_gate_status, channelAvailabilityCount:offer.channel_availability_count, authorizedProviderCapabilityCount:offer.authorized_provider_capability_count, pricedChannelCount:offer.priced_channel_count, ch01APriced:offer.ch01_a_priced, ch01BPriced:offer.ch01_b_priced, ch01LockedPricingCents:pricing?.base_price_cents ?? null, ch01LockedActivePricing:pricing?.base_price_cents != null, ch01BLockedPricingCents:subPricing?.price_override_cents ?? null, ch01LockedActiveSubchannelPricing:Number(subPricing?.price_override_cents || 0)>0, internalCost:master?.internal_cost ?? null, marginEconomics:master?.margin_economics ?? null, runtimeServiceId:offer.runtime_service_id, pricingType:service?.pricing_type, billingCycle:service?.billing_cycle, baseCustomerPrice:service?.starting_price, publicPriceLow:service?.public_price_low, publicPriceHigh:service?.public_price_high, residentDiscountEligible:service?.resident_discount_eligible, releaseState:release?.release_state || null, blockingGate:release?.blocking_gate || null };
 }
-
 export function isQuoteRequired(offer) {
   return QUOTE_REQUIRED_MODELS.has(String(offer?.pricingType || '').toUpperCase())
     || offer?.baseCustomerPrice == null;
@@ -153,122 +88,33 @@ export function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCom
 }
 
 export async function getChannelGovernanceDecision(serviceId, channel) {
-  if (!serviceId || !channel) {
-    return { allowed: false, reason: 'CHANNEL_REQUIRED' };
-  }
-
-  const rows = await queryRaw`
-    SELECT
-      a.disposition,
-      a.proposed_front_door AS "proposedFrontDoor",
-      a.cross_channel_review AS "crossChannelReview",
-      ca.eligibility_status AS "availabilityStatus",
-      pr.pricing_type AS "channelPricingType",
-      EXISTS (
-        SELECT 1
-        FROM public.dd_service_pricing_rules pr
-        WHERE pr.service_id = o.runtime_service_id
-          AND pr.channel_code = ${channel}
-          AND pr.status = 'ACTIVE'
-          AND pr.lock_status = 'LOCKED'
-      ) AS "hasLockedActivePricing"
-    FROM public.dd_ch02_service_adjudication a
-    JOIN public.dd_governed_service_offers o
-      ON o.canonical_sku = a.sku
-     AND o.commercial_offer_status <> 'DO_NOT_SELL'
-    LEFT JOIN public.dd_service_channel_availability ca
-      ON ca.service_id = o.runtime_service_id
-     AND ca.channel_code = a.channel_code
-    LEFT JOIN LATERAL (
-      SELECT pricing_type
-      FROM public.dd_service_pricing_rules
-      WHERE service_id = o.runtime_service_id
-        AND channel_code = ${channel}
-        AND status = 'ACTIVE'
-        AND lock_status = 'LOCKED'
-      ORDER BY effective_date DESC NULLS LAST, updated_at DESC
-      LIMIT 1
-    ) pr ON true
-    WHERE a.channel_code = ${channel}
-      AND a.sku = ${serviceId}
-    LIMIT 1
-  `;
-
-  const row = rows[0];
-  if (!row) {
-    return { allowed: false, reason: 'CHANNEL_GOVERNANCE_NOT_FOUND' };
-  }
-  if (row.disposition !== 'FRONT_DOOR_CANDIDATE') {
-    return { allowed: false, reason: `CH02_ADJUDICATION_${row.disposition}` };
-  }
-  if (row.crossChannelReview) {
-    return { allowed: false, reason: 'CH02_CROSS_CHANNEL_REVIEW' };
-  }
-  if (!['ACTIVE', 'ELIGIBLE'].includes(String(row.availabilityStatus || '').toUpperCase())) {
-    return { allowed: false, reason: 'CH02_CHANNEL_NOT_AVAILABLE' };
-  }
-  if (!row.hasLockedActivePricing) {
-    return { allowed: false, reason: 'CH02_CHANNEL_PRICING_NOT_LOCKED' };
-  }
-
-  return {
-    allowed: true,
-    reason: 'CH02_GOVERNANCE_CLEARED',
-    frontDoor: row.proposedFrontDoor,
-    pricingType: row.channelPricingType || null,
-  };
+  if (!serviceId || !channel) return { allowed:false, reason:'CHANNEL_REQUIRED' };
+  const url=process.env.SUPABASE_URL||process.env.REACT_APP_SUPABASE_URL; const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return { allowed:false, reason:'COMMERCIAL_DATABASE_UNAVAILABLE' };
+  const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+  const { data: offer }=await admin.from('dd_governed_service_offers').select('runtime_service_id').eq('canonical_sku',serviceId).neq('commercial_offer_status','DO_NOT_SELL').limit(1).maybeSingle();
+  if (!offer) return { allowed:false, reason:'CHANNEL_GOVERNANCE_NOT_FOUND' };
+  const [{data:row},{data:availability},{data:pricing}]=await Promise.all([
+    admin.from('dd_ch02_service_adjudication').select('disposition,proposed_front_door,cross_channel_review').eq('channel_code',channel).eq('sku',serviceId).maybeSingle(),
+    admin.from('dd_service_channel_availability').select('eligibility_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channel).maybeSingle(),
+    admin.from('dd_service_pricing_rules').select('pricing_type,base_price_cents,status,lock_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channel).eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle()
+  ]);
+  if (!row) return {allowed:false,reason:'CHANNEL_GOVERNANCE_NOT_FOUND'};
+  if (row.disposition!=='FRONT_DOOR_CANDIDATE') return {allowed:false,reason:'CH02_ADJUDICATION_'+row.disposition};
+  if (row.cross_channel_review) return {allowed:false,reason:'CH02_CROSS_CHANNEL_REVIEW'};
+  if (!['ACTIVE','ELIGIBLE'].includes(String(availability?.eligibility_status||'').toUpperCase())) return {allowed:false,reason:'CH02_CHANNEL_NOT_AVAILABLE'};
+  if (!pricing?.base_price_cents) return {allowed:false,reason:'CH02_CHANNEL_PRICING_NOT_LOCKED'};
+  return {allowed:true,reason:'CH02_GOVERNANCE_CLEARED',frontDoor:row.proposed_front_door,pricingType:pricing.pricing_type||null};
 }
-
-export async function resolveGovernedChannelPrice(offer, { channel, subchannel, isVerifiedCommunityResident } = {}) {
+export async function resolveGovernedChannelPrice(offer,{channel,subchannel,isVerifiedCommunityResident}={}) {
   if (!offer) return null;
-  if (channel === 'CH01' && subchannel === 'CH01-B') {
-    const rows = await queryRaw`
-      SELECT price_override_cents
-      FROM public.dd_service_market_pricing_rules
-      WHERE service_id = ${offer.runtimeServiceId}
-        AND channel_code = 'CH01'
-        AND subchannel_code = 'CH01-B'
-        AND status = 'ACTIVE'
-        AND price_override_cents IS NOT NULL
-        AND price_override_cents > 0
-      ORDER BY updated_at DESC NULLS LAST, id DESC
-      LIMIT 1
-    `;
-    const cents = rows[0]?.price_override_cents == null ? null : Number(rows[0].price_override_cents);
-    if (!Number.isFinite(cents) || cents <= 0) return null;
-    return money(cents / 100);
-  }
-  if (channel === 'CH01' && subchannel === 'CH01-A') {
-    const rows = await queryRaw`
-      SELECT base_price_cents
-      FROM public.dd_service_pricing_rules
-      WHERE service_id = ${offer.runtimeServiceId}
-        AND channel_code = 'CH01'
-        AND status = 'ACTIVE'
-        AND lock_status = 'LOCKED'
-      ORDER BY effective_date DESC NULLS LAST, updated_at DESC, id DESC
-      LIMIT 1
-    `;
-    const cents = rows[0]?.base_price_cents == null ? null : Number(rows[0].base_price_cents);
-    if (!Number.isFinite(cents) || cents <= 0) return null;
-    return money(cents / 100);
-  }
-  if (channel !== 'CH02') return resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident });
-  const rows = await queryRaw`
-    SELECT base_price_cents
-    FROM public.dd_service_pricing_rules
-    WHERE service_id = ${offer.runtimeServiceId}
-      AND channel_code = ${channel}
-      AND status = 'ACTIVE'
-      AND lock_status = 'LOCKED'
-    ORDER BY effective_date DESC NULLS LAST, updated_at DESC, id DESC
-    LIMIT 1
-  `;
-  const cents = rows[0]?.base_price_cents == null ? null : Number(rows[0].base_price_cents);
-  if (!Number.isFinite(cents) || cents <= 0) return null;
-  return money(cents / 100);
+  const url=process.env.SUPABASE_URL||process.env.REACT_APP_SUPABASE_URL; const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+  if(channel==='CH01'&&subchannel==='CH01-B'){const {data}=await admin.from('dd_service_market_pricing_rules').select('price_override_cents').eq('service_id',offer.runtimeServiceId).eq('channel_code','CH01').eq('subchannel_code','CH01-B').eq('status','ACTIVE').gt('price_override_cents',0).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();const cents=Number(data?.price_override_cents||0);return Number.isFinite(cents)&&cents>0?money(cents/100):null;}
+  if(channel==='CH01'&&subchannel==='CH01-A'){const {data}=await admin.from('dd_service_pricing_rules').select('base_price_cents').eq('service_id',offer.runtimeServiceId).eq('channel_code','CH01').eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();const cents=Number(data?.base_price_cents||0);return Number.isFinite(cents)&&cents>0?money(cents/100):null;}
+  return resolveGovernedPrice(offer,{channel,subchannel,isVerifiedCommunityResident});
 }
-
 export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType, hasLockedActivePricing, hasLockedActiveSubchannelPricing } = {}) {
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
