@@ -135,3 +135,26 @@ begin
   end if;
 end
 $$;
+
+
+-- Internal operational views must use caller privileges and must not be
+-- readable from browser roles. Their consumers are service/cron governance.
+do $$
+declare
+  v text;
+  internal_views text[] := array[
+    'dd_production_approval_readiness_v1',
+    'dd_validated_market_peers_v1',
+    'dd_external_intelligence_queue_health_v1',
+    'dd_research_executable_backlog_v1'
+  ];
+begin
+  foreach v in array internal_views loop
+    if to_regclass('public.' || v) is not null then
+      execute format('alter view public.%I set (security_invoker = true)', v);
+      execute format('revoke all on table public.%I from public, anon, authenticated', v);
+      execute format('grant select on table public.%I to service_role', v);
+    end if;
+  end loop;
+end
+$$;
