@@ -1,11 +1,12 @@
 export function adaptVercelHandler(handler) {
   return async function netlifyHandler(request) {
     const url = new URL(request.url);
+    let rawBody = '';
     let body = {};
     if (!['GET','HEAD'].includes(request.method)) {
-      const text = await request.text();
-      if (text) {
-        try { body = JSON.parse(text); } catch { body = text; }
+      rawBody = await request.text();
+      if (rawBody) {
+        try { body = JSON.parse(rawBody); } catch { body = rawBody; }
       }
     }
     const req = {
@@ -13,7 +14,14 @@ export function adaptVercelHandler(handler) {
       headers: Object.fromEntries(request.headers.entries()),
       body,
       query: Object.fromEntries(url.searchParams.entries()),
-      url: url.pathname + url.search
+      url: url.pathname + url.search,
+      // Stripe verifies the exact request bytes. Vercel supplies an async
+      // iterable request while Netlify supplies a Web Request, so preserve
+      // the unparsed bytes behind the same interface instead of weakening
+      // webhook signature verification.
+      async *[Symbol.asyncIterator]() {
+        if (rawBody) yield Buffer.from(rawBody);
+      }
     };
     let statusCode = 200;
     const responseHeaders = { 'content-type': 'application/json; charset=utf-8' };
