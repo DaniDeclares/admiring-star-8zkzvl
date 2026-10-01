@@ -47,3 +47,12 @@ grant execute on function public.dd_world_owner_reconciliation_cycle() to servic
 grant execute on function public.dd_world_route_operator_focus() to service_role;
 grant execute on function public.dd_world_seed_career_system() to service_role;
 grant execute on function public.dd_world_walkaway_check() to service_role;
+
+
+-- Trigger functions execute through their attached database triggers, not as
+-- authenticated browser RPCs. Remove direct browser-role EXECUTE while leaving
+-- trigger behavior and service-role maintenance access intact.
+revoke execute on function public.dd_emit_assignment_accepted_confirmations() from public, anon, authenticated;
+revoke execute on function public.dd_link_provider_portal_identity() from public, anon, authenticated;
+grant execute on function public.dd_emit_assignment_accepted_confirmations() to service_role;
+grant execute on function public.dd_link_provider_portal_identity() to service_role;
