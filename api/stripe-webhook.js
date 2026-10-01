@@ -5,6 +5,7 @@ import { reconcileStripePayment } from '../src/lib/operations/accountingReconcil
 import { publishPaymentReconciled } from '../src/lib/operations/eventBroker2026.js';
 import { getGovernedCommercialOffer, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
 import { captureServer } from '../src/lib/posthogAnalyticsServer.js';
+import { reconcilePaidBookingWindow } from '../src/lib/operations/bookingPaymentReconciliation2026.js';
 
 const secretKey=process.env.STRIPE_SECRET_KEY;
 const webhookSecret=process.env.STRIPE_WEBHOOK_SECRET;
@@ -315,6 +316,8 @@ export default async function handler(req,res){
      const workOrderId=inserted[0]?.id||(await tx.$queryRaw`select id from public.dd_work_orders where work_order_number=${workOrderNumber} limit 1`)[0].id;
      job=await tx.dd_jobs.update({where:{id:job.id},data:{work_order_id:workOrderId},select:{id:true,public_reference:true,work_order_id:true}});
     }
+    const bookingRequested=Boolean(request.property_details?.requestedStartAt)||request.property_details?.bookingStatus==='HOLD_REQUESTED';
+    const bookingTransition=await reconcilePaidBookingWindow(tx,{requestId:request.id,jobId:job.id,bookingRequested});
     const reconciliation=await reconcileStripePayment(event,tx);
     let routingActivation=null;
     if(estimate.economics_status==='PASS' && estimate.active_economics_snapshot_id){
@@ -328,7 +331,7 @@ export default async function handler(req,res){
     // together, or a failure here rolls back the job/status/reconciliation too, so a Stripe
     // retry starts clean instead of silently losing the notification behind an idempotent replay.
     await publishPaymentReconciled(reconciliation,tx);
-    return {status:'RECONCILED',job,reconciliation,estimateId:estimate.id};
+    return {status:'RECONCILED',job,reconciliation,estimateId:estimate.id,bookingTransition};
    });
    if(result.status==='IDEMPOTENT_REPLAY')return res.status(200).json({received:true,idempotent:true});
    await finalizeProposedProviderRoutes(prisma,result.estimateId);
