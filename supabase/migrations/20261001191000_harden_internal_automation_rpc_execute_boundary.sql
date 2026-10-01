@@ -83,3 +83,55 @@ begin
   end if;
 end
 $$;
+
+
+-- The same audit found recent internal governance/vendor tables created in
+-- public without RLS. They are service/cron state, not browser data.
+do $$
+declare
+  tbl text;
+  internal_tables text[] := array[
+    'dd_brain_learning_ledger',
+    'dd_brain_learning_rules',
+    'dd_brain_learning_governance_runs',
+    'dd_brain_learning_replays',
+    'dd_runtime_authority_registry',
+    'dd_vendor_submission_packets_v1'
+  ];
+begin
+  foreach tbl in array internal_tables loop
+    if to_regclass('public.' || tbl) is not null then
+      execute format('alter table public.%I enable row level security', tbl);
+      execute format('revoke all on table public.%I from public, anon, authenticated', tbl);
+      execute format('grant all on table public.%I to service_role', tbl);
+    end if;
+  end loop;
+end
+$$;
+
+-- Fail closed if any targeted table is still missing RLS.
+do $$
+declare
+  exposed text;
+begin
+  select string_agg(c.relname, ', ' order by c.relname)
+  into exposed
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public'
+    and c.relname = any(array[
+      'dd_brain_learning_ledger',
+      'dd_brain_learning_rules',
+      'dd_brain_learning_governance_runs',
+      'dd_brain_learning_replays',
+      'dd_runtime_authority_registry',
+      'dd_vendor_submission_packets_v1'
+    ])
+    and c.relkind = 'r'
+    and not c.relrowsecurity;
+
+  if exposed is not null then
+    raise exception 'INTERNAL_TABLE_RLS_BOUNDARY_FAILED: %', exposed;
+  end if;
+end
+$$;
