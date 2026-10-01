@@ -33,6 +33,20 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
+      - name: Verify Netlify preview matches PR head
+        run: |
+          expected="${{ github.event.pull_request.head.sha }}"
+          for i in {1..12}; do
+            actual=$(curl -fsSL "https://api.netlify.com/api/v1/sites/d4f8ce3d-7443-4b16-8753-99f772ac42e7/deploys?per_page=20" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const ds=JSON.parse(s);const d=ds.find(x=>x.context==='deploy-preview'&&Number(x.review_id)===Number(process.env.PR_NUMBER));process.stdout.write(d?.commit_ref||'')})")
+            echo "Netlify preview commit: ${actual:-missing}; expected: ${expected}"
+            if [ "${actual}" = "${expected}" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "Netlify preview never synchronized to the PR head."
+          exit 1
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
       - name: Verify Netlify preview runtime is reachable
         run: |
           for i in {1..6}; do
