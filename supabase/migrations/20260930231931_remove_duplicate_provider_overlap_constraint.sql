@@ -1,0 +1,1 @@
+alter table public.dd_job_appointments drop constraint if exists dd_job_appointments_provider_no_overlap;
