@@ -103,7 +103,7 @@ export async function getChannelGovernanceDecision(serviceId, channel) {
   if (row.disposition!=='FRONT_DOOR_CANDIDATE') return {allowed:false,reason:'CH02_ADJUDICATION_'+row.disposition};
   if (row.cross_channel_review) return {allowed:false,reason:'CH02_CROSS_CHANNEL_REVIEW'};
   if (!['ACTIVE','ELIGIBLE'].includes(String(availability?.eligibility_status||'').toUpperCase())) return {allowed:false,reason:'CH02_CHANNEL_NOT_AVAILABLE'};
-  if (!pricing?.base_price_cents) return {allowed:false,reason:'CH02_CHANNEL_PRICING_NOT_LOCKED'};
+  if (!pricing) return {allowed:false,reason:'CH02_CHANNEL_PRICING_NOT_LOCKED'};
   return {allowed:true,reason:'CH02_GOVERNANCE_CLEARED',frontDoor:row.proposed_front_door,pricingType:pricing.pricing_type||null};
 }
 export async function resolveGovernedChannelPrice(offer,{channel,subchannel,isVerifiedCommunityResident}={}) {
