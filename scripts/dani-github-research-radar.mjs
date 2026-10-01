@@ -20,6 +20,32 @@ const queries=[
  ['OPPORTUNITY','is:issue is:open ("contractor" OR freelance OR "paid task") (documentation OR research OR data OR testing OR audit OR automation)']
 ];
 const out=[]; const seen=new Set();
+const packageRepos={
+  "@prisma/client":"prisma/prisma","prisma":"prisma/prisma",
+  "@sentry/node":"getsentry/sentry-javascript","@stripe/stripe-js":"stripe/stripe-js",
+  "@supabase/supabase-js":"supabase/supabase-js","react":"facebook/react",
+  "react-dom":"facebook/react","react-router-dom":"remix-run/react-router",
+  "react-scripts":"facebook/create-react-app","stripe":"stripe/stripe-node",
+  "@playwright/test":"microsoft/playwright","checkly":"checkly/checkly-cli"
+};
+async function latestReleases(){
+ const pkg=await gh('/repos/DaniDeclares/admiring-star-8zkzvl/contents/package.json');
+ const raw=Buffer.from(pkg.content,'base64').toString('utf8'); const p=JSON.parse(raw);
+ const deps={...(p.dependencies||{}),...(p.devDependencies||{})}; const updates=[];
+ for(const [name,current] of Object.entries(deps)){
+   const rr=packageRepos[name]; if(!rr) continue;
+   try{
+     const rel=await gh('/repos/'+rr+'/releases/latest');
+     updates.push({lane:'UPDATE',package:name,current_version:current,repository:rr,
+       latest_tag:rel.tag_name||null,released_at:rel.published_at||rel.created_at||null,
+       release_url:rel.html_url||null,title:rel.name||null,
+       next_action:'Review release notes for security, compatibility, performance, and useful capability changes before upgrading.'
+     });
+   }catch{}
+ }
+ return updates;
+}
+
 for(const [lane,q] of queries){
  const data=await gh('/search/issues?per_page=30&sort=updated&order=desc&q='+encodeURIComponent(q));
  for(const i of data.items||[]){
@@ -47,5 +73,7 @@ for(const [lane,q] of queries){
    });
  }
 }
-out.sort((a,b)=>(b.explicit_usd_amount||0)-(a.explicit_usd_amount||0)||b.updated_at.localeCompare(a.updated_at));
+const updates=await latestReleases();
+out.push(...updates);
+out.sort((a,b)=>(b.explicit_usd_amount||0)- (a.explicit_usd_amount||0)||String(b.updated_at||b.released_at||'').localeCompare(String(a.updated_at||a.released_at||'')));
 process.stdout.write(JSON.stringify({worker:'DANI_GITHUB_RESEARCH_RADAR',generated_at:new Date().toISOString(),candidate_count:out.length,candidates:out.slice(0,150)}));
