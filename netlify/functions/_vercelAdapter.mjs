@@ -1,5 +1,5 @@
 export function adaptVercelHandler(handler) {
-  return async function netlifyHandler(request) {
+  return async function netlifyHandler(request, runtime = {}) {
     const url = new URL(request.url);
     let rawBody = '';
     let body = {};
@@ -15,6 +15,7 @@ export function adaptVercelHandler(handler) {
       body,
       query: Object.fromEntries(url.searchParams.entries()),
       url: url.pathname + url.search,
+      netlifyContext: runtime.netlifyContext || null,
       // Stripe verifies the exact request bytes. Vercel supplies an async
       // iterable request while Netlify supplies a Web Request, so preserve
       // the unparsed bytes behind the same interface instead of weakening
