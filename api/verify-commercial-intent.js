@@ -87,11 +87,14 @@ export default async function handler(req,res){let catalogStage='init';try{
  if(req.method==='GET'&&req.query?.catalog==='1'){
    const requestedChannel=normalizeChannel(String(req.query?.channelType||'').trim(),req.query?.channel);
    const requestedSubchannel=String(req.query?.subchannel||'').trim();
-   catalogStage='governedCatalog';const rows=await governedCatalog(); catalogStage='specialRows';const specials=await specialRows(); catalogStage='frontDoors';const frontDoors=await (async()=>{
-     (async()=>{catalogStage='governedCatalog';return governedCatalog();})(),
-     (async()=>{catalogStage='specialRows';return specialRows();})(),
-     (async()=>{catalogStage='frontDoors';const {data,error}=await adminClient().from('dd_channel_front_doors').select('channel_code,front_door_code,front_door_name,audience,customer_promise,primary_triggers,required_context,public_navigation_order').eq('status','LOCKED').order('channel_code').order('public_navigation_order');if(error)throw error;return (data||[]).map(x=>({channelCode:x.channel_code,frontDoorCode:x.front_door_code,frontDoorName:x.front_door_name,audience:x.audience,customerPromise:x.customer_promise,primaryTriggers:x.primary_triggers,requiredContext:x.required_context,navigationOrder:x.public_navigation_order}));})()
-   ]);
+   catalogStage='governedCatalog';
+   const rows=await governedCatalog();
+   catalogStage='specialRows';
+   const specials=await specialRows();
+   catalogStage='frontDoors';
+   const {data:frontDoorRows,error:frontDoorError}=await adminClient().from('dd_channel_front_doors').select('channel_code,front_door_code,front_door_name,audience,customer_promise,primary_triggers,required_context,public_navigation_order').eq('status','LOCKED').order('channel_code').order('public_navigation_order');
+   if(frontDoorError)throw frontDoorError;
+   const frontDoors=(frontDoorRows||[]).map(x=>({channelCode:x.channel_code,frontDoorCode:x.front_door_code,frontDoorName:x.front_door_name,audience:x.audience,customerPromise:x.customer_promise,primaryTriggers:x.primary_triggers,requiredContext:x.required_context,navigationOrder:x.public_navigation_order}));
    const byCanonical=new Map(),unmapped=[];
    for(const s of specials){if(s.canonicalSku){if(!byCanonical.has(s.canonicalSku))byCanonical.set(s.canonicalSku,[]);byCanonical.get(s.canonicalSku).push(s);}else unmapped.push(s);}
    const services=rows.map(s=>{const gate=checkoutEligibility(s,{channel:requestedChannel,subchannel:requestedSubchannel});return {...s,market:'GA',checkoutEligible:gate.eligible,checkoutGateReason:gate.reason,intakeAvailable:true,approvedSpecialOfferCount:(byCanonical.get(s.serviceId)||[]).length,approvedSpecialOffers:(byCanonical.get(s.serviceId)||[])};});
