@@ -31,6 +31,16 @@ jobs:
       - name: Report CLI version
         run: supabase --version
 
+      - name: Reconcile production-owned legacy replay order
+        run: |
+          # Production owns migration key 20260820 (preserved by PR #413), but its
+          # source commit landed at 15:33 UTC after the 14:02 field-ops and 14:26
+          # portal-function prerequisites. Re-key only this disposable workspace
+          # so a clean replay follows the demonstrated historical execution order.
+          test -f supabase/migrations/20260820_activation_security_hardening.sql
+          mv supabase/migrations/20260820_activation_security_hardening.sql \
+             supabase/migrations/20260820153327_activation_security_hardening.sql
+
       - name: Initialize isolated local Supabase config
         run: test -f supabase/config.toml || supabase init
 
