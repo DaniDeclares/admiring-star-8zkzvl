@@ -14,6 +14,51 @@
   status = 200
 
 [[redirects]]
+  from = "/api/create-checkout-session"
+  to = "/.netlify/functions/create-checkout-session"
+  status = 200
+
+[[redirects]]
+  from = "/api/stripe-webhook"
+  to = "/.netlify/functions/stripe-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/portal-operations"
+  to = "/.netlify/functions/portal-operations"
+  status = 200
+
+[[redirects]]
+  from = "/api/appointment-response"
+  to = "/.netlify/functions/appointment-response"
+  status = 200
+
+[[redirects]]
+  from = "/api/process-outbox"
+  to = "/.netlify/functions/process-outbox"
+  status = 200
+
+[[redirects]]
+  from = "/api/provider-support-recovery"
+  to = "/.netlify/functions/provider-support-recovery"
+  status = 200
+
+[[redirects]]
+  from = "/api/provider-accounting"
+  to = "/.netlify/functions/provider-accounting"
+  status = 200
+
+[[redirects]]
+  from = "/api/portal-fulfillment"
+  to = "/.netlify/functions/portal-fulfillment-dispatch"
+  status = 200
+
+[[redirects]]
+  from = "/api/portal-dispatch"
+  to = "/.netlify/functions/provider-routing"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
