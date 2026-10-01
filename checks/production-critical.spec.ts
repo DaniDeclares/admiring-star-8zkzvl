@@ -38,7 +38,10 @@ test.describe('DANI DECLARES production critical journeys', () => {
 
   test('@critical catalog API exposes the released Resident Refresh service', async ({ request }) => {
     const response = await request.get('/api/verify-commercial-intent?catalog=1');
-    expect(response.ok()).toBeTruthy();
+    if (!response.ok()) {
+      const detail = await response.text();
+      throw new Error(`Catalog runtime returned HTTP ${response.status()}: ${detail}`);
+    }
     const body = await response.json();
     expect(body.success).toBeTruthy();
     expect(Array.isArray(body.services)).toBeTruthy();
