@@ -48,7 +48,7 @@ test.describe('DANI DECLARES production critical journeys', () => {
     expect(body.services.length).toBeGreaterThan(0);
 
     const residentRefresh = body.services.filter((service: { canonical_sku?: string }) =>
-      service.canonical_sku === 'DNI-01A-001'
+      service.serviceId === 'DNI-01A-001'
     );
     expect(residentRefresh).toHaveLength(1);
   });
