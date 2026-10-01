@@ -27,6 +27,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Run Checkly checks locally
+        if: env.CHECKLY_ACCOUNT_ID != '' && env.CHECKLY_API_KEY != ''
         run: npx checkly test
       - name: Deploy checks to Checkly
         if: env.CHECKLY_ACCOUNT_ID != '' && env.CHECKLY_API_KEY != ''
