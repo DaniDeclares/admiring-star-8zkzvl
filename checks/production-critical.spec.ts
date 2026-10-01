@@ -36,13 +36,18 @@ test.describe('DANI DECLARES production critical journeys', () => {
     await expect(page.locator('button[type="submit"]')).toContainText(/continue/i);
   });
 
-  test('@critical catalog API is available', async ({ request }) => {
+  test('@critical catalog API exposes the released Resident Refresh service', async ({ request }) => {
     const response = await request.get('/api/verify-commercial-intent?catalog=1');
     expect(response.ok()).toBeTruthy();
     const body = await response.json();
     expect(body.success).toBeTruthy();
     expect(Array.isArray(body.services)).toBeTruthy();
     expect(body.services.length).toBeGreaterThan(0);
+
+    const residentRefresh = body.services.filter((service: { canonical_sku?: string }) =>
+      service.canonical_sku === 'DNI-01A-001'
+    );
+    expect(residentRefresh).toHaveLength(1);
   });
 
   test('@critical service request API rejects incomplete payload safely', async ({ request }) => {
