@@ -60,7 +60,100 @@ function extractBody(payload) {
 function hasAny(text, patterns) {
   return patterns.some(pattern => pattern.test(text));
 }
-function classifyMessage({ from, subject, body, labelIds, direction }) {
+
+function firstMoney(text='') {
+  const matches = [...String(text).matchAll(/\$\s*([0-9]+(?:,[0-9]{3})*(?:\.\d{1,2})?)/g)]
+    .map(m => Number(m[1].replace(/,/g,'')))
+    .filter(Number.isFinite);
+  return matches.length ? Math.max(...matches) : null;
+}
+function firstDistanceMiles(text='') {
+  const m=String(text).match(/approximately\s+(\d+(?:\.\d+)?)\s+miles?|\b(\d+(?:\.\d+)?)\s+miles?\s+(?:away|from you)/i);
+  return m ? Number(m[1] || m[2]) : null;
+}
+function firstDurationMinutes(text='') {
+  const minute=String(text).match(/\b(\d{1,3})\s*(?:minute|min)\b/i);
+  if(minute) return Number(minute[1]);
+  const hour=String(text).match(/\b(\d+(?:\.\d+)?)\s*(?:hour|hr)\b/i);
+  return hour ? Math.round(Number(hour[1])*60) : null;
+}
+function transportationNeedsActualCost(profile, miles) {
+  if (!miles || miles<=0) return false;
+  const transport=String(profile?.vehicle_equipment||'').toLowerCase();
+  if (!transport) return true;
+  return /rideshare|uber|lyft|bus|marta|rail|borrow|friend|family|no car|no vehicle/.test(transport);
+}
+function scoreOpportunityEconomics({ subject, body, profile }) {
+  const text=`${subject||''} ${body||''}`;
+  const gross=firstMoney(text);
+  const oneWayMiles=firstDistanceMiles(text);
+  const durationMinutes=firstDurationMinutes(text);
+  const upfrontSpend=hasAny(text.toLowerCase(),[
+    /activation required/,/subscription required/,/membership required/,/pay (?:a|the) fee/,
+    /purchase required/,/deposit required/,/wallet deposit/,/buy .* first/
+  ]);
+  const isRemote=hasAny(text.toLowerCase(),[/\bremote\b/,/online survey/,/complete on your own/,/virtual/]);
+  const radius=Number(profile?.service_radius_miles);
+  const outsideRadius=Number.isFinite(oneWayMiles)&&Number.isFinite(radius)&&oneWayMiles>radius;
+  const needsTransportCost=!isRemote && transportationNeedsActualCost(profile,oneWayMiles);
+  const grossHourly=gross && durationMinutes ? Number((gross*60/durationMinutes).toFixed(2)) : null;
+
+  let state='INSUFFICIENT_ECONOMICS_DATA';
+  let reason='Compensation, time, travel, or cost inputs are incomplete.';
+  if (upfrontSpend) {
+    state='BLOCKED_UPFRONT_SPEND';
+    reason='Opportunity requires spend/activation before earnings are established.';
+  } else if (outsideRadius && !profile?.willing_outside_radius) {
+    state='BLOCKED_OUTSIDE_NORMAL_RADIUS';
+    reason='Travel exceeds the stored normal service radius and outside-radius work is not authorized.';
+  } else if (needsTransportCost) {
+    state='NEEDS_ACTUAL_TRANSPORT_COST';
+    reason='Travel is required but the current transportation mode needs a real trip cost before net economics can be judged.';
+  } else if (gross!==null && (isRemote || oneWayMiles===0 || oneWayMiles===null)) {
+    state=durationMinutes ? 'ECONOMICS_REVIEW_READY' : 'NEEDS_TIME_ESTIMATE';
+    reason=durationMinutes ? 'Gross compensation and task time are known; compare against owner-time threshold.' : 'Compensation is known but total time is not.';
+  } else if (gross!==null && oneWayMiles!==null) {
+    state='NEEDS_TRAVEL_COST';
+    reason='Gross compensation and distance are known; actual round-trip travel cost is still required.';
+  }
+  return {
+    state, reason,
+    gross_compensation_usd:gross,
+    one_way_miles:oneWayMiles,
+    task_minutes:durationMinutes,
+    gross_hourly_usd:grossHourly,
+    remote_or_virtual:isRemote,
+    upfront_spend_required:upfrontSpend,
+    normal_service_radius_miles:Number.isFinite(radius)?radius:null,
+    outside_normal_radius:outsideRadius,
+    transportation_mode_known:Boolean(profile?.vehicle_equipment),
+    transportation_cost_required:needsTransportCost || (oneWayMiles!==null && oneWayMiles>0),
+    net_value_usd:null,
+    net_hourly_usd:null,
+    rule:'NEVER_TREAT_GROSS_AS_NET'
+  };
+}
+
+async function loadOwnerOpportunityProfile(supabase, ownEmail) {
+  if (!ownEmail) return null;
+  const { data, error } = await supabase.from('dd_provider_applications')
+    .select('service_radius_miles,vehicle_equipment,willing_outside_radius,availability,physical_address,dispatch_location_verified_at')
+    .ilike('contact_email', ownEmail)
+    .order('submitted_at',{ascending:false})
+    .limit(1)
+    .maybeSingle();
+  if (error) return null;
+  if (!data) return null;
+  return {
+    service_radius_miles:data.service_radius_miles,
+    vehicle_equipment:data.vehicle_equipment,
+    willing_outside_radius:data.willing_outside_radius,
+    availability:data.availability,
+    has_private_dispatch_origin:Boolean(data.physical_address),
+    dispatch_origin_verified_at:data.dispatch_location_verified_at||null
+  };
+}
+function classifyMessage({ from, subject, body, labelIds, direction, ownerProfile }) {
   const text = `${from} ${subject || ''} ${body || ''}`.toLowerCase();
   const automated = hasAny(text, [
     /no-?reply@/, /noreply@/, /mailer-daemon/, /notifications@github\.com/,
@@ -93,6 +186,22 @@ function classifyMessage({ from, subject, body, labelIds, direction }) {
   }
   if (automated && !urgent) requiresAttention = false;
 
+  const monetizable=hasAny(text,[
+    /pay offer/,/gift card/,/compensation/,/paid study/,/paid research/,/look available/,
+    /signing request/,/hiring/,/job opening/,/independent contractor/,/bounty/,/cash back/,
+    /refund/,/rebate/,/commission/,/payout/
+  ]);
+  const economics=monetizable ? scoreOpportunityEconomics({subject,body,profile:ownerProfile}) : null;
+  if (economics && ['BLOCKED_UPFRONT_SPEND','BLOCKED_OUTSIDE_NORMAL_RADIUS'].includes(economics.state)) {
+    priority='LOW';
+    requiresAttention=false;
+    reason=economics.reason;
+  } else if (economics && economics.state==='NEEDS_ACTUAL_TRANSPORT_COST') {
+    priority='NORMAL';
+    requiresAttention=true;
+    reason=economics.reason;
+  }
+
   return {
     bucket,
     routing_label: ROUTING_LABELS[bucket] || ROUTING_LABELS.RESEARCH,
@@ -100,8 +209,10 @@ function classifyMessage({ from, subject, body, labelIds, direction }) {
     requires_attention: requiresAttention,
     attention_reason: reason,
     automated,
-    classifier: 'gmail_reconciliation_v2',
+    classifier: 'gmail_reconciliation_v3_economics',
     source_label_ids: labelIds || [],
+    monetizable_opportunity: monetizable,
+    opportunity_economics: economics,
   };
 }
 
@@ -183,7 +294,7 @@ async function listMessages(accessToken, query, maxResults) {
   );
 }
 
-async function processMessage({ supabase, connection, accessToken, ownEmail, item, processedLabelId }) {
+async function processMessage({ supabase, connection, accessToken, ownEmail, ownerProfile, item, processedLabelId }) {
   const message = await gmailJson(
     'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(item.id) + '?format=full',
     accessToken
@@ -198,7 +309,7 @@ async function processMessage({ supabase, connection, accessToken, ownEmail, ite
   const subject = header(headers, 'Subject') || null;
   const body = extractBody(message.payload) || message.snippet || '';
   const excerpt = body.slice(0, 5000);
-  const classification = classifyMessage({ from, subject, body: excerpt, labelIds: message.labelIds || [], direction });
+  const classification = classifyMessage({ from, subject, body: excerpt, labelIds: message.labelIds || [], direction, ownerProfile });
 
   const { data: eventId, error } = await supabase.rpc('dd_ingest_email_communication', {
     p_external_message_id: message.id,
@@ -256,6 +367,7 @@ async function syncConnection(supabase, connection) {
 
   const ownEmail = String(connection.token_metadata?.email || '').toLowerCase();
   const processedLabelId = await ensureLabel(accessToken, PROCESSED_LABEL);
+  const ownerProfile = await loadOwnerOpportunityProfile(supabase, ownEmail);
   const stats = { recent: 0, backlog: 0, skipped: 0, attention: 0, buckets: {} };
   const runs = [
     { kind: 'recent', query: `newer_than:2d -in:spam -in:trash -label:"${PROCESSED_LABEL}"`, max: RECENT_BATCH },
@@ -273,7 +385,7 @@ async function syncConnection(supabase, connection) {
     }
 
     for (const item of list.messages || []) {
-      const result = await processMessage({ supabase, connection, accessToken, ownEmail, item, processedLabelId });
+      const result = await processMessage({ supabase, connection, accessToken, ownEmail, ownerProfile, item, processedLabelId });
       if (result.skipped) {
         stats.skipped += 1;
         continue;
