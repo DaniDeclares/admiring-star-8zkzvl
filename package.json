@@ -24,7 +24,7 @@
     "audit:ai-gateway-callsites": "node scripts/auditAiGatewayCallSites.mjs",
     "test:ai-gateway-callsites": "node scripts/auditAiGatewayCallSites.test.mjs",
     "test:github-opportunity-scout": "node scripts/dani-github-opportunity-scout.test.mjs",
-    "test:integration-status": "node --test scripts/test-integration-status.mjs",
+    "test:integration-status": "node --experimental-vm-modules --test scripts/test-integration-status.mjs",
     "validate:seo": "node scripts/validate-seo.mjs",
     "postinstall": "prisma generate",
     "eject": "react-scripts eject",
