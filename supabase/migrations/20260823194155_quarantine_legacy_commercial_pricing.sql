@@ -15,14 +15,16 @@ WHERE division_slug = 'propertyops'
   AND package_slug LIKE 'b2b_apt_ret_%';
 
 -- Prevent legacy travel-calculation records from being treated as active pricing
--- inputs if the table exists in this deployment.
+-- inputs if the table (and its status column) exists in this deployment.
 DO $$
 BEGIN
-  IF to_regclass('public.dd_travel_calculations') IS NOT NULL THEN
+  IF to_regclass('public.dd_travel_calculations') IS NOT NULL
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dd_travel_calculations' AND column_name = 'status') THEN
     EXECUTE 'UPDATE public.dd_travel_calculations SET status = ''DEPRECATED_HISTORICAL'' WHERE status IS DISTINCT FROM ''DEPRECATED_HISTORICAL''';
   END IF;
 
-  IF to_regclass('public.fieldops_travel_calculations') IS NOT NULL THEN
+  IF to_regclass('public.fieldops_travel_calculations') IS NOT NULL
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'fieldops_travel_calculations' AND column_name = 'status') THEN
     EXECUTE 'UPDATE public.fieldops_travel_calculations SET status = ''DEPRECATED_HISTORICAL'' WHERE status IS DISTINCT FROM ''DEPRECATED_HISTORICAL''';
   END IF;
 END $$;
