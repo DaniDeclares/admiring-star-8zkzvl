@@ -1,112 +1,39 @@
 -- Make research execution converge.
--- Before: RESEARCHING items were re-triggered every 2h forever (attempts reached 6,000+); a trigger only
--- re-fetches a watched page, so nothing ever reached a terminal state and the queue grew without a consumer.
--- After: once an item has been triggered 12 times it moves to EVIDENCE_READY (linked evidence exists) or
--- BLOCKED/NO_CONVERGENCE_MAX_TRIGGERS. Existing over-limit items are settled once by the backfill below.
-CREATE OR REPLACE FUNCTION public.dd_execute_research_work_v1(p_limit integer DEFAULT 8)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'private'
-AS $function$
-declare r record; s record; v_attempt int; v_triggered boolean; v_executed int:=0; v_blocked int:=0; v_limit int; v_brain_slots int; v_status text; v_service_slots int; v_reserve_non_service int:=75; v_max_triggers int:=12; v_evidence int:=0; v_stopped int:=0;
+-- Before: dd_execute_research_work_v1 re-triggered every RESEARCHING item every 2h with no ceiling (Tester
+-- items reached thousands of attempts). A trigger only re-fetches a watched source, so nothing ever reached a
+-- terminal state and the queue grew without a consumer.
+-- After: a row cannot stay RESEARCHING once it has been triggered 12 times. It moves to EVIDENCE_READY when
+-- linked evidence exists, else BLOCKED/NO_CONVERGENCE_MAX_TRIGGERS. Enforced on the table so every writer,
+-- not only the executor, is bound by it. Existing over-limit rows are settled once at the end.
+create or replace function public.dd_research_convergence_guard()
+returns trigger
+language plpgsql
+set search_path to 'public'
+as $function$
+declare v_max_triggers constant int:=12; v_evidence int;
 begin
- v_limit:=greatest(coalesce(p_limit,8),1);
- v_brain_slots:=least(ceil(v_limit/2.0)::int,v_limit);
- select coalesce(reserve_non_service_discovery_pct,75) into v_reserve_non_service
- from public.dd_research_capacity_policy where enabled=true order by updated_at desc limit 1;
- v_service_slots:=least(greatest(ceil((v_limit-v_brain_slots)*(100-least(greatest(v_reserve_non_service,0),100))/100.0)::int,1),greatest(v_limit-v_brain_slots,0));
- for r in
-   with eligible as (
-     select q.* from public.dd_research_work_queue q
-     where coalesce(q.owner_decision_required,false)=false
-       and (q.status='QUEUED' or (q.status='RESEARCHING' and (q.last_researched_at is null or q.last_researched_at<=now()-interval '2 hours')))
-   ), brain as (
-     select q.*,0 lane from eligible q
-     where q.priority='P0' and (q.work_key like 'BRAIN:HYP:%' or coalesce((q.metadata->>'brain_v2')::boolean,false)=true or q.work_key like 'BRAINV2:%')
-     order by case when q.work_key like 'BRAIN:HYP:OWNER_%' then -1 when coalesce((q.metadata->>'brain_v2')::boolean,false)=true or q.work_key like 'BRAINV2:%' then 0 else 1 end,coalesce(q.attempts,0),q.created_at
-     limit v_brain_slots
-   ), service_lane as (
-     select q.*,1 lane from eligible q
-     where q.program_key='SERVICE_DISCOVERY' and (q.work_key like 'candidate:%' or q.work_key like 'WORLD_SERVICE_MATCH:%')
-       and not exists(select 1 from brain b where b.id=q.id)
-     order by case q.priority when 'P0' then 1 when 'P1' then 2 else 3 end,coalesce(q.attempts,0),q.created_at
-     limit v_service_slots
-   ), general as (
-     select q.*,2 lane from eligible q
-     where not exists(select 1 from brain b where b.id=q.id)
-       and not exists(select 1 from service_lane d where d.id=q.id)
-     order by case q.priority when 'P0' then 1 when 'P1' then 2 else 3 end,coalesce(q.attempts,0),q.created_at
-     limit greatest(v_limit-(select count(*) from brain)-(select count(*) from service_lane),0)
-   )
-   select * from (select * from brain union all select * from service_lane union all select * from general) x
-   order by lane,coalesce(attempts,0),created_at
- loop
-   perform pg_advisory_xact_lock(hashtext('DANI_RESEARCH:'||r.work_key));
-   select attempts,status into v_attempt,v_status from public.dd_research_work_queue where id=r.id for update;
-   if v_status not in ('QUEUED','RESEARCHING') then continue; end if;
-   if v_status='RESEARCHING' and exists(select 1 from public.dd_research_work_queue q where q.id=r.id and q.last_researched_at>now()-interval '2 hours') then continue; end if;
-   -- Convergence guard: a re-trigger only re-fetches a watched source; it never moves work to a terminal state.
-   -- After v_max_triggers attempts, hand off to synthesis (linked evidence exists) or stop with an explicit blocker.
-   if v_status='RESEARCHING' and coalesce(v_attempt,0)>=v_max_triggers then
-     select count(*) into v_evidence from public.dd_research_evidence e where e.metadata->>'work_key'=r.work_key;
-     update public.dd_research_work_queue set
-       status=case when v_evidence>0 then 'EVIDENCE_READY' else 'BLOCKED' end,
-       blocker=case when v_evidence>0 then null else 'NO_CONVERGENCE_MAX_TRIGGERS' end,
-       next_action=case when v_evidence>0 then 'Linked evidence exists; synthesize and review instead of re-triggering the source watcher.'
-         else 'Stopped after '||v_attempt||' engine triggers with no linked evidence. Re-queue only after a new source or a narrower question is defined.' end,
-       metadata=coalesce(metadata,'{}')||jsonb_build_object('convergence_guard_at',now(),'attempts_at_guard',v_attempt,'linked_evidence_count',v_evidence,'max_triggers',v_max_triggers,'executor','dd_execute_research_work_v1'),
-       updated_at=now()
-     where id=r.id;
-     v_stopped:=v_stopped+1;
-     continue;
-   end if;
-   v_attempt:=coalesce(v_attempt,0)+1;
-   select * into s from public.dd_research_sources where status='ACTIVE'
-     and coalesce(last_http_status,200) < 400 and last_error is null
-     and (
-       ((r.program_key='SERVICE_DISCOVERY' and r.work_key like 'candidate:%') and work_key=r.work_key)
-       or
-       (r.program_key='OWNER_RESEARCH_MEMORY' and work_key=r.work_key)
-       or
-       (not ((r.program_key='SERVICE_DISCOVERY' and r.work_key like 'candidate:%') or r.program_key='OWNER_RESEARCH_MEMORY') and (work_key=r.work_key or program_key=r.program_key))
-     )
-   order by case when work_key=r.work_key then 0 else 1 end,case authority_level when 'PRIMARY' then 0 when 'OFFICIAL' then 1 else 2 end,coalesce(next_check_at,now()) limit 1;
-   if s.id is null then
-     update public.dd_research_work_queue set attempts=v_attempt,last_researched_at=now(),status='BLOCKED',blocker='SOURCE_DISCOVERY_REQUIRED',
-       next_action='Governed source discovery must validate at least one authoritative source before research execution can continue.',
-       metadata=coalesce(metadata,'{}')||jsonb_build_object('last_execution_attempt',now(),'execution_result','NO_VALIDATED_SOURCE','executor','dd_execute_research_work_v1','fairness_lane',case r.lane when 0 then 'BRAIN_P0_RESERVED' when 1 then 'SERVICE_DISCOVERY_RESERVED' else 'GENERAL' end,'fairness_policy','CAPACITY_POLICY_RESERVED_SERVICE_DISCOVERY'),updated_at=now() where id=r.id;
-     insert into public.dd_research_work_execution_receipts(work_key,program_key,attempt_no,execution_status,detail,completed_at)
-       values(r.work_key,r.program_key,v_attempt,'BLOCKED_NO_SOURCE',jsonb_build_object('source_invented',false,'fairness_lane',case r.lane when 0 then 'BRAIN_P0_RESERVED' when 1 then 'SERVICE_DISCOVERY_RESERVED' else 'GENERAL' end),now()) on conflict(work_key,attempt_no) do nothing;
-     perform public.dd_queue_zero_source_discovery_requests(); v_blocked:=v_blocked+1;
-   else
-     update public.dd_research_sources set next_check_at=now(),updated_at=now() where id=s.id;
-     begin perform private.dd_trigger_research_engine(); v_triggered:=true; exception when others then v_triggered:=false; end;
-     update public.dd_research_work_queue set attempts=v_attempt,last_researched_at=now(),status=case when v_triggered then 'RESEARCHING' else 'BLOCKED' end,
-       blocker=case when v_triggered then null else 'RESEARCH_ENGINE_TRIGGER_FAILED' end,
-       next_action=case when v_triggered then 'Research engine triggered against validated active source; await evidence and synthesis. Cooldown prevents immediate duplicate trigger.' else 'Repair research-engine trigger before retry.' end,
-       metadata=coalesce(metadata,'{}')||jsonb_build_object('last_execution_attempt',now(),'execution_result',case when v_triggered then 'ENGINE_TRIGGERED' else 'ENGINE_TRIGGER_FAILED' end,'source_key',s.source_key,'executor','dd_execute_research_work_v1','fairness_lane',case r.lane when 0 then 'BRAIN_P0_RESERVED' when 1 then 'SERVICE_DISCOVERY_RESERVED' else 'GENERAL' end,'fairness_policy','CAPACITY_POLICY_RESERVED_SERVICE_DISCOVERY','retry_cooldown_minutes',120),updated_at=now() where id=r.id;
-     insert into public.dd_research_work_execution_receipts(work_key,program_key,attempt_no,execution_status,source_key,engine_triggered,detail,completed_at)
-       values(r.work_key,r.program_key,v_attempt,case when v_triggered then 'ENGINE_TRIGGERED' else 'ENGINE_TRIGGER_FAILED' end,s.source_key,v_triggered,jsonb_build_object('source_url_observed',true,'authority_level',s.authority_level,'fairness_lane',case r.lane when 0 then 'BRAIN_P0_RESERVED' when 1 then 'SERVICE_DISCOVERY_RESERVED' else 'GENERAL' end,'retry_cooldown_minutes',120),now()) on conflict(work_key,attempt_no) do nothing;
-     v_executed:=v_executed+1;
-   end if;
- end loop;
- return jsonb_build_object('status','COMPLETED','executed_with_source',v_executed,'blocked_no_source',v_blocked,'stopped_no_convergence',v_stopped,'max_triggers',v_max_triggers,'brain_p0_reserved_slots',v_brain_slots,'service_discovery_reserved_slots',v_service_slots,'retry_cooldown_minutes',120,'fairness_policy','CAPACITY_POLICY_RESERVED_SERVICE_DISCOVERY','production_mutation',false,'invented_sources',false);
-end $function$
-;
-revoke execute on function public.dd_execute_research_work_v1(integer) from public,anon,authenticated;
-grant execute on function public.dd_execute_research_work_v1(integer) to service_role;
+  if new.status<>'RESEARCHING' or coalesce(new.attempts,0)<v_max_triggers then
+    return new;
+  end if;
+  select count(*) into v_evidence from public.dd_research_evidence e where e.metadata->>'work_key'=new.work_key;
+  new.status:=case when v_evidence>0 then 'EVIDENCE_READY' else 'BLOCKED' end;
+  new.blocker:=case when v_evidence>0 then null else 'NO_CONVERGENCE_MAX_TRIGGERS' end;
+  new.next_action:=case when v_evidence>0
+    then 'Linked evidence exists; synthesize and review instead of re-triggering the source watcher.'
+    else 'Stopped after '||new.attempts||' engine triggers with no linked evidence. Re-queue only after a new source or a narrower question is defined.' end;
+  new.metadata:=coalesce(new.metadata,'{}'::jsonb)||jsonb_build_object('convergence_guard_at',now(),'attempts_at_guard',new.attempts,
+    'linked_evidence_count',v_evidence,'max_triggers',v_max_triggers,'convergence_guard','dd_research_convergence_guard');
+  new.updated_at:=now();
+  return new;
+end $function$;
 
-with ev as (
-  select e.metadata->>'work_key' work_key,count(*) n from public.dd_research_evidence e
-  where e.metadata ? 'work_key' group by 1
-)
-update public.dd_research_work_queue q set
-  status=case when coalesce(ev.n,0)>0 then 'EVIDENCE_READY' else 'BLOCKED' end,
-  blocker=case when coalesce(ev.n,0)>0 then null else 'NO_CONVERGENCE_MAX_TRIGGERS' end,
-  next_action=case when coalesce(ev.n,0)>0 then 'Linked evidence exists; synthesize and review instead of re-triggering the source watcher.'
-    else 'Stopped after '||q.attempts||' engine triggers with no linked evidence. Re-queue only after a new source or a narrower question is defined.' end,
-  metadata=coalesce(q.metadata,'{}')||jsonb_build_object('convergence_guard_at',now(),'attempts_at_guard',q.attempts,'linked_evidence_count',coalesce(ev.n,0),'max_triggers',12,'executor','convergence_guard_backfill_20261002'),
-  updated_at=now()
-from public.dd_research_work_queue q2 left join ev on ev.work_key=q2.work_key
-where q.id=q2.id and q.status='RESEARCHING' and coalesce(q.attempts,0)>=12;
+revoke execute on function public.dd_research_convergence_guard() from public,anon,authenticated;
+
+drop trigger if exists trg_dd_research_convergence_guard on public.dd_research_work_queue;
+create trigger trg_dd_research_convergence_guard
+  before insert or update of status, attempts on public.dd_research_work_queue
+  for each row execute function public.dd_research_convergence_guard();
+
+-- Settle rows that are already over the limit; the trigger above does the classification.
+update public.dd_research_work_queue set attempts=attempts
+where status='RESEARCHING' and coalesce(attempts,0)>=12;
