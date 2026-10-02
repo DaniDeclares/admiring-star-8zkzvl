@@ -39,6 +39,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/integrations/gmail/sync"
+  to = "/.netlify/functions/gmail-sync"
+  status = 200
+
+[[redirects]]
   from = "/api/provider-support-recovery"
   to = "/.netlify/functions/provider-support-recovery"
   status = 200
