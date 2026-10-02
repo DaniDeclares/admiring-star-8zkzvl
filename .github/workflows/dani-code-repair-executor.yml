@@ -60,10 +60,12 @@ jobs:
         if: steps.secrets_check.outputs.missing == 'false'
         id: claim
         env:
-          SB_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          SB_URL_RAW: ${{ secrets.TESTER_SUPABASE_URL }}
           SB_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
           RUNNER: ${{ github.run_id }}-${{ github.run_attempt }}
         run: |
+          # The secret may hold a bare project ref (the external-action executor normalizes it the same way).
+          case "$SB_URL_RAW" in http://*|https://*) SB_URL="${SB_URL_RAW%/}" ;; *) SB_URL="https://${SB_URL_RAW}.supabase.co" ;; esac
           set -euo pipefail
           resp=$(curl -sS -X PATCH \
             "$SB_URL/rest/v1/dd_code_repair_work_queue?status=eq.AUTHORIZED&execution_mode=eq.REAL&select=id,work_key,failure_kind,failure_evidence,repo,target_branch,governed_run_id,decision_snapshot_id,external_action_id&order=created_at.asc&limit=1" \
@@ -85,11 +87,13 @@ jobs:
       - name: Claim the linked external action
         if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1'
         env:
-          SB_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          SB_URL_RAW: ${{ secrets.TESTER_SUPABASE_URL }}
           SB_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
           RUNNER: ${{ github.run_id }}-${{ github.run_attempt }}
           ACTION_ID: ${{ steps.claim.outputs.action_id }}
         run: |
+          # The secret may hold a bare project ref (the external-action executor normalizes it the same way).
+          case "$SB_URL_RAW" in http://*|https://*) SB_URL="${SB_URL_RAW%/}" ;; *) SB_URL="https://${SB_URL_RAW}.supabase.co" ;; esac
           curl -sS -X PATCH "$SB_URL/rest/v1/dd_external_action_outbox?id=eq.$ACTION_ID" \
             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" \
             -d "{\"status\":\"CLAIMED\",\"claimed_by\":\"github-actions:${RUNNER}\",\"claimed_at\":\"$(date -u +%FT%TZ)\",\"lease_expires_at\":\"$(date -u -d '+15 min' +%FT%TZ)\"}"
@@ -196,7 +200,7 @@ jobs:
       - name: Write success evidence back to TESTER
         if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1' && steps.pr.outputs.pr_url != ''
         env:
-          SB_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          SB_URL_RAW: ${{ secrets.TESTER_SUPABASE_URL }}
           SB_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
           ACTION_ID: ${{ steps.claim.outputs.action_id }}
           WORK_KEY: ${{ steps.claim.outputs.work_key }}
@@ -204,6 +208,8 @@ jobs:
           PR_URL: ${{ steps.pr.outputs.pr_url }}
           RUN_ID: ${{ github.run_id }}
         run: |
+          # The secret may hold a bare project ref (the external-action executor normalizes it the same way).
+          case "$SB_URL_RAW" in http://*|https://*) SB_URL="${SB_URL_RAW%/}" ;; *) SB_URL="https://${SB_URL_RAW}.supabase.co" ;; esac
           set -euo pipefail
           result=$(node -e "console.log(JSON.stringify({branch:'claude/code-repair-executor-'+process.env.WORK_KEY,commit_sha:process.env.COMMIT_SHA,pr_url:process.env.PR_URL,executor:'github-actions',run_id:process.env.RUN_ID,auto_merged:false,wrote_production_directly:false,wrote_main_directly:false}))" )
           curl -sS -X PATCH "$SB_URL/rest/v1/dd_code_repair_work_queue?work_key=eq.$WORK_KEY" \
@@ -216,11 +222,13 @@ jobs:
       - name: Write failure evidence back to TESTER
         if: steps.secrets_check.outputs.missing == 'false' && steps.claim.outputs.claimed_count == '1' && failure()
         env:
-          SB_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          SB_URL_RAW: ${{ secrets.TESTER_SUPABASE_URL }}
           SB_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
           ACTION_ID: ${{ steps.claim.outputs.action_id }}
           WORK_KEY: ${{ steps.claim.outputs.work_key }}
         run: |
+          # The secret may hold a bare project ref (the external-action executor normalizes it the same way).
+          case "$SB_URL_RAW" in http://*|https://*) SB_URL="${SB_URL_RAW%/}" ;; *) SB_URL="https://${SB_URL_RAW}.supabase.co" ;; esac
           curl -sS -X PATCH "$SB_URL/rest/v1/dd_code_repair_work_queue?work_key=eq.$WORK_KEY" \
             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" \
             -d "{\"status\":\"AUTHORIZED\",\"last_result\":{\"executor\":\"github-actions\",\"run_id\":\"${{ github.run_id }}\",\"failed\":true}}"
