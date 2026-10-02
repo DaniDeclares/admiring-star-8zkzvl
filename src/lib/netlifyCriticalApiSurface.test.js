@@ -10,6 +10,7 @@ const endpoints={
   '/api/portal-operations':'portal-operations',
   '/api/appointment-response':'appointment-response',
   '/api/process-outbox':'process-outbox',
+  '/api/integrations/gmail/sync':'gmail-sync',
   '/api/provider-support-recovery':'provider-support-recovery',
   '/api/provider-accounting':'provider-accounting',
   '/api/portal-fulfillment':'portal-fulfillment-dispatch',
@@ -29,4 +30,12 @@ test('Netlify adapter preserves exact request bytes for Stripe signature verific
  expect(adapter).toContain("rawBody = await request.text()");
  expect(adapter).toContain('async *[Symbol.asyncIterator]()');
  expect(adapter).toContain('yield Buffer.from(rawBody)');
+});
+
+
+test('Netlify schedules Gmail reconciliation on the production rail',()=>{
+ const scheduled=fs.readFileSync(path.join(root,'netlify/functions/gmail-sync-scheduled.mjs'),'utf8');
+ expect(scheduled).toContain("schedule: '*/15 * * * *'");
+ expect(scheduled).toContain("process.env.CRON_SECRET");
+ expect(scheduled).toContain("adaptVercelHandler(handler)");
 });
