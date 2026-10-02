@@ -37,3 +37,29 @@ create trigger trg_dd_research_convergence_guard
 -- Settle rows that are already over the limit; the trigger above does the classification.
 update public.dd_research_work_queue set attempts=attempts
 where status='RESEARCHING' and coalesce(attempts,0)>=12;
+
+-- Regression checks (fail the migration if the loop can come back):
+-- 1. No row may remain RESEARCHING at or above the trigger ceiling.
+-- 2. A write that would re-trigger an over-limit row is converted to a terminal state.
+do $check$
+declare v_left int; v_status text; v_blocker text;
+begin
+  select count(*) into v_left from public.dd_research_work_queue where status='RESEARCHING' and coalesce(attempts,0)>=12;
+  if v_left>0 then
+    raise exception 'convergence guard regression: % RESEARCHING rows at or above 12 attempts', v_left;
+  end if;
+
+  begin
+    insert into public.dd_research_work_queue(program_key,work_key,question,required_evidence,priority,status,attempts)
+    select p.program_key,'CONVERGENCE_GUARD_SELFTEST:'||gen_random_uuid(),'self-test','none','P1','RESEARCHING',12
+    from public.dd_research_programs p order by p.program_key limit 1
+    returning status,blocker into v_status,v_blocker;
+    raise exception using errcode='P0001', message='selftest_rollback', detail=v_status||'|'||coalesce(v_blocker,'');
+  exception when sqlstate 'P0001' then
+    get stacked diagnostics v_blocker = pg_exception_detail;
+    if sqlerrm<>'selftest_rollback' then raise; end if;
+    if v_blocker<>'BLOCKED|NO_CONVERGENCE_MAX_TRIGGERS' then
+      raise exception 'convergence guard regression: over-limit RESEARCHING insert became %', v_blocker;
+    end if;
+  end;
+end $check$;
