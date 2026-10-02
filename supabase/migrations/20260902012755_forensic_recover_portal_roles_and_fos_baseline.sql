@@ -37,8 +37,9 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 -- Grants: Production relacl is {postgres=arwdDxtm, service_role=arwdDxtm, authenticated=r}; anon has none.
--- authenticated is not revoked here so this file stays a no-op on Production (authenticated=r there).
-revoke all on public.dd_portal_user_roles from anon;
+-- Net ACL equals Production, so the file is a no-op if it ever runs there.
+revoke all on public.dd_portal_user_roles from anon, authenticated;
+grant select on public.dd_portal_user_roles to authenticated;
 
 -- ---------- Portal role helpers (Production definitions) ----------
 CREATE OR REPLACE FUNCTION private.dd_has_portal_role(p_role public.dd_portal_role)
@@ -56,10 +57,11 @@ CREATE OR REPLACE FUNCTION public.dd_get_my_portal_roles()
 AS $function$ SELECT COALESCE(array_agg(r.role ORDER BY r.role),'{}'::public.dd_portal_role[]) FROM public.dd_portal_user_roles r WHERE r.user_id=(SELECT auth.uid()) AND r.is_active=true; $function$;
 
 -- Production ACLs: dd_has_portal_role {postgres, authenticated}; dd_get_my_portal_roles
--- {postgres, service_role, authenticated}. The authenticated grants come from 20260918220845.
-revoke all on function private.dd_has_portal_role(public.dd_portal_role) from public, anon;
-revoke all on function public.dd_get_my_portal_roles() from public, anon;
-grant execute on function public.dd_get_my_portal_roles() to service_role;
+-- {postgres, service_role, authenticated}. 20260918220845 re-grants the same (no-op).
+revoke all on function private.dd_has_portal_role(public.dd_portal_role) from public, anon, authenticated;
+revoke all on function public.dd_get_my_portal_roles() from public, anon, authenticated;
+grant execute on function private.dd_has_portal_role(public.dd_portal_role) to authenticated;
+grant execute on function public.dd_get_my_portal_roles() to service_role, authenticated;
 
 -- ---------- FOS columns on dd_work_orders (Production columns no source file adds) ----------
 alter table public.dd_work_orders
