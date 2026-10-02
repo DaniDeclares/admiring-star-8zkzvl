@@ -19,6 +19,12 @@ const required = [
   'REDACTED',
   'inventory_only_per_AI_GATEWAY_MIGRATION_AUDIT',
   'mutationsPerformed: false',
+  'non_ai_credential',
+  'self_tool_or_test',
+  'actionableFindings',
+  'suppressedFindings',
+  'NON_AI_CREDENTIAL_RE',
+  'SELF_PATH_RE',
 ];
 
 for (const name of required) {

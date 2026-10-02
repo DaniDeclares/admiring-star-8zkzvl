@@ -3,7 +3,6 @@
  * AI Gateway call-site inventory.
  *
  * Implements the inventory step required by AI_GATEWAY_MIGRATION_AUDIT.md.
- * Documentation-only until this inventory is complete.
  *
  * Safety:
  * - Read-only scan of the repository.
@@ -15,7 +14,6 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const root = process.cwd();
 const outputPath =
@@ -33,6 +31,13 @@ const IGNORE_DIR_NAMES = new Set([
   'tmp',
   '.next',
 ]);
+
+/** Paths that define or test this inventory — not AI call sites. */
+const SELF_PATH_RE = /(?:^|\/)auditAiGatewayCallSites(?:\.test)?\.mjs$/;
+
+/** Non-AI systems that legitimately use apiKey / api_key shapes. */
+const NON_AI_CREDENTIAL_RE =
+  /\b(RESEND_|POSTHOG_|STRIPE_|SENDGRID_|TWILIO_|HUBSPOT_|MAILGUN_|SENTRY_|CHECKLY_|SUPABASE_|NETLIFY_|VERCEL_(?!OIDC)|GITHUB_|GH_)/i;
 
 /** Patterns drawn from AI_GATEWAY_MIGRATION_AUDIT.md required inventory. */
 const PATTERNS = [
@@ -74,6 +79,20 @@ async function* walk(dir) {
   }
 }
 
+function classifyFinding(hit) {
+  if (SELF_PATH_RE.test(hit.file)) {
+    return { ...hit, classification: 'self_tool_or_test', actionable: false };
+  }
+  if (hit.patternId === 'api_key_literal' && NON_AI_CREDENTIAL_RE.test(hit.lineSnippet)) {
+    return { ...hit, classification: 'non_ai_credential', actionable: false };
+  }
+  // base_url alone is weak; only actionable if co-located with provider signals later
+  if (hit.patternId === 'base_url') {
+    return { ...hit, classification: 'weak_config_signal', actionable: false };
+  }
+  return { ...hit, classification: 'potential_ai_callsite', actionable: true };
+}
+
 function scanContent(relPath, content) {
   const hits = [];
   for (const pattern of PATTERNS) {
@@ -85,7 +104,6 @@ function scanContent(relPath, content) {
       const lineStart = before.lastIndexOf('\n') + 1;
       const lineEnd = content.indexOf('\n', match.index);
       const lineText = content.slice(lineStart, lineEnd === -1 ? undefined : lineEnd).trim();
-      // Never capture values that look like secrets — only the matched token + line shape.
       const safeSnippet = lineText
         .replace(/(['"`])[A-Za-z0-9_\-]{20,}\1/g, '$1[REDACTED]$1')
         .replace(/(sk-|key-|Bearer\s+)[A-Za-z0-9_\-.]{8,}/gi, '$1[REDACTED]');
@@ -97,7 +115,6 @@ function scanContent(relPath, content) {
         matched: match[0].slice(0, 80),
         lineSnippet: safeSnippet.slice(0, 160),
       });
-      // Avoid infinite loops on zero-length matches
       if (match[0].length === 0) pattern.re.lastIndex += 1;
     }
   }
@@ -105,7 +122,7 @@ function scanContent(relPath, content) {
 }
 
 async function main() {
-  const findings = [];
+  const rawFindings = [];
   const scannedFiles = [];
 
   for (const relRoot of SCAN_ROOTS) {
@@ -114,32 +131,32 @@ async function main() {
       const rel = path.relative(root, file).replace(/\\/g, '/');
       scannedFiles.push(rel);
       const content = await fs.readFile(file, 'utf8');
-      findings.push(...scanContent(rel, content));
+      rawFindings.push(...scanContent(rel, content));
     }
   }
 
-  // Also scan root config files that may hold env references
   for (const extra of ['.env.example', 'netlify.toml', 'package.json']) {
     const abs = path.join(root, extra);
     try {
       const content = await fs.readFile(abs, 'utf8');
       scannedFiles.push(extra);
-      findings.push(...scanContent(extra, content));
+      rawFindings.push(...scanContent(extra, content));
     } catch {
       // optional
     }
   }
 
-  const byKind = findings.reduce((acc, f) => {
+  const classified = rawFindings.map(classifyFinding);
+  const actionable = classified.filter((f) => f.actionable);
+  const suppressed = classified.filter((f) => !f.actionable);
+
+  const byClassification = classified.reduce((acc, f) => {
+    acc[f.classification] = (acc[f.classification] || 0) + 1;
+    return acc;
+  }, {});
+
+  const byKindActionable = actionable.reduce((acc, f) => {
     acc[f.kind] = (acc[f.kind] || 0) + 1;
-    return acc;
-  }, {});
-  const byPattern = findings.reduce((acc, f) => {
-    acc[f.patternId] = (acc[f.patternId] || 0) + 1;
-    return acc;
-  }, {});
-  const byFile = findings.reduce((acc, f) => {
-    acc[f.file] = (acc[f.file] || 0) + 1;
     return acc;
   }, {});
 
@@ -153,13 +170,19 @@ async function main() {
     },
     scanRoots: SCAN_ROOTS,
     filesScanned: scannedFiles.length,
-    findingCount: findings.length,
-    counts: { byKind, byPattern, filesWithHits: Object.keys(byFile).length },
-    filesWithHits: Object.keys(byFile).sort(),
-    findings,
+    rawFindingCount: classified.length,
+    actionableFindingCount: actionable.length,
+    suppressedFindingCount: suppressed.length,
+    counts: {
+      byClassification,
+      byKindActionable,
+      actionableFiles: [...new Set(actionable.map((f) => f.file))].sort(),
+    },
+    actionableFindings: actionable,
+    suppressedFindings: suppressed,
     nextSteps: [
-      'Review findings; resolve each against current Vercel AI Gateway catalog before any migration.',
-      'Do not change model IDs or credential routing until inventory is owner-reviewed.',
+      'Review actionableFindings only; suppressedFindings are non-AI or self-tool noise.',
+      'Resolve each actionable model/provider against current Vercel AI Gateway catalog before migration.',
       'Embeddings stay on current provider unless a reindexing plan is approved.',
     ],
   };
@@ -172,9 +195,10 @@ async function main() {
       {
         outputPath,
         filesScanned: payload.filesScanned,
-        findingCount: payload.findingCount,
+        rawFindingCount: payload.rawFindingCount,
+        actionableFindingCount: payload.actionableFindingCount,
+        suppressedFindingCount: payload.suppressedFindingCount,
         counts: payload.counts,
-        filesWithHits: payload.filesWithHits,
       },
       null,
       2
