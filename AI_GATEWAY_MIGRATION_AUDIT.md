@@ -13,6 +13,15 @@ Search all source, tests, server routes, background jobs, cron handlers, and con
 
 For each call site record provider, model, modality, streaming, tools, structured output, credential, and persisted-data dependencies.
 
+**Inventory tool (added on `grok/engineering-trial-bounded`):**
+
+```bash
+npm run audit:ai-gateway-callsites
+# or: node scripts/auditAiGatewayCallSites.mjs
+```
+
+Writes `tmp/ai-gateway-callsite-inventory.json`. Static gate: `node scripts/auditAiGatewayCallSites.test.mjs`.
+
 ## Non-negotiable migration rules
 
 1. Keep the existing application protocol and response shapes.
@@ -34,4 +43,4 @@ Run formatter, lint, type checks, tests, production build, stale-provider search
 
 ## Current status
 
-This file is a governance/audit artifact. Repository changes must be made only after the actual call-site inventory is complete and each model is resolved against the current gateway catalog.
+Inventory script is present on branch `grok/engineering-trial-bounded`. Run the inventory, review findings, and resolve each model against the current gateway catalog before any migration PR. No model routing or credential changes are authorized by the inventory script alone.
