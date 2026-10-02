@@ -35,29 +35,31 @@ jobs:
 
       - name: Verify Netlify preview matches PR head
         run: |
-          expected="${{ github.event.pull_request.head.sha }}"
-          for i in {1..12}; do
-            actual=$(curl -fsSL "https://api.netlify.com/api/v1/sites/d4f8ce3d-7443-4b16-8753-99f772ac42e7/deploys?per_page=20" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const ds=JSON.parse(s);const d=ds.find(x=>x.context==='deploy-preview'&&Number(x.review_id)===Number(process.env.PR_NUMBER));process.stdout.write(d?.commit_ref||'')})")
-            echo "Netlify preview commit: ${actual:-missing}; expected: ${expected}"
-            if [ "${actual}" = "${expected}" ]; then exit 0; fi
+          expected="${EXPECTED_SHA}"
+          for i in {1..30}; do
+            actual=$(curl -fsSL "https://api.netlify.com/api/v1/sites/d4f8ce3d-7443-4b16-8753-99f772ac42e7/deploys?per_page=20" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const ds=JSON.parse(s);const d=ds.find(x=>x.context==='deploy-preview'&&Number(x.review_id)===Number(process.env.PR_NUMBER)&&x.commit_ref===process.env.EXPECTED_SHA);process.stdout.write(d?(d.state||'missing'):'missing')})")
+            echo "Netlify preview deploy for ${expected}: ${actual:-missing}"
+            if [ "${actual}" = "ready" ]; then exit 0; fi
             sleep 10
           done
-          echo "Netlify preview never synchronized to the PR head."
+          echo "Netlify preview for the PR head never reached the ready state."
           exit 1
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
 
       - name: Verify Netlify preview runtime is reachable
         run: |
-          for i in {1..6}; do
+          for i in {1..12}; do
             echo "Preview attempt $i: ${PRODUCTION_BASE_URL}"
             set +e
-            curl -sS -D /tmp/headers.txt --max-time 20 "${PRODUCTION_BASE_URL}/api/verify-commercial-intent?catalog=1" -o /tmp/catalog.json
+            code=$(curl -sS -w '%{http_code}' -D /tmp/headers.txt --max-time 20 "${PRODUCTION_BASE_URL}/api/verify-commercial-intent?catalog=1" -o /tmp/catalog.json)
             status=$?
             set -e
             cat /tmp/headers.txt || true
-            echo "curl_exit=${status}"
-            if [ "${status}" -eq 0 ]; then
+            echo "curl_exit=${status} http=${code}"
+            # 404 here is Netlify's "Site not found" while the preview is still publishing.
+            if [ "${status}" -eq 0 ] && [ "${code}" != "404" ]; then
               echo "Catalog response:"
               cat /tmp/catalog.json
               exit 0
