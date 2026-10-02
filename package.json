@@ -21,6 +21,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "audit:stripe-crosswalk": "node scripts/auditStripeCanonicalCrosswalk.mjs",
+    "audit:ai-gateway-callsites": "node scripts/auditAiGatewayCallSites.mjs",
     "postinstall": "prisma generate",
     "eject": "react-scripts eject",
     "postbuild": "node scripts/generateSeoShells.mjs"
