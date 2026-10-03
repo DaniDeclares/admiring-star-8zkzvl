@@ -20,6 +20,21 @@ This repository is the production application for DANI DECLARES LLC. Multiple AI
 - External tools are rails. They do not become DANI commercial authority merely because they contain a duplicate record.
 - Do not silently change pricing, legal/compliance language, procurement eligibility, certifications, or government-facing claims. Surface these for review.
 
+### Multi-mailbox outreach / no-recontact rule (strict)
+Using a fallback Gmail address (e.g. danideclaresns@gmail.com) while the primary Workspace mailbox (Vendors@) is unavailable does **not** authorize replaying prior campaigns from the new address.
+
+Before any outbound send from a fallback account:
+- Exclude anyone already contacted from Vendors@ (or any other primary business mailbox)
+- Exclude anyone already contacted from the fallback account itself
+- Exclude anyone already closed, suppressed, or opted out
+- Exclude anyone with an unresolved recent touch still sitting in HubSpot or Supabase
+
+Only net-new or clearly dormant-but-still-valid prospects may be contacted from the fallback account. All other prospects stay on their existing thread history (to be recovered when the primary mailbox is restored) or are handled via phone/manual channels if truly hot.
+
+This rule must be enforced in any sales-queue selection, Marketing Distribution Agent, or outbound worker logic. Campaign memory is shared across mailboxes; parallel overlapping outreach is prohibited.
+
+Durable implementation: call `public.dd_can_contact_for_outreach(email, sending_from, lookback_days)` (see migration `20261003030000_outreach_eligibility_no_recontact.sql`) or the JS helper `canContactForOutreach` in `src/lib/operations/outreachEligibility2026.js` before authorizing any send. Fail closed on errors.
+
 ## Agent handoff standard
 Every non-trivial change should register its branch/scope in `dd_agent_change_ledger` when database access is available and leave a durable trail in the PR and, where useful, in the DANI Notion authority matrix. State what changed, files/subsystems touched, assumptions, tests/deployments observed, and any permissions still required.
 
