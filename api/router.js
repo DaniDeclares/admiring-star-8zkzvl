@@ -62,6 +62,15 @@ export function resolveRoute(req) {
   return Object.prototype.hasOwnProperty.call(ROUTES, route) ? route : null;
 }
 
+// Vercel compiles the ESM handlers to CommonJS, so import() can return the
+// module namespace with the real default one level deeper.
+export function handlerFrom(mod) {
+  if (typeof mod?.default === 'function') return mod.default;
+  if (typeof mod?.default?.default === 'function') return mod.default.default;
+  if (typeof mod === 'function') return mod;
+  return null;
+}
+
 // Stripe signature checks read the raw request stream, so the router never
 // touches req.body; the handler sees the request exactly as Vercel delivered it.
 export const config = { api: { bodyParser: false } };
@@ -70,6 +79,7 @@ export default async function router(req, res) {
   const route = resolveRoute(req);
   if (req.query && ROUTE_PARAM in req.query) delete req.query[ROUTE_PARAM];
   if (!route) return res.status(404).json({ error: 'Not found' });
-  const { default: handler } = await ROUTES[route]();
+  const handler = handlerFrom(await ROUTES[route]());
+  if (!handler) return res.status(500).json({ error: 'Route handler unavailable' });
   return handler(req, res);
 }
