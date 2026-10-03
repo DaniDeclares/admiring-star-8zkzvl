@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {useParams,Link} from 'react-router-dom';
 import {ArrowRight,ChevronLeft} from 'lucide-react';
-import {getFamilyVisuals} from '../data/serviceVisuals2026.js';
+import {getFamilyVisuals,getServiceVisuals} from '../data/serviceVisuals2026.js';
 import {groupServicesByBucket,groupServicesByEcosystem,groupedServices,priceValue,priceLabelFor,money} from '../data/serviceCatalogFamilies.js';
 
 function ServiceCard({base,variants,hidePublicPrice=false}){
@@ -10,13 +10,17 @@ function ServiceCard({base,variants,hidePublicPrice=false}){
  const lowest=sorted[0];
  const gated=lowest.checkoutEligible===false;
  const ctaLabel=hidePublicPrice||gated?'Request Custom Scope Quote':hasVariants?'Choose options':'Request service';
- return <div className="rounded-2xl border border-[#ead9b3] bg-white p-5 hover:border-[#caa24a] transition">
-  <div className="flex items-start justify-between gap-4">
-   <div><h3 className="font-black text-[#5a1624] text-lg leading-tight">{base}</h3><p className="mt-1 text-sm text-[#806d72]">{hasVariants?`${sorted.length} options available`:lowest.unit||'Service'}</p></div>
-   <span className="shrink-0 font-black text-[#6b1f2b]">{hidePublicPrice?'Solicitation / quote':hasVariants?`From ${money(priceValue(lowest))}`:priceLabelFor(lowest)}</span>
+ const visual=getServiceVisuals(lowest.division,lowest.name,lowest.serviceId)[0];
+ return <div className="rounded-2xl border border-[#ead9b3] bg-white overflow-hidden hover:border-[#caa24a] transition">
+  {visual&&<div className="h-40 overflow-hidden bg-[#eadfce]"><img src={visual.imageUrl} alt={visual.altText||`${base} service`} className="w-full h-full object-cover" loading="lazy"/></div>}
+  <div className="p-5">
+   <div className="flex items-start justify-between gap-4">
+    <div><h3 className="font-black text-[#5a1624] text-lg leading-tight">{base}</h3><p className="mt-1 text-sm text-[#806d72]">{hasVariants?`${sorted.length} options available`:lowest.unit||'Service'}</p></div>
+    <span className="shrink-0 font-black text-[#6b1f2b]">{hidePublicPrice?'Solicitation / quote':hasVariants?`From ${money(priceValue(lowest))}`:priceLabelFor(lowest)}</span>
+   </div>
+   {gated&&<p className="mt-2 text-xs font-bold text-[#9b6b00]">Custom scope — we'll confirm exact pricing after intake.</p>}
+   <a href={`/request-service?service=${encodeURIComponent(lowest.serviceId)}`} className="mt-3 inline-flex items-center gap-1 text-xs font-black uppercase tracking-wide text-[#855d15] hover:text-[#5a1624]">{ctaLabel}<ArrowRight className="w-4 h-4"/></a>
   </div>
-  {gated&&<p className="mt-2 text-xs font-bold text-[#9b6b00]">Custom scope — we'll confirm exact pricing after intake.</p>}
-  <a href={`/request-service?service=${encodeURIComponent(lowest.serviceId)}`} className="mt-3 inline-flex items-center gap-1 text-xs font-black uppercase tracking-wide text-[#855d15] hover:text-[#5a1624]">{ctaLabel}<ArrowRight className="w-4 h-4"/></a>
  </div>;
 }
 
