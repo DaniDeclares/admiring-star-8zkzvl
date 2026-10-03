@@ -1,4 +1,3 @@
-import {describe,expect,it} from 'vitest';
 import {getServiceVisuals} from './serviceVisuals2026.js';
 
 describe('service visual routing',()=>{
