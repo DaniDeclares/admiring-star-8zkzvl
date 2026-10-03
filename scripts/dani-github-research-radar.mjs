@@ -12,12 +12,18 @@ if(!token) throw new Error('GITHUB_TOKEN required');
 const api='https://api.github.com';
 const headers={accept:'application/vnd.github+json',authorization:`Bearer ${token}`,'x-github-api-version':'2022-11-28','user-agent':'DANI-GitHub-Research-Radar'};
 async function gh(path){const r=await fetch(api+path,{headers});if(!r.ok)throw new Error(`GitHub ${r.status}: ${(await r.text()).slice(0,500)}`);return r.json();}
+// GitHub issue search does not support parenthesized Boolean expressions. Keep
+// each query valid and narrow; dedupe combines the results below.
 const queries=[
- ['SOLUTION','is:issue is:open (idempotency OR deduplication OR reconciliation OR "collision detection" OR "sales queue" OR "payment webhook" OR "double booking")'],
- ['SOLUTION','is:issue is:open (Netlify OR Supabase OR Stripe OR GitHub Actions OR Vercel) (deploy OR deployment OR webhook OR auth OR credential OR runtime)'],
- ['SOLUTION','is:issue is:open (lead scoring OR lead promotion OR CRM OR "duplicate leads" OR "sales automation")'],
- ['OPPORTUNITY','is:issue is:open ("paid bounty" OR bounty OR reward OR payment OR funded) -label:security'],
- ['OPPORTUNITY','is:issue is:open ("contractor" OR freelance OR "paid task") (documentation OR research OR data OR testing OR audit OR automation)']
+ ['SOLUTION','is:issue is:open idempotency'],
+ ['SOLUTION','is:issue is:open deduplication reconciliation'],
+ ['SOLUTION','is:issue is:open "payment webhook"'],
+ ['SOLUTION','is:issue is:open Supabase deployment auth'],
+ ['SOLUTION','is:issue is:open Vercel deployment runtime'],
+ ['SOLUTION','is:issue is:open "lead scoring" CRM'],
+ ['OPPORTUNITY','is:issue is:open bounty -label:security'],
+ ['OPPORTUNITY','is:issue is:open "paid task" automation'],
+ ['OPPORTUNITY','is:issue is:open freelance documentation']
 ];
 const out=[]; const seen=new Set();
 const packageRepos={
@@ -75,5 +81,5 @@ for(const [lane,q] of queries){
 }
 const updates=await latestReleases();
 out.push(...updates);
-out.sort((a,b)=>(b.explicit_usd_amount||0)- (a.explicit_usd_amount||0)||String(b.updated_at||b.released_at||'').localeCompare(String(a.updated_at||a.released_at||'')));
+out.sort((a,b)=>(b.explicit_usd_amount||0)-(a.explicit_usd_amount||0)||String(b.updated_at||b.released_at||'').localeCompare(String(a.updated_at||a.released_at||'')));
 process.stdout.write(JSON.stringify({worker:'DANI_GITHUB_RESEARCH_RADAR',generated_at:new Date().toISOString(),candidate_count:out.length,candidates:out.slice(0,150)}));

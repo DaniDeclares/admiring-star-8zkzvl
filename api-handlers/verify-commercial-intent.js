@@ -28,13 +28,29 @@ const specialRows=async()=>{
  }).sort((a,b)=>String(a.legacyServiceId).localeCompare(String(b.legacyServiceId)));
 };
 
+// The CH01 resolver authorizes a resident service only through the front door
+// its LOCKED adjudication names. Publish that door with the catalog so the
+// request page can start a service-specific request from the governed door;
+// a SKU adjudicated to more than one door gets none and the customer chooses.
+const governedCH01FrontDoors=(rows=[])=>{
+ const doors=new Map();
+ for(const a of rows){
+   if(a.channel_code!=='CH01'||a.status!=='LOCKED'||a.customer_visible_candidate!==true||!['FRONT_DOOR','CONTROLLED_QUOTE'].includes(a.disposition))continue;
+   if(!doors.has(a.sku))doors.set(a.sku,new Set());
+   doors.get(a.sku).add(a.front_door_code);
+ }
+ return new Map([...doors].filter(([,set])=>set.size===1).map(([sku,set])=>[sku,[...set][0]]));
+};
+
 const governedCatalog=async()=>{
- const [offers,services,contracts,masters]=await Promise.all([
+ const [offers,services,contracts,masters,adjudications]=await Promise.all([
    readPublicTable('dd_governed_service_offers','canonical_sku,service_name,division,commercial_offer_status,fulfillment_gate_status,pricing_rule_count,market_rule_count,channel_availability_count,authorized_provider_capability_count,priced_channel_count,ch01_a_priced,ch01_b_priced,runtime_service_id'),
    readPublicTable('services','id,service_family,description,starting_price,public_price_low,public_price_high,public_price_display,pricing_type,billing_cycle,resident_discount_eligible,commercial_status'),
    readPublicTable('dd_service_release_contract_v1','canonical_sku,release_state,blocking_gate'),
-   readPublicTable('dd_master_service_universe','canonical_sku,internal_cost,margin_economics,lifecycle_status,updated_at')
+   readPublicTable('dd_master_service_universe','canonical_sku,internal_cost,margin_economics,lifecycle_status,updated_at'),
+   readPublicTable('dd_ch01_service_adjudication','sku,front_door_code,channel_code,status,customer_visible_candidate,disposition')
  ]);
+ const ch01FrontDoorBySku=governedCH01FrontDoors(adjudications);
  const servicesById=new Map(services.map(s=>[s.id,s]));
  const contractsBySku=new Map(contracts.map(c=>[c.canonical_sku,c]));
  const masterBySku=new Map();
@@ -61,7 +77,8 @@ const governedCatalog=async()=>{
        status:s.commercial_status,runtimeServiceId:o.runtime_service_id,
        releaseState:rc.release_state||null,blockingGate:rc.blocking_gate||null,
        internalCost:m.internal_cost||null,marginEconomics:m.margin_economics||null,
-       ch01LockedActivePricing:o.ch01_a_priced
+       ch01LockedActivePricing:o.ch01_a_priced,
+       ch01FrontDoorCode:ch01FrontDoorBySku.get(o.canonical_sku)||null
      };
    })
    .sort((a,b)=>a.division.localeCompare(b.division)||a.name.localeCompare(b.name));
@@ -82,6 +99,8 @@ const legacySpecial=async(serviceId)=>{
  const candidates=(aliases.length?aliases:names).sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
  return {legacyServiceId:row.service_id,legacyName:row.service_name,family:row.family,unit:row.unit,price:row.price,market:row.market,active:row.active,canonicalSku:candidates[0]?.canonical_sku||null};
 };
+
+export {governedCH01FrontDoors};
 
 export default async function handler(req,res){let catalogStage='init';try{
  if(req.method==='GET'&&req.query?.catalog==='1'){

@@ -84,7 +84,7 @@
     },
     {
       "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "destination": "/api/router?__dani_route=:path*"
     },
     {
       "source": "/portal/:path*",
@@ -167,7 +167,7 @@
   "crons": [
     {
       "path": "/api/integrations/gmail/sync",
-      "schedule": "* * * * *"
+      "schedule": "0 12 * * *"
     }
   ]
 }

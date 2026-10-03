@@ -29,12 +29,11 @@ export async function authenticatePortalRequest(req) {
   const { data: { user }, error } = await supabase.auth.getUser(token);
   if (error || !user) return { error: 'Invalid or expired session', status: 401 };
 
-  const role = user.app_metadata?.portal_role || user.app_metadata?.role;
-  if (STAFF_ROLES.has(role)) return { supabase, userSupabase, user, role, isStaff: true };
-
   // OWNER_OPERATOR is the governed database role used by the portal. Resolve it
-  // server-side before falling back to customer/provider identity so Owner HQ
-  // authority never depends on a display name or hard-coded email address.
+  // server-side first -- before the app_metadata staff shortcut, which would
+  // otherwise return an owner whose metadata says staff_admin as plain staff and
+  // deny them Owner HQ -- so owner authority never depends on a display name,
+  // a hard-coded email address or stale auth metadata.
   const { data: governedRoles, error: governedRoleError } = await supabase
     .from('dd_portal_user_roles')
     .select('role')
@@ -44,6 +43,9 @@ export async function authenticatePortalRequest(req) {
   if ((governedRoles || []).some(row => row.role === 'OWNER_OPERATOR')) {
     return { supabase, userSupabase, user, role: 'owner', governedRole: 'OWNER_OPERATOR', isStaff: true };
   }
+
+  const role = user.app_metadata?.portal_role || user.app_metadata?.role;
+  if (STAFF_ROLES.has(role)) return { supabase, userSupabase, user, role, isStaff: true };
 
   const { data: identity, error: identityError } = await supabase
     .from('dd_portal_identities')

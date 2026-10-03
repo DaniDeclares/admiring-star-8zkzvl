@@ -26,3 +26,15 @@ describe('public request front door regressions',()=>{
   expect(source).not.toContain('solution starting point, not a product or package');
  });
 });
+
+describe('CH01 service-specific requests start from the governed front door',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'RequestServicePage.jsx'),'utf8');
+ test('a selected resident service fills the front door its adjudication names',()=>{
+  expect(source).toContain('selected?.ch01FrontDoorCode');
+  expect(source).toContain('f.frontDoorCode?f:{...f,frontDoorCode:door}');
+ });
+ test('the selected service id always reaches the server CH01 gate, even when verification fails',()=>{
+  expect(source).toContain('body:JSON.stringify({...form,serviceType:');
+  expect(source).not.toContain('OPERATIONS_CHANNELS.B2C?authoritativeServiceId:form.serviceId');
+ });
+});

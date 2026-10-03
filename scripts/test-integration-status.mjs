@@ -3,7 +3,7 @@ import { readFile, access } from 'node:fs/promises';
 import vm from 'node:vm';
 import test from 'node:test';
 
-const sourceUrl = new URL('../api/integrations/status.js', import.meta.url);
+const sourceUrl = new URL('../api-handlers/integrations/status.js', import.meta.url);
 const source = await readFile(sourceUrl, 'utf8');
 
 async function run({ denied = false, databaseError = null } = {}) {

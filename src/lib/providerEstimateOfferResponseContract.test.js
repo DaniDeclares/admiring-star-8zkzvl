@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 const root = path.resolve(__dirname, '../..');
-const api = fs.readFileSync(path.join(root, 'api/portal-operations.js'), 'utf8');
+const api = fs.readFileSync(path.join(root, 'api-handlers/portal-operations.js'), 'utf8');
 const migration = fs.readFileSync(path.join(root, 'supabase/migrations/20261001063000_provider_estimate_offer_response_boundary.sql'), 'utf8');
 
 test('provider portal uses the estimate-offer response boundary', () => {
