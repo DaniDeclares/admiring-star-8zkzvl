@@ -20,6 +20,19 @@ This repository is the production application for DANI DECLARES LLC. Multiple AI
 - External tools are rails. They do not become DANI commercial authority merely because they contain a duplicate record.
 - Do not silently change pricing, legal/compliance language, procurement eligibility, certifications, or government-facing claims. Surface these for review.
 
+### Multi-mailbox outreach / no-recontact rule (extends #525 and #527)
+Using a fallback Gmail address (e.g. danideclaresns@gmail.com) while the primary Workspace mailbox (Vendors@) is unavailable does **not** authorize replaying prior campaigns from the new address.
+
+This is **not** a third parallel gate. It extends:
+- #525 relationship-identity resolution (blocks new sales rows for existing partners/providers/customers)
+- #527 context contract / pain gate (suppresses campaign_eligible when buyer/pain/offer/route are missing)
+
+Shared campaign memory: a recent touch from any known Dani Declares mailbox (Vendors@, danideclaresns@gmail.com, or logged contact events) is treated as a context gap (`RECENT_MAILBOX_TOUCH`) and keeps the row out of new parallel campaign eligibility.
+
+Durable implementation: `private.dd_recent_mailbox_touch` + the extended `private.dd_normalize_sales_queue_context` trigger (migration `20261003040000_extend_context_contract_multi_mailbox_touch.sql`). JS helper in `src/lib/operations/outreachEligibility2026.js` for explicit pre-send checks. Fail closed on errors.
+
+Only net-new or clearly dormant-but-still-valid prospects may be contacted from a fallback account. Phone/manual remains available for truly hot existing relationships.
+
 ## Agent handoff standard
 Every non-trivial change should register its branch/scope in `dd_agent_change_ledger` when database access is available and leave a durable trail in the PR and, where useful, in the DANI Notion authority matrix. State what changed, files/subsystems touched, assumptions, tests/deployments observed, and any permissions still required.
 
