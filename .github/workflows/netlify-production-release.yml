@@ -10,8 +10,13 @@ concurrency:
   group: netlify-production-release
   cancel-in-progress: false
 
+# Netlify is suspended (credit exhaustion, 2026-10-02) and production is back on
+# Vercel Hobby, which deploys main through its Git integration
+# (docs/governance/DANI_HOSTING_RAIL_2026-10-03.md). This release only runs when
+# the repository variable DANI_HOSTING_RAIL is set to "netlify".
 jobs:
   release:
+    if: vars.DANI_HOSTING_RAIL == 'netlify'
     runs-on: ubuntu-latest
     environment:
       name: production

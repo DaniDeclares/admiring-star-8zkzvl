@@ -12,8 +12,12 @@ concurrency:
   group: netlify-preview-runtime-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+# Netlify is suspended (credit exhaustion, 2026-10-02) and production is back on
+# Vercel Hobby (docs/governance/DANI_HOSTING_RAIL_2026-10-03.md). This proof only
+# runs when the repository variable DANI_HOSTING_RAIL is set to "netlify".
 jobs:
   preview-runtime:
+    if: vars.DANI_HOSTING_RAIL == 'netlify'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
