@@ -19,6 +19,7 @@ This repository is the production application for DANI DECLARES LLC. Multiple AI
 - Service/SKU, price, scope, provider authorization, SLA, compliance state, payment state, and release state stay governed by DANI's canonical runtime architecture.
 - External tools are rails. They do not become DANI commercial authority merely because they contain a duplicate record.
 - Do not silently change pricing, legal/compliance language, procurement eligibility, certifications, or government-facing claims. Surface these for review.
+- Baby (learning AI), Chief of Staff (executive orchestration), Personal Assistant (Danielle's personal logistics), C-Team, Tech and external AIs are separate roles defined in `docs/governance/DANI_AI_DIVISION_OF_LABOR_2026-10-02.md` section 5. Read it before touching any of them; never merge or substitute one for another.
 
 ## Agent handoff standard
 Every non-trivial change should register its branch/scope in `dd_agent_change_ledger` when database access is available and leave a durable trail in the PR and, where useful, in the DANI Notion authority matrix. State what changed, files/subsystems touched, assumptions, tests/deployments observed, and any permissions still required.

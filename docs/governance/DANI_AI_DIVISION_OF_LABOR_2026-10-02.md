@@ -1,6 +1,6 @@
 # DANI AI Division of Labor (2026-10-02)
 
-Status: proposed contract. Owner: Danielle. Applies to every AI assistant working for DANI DECLARES (ChatGPT, Claude, Codex, Grok, and any future model).
+Status: contract (merged 2026-10-02); section 5 added the same day. Owner: Danielle. Applies to every AI assistant working for DANI DECLARES (ChatGPT, Claude, Codex, Grok, and any future model).
 
 Read with `AGENTS.md` (change control and external-system authority) and `docs/DANI_DECLARES_CROSS_SYSTEM_AUTHORITY_2026-09-14.md`. This file does not change either; it adds the rules for which AI does what.
 
@@ -67,6 +67,37 @@ Gmail  --(read-only)-->  DANI Gmail reconciliation  -->  dd_sales_queue / relati
 - FACT 2026-10-02: Vendors@ had no Google Voice mail in the last 180 days, so forwarding is not on for that mailbox yet.
 - If a supported Voice integration appears later, it plugs into the same reconciliation and relationship records; nothing is rebuilt.
 
-## 5. What this contract does not do
+## 5. DANI's internal roles (owner definitions, 2026-10-02)
+
+OWNER DECISION (Danielle, 2026-10-02). These are the authoritative meanings. They are separate identities: no AI, worker, prompt, doc or UI may merge, rename or substitute one for another. When existing components carry different names, reconcile them to these meanings; don't rename or rebuild them for that reason alone.
+
+- **Baby** = DANI's learning AI. Baby ingests governed evidence, research, decisions and outcomes; learns patterns; identifies gaps, contradictions and opportunities; and improves DANI's institutional intelligence. Baby learns. Baby is not the Chief of Staff, Personal Assistant, C-Team, Tech, or an external model.
+- **Chief of Staff** = Danielle's executive/business orchestrator. It coordinates the C-Team, departments and workers, priorities, dependencies, exceptions, owner approvals and execution against Danielle's business objectives. It uses Baby's intelligence but does not replace Baby.
+- **Personal Assistant** = Danielle's personal operating assistant. It coordinates Danielle's personal schedule, reminders, household/family logistics, appointments, personal deadlines and other owner-life execution. It can exchange the minimum necessary availability/constraint information with the Chief of Staff, but personal details do not freely propagate into DANI's business systems.
+- **C-Team** leads business functions.
+- **Tech** owns technology execution.
+- **External AIs** (ChatGPT, Claude, Codex, Grok and any future model) are workers and resources, not any of the identities above.
+
+In short: Baby learns DANI. Chief of Staff runs executive coordination for DANI. Personal Assistant assists Danielle's personal life.
+
+### What implements each today (traced 2026-10-02, read-only)
+
+No table, function, worker, cron, prompt, registry row or UI card is literally named Baby, Chief of Staff or Personal Assistant, in this repo (every branch) or in either Supabase project.
+
+| Role | Existing implementation | Gap |
+|---|---|---|
+| Baby | Tester Brain learning loop: `dd_brain_*` (signals, hypotheses, learning ledger/rules/replays, constitution, objectives), `dd_run_dani_brain_cycle`, `dd_run_brain_learning_governance_v1`. Production captures learning and ships it to Tester through the Production learning bridge. | None structural. |
+| Chief of Staff | Company, revenue and research controllers; owner daily and morning briefs; `dd_owner_attention_queue`; DANI HQ (`src/pages/portal/OwnerHQPage.jsx`); Tester constitution rule `EXECUTIVE_TECHNICAL_STEWARDSHIP`. | Pieces run separately; nothing owns them as one role yet. |
+| Personal Assistant | Not built. | No authoritative personal store exists. Don't build one without Danielle's decision. |
+
+"Chief of Staff/PMO" in the service catalog is a customer offering, unrelated to the internal role. "Baby showers" in the events catalog is unrelated to Baby.
+
+### Privacy boundary between business and personal
+
+Business systems may retain business-relevant owner constraints and goals, but not unnecessary personal or family details. The Chief of Staff may need "Danielle unavailable 3–5 PM", "owner requires $X personal draw by date Y" or "protect weekends" when those materially affect company planning. It does not need children's names, birthdays, custody details, school information, private family circumstances, or the reason behind an unavailable calendar block.
+
+This rule applies going forward. Personal or family data already in the Brain is classified and quarantined from business-worker consumption, never deleted blindly. Personal-only material moves to the Personal Assistant's authoritative store only if one exists; otherwise it is held, and the gap goes back to Danielle.
+
+## 6. What this contract does not do
 
 No schema change, no new worker, no new orchestration or memory tool (consistent with the capability evaluation Danielle accepted 2026-10-02). Revenue work comes first; this contract exists so new AI features are adopted by evidence instead of by announcement.
