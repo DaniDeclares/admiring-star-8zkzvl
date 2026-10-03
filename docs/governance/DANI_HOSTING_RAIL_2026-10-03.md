@@ -43,17 +43,23 @@ Read from the code on `main` (b20aa18) and compared with the Vercel project's en
 - `STRIPE_WEBHOOK_SECRET` must match the signing secret of the Stripe webhook endpoint that targets `https://danideclares.com/api/stripe-webhook`.
 
 **Missing in Vercel, needed for features DANI uses:**
-- `PROVIDER_W9_ENCRYPTION_KEY`: provider W-9 storage throws without it. Use the same value Netlify had, or existing encrypted W-9s cannot be decrypted.
+- `PROVIDER_W9_ENCRYPTION_KEY`: provider W-9 submission throws without it. Production had 0 rows in `dd_provider_w9_submissions` on 2026-10-03, so no existing ciphertext depends on the old value. Reuse the Netlify value if it can be recovered; otherwise a new 64-hex key loses nothing (owner decision).
 - `GOOGLE_MAPS_ROUTES_API_KEY`: without it, paid jobs hold provider route offers (`ROUTES_API_KEY_MISSING`).
 - `GOOGLE_MAPS_SERVER_API_KEY`: Google routing in operations.
 - `SITE_URL` = `https://danideclares.com`: invite and recovery links fall back to the request host without it.
 - `APPOINTMENT_CONFIRMATION_SECRET`: appointment links fall back to signing with the service key. Set a dedicated value.
-- `TWILIO_ACCOUNT_SID`, `TWILIO_API_KEY_SID`, `TWILIO_API_KEY_SECRET`, `TWILIO_FROM_NUMBER`, `NOTIFICATION_PHONE`: SMS notifications. Skip if SMS is not in use.
-- `INTEGRATION_TOKEN_ENCRYPTION_KEY` plus the OAuth pairs `GOOGLE_CLIENT_ID/SECRET/REDIRECT_URI`, `HUBSPOT_CLIENT_ID/SECRET/REDIRECT_URI`, `ASANA_…`, `NOTION_OAUTH_…`, `QUICKBOOKS_…`: Owner HQ integration connections. Same encryption key as Netlify, or stored tokens cannot be decrypted.
+- `TWILIO_ACCOUNT_SID`, `TWILIO_API_KEY_SID`, `TWILIO_API_KEY_SECRET`, `TWILIO_FROM_NUMBER`, `NOTIFICATION_PHONE`: SMS notifications. Production `dd_event_outbox` has never held an SMS row (EMAIL only), so not a release blocker.
+- `INTEGRATION_TOKEN_ENCRYPTION_KEY` plus the OAuth pairs `GOOGLE_CLIENT_ID/SECRET/REDIRECT_URI`, `HUBSPOT_CLIENT_ID/SECRET/REDIRECT_URI`, `ASANA_…`, `NOTION_OAUTH_…`, `QUICKBOOKS_…`: Owner HQ integration connections only. Production had 0 rows in `dd_integration_connections` on 2026-10-03, so nothing stored depends on the old key and no live path needs these. Not a release blocker.
 
 **Optional (build-time, client):** `REACT_APP_STRIPE_PUBLISHABLE_KEY` (code falls back to the live publishable key), `REACT_APP_POSTHOG_KEY`, `REACT_APP_POSTHOG_HOST`, `REACT_APP_STRIPE_CONNECT_CLIENT_ID`, `REACT_APP_STRIPE_CONNECT_REDIRECT_URL`.
 
 `PRODUCTION_SUPABASE_SECRET_KEY` is optional on Vercel once `SUPABASE_SERVICE_ROLE_KEY` is correct.
+
+## DNS
+
+On 2026-10-03 the domain still resolved to Netlify: apex `danideclares.com` A → 75.2.60.5 (Netlify) and `www` CNAME → `sparkling-croissant-829102.netlify.app`, answering 503 `usage_exceeded`. Nameservers are `ns1/ns2/ns3.systemdns.com` (the registrar's DNS, not Vercel or Netlify). A Vercel deployment is not public until the owner points apex A to `76.76.21.21` and `www` CNAME to `cname.vercel-dns.com` (or the exact values Vercel shows under Project → Settings → Domains).
+
+Supabase pg_cron job `process-notification-outbox-secure` posts to `https://danideclares.com/api/process-outbox` every 5 minutes with the Vault secret `dd_cron_secret`, which must equal Vercel `CRON_SECRET`.
 
 ## Not transferred with the project
 
