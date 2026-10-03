@@ -268,7 +268,7 @@ async function getOwnerControlSnapshot(supabase) {
     supabase.from('dd_software_build_runs').select('*').order('started_at', { ascending: false }).limit(25),
     supabase.from('dd_software_build_work_queue').select('id,work_key,channel_code,pass_number,pass_name,lifecycle_stage,priority,source_status,work_type,execution_mode,status,blocking_gap,acceptance_criteria,required_build,target_environment,attempts,last_attempt_at,last_result,owner_decision_required,updated_at').order('priority', { ascending: true }).order('updated_at', { ascending: false }).limit(250),
     supabase.from('dd_revenue_agent_registry').select('agent_key,agent_name,responsibility,is_active,updated_at').order('agent_key', { ascending: true }),
-    supabase.from('dd_owner_attention_queue').select('*').neq('status', 'RESOLVED').order('created_at', { ascending: false }).limit(100),
+    supabase.from('dd_owner_attention_queue').select('*').eq('status', 'OPEN').order('created_at', { ascending: false }).limit(100),
   ]);
   const optionalLabels = ['dd_external_action_outbox','dd_research_programs','dd_research_work_queue','dd_research_evidence','dd_research_sources','dd_research_source_snapshots','dd_unattended_green_runs','dd_service_pricing_research_queue','dd_platform_release_audit_10_pass','dd_software_build_runs','dd_software_build_work_queue'];
   const optional = [actionOutbox, researchPrograms, researchWork, researchEvidence, researchSources, researchSnapshots, greenRuns, pricingResearch, platformAudit, softwareBuildRuns, softwareBuildQueue].map((result, i) => tolerateMissingTable(result, optionalLabels[i], degradedSources));
