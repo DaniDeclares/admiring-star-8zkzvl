@@ -24,9 +24,9 @@ Tester is proof/staging authority, not a substitute for Production verification.
 | Public site deployment | GREEN | Current main is deploying through Vercel; prior reconciled Production releases returned 200 | Continue release-SHA verification after each merge |
 | Public navigation | GREEN | #544 merged: My Dashboard label + redundant nav cleanup, route authority preserved | Include in browser walkdown |
 | General request creation | GREEN | Real Production request created and confirmation email received | Preserve as baseline |
-| Governed explicit service selection | FAIL | Bathroom Detail exists in governed catalog but normal Request Service entry does not expose service selection | #548 |
-| Provider incomplete staging/login | HELD | #543 fixed primary blocker; post-merge missing-providerPayload edge case remains | #546, Tester proof before Production promotion |
-| Provider assignment readiness E2E | HELD | Production previously had no assignment-ready providers; do not fabricate readiness | Complete provider lifecycle after #546 |
+| Governed explicit service selection | FAIL | Bathroom Detail exists in governed catalog but normal Request Service entry does not expose service selection | #548; governed picker helper/component/tests are being built on `chatgpt/fix-548-governed-service-selection` |
+| Provider incomplete staging/login | GREEN_GUARD | #550 merged; owner approved governed Production promotion. Production migration `20261003184925_provider_staging_missing_payload_guard_reconciled` applied after canonical whitespace-form migration failed closed; live function now contains the missing-providerPayload guard and promotion candidate verification is PASSED/AUTHORIZED | Continue provider lifecycle using a real provider; no fabricated readiness |
+| Provider assignment readiness E2E | HELD | Production previously had no assignment-ready providers; do not fabricate readiness | Complete provider lifecycle after a real provider reaches approval/readiness |
 | Public imagery/content fit | FAIL | Repeated/mismatched/missing visual behavior demonstrated | #547 |
 | Role-aware unified portal | PARTIAL | Architecture and multiple workspaces exist; surfacing/completeness requires reconciliation | #547 |
 | Owner HQ authentication | PARTIAL | Owner HQ load proven; exact sign-out → sign-in → reopen sequence still needs current Production proof | Walkdown checkpoint |
