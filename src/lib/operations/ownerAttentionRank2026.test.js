@@ -27,4 +27,14 @@ describe('ownerAttentionRank2026', () => {
     expect(rows.every(needsOwnerNow)).toBe(true);
     expect(ownerAttentionNow(rows).map(r => r.id)).toEqual(['a', 'b', 'c']);
   });
+
+  test('superseded and resolved rows leave both lists', () => {
+    const rows = [
+      { ...item('old', 'P0', { state: 'STALE', rank_score: 0, needs_owner_now: false }), status: 'SUPERSEDED' },
+      { ...item('done', 'P0', { state: 'ACTIONABLE_NOW', rank_score: 900, needs_owner_now: true }), status: 'RESOLVED' },
+      { ...item('live', 'P1', { state: 'ACTIONABLE_NOW', rank_score: 500, needs_owner_now: true }), status: 'OPEN' },
+    ];
+    expect(ownerAttentionNow(rows).map(r => r.id)).toEqual(['live']);
+    expect(ownerAttentionDeferred(rows)).toEqual([]);
+  });
 });

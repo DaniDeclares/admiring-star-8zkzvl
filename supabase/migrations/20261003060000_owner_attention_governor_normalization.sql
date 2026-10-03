@@ -151,6 +151,7 @@ begin
     select e.direction, e.occurred_at into v_evt
       from public.dd_lead_contact_events e
      where e.sales_queue_id = sq.id and e.occurred_at > now() - interval '5 days'
+       and (e.direction ilike 'in%' or e.direction ilike 'out%')  -- REDISCOVERED/NONE events are not touches
      order by e.occurred_at desc limit 1;
     if found then
       if v_evt.direction ilike 'in%' then
@@ -525,7 +526,11 @@ declare
 begin
   insert into public.dd_company_controller_runs(status) values('RUNNING') returning id into v_id;
   v_refresh := public.dd_refresh_company_domain_state();
-  v_evidence_health := public.dd_apply_evidence_based_domain_health();
+  -- Live in Tester and Production but not defined in the tracked migration chain; skip it
+  -- where it is absent so the controller (and the governor re-rank) still runs.
+  if to_regprocedure('public.dd_apply_evidence_based_domain_health()') is not null then
+    execute 'select public.dd_apply_evidence_based_domain_health()' into v_evidence_health;
+  end if;
   v_governor := public.dd_governor_rerank_owner_attention();
 
   select count(*) filter (where status='GREEN'), count(*) filter (where status='YELLOW'),

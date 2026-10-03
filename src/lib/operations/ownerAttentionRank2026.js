@@ -20,6 +20,11 @@ export function needsOwnerNow(item) {
   return !governor || governor.needs_owner_now !== false;
 }
 
+/** SUPERSEDED / RESOLVED rows have left attention; rows without a status are treated as open. */
+function isOpen(item) {
+  return String(item?.status || 'OPEN').toUpperCase() === 'OPEN';
+}
+
 function compareByRank(a, b) {
   const ga = governorOf(a);
   const gb = governorOf(b);
@@ -34,10 +39,10 @@ function compareByRank(a, b) {
 
 /** Items the owner should act on now, highest governor rank first. */
 export function ownerAttentionNow(items = []) {
-  return items.filter(needsOwnerNow).sort(compareByRank);
+  return items.filter(item => isOpen(item) && needsOwnerNow(item)).sort(compareByRank);
 }
 
 /** Items the governor is holding back (waiting, unproven, suppressed, system-executable). */
 export function ownerAttentionDeferred(items = []) {
-  return items.filter(item => !needsOwnerNow(item)).sort(compareByRank);
+  return items.filter(item => isOpen(item) && !needsOwnerNow(item)).sort(compareByRank);
 }
