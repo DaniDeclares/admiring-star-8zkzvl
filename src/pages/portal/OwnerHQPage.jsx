@@ -5,6 +5,7 @@ import RequireStaffAuth from '../../components/auth/RequireStaffAuth.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 import { capture } from '../../lib/posthogAnalytics.js';
 import { OWNER_CONNECTED_SYSTEMS, OWNER_PRIORITY_LINKS } from '../../config/ownerConnectedSystems.js';
+import { ownerAttentionNow, ownerAttentionDeferred } from '../../lib/operations/ownerAttentionRank2026.js';
 import './PortalWorkspacePage.css';
 
 const STAFF_ROLES = new Set(['admin', 'owner', 'staff_admin', 'staff']);
@@ -145,7 +146,11 @@ function OwnerHq({ session }) {
     }).length;
     const falseInboundSla = item => item?.domain === 'SALES' && item?.source_table === 'dd_sales_queue' && item?.reason === 'Speed-to-lead SLA exceeded'
       && ['GMAIL_SENT','WEB_SOURCED','LINKEDIN_MESSAGE','LINKEDIN_MARKETPLACE','LINKEDIN_INVITE','HUBSPOT_DEAL'].includes(String(item?.metadata?.source || '').toUpperCase());
-    const businessOwnerAttention = ownerAttention.filter(item => item?.domain !== 'SOFTWARE_PLATFORM' && !falseInboundSla(item));
+    const businessAttentionAll = ownerAttention.filter(item => item?.domain !== 'SOFTWARE_PLATFORM' && !falseInboundSla(item));
+    // The governor (dd_owner_attention_queue.metadata.governor) decides what needs Danielle now;
+    // waiting / unproven / suppressed items stay listed separately instead of inflating the count.
+    const businessOwnerAttention = ownerAttentionNow(businessAttentionAll);
+    const deferredOwnerAttention = ownerAttentionDeferred(businessAttentionAll);
     const now = new Date(); now.setHours(23,59,59,999);
     const salesDueRows = salesQueue.filter(item => {
       if (String(item.disposition || '').toUpperCase() === 'PAYMENT_SUCCEEDED') return false;
@@ -167,6 +172,7 @@ function OwnerHq({ session }) {
       unresolvedQuoteCount,
       ownerAttention: businessOwnerAttention.length,
       ownerAttentionRows: businessOwnerAttention,
+      deferredOwnerAttentionRows: deferredOwnerAttention,
       systemHealthAttention: ownerAttention.filter(item => item?.domain === 'SOFTWARE_PLATFORM'),
       salesQueue: salesQueue.length,
       salesDue: salesDueRows.length,
@@ -293,10 +299,20 @@ function OwnerHq({ session }) {
             <strong>{item.priority === 'URGENT' ? '🚨 ' : ''}{item.reason}</strong>
             <small>{item.domain} · {item.priority} · {item.metadata?.subject || item.source_table} · {item.created_at ? new Date(item.created_at).toLocaleString() : ''}</small>
             {item.metadata?.sender_address && <small>From: {item.metadata.sender_address}</small>}
-            {item.recommended_action && <small>Next: {item.recommended_action}</small>}
+            {(item.metadata?.governor?.next_action || item.recommended_action) && <small>Next: {item.metadata?.governor?.next_action || item.recommended_action}</small>}
+            {item.metadata?.governor?.state && <small>Governor: {item.metadata.governor.state.replaceAll('_', ' ').toLowerCase()} · rank {item.metadata.governor.rank_score}</small>}
           </div>
           <span className="portal-pill" style={statusPillStyle(item.priority)}>{item.priority}</span>
         </div>) : <div style={{ padding: 14, borderRadius: 12, background: '#f2f8f4', color: '#2d6a4f' }}>No open owner-attention items.</div>}
+        {(metrics.deferredOwnerAttentionRows || []).length > 0 && <details style={{ marginTop: 12 }}>
+          <summary>{metrics.deferredOwnerAttentionRows.length} held back by the governor (waiting, unproven, suppressed or system-executable)</summary>
+          {metrics.deferredOwnerAttentionRows.map(item => <div className="portal-row" key={item.id}>
+            <div>
+              <strong>{item.reason}</strong>
+              <small>{item.metadata.governor.state.replaceAll('_', ' ').toLowerCase()} · {item.metadata.governor.next_action}</small>
+            </div>
+          </div>)}
+        </details>}
       </div>
     </section>
 
