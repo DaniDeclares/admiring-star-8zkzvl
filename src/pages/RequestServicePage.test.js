@@ -33,7 +33,8 @@ describe('CH01 service-specific requests start from the governed front door',()=
   expect(source).toContain('selected?.ch01FrontDoorCode');
   expect(source).toContain('f.frontDoorCode?f:{...f,frontDoorCode:door}');
  });
- test('an unverified resident service id is not forwarded to the CH01 intake gate',()=>{
-  expect(source).toContain('serviceId:form.channelType===OPERATIONS_CHANNELS.B2C?authoritativeServiceId:form.serviceId');
+ test('the selected service id always reaches the server CH01 gate, even when verification fails',()=>{
+  expect(source).toContain('body:JSON.stringify({...form,serviceType:');
+  expect(source).not.toContain('OPERATIONS_CHANNELS.B2C?authoritativeServiceId:form.serviceId');
  });
 });
