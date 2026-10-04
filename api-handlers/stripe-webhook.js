@@ -56,7 +56,6 @@ export default async function handler(req,res){
     set subscription_status=${String(subscription.status||event.type).toUpperCase()},
         stripe_customer_id=${typeof subscription.customer==='string'?subscription.customer:subscription.customer?.id||null},
         cancel_at_period_end=${Boolean(subscription.cancel_at_period_end)},
-        current_period_end=${subscription.current_period_end?new Date(subscription.current_period_end*1000).toISOString():null}::timestamptz,
         canceled_at=${subscription.canceled_at?new Date(subscription.canceled_at*1000).toISOString():event.type==='customer.subscription.deleted'?new Date().toISOString():null}::timestamptz,
         updated_at=now()
     where stripe_subscription_id=${subscription.id}

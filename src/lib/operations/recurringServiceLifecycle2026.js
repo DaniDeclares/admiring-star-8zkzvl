@@ -8,7 +8,7 @@ export function hasPeriodEndCancellation(config) {
 }
 export function validateRecurringTerms(terms) {
   if (!terms || !COMMERCIAL_OBJECT_TYPES.includes(terms.objectType)) throw new Error('COMMERCIAL_OBJECT_TYPE_REQUIRED');
-  if (!/^CH0[1-6]$/.test(terms.channel)) throw new Error('CANONICAL_CHANNEL_REQUIRED');
+  if (!/^CH0[1-5]$/.test(terms.channel)) throw new Error('CANONICAL_CHANNEL_REQUIRED');
   if (!terms.scope?.trim() || !terms.exclusions?.trim()) throw new Error('RECURRING_SCOPE_REQUIRED');
   if (terms.rollover !== 'NONE' || terms.overage !== 'QUOTE_REQUIRED' || terms.cancellation !== 'PERIOD_END') throw new Error('UNSUPPORTED_RECURRING_TERMS');
   if (!Array.isArray(terms.allowances) || !terms.allowances.length || terms.allowances.length > 50) throw new Error('ALLOWANCES_REQUIRED');
@@ -27,7 +27,7 @@ export function invoicePeriod(invoice) {
   return { start:new Date(start*1000).toISOString(), end:new Date(end*1000).toISOString() };
 }
 export function validatePaidInvoice(invoice, expectedCents) {
-  if (invoice.status !== 'paid' || invoice.paid !== true || invoice.currency !== 'usd' || !Number.isSafeInteger(expectedCents) || expectedCents <= 0 || invoice.amount_paid !== expectedCents || invoice.total !== expectedCents) throw new Error('SUBSCRIPTION_PAYMENT_MISMATCH');
+  if (invoice.status !== 'paid' || invoice.paid === false || invoice.currency !== 'usd' || !Number.isSafeInteger(expectedCents) || expectedCents <= 0 || invoice.amount_paid !== expectedCents || invoice.total !== expectedCents) throw new Error('SUBSCRIPTION_PAYMENT_MISMATCH');
   if (!['subscription_create','subscription_cycle'].includes(invoice.billing_reason)) throw new Error('RECURRING_INVOICE_REVIEW_REQUIRED');
   return invoicePeriod(invoice);
 }

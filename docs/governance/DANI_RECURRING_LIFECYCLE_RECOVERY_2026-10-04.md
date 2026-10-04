@@ -7,7 +7,7 @@ This change extends the existing paid-first service subscription aggregate and t
 - Source baseline: GitHub `main` at `caa2a65e75b481fa496bf7e0b9ff1db7a2bfc3a3`. Historical PR #560 is now merged. Open PRs #559, #558, #557 and #520 were checked for file overlap; none overlap this change.
 - During publication, `main` advanced to `33ddab6824e3c24613dfad347510d4a31c8ec9f5` with a separate channel-pricing/normalization fix. Its four changed files do not overlap this task; that commit is merged into this branch and the combined code is reverified.
 - Production divisions: 13 rows. Division 01 is **Home, Pet, Plant & Household Support**; Division 02 is **Property, Facilities & Field Operations**. Division 03–13 names follow canonical hydration, not the older 10-division catalog.
-- Canonical channels remain CH01–CH06. Production currently contains CH01–CH05 channel rows, so missing CH06 is runtime drift, not evidence of retirement. This migration does not repair or rename taxonomy.
+- The owner explicitly corrected the earlier six-channel recovery on 2026-10-04: the existing **five Production channels are correct**. Preserve CH01 Resident Concierge; CH02 Property Management & Apartments; CH03 Real Estate Offices & Brokerages; CH04 Businesses; CH05 Government & Institutional Procurement. The six-channel transcript is historical evidence superseded by that owner correction. CH06 is not accepted or added. No taxonomy rows are changed.
 - Production contains 15 recurring/monthly service records and zero subscription instances. Existing household membership, plant care, administrative retainers, Monthly HQ support, bookkeeping, marketing and business development records are reused subject to their own release gates.
 - `src/data/retainerPlansData.js` remains intentionally empty: legacy prices are quarantined. Monthly amounts come from approved frozen estimates, not a newly invented price table.
 - Production already has `dd_service_subscriptions`; Tester lacked it. The new migration reuses the exact existing paid-first baseline before extending it.
@@ -15,7 +15,7 @@ This change extends the existing paid-first service subscription aggregate and t
 
 ## Resulting behavior
 
-Owner HQ can propose immutable scope, exclusions and included allowance terms for an existing approved monthly quote. The customer accepts those terms in the existing portal and proceeds through the existing checkout gates. Only existing CH01 subscription checkout eligibility is supported; this change does not open CH02–CH06 payments or quote-priced subscriptions.
+Owner HQ can propose immutable scope, exclusions and included allowance terms for an existing approved monthly quote. The customer accepts those terms in the existing portal and proceeds through the existing checkout gates. Only existing CH01 subscription checkout eligibility is supported; this change does not open CH02–CH05 payments or quote-priced subscriptions.
 
 Subscription checkout requires an active Stripe billing portal configuration with period-end cancellation enabled and self-service subscription updates disabled. The ordinary one-time invoice action refuses monthly services. No customer can buy a subscription through the new path while cancellation management is unconfigured.
 
@@ -29,11 +29,14 @@ The seven commercial types remain `SERV`, `PROD`, `DIGITAL`, `KIT`, `RET`, `EVEN
 
 ## Verification receipts and limits
 
-- Full local suite: 42 suites / 210 tests passed, 7 pre-existing tests skipped. Focused final lifecycle/API/portal suite: 25 tests passed after the final identity and route checks.
+- Full local suite after current main reconciliation: 42 suites / 217 tests passed, 7 pre-existing tests skipped. Focused lifecycle/API/portal tests: 27 tests pass after the final identity and route checks.
 - Optimized application build and generated SEO validation pass.
 - Isolated PostgreSQL migration proof: 13 checks pass, including existing execution/evidence/QA completion guards, usage restrictions, duplicate cycles/usage, and anonymous access denial.
 - Tester migration ledger version: `20261004050403`, name `recurring_terms_cycles_usage`. Rollback-only live proof passes QA denial, invoice uniqueness and client privilege checks. Afterwards subscriptions, terms, cycles and usage each contain zero rows. The earlier attempt that could not locate a linked Tester estimate was not treated as a pass.
 - Production business schema and offers are unchanged. Engineering ledger registration: `6c50a2c6-31bd-461e-aa4b-03d90880a3a8`.
+- Stripe **test mode**, DANI DECLARES account: fixture clock `clock_1UMhqTChHm1uJK9xy2dvKtFD`, customer `cus_VNSm4BzEV0rMSn`, subscription `sub_1UMhsKChHm1uJK9x6Pgs2gIA`, paid creation invoice `in_1UMhsKChHm1uJK9xjjKjg5mV`. The $1 monthly price is exclusively a labeled TEST_ONLY fixture, never a DANI catalog rate. Period-end cancellation was verified with the subscription still active and `cancel_at=1793769600`. Cleanup then canceled only that test subscription and archived fixture product `prod_VNSmQTq9oCOUQD`; the default price cannot be independently archived. No email was attached to the test customer. The connector did not expose test-clock advancement, so external renewal and expiration proof remain pending. A sanitized real-invoice fixture is checked by the application validator.
+- Actual Stripe API receipts omitted the older `paid` boolean and moved subscription period fields to items. Verification now relies on paid status plus exact paid amount/total and rejects explicit `paid=false`. Subscription notifications cannot replace the verified paid-period end with an unverified future period.
+- Node CI and DANI Software Quality Loop passed for reconciled head `5c33eea6358134faf5fc2ee0bdcb7a0073e254f2`; its exact Vercel preview is READY (`dpl_yXziRUcUxrAyEoQgHwZ1xEGrRXxQ`). Authenticated fetch remained blocked with `deployment_authentication_required`, so this is deployment proof, not runtime proof. The owner channel correction and Stripe compatibility changes require fresh exact-head checks.
 - A local build is not deployment or live Stripe proof. Exact-head CI, preview deployment, protected runtime checks, Production migration/promotion and Stripe test-mode lifecycle proof remain release gates. No live charge or cancellation was created for testing.
 
 ## Reproduce the isolated database proof
