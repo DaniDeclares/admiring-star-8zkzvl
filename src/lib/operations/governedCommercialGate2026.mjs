@@ -87,24 +87,41 @@ export function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCom
   return money(price);
 }
 
+export function evaluateChannelGovernanceDecision({ channel, adjudication, availability, pricing } = {}) {
+  const channelCode=String(channel||'').trim().toUpperCase();
+  if (!['CH02','CH03','CH04','CH05'].includes(channelCode)) {
+    return {allowed:false,reason:'CHANNEL_GOVERNANCE_NOT_SUPPORTED'};
+  }
+  if (!['ACTIVE','ELIGIBLE'].includes(String(availability?.eligibility_status||'').toUpperCase())) {
+    return {allowed:false,reason:channelCode+'_CHANNEL_NOT_AVAILABLE'};
+  }
+  if (channelCode!=='CH02') {
+    return {allowed:true,reason:channelCode+'_GOVERNANCE_CLEARED',frontDoor:null,pricingType:pricing?.pricing_type||null};
+  }
+  if (!adjudication) return {allowed:false,reason:'CHANNEL_GOVERNANCE_NOT_FOUND'};
+  if (adjudication.disposition!=='FRONT_DOOR_CANDIDATE') return {allowed:false,reason:'CH02_ADJUDICATION_'+adjudication.disposition};
+  if (adjudication.cross_channel_review) return {allowed:false,reason:'CH02_CROSS_CHANNEL_REVIEW'};
+  if (!pricing) return {allowed:false,reason:'CH02_CHANNEL_PRICING_NOT_LOCKED'};
+  return {allowed:true,reason:'CH02_GOVERNANCE_CLEARED',frontDoor:adjudication.proposed_front_door,pricingType:pricing.pricing_type||null};
+}
+
 export async function getChannelGovernanceDecision(serviceId, channel) {
   if (!serviceId || !channel) return { allowed:false, reason:'CHANNEL_REQUIRED' };
+  const channelCode=String(channel).trim().toUpperCase();
   const url=process.env.SUPABASE_URL||process.env.REACT_APP_SUPABASE_URL; const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return { allowed:false, reason:'COMMERCIAL_DATABASE_UNAVAILABLE' };
   const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
   const { data: offer }=await admin.from('dd_governed_service_offers').select('runtime_service_id').eq('canonical_sku',serviceId).neq('commercial_offer_status','DO_NOT_SELL').limit(1).maybeSingle();
   if (!offer) return { allowed:false, reason:'CHANNEL_GOVERNANCE_NOT_FOUND' };
-  const [{data:row},{data:availability},{data:pricing}]=await Promise.all([
-    admin.from('dd_ch02_service_adjudication').select('disposition,proposed_front_door,cross_channel_review').eq('channel_code',channel).eq('sku',serviceId).maybeSingle(),
-    admin.from('dd_service_channel_availability').select('eligibility_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channel).maybeSingle(),
-    admin.from('dd_service_pricing_rules').select('pricing_type,base_price_cents,status,lock_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channel).eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle()
+  const adjudicationQuery=channelCode==='CH02'
+    ? admin.from('dd_ch02_service_adjudication').select('disposition,proposed_front_door,cross_channel_review').eq('channel_code','CH02').eq('sku',serviceId).maybeSingle()
+    : Promise.resolve({data:null});
+  const [{data:adjudication},{data:availability},{data:pricing}]=await Promise.all([
+    adjudicationQuery,
+    admin.from('dd_service_channel_availability').select('eligibility_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channelCode).maybeSingle(),
+    admin.from('dd_service_pricing_rules').select('pricing_type,base_price_cents,status,lock_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channelCode).eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle()
   ]);
-  if (!row) return {allowed:false,reason:'CHANNEL_GOVERNANCE_NOT_FOUND'};
-  if (row.disposition!=='FRONT_DOOR_CANDIDATE') return {allowed:false,reason:'CH02_ADJUDICATION_'+row.disposition};
-  if (row.cross_channel_review) return {allowed:false,reason:'CH02_CROSS_CHANNEL_REVIEW'};
-  if (!['ACTIVE','ELIGIBLE'].includes(String(availability?.eligibility_status||'').toUpperCase())) return {allowed:false,reason:'CH02_CHANNEL_NOT_AVAILABLE'};
-  if (!pricing) return {allowed:false,reason:'CH02_CHANNEL_PRICING_NOT_LOCKED'};
-  return {allowed:true,reason:'CH02_GOVERNANCE_CLEARED',frontDoor:row.proposed_front_door,pricingType:pricing.pricing_type||null};
+  return evaluateChannelGovernanceDecision({channel:channelCode,adjudication,availability,pricing});
 }
 export async function resolveGovernedChannelPrice(offer,{channel,subchannel,isVerifiedCommunityResident}={}) {
   if (!offer) return null;
