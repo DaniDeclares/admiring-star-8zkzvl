@@ -89,6 +89,9 @@ async function implementation() {
 async function getGovernedCommercialOffer(...args) {
   return (await implementation()).getGovernedCommercialOffer(...args);
 }
+async function evaluateChannelGovernanceDecision(...args) {
+  return (await implementation()).evaluateChannelGovernanceDecision(...args);
+}
 async function getChannelGovernanceDecision(...args) {
   return (await implementation()).getChannelGovernanceDecision(...args);
 }
@@ -110,6 +113,7 @@ module.exports = {
   isQuoteRequired,
   getChannelFromRequest,
   getGovernedCommercialOffer,
+  evaluateChannelGovernanceDecision,
   getChannelGovernanceDecision,
   resolveGovernedChannelPrice,
   resolveVerifiedCommunity,
