@@ -1,6 +1,12 @@
 name: DANI Owner Personal Candidate Miner
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/dani-owner-personal-candidate-miner.mjs'
+      - '.github/workflows/dani-owner-personal-candidate-miner.yml'
+      - 'supabase/migrations/20261004181500_recover_owner_personal_candidate_lane.sql'
   pull_request:
     paths:
       - 'scripts/dani-owner-personal-candidate-miner.mjs'
