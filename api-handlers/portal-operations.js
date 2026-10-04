@@ -963,6 +963,13 @@ export default async function handler(req, res) {
       const identityGate = customerIdentityGate(estimate, context.user?.email);
       if (!identityGate.ok) return identityFailure(res, identityGate);
 
+      const recurringSku=estimate.intake_answers?.serviceSku;
+      if(recurringSku){
+        const recurringService=await context.supabase.from('services').select('billing_cycle').eq('sku',recurringSku).maybeSingle();
+        if(recurringService.error)throw recurringService.error;
+        if(['MONTH','MONTHLY'].includes(String(recurringService.data?.billing_cycle||'').toUpperCase()))return fail(res,'Use the recurring agreement payment action. Monthly services cannot be paid as one-time invoices.',409);
+      }
+
       const { data: existingInvoice, error: existingError } = await context.supabase.from('dd_invoices').select('*').eq('estimate_id', estimate.id).not('stripe_invoice_id', 'is', null).order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (existingError) throw existingError;
       if (existingInvoice?.stripe_invoice_id) {

@@ -36,6 +36,7 @@ export const ROUTES = {
   'provider-routing': () => import('../api-handlers/provider-routing.js'),
   'provider-support-recovery': () => import('../api-handlers/provider-support-recovery.js'),
   'research-lead-worker': () => import('../api-handlers/research-lead-worker.js'),
+  'service-subscriptions': () => import('../api-handlers/service-subscriptions.js'),
   'stripe-webhook': () => import('../api-handlers/stripe-webhook.js'),
   'stripe/fetch-balance': () => import('../api-handlers/stripe/fetch-balance.js'),
   'verify-commercial-intent': () => import('../api-handlers/verify-commercial-intent.js')
