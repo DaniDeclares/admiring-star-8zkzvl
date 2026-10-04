@@ -194,7 +194,7 @@ async function main(){
       successfulSources++;
       for(const item of searchResults(await r.text())){
         if(!/^https:\/\/(?:www\.)?reddit\.com\/r\//i.test(item.link)) continue;
-        if(!\/comments\//.test(item.link)) continue;
+        if(!/\/comments\//.test(item.link)) continue;
         discoveredUrls.set(item.link,item);
       }
     }catch(e){ console.warn('search feed failure',String(e.message).slice(0,300)); }
