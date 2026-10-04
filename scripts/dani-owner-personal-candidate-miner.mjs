@@ -13,8 +13,16 @@ if(!DRY_RUN&&(!SUPABASE_URL||!SUPABASE_KEY)) throw new Error('Production Supabas
 
 const UA='DANI-Owner-Personal-Candidate-Miner/1.0 (+public research; no contact)';
 const SOURCES=[
-  'https://www.reddit.com/r/LavenderMarriageWorld/new.json?limit=100&raw_json=1',
-  'https://www.reddit.com/r/queerplatonic/new.json?limit=100&raw_json=1'
+  {
+    name:'LavenderMarriageWorld',
+    rss:'https://www.reddit.com/r/LavenderMarriageWorld/new/.rss',
+    json:'https://www.reddit.com/r/LavenderMarriageWorld/new.json?limit=100&raw_json=1'
+  },
+  {
+    name:'queerplatonic',
+    rss:'https://www.reddit.com/r/queerplatonic/new/.rss',
+    json:'https://www.reddit.com/r/queerplatonic/new.json?limit=100&raw_json=1'
+  }
 ];
 
 const male=/\b(?:m4f|male|man|guy|husband|\d{2}m|m\d{2})\b/i;
@@ -24,7 +32,26 @@ const financial=/\b(?:financial(?:ly)? stable|provider|career|accountant|enginee
 const bad=/\b(?:visa|green card|citizenship only|sugar daddy|allowance|pay me|send money|crypto|investment opportunity)\b/i;
 const ageRe=/\b([2-6]\d)\s*(?:m|male|yo|years? old)\b/i;
 
+function decodeXml(value=''){
+  return value
+    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')
+    .replace(/&#39;/g,"'").replace(/&amp;/g,'&');
+}
+function stripHtml(value=''){ return decodeXml(value).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); }
 function textOf(post){ return [post.title||'',post.selftext||''].join('\n').trim(); }
+function rssPosts(xml,sourceName){
+  const out=[];
+  for(const match of xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)){
+    const entry=match[1];
+    const title=decodeXml(entry.match(/<title[^>]*>([\s\S]*?)<\/title>/)?.[1]||'');
+    const content=stripHtml(entry.match(/<content[^>]*>([\s\S]*?)<\/content>/)?.[1]||'');
+    const href=decodeXml(entry.match(/<link[^>]+href="([^"]+)"/)?.[1]||'');
+    const id=(href.match(/\/comments\/([^/]+)/)||[])[1];
+    if(!id||!href) continue;
+    out.push({id,title,selftext:content,permalink:new URL(href).pathname,subreddit:sourceName,over_18:false,removed_by_category:null,author:'public-rss'});
+  }
+  return out;
+}
 function ageOf(text){ const m=text.match(ageRe); return m?m[1]:null; }
 function locationOf(text){
   const m=text.match(/\b(?:based in|living in|live in|from)\s+([A-Z][A-Za-z .,'-]{2,60})(?:[.\n,]|$)/);
@@ -93,24 +120,48 @@ async function supabase(path,opts={}){
 
 async function main(){
   const found=new Map();
-  for(const url of SOURCES){
+  let successfulSources=0;
+  for(const source of SOURCES){
+    let posts=[];
+    let sourceWorked=false;
     try{
-      const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'application/json'}});
-      if(!r.ok){ console.warn('source unavailable',url,r.status); continue; }
-      const j=await r.json();
-      for(const child of j?.data?.children||[]){
-        const post=child?.data;
-        if(!post||post.over_18||post.removed_by_category||post.author==='[deleted]') continue;
-        const c=candidate(post);
-        if(c) found.set(c.candidate_key,c);
+      const rss=await fetch(source.rss,{headers:{'User-Agent':UA,'Accept':'application/atom+xml,application/rss+xml,text/xml'}});
+      if(rss.ok){
+        posts=rssPosts(await rss.text(),source.name);
+        sourceWorked=true;
+      } else {
+        console.warn('rss source unavailable',source.name,rss.status);
       }
-    }catch(e){ console.warn('source failure',url,String(e.message).slice(0,300)); }
+    }catch(e){ console.warn('rss source failure',source.name,String(e.message).slice(0,300)); }
+
+    if(!sourceWorked){
+      try{
+        const r=await fetch(source.json,{headers:{'User-Agent':UA,'Accept':'application/json'}});
+        if(r.ok){
+          const j=await r.json();
+          posts=(j?.data?.children||[]).map(child=>child?.data).filter(Boolean);
+          sourceWorked=true;
+        } else {
+          console.warn('json source unavailable',source.name,r.status);
+        }
+      }catch(e){ console.warn('json source failure',source.name,String(e.message).slice(0,300)); }
+    }
+
+    if(!sourceWorked) continue;
+    successfulSources++;
+    for(const post of posts){
+      if(!post||post.over_18||post.removed_by_category||post.author==='[deleted]') continue;
+      const c=candidate(post);
+      if(c) found.set(c.candidate_key,c);
+    }
   }
+  if(successfulSources===0) throw new Error('NO_PUBLIC_CANDIDATE_SOURCE_REACHABLE');
 
   if(DRY_RUN){
     console.log(JSON.stringify({
       status:'DRY_RUN_COMPLETED',
       public_sources:SOURCES.length,
+      reachable_sources:successfulSources,
       qualified_candidates:found.size,
       candidates:[...found.values()].map(c=>({candidate_key:c.candidate_key,source_url:c.source_url,display_name:c.display_name})),
       production_write:false,
@@ -137,6 +188,7 @@ async function main(){
   console.log(JSON.stringify({
     status:'COMPLETED',
     public_sources:SOURCES.length,
+    reachable_sources:successfulSources,
     qualified_candidates:found.size,
     upserted,
     hq_refresh:refreshed,
