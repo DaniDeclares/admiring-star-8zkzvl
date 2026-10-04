@@ -12,15 +12,7 @@
   <meta property="og:type" content="website">
   <meta name="robots" content="index,follow">
   <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"WebPage",
-    "name":"Join the DANI DECLARES Provider Network",
-    "description":"Service providers can apply to work with DANI DECLARES.",
-    "url":"https://www.danideclares.com/providers",
-    "about":{"@type":"Organization","name":"DANI DECLARES LLC","url":"https://www.danideclares.com"},
-    "mainEntity":{"@type":"WebPage","name":"DANI DECLARES Provider Application","url":"https://www.danideclares.com/portal/access?role=provider"}
-  }
+  {"@context":"https://schema.org","@type":"WebPage","name":"Join the DANI DECLARES Provider Network","description":"Service providers can apply to work with DANI DECLARES.","url":"https://www.danideclares.com/providers","about":{"@type":"Organization","name":"DANI DECLARES LLC","url":"https://www.danideclares.com"},"mainEntity":{"@type":"WebPage","name":"DANI DECLARES Provider Application","url":"https://www.danideclares.com/portal/access?role=provider"}}
   </script>
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:760px;margin:0 auto;padding:48px 24px;line-height:1.6;color:#172033;background:#fff}
@@ -36,8 +28,19 @@
     <h1>Apply to Work With DANI DECLARES</h1>
     <p>DANI DECLARES works with qualified service providers to fulfill customer, property, real estate, business, and institutional work across Georgia and regional South Carolina.</p>
     <p><strong>Are you a service provider, contractor, specialist, or vendor who wants to work with DANI DECLARES?</strong> Apply through the provider network and tell us what you do, where you work, and what capabilities you bring.</p>
-    <p><a href="/portal/access?role=provider">Start the Provider Application</a></p>
+    <p><a id="provider-apply-link" href="/portal/access?role=provider">Start the Provider Application</a></p>
     <div class="note"><strong>Important:</strong> Creating an account or submitting an application does not authorize work. Provider applications are subject to DANI DECLARES qualification, verification, and authorization requirements before fulfillment eligibility is established.</div>
   </main>
+  <script>
+    (function(){
+      var incoming=new URLSearchParams(window.location.search);
+      var outgoing=new URLSearchParams();
+      outgoing.set('role','provider');
+      ['ref','referral','utm_source','utm_medium','utm_campaign','utm_content','utm_term','audience'].forEach(function(key){
+        var value=incoming.get(key); if(value) outgoing.set(key,value);
+      });
+      document.getElementById('provider-apply-link').href='/portal/access?'+outgoing.toString();
+    })();
+  </script>
 </body>
 </html>
