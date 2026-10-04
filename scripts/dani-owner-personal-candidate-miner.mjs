@@ -192,7 +192,9 @@ async function main(){
       const r=await fetch(feed,{headers:{'User-Agent':UA,'Accept':'application/rss+xml,text/xml'}});
       if(!r.ok){ console.warn('search feed unavailable',r.status); continue; }
       successfulSources++;
-      for(const item of searchResults(await r.text())){
+      const results=searchResults(await r.text());
+      if(DRY_RUN) console.log(JSON.stringify({search_feed:feed,result_count:results.length,sample:results.slice(0,5)}));
+      for(const item of results){
         if(!/^https:\/\/(?:www\.)?reddit\.com\/r\//i.test(item.link)) continue;
         if(!/\/comments\//.test(item.link)) continue;
         discoveredUrls.set(item.link,item);
@@ -200,6 +202,7 @@ async function main(){
     }catch(e){ console.warn('search feed failure',String(e.message).slice(0,300)); }
   }
 
+  if(DRY_RUN) console.log(JSON.stringify({discovered_reddit_urls:discoveredUrls.size,urls:[...discoveredUrls.keys()].slice(0,12)}));
   let readerPages=0;
   for(const [url,item] of discoveredUrls){
     if(readerPages>=MAX_READER_PAGES) break;
