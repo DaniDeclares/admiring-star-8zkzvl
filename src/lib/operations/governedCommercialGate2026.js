@@ -38,7 +38,8 @@ function money(value) {
 }
 
 function normalizeChannel(channelType, channel) {
-  return INTAKE_TO_CHANNEL[channelType] || String(channel || '').trim();
+  const normalizedType = String(channelType || '').trim().toUpperCase();
+  return INTAKE_TO_CHANNEL[normalizedType] || String(channel || '').trim().toUpperCase();
 }
 
 function isQuoteRequired(offer) {
@@ -55,7 +56,7 @@ function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityR
   return money(price);
 }
 
-function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType, hasLockedActivePricing, hasLockedActiveSubchannelPricing } = {}) {
+function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType, channelPriceCents, hasLockedActivePricing, hasLockedActiveSubchannelPricing } = {}) {
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
@@ -64,6 +65,10 @@ function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityRe
   if (['CH02','CH03','CH04','CH05'].includes(channel)) {
     if (!channelPricingType) return { eligible: false, reason: `${channel}_CHANNEL_PRICING_NOT_LOCKED`, price: null };
     if (QUOTE_REQUIRED_MODELS.has(String(channelPricingType).toUpperCase())) return { eligible: false, reason: `${channel}_CHANNEL_QUOTE_REQUIRED`, price: null };
+    const lockedChannelPriceCents = Number(channelPriceCents);
+    if (!Number.isFinite(lockedChannelPriceCents) || lockedChannelPriceCents <= 0) {
+      return { eligible: false, reason: `${channel}_CHANNEL_PRICE_INVALID`, price: null };
+    }
   }
   const economics = economicGateFromOffer(offer);
   if (!economics.cleared) return { eligible: false, reason: economics.reason, price: null, marginPercent: economics.marginPercent };
