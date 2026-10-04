@@ -1,4 +1,4 @@
-const { checkoutEligibility, evaluateChannelGovernanceDecision } = require('./governedCommercialGate2026');
+const { checkoutEligibility, evaluateChannelGovernanceDecision, normalizeChannel } = require('./governedCommercialGate2026');
 
 const readyOffer = {
   releaseState: 'LIVE_READY',
@@ -14,6 +14,13 @@ const readyOffer = {
   authorizedProviderCapabilityCount: 1,
 };
 
+describe('normalizeChannel', () => {
+  test('canonicalizes direct channel input before authority and pricing lookup', () => {
+    expect(normalizeChannel('', ' ch03 ')).toBe('CH03');
+    expect(normalizeChannel(' b2b_re ', 'CH01')).toBe('CH03');
+  });
+});
+
 describe('evaluateChannelGovernanceDecision', () => {
   test.each(['CH03', 'CH04', 'CH05'])(
     '%s uses exact service-channel availability without CH02 adjudication',
@@ -28,6 +35,7 @@ describe('evaluateChannelGovernanceDecision', () => {
         reason: `${channel}_GOVERNANCE_CLEARED`,
         frontDoor: null,
         pricingType: null,
+        channelPriceCents: null,
       });
     }
   );
@@ -58,12 +66,13 @@ describe('evaluateChannelGovernanceDecision', () => {
         cross_channel_review: false,
       },
       availability: { eligibility_status: 'ELIGIBLE' },
-      pricing: { pricing_type: 'FIXED' },
+      pricing: { pricing_type: 'FIXED', base_price_cents: 12500 },
     })).resolves.toEqual({
       allowed: true,
       reason: 'CH02_GOVERNANCE_CLEARED',
       frontDoor: 'CH02-F01',
       pricingType: 'FIXED',
+      channelPriceCents: 12500,
     });
 
     await expect(evaluateChannelGovernanceDecision({
@@ -110,10 +119,26 @@ describe('non-CH01 direct checkout pricing', () => {
     }
   );
 
-  test.each(['CH03', 'CH04', 'CH05'])(
-    '%s permits the direct-checkout gate only when exact channel pricing is a direct-price model',
+  test.each(['CH02', 'CH03', 'CH04', 'CH05'])(
+    '%s blocks direct checkout when exact locked pricing has no positive amount',
     channel => {
-      expect(checkoutEligibility(readyOffer, { channel, channelPricingType: 'FIXED' })).toMatchObject({
+      expect(checkoutEligibility(readyOffer, { channel, channelPricingType: 'FIXED', channelPriceCents: null })).toEqual({
+        eligible: false,
+        reason: `${channel}_CHANNEL_PRICE_INVALID`,
+        price: null,
+      });
+      expect(checkoutEligibility(readyOffer, { channel, channelPricingType: 'FIXED', channelPriceCents: 0 })).toEqual({
+        eligible: false,
+        reason: `${channel}_CHANNEL_PRICE_INVALID`,
+        price: null,
+      });
+    }
+  );
+
+  test.each(['CH03', 'CH04', 'CH05'])(
+    '%s permits the direct-checkout gate only when exact channel pricing has a positive direct price',
+    channel => {
+      expect(checkoutEligibility(readyOffer, { channel, channelPricingType: 'FIXED', channelPriceCents: 12500 })).toMatchObject({
         eligible: true,
         reason: 'READY_FOR_DIRECT_CHECKOUT',
       });
