@@ -12,6 +12,11 @@ const SUPABASE_KEY=process.env.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY||'';
 if(!DRY_RUN&&(!SUPABASE_URL||!SUPABASE_KEY)) throw new Error('Production Supabase credentials are required');
 
 const UA='DANI-Owner-Personal-Candidate-Miner/1.0 (+public research; no contact)';
+const MAX_READER_PAGES=12;
+const SEARCH_FEEDS=[
+  'https://www.bing.com/search?format=rss&q=site%3Areddit.com%2Fr%2FLavenderMarriageWorld%20%22lavender%20marriage%22%20male%20children%20career',
+  'https://www.bing.com/search?format=rss&q=site%3Areddit.com%2Fr%2FLavenderMarriageWorld%20platonic%20marriage%20M4F%20family'
+];
 const SOURCES=[
   {
     name:'LavenderMarriageWorld:new',
@@ -49,6 +54,22 @@ function decodeXml(value=''){
 }
 function stripHtml(value=''){ return decodeXml(value).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); }
 function textOf(post){ return [post.title||'',post.selftext||''].join('\n').trim(); }
+function searchResults(xml){
+  const out=[];
+  for(const match of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)){
+    const item=match[1];
+    const title=decodeXml(item.match(/<title>([\s\S]*?)<\/title>/)?.[1]||'');
+    const link=decodeXml(item.match(/<link>([\s\S]*?)<\/link>/)?.[1]||'').trim();
+    const description=stripHtml(item.match(/<description>([\s\S]*?)<\/description>/)?.[1]||'');
+    if(link) out.push({title,link,description});
+  }
+  return out;
+}
+async function readerText(url){
+  const r=await fetch('https://r.jina.ai/'+url,{headers:{'User-Agent':UA,'Accept':'text/plain'}});
+  if(!r.ok) throw new Error('JINA_READER_'+r.status);
+  return await r.text();
+}
 function rssPosts(xml,sourceName){
   const out=[];
   for(const match of xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)){
@@ -165,12 +186,49 @@ async function main(){
       if(c) found.set(c.candidate_key,c);
     }
   }
+  const discoveredUrls=new Map();
+  for(const feed of SEARCH_FEEDS){
+    try{
+      const r=await fetch(feed,{headers:{'User-Agent':UA,'Accept':'application/rss+xml,text/xml'}});
+      if(!r.ok){ console.warn('search feed unavailable',r.status); continue; }
+      successfulSources++;
+      for(const item of searchResults(await r.text())){
+        if(!/^https:\/\/(?:www\.)?reddit\.com\/r\//i.test(item.link)) continue;
+        if(!\/comments\//.test(item.link)) continue;
+        discoveredUrls.set(item.link,item);
+      }
+    }catch(e){ console.warn('search feed failure',String(e.message).slice(0,300)); }
+  }
+
+  let readerPages=0;
+  for(const [url,item] of discoveredUrls){
+    if(readerPages>=MAX_READER_PAGES) break;
+    try{
+      const body=await readerText(url);
+      readerPages++;
+      const id=(url.match(/\/comments\/([^/]+)/)||[])[1];
+      if(!id) continue;
+      const post={
+        id,
+        title:item.title,
+        selftext:body.slice(0,12000),
+        permalink:new URL(url).pathname,
+        subreddit:'LavenderMarriageWorld',
+        over_18:false,
+        removed_by_category:null,
+        author:'public-reader'
+      };
+      const c=candidate(post);
+      if(c) found.set(c.candidate_key,c);
+    }catch(e){ console.warn('reader failure',url,String(e.message).slice(0,200)); }
+  }
+
   if(successfulSources===0) throw new Error('NO_PUBLIC_CANDIDATE_SOURCE_REACHABLE');
 
   if(DRY_RUN){
     console.log(JSON.stringify({
       status:'DRY_RUN_COMPLETED',
-      public_sources:SOURCES.length,
+      public_sources:SOURCES.length+SEARCH_FEEDS.length,
       reachable_sources:successfulSources,
       qualified_candidates:found.size,
       candidates:[...found.values()].map(c=>({candidate_key:c.candidate_key,source_url:c.source_url,display_name:c.display_name})),
@@ -197,7 +255,7 @@ async function main(){
 
   console.log(JSON.stringify({
     status:'COMPLETED',
-    public_sources:SOURCES.length,
+    public_sources:SOURCES.length+SEARCH_FEEDS.length,
     reachable_sources:successfulSources,
     qualified_candidates:found.size,
     upserted,
