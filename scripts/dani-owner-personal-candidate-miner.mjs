@@ -106,6 +106,18 @@ async function main(){
     }catch(e){ console.warn('source failure',url,String(e.message).slice(0,300)); }
   }
 
+  if(DRY_RUN){
+    console.log(JSON.stringify({
+      status:'DRY_RUN_COMPLETED',
+      public_sources:SOURCES.length,
+      qualified_candidates:found.size,
+      candidates:[...found.values()].map(c=>({candidate_key:c.candidate_key,source_url:c.source_url,display_name:c.display_name})),
+      production_write:false,
+      outreach_authorized:false
+    }));
+    return;
+  }
+
   let upserted=0;
   for(const c of found.values()){
     await supabase('dd_owner_personal_candidates?on_conflict=candidate_key',{
