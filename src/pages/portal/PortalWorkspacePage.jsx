@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProviderNav from './ProviderNav.jsx';
 import CustomerNav from './CustomerNav.jsx';
+import RecurringServicesCard from './RecurringServicesCard.jsx';
 import { Card, Empty, Requirement, buildProviderRequirements, statusLabel, formatDate, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
 import './PortalWorkspacePage.css';
 import OwnerHQPage from './OwnerHQPage.jsx';
@@ -78,6 +79,7 @@ export default function PortalWorkspacePage() {
   return <main className="portal-shell">
     <header className="portal-hero"><div><p className="portal-eyebrow">{isProvider ? 'DANI DECLARES PROVIDER' : 'DANI DECLARES'}</p><h1>{ROLE_LABELS[role] || 'DANI DECLARES'}</h1><p>{isProvider ? 'Assignments, dispatch instructions, field checklists, evidence and completion records — connected to the DANI DECLARES fulfillment system.' : 'Requests, services, projects, approvals, documents and financial records — connected to the same DANI DECLARES operating system.'}</p></div><div className="portal-hero-actions"><AccountBadge session={session} /><button className="portal-refresh" onClick={load}>Refresh</button></div></header>
     {isProvider ? <ProviderNav isApprovedProvider={isApprovedProvider} agreementSigned={isSignedProvider} showAccounting={hasAccountingWorkspace} /> : <CustomerNav />}
+    {!isProvider && session && <RecurringServicesCard session={session} />}
     {error && <div className="portal-alert" role="alert">{error}</div>}{message && <div className="portal-success" role="status">{message}</div>}
     {isProvider && !application && <div className="portal-status-banner"><div><strong>Finish your provider application</strong><p style={{ margin: '6px 0 0', color: '#6d6263' }}>Your DANI provider login is active, but no provider application is linked to this account yet. Complete the missing application details and select the specific services you can fulfill. Your existing login will be kept.</p></div><Link className="portal-primary" to="/portal/providers?resume=1">Finish application →</Link></div>}
     {isProvider ? (isApprovedProvider ? <>

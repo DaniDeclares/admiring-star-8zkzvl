@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import prisma from '../lib/prisma.js';
 import { checkoutEligibility, getGovernedCommercialOffer, getChannelFromRequest, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
+import { isMonthlyOffer, validateRecurringTerms, hasPeriodEndCancellation } from '../src/lib/operations/recurringServiceLifecycle2026.js';
 import { ensureOwnerDirectCheckoutEconomics } from '../src/lib/operations/ownerDirectCheckout2026.js';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -60,10 +61,20 @@ export default async function handler(req,res){
   const initialPayment=quoteRequired&&Number.isFinite(depositDue)&&depositDue>0&&depositDue<frozenAmount;
   const paymentAmount=initialPayment?depositDue:frozenAmount;
   const paymentType=initialPayment?'INITIAL_PAYMENT':'FULL_PAYMENT';
-  const recurring=String(offer.billingCycle||'').toLowerCase()==='month';
+  const recurring=isMonthlyOffer(offer);
+  if(recurring){
+   const configurationId=process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID;
+   if(!configurationId)return json(res,409,{error:'Subscription checkout is held until billing and cancellation management is configured.'});
+   const config=await stripe.billingPortal.configurations.retrieve(configurationId);
+   if(!hasPeriodEndCancellation(config))return json(res,409,{error:'Subscription checkout is held until period-end cancellation terms are verified.'});
+   const terms=await prisma.$queryRaw`select terms,monthly_amount_cents from public.dd_service_subscription_terms where estimate_id=${estimate.id}::uuid and canonical_sku=${offer.serviceId} and accepted_at is not null`;
+   if(!terms[0])return json(res,409,{error:'Recurring scope, allowances and renewal terms must be approved and accepted before payment.'});
+   if(terms[0].monthly_amount_cents!==Math.round(frozenAmount*100))return json(res,409,{error:'Approved recurring amount changed; reconcile the agreement before checkout.'});
+   if(validateRecurringTerms(terms[0].terms).channel!==channel)return json(res,409,{error:'Recurring agreement channel does not match this request.'});
+  }
   if(recurring&&quoteRequired)return json(res,409,{error:'Recurring quote-priced services require owner review before subscription checkout.'});
   const paymentMetadata={request_id:requestId,service_id:serviceId,estimate_id:estimate.id,canonical_sku:offer.serviceId,channel,subchannel,payment_type:recurring?'SUBSCRIPTION':paymentType,full_estimate_amount:String(frozenAmount),deposit_due:String(initialPayment?depositDue:frozenAmount),balance_due:String(Math.max(frozenAmount-paymentAmount,0))};
-  const params={mode:recurring?'subscription':'payment',customer_email:email,line_items:[{price_data:{currency:'usd',unit_amount:Math.round(paymentAmount*100),product_data:{name:initialPayment?`${offer.name} — Initial Payment`:offer.name,metadata:paymentMetadata},...(recurring?{recurring:{interval:'month'}}:{})},quantity:1}],metadata:paymentMetadata,...(recurring?{}:{payment_intent_data:{metadata:paymentMetadata}}),success_url:`${siteOrigin(req)}/request-service?service=${encodeURIComponent(serviceId)}&paid=1&request_id=${encodeURIComponent(requestId)}`,cancel_url:`${siteOrigin(req)}/request-service?service=${encodeURIComponent(serviceId)}&canceled=1&request_id=${encodeURIComponent(requestId)}`};
+  const params={mode:recurring?'subscription':'payment',customer_email:email,line_items:[{price_data:{currency:'usd',unit_amount:Math.round(paymentAmount*100),product_data:{name:initialPayment?`${offer.name} — Initial Payment`:offer.name,metadata:paymentMetadata},...(recurring?{recurring:{interval:'month'}}:{})},quantity:1}],metadata:paymentMetadata,...(recurring?{subscription_data:{metadata:paymentMetadata}}:{payment_intent_data:{metadata:paymentMetadata}}),success_url:`${siteOrigin(req)}/request-service?service=${encodeURIComponent(serviceId)}&paid=1&request_id=${encodeURIComponent(requestId)}`,cancel_url:`${siteOrigin(req)}/request-service?service=${encodeURIComponent(serviceId)}&canceled=1&request_id=${encodeURIComponent(requestId)}`};
   const session=await stripe.checkout.sessions.create(params,{idempotencyKey:`dani-checkout:${requestId}:${recurring?'SUBSCRIPTION':paymentType}`});
   if(recurring){
    await prisma.$executeRaw`

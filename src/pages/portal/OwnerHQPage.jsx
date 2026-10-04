@@ -8,6 +8,7 @@ import { OWNER_CONNECTED_SYSTEMS, OWNER_PRIORITY_LINKS } from '../../config/owne
 import { ownerAttentionNow, ownerAttentionDeferred } from '../../lib/operations/ownerAttentionRank2026.js';
 import { isProspectingDue } from '../../lib/operations/ownerHqTruth2026.js';
 import './PortalWorkspacePage.css';
+import RecurringServicesCard from './RecurringServicesCard.jsx';
 
 const STAFF_ROLES = new Set(['admin', 'owner', 'staff_admin', 'staff']);
 
@@ -488,6 +489,7 @@ function OwnerHq({ session }) {
       <div className="portal-row"><div><strong>4. Add API synchronization in controlled phases</strong><small>True in-portal synchronization requires the relevant external API credentials/permissions in DANI's server environment. The architecture is ready for that phase without forcing a redesign.</small></div><span className="portal-pill">PHASE 2</span></div>
     </section>
 
+    <RecurringServicesCard session={session} ownerMode />
     <footer className="portal-footer">
       <strong>Authority rule:</strong> DANI owns customer, service, commercial, operational, fulfillment and release state. Connected systems remain authoritative for their own domains until an explicit integration replaces or synchronizes that authority.
     </footer>

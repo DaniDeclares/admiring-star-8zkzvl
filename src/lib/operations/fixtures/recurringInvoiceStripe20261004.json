@@ -1,0 +1,19 @@
+{
+  "id": "in_test_proof",
+  "status": "paid",
+  "currency": "usd",
+  "total": 100,
+  "amount_paid": 100,
+  "billing_reason": "subscription_create",
+  "livemode": false,
+  "lines": {
+    "has_more": false,
+    "data": [{
+      "parent": {
+        "type": "subscription_item_details",
+        "subscription_item_details": { "proration": false }
+      },
+      "period": { "start": 1791091200, "end": 1793769600 }
+    }]
+  }
+}
