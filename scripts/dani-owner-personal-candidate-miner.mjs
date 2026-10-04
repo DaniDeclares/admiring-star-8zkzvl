@@ -12,33 +12,11 @@ const SUPABASE_KEY=process.env.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY||'';
 if(!DRY_RUN&&(!SUPABASE_URL||!SUPABASE_KEY)) throw new Error('Production Supabase credentials are required');
 
 const UA='DANI-Owner-Personal-Candidate-Miner/1.0 (+public research; no contact)';
-const MAX_READER_PAGES=12;
-const SEARCH_FEEDS=[
-  'https://www.bing.com/search?format=rss&q=site%3Areddit.com%2Fr%2FLavenderMarriageWorld%20%22lavender%20marriage%22%20male%20children%20career',
-  'https://www.bing.com/search?format=rss&q=site%3Areddit.com%2Fr%2FLavenderMarriageWorld%20platonic%20marriage%20M4F%20family'
-];
-const SOURCES=[
-  {
-    name:'LavenderMarriageWorld:new',
-    rss:'https://www.reddit.com/r/LavenderMarriageWorld/new/.rss',
-    json:'https://www.reddit.com/r/LavenderMarriageWorld/new.json?limit=100&raw_json=1'
-  },
-  {
-    name:'LavenderMarriageWorld:search',
-    rss:'https://www.reddit.com/r/LavenderMarriageWorld/search.rss?q=lavender%20marriage&restrict_sr=on&sort=new&t=year',
-    json:'https://www.reddit.com/r/LavenderMarriageWorld/search.json?q=lavender%20marriage&restrict_sr=on&sort=new&t=year&limit=100&raw_json=1'
-  },
-  {
-    name:'LavenderMarriageWorld:platonic-search',
-    rss:'https://www.reddit.com/r/LavenderMarriageWorld/search.rss?q=platonic%20marriage&restrict_sr=on&sort=new&t=year',
-    json:'https://www.reddit.com/r/LavenderMarriageWorld/search.json?q=platonic%20marriage&restrict_sr=on&sort=new&t=year&limit=100&raw_json=1'
-  },
-  {
-    name:'queerplatonic:new',
-    rss:'https://www.reddit.com/r/queerplatonic/new/.rss',
-    json:'https://www.reddit.com/r/queerplatonic/new.json?limit=100&raw_json=1'
-  }
-];
+const SOURCE={
+  name:'LavenderMarriageWorld:new',
+  rss:'https://www.reddit.com/r/LavenderMarriageWorld/new/.rss',
+  json:'https://www.reddit.com/r/LavenderMarriageWorld/new.json?limit=100&raw_json=1'
+};
 
 const male=/\b(?:m4f|male|man|guy|husband|\d{2}m|m\d{2})\b/i;
 const explicitArrangement=/\b(?:lavender marriage|marriage of convenience|platonic marriage|platonic life partner|queerplatonic|qpp|co[- ]?parent(?:ing)? arrangement)\b/i;
@@ -54,22 +32,12 @@ function decodeXml(value=''){
 }
 function stripHtml(value=''){ return decodeXml(value).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); }
 function textOf(post){ return [post.title||'',post.selftext||''].join('\n').trim(); }
-function searchResults(xml){
-  const out=[];
-  for(const match of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)){
-    const item=match[1];
-    const title=decodeXml(item.match(/<title>([\s\S]*?)<\/title>/)?.[1]||'');
-    const link=decodeXml(item.match(/<link>([\s\S]*?)<\/link>/)?.[1]||'').trim();
-    const description=stripHtml(item.match(/<description>([\s\S]*?)<\/description>/)?.[1]||'');
-    if(link) out.push({title,link,description});
-  }
-  return out;
+function ageOf(text){ const m=text.match(ageRe); return m?m[1]:null; }
+function locationOf(text){
+  const m=text.match(/\b(?:based in|living in|live in|from)\s+([A-Z][A-Za-z .,'-]{2,60})(?:[.\n,]|$)/);
+  return m?m[1].trim():null;
 }
-async function readerText(url){
-  const r=await fetch('https://r.jina.ai/'+url,{headers:{'User-Agent':UA,'Accept':'text/plain'}});
-  if(!r.ok) throw new Error('JINA_READER_'+r.status);
-  return await r.text();
-}
+
 function rssPosts(xml,sourceName){
   const out=[];
   for(const match of xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)){
@@ -79,36 +47,26 @@ function rssPosts(xml,sourceName){
     const href=decodeXml(entry.match(/<link[^>]+href="([^"]+)"/)?.[1]||'');
     const id=(href.match(/\/comments\/([^/]+)/)||[])[1];
     if(!id||!href) continue;
-    out.push({id,title,selftext:content,permalink:new URL(href).pathname,subreddit:sourceName,over_18:false,removed_by_category:null,author:'public-rss'});
+    out.push({
+      id,title,selftext:content,permalink:new URL(href).pathname,
+      subreddit:sourceName,over_18:false,removed_by_category:null,author:'public-rss'
+    });
   }
   return out;
 }
-function ageOf(text){ const m=text.match(ageRe); return m?m[1]:null; }
-function locationOf(text){
-  const m=text.match(/\b(?:based in|living in|live in|from)\s+([A-Z][A-Za-z .,'-]{2,60})(?:[.\n,]|$)/);
-  return m?m[1].trim():null;
-}
+
 function candidate(post){
   const body=textOf(post);
   if(!male.test(body)||!explicitArrangement.test(body)||bad.test(body)) return null;
   const hasFamily=family.test(body), hasFinancial=financial.test(body);
   if(!hasFamily||!hasFinancial) return null;
-  const url='https://www.reddit.com'+post.permalink;
+
   const age=ageOf(body);
   const loc=locationOf(body);
-  const facts={
-    public_post:true,
-    explicit_arrangement:true,
-    family_signal:hasFamily,
-    financial_or_career_signal:hasFinancial,
-    reddit_post_id:post.id,
-    subreddit:post.subreddit,
-    observed_utc:new Date().toISOString()
-  };
   return {
     candidate_key:'HUSBAND:REDDIT:'+post.id,
     display_name:[age?age+'M':null,loc].filter(Boolean).join(' — ')||'Public Reddit candidate',
-    source_url:url,
+    source_url:'https://www.reddit.com'+post.permalink,
     source_system:'REDDIT_PUBLIC',
     public_age:age,
     public_location:loc,
@@ -117,7 +75,15 @@ function candidate(post){
     family_fit_status:'UNKNOWN_ASK',
     platonic_practical_fit:'EXPLICIT',
     red_flags:[],
-    verified_facts:facts,
+    verified_facts:{
+      public_post:true,
+      explicit_arrangement:true,
+      family_signal:true,
+      financial_or_career_signal:true,
+      reddit_post_id:post.id,
+      subreddit:post.subreddit,
+      observed_utc:new Date().toISOString()
+    },
     owner_questions:[
       'Are six children and a blended household compatible with what you want?',
       'What does financial/provider stability mean in practice for you?',
@@ -131,6 +97,25 @@ function candidate(post){
     last_verified_at:new Date().toISOString(),
     updated_at:new Date().toISOString()
   };
+}
+
+async function fetchPosts(){
+  try{
+    const rss=await fetch(SOURCE.rss,{headers:{'User-Agent':UA,'Accept':'application/atom+xml,application/rss+xml,text/xml'}});
+    if(rss.ok) return {transport:'RSS',posts:rssPosts(await rss.text(),SOURCE.name)};
+    console.warn('rss source unavailable',SOURCE.name,rss.status);
+  }catch(e){ console.warn('rss source failure',SOURCE.name,String(e.message).slice(0,300)); }
+
+  try{
+    const r=await fetch(SOURCE.json,{headers:{'User-Agent':UA,'Accept':'application/json'}});
+    if(r.ok){
+      const j=await r.json();
+      return {transport:'JSON',posts:(j?.data?.children||[]).map(child=>child?.data).filter(Boolean)};
+    }
+    console.warn('json source unavailable',SOURCE.name,r.status);
+  }catch(e){ console.warn('json source failure',SOURCE.name,String(e.message).slice(0,300)); }
+
+  throw new Error('NO_PUBLIC_CANDIDATE_SOURCE_REACHABLE');
 }
 
 async function supabase(path,opts={}){
@@ -150,91 +135,27 @@ async function supabase(path,opts={}){
 }
 
 async function main(){
+  const {transport,posts}=await fetchPosts();
   const found=new Map();
-  let successfulSources=0;
-  for(const source of SOURCES){
-    let posts=[];
-    let sourceWorked=false;
-    try{
-      const rss=await fetch(source.rss,{headers:{'User-Agent':UA,'Accept':'application/atom+xml,application/rss+xml,text/xml'}});
-      if(rss.ok){
-        posts=rssPosts(await rss.text(),source.name);
-        sourceWorked=true;
-      } else {
-        console.warn('rss source unavailable',source.name,rss.status);
-      }
-    }catch(e){ console.warn('rss source failure',source.name,String(e.message).slice(0,300)); }
 
-    if(!sourceWorked){
-      try{
-        const r=await fetch(source.json,{headers:{'User-Agent':UA,'Accept':'application/json'}});
-        if(r.ok){
-          const j=await r.json();
-          posts=(j?.data?.children||[]).map(child=>child?.data).filter(Boolean);
-          sourceWorked=true;
-        } else {
-          console.warn('json source unavailable',source.name,r.status);
-        }
-      }catch(e){ console.warn('json source failure',source.name,String(e.message).slice(0,300)); }
-    }
-
-    if(!sourceWorked) continue;
-    successfulSources++;
-    for(const post of posts){
-      if(!post||post.over_18||post.removed_by_category||post.author==='[deleted]') continue;
-      const c=candidate(post);
-      if(c) found.set(c.candidate_key,c);
-    }
+  for(const post of posts){
+    if(!post||post.over_18||post.removed_by_category||post.author==='[deleted]') continue;
+    const c=candidate(post);
+    if(c) found.set(c.candidate_key,c);
   }
-  const discoveredUrls=new Map();
-  for(const feed of SEARCH_FEEDS){
-    try{
-      const r=await fetch(feed,{headers:{'User-Agent':UA,'Accept':'application/rss+xml,text/xml'}});
-      if(!r.ok){ console.warn('search feed unavailable',r.status); continue; }
-      successfulSources++;
-      const results=searchResults(await r.text());
-      if(DRY_RUN) console.log(JSON.stringify({search_feed:feed,result_count:results.length,sample:results.slice(0,5)}));
-      for(const item of results){
-        if(!/^https:\/\/(?:www\.)?reddit\.com\/r\//i.test(item.link)) continue;
-        if(!/\/comments\//.test(item.link)) continue;
-        discoveredUrls.set(item.link,item);
-      }
-    }catch(e){ console.warn('search feed failure',String(e.message).slice(0,300)); }
-  }
-
-  if(DRY_RUN) console.log(JSON.stringify({discovered_reddit_urls:discoveredUrls.size,urls:[...discoveredUrls.keys()].slice(0,12)}));
-  let readerPages=0;
-  for(const [url,item] of discoveredUrls){
-    if(readerPages>=MAX_READER_PAGES) break;
-    try{
-      const body=await readerText(url);
-      readerPages++;
-      const id=(url.match(/\/comments\/([^/]+)/)||[])[1];
-      if(!id) continue;
-      const post={
-        id,
-        title:item.title,
-        selftext:body.slice(0,12000),
-        permalink:new URL(url).pathname,
-        subreddit:'LavenderMarriageWorld',
-        over_18:false,
-        removed_by_category:null,
-        author:'public-reader'
-      };
-      const c=candidate(post);
-      if(c) found.set(c.candidate_key,c);
-    }catch(e){ console.warn('reader failure',url,String(e.message).slice(0,200)); }
-  }
-
-  if(successfulSources===0) throw new Error('NO_PUBLIC_CANDIDATE_SOURCE_REACHABLE');
 
   if(DRY_RUN){
     console.log(JSON.stringify({
       status:'DRY_RUN_COMPLETED',
-      public_sources:SOURCES.length+SEARCH_FEEDS.length,
-      reachable_sources:successfulSources,
+      source:SOURCE.name,
+      transport,
+      scanned_posts:posts.length,
       qualified_candidates:found.size,
-      candidates:[...found.values()].map(c=>({candidate_key:c.candidate_key,source_url:c.source_url,display_name:c.display_name})),
+      candidates:[...found.values()].map(c=>({
+        candidate_key:c.candidate_key,
+        source_url:c.source_url,
+        display_name:c.display_name
+      })),
       production_write:false,
       outreach_authorized:false
     }));
@@ -258,8 +179,9 @@ async function main(){
 
   console.log(JSON.stringify({
     status:'COMPLETED',
-    public_sources:SOURCES.length+SEARCH_FEEDS.length,
-    reachable_sources:successfulSources,
+    source:SOURCE.name,
+    transport,
+    scanned_posts:posts.length,
     qualified_candidates:found.size,
     upserted,
     hq_refresh:refreshed,
