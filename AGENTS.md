@@ -2,6 +2,8 @@
 
 This repository is the production application for DANI DECLARES LLC. Multiple AI assistants and human contributors may work on it. This is the shared engineering contract.
 
+Before repository/project work, also read `docs/governance/DANI_REPOSITORY_RUNTIME_AUTHORITY_MAP_2026-10-03.md` for canonical vs historical repo/runtime roles.
+
 ## Non-overwrite protocol
 1. main is production authority. Never treat a stale local copy, chat transcript, generated paste, or cached tool result as newer than GitHub main.
 2. Read before write. Before editing a file, fetch the current version and check open pull requests that touch the same file or subsystem.
