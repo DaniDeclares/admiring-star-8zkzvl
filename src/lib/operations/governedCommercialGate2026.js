@@ -61,7 +61,10 @@ function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityRe
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
   if (offer.fulfillmentGateStatus !== 'READY') return { eligible: false, reason: 'FULFILLMENT_NOT_READY', price: null };
   if (isQuoteRequired(offer)) return { eligible: false, reason: 'QUOTE_REQUIRED', price: null };
-  if (channel === 'CH02' && QUOTE_REQUIRED_MODELS.has(String(channelPricingType || '').toUpperCase())) return { eligible: false, reason: 'CH02_CHANNEL_QUOTE_REQUIRED', price: null };
+  if (['CH02','CH03','CH04','CH05'].includes(channel)) {
+    if (!channelPricingType) return { eligible: false, reason: `${channel}_CHANNEL_PRICING_NOT_LOCKED`, price: null };
+    if (QUOTE_REQUIRED_MODELS.has(String(channelPricingType).toUpperCase())) return { eligible: false, reason: `${channel}_CHANNEL_QUOTE_REQUIRED`, price: null };
+  }
   const economics = economicGateFromOffer(offer);
   if (!economics.cleared) return { eligible: false, reason: economics.reason, price: null, marginPercent: economics.marginPercent };
   if (!channel) return { eligible: false, reason: 'CHANNEL_REQUIRED', price: null };
@@ -89,6 +92,9 @@ async function implementation() {
 async function getGovernedCommercialOffer(...args) {
   return (await implementation()).getGovernedCommercialOffer(...args);
 }
+async function evaluateChannelGovernanceDecision(...args) {
+  return (await implementation()).evaluateChannelGovernanceDecision(...args);
+}
 async function getChannelGovernanceDecision(...args) {
   return (await implementation()).getChannelGovernanceDecision(...args);
 }
@@ -110,6 +116,7 @@ module.exports = {
   isQuoteRequired,
   getChannelFromRequest,
   getGovernedCommercialOffer,
+  evaluateChannelGovernanceDecision,
   getChannelGovernanceDecision,
   resolveGovernedChannelPrice,
   resolveVerifiedCommunity,

@@ -76,35 +76,47 @@ export function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCom
   if (!offer || isQuoteRequired(offer)) return null;
   let price = offer.baseCustomerPrice == null ? null : Number(offer.baseCustomerPrice);
   if (!Number.isFinite(price) || price <= 0) return null;
-  // CH01-B is the apartment/complex-resident subchannel gated behind a real
-  // property invitation (see checkoutEligibility above) -- the discount
-  // belongs to that verified tier, not the unverified general-public CH01-A
-  // tier. This previously checked CH01-A, which handed every unverified
-  // shopper the discount while verified community residents got none.
   if (channel === 'CH01' && subchannel === 'CH01-B' && isVerifiedCommunityResident && offer.residentDiscountEligible) {
     price = Math.round(price * 0.85 * 100) / 100;
   }
   return money(price);
 }
 
+export function evaluateChannelGovernanceDecision({ channel, adjudication, availability, pricing } = {}) {
+  const channelCode=String(channel||'').trim().toUpperCase();
+  if (!['CH02','CH03','CH04','CH05'].includes(channelCode)) {
+    return {allowed:false,reason:'CHANNEL_GOVERNANCE_NOT_SUPPORTED'};
+  }
+  if (!['ACTIVE','ELIGIBLE'].includes(String(availability?.eligibility_status||'').toUpperCase())) {
+    return {allowed:false,reason:channelCode+'_CHANNEL_NOT_AVAILABLE'};
+  }
+  if (channelCode!=='CH02') {
+    return {allowed:true,reason:channelCode+'_GOVERNANCE_CLEARED',frontDoor:null,pricingType:pricing?.pricing_type||null};
+  }
+  if (!adjudication) return {allowed:false,reason:'CHANNEL_GOVERNANCE_NOT_FOUND'};
+  if (adjudication.disposition!=='FRONT_DOOR_CANDIDATE') return {allowed:false,reason:'CH02_ADJUDICATION_'+adjudication.disposition};
+  if (adjudication.cross_channel_review) return {allowed:false,reason:'CH02_CROSS_CHANNEL_REVIEW'};
+  if (!pricing) return {allowed:false,reason:'CH02_CHANNEL_PRICING_NOT_LOCKED'};
+  return {allowed:true,reason:'CH02_GOVERNANCE_CLEARED',frontDoor:adjudication.proposed_front_door,pricingType:pricing.pricing_type||null};
+}
+
 export async function getChannelGovernanceDecision(serviceId, channel) {
   if (!serviceId || !channel) return { allowed:false, reason:'CHANNEL_REQUIRED' };
+  const channelCode=String(channel).trim().toUpperCase();
   const url=process.env.SUPABASE_URL||process.env.REACT_APP_SUPABASE_URL; const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return { allowed:false, reason:'COMMERCIAL_DATABASE_UNAVAILABLE' };
   const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
   const { data: offer }=await admin.from('dd_governed_service_offers').select('runtime_service_id').eq('canonical_sku',serviceId).neq('commercial_offer_status','DO_NOT_SELL').limit(1).maybeSingle();
   if (!offer) return { allowed:false, reason:'CHANNEL_GOVERNANCE_NOT_FOUND' };
-  const [{data:row},{data:availability},{data:pricing}]=await Promise.all([
-    admin.from('dd_ch02_service_adjudication').select('disposition,proposed_front_door,cross_channel_review').eq('channel_code',channel).eq('sku',serviceId).maybeSingle(),
-    admin.from('dd_service_channel_availability').select('eligibility_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channel).maybeSingle(),
-    admin.from('dd_service_pricing_rules').select('pricing_type,base_price_cents,status,lock_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channel).eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle()
+  const adjudicationQuery=channelCode==='CH02'
+    ? admin.from('dd_ch02_service_adjudication').select('disposition,proposed_front_door,cross_channel_review').eq('channel_code','CH02').eq('sku',serviceId).maybeSingle()
+    : Promise.resolve({data:null});
+  const [{data:adjudication},{data:availability},{data:pricing}]=await Promise.all([
+    adjudicationQuery,
+    admin.from('dd_service_channel_availability').select('eligibility_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channelCode).maybeSingle(),
+    admin.from('dd_service_pricing_rules').select('pricing_type,base_price_cents,status,lock_status').eq('service_id',offer.runtime_service_id).eq('channel_code',channelCode).eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle()
   ]);
-  if (!row) return {allowed:false,reason:'CHANNEL_GOVERNANCE_NOT_FOUND'};
-  if (row.disposition!=='FRONT_DOOR_CANDIDATE') return {allowed:false,reason:'CH02_ADJUDICATION_'+row.disposition};
-  if (row.cross_channel_review) return {allowed:false,reason:'CH02_CROSS_CHANNEL_REVIEW'};
-  if (!['ACTIVE','ELIGIBLE'].includes(String(availability?.eligibility_status||'').toUpperCase())) return {allowed:false,reason:'CH02_CHANNEL_NOT_AVAILABLE'};
-  if (!pricing) return {allowed:false,reason:'CH02_CHANNEL_PRICING_NOT_LOCKED'};
-  return {allowed:true,reason:'CH02_GOVERNANCE_CLEARED',frontDoor:row.proposed_front_door,pricingType:pricing.pricing_type||null};
+  return evaluateChannelGovernanceDecision({channel:channelCode,adjudication,availability,pricing});
 }
 export async function resolveGovernedChannelPrice(offer,{channel,subchannel,isVerifiedCommunityResident}={}) {
   if (!offer) return null;
@@ -113,6 +125,7 @@ export async function resolveGovernedChannelPrice(offer,{channel,subchannel,isVe
   const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
   if(channel==='CH01'&&subchannel==='CH01-B'){const {data}=await admin.from('dd_service_market_pricing_rules').select('price_override_cents').eq('service_id',offer.runtimeServiceId).eq('channel_code','CH01').eq('subchannel_code','CH01-B').eq('status','ACTIVE').gt('price_override_cents',0).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();const cents=Number(data?.price_override_cents||0);return Number.isFinite(cents)&&cents>0?money(cents/100):null;}
   if(channel==='CH01'&&subchannel==='CH01-A'){const {data}=await admin.from('dd_service_pricing_rules').select('base_price_cents').eq('service_id',offer.runtimeServiceId).eq('channel_code','CH01').eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();const cents=Number(data?.base_price_cents||0);return Number.isFinite(cents)&&cents>0?money(cents/100):null;}
+  if(['CH02','CH03','CH04','CH05'].includes(channel)){const {data}=await admin.from('dd_service_pricing_rules').select('pricing_type,base_price_cents').eq('service_id',offer.runtimeServiceId).eq('channel_code',channel).eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();if(!data||QUOTE_REQUIRED_MODELS.has(String(data.pricing_type||'').toUpperCase()))return null;const cents=Number(data.base_price_cents||0);return Number.isFinite(cents)&&cents>0?money(cents/100):null;}
   return resolveGovernedPrice(offer,{channel,subchannel,isVerifiedCommunityResident});
 }
 export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType, hasLockedActivePricing, hasLockedActiveSubchannelPricing } = {}) {
@@ -121,8 +134,9 @@ export function checkoutEligibility(offer, { channel, subchannel, isVerifiedComm
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
   if (offer.fulfillmentGateStatus !== 'READY') return { eligible: false, reason: 'FULFILLMENT_NOT_READY', price: null };
   if (isQuoteRequired(offer)) return { eligible: false, reason: 'QUOTE_REQUIRED', price: null };
-  if (channel === 'CH02' && QUOTE_REQUIRED_MODELS.has(String(channelPricingType || '').toUpperCase())) {
-    return { eligible: false, reason: 'CH02_CHANNEL_QUOTE_REQUIRED', price: null };
+  if (['CH02','CH03','CH04','CH05'].includes(channel)) {
+    if (!channelPricingType) return { eligible: false, reason: `${channel}_CHANNEL_PRICING_NOT_LOCKED`, price: null };
+    if (QUOTE_REQUIRED_MODELS.has(String(channelPricingType).toUpperCase())) return { eligible: false, reason: `${channel}_CHANNEL_QUOTE_REQUIRED`, price: null };
   }
   const economics = economicGateFromOffer(offer);
   if (!economics.cleared) return { eligible: false, reason: economics.reason, price: null, marginPercent: economics.marginPercent };
@@ -130,12 +144,6 @@ export function checkoutEligibility(offer, { channel, subchannel, isVerifiedComm
   if (channel === 'CH01' && !['CH01-A', 'CH01-B'].includes(subchannel)) {
     return { eligible: false, reason: 'RESIDENT_SUBCHANNEL_REQUIRED', price: null };
   }
-  // CH01-B (apartment/complex resident discount) is only ever eligible for
-  // direct checkout once the caller has proven community membership -- i.e.
-  // dd_portal_identities.organization_id was set by consuming a real property
-  // invite (see dd_consume_apartment_resident_invite_impl), never by a client
-  // simply claiming it. isVerifiedCommunityResident must be derived server-side
-  // from that identity, not trusted from an unauthenticated request body.
   if (channel === 'CH01' && subchannel === 'CH01-B' && !isVerifiedCommunityResident) {
     return { eligible: false, reason: 'COMMUNITY_RESIDENT_VERIFICATION_REQUIRED', price: null };
   }
@@ -157,14 +165,6 @@ export function checkoutEligibility(offer, { channel, subchannel, isVerifiedComm
   return { eligible: true, reason: 'READY_FOR_DIRECT_CHECKOUT', price: resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityResident }), marginPercent: economics.marginPercent };
 }
 
-// Shared by every endpoint that needs to know if the caller is a verified
-// CH01-B (apartment/complex resident) shopper. These endpoints are reachable
-// without an account (a shopper can price-check before signing up), so the
-// discount can never be taken on the client's word -- it must be re-derived
-// from a real session and dd_portal_identities.organization_id, which is only
-// ever set by consuming a real property invite. No bearer token, an invalid
-// one, or no matching verified identity all mean "not verified", never an
-// error thrown back to the caller.
 export async function resolveVerifiedCommunity(req) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -182,14 +182,6 @@ export async function resolveVerifiedCommunity(req) {
 
 export function getChannelFromRequest(request) {
   const routing = request?.property_details?.operationsRouting || {};
-  // buildIntakeRoutingContext() stores the OPERATIONS_CHANNELS-style value
-  // (e.g. 'B2C') under `channel`, not `channelType` -- there is no
-  // `channelType` key on this object. normalizeChannel's first argument is
-  // the one it looks up in INTAKE_TO_CHANNEL, so it must be `routing.channel`
-  // here, not a nonexistent `routing.channelType`. Passing them the old way
-  // meant this always fell through to the raw unmapped value (e.g. 'B2C'
-  // instead of 'CH01'), so create-checkout-session's `channel !== 'CH01'`
-  // check rejected every single request unconditionally.
   return normalizeChannel(routing.channel, routing.channel);
 }
 
