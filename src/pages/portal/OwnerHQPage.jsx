@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabaseClient.js';
 import { capture } from '../../lib/posthogAnalytics.js';
 import { OWNER_CONNECTED_SYSTEMS, OWNER_PRIORITY_LINKS } from '../../config/ownerConnectedSystems.js';
 import { ownerAttentionNow, ownerAttentionDeferred } from '../../lib/operations/ownerAttentionRank2026.js';
+import { isProspectingDue } from '../../lib/operations/ownerHqTruth2026.js';
 import './PortalWorkspacePage.css';
 
 const STAFF_ROLES = new Set(['admin', 'owner', 'staff_admin', 'staff']);
@@ -177,12 +178,9 @@ function OwnerHq({ session }) {
     const businessOwnerAttention = ownerAttentionNow(businessAttentionAll);
     const deferredOwnerAttention = ownerAttentionDeferred(businessAttentionAll);
     const now = new Date(); now.setHours(23,59,59,999);
-    const salesDueRows = salesQueue.filter(item => {
-      if (String(item.disposition || '').toUpperCase() === 'PAYMENT_SUCCEEDED') return false;
-      if (!item.next_action_date) return false;
-      const due = new Date(item.next_action_date + 'T23:59:59');
-      return !Number.isNaN(due.getTime()) && due <= now;
-    }).sort((a,b) => Number(b.priority_score || 0) - Number(a.priority_score || 0));
+    const salesDueRows = salesQueue
+      .filter(item => isProspectingDue(item, now))
+      .sort((a,b) => Number(b.priority_score || 0) - Number(a.priority_score || 0));
     const paidServiceRows = salesQueue.filter(item => String(item.disposition || '').toUpperCase() === 'PAYMENT_SUCCEEDED');
     return {
       openRequests: openRequests.length,
@@ -376,10 +374,10 @@ function OwnerHq({ session }) {
         <a className="portal-summary-tile" href="#research-engine"><strong>{metrics.researchFailures}</strong><span>Source check failures</span></a>
       </div>
       <div style={{ marginTop: 14 }}>
-        {(data?.researchPrograms || []).map(program => <div className="portal-row" key={program.program_key}>
-          <div><strong>{program.program_name}</strong><small>{program.domain} · {program.objective}</small><small>Green rule: {program.green_rule}</small></div>
-          <span className="portal-pill">{program.release_blocked ? 'RELEASE BLOCKED' : program.status}</span>
-        </div>)}
+        <div className="portal-row">
+          <div><strong>{metrics.researchPrograms} governed research programs</strong><small>Program-level release gates remain authoritative in the research workspace and do not automatically become owner actions.</small></div>
+          <span className="portal-pill">SUMMARY</span>
+        </div>
         {(data?.researchWork || []).slice(0, 12).map(item => <div className="portal-row" key={item.id}>
           <div><strong>{item.question}</strong><small>{item.priority} · {item.status} · {item.metadata?.partner || item.metadata?.jurisdiction || item.metadata?.gate || 'DANI'}</small><small>Next: {item.next_action || 'Continue evidence collection'}</small></div>
           <span className="portal-pill">{item.status}</span>
