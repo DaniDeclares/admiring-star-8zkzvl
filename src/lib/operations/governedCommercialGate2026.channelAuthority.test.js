@@ -1,4 +1,18 @@
-const { evaluateChannelGovernanceDecision } = require('./governedCommercialGate2026');
+const { checkoutEligibility, evaluateChannelGovernanceDecision } = require('./governedCommercialGate2026');
+
+const readyOffer = {
+  releaseState: 'LIVE_READY',
+  blockingGate: null,
+  commercialOfferStatus: 'SELL_NOW',
+  fulfillmentGateStatus: 'READY',
+  pricingType: 'FIXED',
+  baseCustomerPrice: 125,
+  internalCost: '$50',
+  marginEconomics: 'margin 60%',
+  channelAvailabilityCount: 1,
+  pricedChannelCount: 1,
+  authorizedProviderCapabilityCount: 1,
+};
 
 describe('evaluateChannelGovernanceDecision', () => {
   test.each(['CH03', 'CH04', 'CH05'])(
@@ -71,4 +85,38 @@ describe('evaluateChannelGovernanceDecision', () => {
       reason: 'CHANNEL_GOVERNANCE_NOT_SUPPORTED',
     });
   });
+});
+
+describe('non-CH01 direct checkout pricing', () => {
+  test.each(['CH02', 'CH03', 'CH04', 'CH05'])(
+    '%s keeps intake open but blocks direct checkout without exact locked channel pricing',
+    channel => {
+      expect(checkoutEligibility(readyOffer, { channel, channelPricingType: null })).toEqual({
+        eligible: false,
+        reason: `${channel}_CHANNEL_PRICING_NOT_LOCKED`,
+        price: null,
+      });
+    }
+  );
+
+  test.each(['CH02', 'CH03', 'CH04', 'CH05'])(
+    '%s routes quote-only exact channel pricing away from direct checkout',
+    channel => {
+      expect(checkoutEligibility(readyOffer, { channel, channelPricingType: 'QUOTE' })).toEqual({
+        eligible: false,
+        reason: `${channel}_CHANNEL_QUOTE_REQUIRED`,
+        price: null,
+      });
+    }
+  );
+
+  test.each(['CH03', 'CH04', 'CH05'])(
+    '%s permits the direct-checkout gate only when exact channel pricing is a direct-price model',
+    channel => {
+      expect(checkoutEligibility(readyOffer, { channel, channelPricingType: 'FIXED' })).toMatchObject({
+        eligible: true,
+        reason: 'READY_FOR_DIRECT_CHECKOUT',
+      });
+    }
+  );
 });
