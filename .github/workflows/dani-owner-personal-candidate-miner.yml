@@ -1,0 +1,52 @@
+name: DANI Owner Personal Candidate Miner
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/dani-owner-personal-candidate-miner.mjs'
+      - '.github/workflows/dani-owner-personal-candidate-miner.yml'
+      - 'src/lib/operations/ownerPersonalCandidateMiner.test.js'
+  workflow_dispatch: {}
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dani-owner-personal-candidate-miner
+  cancel-in-progress: false
+
+jobs:
+  dry-run:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify public-source discovery without writes
+        run: node scripts/dani-owner-personal-candidate-miner.mjs --dry-run
+
+  mine:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Mine public partner candidates
+        env:
+          PRODUCTION_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          PRODUCTION_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/dani-owner-personal-candidate-miner.mjs
