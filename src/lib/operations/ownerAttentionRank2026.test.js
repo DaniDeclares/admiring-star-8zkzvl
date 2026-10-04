@@ -5,21 +5,23 @@ const item = (id, priority, governor) => ({ id, priority, metadata: governor ? {
 describe('ownerAttentionRank2026', () => {
   test('orders evaluated items by governor rank, not by priority label', () => {
     const rows = [
-      item('low-value-p0', 'P0', { state: 'ACTIONABLE_NOW', rank_score: 1007, needs_owner_now: true }),
-      item('turn-350', 'P1', { state: 'ACTIONABLE_NOW', rank_score: 1290, needs_owner_now: true }),
+      item('low-value-p0', 'P0', { state: 'ACTIONABLE_NOW', rank_score: 1007, needs_owner_now: false }),
+      item('turn-350', 'P1', { state: 'ACTIONABLE_NOW', rank_score: 1290, needs_owner_now: false }),
       item('netlify', 'P0', { state: 'OWNER_ONLY', rank_score: 1000, needs_owner_now: true }),
     ];
-    expect(ownerAttentionNow(rows).map(r => r.id)).toEqual(['turn-350', 'low-value-p0', 'netlify']);
+    expect(ownerAttentionNow(rows).map(r => r.id)).toEqual(['netlify']);
+    expect(ownerAttentionDeferred(rows).map(r => r.id)).toEqual(['turn-350', 'low-value-p0']);
   });
 
   test('waiting, unproven and suppressed items leave the owner list but are not lost', () => {
     const rows = [
       item('rpm', 'P1', { state: 'WAITING', rank_score: 30, needs_owner_now: false }),
       item('dnc', 'P0', { state: 'BLOCKED', rank_score: 0, needs_owner_now: false }),
-      item('turn', 'P1', { state: 'ACTIONABLE_NOW', rank_score: 1290, needs_owner_now: true }),
+      item('turn', 'P1', { state: 'ACTIONABLE_NOW', rank_score: 1290, needs_owner_now: false }),
+      item('owner-only', 'P0', { state: 'OWNER_ONLY', rank_score: 1000, needs_owner_now: true }),
     ];
-    expect(ownerAttentionNow(rows).map(r => r.id)).toEqual(['turn']);
-    expect(ownerAttentionDeferred(rows).map(r => r.id)).toEqual(['rpm', 'dnc']);
+    expect(ownerAttentionNow(rows).map(r => r.id)).toEqual(['owner-only']);
+    expect(ownerAttentionDeferred(rows).map(r => r.id)).toEqual(['turn', 'rpm', 'dnc']);
   });
 
   test('items without a governor evaluation stay visible in their original order', () => {
@@ -32,7 +34,7 @@ describe('ownerAttentionRank2026', () => {
     const rows = [
       { ...item('old', 'P0', { state: 'STALE', rank_score: 0, needs_owner_now: false }), status: 'SUPERSEDED' },
       { ...item('done', 'P0', { state: 'ACTIONABLE_NOW', rank_score: 900, needs_owner_now: true }), status: 'RESOLVED' },
-      { ...item('live', 'P1', { state: 'ACTIONABLE_NOW', rank_score: 500, needs_owner_now: true }), status: 'OPEN' },
+      { ...item('live', 'P1', { state: 'OWNER_ONLY', rank_score: 500, needs_owner_now: true }), status: 'OPEN' },
     ];
     expect(ownerAttentionNow(rows).map(r => r.id)).toEqual(['live']);
     expect(ownerAttentionDeferred(rows)).toEqual([]);
