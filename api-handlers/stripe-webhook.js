@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { reconcileRecurringInvoice } from '../src/lib/operations/recurringServiceLifecycle2026.js';
 import prisma from '../lib/prisma.js';
 import { nextStateAfterPayment, assertTransition } from '../src/lib/operations/workflowStateMachines2026.js';
 import { reconcileStripePayment } from '../src/lib/operations/accountingReconciliation2026.js';
@@ -16,7 +17,7 @@ async function getRawBody(req){const chunks=[];for await(const chunk of req)chun
 function readChannel(propertyDetails){return propertyDetails?.operationsRouting?.channelType||propertyDetails?.operationsRouting?.channel||null;}
 function money(value){return Number(Number(value||0).toFixed(2));}
 const GOOGLE_ROUTES_ENDPOINT='https://routes.googleapis.com/directions/v2:computeRoutes';
-async function finalizeProposedProviderRoutes(db,estimateId){
+export async function finalizeProposedProviderRoutes(db,estimateId){
  const key=process.env.GOOGLE_MAPS_ROUTES_API_KEY;
  if(!estimateId)return {resolved:0,held:'ESTIMATE_REQUIRED'};
  if(!key){console.warn('Provider route offers held: GOOGLE_MAPS_ROUTES_API_KEY is not configured.');return {resolved:0,held:'ROUTES_API_KEY_MISSING'};}
@@ -48,12 +49,13 @@ export default async function handler(req,res){
  try{const rawBody=await getRawBody(req);event=stripe.webhooks.constructEvent(rawBody,req.headers['stripe-signature'],webhookSecret);}catch(err){console.error('Stripe Webhook Signature Verification Failed:',err.message);return res.status(400).send('Webhook Signature Error');}
  const subscriptionEventTypes=new Set(['customer.subscription.updated','customer.subscription.deleted']);
  if(subscriptionEventTypes.has(event.type)){
-  const subscription=event.data.object;
   try{
+   const subscription=await stripe.subscriptions.retrieve(event.data.object.id);
    await prisma.$executeRaw`
     update public.dd_service_subscriptions
     set subscription_status=${String(subscription.status||event.type).toUpperCase()},
         stripe_customer_id=${typeof subscription.customer==='string'?subscription.customer:subscription.customer?.id||null},
+        cancel_at_period_end=${Boolean(subscription.cancel_at_period_end)},
         current_period_end=${subscription.current_period_end?new Date(subscription.current_period_end*1000).toISOString():null}::timestamptz,
         canceled_at=${subscription.canceled_at?new Date(subscription.canceled_at*1000).toISOString():event.type==='customer.subscription.deleted'?new Date().toISOString():null}::timestamptz,
         updated_at=now()
@@ -73,41 +75,35 @@ export default async function handler(req,res){
     limit 1
    `;
    let row=localInvoice?.[0];
-   if(!row&&invoice.subscription){
-    const subscriptionId=typeof invoice.subscription==='string'?invoice.subscription:invoice.subscription?.id;
+   if(!row&&(invoice.subscription||invoice.parent?.subscription_details?.subscription)){
+    const invoiceSubscription=invoice.subscription||invoice.parent?.subscription_details?.subscription;
+    const subscriptionId=typeof invoiceSubscription==='string'?invoiceSubscription:invoiceSubscription?.id;
+    const invoiceMetadata=invoice.subscription_details?.metadata||invoice.parent?.subscription_details?.metadata||{};
     const subRows=await prisma.$queryRaw`
-      select id,service_request_id,estimate_id,canonical_sku,first_payment_verified_at
-      from public.dd_service_subscriptions where stripe_subscription_id=${subscriptionId} limit 1
+      select * from public.dd_service_subscriptions
+      where stripe_subscription_id=${subscriptionId}
+      or (stripe_subscription_id is null and service_request_id::text=${invoiceMetadata.request_id||''} and canonical_sku=${invoiceMetadata.canonical_sku||''}) limit 1
     `;
     const sub=subRows?.[0];
     if(sub){
-     await prisma.$executeRaw`
-       update public.dd_service_subscriptions
-       set latest_stripe_invoice_id=${invoice.id},
-           stripe_customer_id=${typeof invoice.customer==='string'?invoice.customer:invoice.customer?.id||null},
-           subscription_status=${event.type==='invoice.paid'?'ACTIVE_PAID':event.type==='invoice.payment_failed'?'PAYMENT_FAILED':String(invoice.status||'OPEN').toUpperCase()},
-           first_payment_verified_at=case when ${event.type}='invoice.paid' then coalesce(first_payment_verified_at,now()) else first_payment_verified_at end,
-           updated_at=now()
-       where id=${sub.id}::uuid
-     `;
-     if(event.type==='invoice.paid'&&!sub.first_payment_verified_at){
-      const paidRequest=await prisma.serviceRequest.findUnique({where:{id:sub.service_request_id}});
-      const paidEstimate=sub.estimate_id?await prisma.dd_estimates.findUnique({where:{id:sub.estimate_id}}):null;
-      if(!paidRequest||!paidEstimate)throw new Error('Paid subscription is missing its governed request or estimate.');
-      const expected=money(Number(paidEstimate.estimated_total)),received=money(Number(invoice.amount_paid||0)/100);
-      if(expected<=0||expected!==received)throw new Error('Paid subscription invoice does not match the frozen monthly estimate.');
-      let job=await prisma.dd_jobs.findFirst({where:{service_request_id:paidRequest.id},orderBy:{created_at:'desc'}});
-      if(!job) job=await prisma.dd_jobs.create({data:{estimate_id:paidEstimate.id,lead_id:paidRequest.leadId||null,service_request_id:paidRequest.id,division_slug:paidEstimate.division_slug||'concierge',job_title:paidRequest.service_needed||paidRequest.service_category||'Dani Declares Membership',job_status:'new',location_address:paidRequest.location_address||null,scope_summary:paidRequest.request_details||null}});
-      await prisma.serviceRequest.update({where:{id:paidRequest.id},data:{status:'job_created'}});
-      await prisma.$executeRaw`
-       insert into public.dd_payment_events(provider_event_id,provider_payment_id,request_id,job_id,event_type,payment_status,amount_received,currency,raw_metadata)
-       values(${event.id},${invoice.payment_intent||invoice.id},${paidRequest.id}::uuid,${job.id}::uuid,${event.type},'SUCCEEDED',${received},${invoice.currency||'usd'},${JSON.stringify(invoice.metadata||{})}::jsonb)
-       on conflict(provider_event_id) do nothing
-      `;
-      if(paidEstimate.economics_status==='PASS'&&paidEstimate.active_economics_snapshot_id){ await prisma.$queryRaw`select public.dd_activate_paid_estimate_assignments(${paidEstimate.id}::uuid) as routing`; await finalizeProposedProviderRoutes(prisma,paidEstimate.id); }
+     if(!sub.stripe_subscription_id){
+      await prisma.$executeRaw`update public.dd_service_subscriptions set stripe_subscription_id=${subscriptionId} where id=${sub.id}::uuid and stripe_subscription_id is null`;
+      sub.stripe_subscription_id=subscriptionId;
      }
-     return res.status(200).json({received:true,subscriptionInvoice:true,status:event.type});
+     if(event.type==='invoice.paid'){
+      const liveSubscription=await stripe.subscriptions.retrieve(subscriptionId);
+      sub.currentStripeStatus=String(liveSubscription.status).toUpperCase();
+      sub.cancel_at_period_end=Boolean(liveSubscription.cancel_at_period_end);
+      const recurringOffer=await getGovernedCommercialOffer(sub.canonical_sku);
+      sub.commercialReady=recurringOffer?.releaseState==='LIVE_READY'&&recurringOffer.commercialOfferStatus==='SELL_NOW'&&recurringOffer.fulfillmentGateStatus==='READY';
+      const result=await reconcileRecurringInvoice(prisma,event,sub,finalizeProposedProviderRoutes);
+      return res.status(200).json({received:true,subscriptionInvoice:true,...result});
+     }
+     // Nonpaid/out-of-order invoice notifications never undo verified paid cycles.
+     return res.status(200).json({received:true,subscriptionInvoice:true,fulfillmentDeferred:true});
     }
+    // Stripe does not guarantee delivery order. Retry after checkout binding instead of losing payment.
+    if(event.type==='invoice.paid'&&invoiceMetadata.payment_type==='SUBSCRIPTION'&&invoiceMetadata.request_id)throw new Error('Subscription invoice binding is pending.');
    }
    if(!row)return res.status(200).json({received:true,unmappedInvoice:true});
    const statusMap={
@@ -212,7 +208,7 @@ export default async function handler(req,res){
     update public.dd_service_subscriptions
     set stripe_subscription_id=${subscriptionId},
         stripe_customer_id=${typeof session.customer==='string'?session.customer:session.customer?.id||null},
-        subscription_status='AWAITING_FIRST_INVOICE_PAYMENT',
+        subscription_status=case when first_payment_verified_at is null then 'AWAITING_FIRST_INVOICE_PAYMENT' else subscription_status end,
         updated_at=now()
     where service_request_id=${requestId}::uuid and canonical_sku=${String(session.metadata?.canonical_sku||session.metadata?.service_id||'')}
    `;
