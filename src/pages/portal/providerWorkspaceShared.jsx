@@ -64,6 +64,12 @@ export function useProviderWorkspace() {
       }
 
       const body = await response.json().catch(() => ({}));
+      if (response.status === 401 || response.status === 403) {
+        setSession(null);
+        setSnapshot(null);
+        setError(body.error || 'Your DANI DECLARES session expired. Please sign in again.');
+        return;
+      }
       if (!response.ok || !body.success) {
         throw new Error(body.error || `Portal data could not be loaded (HTTP ${response.status}).`);
       }
