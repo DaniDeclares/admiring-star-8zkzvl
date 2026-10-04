@@ -68,15 +68,35 @@ function OwnerHq({ session }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const didTrackLoad = useRef(false);
+  const pollTimer = useRef(null);
+  const authBlocked = useRef(false);
+
+  const stopPolling = () => {
+    if (pollTimer.current) window.clearInterval(pollTimer.current);
+    pollTimer.current = null;
+  };
 
   const load = async ({ background = false } = {}) => {
+    if (!session?.access_token || authBlocked.current) {
+      stopPolling();
+      setError('Staff session required.');
+      if (!background) setLoading(false);
+      return;
+    }
     if (!background) setLoading(true);
     setError('');
     try {
       const response = await fetch('/api/portal-operations?ownerDashboard=1', {
         headers: { Authorization: 'Bearer ' + session.access_token },
+        cache: 'no-store',
       });
-      const body = await response.json();
+      const body = await response.json().catch(() => ({}));
+      if (response.status === 401 || response.status === 403) {
+        authBlocked.current = true;
+        stopPolling();
+        setError(body.error || 'Your staff session expired. Please sign in again.');
+        return;
+      }
       if (!response.ok || !body.success) throw new Error(body.error || 'Could not load DANI HQ.');
       setData(body);
       if (!didTrackLoad.current) {
@@ -96,7 +116,12 @@ function OwnerHq({ session }) {
     }
   };
 
-  useEffect(() => { load(); const timer = window.setInterval(() => load({ background: true }), 30000); return () => window.clearInterval(timer); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    authBlocked.current = false;
+    load();
+    pollTimer.current = window.setInterval(() => load({ background: true }), 30000);
+    return stopPolling;
+  }, [session?.access_token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const metrics = useMemo(() => {
     const requests = data?.requests || [];
