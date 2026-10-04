@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { isProspectingDue, researchProgramNeedsOwner } from './ownerHqTruth2026.js';
 
 const now = new Date('2026-10-04T23:59:59-04:00');
