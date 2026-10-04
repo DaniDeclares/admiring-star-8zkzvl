@@ -48,7 +48,8 @@ function money(value) {
 }
 
 export function normalizeChannel(channelType, channel) {
-  return INTAKE_TO_CHANNEL[channelType] || String(channel || '').trim();
+  const normalizedType = String(channelType || '').trim().toUpperCase();
+  return INTAKE_TO_CHANNEL[normalizedType] || String(channel || '').trim().toUpperCase();
 }
 
 export async function getGovernedCommercialOffer(serviceId) {
@@ -90,14 +91,15 @@ export function evaluateChannelGovernanceDecision({ channel, adjudication, avail
   if (!['ACTIVE','ELIGIBLE'].includes(String(availability?.eligibility_status||'').toUpperCase())) {
     return {allowed:false,reason:channelCode+'_CHANNEL_NOT_AVAILABLE'};
   }
+  const channelPriceCents=pricing?.base_price_cents == null ? null : Number(pricing.base_price_cents);
   if (channelCode!=='CH02') {
-    return {allowed:true,reason:channelCode+'_GOVERNANCE_CLEARED',frontDoor:null,pricingType:pricing?.pricing_type||null};
+    return {allowed:true,reason:channelCode+'_GOVERNANCE_CLEARED',frontDoor:null,pricingType:pricing?.pricing_type||null,channelPriceCents};
   }
   if (!adjudication) return {allowed:false,reason:'CHANNEL_GOVERNANCE_NOT_FOUND'};
   if (adjudication.disposition!=='FRONT_DOOR_CANDIDATE') return {allowed:false,reason:'CH02_ADJUDICATION_'+adjudication.disposition};
   if (adjudication.cross_channel_review) return {allowed:false,reason:'CH02_CROSS_CHANNEL_REVIEW'};
   if (!pricing) return {allowed:false,reason:'CH02_CHANNEL_PRICING_NOT_LOCKED'};
-  return {allowed:true,reason:'CH02_GOVERNANCE_CLEARED',frontDoor:adjudication.proposed_front_door,pricingType:pricing.pricing_type||null};
+  return {allowed:true,reason:'CH02_GOVERNANCE_CLEARED',frontDoor:adjudication.proposed_front_door,pricingType:pricing.pricing_type||null,channelPriceCents};
 }
 
 export async function getChannelGovernanceDecision(serviceId, channel) {
@@ -128,7 +130,7 @@ export async function resolveGovernedChannelPrice(offer,{channel,subchannel,isVe
   if(['CH02','CH03','CH04','CH05'].includes(channel)){const {data}=await admin.from('dd_service_pricing_rules').select('pricing_type,base_price_cents').eq('service_id',offer.runtimeServiceId).eq('channel_code',channel).eq('status','ACTIVE').eq('lock_status','LOCKED').order('effective_date',{ascending:false}).order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();if(!data||QUOTE_REQUIRED_MODELS.has(String(data.pricing_type||'').toUpperCase()))return null;const cents=Number(data.base_price_cents||0);return Number.isFinite(cents)&&cents>0?money(cents/100):null;}
   return resolveGovernedPrice(offer,{channel,subchannel,isVerifiedCommunityResident});
 }
-export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType, hasLockedActivePricing, hasLockedActiveSubchannelPricing } = {}) {
+export function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType, channelPriceCents, hasLockedActivePricing, hasLockedActiveSubchannelPricing } = {}) {
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
@@ -137,6 +139,10 @@ export function checkoutEligibility(offer, { channel, subchannel, isVerifiedComm
   if (['CH02','CH03','CH04','CH05'].includes(channel)) {
     if (!channelPricingType) return { eligible: false, reason: `${channel}_CHANNEL_PRICING_NOT_LOCKED`, price: null };
     if (QUOTE_REQUIRED_MODELS.has(String(channelPricingType).toUpperCase())) return { eligible: false, reason: `${channel}_CHANNEL_QUOTE_REQUIRED`, price: null };
+    const lockedChannelPriceCents = Number(channelPriceCents);
+    if (!Number.isFinite(lockedChannelPriceCents) || lockedChannelPriceCents <= 0) {
+      return { eligible: false, reason: `${channel}_CHANNEL_PRICE_INVALID`, price: null };
+    }
   }
   const economics = economicGateFromOffer(offer);
   if (!economics.cleared) return { eligible: false, reason: economics.reason, price: null, marginPercent: economics.marginPercent };

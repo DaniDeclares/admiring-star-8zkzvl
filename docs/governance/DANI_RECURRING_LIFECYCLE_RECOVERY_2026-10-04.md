@@ -5,6 +5,7 @@ This change extends the existing paid-first service subscription aggregate and t
 ## Authority checked live
 
 - Source baseline: GitHub `main` at `caa2a65e75b481fa496bf7e0b9ff1db7a2bfc3a3`. Historical PR #560 is now merged. Open PRs #559, #558, #557 and #520 were checked for file overlap; none overlap this change.
+- During publication, `main` advanced to `33ddab6824e3c24613dfad347510d4a31c8ec9f5` with a separate channel-pricing/normalization fix. Its four changed files do not overlap this task; that commit is merged into this branch and the combined code is reverified.
 - Production divisions: 13 rows. Division 01 is **Home, Pet, Plant & Household Support**; Division 02 is **Property, Facilities & Field Operations**. Division 03–13 names follow canonical hydration, not the older 10-division catalog.
 - Canonical channels remain CH01–CH06. Production currently contains CH01–CH05 channel rows, so missing CH06 is runtime drift, not evidence of retirement. This migration does not repair or rename taxonomy.
 - Production contains 15 recurring/monthly service records and zero subscription instances. Existing household membership, plant care, administrative retainers, Monthly HQ support, bookkeeping, marketing and business development records are reused subject to their own release gates.
