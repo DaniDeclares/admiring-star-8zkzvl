@@ -6,9 +6,10 @@
  * Writes only evidence-backed candidate records to the existing owner-personal table.
  */
 
+const DRY_RUN=process.argv.includes('--dry-run')||process.env.DANI_MINER_DRY_RUN==='1';
 const SUPABASE_URL=(process.env.PRODUCTION_SUPABASE_URL||'').replace(/\/+$/,'');
 const SUPABASE_KEY=process.env.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY||'';
-if(!SUPABASE_URL||!SUPABASE_KEY) throw new Error('Production Supabase credentials are required');
+if(!DRY_RUN&&(!SUPABASE_URL||!SUPABASE_KEY)) throw new Error('Production Supabase credentials are required');
 
 const UA='DANI-Owner-Personal-Candidate-Miner/1.0 (+public research; no contact)';
 const SOURCES=[
