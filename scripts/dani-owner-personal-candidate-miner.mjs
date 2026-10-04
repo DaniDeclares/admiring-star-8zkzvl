@@ -14,12 +14,22 @@ if(!DRY_RUN&&(!SUPABASE_URL||!SUPABASE_KEY)) throw new Error('Production Supabas
 const UA='DANI-Owner-Personal-Candidate-Miner/1.0 (+public research; no contact)';
 const SOURCES=[
   {
-    name:'LavenderMarriageWorld',
+    name:'LavenderMarriageWorld:new',
     rss:'https://www.reddit.com/r/LavenderMarriageWorld/new/.rss',
     json:'https://www.reddit.com/r/LavenderMarriageWorld/new.json?limit=100&raw_json=1'
   },
   {
-    name:'queerplatonic',
+    name:'LavenderMarriageWorld:search',
+    rss:'https://www.reddit.com/r/LavenderMarriageWorld/search.rss?q=lavender%20marriage&restrict_sr=on&sort=new&t=year',
+    json:'https://www.reddit.com/r/LavenderMarriageWorld/search.json?q=lavender%20marriage&restrict_sr=on&sort=new&t=year&limit=100&raw_json=1'
+  },
+  {
+    name:'LavenderMarriageWorld:platonic-search',
+    rss:'https://www.reddit.com/r/LavenderMarriageWorld/search.rss?q=platonic%20marriage&restrict_sr=on&sort=new&t=year',
+    json:'https://www.reddit.com/r/LavenderMarriageWorld/search.json?q=platonic%20marriage&restrict_sr=on&sort=new&t=year&limit=100&raw_json=1'
+  },
+  {
+    name:'queerplatonic:new',
     rss:'https://www.reddit.com/r/queerplatonic/new/.rss',
     json:'https://www.reddit.com/r/queerplatonic/new.json?limit=100&raw_json=1'
   }
