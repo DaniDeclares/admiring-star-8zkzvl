@@ -43,15 +43,38 @@ async function hashInviteToken(token) {
   return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+function providerAcquisitionSource() {
+  if (typeof window === 'undefined') return 'WEBSITE_PORTAL';
+  const params = new URLSearchParams(window.location.search);
+  const pairs = [
+    ['ref', params.get('ref') || params.get('referral')],
+    ['utm_source', params.get('utm_source')],
+    ['utm_medium', params.get('utm_medium')],
+    ['utm_campaign', params.get('utm_campaign')],
+    ['utm_content', params.get('utm_content')],
+    ['utm_term', params.get('utm_term')],
+    ['audience', params.get('audience')],
+  ].filter(([, value]) => value);
+  if (!pairs.length) return 'WEBSITE_PORTAL';
+  return ['WEBSITE_PORTAL', ...pairs.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)].join('|');
+}
+
 // Called from PortalAccessPage BEFORE supabase.auth.signUp(), so the intake
 // payload is durable (server-side) the moment the applicant submits, not
 // only after they confirm their email. Returns the staging row's id, which
 // the caller embeds in emailRedirectTo.
 export async function createProviderIntakeStaging(supabase, { email, kind, payload }) {
+  // The public /providers page preserves social/referral query parameters into
+  // /portal/access. Persist them at the durable pre-auth staging boundary so
+  // email confirmation, browser changes, or delayed login cannot erase acquisition
+  // attribution before dd_provider_applications is created.
+  const stagedPayload = kind === 'provider' && payload?.providerPayload
+    ? { ...payload, providerPayload: { ...payload.providerPayload, referral_source: providerAcquisitionSource() } }
+    : payload;
   const { data, error } = await supabase.rpc('dd_create_provider_intake_staging', {
     p_email: email,
     p_kind: kind,
-    p_payload: payload,
+    p_payload: stagedPayload,
   });
   if (error) return { stagingId: null, error: error.message };
   savePendingOnboardingHint(data, email);
