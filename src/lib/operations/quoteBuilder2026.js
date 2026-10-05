@@ -236,7 +236,7 @@ function configuredBasePrice(service, rule, answers) {
   return { base: Number(tier.price || 0), flags: [] };
 }
 
-function validateQuoteLineContract(service, answers, lineItem, requestedLineItems) {
+export function validateQuoteLineContract(service, answers, lineItem, requestedLineItems) {
   const schema=service?.quote_input_schema;
   if(!schema?.ui_mode?.startsWith('SPECIALIZED_')) return;
   const fields=[...(schema.fields||[]),...(schema.commercial_inputs||[])];
