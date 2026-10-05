@@ -73,6 +73,17 @@ jobs:
         env:
           PRODUCTION_BASE_URL: https://www.danideclares.com
         run: npx playwright test checks/production-critical.spec.ts
+      - name: Record PRODUCTION_SMOKE release evidence for DNI-01A-001
+        if: success()
+        env:
+          TESTER_SUPABASE_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          TESTER_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
+          DANI_RELEASE_GATE_SKU: DNI-01A-001
+          DANI_PROOF_KIND: PRODUCTION_SMOKE
+          DANI_PROOF_ENVIRONMENT: PRODUCTION
+          DANI_PROOF_RESULT: PASS
+          DANI_RECEIPT_URI: github-run://${{ github.run_id }}/critical-production-smoke/production-critical.spec.ts
+        run: node scripts/dani-record-release-gate-evidence.mjs
       - name: Preserve Production failure evidence
         if: failure()
         uses: actions/upload-artifact@v4
@@ -82,4 +93,31 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+          retention-days: 14
+
+  ch01-sku-release-contract-proof:
+    if: github.event_name != 'pull_request'
+    needs: deterministic-quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - name: DNI-01A-001 runtime + regression release-contract proof
+        env:
+          TESTER_SUPABASE_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          TESTER_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
+          DANI_RELEASE_GATE_SKU: DNI-01A-001
+          DANI_PROOF_MODE: BOTH
+          DANI_PROOF_REPORT: artifacts/dni-01a-001-release-contract-proof.md
+        run: node scripts/dani-dni-01a-001-release-contract-proof.mjs
+      - name: Preserve SKU proof receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ch01-sku-release-contract-proof-${{ github.run_id }}
+          path: artifacts/dni-01a-001-release-contract-proof.md
+          if-no-files-found: warn
           retention-days: 14
