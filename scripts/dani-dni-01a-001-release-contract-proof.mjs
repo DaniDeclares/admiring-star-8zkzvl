@@ -9,16 +9,21 @@
  * Never stamps PRODUCTION_SMOKE. Never weakens gates. Never mutates price/offer/status.
  */
 import fs from 'node:fs';
+import { DNI_01A_001, evaluateRuntime, evaluateRegression, WRITER_NEGATIVE_PROBES } from '../src/lib/operations/dni01a001ReleaseContractProof2026.js';
 
-const sku = process.env.DANI_RELEASE_GATE_SKU || 'DNI-01A-001';
+const sku = process.env.DANI_RELEASE_GATE_SKU || DNI_01A_001;
 const mode = (process.env.DANI_PROOF_MODE || 'BOTH').toUpperCase();
 const out = process.env.DANI_PROOF_REPORT || 'artifacts/dni-01a-001-release-contract-proof.md';
 const rawUrl = process.env.TESTER_SUPABASE_URL || '';
 const key = process.env.TESTER_SUPABASE_SERVICE_ROLE_KEY || '';
-const sourceSha = process.env.GITHUB_SHA || process.env.DANI_SOURCE_SHA || 'local-dev';
-const workflowRunId = String(process.env.GITHUB_RUN_ID || process.env.DANI_WORKFLOW_RUN_ID || 'local');
+const sourceSha = process.env.GITHUB_SHA || process.env.DANI_SOURCE_SHA || '';
+const workflowRunId = String(process.env.GITHUB_RUN_ID || process.env.DANI_WORKFLOW_RUN_ID || '');
 
+if (sku !== DNI_01A_001) throw new Error(`This proof is bound to ${DNI_01A_001}; got ${sku}. Fail closed.`);
+if (!['RUNTIME','REGRESSION','BOTH'].includes(mode)) throw new Error(`unsupported DANI_PROOF_MODE: ${mode}`);
 if (!rawUrl || !key) throw new Error('Tester Supabase connection is required; fail closed.');
+if (!sourceSha || sourceSha.length < 7) throw new Error('GITHUB_SHA / DANI_SOURCE_SHA required; fail closed.');
+if (!workflowRunId) throw new Error('GITHUB_RUN_ID / DANI_WORKFLOW_RUN_ID required; fail closed.');
 const base = /^https?:\/\//.test(rawUrl) ? rawUrl.replace(/\/$/, '') : `https://${rawUrl}.supabase.co`;
 const headers = { apikey: key, Authorization: `Bearer ${key}` };
 
@@ -58,85 +63,26 @@ async function record(proofKind, receiptUri) {
 const failures = [];
 const notes = [];
 
-const [releaseRows, verificationRows, offerRows, serviceRows] = await Promise.all([
-  read(
-    `dd_service_release_contract_v1?canonical_sku=eq.${encodeURIComponent(sku)}&select=canonical_sku,release_state,blocking_gate,runtime_verified,production_smoke_verified,runtime_accuracy_ok,regression_verified,payment_ledger_ok,fulfillment_matrix_ok,quote_path_ok`,
-  ),
-  read(
-    `dd_service_release_verifications?canonical_sku=eq.${encodeURIComponent(sku)}&select=canonical_sku,stripe_price_verified_at,payment_path_verified_at,runtime_verified_at,production_smoke_verified_at,regression_verified_at,verification_commit_sha,notes,updated_at`,
-  ),
-  read(
-    `dd_governed_service_offers?canonical_sku=eq.${encodeURIComponent(sku)}&select=canonical_sku,commercial_offer_status,fulfillment_gate_status,runtime_service_id`,
-  ),
-  read(
-    `services?sku=eq.${encodeURIComponent(sku)}&select=sku,base_price_cents,starting_price,is_active,price_note,description&limit=1`,
-  ),
+const [releaseRows, verificationRows, offerRows, serviceRows, receipts] = await Promise.all([
+  read(`dd_service_release_contract_v1?canonical_sku=eq.${encodeURIComponent(sku)}&select=canonical_sku,release_state,blocking_gate,runtime_verified,production_smoke_verified,regression_verified,runtime_accuracy_ok`),
+  read(`dd_service_release_verifications?canonical_sku=eq.${encodeURIComponent(sku)}&select=canonical_sku,stripe_price_verified_at,runtime_verified_at,production_smoke_verified_at,regression_verified_at,verification_commit_sha,updated_at`),
+  read(`dd_governed_service_offers?canonical_sku=eq.${encodeURIComponent(sku)}&select=canonical_sku,commercial_offer_status,fulfillment_gate_status,runtime_service_id`),
+  read(`services?sku=eq.${encodeURIComponent(sku)}&select=id,sku,name,pricing_type,billing_cycle,base_price_cents,starting_price,is_active,quote_input_schema,resident_discount_eligible`),
+  read(`dd_service_release_evidence_receipts?canonical_sku=eq.${encodeURIComponent(sku)}&select=id,canonical_sku,proof_kind,proof_environment,source_sha,workflow_run_id,receipt_uri,proof_result,verified_at&order=verified_at.asc`),
 ]);
+if (serviceRows.length !== 1) throw new Error(`expected exactly one services row for ${sku}, got ${serviceRows.length}; fail closed.`);
+const service=serviceRows[0];
+const rules=await read(`dd_service_pricing_rules?service_id=eq.${encodeURIComponent(service.id)}&select=id,service_id,channel_code,status,lock_status,pricing_type,billing_cycle,base_price_cents,currency,resident_discount_eligible`);
+const release=releaseRows[0]||null, verification=verificationRows[0]||null, offers=offerRows||[];
+const state={sku,release,verification,offers,service,rules,receipts};
+const failures=[],notes=[];
 
-const release = releaseRows[0] || null;
-const verification = verificationRows[0] || null;
-const offers = offerRows || [];
-const service = serviceRows[0] || null;
-
-// --- RUNTIME contract for Resident Refresh ---
-if (mode === 'RUNTIME' || mode === 'BOTH') {
-  if (!verification) failures.push('RUNTIME: verification row missing');
-  if (!service) failures.push('RUNTIME: services row missing');
-  if (service && Number(service.base_price_cents) !== 14000) {
-    failures.push(`RUNTIME: base_price_cents expected 14000, got ${service.base_price_cents}`);
-  }
-  if (service && Number(service.starting_price) !== 140) {
-    failures.push(`RUNTIME: starting_price expected 140, got ${service.starting_price}`);
-  }
-  if (service && service.is_active !== true) failures.push('RUNTIME: service is not active');
-  if (!verification?.stripe_price_verified_at) {
-    failures.push('RUNTIME: stripe_price_verified_at required before runtime clearance path');
-  }
-  if (!offers.length) failures.push('RUNTIME: governed offer row missing');
-  if (!release) failures.push('RUNTIME: release contract row missing');
-  // Fail-closed while incomplete is correct runtime behavior for this SKU.
-  if (release && release.release_state === 'LIVE_READY') {
-    const missingTs = [
-      verification?.runtime_verified_at,
-      verification?.production_smoke_verified_at,
-      verification?.regression_verified_at,
-    ].filter((x) => !x);
-    if (missingTs.length) {
-      failures.push('RUNTIME: LIVE_READY with missing verification timestamps (contract broken)');
-    }
-  } else if (release) {
-    notes.push(`RUNTIME: release_state=${release.release_state} blocking_gate=${release.blocking_gate} (fail-closed OK)`);
-  }
-}
-
-// --- REGRESSION: release contract still requires the three timestamps ---
+if (mode === 'RUNTIME' || mode === 'BOTH') { const r=evaluateRuntime(state); failures.push(...r.failures); notes.push(...r.notes); }
 if (mode === 'REGRESSION' || mode === 'BOTH') {
-  if (!release) {
-    failures.push('REGRESSION: release contract row missing');
-  } else {
-    // When any verification timestamp is null, LIVE_READY must not be claimed.
-    const anyMissing =
-      !verification?.runtime_verified_at ||
-      !verification?.production_smoke_verified_at ||
-      !verification?.regression_verified_at;
-    if (anyMissing && release.release_state === 'LIVE_READY') {
-      failures.push('REGRESSION: LIVE_READY while verification timestamps incomplete');
-    }
-    if (anyMissing && release.release_state !== 'HOLD' && release.release_state !== 'LIVE_READY') {
-      notes.push(`REGRESSION: non-HOLD intermediate state ${release.release_state}`);
-    }
-    if (anyMissing && release.release_state === 'HOLD') {
-      notes.push('REGRESSION: HOLD while timestamps incomplete (expected fail-closed)');
-    }
-  }
-  if (service && Number(service.base_price_cents) !== 14000) {
-    failures.push('REGRESSION: locked $140 price authority drifted');
-  }
+  const r=evaluateRegression(state); failures.push(...r.failures); notes.push(...r.notes);
 }
-
-const runtimePass = (mode === 'RUNTIME' || mode === 'BOTH') && failures.every((f) => !f.startsWith('RUNTIME:'));
-const regressionPass =
-  (mode === 'REGRESSION' || mode === 'BOTH') && failures.every((f) => !f.startsWith('REGRESSION:'));
+const runtimePass=(mode==='RUNTIME'||mode==='BOTH')&&!failures.some(f=>f.startsWith('RUNTIME:'));
+const regressionPass=(mode==='REGRESSION'||mode==='BOTH')&&!failures.some(f=>f.startsWith('REGRESSION:'));
 
 if (failures.length) {
   const report = [
