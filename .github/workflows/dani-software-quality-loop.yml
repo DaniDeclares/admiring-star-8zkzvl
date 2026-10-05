@@ -30,6 +30,31 @@ jobs:
       - name: Production build
         run: npm run build
 
+  ch01-release-gate-investigation:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - name: Trace DNI-01A-001 governed release evidence
+        env:
+          TESTER_SUPABASE_URL: ${{ secrets.TESTER_SUPABASE_URL }}
+          TESTER_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TESTER_SUPABASE_SERVICE_ROLE_KEY }}
+          DANI_RELEASE_GATE_SKU: DNI-01A-001
+          DANI_RELEASE_GATE_REPORT: artifacts/dni-01a-001-release-gate.md
+        run: node scripts/dani-release-gate-investigation.mjs
+      - name: Preserve release-gate investigation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ch01-release-gate-investigation-${{ github.run_id }}
+          path: artifacts/dni-01a-001-release-gate.md
+          if-no-files-found: warn
+          retention-days: 14
+
   critical-production-smoke:
     if: github.event_name != 'pull_request'
     needs: deterministic-quality
