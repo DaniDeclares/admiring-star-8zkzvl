@@ -58,7 +58,7 @@ export function evaluateRuntime({ sku, release, verification, offers, service, r
   if (lr.length !== 1) f('expected exactly one ACTIVE+LOCKED CH01 pricing rule');
   if (lr[0] && Number(lr[0].base_price_cents) !== GOVERNED_PRICE_CENTS) f('locked CH01 rule price drifted');
   if (lr[0] && String(lr[0].pricing_type).toUpperCase() !== 'FIXED') f('locked CH01 rule pricing_type drifted');
-  if (lr[0] && String(lr[0].billing_cycle).toUpperCase() !== 'ONE_TIME') f('locked CH01 rule billing_cycle drifted');
+  if (lr[0] && String(lr[0].billing_cycle).toUpperCase() !== 'ONETIME') f('locked CH01 rule billing_cycle drifted');
   if (!verification.stripe_price_verified_at) f('stripe_price_verified_at missing');
 
   const schema = service.quote_input_schema || {}, b = schema.scope_boundary || {};
