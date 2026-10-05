@@ -14,7 +14,10 @@ permissions:
 
 concurrency:
   group: dani-software-quality-${{ github.ref }}
-  cancel-in-progress: true
+  # Only superseded PR runs are cancelled. On main (push/schedule/dispatch) a governed
+  # proof run that has started writing release-evidence receipts must finish, so no
+  # receipt ever points at a cancelled run; later main runs queue behind it instead.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   deterministic-quality:

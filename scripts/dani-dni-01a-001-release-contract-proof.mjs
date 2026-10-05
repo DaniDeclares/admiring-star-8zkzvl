@@ -9,6 +9,7 @@ import {
   evaluateRuntime,
   evaluateRegression,
   WRITER_NEGATIVE_PROBES,
+  classifyWriterProbeResponse,
 } from '../src/lib/operations/dni01a001ReleaseContractProof2026.js';
 
 const sku = process.env.DANI_RELEASE_GATE_SKU || DNI_01A_001;
@@ -53,8 +54,12 @@ async function assertWriterRejectsBadEvidence() {
       p_receipt_uri: `github-run://${workflowRunId}/dni-01a-001-release-contract-proof#negative-${encodeURIComponent(probe.label)}`,
       p_proof_result: probe.args.p_proof_result,
     });
-    if (r.ok) {
+    const verdict = classifyWriterProbeResponse(probe, r.status, await r.text());
+    if (!verdict.rejected) {
       throw new Error(`REGRESSION: governed writer ACCEPTED invalid evidence: ${probe.label}`);
+    }
+    if (!verdict.governed) {
+      throw new Error(`REGRESSION: writer negative probe not rejected by the governed guard (${probe.label}): ${verdict.reason}`);
     }
   }
 }

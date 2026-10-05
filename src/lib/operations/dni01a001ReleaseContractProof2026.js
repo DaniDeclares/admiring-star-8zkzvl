@@ -134,7 +134,24 @@ export function evaluateRegression({ sku, release, verification, service, rules,
 }
 
 export const WRITER_NEGATIVE_PROBES = Object.freeze([
-  { label: 'PRODUCTION_SMOKE from TESTER', args: { p_proof_kind: 'PRODUCTION_SMOKE', p_proof_environment: 'TESTER', p_proof_result: 'PASS' } },
-  { label: 'non-PASS result', args: { p_proof_kind: 'RUNTIME', p_proof_environment: 'TESTER', p_proof_result: 'FAIL' } },
-  { label: 'unsupported proof kind', args: { p_proof_kind: 'GENERIC_GREEN', p_proof_environment: 'TESTER', p_proof_result: 'PASS' } },
+  { label: 'PRODUCTION_SMOKE from TESTER', args: { p_proof_kind: 'PRODUCTION_SMOKE', p_proof_environment: 'TESTER', p_proof_result: 'PASS' }, expectedRejection: 'PRODUCTION_SMOKE requires PRODUCTION evidence' },
+  { label: 'non-PASS result', args: { p_proof_kind: 'RUNTIME', p_proof_environment: 'TESTER', p_proof_result: 'FAIL' }, expectedRejection: 'only PASS proof may advance release verification' },
+  { label: 'non-PASS OBSERVED result', args: { p_proof_kind: 'RUNTIME', p_proof_environment: 'TESTER', p_proof_result: 'OBSERVED' }, expectedRejection: 'only PASS proof may advance release verification' },
+  { label: 'unsupported proof kind', args: { p_proof_kind: 'GENERIC_GREEN', p_proof_environment: 'TESTER', p_proof_result: 'PASS' }, expectedRejection: 'unsupported proof kind' },
 ]);
+
+// A negative probe only proves the governed writer is fail-closed when the writer itself
+// rejected it with its own guard (PL/pgSQL RAISE -> PostgREST HTTP 400, code P0001, the
+// probe's expected message). A missing RPC (404), auth failure (401/403), outage (5xx) or an
+// unrelated guard (e.g. "service_role required") is NOT evidence of fail-closed semantics.
+export function classifyWriterProbeResponse(probe, status, bodyText) {
+  if (status >= 200 && status < 300) return { rejected: false, governed: false, reason: `ACCEPTED (HTTP ${status})` };
+  let body = null;
+  try { body = bodyText ? JSON.parse(bodyText) : null; } catch { body = null; }
+  const code = body?.code || null;
+  const message = String(body?.message || '');
+  if (status === 400 && code === 'P0001' && probe?.expectedRejection && message.includes(probe.expectedRejection)) {
+    return { rejected: true, governed: true, reason: message };
+  }
+  return { rejected: true, governed: false, reason: `INCONCLUSIVE (HTTP ${status}${code ? ` ${code}` : ''}: ${message || String(bodyText || '').slice(0, 200)})` };
+}
