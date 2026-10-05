@@ -40,6 +40,18 @@ if (!receiptUri || !String(receiptUri).trim()) {
 
 const base = /^https?:\/\//.test(rawUrl) ? rawUrl.replace(/\/$/, '') : `https://${rawUrl}.supabase.co`;
 
+// Idempotent per source SHA: scheduled re-runs on unchanged code add no duplicate receipt/note.
+const existing = await fetch(
+  `${base}/rest/v1/dd_service_release_evidence_receipts?canonical_sku=eq.${encodeURIComponent(sku)}&proof_kind=eq.${proofKind}&proof_environment=eq.${proofEnvironment}&source_sha=eq.${encodeURIComponent(sourceSha)}&proof_result=eq.PASS&select=id,workflow_run_id,verified_at&limit=1`,
+  { headers: { apikey: key, Authorization: `Bearer ${key}` } },
+);
+if (!existing.ok) throw new Error(`receipt lookup failed: ${existing.status} ${await existing.text()}`);
+const prior = await existing.json();
+if (prior.length) {
+  console.log(JSON.stringify({ status: 'ALREADY_RECORDED_FOR_SHA', canonical_sku: sku, proof_kind: proofKind, source_sha: sourceSha, prior: prior[0] }));
+  process.exit(0);
+}
+
 const response = await fetch(`${base}/rest/v1/rpc/dd_record_release_gate_evidence`, {
   method: 'POST',
   headers: {
