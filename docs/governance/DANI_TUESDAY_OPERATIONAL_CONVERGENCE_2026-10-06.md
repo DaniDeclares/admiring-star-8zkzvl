@@ -89,3 +89,5 @@ The business may be called **CORE OPERATIONAL** when the revenue/fulfillment/own
 ## Existing known legitimate hold
 
 Recurring-service cancellation remains legitimately held if `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` is still absent at current live verification. Continue every independent lane around that dependency. Never weaken the cancellation gate or fabricate Stripe proof.
+
+Update 2026-10-05: live verification found the variable present on Production and the live Stripe configuration satisfying the period-end cancellation gate; this hold is resolved. Receipt: `docs/governance/DANI_RECURRING_LIFECYCLE_RECOVERY_2026-10-04.md` (Post-merge Billing Portal dependency receipt). The gate itself is unchanged and still fails closed if the configuration is removed or altered.

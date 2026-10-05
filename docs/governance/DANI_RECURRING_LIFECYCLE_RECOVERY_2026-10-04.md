@@ -39,6 +39,17 @@ The seven commercial types remain `SERV`, `PROD`, `DIGITAL`, `KIT`, `RET`, `EVEN
 - Node CI and DANI Software Quality Loop passed for reconciled head `5c33eea6358134faf5fc2ee0bdcb7a0073e254f2`; its exact Vercel preview is READY (`dpl_yXziRUcUxrAyEoQgHwZ1xEGrRXxQ`). Authenticated fetch remained blocked with `deployment_authentication_required`, so this is deployment proof, not runtime proof. The owner channel correction and Stripe compatibility changes require fresh exact-head checks.
 - A local build is not deployment or live Stripe proof. Exact-head CI, preview deployment, protected runtime checks, Production migration/promotion and Stripe test-mode lifecycle proof remain release gates. No live charge or cancellation was created for testing.
 
+## Post-merge Billing Portal dependency receipt (2026-10-05)
+
+Read-only re-verification after #562 merged as `b92320fe`. Supersedes the "absent" observation in *Authority checked live* above for the Billing Portal dependency only.
+
+- Vercel team `team_E1ObiftcLzJdXzNE0W2fs6PG`, project `admiring-star-8zkzvl-dhnz` (`prj_sjL4eMox6OLrt6daRuJxUJeKA1Ba`): `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` exists, type `encrypted`, target `production` only, created 2026-10-04 20:42:07 UTC. Value was not decrypted or read.
+- Current Production deployment `dpl_8kGxGw9mGvMYpnQWAtRG9KuVwsAN` (READY, `main` `943e9b532e4226ff7ca2650152577edd99e8aa5c`) was created after that variable, so the current Production build carries it.
+- Stripe **live** mode, DANI DECLARES account, configuration `bpc_1UMwA4ChHm1uJK9xO55YGP2W` (read via GET only): `active=true`, `is_default=true`, `subscription_cancel.enabled=true`, `mode=at_period_end`, `proration_behavior=none`, `subscription_update.enabled=false`, `subscription_pause.enabled=false`. This satisfies `hasPeriodEndCancellation()` in `src/lib/operations/recurringServiceLifecycle2026.js`. The Vercel variable comment names this configuration; equality of the encrypted value with this ID is attested by the owner's #562 closing comment, not by reading the secret.
+- Production `dd_service_subscriptions`, `dd_service_subscription_terms`, `_cycles` and `_usage` each contain 0 rows. No customer charge, subscription or cancellation was created by this check.
+
+Disposition: the Billing Portal configuration dependency is **resolved**. Recurring checkout is no longer held on it. Recurring checkout remains gated by its other existing controls (accepted immutable terms, frozen monthly amount, CH01-only eligibility, canonical release). Live renewal/expiration outcomes remain `OBSERVING` until a real governed subscription completes a cycle; Stripe test-clock renewal/expiration proof remains pending as recorded above.
+
 ## Reproduce the isolated database proof
 
 Run from the repository root. The test dependency is installed outside the application and is not a production dependency:
