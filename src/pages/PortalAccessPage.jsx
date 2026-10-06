@@ -124,7 +124,7 @@ export default function PortalAccessPage() {
       // always has been.
       const [servicesResult, categoriesResult, requirementsResult] = await Promise.all([
         supabase.from('services').select('id, name, sku, division_id, service_family').neq('sku', 'DNI-12A-028').order('name'),
-        supabase.from('dd_provider_capability_categories').select('*').order('display_order'),
+        supabase.from('dd_provider_capability_categories').select('*').lt('display_order', 90).order('display_order'),
         supabase.from('dd_service_capability_requirements').select('canonical_sku, requirement_code').in('requirement_code', ['LICENSE_SERVICE', 'CERT_SERVICE', 'AUTO_MOBILE']).eq('required', true),
       ]);
       if (cancelled) return;
