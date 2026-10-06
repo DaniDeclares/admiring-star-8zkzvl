@@ -234,7 +234,9 @@ export default async function handler(req,res){
    });
    if(!canonicalSelection.allowed)throw new Error(`CH01 canonical resolution failed: ${canonicalSelection.reason}`);
    const offer=await getGovernedCommercialOffer(canonicalSelection.serviceId);
-   if(!offer||offer.commercialOfferStatus!=='SELL_NOW'||offer.fulfillmentGateStatus!=='READY')return res.status(422).json({error:'Payment references a commercial offer that is no longer eligible for checkout.'});
+   const testerProofMode=req.__daniTesterProof===true;
+   if(!offer||(!testerProofMode&&(offer.commercialOfferStatus!=='SELL_NOW'||offer.fulfillmentGateStatus!=='READY')))return res.status(422).json({error:'Payment references a commercial offer that is no longer eligible for checkout.'});
+   if(testerProofMode&&offer.releaseState!=='LIVE_READY')return res.status(422).json({error:'Tester proof cannot bypass an uncleared release contract.'});
    const quoteRequired=QUOTE_PRICING_TYPES.has(String(offer.pricingType||'').toUpperCase());
    const result=await prisma.$transaction(async tx=>{
     const existing=await tx.$queryRaw`select id,invoice_id from public.dd_payment_events where provider_event_id=${event.id} limit 1`;
@@ -329,10 +331,12 @@ export default async function handler(req,res){
     return {status:'RECONCILED',job,reconciliation,estimateId:estimate.id,bookingTransition};
    });
    if(result.status==='IDEMPOTENT_REPLAY')return res.status(200).json({received:true,idempotent:true});
-   await finalizeProposedProviderRoutes(prisma,result.estimateId);
-   await captureServer('payment_completed',{request_id:requestId,service_id:serviceId,payment_state:'completed',transaction_status:result.status,job_reference:result.job?.public_reference||undefined,route:'/api/stripe-webhook'});
+   if(!testerProofMode){
+    await finalizeProposedProviderRoutes(prisma,result.estimateId);
+    await captureServer('payment_completed',{request_id:requestId,service_id:serviceId,payment_state:'completed',transaction_status:result.status,job_reference:result.job?.public_reference||undefined,route:'/api/stripe-webhook'});
+   }
    console.log(`B2C payment accepted; request ${requestId} -> job ${result.job.public_reference}.`);
-  }catch(error){await captureServer('payment_reconciliation_failed',{request_id:requestId,service_id:String(session.metadata?.service_id||'').trim()||undefined,error_type:'operational_transition',route:'/api/stripe-webhook'});console.error('Failed to transition/reconcile paid B2C request:',error.message);return res.status(500).json({error:'Payment received but operational/accounting transition failed'});}
+  }catch(error){if(!req.__daniTesterProof)await captureServer('payment_reconciliation_failed',{request_id:requestId,service_id:String(session.metadata?.service_id||'').trim()||undefined,error_type:'operational_transition',route:'/api/stripe-webhook'});console.error('Failed to transition/reconcile paid B2C request:',error.message);return res.status(500).json({error:'Payment received but operational/accounting transition failed'});}
  }else if(changeOrderId){
   try{
    await prisma.$transaction(async tx=>{const reconciliation=await reconcileStripePayment(event,tx);await publishPaymentReconciled(reconciliation,tx);});
