@@ -1,10 +1,11 @@
 -- Repair the deterministic bridge from mailbox evidence to sales-touch truth.
 -- This does not create prospects, alter disposition, authorize outreach, or infer relationships.
+-- The caller is the server-side service role, so keep execution invoker-scoped rather than bypassing RLS.
 
 create or replace function public.dd_reconcile_outbound_sales_touch_bridge()
 returns table(updated_rows integer, touched_missing_timestamp integer)
 language plpgsql
-security definer
+security invoker
 set search_path=''
 as $$
 declare
@@ -62,4 +63,4 @@ revoke all on function public.dd_reconcile_outbound_sales_touch_bridge() from pu
 grant execute on function public.dd_reconcile_outbound_sales_touch_bridge() to service_role;
 
 comment on function public.dd_reconcile_outbound_sales_touch_bridge() is
-'Exact-email evidence bridge from outbound Gmail communication events to dd_sales_queue touch chronology. Raises proven minimum contact_attempts and latest contact timestamp only; never changes sales disposition, campaign authority, prospect identity, or outreach permission.';
+'Exact-email evidence bridge from outbound Gmail communication events to dd_sales_queue touch chronology. Invoker-scoped and service-role-only; raises proven minimum contact_attempts and latest contact timestamp only; never changes sales disposition, campaign authority, prospect identity, or outreach permission.';
