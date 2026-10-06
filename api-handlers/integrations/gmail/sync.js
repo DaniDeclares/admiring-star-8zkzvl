@@ -18,6 +18,15 @@ function emailOnly(value) {
   const m = String(value || '').match(/<([^>]+)>/);
   return (m ? m[1] : value || '').trim().toLowerCase();
 }
+function gmailSearchQuery(connection) {
+  const lastSync = connection.last_sync_at ? new Date(connection.last_sync_at) : null;
+  if (!lastSync || Number.isNaN(lastSync.getTime())) return 'newer_than:30d -in:spam -in:trash';
+  const buffered = new Date(lastSync.getTime() - 2 * 24 * 60 * 60 * 1000);
+  const yyyy = buffered.getUTCFullYear();
+  const mm = String(buffered.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(buffered.getUTCDate()).padStart(2, '0');
+  return `after:${yyyy}/${mm}/${dd} -in:spam -in:trash`;
+}
 
 async function refreshAccessToken(supabase, connection) {
   const refreshToken = decryptSecret(connection.refresh_token_ciphertext);
@@ -60,40 +69,67 @@ async function gmailJson(url, accessToken) {
   return body;
 }
 
-async function syncConnection(supabase, connection) {
+async function getAccessToken(supabase, connection) {
   let accessToken = connection.access_token_ciphertext ? decryptSecret(connection.access_token_ciphertext) : null;
   const expiring = !connection.token_expires_at || new Date(connection.token_expires_at).getTime() < Date.now() + 60_000;
   if (!accessToken || expiring) accessToken = await refreshAccessToken(supabase, connection);
+  return accessToken;
+}
 
-  const ownEmail = String(connection.token_metadata?.email || '').toLowerCase();
-  const query = encodeURIComponent('newer_than:2d -in:spam -in:trash');
-  let list;
+async function syncConnection(supabase, connection) {
+  let accessToken = await getAccessToken(supabase, connection);
+  let ownEmail = String(connection.token_metadata?.email || '').toLowerCase();
+
   try {
-    list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
+    if (!ownEmail) {
+      const profile = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/profile', accessToken);
+      ownEmail = String(profile.emailAddress || '').toLowerCase();
+    }
   } catch (error) {
     if (error.status !== 401) throw error;
     accessToken = await refreshAccessToken(supabase, connection);
-    list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query, accessToken);
+    const profile = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/profile', accessToken);
+    ownEmail = String(profile.emailAddress || '').toLowerCase();
   }
 
+  const query = encodeURIComponent(gmailSearchQuery(connection));
+  const items = [];
+  let pageToken = '';
+  do {
+    const tokenPart = pageToken ? '&pageToken=' + encodeURIComponent(pageToken) : '';
+    let list;
+    try {
+      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query + tokenPart, accessToken);
+    } catch (error) {
+      if (error.status !== 401) throw error;
+      accessToken = await refreshAccessToken(supabase, connection);
+      list = await gmailJson('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100&q=' + query + tokenPart, accessToken);
+    }
+    items.push(...(list.messages || []));
+    pageToken = list.nextPageToken || '';
+  } while (pageToken && items.length < 500);
+
   let ingested = 0;
-  for (const item of list.messages || []) {
+  for (const item of items) {
     const message = await gmailJson(
-      'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(item.id) + '?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date',
+      'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(item.id) + '?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Bcc&metadataHeaders=Subject&metadataHeaders=Date',
       accessToken
     );
     const headers = message.payload?.headers || [];
     const fromRaw = header(headers, 'From');
     const toRaw = header(headers, 'To');
+    const ccRaw = header(headers, 'Cc');
+    const bccRaw = header(headers, 'Bcc');
     const from = emailOnly(fromRaw);
     const direction = ownEmail && from === ownEmail ? 'OUTBOUND' : 'INBOUND';
     const receivedAt = message.internalDate ? new Date(Number(message.internalDate)).toISOString() : new Date().toISOString();
+    const recipients = [...addresses(toRaw), ...addresses(ccRaw), ...addresses(bccRaw)];
     const { error } = await supabase.rpc('dd_ingest_email_communication', {
       p_external_message_id: message.id,
       p_external_thread_id: message.threadId || null,
       p_direction: direction,
       p_sender_address: from,
-      p_recipient_addresses: addresses(toRaw),
+      p_recipient_addresses: recipients,
       p_subject: header(headers, 'Subject') || null,
       p_body_excerpt: message.snippet || null,
       p_received_at: receivedAt,
@@ -112,12 +148,13 @@ async function syncConnection(supabase, connection) {
   const { error: updateError } = await supabase.from('dd_integration_connections').update({
     last_sync_at: now,
     last_error: null,
+    token_metadata: { ...(connection.token_metadata || {}), email: ownEmail || null },
     updated_at: now
   }).eq('id', connection.id);
   if (updateError) throw updateError;
   await logIntegrationEvent({
     supabase, adapterCode: 'GMAIL', connectionId: connection.id, direction: 'INBOUND',
-    eventType: 'MAILBOX_SYNC', status: 'PROCESSED', payload: { messages_scanned: ingested }
+    eventType: 'MAILBOX_SYNC', status: 'PROCESSED', payload: { messages_scanned: ingested, query: gmailSearchQuery(connection) }
   });
   return ingested;
 }
@@ -135,7 +172,7 @@ export default async function handler(req, res) {
       .eq('environment', ENVIRONMENT)
       .eq('connection_status', 'CONNECTED');
     if (error) throw error;
-    if (!connections?.length) return res.status(200).json({ success: true, connected: false, ingested: 0 });
+    if (!connections?.length) return res.status(200).json({ success: true, connected: false, ingested: 0, sales_touch_rows_reconciled: 0 });
 
     let total = 0;
     for (const connection of connections) {
@@ -153,7 +190,17 @@ export default async function handler(req, res) {
         throw error;
       }
     }
-    return res.status(200).json({ success: true, connected: true, ingested: total });
+
+    const { data: bridgeResult, error: bridgeError } = await supabase.rpc('dd_reconcile_outbound_sales_touch_bridge');
+    if (bridgeError) throw bridgeError;
+    const receipt = Array.isArray(bridgeResult) ? bridgeResult[0] : bridgeResult;
+    return res.status(200).json({
+      success: true,
+      connected: true,
+      ingested: total,
+      sales_touch_rows_reconciled: Number(receipt?.updated_rows || 0),
+      touched_rows_missing_timestamp: Number(receipt?.touched_missing_timestamp || 0)
+    });
   } catch (error) {
     return res.status(error.status || 500).json({ success: false, error: error.message || 'GMAIL_SYNC_FAILED' });
   }
