@@ -176,6 +176,7 @@ export default async function handler(req,res){
   });
   const request=result.request;
   const notificationText=['New DANI DECLARES service request',`Name: ${name}`,`Email: ${email||'not provided'}`,`Phone: ${phone||'not provided'}`,`Customer type: ${channelType||'not specified'}`,`Starting point: ${frontDoorCode||'not specified'}`,`Service: ${serviceType||category||'not specified'}`,`Service reference: ${serviceRef||'not specified'}`,`Location: ${fullServiceAddress}`,`Requested date/time: ${requestedStartAt||'not provided'}`,`Timeline: ${timeline||'not provided'}`,`Budget: ${budgetRange||'not provided'}`,`Request ID: ${request.id}`,`Booking hold: ${booking?.id||'none'}`].join('\n');
+  if(!req.__daniTesterProof){
   try{
    if(process.env.NOTIFICATION_EMAIL)await publishOperationalEvent({
     eventType:'LEAD_CREATED',
@@ -252,6 +253,7 @@ export default async function handler(req,res){
     payload:{to:process.env.NOTIFICATION_PHONE,text:`New DANI DECLARES request: ${name}; ${serviceType||category||'service'}; ${phone||email||''}; Request ${request.id}`}
    });
   }catch(notificationError){console.error('Lead notification queue error:',notificationError)}
+  }
   return res.status(200).json({success:true,message:'We received your request.',requestId:request.id,paymentPending:paymentEligible,status:requestState,referralAttributed:Boolean(referralAttribution),booking:booking?{id:booking.id,startsAt:booking.requested_start_at,endsAt:booking.requested_end_at,holdExpiresAt:booking.hold_expires_at,durationMinutes:booking.duration_minutes}:null});
  }catch(error){
   captureServerException(error,{route:'/api/intake-webhook',stage:'request_persistence'});
