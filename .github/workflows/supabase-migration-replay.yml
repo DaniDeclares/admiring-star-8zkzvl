@@ -162,6 +162,14 @@ jobs:
           sql = path.read_text()
           sql = "ALTER TABLE public.dd_provider_organizations DROP CONSTRAINT IF EXISTS dd_provider_organizations_vendor_type_check; ALTER TABLE public.dd_provider_organizations ADD CONSTRAINT dd_provider_organizations_vendor_type_check CHECK (vendor_type = ANY (ARRAY['PARTNER'::text,'SUBCONTRACTOR'::text,'EMPLOYEE'::text,'INDIVIDUAL'::text]));\n" + sql
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260918022314_price_and_authorize_remaining_division_05_notary_candidates.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "JOIN public.services s ON s.sku = t.canonical_sku;\n\nDROP TABLE tmp_notary_pricing;",
+              "JOIN public.services s ON s.sku = t.canonical_sku WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '19c10267-898f-4c10-a25e-186f6aff8771') AND EXISTS (SELECT 1 FROM public.dd_providers WHERE id = 'acba894f-a8c7-4156-b981-fa08acc9e65b');\n\nDROP TABLE tmp_notary_pricing;",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
