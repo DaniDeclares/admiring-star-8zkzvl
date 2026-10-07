@@ -261,7 +261,7 @@ jobs:
           sql = path.read_text()
           sql = sql.replace(
               "  v_chan_count int;\n  v_offer_count int;\n  v_i9_status text;\nBEGIN\n  SELECT count(*) INTO v_chan_count",
-              "  v_service_count int;\n  v_chan_count int;\n  v_offer_count int;\n  v_i9_status text;\nBEGIN\n  SELECT count(*) INTO v_service_count FROM public.services WHERE service_family IN ('05A Notary & Signing Services','Notary & Document Services');\n  IF v_service_count = 0 THEN\n    RAISE NOTICE 'Clean replay has no seeded notary service population; Production-data channel verification skipped.';\n    RETURN;\n  ELSIF v_service_count <> 27 THEN\n    RAISE EXCEPTION 'Notary service population drifted: expected 27 or clean-replay zero, found %', v_service_count;\n  END IF;\n  SELECT count(*) INTO v_chan_count",
+              "  v_service_count int;\n  v_service_skus text[];\n  v_chan_count int;\n  v_offer_count int;\n  v_i9_status text;\nBEGIN\n  SELECT count(*), array_agg(sku ORDER BY sku) INTO v_service_count, v_service_skus FROM public.services WHERE service_family IN ('05A Notary & Signing Services','Notary & Document Services');\n  IF v_service_skus = ARRAY['DNI-05A-021','DNI-05A-022','DNI-05A-023','DNI-05A-024','DNI-05A-025','DNI-05A-026','DNI-05A-027']::text[] THEN\n    RAISE NOTICE 'Clean replay contains only the exact canonical 021-027 notary additions; pre-ledger Production baseline verification skipped.';\n    RETURN;\n  ELSIF v_service_count <> 27 THEN\n    RAISE EXCEPTION 'Notary service population drifted: expected full 27 or exact clean-source 021-027 baseline, found % rows: %', v_service_count, v_service_skus;\n  END IF;\n  SELECT count(*) INTO v_chan_count",
           )
           path.write_text(sql)
           PY
