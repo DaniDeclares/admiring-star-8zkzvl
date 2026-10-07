@@ -109,6 +109,14 @@ jobs:
               "IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'fieldops_travel_calculations' AND column_name = 'status') THEN",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260905000001_p0_fulfillment_state_machine_alignment.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "), ranked as (select c.*,row_number() over(partition by jid order by score desc,pid) rn), ins as (",
+              "), ranked as (select c.*,row_number() over(partition by jid order by score desc,pid) rn from candidates c), ins as (",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
