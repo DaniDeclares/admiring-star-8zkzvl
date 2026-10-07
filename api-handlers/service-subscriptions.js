@@ -87,8 +87,18 @@ export default async function handler(req,res){
    const request=await sb.from('service_requests').select('*').eq('id',estimate.data.service_request_id).single();if(request.error)throw request.error;
    if(!ownsRecurringRequest(ctx,request.data))return fail(res,403,'This agreement belongs to another account');
    const serviceId=request.data.property_details?.commercialIntent?.serviceId||request.data.property_details?.pricingServiceId;
+   const channel=getChannelFromRequest(request.data);
    req.body={requestId:request.data.id,serviceId,email:ctx.user.email};
-   // Reuse the existing canonical, channel, pricing and payment readiness gates.
+   // Server-only authorization marker. This cannot be supplied by the public checkout request:
+   // it is created only after authenticated customer ownership + accepted owner-approved recurring terms.
+   req.daniRecurringAgreement={
+    termsId:term.data.id,
+    estimateId:term.data.estimate_id,
+    requestId:request.data.id,
+    serviceId,
+    channel
+   };
+   // Reuse the canonical release, exact-channel pricing, economics and Stripe cancellation gates.
    return createCheckoutSession(req,res);
   }
   const sub=await sb.from('dd_service_subscriptions').select('*').eq('id',body.subscriptionId).single();if(sub.error)throw sub.error;
