@@ -186,6 +186,20 @@ jobs:
               "JOIN public.services s ON s.sku = t.canonical_sku WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '19c10267-898f-4c10-a25e-186f6aff8771') AND EXISTS (SELECT 1 FROM public.dd_providers WHERE id = 'acba894f-a8c7-4156-b981-fa08acc9e65b');\n\nDROP TABLE tmp_div04;",
           )
           path.write_text(sql)
+
+          for migration_name, temp_table in [
+              ("20260918024917_add_division_06_master_pricebook_website_services.sql", "tmp_div06"),
+              ("20260918024942_add_division_10_events_and_premium_destination_planning.sql", "tmp_div10"),
+              ("20260918025002_add_division_11_merch_brand_products.sql", "tmp_div11"),
+              ("20260918030615_expand_division_10_destination_event_addons.sql", "tmp_div10b"),
+          ]:
+              path = Path("supabase/migrations") / migration_name
+              sql = path.read_text()
+              sql = sql.replace(
+                  f"JOIN public.services s ON s.sku = t.canonical_sku;\nDROP TABLE {temp_table};",
+                  f"JOIN public.services s ON s.sku = t.canonical_sku WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '19c10267-898f-4c10-a25e-186f6aff8771') AND EXISTS (SELECT 1 FROM public.dd_providers WHERE id = 'acba894f-a8c7-4156-b981-fa08acc9e65b');\nDROP TABLE {temp_table};",
+              )
+              path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
