@@ -141,6 +141,14 @@ jobs:
               "WHERE m.canonical_sku = 'DNI-10A-022' AND EXISTS (SELECT 1 FROM public.services WHERE id = '0fd8d9b9-fe4f-47d2-a78b-27eed38ddd69');",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260918005712_add_pet_mess_yardsale_engraving_services.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "JOIN public.services s ON s.sku = t.canonical_sku;\n\nDROP TABLE tmp_new_svcs;",
+              "JOIN public.services s ON s.sku = t.canonical_sku WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '19c10267-898f-4c10-a25e-186f6aff8771') AND EXISTS (SELECT 1 FROM public.dd_providers WHERE id = 'acba894f-a8c7-4156-b981-fa08acc9e65b');\n\nDROP TABLE tmp_new_svcs;",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
