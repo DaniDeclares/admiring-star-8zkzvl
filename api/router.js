@@ -14,6 +14,7 @@ export const ROUTES = {
   'contracting-period': () => import('../api-handlers/contracting-period.js'),
   'create-checkout-session': () => import('../api-handlers/create-checkout-session.js'),
   'intake-webhook': () => import('../api-handlers/intake-webhook.js'),
+  'internal-ch01-sell-proof': () => import('../api-handlers/internal-ch01-sell-proof.js'),
   'integrations/asana/callback': () => import('../api-handlers/integrations/asana/callback.js'),
   'integrations/asana/start': () => import('../api-handlers/integrations/asana/start.js'),
   'integrations/gmail/sync': () => import('../api-handlers/integrations/gmail/sync.js'),
