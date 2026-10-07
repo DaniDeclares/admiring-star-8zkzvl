@@ -45,6 +45,32 @@ Production authority:
 Tester Brain authority:
 - `public.dd_brain_constitution` → `OP1M_RAW_CREATOR_VOICE`
 
+## FAMILY_COMPATIBLE_EXECUTION_V1
+
+Operation $1 Million must fit the owner's real household rather than assume uninterrupted creator days.
+
+Operating rules:
+- Standard owner work boundary remains weekdays, approximately 9:00 AM–5:00 PM. Evenings and weekends are protected by default.
+- The youngest children have a target nap start around 12:30–1:30 PM and target bedtime around 9:00 PM, but neither is a reliable dependency.
+- Morning capacity carries mission-critical owner work: outward-facing revenue action, recording that requires focus, decisions, and approvals.
+- Nap time is **bonus capacity**, not a hard dependency. Use it for editing/review/deeper work when available; failure to nap must not break the campaign.
+- Afternoon work should be interruption-tolerant: household reset, B-roll captured during real work, voice notes, light administration, comments and DMs.
+- After 9:00 PM is overflow only, not a normal second shift.
+- A materially late afternoon/evening nap automatically converts the evening to family/low-brain activity rather than extending the workday late into the night.
+- Recording should be integrated into real life where appropriate; do not stage a separate fake creator life.
+- Protect children's private details, locations, school/legal/health information, and sensitive family context.
+- Editing burden should be minimized for Danielle. Danielle talks, shows, sells, responds and approves; the system drafts, repurposes, classifies, attributes, prioritizes, prepares follow-up and measures.
+- Household care is an operating constraint, not invisible labor. The 30-day execution plan must include recurring house-reset capacity and may be recalibrated from real household conditions.
+- Calendar is the authority for Danielle's time commitments; Asana is work/deadlines; Airtable is operational/research evidence; HubSpot is CRM/sales activity; Production remains campaign/service/attribution authority. Synchronize identifiers and state, not indiscriminately duplicate every object.
+
+## 30-DAY CAMPAIGN EXECUTION
+
+Production authority:
+- `public.dd_op1m_30day_calendar_v1` contains Days 1–30, 2026-10-06 through 2026-11-04.
+- All campaign content remains owner-approval gated; no external publish authorization is implied by scheduling.
+- Days 22–30 remain adaptive and must use actual attribution, objections, conversion evidence and scorecards rather than predictions made at campaign start.
+- Every business day should include outward-facing revenue action before substantial optional internal building.
+
 ## Environment note
 
 Production and Tester intentionally use different existing governance structures. Do not flatten them into one schema merely for symmetry. Tester’s Brain constitution is its native control surface; Production uses the acquisition/doctrine layer. Future promotion remains evidence-first and independently reviewed.
