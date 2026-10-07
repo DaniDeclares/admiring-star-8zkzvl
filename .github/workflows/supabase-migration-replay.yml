@@ -208,6 +208,14 @@ jobs:
               "SELECT '19c10267-898f-4c10-a25e-186f6aff8771'::uuid, 'acba894f-a8c7-4156-b981-fa08acc9e65b'::uuid, '25ac02f5-8ab3-4ed1-ad52-0898d89b9980'::uuid, 'Mobile Vehicle Detailing', 'VEHICLE_DETAILING', true, '{}'::jsonb WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '19c10267-898f-4c10-a25e-186f6aff8771') AND EXISTS (SELECT 1 FROM public.dd_providers WHERE id = 'acba894f-a8c7-4156-b981-fa08acc9e65b') AND EXISTS (SELECT 1 FROM public.services WHERE id = '25ac02f5-8ab3-4ed1-ad52-0898d89b9980') UNION ALL SELECT '04d66fe4-e006-4b8e-988e-e063ae93b8ab'::uuid, '96b78147-c991-43d2-a3fe-4d9dc49fd90d'::uuid, '25ac02f5-8ab3-4ed1-ad52-0898d89b9980'::uuid, 'Mobile Vehicle Detailing', 'VEHICLE_DETAILING', true, '{}'::jsonb WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '04d66fe4-e006-4b8e-988e-e063ae93b8ab') AND EXISTS (SELECT 1 FROM public.dd_providers WHERE id = '96b78147-c991-43d2-a3fe-4d9dc49fd90d') AND EXISTS (SELECT 1 FROM public.services WHERE id = '25ac02f5-8ab3-4ed1-ad52-0898d89b9980');",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260918134516_remove_legacy_provider_document_rpc_overload.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "revoke execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) from public;\ngrant execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) to authenticated, service_role, postgres;",
+              "DO $ BEGIN IF to_regprocedure('public.dd_record_provider_application_document(uuid,text,text,text,text,date,uuid)') IS NOT NULL THEN EXECUTE 'revoke execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) from public'; EXECUTE 'grant execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) to authenticated, service_role, postgres'; END IF; END $;",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
