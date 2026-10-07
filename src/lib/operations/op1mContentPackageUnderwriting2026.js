@@ -160,3 +160,81 @@ export const CREATE_STARTER_CONS = Object.freeze([
   'Customer communication and footage cleanup can create hidden labor.',
   'Recurring package prices remain held until measured economics clear.',
 ]);
+
+
+// Live OP1M signal: Nayja. Keep this lane distinct from DeAndrea CREATE.
+export const NAYJA_MARKETING_PARTNER_SIGNAL = Object.freeze({
+  stage: 'QUALIFIED_PROBLEM_DEEPENED',
+  exactLanguage: [
+    'business is not creating the revenue I’d like',
+    'I’m an owner operator which causes me to not do as much marketing as I’d like',
+    'I also don’t like being in front of the camera',
+  ],
+  rootProblem: 'Owner-operator delivery load crowds out consistent acquisition/marketing, contributing to below-target revenue.',
+  deliveryConstraint: 'Do not make camera-first content the default solution.',
+  candidateDepth: CONTENT_DEPTH.MARKETING_PARTNER,
+  minimumMissingInformation: ['business type / offer', 'current customer acquisition source'],
+  nextSalesAction: 'Continue the DM naturally, learn the business/offer and current acquisition source, then compose an outcome offer from existing governed Marketing + Business Development SKUs.',
+});
+
+export const MARKETING_PARTNER_PACKAGE_RULES = Object.freeze({
+  sellOutcomeNotChores: true,
+  outcome: 'Create a repeatable visibility/acquisition rhythm that does not require the owner to become a full-time marketer or on-camera creator.',
+  allowedComposition: 'Existing governed Marketing + Business Development SKUs only until new package economics are approved.',
+  cameraOptional: true,
+  prohibitedAssumptions: ['cold calling', 'closing', 'appointment setting', 'live sales representation', 'unlimited DM management'],
+  priceAuthority: false,
+  holdReason: 'Need business/offer + current acquisition source, and DNI-07A-005 $400/$650 authority conflict must be resolved before it anchors a fixed package.',
+});
+
+export const OP1M_BURDEN_ROUTER = Object.freeze({
+  principle: 'Customer describes what they need off their plate; DANI maps burden -> depth -> volume -> add-ons/overages -> governed offer.',
+  liveEvidence: [
+    { customer: 'DeAndrea', burden: 'thought organization + voice-over support + editing/reels', depth: CONTENT_DEPTH.CREATE, stage: 'BUYING_INTENT' },
+    { customer: 'Nayja', burden: 'owner-operator marketing capacity + below-target revenue + camera avoidance', depth: CONTENT_DEPTH.MARKETING_PARTNER, stage: 'QUALIFIED_PROBLEM_DEEPENED' },
+  ],
+});
+
+export const MARKETING_PARTNER_BLIND_SPOTS = Object.freeze([
+  'Low revenue is not proof that marketing alone is the root cause; offer, pricing, conversion, capacity and retention may also matter.',
+  'Camera avoidance is a constraint, not a diagnosis; do not overcorrect into social-media-only or no-social strategies.',
+  'A Marketing Partner package must not promise revenue results DANI cannot control.',
+  'Owner-operator capacity means the package itself must require little client coordination or it recreates the same burden.',
+  'Lead generation without a workable follow-up path can create activity without revenue.',
+  'The current Social Media Management price authority is conflicted ($400 vs $650), so it cannot safely anchor a fixed bundle yet.',
+  'Before quoting, DANI needs the business/offer and current acquisition source; anything more is optional discovery, not a reason to stall.',
+]);
+
+export const MARKETING_PARTNER_OWNER_QUESTIONS = Object.freeze([
+  {
+    id: 'MARKETING_PARTNER_PROMISE',
+    question: 'Should the package promise A) consistent marketing execution, B) qualified opportunity creation, or C) revenue growth?',
+    cTeamVote: 'A',
+  },
+  {
+    id: 'CAMERA_OPTIONAL_DEFAULT',
+    question: 'Should every Marketing Partner package work without requiring the owner to appear on camera, with on-camera content optional?',
+    cTeamVote: 'YES',
+  },
+  {
+    id: 'SALES_HANDOFF_BOUNDARY',
+    question: 'Should DANI own marketing/follow-up systems through qualified handoff while the client retains closing unless separately scoped and authorized?',
+    cTeamVote: 'YES',
+  },
+]);
+
+export const MARKETING_PARTNER_PROS = Object.freeze([
+  'Targets the owner-operator capacity problem instead of selling random marketing chores.',
+  'Can combine existing DANI capabilities without inventing a new service for every buyer.',
+  'Does not require camera-first content.',
+  'Creates a recurring-revenue path for OP1M.',
+  'Can connect visibility, lead research and governed follow-up into one measurable funnel.',
+]);
+
+export const MARKETING_PARTNER_CONS = Object.freeze([
+  'Cannot responsibly promise revenue growth as a guaranteed outcome.',
+  'Needs business/offer context before the component mix can be priced.',
+  'Social Media Management pricing authority must be reconciled before fixed-bundle use.',
+  'Poor client sales conversion can make good marketing activity look ineffective.',
+  'Too much client coordination would defeat the owner-operator relief promise.',
+]);
