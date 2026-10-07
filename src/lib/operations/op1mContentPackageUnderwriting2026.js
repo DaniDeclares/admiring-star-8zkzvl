@@ -171,10 +171,11 @@ export const NAYJA_MARKETING_PARTNER_SIGNAL = Object.freeze({
     'I also don’t like being in front of the camera',
   ],
   rootProblem: 'Owner-operator delivery load crowds out consistent acquisition/marketing, contributing to below-target revenue.',
-  deliveryConstraint: 'Do not make camera-first content the default solution.',
+  deliveryConstraint: 'Camera-optional, not social-optional: use work/process B-roll, before/after, walkthroughs, hands-only, text-led Reels and voiceovers where appropriate.',
   candidateDepth: CONTENT_DEPTH.MARKETING_PARTNER,
-  minimumMissingInformation: ['business type / offer', 'current customer acquisition source'],
-  nextSalesAction: 'Continue the DM naturally, learn the business/offer and current acquisition source, then compose an outcome offer from existing governed Marketing + Business Development SKUs.',
+  knownBusiness: 'Atlanta Airbnb / short-term-rental cleaning',
+  minimumMissingInformation: ['current customer acquisition source'],
+  nextSalesAction: 'Wait for her current acquisition-source answer, then compose an outcome offer from existing governed Marketing + Business Development capabilities without prolonging discovery.',
 });
 
 export const MARKETING_PARTNER_PACKAGE_RULES = Object.freeze({
@@ -184,7 +185,7 @@ export const MARKETING_PARTNER_PACKAGE_RULES = Object.freeze({
   cameraOptional: true,
   prohibitedAssumptions: ['cold calling', 'closing', 'appointment setting', 'live sales representation', 'unlimited DM management'],
   priceAuthority: false,
-  holdReason: 'Need business/offer + current acquisition source, and DNI-07A-005 $400/$650 authority conflict must be resolved before it anchors a fixed package.',
+  holdReason: 'Need current acquisition source for buyer-specific composition; DNI-07A-005 $400/$650 authority conflict must not anchor a fixed package.',
 });
 
 export const OP1M_BURDEN_ROUTER = Object.freeze({
@@ -202,7 +203,7 @@ export const MARKETING_PARTNER_BLIND_SPOTS = Object.freeze([
   'Owner-operator capacity means the package itself must require little client coordination or it recreates the same burden.',
   'Lead generation without a workable follow-up path can create activity without revenue.',
   'The current Social Media Management price authority is conflicted ($400 vs $650), so it cannot safely anchor a fixed bundle yet.',
-  'Before quoting, DANI needs the business/offer and current acquisition source; anything more is optional discovery, not a reason to stall.',
+  'Nayja business type is already known from the Atlanta Airbnb cleaners context; current acquisition source is the only remaining essential discovery input before buyer-specific composition.',
 ]);
 
 export const MARKETING_PARTNER_OWNER_QUESTIONS = Object.freeze([
