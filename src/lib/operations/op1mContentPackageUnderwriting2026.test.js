@@ -4,6 +4,9 @@ import {
   cTeamDecision,
   CREATE_STARTER_SCOPE,
   OWNER_DECISIONS_REQUIRED,
+  NAYJA_MARKETING_PARTNER_SIGNAL,
+  MARKETING_PARTNER_PACKAGE_RULES,
+  OP1M_BURDEN_ROUTER,
 } from './op1mContentPackageUnderwriting2026';
 
 describe('OP1M content package underwriting', () => {
@@ -36,5 +39,15 @@ describe('OP1M content package underwriting', () => {
 
   it('keeps the three owner decisions explicit', () => {
     expect(OWNER_DECISIONS_REQUIRED).toHaveLength(3);
+  });
+  it('routes Nayja to Marketing Partner without forcing camera-first social', () => {
+    expect(NAYJA_MARKETING_PARTNER_SIGNAL.candidateDepth).toBe('MARKETING_PARTNER');
+    expect(MARKETING_PARTNER_PACKAGE_RULES.cameraOptional).toBe(true);
+    expect(MARKETING_PARTNER_PACKAGE_RULES.priceAuthority).toBe(false);
+  });
+
+  it('keeps live OP1M burden signals in one reusable router', () => {
+    expect(OP1M_BURDEN_ROUTER.liveEvidence).toHaveLength(2);
+    expect(OP1M_BURDEN_ROUTER.liveEvidence.map(x => x.depth)).toEqual(['CREATE', 'MARKETING_PARTNER']);
   });
 });
