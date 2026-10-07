@@ -240,6 +240,14 @@ jobs:
               "  IF v_service_id IS NULL THEN\n    RAISE NOTICE 'Clean replay has no seeded DNI-01B-008 service; Production-data verification skipped.';\n    RETURN;",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919020718_verify_division_04a_admin_stripe_checkout_activation.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "  IF v_count <> 19 THEN\n    RAISE EXCEPTION 'Expected 19 fully-active Division 04A launch register rows, found %', v_count;",
+              "  IF v_count = 0 THEN\n    RAISE NOTICE 'Clean replay has no seeded Division 04A Stripe launch rows; Production-data verification skipped.';\n    RETURN;\n  ELSIF v_count <> 19 THEN\n    RAISE EXCEPTION 'Expected 19 fully-active Division 04A launch register rows, found %', v_count;",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
