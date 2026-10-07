@@ -213,7 +213,7 @@ jobs:
           sql = path.read_text()
           sql = sql.replace(
               "revoke execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) from public;\ngrant execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) to authenticated, service_role, postgres;",
-              "DO $ BEGIN IF to_regprocedure('public.dd_record_provider_application_document(uuid,text,text,text,text,date,uuid)') IS NOT NULL THEN EXECUTE 'revoke execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) from public'; EXECUTE 'grant execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) to authenticated, service_role, postgres'; END IF; END $;",
+              "DO $guard$ BEGIN IF to_regprocedure('public.dd_record_provider_application_document(uuid,text,text,text,text,date,uuid)') IS NOT NULL THEN EXECUTE 'revoke execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) from public'; EXECUTE 'grant execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) to authenticated, service_role, postgres'; END IF; END $guard$;",
           )
           path.write_text(sql)
           PY
