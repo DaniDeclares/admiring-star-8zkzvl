@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { GROWTH_OPTIONS, GROWTH_RELEASE_GATES, growthEconomics, growthOptionUnderwriting } from './op1mGrowthPartnerEconomics2026';
 
 describe('OP1M Growth Partner candidate underwriting', () => {
