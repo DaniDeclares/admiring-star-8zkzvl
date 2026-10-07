@@ -72,6 +72,23 @@ jobs:
           mv supabase/migrations/20260820000004_pass_a1_portal_role_alignment.sql \
              supabase/migrations/20260820142658_pass_a1_portal_role_alignment.sql
 
+          # The remaining early Production records below depend on canonical
+          # private-schema, scheduler, portal/job, and provider foundations that
+          # source reconstructs by 15:35:29. Preserve their SQL and source keys,
+          # but replay disposable copies after those demonstrated prerequisites.
+          test -f supabase/migrations/20260820000005_pass_a4_10_guarded_outbox_cron.sql
+          mv supabase/migrations/20260820000005_pass_a4_10_guarded_outbox_cron.sql \
+             supabase/migrations/20260820153530_pass_a4_10_guarded_outbox_cron.sql
+          test -f supabase/migrations/20260820000008_portal_organization_scoping.sql
+          mv supabase/migrations/20260820000008_portal_organization_scoping.sql \
+             supabase/migrations/20260820153531_portal_organization_scoping.sql
+          test -f supabase/migrations/20260820000009_provider_network_routing_engine.sql
+          mv supabase/migrations/20260820000009_provider_network_routing_engine.sql \
+             supabase/migrations/20260820153532_provider_network_routing_engine.sql
+          test -f supabase/migrations/20260820000010_provider_routing_notifications.sql
+          mv supabase/migrations/20260820000010_provider_routing_notifications.sql \
+             supabase/migrations/20260820153533_provider_routing_notifications.sql
+
       - name: Initialize isolated local Supabase config
         run: test -f supabase/config.toml || supabase init
 
