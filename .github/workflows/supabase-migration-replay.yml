@@ -149,6 +149,14 @@ jobs:
               "JOIN public.services s ON s.sku = t.canonical_sku WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '19c10267-898f-4c10-a25e-186f6aff8771') AND EXISTS (SELECT 1 FROM public.dd_providers WHERE id = 'acba894f-a8c7-4156-b981-fa08acc9e65b');\n\nDROP TABLE tmp_new_svcs;",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260918020500_activate_cass_division_04_bookkeeping_authorization.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "VALUES (gen_random_uuid(), '47eda04f-1ed4-4727-8e07-57018236009c', 'Cassandra', 'Rosser', true, now(), now(), 'Cassandra Rosser', 'Business & Financial Support Partner', 'OWNER_CONFIRMED_REAL_AGREEMENT_2026-09-18')\n  RETURNING id",
+              "SELECT gen_random_uuid(), '47eda04f-1ed4-4727-8e07-57018236009c', 'Cassandra', 'Rosser', true, now(), now(), 'Cassandra Rosser', 'Business & Financial Support Partner', 'OWNER_CONFIRMED_REAL_AGREEMENT_2026-09-18' WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '47eda04f-1ed4-4727-8e07-57018236009c')\n  RETURNING id",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
