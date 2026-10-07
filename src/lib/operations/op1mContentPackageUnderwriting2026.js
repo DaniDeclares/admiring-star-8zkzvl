@@ -273,3 +273,63 @@ export const OWNER_APPROVED_PACKAGE_LADDER_PHILOSOPHY = Object.freeze({
   recommendedOptionPosition: 'MIDDLE',
   successPath: ['conversation','first payment','excellent fulfillment','proof','repeat purchase','recurring relationship','referral'],
 });
+
+
+export const OWNER_APPROVED_GROWTH_PARTNER_FAMILY = Object.freeze({
+  approved: true,
+  marketDesign: 'LOCAL_OWNER_OPERATED_SERVICE_BUSINESSES_WITH_VERTICAL_PLAYBOOKS',
+  nayjaPlaybook: 'ATLANTA_STR_PROPERTY_CLEANING',
+  tiers: ['VISIBILITY_PARTNER','GROWTH_PARTNER','GROWTH_OPERATIONS_PARTNER'],
+  directMatchNayja: 'GROWTH_PARTNER',
+  outreachFollowupIncluded: true,
+  handoffBoundary: 'QUALIFIED_HANDOFF_CLIENT_CLOSES_UNLESS_SEPARATELY_SCOPED',
+  commercialModel: 'PAID_ACTIVATION_PLUS_RECURRING_MONTHLY',
+  fixedPriceAuthority: false,
+});
+
+export const GROWTH_PARTNER_UNDERWRITING_POLICY = Object.freeze({
+  maxLaborPct: OP1M_CONTENT_PACKAGE_POLICY.maxLaborPct,
+  promise: 'CONSISTENT_MARKETING_EXECUTION',
+  neverGuarantee: ['revenue','closed customers','platform reach'],
+  measureFunnel: ['researched_prospects','contacted','responses','qualified_opportunities','handoffs','wins','attributed_collected_revenue'],
+  clientInputsRequired: ['offer','service_area','capacity','minimum_profitable_job','current_acquisition_sources','approved_contact_channels'],
+  privacyRule: 'No guest addresses, access details, belongings or identifiable property/customer information in content without appropriate permission.',
+});
+
+export const GROWTH_PARTNER_ACTIVATION = Object.freeze({
+  purpose: 'Build the minimum acquisition operating system before recurring execution begins.',
+  candidateComponents: [
+    'offer/buyer definition',
+    'territory + capacity constraints',
+    'baseline acquisition-source capture',
+    'simple pipeline + source attribution',
+    'camera-optional content capture playbook',
+    'target-account criteria',
+    'outreach/follow-up messaging + handoff rules',
+  ],
+  priceAuthority: false,
+});
+
+export const GROWTH_PARTNER_MONTHLY = Object.freeze({
+  outcome: 'Keep visibility and governed acquisition activity moving while the owner runs delivery.',
+  allowancesMustBeExplicit: [
+    'content pieces/repurposing',
+    'researched prospects',
+    'outreach touches',
+    'follow-up touches',
+    'local visibility actions',
+    'pipeline updates/reporting',
+  ],
+  overagesRequired: true,
+  cameraOptional: true,
+  closeOwnedByClient: true,
+  priceAuthority: false,
+});
+
+export const GROWTH_PARTNER_ECONOMIC_HOLDS = Object.freeze([
+  'Do not sum existing SKU sticker prices into a package: shared work can reduce labor, but actual shared labor must be modeled.',
+  'DNI-07A-005 Social Media Management has conflicting $400 customer-price vs $650 margin authority.',
+  'Several Marketing/BD canonical starting prices have DRAFT economics at or below break-even under the old $90/hr model.',
+  'Activation and steady-state monthly execution have different labor shapes and require separate underwriting.',
+  'Recurring price cannot be promoted until explicit allowances clear the <=40% all-human labor gate.',
+]);
