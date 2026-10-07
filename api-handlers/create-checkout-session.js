@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import prisma from '../lib/prisma.js';
-import { checkoutEligibility, getGovernedCommercialOffer, getChannelFromRequest, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
+import { checkoutEligibility, getGovernedCommercialOffer, getChannelFromRequest, getChannelGovernanceDecision, resolveVerifiedCommunity, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
 import { isMonthlyOffer, validateRecurringTerms, hasPeriodEndCancellation } from '../src/lib/operations/recurringServiceLifecycle2026.js';
 import { ensureOwnerDirectCheckoutEconomics } from '../src/lib/operations/ownerDirectCheckout2026.js';
 
@@ -20,31 +20,55 @@ export default async function handler(req,res){
   if(!requestId||!serviceId||!email)return json(res,400,{error:'Please complete the service request before payment.'});
   const request=await prisma.serviceRequest.findUnique({where:{id:requestId}});
   if(!request)return json(res,404,{error:'The service request could not be found. Please submit the request again.'});
-  if(String(request.status||'').toLowerCase()!=='payment_pending')return json(res,409,{error:'This request is not currently awaiting payment.'});
+  const recurringAgreement=req.daniRecurringAgreement||null;
+  const requestStatus=String(request.status||'').toLowerCase();
+  if(requestStatus!=='payment_pending'&&!recurringAgreement)return json(res,409,{error:'This request is not currently awaiting payment.'});
   const channel=getChannelFromRequest(request);
-  if(channel!=='CH01')return json(res,400,{error:'Online checkout is currently limited to Resident Concierge requests.'});
+  if(channel!=='CH01'&&!recurringAgreement)return json(res,400,{error:'Direct checkout for this channel requires an accepted recurring agreement.'});
   const intent=request.property_details?.commercialIntent||{};
   const requestedServiceId=String(intent.serviceId||request.property_details?.pricingServiceId||'').trim();
   if(requestedServiceId!==serviceId)return json(res,422,{error:'Payment service does not match the submitted service request.'});
   const requestedSubchannel=String(intent.subchannelCode||request.property_details?.operationsRouting?.subchannelCode||body.subchannelCode||'').trim();
-  if(requestedSubchannel && !VALID_CH01_SUBCHANNELS.has(requestedSubchannel))return json(res,400,{error:'Please select a valid resident subchannel before payment.'});
   const frontDoorCode=String(intent.frontDoorCode||request.property_details?.frontDoorCode||'').trim();
-  const { verified: isVerifiedCommunityResident } = await resolveVerifiedCommunity(req);
-  const canonicalSelection=await resolveCH01CommercialSelection({
-   serviceId,
-   frontDoorCode,
-   subchannelCode:requestedSubchannel,
-   isVerifiedCommunityResident
-  });
-  if(!canonicalSelection.allowed)return json(res,409,{error:'This resident service is not currently authorized for payment through the submitted starting point.',reason:canonicalSelection.reason});
-  const subchannel=canonicalSelection.subchannel;
-  const offer=await getGovernedCommercialOffer(canonicalSelection.serviceId);
+  let subchannel=null, offer=null, gate=null, governedAmount=null;
+  if(channel==='CH01'){
+   if(requestedSubchannel && !VALID_CH01_SUBCHANNELS.has(requestedSubchannel))return json(res,400,{error:'Please select a valid resident subchannel before payment.'});
+   const { verified: isVerifiedCommunityResident } = await resolveVerifiedCommunity(req);
+   const canonicalSelection=await resolveCH01CommercialSelection({
+    serviceId,
+    frontDoorCode,
+    subchannelCode:requestedSubchannel,
+    isVerifiedCommunityResident
+   });
+   if(!canonicalSelection.allowed)return json(res,409,{error:'This resident service is not currently authorized for payment through the submitted starting point.',reason:canonicalSelection.reason});
+   subchannel=canonicalSelection.subchannel;
+   offer=await getGovernedCommercialOffer(canonicalSelection.serviceId);
+   gate=checkoutEligibility(offer,{channel,subchannel,isVerifiedCommunityResident});
+   governedAmount=Number(gate.price);
+  }else{
+   if(
+    recurringAgreement.requestId!==requestId||
+    recurringAgreement.serviceId!==serviceId||
+    recurringAgreement.channel!==channel
+   )return json(res,403,{error:'Recurring checkout authorization does not match this request.'});
+   offer=await getGovernedCommercialOffer(serviceId);
+   const channelDecision=await getChannelGovernanceDecision(serviceId,channel);
+   if(!channelDecision.allowed)return json(res,409,{error:'This service is not currently authorized for payment through this channel.',reason:channelDecision.reason});
+   gate=checkoutEligibility(offer,{
+    channel,
+    channelPricingType:channelDecision.pricingType,
+    channelPriceCents:channelDecision.channelPriceCents
+   });
+   governedAmount=Number(channelDecision.channelPriceCents)/100;
+  }
   const quoteRequired=QUOTE_PRICING_TYPES.has(String(offer?.pricingType||'').toUpperCase());
-  const gate=checkoutEligibility(offer,{channel,subchannel,isVerifiedCommunityResident});
   if(!gate.eligible&&!(quoteRequired&&gate.reason==='QUOTE_REQUIRED'))return json(res,409,{error:'This service is not currently eligible for online payment.',reason:gate.reason});
-  const estimate=await prisma.dd_estimates.findFirst({where:{service_request_id:request.id},orderBy:{created_at:'desc'},select:{id:true,estimated_total:true,deposit_due:true,estimate_status:true,economics_status:true,assignment_readiness_status:true,active_economics_snapshot_id:true,intake_answers:true}});
+  const estimateWhere=recurringAgreement?.estimateId
+   ? {id:recurringAgreement.estimateId,service_request_id:request.id}
+   : {service_request_id:request.id};
+  const estimate=await prisma.dd_estimates.findFirst({where:estimateWhere,orderBy:{created_at:'desc'},select:{id:true,estimated_total:true,deposit_due:true,estimate_status:true,economics_status:true,assignment_readiness_status:true,active_economics_snapshot_id:true,intake_answers:true}});
   if(!estimate)return json(res,422,{error:'No frozen estimate was found for this payment request.'});
-  const frozenAmount=Number(estimate.estimated_total),governedAmount=Number(gate.price);
+  const frozenAmount=Number(estimate.estimated_total);
   if(!Number.isFinite(frozenAmount)||frozenAmount<=0)return json(res,422,{error:'The frozen estimate total could not be securely verified before payment.'});
   if(!quoteRequired&&(!Number.isFinite(governedAmount)||governedAmount<=0||Math.round(frozenAmount*100)!==Math.round(governedAmount*100)))return json(res,409,{error:'The frozen request price no longer matches the governed commercial price. Payment has been blocked and the request needs reconciliation.'});
   if(String(estimate.estimate_status||'').toLowerCase()!=='approved')return json(res,409,{error:'The estimate is not approved for payment.'});
@@ -62,12 +86,15 @@ export default async function handler(req,res){
   const paymentAmount=initialPayment?depositDue:frozenAmount;
   const paymentType=initialPayment?'INITIAL_PAYMENT':'FULL_PAYMENT';
   const recurring=isMonthlyOffer(offer);
+  if(recurringAgreement&&!recurring)return json(res,409,{error:'The accepted recurring agreement does not reference a monthly service.'});
   if(recurring){
    const configurationId=process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID;
    if(!configurationId)return json(res,409,{error:'Subscription checkout is held until billing and cancellation management is configured.'});
    const config=await stripe.billingPortal.configurations.retrieve(configurationId);
    if(!hasPeriodEndCancellation(config))return json(res,409,{error:'Subscription checkout is held until period-end cancellation terms are verified.'});
-   const terms=await prisma.$queryRaw`select terms,monthly_amount_cents from public.dd_service_subscription_terms where estimate_id=${estimate.id}::uuid and canonical_sku=${offer.serviceId} and accepted_at is not null`;
+   const terms=recurringAgreement?.termsId
+    ? await prisma.$queryRaw`select id,terms,monthly_amount_cents from public.dd_service_subscription_terms where id=${recurringAgreement.termsId}::uuid and estimate_id=${estimate.id}::uuid and canonical_sku=${offer.serviceId} and accepted_at is not null`
+    : await prisma.$queryRaw`select id,terms,monthly_amount_cents from public.dd_service_subscription_terms where estimate_id=${estimate.id}::uuid and canonical_sku=${offer.serviceId} and accepted_at is not null`;
    if(!terms[0])return json(res,409,{error:'Recurring scope, allowances and renewal terms must be approved and accepted before payment.'});
    if(terms[0].monthly_amount_cents!==Math.round(frozenAmount*100))return json(res,409,{error:'Approved recurring amount changed; reconcile the agreement before checkout.'});
    if(validateRecurringTerms(terms[0].terms).channel!==channel)return json(res,409,{error:'Recurring agreement channel does not match this request.'});
