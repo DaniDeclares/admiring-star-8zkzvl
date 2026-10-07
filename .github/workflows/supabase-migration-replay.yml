@@ -56,6 +56,15 @@ jobs:
           mv supabase/migrations/20260820_activation_security_hardening.sql \
              supabase/migrations/20260820153327_activation_security_hardening.sql
 
+          # Production applied the 00:00:02 hardening record against a pre-existing
+          # dd_task_templates relation. In canonical source, that relation's first
+          # reconstructible creator is 14:02:59. Re-key only the disposable replay
+          # copy immediately after that prerequisite; keep the Production-owned
+          # source filename and SQL unchanged.
+          test -f supabase/migrations/20260820000002_b2b_retainers_and_public_write_hardening.sql
+          mv supabase/migrations/20260820000002_b2b_retainers_and_public_write_hardening.sql \
+             supabase/migrations/20260820140300_b2b_retainers_and_public_write_hardening.sql
+
       - name: Initialize isolated local Supabase config
         run: test -f supabase/config.toml || supabase init
 
