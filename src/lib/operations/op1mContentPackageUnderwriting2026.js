@@ -238,3 +238,27 @@ export const MARKETING_PARTNER_CONS = Object.freeze([
   'Poor client sales conversion can make good marketing activity look ineffective.',
   'Too much client coordination would defeat the owner-operator relief promise.',
 ]);
+
+
+// Owner approvals — 2026-10-07. These resolve the C-team decision points.
+// CREATE price/scope is owner-approved for the live measurement offer.
+// Marketing Partner architecture is approved; fixed price remains pending buyer composition + economics.
+export const OWNER_APPROVALS_20261007 = Object.freeze({
+  CREATE_STARTER: {
+    approved: true,
+    scopeDepth: 'A',
+    laborDefinition: 'ALL_HUMAN_DELIVERY_LABOR',
+    price: 547,
+    quantity: 2,
+    payment: '100_PERCENT_UPFRONT',
+    status: 'OWNER_APPROVED_MEASUREMENT_OFFER',
+  },
+  MARKETING_PARTNER: {
+    approved: true,
+    promise: 'CONSISTENT_MARKETING_EXECUTION',
+    cameraOptionalDefault: true,
+    salesHandoffBoundary: 'GOVERNED_FOLLOWUP_THROUGH_QUALIFIED_HANDOFF_CLIENT_CLOSES',
+    fixedPriceApproved: false,
+    status: 'OWNER_APPROVED_ARCHITECTURE_PENDING_COMPOSITION_AND_ECONOMICS',
+  },
+});
