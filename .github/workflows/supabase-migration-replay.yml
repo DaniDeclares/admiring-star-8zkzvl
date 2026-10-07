@@ -125,6 +125,22 @@ jobs:
               "WHERE canonical_sku IN (SELECT canonical_sku FROM tmp_new_prices) AND runtime_service_id IS NOT NULL;",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260917014659_reconcile_and_price_wedding_officiant_services.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "FROM unnest(ARRAY['CH01','CH02','CH03','CH04','CH05']) AS ch;",
+              "FROM unnest(ARRAY['CH01','CH02','CH03','CH04','CH05']) AS ch WHERE EXISTS (SELECT 1 FROM public.services WHERE id = '0fd8d9b9-fe4f-47d2-a78b-27eed38ddd69');",
+          )
+          sql = sql.replace(
+              "VALUES ('19c10267-898f-4c10-a25e-186f6aff8771', '0fd8d9b9-fe4f-47d2-a78b-27eed38ddd69', 'OFFICIANT_ORDAINED', 'Wedding Officiant Services', true);",
+              "SELECT '19c10267-898f-4c10-a25e-186f6aff8771', '0fd8d9b9-fe4f-47d2-a78b-27eed38ddd69', 'OFFICIANT_ORDAINED', 'Wedding Officiant Services', true WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '19c10267-898f-4c10-a25e-186f6aff8771') AND EXISTS (SELECT 1 FROM public.services WHERE id = '0fd8d9b9-fe4f-47d2-a78b-27eed38ddd69');",
+          )
+          sql = sql.replace(
+              "WHERE m.canonical_sku = 'DNI-10A-022';",
+              "WHERE m.canonical_sku = 'DNI-10A-022' AND EXISTS (SELECT 1 FROM public.services WHERE id = '0fd8d9b9-fe4f-47d2-a78b-27eed38ddd69');",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
