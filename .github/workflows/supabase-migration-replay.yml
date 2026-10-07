@@ -224,6 +224,14 @@ jobs:
               "    if v_total = 0 then\n        raise notice 'Clean replay has no seeded SELL_NOW service population; schema and registry retained, Production-data backfill assertions skipped.';\n        return;\n    elsif v_total != 279 then\n        raise exception 'Eligible population drifted: expected 279, found %. Re-run classification before backfilling.', v_total;",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919000931_create_joseph_sink_provider_record_nawfside.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "values (\n  '6bb73275-cd4d-44ea-98e4-19113d1954cc',\n  'Joseph',\n  'Sink',\n  true,\n  'Joseph Sink',\n  'Owner',\n  'STAFF_DIRECT',\n  'OWNER_CONFIRMED_2026-09-18'\n);",
+              "select '6bb73275-cd4d-44ea-98e4-19113d1954cc', 'Joseph', 'Sink', true, 'Joseph Sink', 'Owner', 'STAFF_DIRECT', 'OWNER_CONFIRMED_2026-09-18' where exists (select 1 from public.dd_provider_organizations where id = '6bb73275-cd4d-44ea-98e4-19113d1954cc');",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
