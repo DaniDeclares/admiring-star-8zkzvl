@@ -333,3 +333,64 @@ export const GROWTH_PARTNER_ECONOMIC_HOLDS = Object.freeze([
   'Activation and steady-state monthly execution have different labor shapes and require separate underwriting.',
   'Recurring price cannot be promoted until explicit allowances clear the <=40% all-human labor gate.',
 ]);
+
+
+export const DEANDREA_CREATE_UNDERWRITING = Object.freeze({
+  starter: {
+    publicName: 'Content Assist',
+    price: 547,
+    quantity: 2,
+    status: 'OWNER_APPROVED_MEASUREMENT_OFFER',
+    modeledMinutes: { providerPerPiece: 60, ownerCreativeBatch: 30, ownerQaAdminBatch: 30, ownerCustomerCommsBatch: 15 },
+    modeledEconomics: createStarterEconomics(547),
+  },
+  sensitivity: {
+    provider75MinutesPerPiece: underwritePackage({
+      price: 547,
+      providerMinutes: 150,
+      ownerCreativeMinutes: 30,
+      ownerQaAdminMinutes: 30,
+      ownerCustomerCommsMinutes: 15,
+    }),
+    rule: 'If measured provider edit effort averages materially above 60 minutes per piece, do not use $547 as the basis for scaled recurring pricing.',
+  },
+});
+
+export function contentPartnerEconomics({
+  price,
+  quantity,
+  providerMinutesPerPiece = 60,
+  ownerCreativeMinutesPerPiece = 15,
+  ownerQaAdminMinutesPerPiece = 15,
+  ownerCustomerCommsMinutesPerMonth = 30,
+}) {
+  return underwritePackage({
+    price,
+    providerMinutes: quantity * providerMinutesPerPiece,
+    ownerCreativeMinutes: quantity * ownerCreativeMinutesPerPiece,
+    ownerQaAdminMinutes: quantity * ownerQaAdminMinutesPerPiece,
+    ownerCustomerCommsMinutes: ownerCustomerCommsMinutesPerMonth,
+  });
+}
+
+export const CONTENT_PARTNER_RECURRING_UNDERWRITING = Object.freeze({
+  status: 'CANDIDATE_NOT_PUBLIC_PRICE_AUTHORITY',
+  scopeBoundary: 'Recurring CREATE-depth production: client supplies core topics/messages + footage; DANI organizes/refines and produces. Blank-page campaign strategy, filming, posting/management and heavy footage rescue are separate scope.',
+  candidateVolumes: [4, 8, 12],
+  pricingRule: 'Do not reuse historical $1097/$1797/$2497 candidates unless the selected volume clears the <=40% all-human labor gate under measured delivery time.',
+  measurementPromotionGate: {
+    minimumPaidStarterJobs: OP1M_CONTENT_PACKAGE_POLICY.measurementJobsRequired,
+    capture: ['provider_edit_minutes','owner_creative_minutes','qa_admin_minutes','customer_comms_minutes','revision_minutes','footage_rescue_minutes','turnaround','customer_satisfaction'],
+    action: 'Re-underwrite recurring volume tiers from observed p50/p75 labor before public promotion.',
+  },
+  currentModelFloorsAt60MinProviderPerPiece: {
+    four: contentPartnerEconomics({ price: 1, quantity: 4 }).minimumPriceForLaborGate,
+    eight: contentPartnerEconomics({ price: 1, quantity: 8 }).minimumPriceForLaborGate,
+    twelve: contentPartnerEconomics({ price: 1, quantity: 12 }).minimumPriceForLaborGate,
+  },
+  currentModelFloorsAt75MinProviderPerPiece: {
+    four: contentPartnerEconomics({ price: 1, quantity: 4, providerMinutesPerPiece: 75 }).minimumPriceForLaborGate,
+    eight: contentPartnerEconomics({ price: 1, quantity: 8, providerMinutesPerPiece: 75 }).minimumPriceForLaborGate,
+    twelve: contentPartnerEconomics({ price: 1, quantity: 12, providerMinutesPerPiece: 75 }).minimumPriceForLaborGate,
+  },
+});
