@@ -117,6 +117,14 @@ jobs:
               "), ranked as (select c.*,row_number() over(partition by jid order by score desc,pid) rn from candidates c), ins as (",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260917001856_price_32_unpriced_sell_now_services.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "WHERE canonical_sku IN (SELECT canonical_sku FROM tmp_new_prices);",
+              "WHERE canonical_sku IN (SELECT canonical_sku FROM tmp_new_prices) AND runtime_service_id IS NOT NULL;",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
