@@ -262,3 +262,14 @@ export const OWNER_APPROVALS_20261007 = Object.freeze({
     status: 'OWNER_APPROVED_ARCHITECTURE_PENDING_COMPOSITION_AND_ECONOMICS',
   },
 });
+
+
+export const OWNER_APPROVED_PACKAGE_LADDER_PHILOSOPHY = Object.freeze({
+  editPermanentEntryProduct: true,
+  editScope: 'Organized footage + clear direction -> complete professional edit.',
+  scopeMismatchRule: 'If EDIT intake requires CREATE work, flag and require upgrade/change order before work begins.',
+  salesPhilosophy: 'EASY_ENTRY_PROVE_VALUE_MOVE_TO_RECURRING',
+  customerFacingChoiceLimit: 3,
+  recommendedOptionPosition: 'MIDDLE',
+  successPath: ['conversation','first payment','excellent fulfillment','proof','repeat purchase','recurring relationship','referral'],
+});
