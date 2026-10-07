@@ -229,7 +229,7 @@ jobs:
           sql = path.read_text()
           sql = sql.replace(
               "values (\n  '6bb73275-cd4d-44ea-98e4-19113d1954cc',\n  'Joseph',\n  'Sink',\n  true,\n  'Joseph Sink',\n  'Owner',\n  'STAFF_DIRECT',\n  'OWNER_CONFIRMED_2026-09-18'\n);",
-              "select '6bb73275-cd4d-44ea-98e4-19113d1954cc', 'Joseph', 'Sink', true, 'Joseph Sink', 'Owner', 'STAFF_DIRECT', 'OWNER_CONFIRMED_2026-09-18' where exists (select 1 from public.dd_provider_organizations where id = '6bb73275-cd4d-44ea-98e4-19113d1954cc');",
+              "select '6bb73275-cd4d-44ea-98e4-19113d1954cc'::uuid, 'Joseph', 'Sink', true, 'Joseph Sink', 'Owner', 'STAFF_DIRECT', 'OWNER_CONFIRMED_2026-09-18' where exists (select 1 from public.dd_provider_organizations where id = '6bb73275-cd4d-44ea-98e4-19113d1954cc');",
           )
           path.write_text(sql)
           PY
