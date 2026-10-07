@@ -7,6 +7,14 @@ import {
   NAYJA_MARKETING_PARTNER_SIGNAL,
   MARKETING_PARTNER_PACKAGE_RULES,
   OP1M_BURDEN_ROUTER,
+  OWNER_APPROVED_CONTENT_PARTNER_OPERATING_MODEL,
+  CONTENT_ASSIST_MEASUREMENT_RECEIPT,
+  CONTENT_PRODUCTION_AUTOMATION_BLUEPRINT,
+  OP1M_LIVE_SALES_STATE,
+  OP1M_SILENCE_GUARD,
+  routeOp1mLiveEvent,
+  DEANDREA_CREATE_UNDERWRITING,
+  CONTENT_PARTNER_RECURRING_UNDERWRITING,
 } from './op1mContentPackageUnderwriting2026';
 
 describe('OP1M content package underwriting', () => {
@@ -49,5 +57,36 @@ describe('OP1M content package underwriting', () => {
   it('keeps live OP1M burden signals in one reusable router', () => {
     expect(OP1M_BURDEN_ROUTER.liveEvidence).toHaveLength(2);
     expect(OP1M_BURDEN_ROUTER.liveEvidence.map(x => x.depth)).toEqual(['CREATE', 'MARKETING_PARTNER']);
+  });
+  it('uses one recurring Content Partner relationship with allowances and a stronger mature labor target', () => {
+    expect(OWNER_APPROVED_CONTENT_PARTNER_OPERATING_MODEL.publicTierMatrix).toBe(false);
+    expect(OWNER_APPROVED_CONTENT_PARTNER_OPERATING_MODEL.matureHumanLaborTargetPct).toBe(0.30);
+    expect(OWNER_APPROVED_CONTENT_PARTNER_OPERATING_MODEL.absoluteHumanLaborReleaseGatePct).toBe(0.40);
+  });
+
+  it('instruments the first paid Content Assist job before scaling recurring pricing', () => {
+    expect(CONTENT_PRODUCTION_AUTOMATION_BLUEPRINT.trigger).toBe('FIRST_PAID_CONTENT_ASSIST_JOB');
+    expect(CONTENT_ASSIST_MEASUREMENT_RECEIPT.requiredMetrics).toContain('repeat_purchase_requested');
+    expect(CONTENT_PARTNER_RECURRING_UNDERWRITING.measurementPromotionGate.minimumPaidStarterJobs).toBe(3);
+  });
+
+  it('preserves the 75-minute edit sensitivity instead of treating $547 as scale proof', () => {
+    expect(DEANDREA_CREATE_UNDERWRITING.sensitivity.provider75MinutesPerPiece.clearsLaborGate).toBe(false);
+  });
+
+  it('holds silent buyers without auto-contact and resumes from real evidence', () => {
+    expect(OP1M_LIVE_SALES_STATE.deAndrea.stage).toBe('WAITING_FOR_BUYER');
+    expect(OP1M_LIVE_SALES_STATE.nayja.minimumMissingInformation).toEqual(['current customer acquisition source']);
+    expect(routeOp1mLiveEvent({ lane: 'DEANDREA', event: 'NO_RESPONSE' })).toEqual({
+      state: 'WAITING_FOR_BUYER', action: 'NONE', autoContact: false,
+    });
+    expect(routeOp1mLiveEvent({ lane: 'NAYJA', event: 'ACQUISITION_SOURCE_RECEIVED' }).state).toBe('COMPOSE_GROWTH_PARTNER');
+    expect(OP1M_SILENCE_GUARD.autoFollowupFromThisExperiment).toBe(false);
+  });
+
+  it('routes new Day-2 burden comments into discovery without manufacturing demand', () => {
+    const routed = routeOp1mLiveEvent({ lane: 'DAY2_POST', event: 'NEW_BURDEN_COMMENT' });
+    expect(routed.state).toBe('DISCOVERY_REQUIRED');
+    expect(routed.autoContact).toBe(false);
   });
 });
