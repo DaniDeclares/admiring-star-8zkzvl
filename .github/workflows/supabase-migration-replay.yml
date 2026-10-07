@@ -216,6 +216,14 @@ jobs:
               "DO $guard$ BEGIN IF to_regprocedure('public.dd_record_provider_application_document(uuid,text,text,text,text,date,uuid)') IS NOT NULL THEN EXECUTE 'revoke execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) from public'; EXECUTE 'grant execute on function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) to authenticated, service_role, postgres'; END IF; END $guard$;",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919000124_create_pricing_engines_registry_and_backfill.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "    if v_total != 279 then\n        raise exception 'Eligible population drifted: expected 279, found %. Re-run classification before backfilling.', v_total;",
+              "    if v_total = 0 then\n        raise notice 'Clean replay has no seeded SELL_NOW service population; schema and registry retained, Production-data backfill assertions skipped.';\n        return;\n    elsif v_total != 279 then\n        raise exception 'Eligible population drifted: expected 279, found %. Re-run classification before backfilling.', v_total;",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
