@@ -65,6 +65,13 @@ jobs:
           mv supabase/migrations/20260820000002_b2b_retainers_and_public_write_hardening.sql \
              supabase/migrations/20260820140300_b2b_retainers_and_public_write_hardening.sql
 
+          # The 00:00:04 portal-role alignment likewise ran in Production against
+          # pre-existing identity storage. Canonical source first reconstructs that
+          # table at 14:26:57, so replay the unchanged record immediately afterward.
+          test -f supabase/migrations/20260820000004_pass_a1_portal_role_alignment.sql
+          mv supabase/migrations/20260820000004_pass_a1_portal_role_alignment.sql \
+             supabase/migrations/20260820142658_pass_a1_portal_role_alignment.sql
+
       - name: Initialize isolated local Supabase config
         run: test -f supabase/config.toml || supabase init
 
