@@ -157,6 +157,11 @@ jobs:
               "SELECT gen_random_uuid(), '47eda04f-1ed4-4727-8e07-57018236009c', 'Cassandra', 'Rosser', true, now(), now(), 'Cassandra Rosser', 'Business & Financial Support Partner', 'OWNER_CONFIRMED_REAL_AGREEMENT_2026-09-18' WHERE EXISTS (SELECT 1 FROM public.dd_provider_organizations WHERE id = '47eda04f-1ed4-4727-8e07-57018236009c')\n  RETURNING id",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260918021058_authorize_christopher_walker_dtf_computer_capabilities.sql")
+          sql = path.read_text()
+          sql = "ALTER TABLE public.dd_provider_organizations DROP CONSTRAINT IF EXISTS dd_provider_organizations_vendor_type_check; ALTER TABLE public.dd_provider_organizations ADD CONSTRAINT dd_provider_organizations_vendor_type_check CHECK (vendor_type = ANY (ARRAY['PARTNER'::text,'SUBCONTRACTOR'::text,'EMPLOYEE'::text,'INDIVIDUAL'::text]));\n" + sql
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
