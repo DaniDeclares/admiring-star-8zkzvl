@@ -70,7 +70,7 @@ jobs:
           # table at 14:26:57, so replay the unchanged record immediately afterward.
           test -f supabase/migrations/20260820000004_pass_a1_portal_role_alignment.sql
           mv supabase/migrations/20260820000004_pass_a1_portal_role_alignment.sql \
-             supabase/migrations/20260820142658_pass_a1_portal_role_alignment.sql
+             supabase/migrations/20260820153535_pass_a1_portal_role_alignment.sql
 
           # The remaining early Production records below depend on canonical
           # private-schema, scheduler, portal/job, and provider foundations that
