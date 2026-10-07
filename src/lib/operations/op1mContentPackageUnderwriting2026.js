@@ -394,3 +394,112 @@ export const CONTENT_PARTNER_RECURRING_UNDERWRITING = Object.freeze({
     twelve: contentPartnerEconomics({ price: 1, quantity: 12, providerMinutesPerPiece: 75 }).minimumPriceForLaborGate,
   },
 });
+
+
+export const OWNER_APPROVED_CONTENT_PARTNER_OPERATING_MODEL = Object.freeze({
+  recurringShape: 'ONE_RELATIONSHIP_INCLUDED_MONTHLY_ALLOWANCE_PLUS_OVERAGES',
+  publicTierMatrix: false,
+  internalScenarioVolumes: [4, 8, 12],
+  matureHumanLaborTargetPct: 0.30,
+  absoluteHumanLaborReleaseGatePct: 0.40,
+  optimizationRule: 'Improve workflow/automation before solving avoidable labor with price alone.',
+  buildTrigger: 'FIRST_PAID_CONTENT_ASSIST_JOB',
+  buildFromRealWork: true,
+});
+
+export const CONTENT_ASSIST_MEASUREMENT_RECEIPT = Object.freeze({
+  requiredStages: [
+    'intake',
+    'planning_voiceover_organization',
+    'footage_prep',
+    'edit',
+    'captions_polish',
+    'qa_admin',
+    'customer_comms',
+    'revisions',
+    'final_delivery',
+  ],
+  requiredMetrics: [
+    'provider_edit_minutes',
+    'owner_creative_minutes',
+    'qa_admin_minutes',
+    'customer_comms_minutes',
+    'revision_minutes',
+    'footage_rescue_minutes',
+    'turnaround_minutes',
+    'customer_satisfaction',
+    'posted_or_used',
+    'repeat_purchase_requested',
+  ],
+  measurementRule: 'Measure stage-level time; do not create burdensome micro-timers.',
+});
+
+export const CONTENT_PRODUCTION_AUTOMATION_BLUEPRINT = Object.freeze({
+  trigger: 'FIRST_PAID_CONTENT_ASSIST_JOB',
+  sequence: [
+    'assets_received',
+    'transcribe',
+    'extract_topics_and_message',
+    'organize_voiceover_direction',
+    'clip_selection_edit_prep',
+    'human_edit',
+    'human_qa',
+    'customer_approval',
+    'platform_ready_export',
+    'measurement_receipt',
+    'repeat_or_recurring_offer',
+  ],
+  automationBoundary: 'AI may assist repetitive preparation; human judgment owns creative QA and final release.',
+  doNotPrebuildBlindly: true,
+});
+
+export const OP1M_LIVE_SALES_STATE = Object.freeze({
+  deAndrea: {
+    stage: 'WAITING_FOR_BUYER',
+    lastKnownEvent: 'PACKAGES_SENT',
+    allowedNextEvents: ['SELECT_EDIT','SELECT_CONTENT_ASSIST','ASK_CONTENT_PARTNER_PRICE','DECLINE','NO_RESPONSE'],
+  },
+  nayja: {
+    stage: 'WAITING_FOR_BUYER',
+    lastKnownEvent: 'ACQUISITION_SOURCE_QUESTION_SENT_OR_PENDING_RESPONSE',
+    knownBusiness: 'ATLANTA_STR_PROPERTY_CLEANING',
+    minimumMissingInformation: ['current customer acquisition source'],
+    allowedNextEvents: ['ACQUISITION_SOURCE_RECEIVED','DECLINE','NO_RESPONSE'],
+  },
+  day2Post: {
+    stage: 'LISTENING',
+    currentAdditionalResponders: 0,
+    rule: 'New burden comments enter the existing burden router; do not manufacture outreach from silence.',
+  },
+});
+
+export function routeOp1mLiveEvent({ lane, event }) {
+  const key = String(lane || '').toUpperCase();
+  const e = String(event || '').toUpperCase();
+  if (e === 'NO_RESPONSE') return { state: 'WAITING_FOR_BUYER', action: 'NONE', autoContact: false };
+
+  if (key === 'DEANDREA') {
+    if (e === 'SELECT_EDIT') return { state: 'PAYMENT_READY', action: 'COLLECT_199_THEN_EDIT_INTAKE_SCOPE_GATE', autoContact: false };
+    if (e === 'SELECT_CONTENT_ASSIST') return { state: 'PAYMENT_READY', action: 'COLLECT_547_THEN_MEASURED_CONTENT_ASSIST_FULFILLMENT', autoContact: false };
+    if (e === 'ASK_CONTENT_PARTNER_PRICE') return { state: 'UNDERWRITE_REQUESTED_CADENCE', action: 'UNDERWRITE_REQUESTED_ALLOWANCE_FROM_CURRENT_MODEL_AND_MEASURED_EVIDENCE', autoContact: false };
+    if (e === 'DECLINE') return { state: 'CLOSED_LEARNING', action: 'CAPTURE_DECLINE_REASON_IF_VOLUNTEERED', autoContact: false };
+  }
+
+  if (key === 'NAYJA') {
+    if (e === 'ACQUISITION_SOURCE_RECEIVED') return { state: 'COMPOSE_GROWTH_PARTNER', action: 'MAP_SOURCE_TO_VISIBILITY_ACQUISITION_FOLLOWUP_ALLOWANCES_THEN_UNDERWRITE', autoContact: false };
+    if (e === 'DECLINE') return { state: 'CLOSED_LEARNING', action: 'CAPTURE_DECLINE_REASON_IF_VOLUNTEERED', autoContact: false };
+  }
+
+  if (key === 'DAY2_POST' && e === 'NEW_BURDEN_COMMENT') {
+    return { state: 'DISCOVERY_REQUIRED', action: 'ROUTE_BURDEN_TO_EXISTING_DEPTH_THEN_ASK_ONE_MINIMUM_DISCOVERY_QUESTION', autoContact: false };
+  }
+
+  return { state: 'HOLD_FOR_EVIDENCE', action: 'NONE', autoContact: false };
+}
+
+export const OP1M_SILENCE_GUARD = Object.freeze({
+  silenceIsNotRejection: true,
+  silenceIsNotBuyingIntent: true,
+  autoFollowupFromThisExperiment: false,
+  rule: 'No repeated DM, no pressure escalation, no fabricated responder. Resume only on real buyer evidence or a separately owner-approved follow-up policy.',
+});
