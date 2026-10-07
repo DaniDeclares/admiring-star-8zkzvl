@@ -92,6 +92,25 @@ jobs:
           mv supabase/migrations/20260820000007_pass_a5_evidence_access_hardening.sql \
              supabase/migrations/20260820153534_pass_a5_evidence_access_hardening.sql
 
+          # Production's quarantine receipt ran historically, but neither current
+          # Production nor canonical clean-source tables retain the optional status
+          # columns it targeted. Patch only the disposable replay copy so its stated
+          # "if the table exists" intent also requires the referenced column.
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("supabase/migrations/20260823194155_quarantine_legacy_commercial_pricing.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "IF to_regclass('public.dd_travel_calculations') IS NOT NULL THEN",
+              "IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dd_travel_calculations' AND column_name = 'status') THEN",
+          )
+          sql = sql.replace(
+              "IF to_regclass('public.fieldops_travel_calculations') IS NOT NULL THEN",
+              "IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'fieldops_travel_calculations' AND column_name = 'status') THEN",
+          )
+          path.write_text(sql)
+          PY
+
       - name: Initialize isolated local Supabase config
         run: test -f supabase/config.toml || supabase init
 
