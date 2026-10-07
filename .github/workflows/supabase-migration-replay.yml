@@ -256,6 +256,14 @@ jobs:
               "  v_service_count int;\n  v_cap_count int;\n  v_chan_count int;\n  v_offer_count int;\nBEGIN\n  SELECT count(*) INTO v_service_count FROM public.services WHERE sku LIKE 'DNI-04A-%' AND split_part(sku, '-', 3)::int BETWEEN 1 AND 19;\n  IF v_service_count = 0 THEN\n    RAISE NOTICE 'Clean replay has no seeded Division 04A service population; Production-data authorization reconciliation skipped.';\n    RETURN;\n  ELSIF v_service_count <> 19 THEN\n    RAISE EXCEPTION 'Division 04A service population drifted: expected 19 or clean-replay zero, found %', v_service_count;\n  END IF;\n  SELECT count(*) INTO v_cap_count",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919030648_verify_notary_division_channel_availability.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "  v_chan_count int;\n  v_offer_count int;\n  v_i9_status text;\nBEGIN\n  SELECT count(*) INTO v_chan_count",
+              "  v_service_count int;\n  v_chan_count int;\n  v_offer_count int;\n  v_i9_status text;\nBEGIN\n  SELECT count(*) INTO v_service_count FROM public.services WHERE service_family IN ('05A Notary & Signing Services','Notary & Document Services');\n  IF v_service_count = 0 THEN\n    RAISE NOTICE 'Clean replay has no seeded notary service population; Production-data channel verification skipped.';\n    RETURN;\n  ELSIF v_service_count <> 27 THEN\n    RAISE EXCEPTION 'Notary service population drifted: expected 27 or clean-replay zero, found %', v_service_count;\n  END IF;\n  SELECT count(*) INTO v_chan_count",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
