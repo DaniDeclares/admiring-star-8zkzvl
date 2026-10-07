@@ -248,6 +248,14 @@ jobs:
               "  IF v_count = 0 THEN\n    RAISE NOTICE 'Clean replay has no seeded Division 04A Stripe launch rows; Production-data verification skipped.';\n    RETURN;\n  ELSIF v_count <> 19 THEN\n    RAISE EXCEPTION 'Expected 19 fully-active Division 04A launch register rows, found %', v_count;",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919023839_authorize_danielle_division_04a_admin_services.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "  v_cap_count int;\n  v_chan_count int;\n  v_offer_count int;\nBEGIN\n  SELECT count(*) INTO v_cap_count",
+              "  v_service_count int;\n  v_cap_count int;\n  v_chan_count int;\n  v_offer_count int;\nBEGIN\n  SELECT count(*) INTO v_service_count FROM public.services WHERE sku LIKE 'DNI-04A-%' AND split_part(sku, '-', 3)::int BETWEEN 1 AND 19;\n  IF v_service_count = 0 THEN\n    RAISE NOTICE 'Clean replay has no seeded Division 04A service population; Production-data authorization reconciliation skipped.';\n    RETURN;\n  ELSIF v_service_count <> 19 THEN\n    RAISE EXCEPTION 'Division 04A service population drifted: expected 19 or clean-replay zero, found %', v_service_count;\n  END IF;\n  SELECT count(*) INTO v_cap_count",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
