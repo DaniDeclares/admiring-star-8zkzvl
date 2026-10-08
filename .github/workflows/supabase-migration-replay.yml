@@ -280,8 +280,16 @@ jobs:
           path = Path("supabase/migrations/20260919120614_division_01_engine_backfill_and_close_gate_bypass.sql")
           sql = path.read_text()
           sql = sql.replace(
+              "  v_gated_count int;",
+              "  v_present_skus text[];\n  v_clean_replay boolean := false;\n  v_gated_count int;",
+          )
+          sql = sql.replace(
               "BEGIN\n  -- 1. Close the live gate-bypass",
-              "BEGIN\n  IF NOT EXISTS (SELECT 1 FROM public.services WHERE sku IN ('DNI-01A-042','DNI-01D-017','DNI-01C-002','DNI-01C-003','DNI-01C-005','DNI-01C-006','DNI-01D-008','DNI-01D-009','DNI-01D-010','DNI-01D-011','DNI-01D-013','DNI-01D-014','DNI-01D-016','DNI-01F-005','DNI-01C-004','DNI-01D-007','DNI-01D-012','DNI-01D-015','DNI-01E-002','DNI-01F-002','DNI-01F-003','DNI-01F-004')) THEN\n    RAISE NOTICE 'Clean replay has none of the 22 Production Division 01 reconciliation targets; data-only engine/gate receipt skipped.';\n    RETURN;\n  END IF;\n  -- 1. Close the live gate-bypass",
+              "BEGIN\n  SELECT array_agg(sku ORDER BY sku) INTO v_present_skus FROM public.services WHERE sku IN ('DNI-01A-042','DNI-01D-017','DNI-01C-002','DNI-01C-003','DNI-01C-005','DNI-01C-006','DNI-01D-008','DNI-01D-009','DNI-01D-010','DNI-01D-011','DNI-01D-013','DNI-01D-014','DNI-01D-016','DNI-01F-005','DNI-01C-004','DNI-01D-007','DNI-01D-012','DNI-01D-015','DNI-01E-002','DNI-01F-002','DNI-01F-003','DNI-01F-004');\n  IF v_present_skus = ARRAY['DNI-01A-042','DNI-01D-017']::text[] THEN\n    v_clean_replay := true;\n  ELSIF coalesce(array_length(v_present_skus, 1), 0) <> 22 THEN\n    RAISE EXCEPTION 'Division 01 target population drifted: expected full 22 or exact clean-source gate pair, found %', v_present_skus;\n  END IF;\n  -- 1. Close the live gate-bypass",
+          )
+          sql = sql.replace(
+              "  IF v_gated_count <> 2 THEN\n    RAISE EXCEPTION 'Expected DNI-01A-042 and DNI-01D-017 gated to INTAKE_ONLY/FULFILLMENT_GATED, found %', v_gated_count;\n  END IF;\n\n  SELECT count(*) INTO v_engine_a_count",
+              "  IF v_gated_count <> 2 THEN\n    RAISE EXCEPTION 'Expected DNI-01A-042 and DNI-01D-017 gated to INTAKE_ONLY/FULFILLMENT_GATED, found %', v_gated_count;\n  END IF;\n  IF v_clean_replay THEN\n    RAISE NOTICE 'Clean replay contains only the exact gated pair; gate repair verified and pre-ledger Engine A/E backfill assertions skipped.';\n    RETURN;\n  END IF;\n\n  SELECT count(*) INTO v_engine_a_count",
           )
           path.write_text(sql)
           PY
