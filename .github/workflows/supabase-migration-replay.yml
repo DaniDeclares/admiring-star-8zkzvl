@@ -324,6 +324,26 @@ jobs:
               "  -- Assertions (fail closed).\n  IF v_clean_replay THEN\n    IF v_logistics_c <> 0 OR v_d13_gov_d <> 0 OR v_d10_events_e <> 0 OR v_recurring_a <> 4 OR v_fixed_a <> 52 OR v_referral_untouched <> 11 OR v_d02_turnover_untouched <> 20 OR v_remaining_unpriced <> 54 THEN\n      RAISE EXCEPTION 'Clean replay pass 2 drifted: logistics %, d13 %, d10 %, recurring %, fixed %, referral %, d02 %, remaining %', v_logistics_c, v_d13_gov_d, v_d10_events_e, v_recurring_a, v_fixed_a, v_referral_untouched, v_d02_turnover_untouched, v_remaining_unpriced;\n    END IF;\n    RAISE NOTICE 'Clean replay pass 2 verified: exact canonical-source candidate effects and eleven intentionally unpriced referral services.';\n    RETURN;\n  END IF;\n  IF v_logistics_c <> 11 THEN",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919172850_implement_owner_default_fulfillment_all_217.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              " IF v_count<>217 THEN RAISE EXCEPTION 'Owner fulfillment candidate drift: expected 217, found %',v_count; END IF;",
+              " IF v_count NOT IN (0,217) THEN RAISE EXCEPTION 'Owner fulfillment candidate drift: expected full 217 or zero clean-source candidates, found %',v_count; END IF;",
+          )
+          sql = sql.replace(
+              " v_caps int; v_channels int; v_blocked int; v_quote int;",
+              " v_candidates int; v_caps int; v_channels int; v_blocked int; v_quote int;",
+          )
+          sql = sql.replace(
+              "BEGIN\n SELECT count(*) INTO v_caps",
+              "BEGIN\n SELECT count(*) INTO v_candidates FROM tmp_owner_fulfillment_gap;\n SELECT count(*) INTO v_caps",
+          )
+          sql = sql.replace(
+              " IF v_caps<>217 THEN RAISE EXCEPTION 'Owner capability assertion failed: %/217',v_caps; END IF;",
+              " IF v_candidates=0 THEN\n   IF v_caps<>0 OR v_channels<>0 OR v_blocked<>0 OR v_quote<>0 THEN RAISE EXCEPTION 'Clean replay owner fulfillment no-op drifted: caps %, channels %, blocked %, quote %',v_caps,v_channels,v_blocked,v_quote; END IF;\n   RAISE NOTICE 'Clean replay contains zero owner-fulfillment candidates; exact no-op verified without fabricating owner capability.';\n   RETURN;\n END IF;\n IF v_caps<>217 THEN RAISE EXCEPTION 'Owner capability assertion failed: %/217',v_caps; END IF;",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
