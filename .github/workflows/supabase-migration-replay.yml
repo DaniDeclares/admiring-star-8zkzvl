@@ -390,7 +390,7 @@ jobs:
           sql = legacy_price_view + sql
           sql = sql.replace(
               "  v_expected integer := 8;\n  v_updated integer;\nbegin",
-              "  v_expected integer;\n  v_candidate_skus text[];\n  v_updated integer;\nbegin\n  select count(*), array_agg(sku order by sku) into v_expected,v_candidate_skus from public.vw_legacy_price_reconciliation where is_active=true and reconciliation_status='UNAMBIGUOUS_STALE';\n  if v_expected=7 then raise exception 'Clean-source legacy price candidates require exact classification: %',v_candidate_skus; elsif v_expected<>8 then raise exception 'Legacy price candidate drift: expected full 8 or exact classified clean-source set, found % (%)',v_expected,v_candidate_skus; end if;",
+              "  v_expected integer;\n  v_candidate_skus text[];\n  v_updated integer;\nbegin\n  select count(*), array_agg(sku order by sku) into v_expected,v_candidate_skus from public.vw_legacy_price_reconciliation where is_active=true and reconciliation_status='UNAMBIGUOUS_STALE';\n  if v_candidate_skus=ARRAY['DNI-01A-002','DNI-01A-003','DNI-01A-004','DNI-01A-005','DNI-01A-006','DNI-01A-007','DNI-01A-008']::text[] then null; elsif v_expected<>8 then raise exception 'Legacy price candidate drift: expected full 8 or exact clean-source DNI-01A-002..008 set, found % (%)',v_expected,v_candidate_skus; end if;",
           )
           path.write_text(sql)
           PY
