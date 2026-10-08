@@ -352,6 +352,47 @@ jobs:
               " IF (v_candidates=0 AND v_quote<>0) OR (v_candidates=217 AND v_quote<>47) THEN RAISE EXCEPTION 'Quote-only assertion failed: candidates %, quote %',v_candidates,v_quote; END IF;\n IF v_candidates=0 THEN RAISE NOTICE 'Clean replay contains zero owner-fulfillment candidates; exact no-op verified without fabricating owner capability.'; END IF;",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919182821_sync_unambiguous_legacy_service_prices_from_pricing_rules.sql")
+          sql = path.read_text()
+          legacy_price_view = """CREATE OR REPLACE VIEW public.vw_legacy_price_reconciliation WITH (security_invoker=true) AS
+          WITH active_rules AS (
+            SELECT r.service_id,
+              count(*) AS active_rule_count,
+              count(DISTINCT r.base_price_cents) AS distinct_active_price_count,
+              min(r.base_price_cents) AS min_active_price_cents,
+              max(r.base_price_cents) AS max_active_price_cents,
+              string_agg((r.channel_code || '=') || to_char(r.base_price_cents::numeric / 100.0, 'FM999999990.00'), ', ' ORDER BY r.channel_code) AS channel_prices
+            FROM public.dd_service_pricing_rules r
+            WHERE r.status='ACTIVE' AND r.base_price_cents IS NOT NULL
+            GROUP BY r.service_id
+          ), classified AS (
+            SELECT s.id AS service_id, s.sku, s.name AS service_name, s.is_active, s.starting_price,
+              COALESCE(ar.active_rule_count,0) AS active_rule_count,
+              COALESCE(ar.distinct_active_price_count,0) AS distinct_active_price_count,
+              ar.min_active_price_cents, ar.max_active_price_cents, ar.channel_prices,
+              CASE
+                WHEN ar.service_id IS NULL THEN 'NO_ACTIVE_RULE'
+                WHEN ar.distinct_active_price_count > 1 THEN 'MULTI_CHANNEL_PRICE'
+                WHEN ar.distinct_active_price_count = 1 AND s.starting_price IS DISTINCT FROM (ar.min_active_price_cents::numeric / 100.0) THEN 'UNAMBIGUOUS_STALE'
+                WHEN ar.distinct_active_price_count = 1 THEN 'UNAMBIGUOUS_MATCH'
+                ELSE 'MISSING_PRICE'
+              END AS reconciliation_status,
+              CASE WHEN ar.distinct_active_price_count=1 THEN ar.min_active_price_cents::numeric / 100.0 ELSE NULL::numeric END AS proposed_starting_price
+            FROM public.services s
+            LEFT JOIN active_rules ar ON ar.service_id=s.id
+          )
+          SELECT service_id,sku,service_name,is_active,starting_price,active_rule_count,distinct_active_price_count,
+            min_active_price_cents,max_active_price_cents,channel_prices,reconciliation_status,proposed_starting_price
+          FROM classified;
+
+          """
+          sql = legacy_price_view + sql
+          sql = sql.replace(
+              "  v_expected integer := 8;\n  v_updated integer;\nbegin",
+              "  v_expected integer;\n  v_updated integer;\nbegin\n  select count(*) into v_expected from public.vw_legacy_price_reconciliation where is_active=true and reconciliation_status='UNAMBIGUOUS_STALE';\n  if v_expected not in (0,8) then raise exception 'Legacy price candidate drift: expected full 8 or zero clean-source candidates, found %',v_expected; end if;",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
