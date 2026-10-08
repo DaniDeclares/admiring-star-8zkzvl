@@ -92,6 +92,14 @@ jobs:
           mv supabase/migrations/20260820000007_pass_a5_evidence_access_hardening.sql \
              supabase/migrations/20260820153534_pass_a5_evidence_access_hardening.sql
 
+          # CH02 governance enforcement at 20:10:458 consumes the adjudication
+          # queue whose reconstructible canonical creator is timestamped 21:30:00.
+          # Re-key only the disposable creator immediately before its first consumer;
+          # preserve the authoritative source filename, SQL, and Production ledger key.
+          test -f supabase/migrations/20260920213000_create_ch02_service_adjudication.sql
+          mv supabase/migrations/20260920213000_create_ch02_service_adjudication.sql \
+             supabase/migrations/20260920210457_create_ch02_service_adjudication.sql
+
           # Production's quarantine receipt ran historically, but neither current
           # Production nor canonical clean-source tables retain the optional status
           # columns it targeted. Patch only the disposable replay copy so its stated
