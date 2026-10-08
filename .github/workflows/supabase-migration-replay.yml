@@ -317,19 +317,7 @@ jobs:
           )
           sql = sql.replace(
               "BEGIN\n  -- Division 12 Logistics -> Engine C.",
-              "BEGIN\n  SELECT count(*) INTO v_candidate_count FROM public.services s JOIN public.dd_governed_service_offers o ON o.runtime_service_id=s.id WHERE s.pricing_engine_code IS NULL AND o.commercial_offer_status <> 'DO_NOT_SELL' AND ((o.division='12' AND s.service_family='Logistics, Courier & Asset Sourcing') OR (o.division='13' AND s.service_family='Government & Institutional Procurement' AND s.pricing_type='SOW') OR o.canonical_sku IN ('DNI-10A-026','DNI-10A-027','DNI-10A-028','DNI-04A-033','DNI-04A-034','DNI-04A-035','DNI-04A-053','DNI-08A-026') OR (s.pricing_type='FIXED' AND NOT (o.division='02' AND o.canonical_sku ~ '^DNI-02A-0(2[3-9]|[34][0-9])
-        run: test -f supabase/config.toml || supabase init
-
-      - name: Start isolated local Supabase and apply migrations
-        run: supabase start
-
-      - name: Replay migrations from scratch without seed data
-        run: supabase db reset --no-seed
-
-      - name: Stop isolated local Supabase
-        if: always()
-        run: supabase stop --no-backup || true
-)));\n  SELECT array_agg(o.canonical_sku ORDER BY o.canonical_sku) INTO v_referral_skus FROM public.services s JOIN public.dd_governed_service_offers o ON o.runtime_service_id=s.id WHERE o.canonical_sku IN ('DNI-10B-001','DNI-10C-001','DNI-10D-001','DNI-10E-001','DNI-10F-001','DNI-10G-001','DNI-10H-001','DNI-10I-001','DNI-10J-001','DNI-10K-001','DNI-10L-001') AND s.pricing_engine_code IS NULL;\n  IF v_candidate_count = 0 AND v_referral_skus = ARRAY['DNI-10B-001','DNI-10C-001','DNI-10D-001','DNI-10E-001','DNI-10F-001','DNI-10G-001','DNI-10H-001','DNI-10I-001','DNI-10J-001','DNI-10K-001','DNI-10L-001']::text[] THEN\n    v_clean_replay := true;\n  ELSIF v_candidate_count <> 125 THEN\n    RAISE EXCEPTION 'Readiness pass 2 target population drifted: expected 125 authoritative candidates or exact zero-candidate clean source with eleven referral holds; candidates %, referrals %', v_candidate_count, v_referral_skus;\n  END IF;\n  -- Division 12 Logistics -> Engine C.",
+              "BEGIN\n  SELECT count(*) INTO v_candidate_count FROM public.services s JOIN public.dd_governed_service_offers o ON o.runtime_service_id=s.id WHERE s.pricing_engine_code IS NULL AND o.commercial_offer_status <> 'DO_NOT_SELL' AND ((o.division='12' AND s.service_family='Logistics, Courier & Asset Sourcing') OR (o.division='13' AND s.service_family='Government & Institutional Procurement' AND s.pricing_type='SOW') OR o.canonical_sku IN ('DNI-10A-026','DNI-10A-027','DNI-10A-028','DNI-04A-033','DNI-04A-034','DNI-04A-035','DNI-04A-053','DNI-08A-026') OR (s.pricing_type='FIXED' AND NOT (o.division='02' AND o.canonical_sku ~ '^DNI-02A-0(2[3-9]|[34][0-9])$')));\n  SELECT array_agg(o.canonical_sku ORDER BY o.canonical_sku) INTO v_referral_skus FROM public.services s JOIN public.dd_governed_service_offers o ON o.runtime_service_id=s.id WHERE o.canonical_sku IN ('DNI-10B-001','DNI-10C-001','DNI-10D-001','DNI-10E-001','DNI-10F-001','DNI-10G-001','DNI-10H-001','DNI-10I-001','DNI-10J-001','DNI-10K-001','DNI-10L-001') AND s.pricing_engine_code IS NULL;\n  IF v_candidate_count = 0 AND v_referral_skus = ARRAY['DNI-10B-001','DNI-10C-001','DNI-10D-001','DNI-10E-001','DNI-10F-001','DNI-10G-001','DNI-10H-001','DNI-10I-001','DNI-10J-001','DNI-10K-001','DNI-10L-001']::text[] THEN\n    v_clean_replay := true;\n  ELSIF v_candidate_count <> 125 THEN\n    RAISE EXCEPTION 'Readiness pass 2 target population drifted: expected 125 authoritative candidates or exact zero-candidate clean source with eleven referral holds; candidates %, referrals %', v_candidate_count, v_referral_skus;\n  END IF;\n  -- Division 12 Logistics -> Engine C.",
           )
           sql = sql.replace(
               "  -- Assertions (fail closed).\n  IF v_logistics_c <> 11 THEN",
