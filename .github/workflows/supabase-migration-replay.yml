@@ -308,6 +308,34 @@ jobs:
               "  -- Assertions (fail closed).\n  IF v_clean_replay THEN\n    IF v_channel_rows_added <> 0 OR v_div02_offers_synced <> 0 OR v_div06_offers_synced <> 0 OR v_a_backfill <> 0 OR v_e_backfill <> 4 OR v_e_schema_count <> 4 OR v_referral_untouched <> 11 THEN\n      RAISE EXCEPTION 'Clean replay readiness subset drifted: channel %, div02 %, div06 %, A %, E %, schemas %, referral %', v_channel_rows_added, v_div02_offers_synced, v_div06_offers_synced, v_a_backfill, v_e_backfill, v_e_schema_count, v_referral_untouched;\n    END IF;\n    RAISE NOTICE 'Clean replay exact 10A-034..037 plus 10B..10L referral subset verified with four Engine E schemas and eleven intentionally untouched referral services; pre-ledger readiness assertions skipped.';\n    RETURN;\n  END IF;\n  IF v_channel_rows_added <> 14 THEN",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919124837_readiness_sweep_pass2_pricing_engine_completeness.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "  v_logistics_c int;",
+              "  v_candidate_count int;\n  v_referral_skus text[];\n  v_clean_replay boolean := false;\n  v_logistics_c int;",
+          )
+          sql = sql.replace(
+              "BEGIN\n  -- Division 12 Logistics -> Engine C.",
+              "BEGIN\n  SELECT count(*) INTO v_candidate_count FROM public.services s JOIN public.dd_governed_service_offers o ON o.runtime_service_id=s.id WHERE s.pricing_engine_code IS NULL AND o.commercial_offer_status <> 'DO_NOT_SELL' AND ((o.division='12' AND s.service_family='Logistics, Courier & Asset Sourcing') OR (o.division='13' AND s.service_family='Government & Institutional Procurement' AND s.pricing_type='SOW') OR o.canonical_sku IN ('DNI-10A-026','DNI-10A-027','DNI-10A-028','DNI-04A-033','DNI-04A-034','DNI-04A-035','DNI-04A-053','DNI-08A-026') OR (s.pricing_type='FIXED' AND NOT (o.division='02' AND o.canonical_sku ~ '^DNI-02A-0(2[3-9]|[34][0-9])
+        run: test -f supabase/config.toml || supabase init
+
+      - name: Start isolated local Supabase and apply migrations
+        run: supabase start
+
+      - name: Replay migrations from scratch without seed data
+        run: supabase db reset --no-seed
+
+      - name: Stop isolated local Supabase
+        if: always()
+        run: supabase stop --no-backup || true
+)));\n  SELECT array_agg(o.canonical_sku ORDER BY o.canonical_sku) INTO v_referral_skus FROM public.services s JOIN public.dd_governed_service_offers o ON o.runtime_service_id=s.id WHERE o.canonical_sku IN ('DNI-10B-001','DNI-10C-001','DNI-10D-001','DNI-10E-001','DNI-10F-001','DNI-10G-001','DNI-10H-001','DNI-10I-001','DNI-10J-001','DNI-10K-001','DNI-10L-001') AND s.pricing_engine_code IS NULL;\n  IF v_candidate_count = 0 AND v_referral_skus = ARRAY['DNI-10B-001','DNI-10C-001','DNI-10D-001','DNI-10E-001','DNI-10F-001','DNI-10G-001','DNI-10H-001','DNI-10I-001','DNI-10J-001','DNI-10K-001','DNI-10L-001']::text[] THEN\n    v_clean_replay := true;\n  ELSIF v_candidate_count <> 125 THEN\n    RAISE EXCEPTION 'Readiness pass 2 target population drifted: expected 125 authoritative candidates or exact zero-candidate clean source with eleven referral holds; candidates %, referrals %', v_candidate_count, v_referral_skus;\n  END IF;\n  -- Division 12 Logistics -> Engine C.",
+          )
+          sql = sql.replace(
+              "  -- Assertions (fail closed).\n  IF v_logistics_c <> 11 THEN",
+              "  -- Assertions (fail closed).\n  IF v_clean_replay THEN\n    IF v_logistics_c <> 0 OR v_d13_gov_d <> 0 OR v_d10_events_e <> 0 OR v_recurring_a <> 0 OR v_fixed_a <> 0 OR v_referral_untouched <> 11 OR v_d02_turnover_untouched <> 0 OR v_remaining_unpriced <> 11 THEN\n      RAISE EXCEPTION 'Clean replay pass 2 drifted: logistics %, d13 %, d10 %, recurring %, fixed %, referral %, d02 %, remaining %', v_logistics_c, v_d13_gov_d, v_d10_events_e, v_recurring_a, v_fixed_a, v_referral_untouched, v_d02_turnover_untouched, v_remaining_unpriced;\n    END IF;\n    RAISE NOTICE 'Clean replay pass 2 verified: no pre-ledger backfill candidates, exactly eleven referral services remain intentionally unpriced.';\n    RETURN;\n  END IF;\n  IF v_logistics_c <> 11 THEN",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
