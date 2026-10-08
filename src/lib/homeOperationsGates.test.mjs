@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { onboardingEligibility, contentReleaseEligibility, cadence } from './homeOperationsGates.js';
+const base = {verifiedBuyerAcceptance:true,approvedSellableSku:true,scopeConfirmed:true,agreementRequired:true,agreementSigned:true,paymentRequiredBeforeWork:true,paymentVerified:true,accessRequired:true,accessAuthorized:true,providerRequired:true,providerQualified:true,schedulingConfirmed:true,communicationAuthorized:true};
+assert.equal(onboardingEligibility(base).assignmentEligible,true);
+assert.equal(onboardingEligibility({...base,paymentVerified:false}).assignmentEligible,false);
+assert.equal(onboardingEligibility({...base,agreementSigned:false}).welcomeEligible,false);
+assert.equal(onboardingEligibility({...base,providerQualified:false}).assignmentEligible,false);
+assert.equal(onboardingEligibility({...base,noRecontact:true}).welcomeEligible,false);
+assert.equal(onboardingEligibility({...base,recurringAgreement:true,reportingAuthorized:true,reportEvidenceComplete:false}).monthlyReportEligible,false);
+assert.equal(onboardingEligibility({...base,welcomeAlreadySent:true}).welcomeEligible,false);
+assert.equal(contentReleaseEligibility({originalOrLicensed:false,approvedClaim:true,noPrivateCustomerData:true,scheduledThroughExistingEngine:true,channelAuthorized:true}).ready,false);
+assert.equal(cadence.daily[0],'scheduled_post_9am');
+console.log('homeOperationsGates: 9 assertions passed');
