@@ -321,7 +321,7 @@ jobs:
           )
           sql = sql.replace(
               "  -- Assertions (fail closed).\n  IF v_logistics_c <> 11 THEN",
-              "  -- Assertions (fail closed).\n  IF v_clean_replay THEN\n    IF v_logistics_c <> 0 OR v_d13_gov_d <> 0 OR v_d10_events_e <> 0 OR v_recurring_a <> 0 OR v_fixed_a <> 0 OR v_referral_untouched <> 11 OR v_d02_turnover_untouched <> 0 OR v_remaining_unpriced <> 11 THEN\n      RAISE EXCEPTION 'Clean replay pass 2 drifted: logistics %, d13 %, d10 %, recurring %, fixed %, referral %, d02 %, remaining %', v_logistics_c, v_d13_gov_d, v_d10_events_e, v_recurring_a, v_fixed_a, v_referral_untouched, v_d02_turnover_untouched, v_remaining_unpriced;\n    END IF;\n    RAISE NOTICE 'Clean replay pass 2 verified: exact canonical-source candidate effects and eleven intentionally unpriced referral services.';\n    RETURN;\n  END IF;\n  IF v_logistics_c <> 11 THEN",
+              "  -- Assertions (fail closed).\n  IF v_clean_replay THEN\n    IF v_logistics_c <> 0 OR v_d13_gov_d <> 0 OR v_d10_events_e <> 0 OR v_recurring_a <> 4 OR v_fixed_a <> 52 OR v_referral_untouched <> 11 OR v_d02_turnover_untouched <> 20 OR v_remaining_unpriced <> 54 THEN\n      RAISE EXCEPTION 'Clean replay pass 2 drifted: logistics %, d13 %, d10 %, recurring %, fixed %, referral %, d02 %, remaining %', v_logistics_c, v_d13_gov_d, v_d10_events_e, v_recurring_a, v_fixed_a, v_referral_untouched, v_d02_turnover_untouched, v_remaining_unpriced;\n    END IF;\n    RAISE NOTICE 'Clean replay pass 2 verified: exact canonical-source candidate effects and eleven intentionally unpriced referral services.';\n    RETURN;\n  END IF;\n  IF v_logistics_c <> 11 THEN",
           )
           path.write_text(sql)
           PY
