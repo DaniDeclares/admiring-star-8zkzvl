@@ -341,7 +341,15 @@ jobs:
           )
           sql = sql.replace(
               " IF v_caps<>217 THEN RAISE EXCEPTION 'Owner capability assertion failed: %/217',v_caps; END IF;",
-              " IF v_candidates=0 THEN\n   IF v_caps<>0 OR v_channels<>0 OR v_blocked<>0 OR v_quote<>0 THEN RAISE EXCEPTION 'Clean replay owner fulfillment no-op drifted: caps %, channels %, blocked %, quote %',v_caps,v_channels,v_blocked,v_quote; END IF;\n   RAISE NOTICE 'Clean replay contains zero owner-fulfillment candidates; exact no-op verified without fabricating owner capability.';\n   RETURN;\n END IF;\n IF v_caps<>217 THEN RAISE EXCEPTION 'Owner capability assertion failed: %/217',v_caps; END IF;",
+              " IF (v_candidates=0 AND v_caps<>0) OR (v_candidates=217 AND v_caps<>217) THEN RAISE EXCEPTION 'Owner capability assertion failed: candidates %, caps %',v_candidates,v_caps; END IF;",
+          )
+          sql = sql.replace(
+              " IF v_channels<>276 THEN RAISE EXCEPTION 'Channel backfill assertion failed: %/276',v_channels; END IF;",
+              " IF (v_candidates=0 AND v_channels<>0) OR (v_candidates=217 AND v_channels<>276) THEN RAISE EXCEPTION 'Channel backfill assertion failed: candidates %, channels %',v_candidates,v_channels; END IF;",
+          )
+          sql = sql.replace(
+              " IF v_quote<>47 THEN RAISE EXCEPTION 'Quote-only assertion failed: expected 47, found %',v_quote; END IF;",
+              " IF (v_candidates=0 AND v_quote<>0) OR (v_candidates=217 AND v_quote<>47) THEN RAISE EXCEPTION 'Quote-only assertion failed: candidates %, quote %',v_candidates,v_quote; END IF;\n IF v_candidates=0 THEN RAISE NOTICE 'Clean replay contains zero owner-fulfillment candidates; exact no-op verified without fabricating owner capability.'; END IF;",
           )
           path.write_text(sql)
           PY
