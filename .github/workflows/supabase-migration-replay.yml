@@ -276,6 +276,14 @@ jobs:
               "BEGIN\n  SELECT array_agg(canonical_sku ORDER BY canonical_sku) INTO v_present_skus FROM public.dd_governed_service_offers WHERE division='02' AND canonical_sku = ANY(v_target_skus);\n  IF v_present_skus = ARRAY['DNI-02A-023','DNI-02A-024','DNI-02A-025','DNI-02A-026','DNI-02A-027','DNI-02A-028','DNI-02A-029','DNI-02A-030','DNI-02A-031','DNI-02A-032','DNI-02A-033','DNI-02A-034','DNI-02A-035','DNI-02A-036','DNI-02A-037','DNI-02A-038','DNI-02A-039','DNI-02A-040','DNI-02A-041','DNI-02A-042']::text[] THEN\n    RAISE NOTICE 'Clean replay contains exact canonical 023-042 Division 02 additions; pre-ledger 021-022 reconciliation skipped.';\n    RETURN;\n  ELSIF coalesce(array_length(v_present_skus, 1), 0) <> 22 THEN\n    RAISE EXCEPTION 'Division 02 target population drifted: expected full 021-042 or exact clean-source 023-042 baseline, found %', v_present_skus;\n  END IF;\n  UPDATE public.dd_governed_service_offers",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919120614_division_01_engine_backfill_and_close_gate_bypass.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "BEGIN\n  -- 1. Close the live gate-bypass",
+              "BEGIN\n  IF NOT EXISTS (SELECT 1 FROM public.services WHERE sku IN ('DNI-01A-042','DNI-01D-017','DNI-01C-002','DNI-01C-003','DNI-01C-005','DNI-01C-006','DNI-01D-008','DNI-01D-009','DNI-01D-010','DNI-01D-011','DNI-01D-013','DNI-01D-014','DNI-01D-016','DNI-01F-005','DNI-01C-004','DNI-01D-007','DNI-01D-012','DNI-01D-015','DNI-01E-002','DNI-01F-002','DNI-01F-003','DNI-01F-004')) THEN\n    RAISE NOTICE 'Clean replay has none of the 22 Production Division 01 reconciliation targets; data-only engine/gate receipt skipped.';\n    RETURN;\n  END IF;\n  -- 1. Close the live gate-bypass",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
