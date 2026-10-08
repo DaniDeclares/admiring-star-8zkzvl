@@ -401,6 +401,18 @@ jobs:
               "  IF v_count NOT IN (0,24) THEN RAISE EXCEPTION 'FAIL-CLOSED: expected full 24 or zero clean-source theoretical baselines, found %',v_count; END IF;",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919193221_correct_d04_002_travel_baseline_state.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "  IF v_count <> 1 THEN",
+              "  IF v_count NOT IN (0,1) THEN",
+          )
+          sql = sql.replace(
+              "RAISE EXCEPTION 'FAIL-CLOSED: expected exactly one DNI-04A-002 theoretical baseline, found %'",
+              "RAISE EXCEPTION 'FAIL-CLOSED: expected one full-source or zero clean-source DNI-04A-002 theoretical baseline, found %'",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
