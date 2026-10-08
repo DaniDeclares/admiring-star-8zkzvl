@@ -292,6 +292,22 @@ jobs:
               "  IF v_gated_count <> 2 THEN\n    RAISE EXCEPTION 'Expected DNI-01A-042 and DNI-01D-017 gated to INTAKE_ONLY/FULFILLMENT_GATED, found %', v_gated_count;\n  END IF;\n  IF v_clean_replay THEN\n    RAISE NOTICE 'Clean replay contains only the exact gated pair; gate repair verified and pre-ledger Engine A/E backfill assertions skipped.';\n    RETURN;\n  END IF;\n\n  SELECT count(*) INTO v_engine_a_count",
           )
           path.write_text(sql)
+
+          path = Path("supabase/migrations/20260919123034_readiness_sweep_channel_gaps_and_engine_backfill.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "  v_channel_rows_added int;",
+              "  v_present_skus text[];\n  v_clean_replay boolean := false;\n  v_channel_rows_added int;",
+          )
+          sql = sql.replace(
+              "BEGIN\n  -- 1a. Channel availability rows.",
+              "BEGIN\n  SELECT array_agg(sku ORDER BY sku) INTO v_present_skus FROM public.services WHERE sku IN ('DNI-02A-013','DNI-02A-014','DNI-06A-016','DNI-06A-017','DNI-02A-021','DNI-02A-022','DNI-05A-008','DNI-05A-016','DNI-03A-023','DNI-10A-034','DNI-10A-035','DNI-10A-036','DNI-10A-037','DNI-10B-001','DNI-10C-001','DNI-10D-001','DNI-10E-001','DNI-10F-001','DNI-10G-001','DNI-10H-001','DNI-10I-001','DNI-10J-001','DNI-10K-001','DNI-10L-001');\n  IF v_present_skus = ARRAY['DNI-10A-034','DNI-10A-035','DNI-10A-036','DNI-10A-037']::text[] THEN\n    v_clean_replay := true;\n  ELSIF coalesce(array_length(v_present_skus, 1), 0) <> 24 THEN\n    RAISE EXCEPTION 'Readiness sweep target population drifted: expected full 24 or exact clean-source 10A-034..037 set, found %', v_present_skus;\n  END IF;\n  -- 1a. Channel availability rows.",
+          )
+          sql = sql.replace(
+              "  -- Assertions (fail closed).\n  IF v_channel_rows_added <> 14 THEN",
+              "  -- Assertions (fail closed).\n  IF v_clean_replay THEN\n    IF v_channel_rows_added <> 0 OR v_div02_offers_synced <> 0 OR v_div06_offers_synced <> 0 OR v_a_backfill <> 0 OR v_e_backfill <> 4 OR v_e_schema_count <> 4 OR v_referral_untouched <> 0 THEN\n      RAISE EXCEPTION 'Clean replay readiness subset drifted: channel %, div02 %, div06 %, A %, E %, schemas %, referral %', v_channel_rows_added, v_div02_offers_synced, v_div06_offers_synced, v_a_backfill, v_e_backfill, v_e_schema_count, v_referral_untouched;\n    END IF;\n    RAISE NOTICE 'Clean replay exact 10A-034..037 subset verified with four Engine E schemas; pre-ledger readiness assertions skipped.';\n    RETURN;\n  END IF;\n  IF v_channel_rows_added <> 14 THEN",
+          )
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
