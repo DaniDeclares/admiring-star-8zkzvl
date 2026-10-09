@@ -94,3 +94,24 @@ export function providerApplicationLink(attribution = {}) {
   params.set('audience', 'provider');
   return `/providers?${params.toString()}`;
 }
+
+// What happens next for each participation type. Shown on screen and in the acknowledgment
+// email. Interest never authorizes paid work; these are honest next steps only.
+export const NEXT_STEPS = {
+  SERVICE_PROVIDER: 'If you want paid service work, the next step is the DANI provider application: your services, agreement, tax form and any required documents. Approval comes after review.',
+  MAKER_CREATOR: "We'll review what you make and reach out if there's a fit with a DANI product, project or order. Nothing is scheduled or purchased yet.",
+  BUSINESS_PARTNER: "We'll review your business and reach out about whether a partnership or subcontracting conversation makes sense. This isn't a contract or provider approval.",
+  COMMUNITY_CONTRIBUTOR: "We'll reach out about ways to stay involved as DANI grows. This isn't a paid role.",
+  SKILL_BUILDER: "We'll keep you in mind as opportunities to learn and grow open up. This isn't a job or training offer.",
+};
+
+// The paying-customer path for business-building help. It enters the existing service
+// request intake (leads + service_requests, operator alert + customer confirmation) on the
+// CH04 Businesses channel, front door CH04-F02 Workplace & Office Operations. It never
+// creates a provider application.
+export function hireDaniLink(attribution = {}) {
+  const params = new URLSearchParams({ channelType: 'B2B', frontDoor: 'CH04-F02', utm_campaign: attribution.campaign_code || attribution.utm_campaign || 'build-with-me', audience: 'hire-dani' });
+  if (attribution.utm_source) params.set('utm_source', attribution.utm_source);
+  if (attribution.utm_medium) params.set('utm_medium', attribution.utm_medium);
+  return `/request-service?${params.toString()}`;
+}
