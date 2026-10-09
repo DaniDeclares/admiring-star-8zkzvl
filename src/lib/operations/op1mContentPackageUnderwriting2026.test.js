@@ -1,5 +1,6 @@
 import {
   createStarterEconomics,
+  underwritePackage,
   cTeamDecision,
   CREATE_STARTER_SCOPE,
   OWNER_DECISIONS_REQUIRED,
@@ -87,5 +88,25 @@ describe('OP1M content package underwriting', () => {
     const routed = routeOp1mLiveEvent({ lane: 'DAY2_POST', event: 'NEW_BURDEN_COMMENT' });
     expect(routed.state).toBe('DISCOVERY_REQUIRED');
     expect(routed.autoContact).toBe(false);
+  });
+});
+
+describe('fail-closed content economics', () => {
+  it.each([0, -1, NaN, Infinity, undefined])('rejects invalid price %s', price => {
+    expect(() => underwritePackage({ price })).toThrow(RangeError);
+  });
+  it.each([
+    { providerMinutes: -1 },
+    { ownerCreativeMinutes: NaN },
+    { ownerQaAdminMinutes: Infinity },
+    { ownerCustomerCommsMinutes: -3 },
+    { providerRate: -10 },
+    { ownerRate: Infinity },
+  ])('rejects invalid labor assumptions %j', values => {
+    expect(() => underwritePackage({ price: 547, ...values })).toThrow(RangeError);
+  });
+  it('preserves the previously measured starter result', () => {
+    expect(createStarterEconomics(547).clearsLaborGate).toBe(true);
+    expect(createStarterEconomics(547).totalLabor).toBe(213.75);
   });
 });
