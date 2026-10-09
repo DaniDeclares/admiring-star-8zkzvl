@@ -53,7 +53,8 @@ export default async function shopifyReleaseAuth(req, res) {
         fallback: 'SHOPIFY_AUTHORIZATION_CODE_FLOW_REQUIRED',
       });
     }
-    const tokenPayload = await tokenResponse.json();
+    // A 200 response without JSON is not a valid token response.
+    const tokenPayload = await tokenResponse.json().catch(() => null);
     if (!tokenPayload || typeof tokenPayload.access_token !== 'string' || !tokenPayload.access_token) {
       return reply(res, 424, { ok: false, code: 'SHOPIFY_TOKEN_MISSING' });
     }
@@ -64,12 +65,15 @@ export default async function shopifyReleaseAuth(req, res) {
         'Content-Type': 'application/json',
         'X-Shopify-Access-Token': tokenPayload.access_token,
       },
-      body: JSON.stringify({ query: '{ shop { myshopifyDomain } }' }),
+      body: JSON.stringify({ query: '{ shop { myshopifyDomain } appInstallation { accessScopes { handle } } }' }),
       signal: AbortSignal.timeout(SHOPIFY_TIMEOUT_MS),
     });
     // Shopify may return a non-JSON gateway error; never echo its body.
     const result = await probe.json().catch(() => null);
     const returnedShop = result?.data?.shop?.myshopifyDomain;
+    const grantedScopes = result?.data?.appInstallation?.accessScopes?.map(scope => scope.handle) || [];
+    const requiredScopes = ['write_products', 'write_files'];
+    const missingScopes = requiredScopes.filter(scope => !grantedScopes.includes(scope));
     if (!probe.ok || !result || result.errors?.length || returnedShop !== SHOP) {
       return reply(res, 424, {
         ok: false,
@@ -78,11 +82,15 @@ export default async function shopifyReleaseAuth(req, res) {
         shopMatches: returnedShop === SHOP,
       });
     }
+    if (missingScopes.length) {
+      return reply(res, 424, { ok: false, code: 'SHOPIFY_REQUIRED_SCOPES_MISSING', missingScopes });
+    }
     return reply(res, 200, {
       ok: true,
       code: 'SHOPIFY_AUTHENTICATED',
       shop: SHOP,
       scope: 'read-only-smoke',
+      requiredScopesVerified: true,
       productsWritten: 0,
       filesWritten: 0,
     });
