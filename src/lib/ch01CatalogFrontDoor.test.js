@@ -1,4 +1,4 @@
-import { governedCH01FrontDoors } from '../../api-handlers/verify-commercial-intent.js';
+import { governedCH01FrontDoors, publicCatalogService } from '../../api-handlers/verify-commercial-intent.js';
 
 jest.mock('@supabase/supabase-js', () => ({ createClient: jest.fn() }));
 
@@ -19,5 +19,12 @@ describe('catalog publishes the governed CH01 front door per service', () => {
    row('D', 'CH02-F01', { channel_code: 'CH02' }),
   ]);
   expect(doors.size).toBe(0);
+ });
+});
+
+describe('public catalog never publishes internal economics', () => {
+ test('internal cost, margin notes and legacy special prices are stripped; governed fields stay', () => {
+  const out = publicCatalogService({ serviceId: 'DNI-04A-001', baseCustomerPrice: 149, checkoutEligible: false, checkoutGateReason: 'ECONOMICS_NOT_RECONCILED', approvedSpecialOfferCount: 1, internalCost: '1 hrs @ $75/hr', marginEconomics: '49.7%', approvedSpecialOffers: [{ price: 45 }] });
+  expect(out).toEqual({ serviceId: 'DNI-04A-001', baseCustomerPrice: 149, checkoutEligible: false, checkoutGateReason: 'ECONOMICS_NOT_RECONCILED', approvedSpecialOfferCount: 1 });
  });
 });
