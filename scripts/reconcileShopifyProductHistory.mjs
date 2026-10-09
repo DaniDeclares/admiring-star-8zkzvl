@@ -13,11 +13,12 @@ export function planRecovery({ historical, shopify, governed = [] }) {
     const governedMatch = (h.governedSku && governedKeys.has(norm(h.governedSku)));
     const problems = [];
     if (exact.length > 1 || (exact.length === 0 && fuzzy.length)) problems.push('AMBIGUOUS_OR_POSSIBLE_DUPLICATE');
+    if (!h.title?.trim() || !h.key?.trim()) problems.push('HISTORICAL_IDENTITY_INCOMPLETE');
     if (!h.approval?.evidenceId || h.approval?.status !== 'APPROVED') problems.push('APPROVAL_NOT_VERIFIED');
     if (!h.price?.amount || !h.price?.currency || !h.price?.evidenceId) problems.push('APPROVED_PRICE_MISSING');
     if (!h.production?.assetId || !h.production?.fulfillmentVerified) problems.push('PRODUCTION_ASSET_OR_FULFILLMENT_UNVERIFIED');
     if (!h.governedSku || !governedMatch) problems.push('GOVERNED_CATALOG_MATCH_UNVERIFIED');
-    const action = exact.length === 1 ? 'EXISTING_RECONCILE' : problems.length ? 'HOLD' : 'CREATE_DRAFT';
+    const action = exact.length === 1 && !problems.includes('AMBIGUOUS_OR_POSSIBLE_DUPLICATE') ? 'EXISTING_RECONCILE' : problems.length ? 'HOLD' : 'CREATE_DRAFT';
     return { key:h.key, title:h.title, action, existingId:exact[0]?.id ?? null, problems };
   });
 }
@@ -28,6 +29,7 @@ async function main() {
   const governed = [];
   const catalogUrl = process.env.DANI_CATALOG_API_URL;
   const catalogToken = process.env.DANI_CATALOG_API_KEY;
+  if (Boolean(catalogUrl) !== Boolean(catalogToken)) throw Error('CATALOG_CONFIGURATION_INCOMPLETE');
   if (catalogUrl && catalogToken) {
     const base = new URL(catalogUrl);
     if (base.protocol !== 'https:') throw Error('CATALOG_ENDPOINT_MUST_BE_HTTPS');
@@ -37,6 +39,7 @@ async function main() {
     if (!response.ok) throw Error('CATALOG_READ_FAILED_'+response.status);
     const records = await response.json();
     if (!Array.isArray(records)) throw Error('CATALOG_RESPONSE_INVALID');
+    if (records.length === 1000) throw Error('CATALOG_PAGINATION_UNVERIFIED');
     for (const row of records) {
       if (row.verification_state === 'VERIFIED' && row.approval_state === 'APPROVED' &&
           row.approved_by && row.approved_at && ['READY','QUEUED','PUBLISHED'].includes(row.publication_state)) {
@@ -51,6 +54,7 @@ async function main() {
     if (!res.ok) throw Error('SHOPIFY_READ_FAILED_'+res.status);
     const body=await res.json();
     if (body.errors?.length || !body.data?.products) throw Error('SHOPIFY_QUERY_FAILED');
+    if (!Array.isArray(body.data.products.edges)) throw Error('SHOPIFY_EDGES_INVALID');
     for (const {node} of body.data.products.edges) {
       if (node.variants.pageInfo.hasNextPage) throw Error('VARIANT_SCAN_INCOMPLETE');
       products.push({...node,variants:node.variants.nodes});
