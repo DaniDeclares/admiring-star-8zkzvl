@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test history-first recovery gates
-        run: node --test scripts/reconcileShopifyProductHistory.test.mjs scripts/shopifyRecoveryDrafts.test.mjs scripts/shopifyWalkAway.test.mjs
+        run: node --test scripts/reconcileShopifyProductHistory.test.mjs scripts/shopifyRecoveryDrafts.test.mjs scripts/shopifyWalkAway.test.mjs scripts/shopifyRecoveryAdapters.test.mjs
       - name: Reconcile historical Cookout catalog (dry-run only)
         env:
           SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
@@ -32,6 +32,16 @@ jobs:
           SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
           SHOPIFY_ADMIN_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ADMIN_ACCESS_TOKEN }}
         run: node scripts/watchShopifyRevenueReadiness.mjs > shopify-watch.json
+      - name: Upload read-only recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dani-shopify-recovery-readonly
+          path: |
+            shopify-recovery-plan.json
+            shopify-watch.json
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Report only new actionable findings
         uses: actions/github-script@v7
         with:
