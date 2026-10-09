@@ -79,4 +79,55 @@ describe('Shopify release authentication safety', () => {
     expect(res.status).toHaveBeenCalledWith(403);
     expect(global.fetch).not.toHaveBeenCalled();
   });
+  it('requires Shopify write_products and write_files before reporting ready', async () => {
+    authenticatePortalRequest.mockResolvedValue({ role: 'owner', governedRole: 'OWNER_OPERATOR' });
+    const oldId = process.env.SHOPIFY_CLIENT_ID;
+    const oldSecret = process.env.SHOPIFY_CLIENT_SECRET;
+    process.env.SHOPIFY_CLIENT_ID = 'test-id';
+    process.env.SHOPIFY_CLIENT_SECRET = 'test-secret';
+    try {
+      global.fetch = jest.fn()
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ access_token: 'test-token' }) })
+        .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({
+          data: { shop: { myshopifyDomain: 'v0dqbe-j1.myshopify.com' },
+            appInstallation: { accessScopes: [{ handle: 'write_products' }] } },
+        }) });
+      const res = response();
+      await handler(request(), res);
+      expect(res.status).toHaveBeenCalledWith(424);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        code: 'SHOPIFY_REQUIRED_SCOPES_MISSING', missingScopes: ['write_files'],
+      }));
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+    } finally {
+      if (oldId === undefined) delete process.env.SHOPIFY_CLIENT_ID;
+      else process.env.SHOPIFY_CLIENT_ID = oldId;
+      if (oldSecret === undefined) delete process.env.SHOPIFY_CLIENT_SECRET;
+      else process.env.SHOPIFY_CLIENT_SECRET = oldSecret;
+    }
+  });
+
+  it('does not report success when Shopify returns invalid token JSON', async () => {
+    authenticatePortalRequest.mockResolvedValue({ role: 'owner', governedRole: 'OWNER_OPERATOR' });
+    const oldId = process.env.SHOPIFY_CLIENT_ID;
+    const oldSecret = process.env.SHOPIFY_CLIENT_SECRET;
+    process.env.SHOPIFY_CLIENT_ID = 'test-id';
+    process.env.SHOPIFY_CLIENT_SECRET = 'test-secret';
+    try {
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true, json: async () => { throw new SyntaxError('invalid JSON'); },
+      });
+      const res = response();
+      await handler(request(), res);
+      expect(res.status).toHaveBeenCalledWith(424);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'SHOPIFY_TOKEN_MISSING' }));
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    } finally {
+      if (oldId === undefined) delete process.env.SHOPIFY_CLIENT_ID;
+      else process.env.SHOPIFY_CLIENT_ID = oldId;
+      if (oldSecret === undefined) delete process.env.SHOPIFY_CLIENT_SECRET;
+      else process.env.SHOPIFY_CLIENT_SECRET = oldSecret;
+    }
+  });
+
 });
