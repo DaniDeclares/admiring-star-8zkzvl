@@ -22,3 +22,13 @@ test('missing live governed record blocks creation',()=>{
  const p=planRecovery({historical:[item],shopify:[],governed:[]});
  assert.equal(p[0].action,'HOLD');
 });
+
+test('empty historical title does not fuzzy-match every existing listing',()=>{
+ const p=planRecovery({historical:[{...item,title:'',sku:'NEW',governedSku:'NEW'}],shopify:[{id:'other',title:'Other product',variants:[]}],governed:[{sku:'NEW'}]});
+ assert.equal(p[0].action,'CREATE_DRAFT');
+});
+test('historical record without an approved price stays held even when governed SKU matches',()=>{
+ const p=planRecovery({historical:[{...item,price:null}],shopify:[],governed:[{sku:'COOK-S'}]});
+ assert.equal(p[0].action,'HOLD');
+ assert.ok(p[0].problems.includes('APPROVED_PRICE_MISSING'));
+});
