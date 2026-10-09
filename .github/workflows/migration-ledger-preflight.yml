@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'scripts/checkProductionMigrationLedger.mjs'
+      - 'scripts/checkLocalMigrationVersions.mjs'
       - 'scripts/checkProductionMigrationLedger.test.mjs'
       - 'supabase/migrations/**'
       - '.github/workflows/migration-ledger-preflight.yml'
@@ -10,6 +11,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/checkProductionMigrationLedger.mjs'
+      - 'scripts/checkLocalMigrationVersions.mjs'
       - 'scripts/checkProductionMigrationLedger.test.mjs'
       - 'supabase/migrations/**'
       - '.github/workflows/migration-ledger-preflight.yml'
