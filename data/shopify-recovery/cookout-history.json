@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "source": "User Library: Cookout & Community Event Merch Flyer.png; Dani Declares Community Events Flyer.png; products.pdf.pdf September 2026 export",
+  "sourceAuthority": "HISTORICAL_DISCOVERY_ONLY",
+  "products": [
+    {
+      "key": "cookout-small",
+      "title": "Small Cookout Crew event package",
+      "contents": [
+        "welcome sign",
+        "25 stadium cups",
+        "25 napkins",
+        "food station sign"
+      ],
+      "approval": {
+        "status": "UNVERIFIED"
+      },
+      "price": null,
+      "production": {
+        "fulfillmentVerified": false
+      }
+    },
+    {
+      "key": "cookout-mid",
+      "title": "Mid-size Cookout Crew event package",
+      "contents": [
+        "welcome sign",
+        "table runner",
+        "50 stadium cups",
+        "50 napkins",
+        "25 buttons",
+        "25 stickers"
+      ],
+      "approval": {
+        "status": "UNVERIFIED"
+      },
+      "price": null,
+      "production": {
+        "fulfillmentVerified": false
+      }
+    },
+    {
+      "key": "cookout-large",
+      "title": "Large Cookout Crew event package",
+      "contents": [
+        "welcome sign",
+        "table runner",
+        "food and drink station signs",
+        "100 stadium cups",
+        "100 napkins",
+        "50 buttons",
+        "50 stickers",
+        "12 shirts"
+      ],
+      "approval": {
+        "status": "UNVERIFIED"
+      },
+      "price": null,
+      "production": {
+        "fulfillmentVerified": false
+      }
+    }
+  ]
+}
