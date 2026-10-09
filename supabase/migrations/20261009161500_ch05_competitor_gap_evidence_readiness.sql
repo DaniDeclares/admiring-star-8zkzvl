@@ -1,6 +1,6 @@
 -- CH05 competitor gap evidence: extend existing demand staging, never create a parallel queue.
 -- Source-observed competitor gaps are research, not qualified buyers or authorized outreach.
-create or replace function public.dd_ch05_competitor_gap_readiness_v1(
+create or replace function private.dd_ch05_competitor_gap_readiness_v1(
   p_source_signal_id text,
   p_source_url text,
   p_problem text,
@@ -33,7 +33,3 @@ begin
     'next_action',case when cardinality(v_missing)=0 then 'VERIFY_BUYER_IDENTITY_CONTACT_PERMISSION_AND_EXISTING_SALES_GATES'
       else 'COLLECT_MISSING_EVIDENCE' end);
 end $$;
-revoke all on function public.dd_ch05_competitor_gap_readiness_v1(text,text,text,text,text,text,text,text,text) from public,anon,authenticated;
-grant execute on function public.dd_ch05_competitor_gap_readiness_v1(text,text,text,text,text,text,text,text,text) to service_role;
-comment on function public.dd_ch05_competitor_gap_readiness_v1(text,text,text,text,text,text,text,text,text,text) is
- 'Read-only CH05 research triage. Evidence fields are claims requiring independent verification. Never promotes to sales or authorizes contact. Reuse dd_demand_capture_staging and existing sales governance.';
