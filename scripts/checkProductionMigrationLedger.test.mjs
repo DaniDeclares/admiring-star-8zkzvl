@@ -39,3 +39,27 @@ test('malformed ledger fails closed', () => {
   const result = run({ migrations: [{ version: 'not-a-version', name: 'guard_sales_touch_evidence' }] });
   assert.notEqual(result.status, 0);
 });
+
+test('same version assigned to a different migration name fails closed', () => {
+  const result = run({ migrations: [
+    { version: '20261007223000', name: 'another_migration' }
+  ] });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /VERSION_COLLISION/);
+});
+test('duplicate applied ledger rows fail closed', () => {
+  const result = run({ migrations: [
+    { version: '20261007223000', name: 'guard_sales_touch_evidence' },
+    { version: '20261007223000', name: 'guard_sales_touch_evidence' }
+  ] });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Duplicate migration ledger entry/);
+});
+test('different names sharing a ledger version fail closed', () => {
+  const result = run({ migrations: [
+    { version: '20261007223000', name: 'guard_sales_touch_evidence' },
+    { version: '20261007223000', name: 'other_migration' }
+  ] });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /multiple names/);
+});
