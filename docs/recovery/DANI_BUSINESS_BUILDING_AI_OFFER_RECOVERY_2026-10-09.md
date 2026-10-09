@@ -38,3 +38,28 @@ Before PR #615, audience (2) had a Hire DANI card but no explicit AI/digital-ide
 ## Owner-facing commercial priority
 
 Prioritize one **already eligible** owner-deliverable business-building service and one existing downloadable kit, validate paid conversion and delivery, then decide whether an AI workshop or app product deserves launch. Measure actual buyer and cash outcomes, not signups or draft hourly margins.
+
+## Live Production read-back (2026-10-09, read-only)
+
+Supabase project `ajxezpczaemunlcmqlgl` was queried directly. Current release contract and locked prices:
+
+| SKU | Offer | Locked price (each CH01–CH05) | Release | Blocking gate | Payment-link / Stripe price / verification |
+|---|---|---:|---|---|---|
+| DNI-09A-003 | Startup Systems Workshop | $199 | HOLD | PAYMENT_LEDGER | false / false / false |
+| DNI-09A-009 | AI for Business Workshop | $149 | HOLD | PAYMENT_LEDGER | false / false / false |
+| DNI-09A-011 | Pricing Fundamentals Workshop | $149 | HOLD | PAYMENT_LEDGER | false / false / false |
+| DNI-09A-019 | Digital Products Workshop | $149 | HOLD | PAYMENT_LEDGER | false / false / false |
+
+For all four: `quote_path_ok=true`, `fulfillment_matrix_ok=true`, `payment_ledger_ok=false`, `runtime_accuracy_ok=false`, `production_smoke_verified=false`. `provider_capability_count=1` is **not** dispatch eligibility. Do not expose checkout or sell a dated seat before instructor/format/seat inventory and delivery evidence are verified.
+
+Production digital product candidates and build queue already contain seven same-key concepts: `TURN_DAY_GAME_V1` (free browser game), `JOB_PROFIT_CALCULATOR_V1` ($9 hypothesis), `TURN_ESTIMATOR_V1` ($19 hypothesis), `FIELD_PHOTO_LOG_KIT_V1` ($7 hypothesis), `NOTARY_APPOINTMENT_WORKFLOW_KIT` ($27 hypothesis), `SMALL_SERVICE_BUSINESS_FOLLOWUP_KIT` ($19 hypothesis), `PM_TURNOVER_EVIDENCE_TOOLKIT` ($27 hypothesis). Six are `VALIDATE`; Property Manager Turnover Evidence Toolkit is `BUILD_NEXT`. **Hypotheses are not approved retail prices or active Shopify products.** `dd_software_service_opportunities` contains `TWENTY_CRM_IMPLEMENTATION` in `RESEARCH_TO_INTERNAL_PILOT`, not released SaaS.
+
+Production table counts: `leads=14`, `service_requests=15`, `dd_payment_events=2`, `dd_customer_success_followups=1`. These are independent counts, **not** proof of a connected conversion funnel or sales. Next step is a privacy-preserving join/evidence audit with test records excluded and no invented lifecycle pass.
+
+### Prioritized controlled completion
+
+1. Confirm historical workshop scope, duration, instructor, delivery format, booking/seat logic and refund/cancellation terms. If absent, keep HOLD; use existing governance to record gaps.
+2. Reconcile candidate digital assets against files and existing Shopify products; verify file delivery for the three ACTIVE Shopify kits before new releases.
+3. Test B2B customer path using TEST-tagged evidence, excluding test records from performance. Confirm actual production customer conversion separately.
+4. Use existing Stripe/payment release train for each approved SKU only after commercial and fulfillment checks. No price modifications or direct Production SQL updates without owner authorization.
+5. Run CI and preview against PR #615, review diff against current main, then merge if approved.
