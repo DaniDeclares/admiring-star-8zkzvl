@@ -9,7 +9,7 @@ export function planRecovery({ historical, shopify, governed = [] }) {
   return historical.map(h => {
     const keys = [h.shopifyId,h.handle,h.sku,h.title].map(norm).filter(Boolean);
     const exact = products.filter(p=>keys.some(k=>p.keys.includes(k)));
-    const fuzzy = products.filter(p=>norm(p.title).includes(norm(h.title)) || norm(h.title).includes(norm(p.title)));
+    const fuzzy = products.filter(p=>norm(h.title) && (norm(p.title).includes(norm(h.title)) || norm(h.title).includes(norm(p.title))));
     const governedMatch = (h.governedSku && governedKeys.has(norm(h.governedSku)));
     const problems = [];
     if (exact.length > 1 || (exact.length === 0 && fuzzy.length)) problems.push('AMBIGUOUS_OR_POSSIBLE_DUPLICATE');
@@ -25,6 +25,7 @@ async function main() {
   const domain = process.env.SHOPIFY_SHOP_DOMAIN, token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
   if (!domain || !token || !/^[a-z0-9-]+\.myshopify\.com$/.test(domain)) throw Error('SHOPIFY_READ_CREDENTIALS_REQUIRED');
   const products = [];
+  const governed = [];
   let after = null;
   do {
     const q = `query ($after:String) { products(first:100,after:$after) { edges { cursor node { id title handle variants(first:100) { nodes { sku } pageInfo { hasNextPage } } } } pageInfo { hasNextPage endCursor } } }`;
@@ -40,7 +41,7 @@ async function main() {
   } while (after);
   // Catalog is a historical lead, not a substitute for the live governed authority.
   // Until a verified governed catalog adapter exists, all unmatched products remain held.
-  const plan=planRecovery({historical:catalog.products,shopify:products,governed:[]});
-  console.log(JSON.stringify({mode:'DRY_RUN',source:catalog.source,scanned:products.length,plan},null,2));
+  const plan=planRecovery({historical:catalog.products,shopify:products,governed});
+  console.log(JSON.stringify({mode:'DRY_RUN',source:catalog.source,scanned:products.length,governedVerified:governed.length,plan},null,2));
 }
 if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) main().catch(e=>{console.error(e.message);process.exitCode=2});
