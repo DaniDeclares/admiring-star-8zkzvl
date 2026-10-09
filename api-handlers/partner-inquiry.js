@@ -4,7 +4,7 @@
 // existing owner surfaces: an OPEN item in dd_owner_attention_queue (Owner HQ "Danielle
 // queue", domain PROVIDER_OPERATIONS) and an operator email intent in dd_event_outbox
 // (delivered by /api/process-outbox). It never creates a provider, capability or job.
-import { normalizeInterestSubmission, providerApplicationLink } from '../src/lib/buildWithMeInterest.js';
+import { NEXT_STEPS, normalizeInterestSubmission, providerApplicationLink } from '../src/lib/buildWithMeInterest.js';
 
 const MAX_PER_EMAIL_PER_DAY = 3;
 
@@ -63,7 +63,7 @@ export async function handlePartnerInterest(req, res, { adminClient = defaultAdm
   const { data: recent, error: recentError } = await admin.from('dd_partner_inquiries').select('id').eq('email', record.email).gte('created_at', since).order('created_at', { ascending: false }).limit(MAX_PER_EMAIL_PER_DAY);
   if (recentError) { console.error('Partner interest lookup failed', recentError.message); return res.status(500).json({ error: 'We could not save your interest right now. Please try again shortly.' }); }
   if ((recent || []).length >= MAX_PER_EMAIL_PER_DAY) {
-    return res.status(200).json({ success: true, inquiryId: recent[0].id, duplicate: true, nextStep });
+    return res.status(200).json({ success: true, inquiryId: recent[0].id, duplicate: true, nextStep, nextStepText: NEXT_STEPS[record.participation_interest] });
   }
 
   const { data, error } = await admin.from('dd_partner_inquiries').insert(record).select('id').single();
@@ -109,5 +109,35 @@ export async function handlePartnerInterest(req, res, { adminClient = defaultAdm
     if (outbox.error) console.error('Partner interest notification enqueue failed', outbox.error.message);
   }
 
-  return res.status(200).json({ success: true, inquiryId: data.id, nextStep });
+  // Acknowledgment to the person, who consented to contact about this interest. Same
+  // idempotent outbox; skipped when it would land in the operator inbox.
+  if (record.email !== String(env.NOTIFICATION_EMAIL || '').toLowerCase()) {
+    const firstName = record.name.split(' ')[0];
+    const ackText = [
+      `Hi ${firstName},`,
+      '',
+      `Thanks for raising your hand to build with DANI DECLARES. We received your interest as: ${record.interest_area}.`,
+      '',
+      NEXT_STEPS[record.participation_interest],
+      nextStep ? `Provider application: https://danideclares.com${nextStep}` : '',
+      '',
+      'Danielle and the DANI team review every submission and will follow up by email if there is a fit. Submitting this form does not create a job, contract, or guarantee of work or income.',
+      '',
+      'If you want DANI to help build your own business instead, you can request that here: https://danideclares.com/request-service?channelType=B2B&frontDoor=CH04-F02&audience=hire-dani',
+      '',
+      'DANI DECLARES LLC — WE HANDLE THE EXECUTION.',
+      `Reference: ${data.id}`,
+    ].filter((line, i, all) => line !== '' || all[i - 1] !== '').join('\n');
+    const ack = await admin.from('dd_event_outbox').insert({
+      event_key: `partner-interest-ack:${data.id}`,
+      event_type: 'PARTNER_INTEREST_ACKNOWLEDGED',
+      channel: 'EMAIL',
+      aggregate_type: 'PARTNER_INQUIRY',
+      aggregate_id: data.id,
+      payload: { to: record.email, subject: 'We got your interest — DANI DECLARES', text: ackText },
+    });
+    if (ack.error) console.error('Partner interest acknowledgment enqueue failed', ack.error.message);
+  }
+
+  return res.status(200).json({ success: true, inquiryId: data.id, nextStep, nextStepText: NEXT_STEPS[record.participation_interest] });
 }

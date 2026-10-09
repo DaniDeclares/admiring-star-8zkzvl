@@ -1,4 +1,4 @@
-import { CONSENT_TEXT, normalizeInterestSubmission, providerApplicationLink } from './buildWithMeInterest';
+import { CONSENT_TEXT, NEXT_STEPS, PARTICIPATION_INTERESTS, hireDaniLink, normalizeInterestSubmission, providerApplicationLink } from './buildWithMeInterest';
 
 const valid = () => ({
   name: '  Jordan Maker ',
@@ -61,5 +61,21 @@ describe('Build With Me interest submissions', () => {
   test('next step links into the existing provider application with attribution', () => {
     expect(providerApplicationLink({ campaign_code: 'build-with-me', utm_source: 'instagram' }))
       .toBe('/providers?utm_campaign=build-with-me&utm_source=instagram&audience=provider');
+  });
+
+  test('every participation type has an honest next step', () => {
+    expect(Object.keys(NEXT_STEPS).sort()).toEqual(Object.keys(PARTICIPATION_INTERESTS).sort());
+    for (const text of Object.values(NEXT_STEPS)) expect(/guarantee|you will be hired|earn \$/i.test(text)).toBe(false);
+  });
+
+  test('Hire DANI enters the existing service request intake on CH04-F02, never the provider application', () => {
+    const link = hireDaniLink({ campaign_code: 'build-with-me', utm_source: 'facebook' });
+    expect(link.startsWith('/request-service?')).toBe(true);
+    const q = new URLSearchParams(link.split('?')[1]);
+    expect(q.get('channelType')).toBe('B2B');
+    expect(q.get('frontDoor')).toBe('CH04-F02');
+    expect(q.get('audience')).toBe('hire-dani');
+    expect(q.get('utm_source')).toBe('facebook');
+    expect(link.includes('/providers')).toBe(false);
   });
 });

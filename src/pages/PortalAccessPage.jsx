@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { categoriesMissingServices, explicitServiceEntries, filterServices, selectedServiceIds, toggleServiceInSelection } from '../lib/providerCapabilitySelection.js';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 import { createProviderIntakeStaging } from '../lib/pendingOnboarding.js';
@@ -161,6 +162,15 @@ export default function PortalAccessPage() {
     const checked = !selectedCategories[category.category_key]?.checked;
     setSelectedCategories(prev => ({ ...prev, [category.category_key]: { ...prev[category.category_key], checked } }));
   };
+  // Ticking a category no longer claims every service in it; applicants tick the services
+  // they actually perform (see src/lib/providerCapabilitySelection.js).
+  const toggleCategoryService = (categoryKey, serviceId) => {
+    setSelectedCategories(prev => ({ ...prev, [categoryKey]: toggleServiceInSelection(prev[categoryKey], serviceId) }));
+  };
+  const selectAllInCategory = (category, ids) => {
+    setSelectedCategories(prev => ({ ...prev, [category.category_key]: { ...prev[category.category_key], serviceIds: ids } }));
+  };
+  const [serviceSearch, setServiceSearch] = useState({});
 
   const update=(e)=>setForm({...form,[e.target.name]:e.target.value});
   const choose=(option)=>{
@@ -186,6 +196,7 @@ export default function PortalAccessPage() {
       if(!Number.isFinite(radius)||radius<=0||radius>250){setError('Enter a service radius between 1 and 250 miles.');return false;}
     }
     if(providerStep===3&&!Object.values(selectedCategories).some(v=>v?.checked)){setError('Select at least one service category you can fulfill.');return false;}
+    if(providerStep===3){const missing=categoriesMissingServices(categories,selectedCategories,servicesForCategory);if(missing.length){setError(`Choose the specific services you perform in: ${missing.map(c=>c.label).join(', ')} (or untick the category).`);return false;}}
     setError('');return true;
   };
   const nextProviderStep=()=>{if(providerStepValid())setProviderStep(s=>Math.min(s+1,4));};
@@ -200,6 +211,7 @@ export default function PortalAccessPage() {
     if(form.password!==form.confirm)return setError('Passwords do not match.');
     if(selected?.key==='apartment_resident' && !propertyInvite)return setError('A valid property invitation is required for Apartment Resident access.');
     if(selected?.key==='provider' && !Object.values(selectedCategories).some(v=>v?.checked))return setError('Select at least one service category you can fulfill.');
+    if(selected?.key==='provider' && categoriesMissingServices(categories,selectedCategories,servicesForCategory).length)return setError('Choose the specific services you perform in each selected category, or untick it.');
     setBusy(true);
     capture('signup_started',{route:'/portal/access',account_type:selected?.key||'unknown',channel:selected?.channel||undefined});
     captureSentryEvent('started',{account_type:selected?.key||'unknown',channel:selected?.channel||undefined,route:'/portal/access'});
@@ -242,9 +254,7 @@ export default function PortalAccessPage() {
     // refuses to approve the application at all until ID, tax form, agreement and
     // background check are cleared, so this never skips those baseline checks.
     const selectedServiceEntries = selected.key==='provider'
-      ? categories
-          .filter(category => selectedCategories[category.category_key]?.checked)
-          .flatMap(category => servicesForCategory(category).map(service => ({ service, category })))
+      ? explicitServiceEntries(categories, selectedCategories, servicesForCategory)
       : [];
     const seenServiceIds = new Set();
     const capabilityPayloads=selectedServiceEntries.filter(({service:s}) => {
@@ -360,12 +370,12 @@ export default function PortalAccessPage() {
       <label className="portal-wide portal-capability-item"><input type="checkbox" checked={Boolean(form.willingOutsideRadius)} onChange={e=>setForm({...form,willingOutsideRadius:e.target.checked})}/> I may consider assignments outside my normal radius when the job and travel make sense.</label>
     </div>}
     {providerStep===3&&<div className="portal-wide portal-capability-picker">
-      <p>Choose the kinds of work you can perform. You do not need to search through DANI DECLARES' entire service catalog.</p>
+      <p>Choose the kinds of work you can perform, then tick the specific services you actually do in each. Only the services you tick are added to your application, and each one is reviewed before you can be offered that work.</p>
       {catalogLoading?<p>Loading service categories…</p>:<div className="portal-capability-groups">{categories.map(category=>{
         const checked=Boolean(selectedCategories[category.category_key]?.checked);
         return <div key={category.category_key} className="portal-capability-group">
           <label className="portal-capability-item"><input type="checkbox" checked={checked} onChange={()=>toggleCategory(category)}/><span><strong>{category.label}</strong>{category.description&&<small> · {category.description}</small>}</span></label>
-          {checked&&<div className="portal-capability-followup"><label>{category.equipment_prompt||'Tell us briefly about your experience in this area.'}<input type="text" value={selectedCategories[category.category_key]?.equipmentAnswer||''} onChange={e=>setCategoryAnswer(category.category_key,e.target.value)} placeholder="Describe briefly…"/></label>{category.requires_credential&&<small className="portal-capability-credential-note">Required credentials will be verified before you are authorized for regulated work.</small>}</div>}
+          {checked&&<div className="portal-capability-followup"><label>{category.equipment_prompt||'Tell us briefly about your experience in this area.'}<input type="text" value={selectedCategories[category.category_key]?.equipmentAnswer||''} onChange={e=>setCategoryAnswer(category.category_key,e.target.value)} placeholder="Describe briefly…"/></label>{category.requires_credential&&<small className="portal-capability-credential-note">Required credentials will be verified before you are authorized for regulated work.</small>}{(()=>{const all=servicesForCategory(category);const chosen=selectedServiceIds(selectedCategories[category.category_key]);const shown=filterServices(all,serviceSearch[category.category_key]);return <fieldset className="portal-capability-services" style={{border:0,padding:0,margin:'10px 0 0'}}><legend style={{fontWeight:700,fontSize:14}}>Which of these do you actually perform? <small>({chosen.length} of {all.length} selected)</small></legend>{all.length>8&&<input type="search" aria-label={`Search ${category.label} services`} value={serviceSearch[category.category_key]||''} onChange={e=>setServiceSearch(prev=>({...prev,[category.category_key]:e.target.value}))} placeholder="Search these services…" style={{margin:'6px 0'}}/>}<div style={{display:'flex',gap:8,margin:'4px 0'}}><button type="button" className="portal-secondary" onClick={()=>selectAllInCategory(category,all.map(x=>x.id))}>Select all {all.length}</button>{chosen.length>0&&<button type="button" className="portal-secondary" onClick={()=>selectAllInCategory(category,[])}>Clear</button>}</div><div style={{maxHeight:260,overflowY:'auto',display:'grid',gap:4}}>{shown.map(service=><label key={service.id} className="portal-capability-item"><input type="checkbox" checked={chosen.includes(service.id)} onChange={()=>toggleCategoryService(category.category_key,service.id)}/><span>{service.name}{licenseGatedSkus.has(service.sku)&&<small> · credential required</small>}</span></label>)}{shown.length===0&&<small>No matching services.</small>}</div></fieldset>;})()}</div>}
         </div>;
       })}</div>}
     </div>}
@@ -374,7 +384,7 @@ export default function PortalAccessPage() {
       <div className="portal-row"><div><strong>{form.firstName} {form.lastName}</strong><small>{form.email} · {form.phone||'No phone provided'}</small></div></div>
       <div className="portal-row"><div><strong>{form.organization||'Individual provider'}</strong><small>{[form.address,form.city,form.state,form.zip].filter(Boolean).join(', ')} · {form.serviceRadiusMiles} mile normal radius</small></div></div>
       <div className="portal-row"><div><strong>Travel & availability</strong><small>{form.transportation||'Not specified'} · {form.availability||'Availability not specified'}{form.willingOutsideRadius?' · May consider outside-radius work':''}</small></div></div>
-      <div className="portal-row"><div><strong>{Object.values(selectedCategories).filter(v=>v?.checked).length} service categor{Object.values(selectedCategories).filter(v=>v?.checked).length===1?'y':'ies'} selected</strong><small>{categories.filter(cat=>selectedCategories[cat.category_key]?.checked).map(cat=>cat.label).join(', ')||'None selected'}</small></div></div>
+      <div className="portal-row"><div><strong>{explicitServiceEntries(categories,selectedCategories,servicesForCategory).length} service{explicitServiceEntries(categories,selectedCategories,servicesForCategory).length===1?'':'s'} selected across {Object.values(selectedCategories).filter(v=>v?.checked).length} categor{Object.values(selectedCategories).filter(v=>v?.checked).length===1?'y':'ies'}</strong><small>{categories.filter(cat=>selectedCategories[cat.category_key]?.checked).map(cat=>`${cat.label} (${explicitServiceEntries([cat],selectedCategories,servicesForCategory).length})`).join(', ')||'None selected'}</small></div></div>
       <label className="portal-wide">Rate expectations (optional)<input name="rateExpectation" value={form.rateExpectation} onChange={update} placeholder="Example: $35/hr, $125 minimum, or 'see attached price sheet'."/><small>These are provider-submitted expectations, not DANI DECLARES customer pricing.</small></label>
       <label className="portal-wide">Additional notes about your experience (optional)<textarea name="services" rows="4" value={form.services} onChange={update} placeholder="Certifications, equipment, years of experience, anything else worth knowing."/></label>
     </div>}
