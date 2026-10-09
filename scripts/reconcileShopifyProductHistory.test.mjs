@@ -32,3 +32,13 @@ test('historical record without an approved price stays held even when governed 
  assert.equal(p[0].action,'HOLD');
  assert.ok(p[0].problems.includes('APPROVED_PRICE_MISSING'));
 });
+
+test('multiple exact matches are held instead of reconciled',()=>{
+ const p=planRecovery({historical:[item],shopify:[{id:'a',title:item.title,variants:[]},{id:'b',title:item.title,variants:[]}],governed:[{sku:'COOK-S'}]});
+ assert.equal(p[0].action,'HOLD');
+ assert.ok(p[0].problems.includes('AMBIGUOUS_OR_POSSIBLE_DUPLICATE'));
+});
+test('missing identity is held even with approval evidence',()=>{
+ const p=planRecovery({historical:[{...item,title:''}],shopify:[],governed:[{sku:'COOK-S'}]});
+ assert.equal(p[0].action,'HOLD');
+});
