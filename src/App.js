@@ -174,6 +174,7 @@ export default function App() {
         <Route path="/packages" element={<PackagesPage />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/partner-network" element={<PartnerNetwork />} />
+        <Route path="/build-with-me" element={<PartnerNetwork />} />
         <Route path="/network" element={<NetworkHubPage />} />
         <Route path="/portal/vendors" element={<Navigate to="/portal/vendor-onboarding" replace />} />
         <Route path="/industries/government" element={<FederalPage />} />

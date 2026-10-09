@@ -27,7 +27,7 @@ function esc(value) {
 }
 
 function nl2br(value) {
-  return esc(value).replace(/\\n/g, '<br>');
+  return esc(value).replace(/\r?\n/g, '<br>');
 }
 
 function formatDateTime(value) {

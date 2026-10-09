@@ -18,6 +18,7 @@ const routes={
  '/packages':['Service Packages | DANI DECLARES','Explore DANI DECLARES service packages and request a scope tailored to your needs.','Explore service packages and request a tailored scope.'],
  '/membership':['Membership | DANI DECLARES','Explore recurring DANI DECLARES support options for eligible customers.','Explore recurring support options.'],
  '/partner-network':['Provider Network | DANI DECLARES','Learn about the DANI DECLARES provider network and how qualified independent service providers can apply.','Qualified independent service providers can learn about the provider network.'],
+ '/build-with-me':['Build With Me | DANI DECLARES','You can watch me build it, or you can build it with me. Tell DANI DECLARES what you bring: skills, equipment, a business or the drive to learn.','Start with what you have and build toward what you want. Raise your hand to take part in building DANI DECLARES.'],
  '/about':['About DANI DECLARES','Learn how DANI DECLARES handles mobile operations, execution and support for customers across Metro Atlanta and regional South Carolina.','DANI DECLARES is a mobile operations and execution company serving Metro Atlanta and regional South Carolina.'],
  '/contact':['Contact DANI DECLARES','Contact DANI DECLARES for service, business and general inquiries.','Contact DANI DECLARES for service and business inquiries.'],
  '/blog':['DANI DECLARES Blog','Practical updates, service information and operational insights from DANI DECLARES.','Practical updates and operational insights from DANI DECLARES.'],
