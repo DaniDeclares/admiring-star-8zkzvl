@@ -12,13 +12,18 @@ export function planRecovery({ historical, shopify, governed = [] }) {
     const exact = products.filter(p=>keys.some(k=>p.keys.includes(k)));
     const fuzzy = products.filter(p=>norm(h.title) && (norm(p.title).includes(norm(h.title)) || norm(h.title).includes(norm(p.title))));
     const governedMatch = (h.governedSku && governedKeys.has(norm(h.governedSku)));
+    const live = governed.filter(g=>norm(g.sku||g.canonical_sku)===norm(h.governedSku));
     const problems = [];
     if (exact.length > 1 || (exact.length === 0 && fuzzy.length)) problems.push('AMBIGUOUS_OR_POSSIBLE_DUPLICATE');
     if (!h.title?.trim() || !h.key?.trim()) problems.push('HISTORICAL_IDENTITY_INCOMPLETE');
     if (!h.approval?.evidenceId || h.approval?.status !== 'APPROVED') problems.push('APPROVAL_NOT_VERIFIED');
-    if (!h.price?.amount || !h.price?.currency || !h.price?.evidenceId) problems.push('APPROVED_PRICE_MISSING');
+    if (!Number.isFinite(Number(h.price?.amount)) || Number(h.price?.amount)<=0 || h.price?.currency !== 'USD' || !h.price?.evidenceId) problems.push('APPROVED_PRICE_MISSING');
     if (!h.production?.assetId || !h.production?.fulfillmentVerified) problems.push('PRODUCTION_ASSET_OR_FULFILLMENT_UNVERIFIED');
-    if (!h.governedSku || !governedMatch) problems.push('GOVERNED_CATALOG_MATCH_UNVERIFIED');
+    if (!h.governedSku || !governedMatch || live.length!==1) problems.push('GOVERNED_CATALOG_MATCH_UNVERIFIED');
+    if(live.length===1){const e=live[0].economics_snapshot||{};
+      if(!Number.isSafeInteger(e.approved_price_cents) || e.approved_price_cents<=0 || e.currency!=='USD' || !e.approval_evidence_id || Number(h.price?.amount)*100!==e.approved_price_cents) problems.push('LIVE_APPROVED_PRICE_MISMATCH');
+      if(!Array.isArray(live[0].asset_refs) || !live[0].asset_refs.length || live[0].provenance?.fulfillment_verified!==true) problems.push('LIVE_FULFILLMENT_NOT_VERIFIED');
+    }
     const action = exact.length === 1 && !problems.includes('AMBIGUOUS_OR_POSSIBLE_DUPLICATE') ? 'EXISTING_RECONCILE' : problems.length ? 'HOLD' : 'CREATE_DRAFT';
     return { key:h.key, title:h.title, action, existingId:exact[0]?.id ?? null, problems };
   });
