@@ -18,17 +18,19 @@ export async function readAllShopifyProducts(credentials,request=shopifyGraphQL)
       seen.add(product.id);
       if(!product.variants?.pageInfo || !Array.isArray(product.variants.nodes)) throw Error('SHOPIFY_VARIANTS_INVALID');
       const variants=[...product.variants.nodes];let vc=product.variants.pageInfo.endCursor;
-      while(product.variants.pageInfo.hasNextPage && variants.length>=100 && vc) {
+      let hasMoreVariants=product.variants.pageInfo.hasNextPage;
+      while(hasMoreVariants) {
         // Nested variant pages are fetched separately; no silent truncation.
         const vd=await request({...credentials,query:`query($id:ID!,$cursor:String){product(id:$id){variants(first:100,after:$cursor){nodes{sku}pageInfo{hasNextPage endCursor}}}}`,variables:{id:product.id,cursor:vc}});
         const vp=vd.product?.variants;
         if(!vp || !Array.isArray(vp.nodes)) throw Error('SHOPIFY_VARIANT_PAGE_INVALID');
         variants.push(...vp.nodes);
-        if(!vp.pageInfo?.hasNextPage) break;
+        hasMoreVariants=Boolean(vp.pageInfo?.hasNextPage);
+        if(!hasMoreVariants) break;
         if(!vp.pageInfo.endCursor || vp.pageInfo.endCursor===vc) throw Error('SHOPIFY_VARIANT_CURSOR_STALLED');
         vc=vp.pageInfo.endCursor;
       }
-      if(product.variants.pageInfo.hasNextPage && variants.length<101) throw Error('SHOPIFY_VARIANTS_INCOMPLETE');
+      
       products.push({...product,variants});
     }
     if(!page.pageInfo.hasNextPage) break;
