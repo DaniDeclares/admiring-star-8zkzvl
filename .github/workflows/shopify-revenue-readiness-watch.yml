@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test history-first recovery gates
-        run: node --test scripts/reconcileShopifyProductHistory.test.mjs scripts/shopifyRecoveryDrafts.test.mjs scripts/shopifyWalkAway.test.mjs scripts/shopifyRecoveryAdapters.test.mjs
+        run: node --test scripts/reconcileShopifyProductHistory.test.mjs scripts/shopifyRecoveryDrafts.test.mjs scripts/shopifyWalkAway.test.mjs scripts/shopifyRecoveryAdapters.test.mjs scripts/shopifyReadiness.test.mjs
       - name: Reconcile historical Cookout catalog (dry-run only)
         env:
           SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
@@ -43,10 +43,12 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
       - name: Report only new actionable findings
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
+            if (!fs.existsSync('shopify-watch.json')) { core.warning('Shopify readiness evidence missing; inspect failed preceding steps'); return; }
             const data = JSON.parse(fs.readFileSync('shopify-watch.json', 'utf8'));
             if (!data.findings.length) return;
             const title = '[Revenue watch] Shopify catalog readiness gaps';
