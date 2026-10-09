@@ -1,6 +1,6 @@
 -- Read-only commercial readiness diagnostic; no price, release state or buyer plan is mutated.
 -- Tiered margin thresholds remain governed by existing authority, never guessed here.
-create or replace view public.dd_commercial_readiness_diagnostic_v1 as
+create or replace view public.dd_commercial_readiness_diagnostic_v1 with (security_invoker = true) as
 select u.canonical_sku,
        u.division,
        u.service_family,
@@ -43,3 +43,7 @@ left join public.dd_service_economics_authority_v1 e on e.canonical_sku=u.canoni
 left join public.dd_service_release_contract_v1 r on r.canonical_sku=u.canonical_sku;
 comment on view public.dd_commercial_readiness_diagnostic_v1 is
  'Observability only. Existing release and pricing authorities remain canonical. No family margin thresholds inferred; missing proof never auto-approves.';
+
+-- Internal diagnostic only; do not grant public Data API access.
+revoke all on public.dd_commercial_readiness_diagnostic_v1 from public, anon, authenticated;
+grant select on public.dd_commercial_readiness_diagnostic_v1 to service_role;
