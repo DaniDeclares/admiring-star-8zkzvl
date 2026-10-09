@@ -7,6 +7,7 @@ import { publishPaymentReconciled } from '../src/lib/operations/eventBroker2026.
 import { getGovernedCommercialOffer, resolveCH01CommercialSelection } from '../src/lib/operations/governedCommercialGate2026.js';
 import { captureServer } from '../src/lib/posthogAnalyticsServer.js';
 import { reconcilePaidBookingWindow } from '../src/lib/operations/bookingPaymentReconciliation2026.js';
+import { linkJobForPaidProposalInvoice, readRequestChannel as readChannel } from '../src/lib/operations/paidProposalInvoice2026.js';
 
 const secretKey=process.env.STRIPE_SECRET_KEY;
 const webhookSecret=process.env.STRIPE_WEBHOOK_SECRET;
@@ -14,7 +15,6 @@ const stripe=secretKey?new Stripe(secretKey):null;
 const QUOTE_PRICING_TYPES=new Set(['BESPOKE_SOW','SOW','SOW_PROCUREMENT','QUOTE','STARTING_AT','CONFIGURED','VARIABLE_QUOTE']);
 export const config={api:{bodyParser:false}};
 async function getRawBody(req){const chunks=[];for await(const chunk of req)chunks.push(typeof chunk==='string'?Buffer.from(chunk):chunk);return Buffer.concat(chunks);}
-function readChannel(propertyDetails){return propertyDetails?.operationsRouting?.channelType||propertyDetails?.operationsRouting?.channel||null;}
 function money(value){return Number(Number(value||0).toFixed(2));}
 const GOOGLE_ROUTES_ENDPOINT='https://routes.googleapis.com/directions/v2:computeRoutes';
 export async function finalizeProposedProviderRoutes(db,estimateId){
@@ -105,6 +105,9 @@ export default async function handler(req,res){
     if(event.type==='invoice.paid'&&invoiceMetadata.payment_type==='SUBSCRIPTION'&&invoiceMetadata.request_id)throw new Error('Subscription invoice binding is pending.');
    }
    if(!row)return res.status(200).json({received:true,unmappedInvoice:true});
+   // Stripe delivery order is not guaranteed: a late finalized/sent/payment_failed notice must never
+   // reopen a paid invoice, or the customer could be asked to pay twice.
+   if(String(row.invoice_status||'').toLowerCase()==='paid'&&event.type!=='invoice.paid')return res.status(200).json({received:true,invoiceId:row.id,status:'paid',staleEventIgnored:true});
    const statusMap={
     'invoice.paid':'paid',
     'invoice.voided':'void',
@@ -116,6 +119,8 @@ export default async function handler(req,res){
    const nextStatus=statusMap[event.type]||row.invoice_status;
    const paidAt=event.type==='invoice.paid'?(invoice.status_transitions?.paid_at?new Date(invoice.status_transitions.paid_at*1000).toISOString():new Date().toISOString()):null;
    await prisma.$transaction(async tx=>{
+    // Serialize concurrent deliveries for the same invoice before the replay check.
+    await tx.$executeRaw`select pg_advisory_xact_lock(hashtextextended(${row.id}::text, 0))`;
     const prior=await tx.$queryRaw`select id from public.dd_payment_events where provider_event_id=${event.id} limit 1`;
     if(prior.length)return;
     await tx.$executeRaw`
@@ -125,54 +130,21 @@ export default async function handler(req,res){
           hosted_invoice_url=${invoice.hosted_invoice_url||null},
           stripe_payment_link=${invoice.hosted_invoice_url||null},
           balance_due=${Number(invoice.amount_remaining||0)/100},
-          stripe_invoice_paid_at=${paidAt},
+          stripe_invoice_paid_at=${paidAt}::timestamptz,
           stripe_invoice_last_event_at=now(),
           updated_at=now()
       where id=${row.id}::uuid
     `;
     if(event.type==='invoice.paid'){
-      let paymentJob = null;
-      let paymentEstimate = null;
-      let paymentRequest = null;
-      if(row.estimate_id){
-        paymentEstimate = await tx.dd_estimates.findUnique({where:{id:row.estimate_id}});
-        if(paymentEstimate?.service_request_id){
-          paymentRequest = await tx.serviceRequest.findUnique({where:{id:paymentEstimate.service_request_id}});
-        }
-      }
-      const channel = readChannel(paymentRequest?.property_details);
-      if(paymentEstimate && paymentRequest && channel === 'B2B_APT'){
-        const approvedTotal = Number(paymentEstimate.estimated_total || 0);
-        const paidAmount = Number(invoice.amount_paid || invoice.total || 0) / 100;
-        if(!Number.isFinite(approvedTotal) || approvedTotal <= 0) throw new Error('Paid CH02 invoice has no valid approved estimate total.');
-        if(money(approvedTotal) !== money(paidAmount)) throw new Error('CH02 invoice payment does not match the frozen approved estimate.');
-        paymentJob = await tx.dd_jobs.findFirst({where:{service_request_id:paymentRequest.id},orderBy:{created_at:'desc'}});
-        if(!paymentJob){
-          const lineItems = paymentEstimate.intake_answers?.pricingSnapshot?.lineItems || paymentEstimate.intake_answers?.lineItems || [];
-          const primaryName = lineItems[0]?.serviceName || paymentRequest.service_needed || paymentRequest.service_category || 'Property Operations';
-          paymentJob = await tx.dd_jobs.create({
-            data:{
-              estimate_id:paymentEstimate.id,
-              lead_id:paymentRequest.leadId || null,
-              service_request_id:paymentRequest.id,
-              division_slug:paymentEstimate.division_slug || 'propertyops',
-              job_title:primaryName,
-              job_status:'new',
-              location_address:paymentRequest.location_address || paymentEstimate.location_address || null,
-              scope_summary:paymentEstimate.client_notes || paymentRequest.request_details || null,
-              organization_id:paymentRequest.organization_id || null
-            }
-          });
-        }
-        await tx.dd_invoices.update({where:{id:row.id},data:{job_id:paymentJob.id,invoice_status:'paid',balance_due:0,updated_at:new Date()}});
-        await tx.serviceRequest.update({where:{id:paymentRequest.id},data:{status:'job_created'}});
-      }
+      const {paymentJob,paymentEstimate,paymentRequest,heldReason}=await linkJobForPaidProposalInvoice(tx,{row,invoice});
+      if(heldReason)console.error(`Paid invoice ${row.id} recorded without a job: ${heldReason}`);
+      const paymentMetadata={...(invoice.metadata||{}),dani_job_link:heldReason?`HELD:${heldReason}`:'LINKED'};
       const paymentEvent = await tx.$queryRaw`
         insert into public.dd_payment_events
           (provider_event_id,provider_payment_id,request_id,job_id,invoice_id,event_type,payment_status,amount_received,currency,raw_metadata)
         values
           (${event.id},${invoice.payment_intent||invoice.id},${paymentRequest?.id||null},${paymentJob?.id||null},${row.id}::uuid,${event.type},'SUCCEEDED',
-           ${Number(invoice.amount_paid||0)/100},${invoice.currency||'usd'},${JSON.stringify(invoice.metadata||{})}::jsonb)
+           ${Number(invoice.amount_paid||0)/100},${invoice.currency||'usd'},${JSON.stringify(paymentMetadata)}::jsonb)
         returning id
       `;
       if(paymentEstimate?.economics_status==='PASS' && paymentEstimate?.active_economics_snapshot_id){
