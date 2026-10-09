@@ -26,6 +26,24 @@ async function main() {
   if (!domain || !token || !/^[a-z0-9-]+\.myshopify\.com$/.test(domain)) throw Error('SHOPIFY_READ_CREDENTIALS_REQUIRED');
   const products = [];
   const governed = [];
+  const catalogUrl = process.env.DANI_CATALOG_API_URL;
+  const catalogToken = process.env.DANI_CATALOG_API_KEY;
+  if (catalogUrl && catalogToken) {
+    const base = new URL(catalogUrl);
+    if (base.protocol !== 'https:') throw Error('CATALOG_ENDPOINT_MUST_BE_HTTPS');
+    const endpoint = new URL('/rest/v1/dd_merch_product_candidates',base);
+    endpoint.searchParams.set('select','canonical_sku,title,verification_state,approval_state,approved_by,approved_at,publication_state');
+    const response = await fetch(endpoint,{headers:{apikey:catalogToken,Authorization:'Bearer '+catalogToken},signal:AbortSignal.timeout(20000)});
+    if (!response.ok) throw Error('CATALOG_READ_FAILED_'+response.status);
+    const records = await response.json();
+    if (!Array.isArray(records)) throw Error('CATALOG_RESPONSE_INVALID');
+    for (const row of records) {
+      if (row.verification_state === 'VERIFIED' && row.approval_state === 'APPROVED' &&
+          row.approved_by && row.approved_at && ['READY','QUEUED','PUBLISHED'].includes(row.publication_state)) {
+        governed.push({sku:row.canonical_sku,title:row.title});
+      }
+    }
+  }
   let after = null;
   do {
     const q = `query ($after:String) { products(first:100,after:$after) { edges { cursor node { id title handle variants(first:100) { nodes { sku } pageInfo { hasNextPage } } } } pageInfo { hasNextPage endCursor } } }`;
@@ -42,6 +60,6 @@ async function main() {
   // Catalog is a historical lead, not a substitute for the live governed authority.
   // Until a verified governed catalog adapter exists, all unmatched products remain held.
   const plan=planRecovery({historical:catalog.products,shopify:products,governed});
-  console.log(JSON.stringify({mode:'DRY_RUN',source:catalog.source,scanned:products.length,governedVerified:governed.length,plan},null,2));
+  console.log(JSON.stringify({mode:'DRY_RUN',source:catalog.source,scanned:products.length,governedVerified:governed.length,catalogConnected:!!(catalogUrl&&catalogToken),plan},null,2));
 }
 if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) main().catch(e=>{console.error(e.message);process.exitCode=2});
