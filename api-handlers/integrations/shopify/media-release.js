@@ -4,6 +4,9 @@
 //   <release_key>/manifest.json   (owner-approved mapping, see src/lib/shopifyMediaRelease.js)
 //   <release_key>/<images>
 // Modes:
+//   upload_url   - (staff) one-time signed upload URL for one image in a release folder; never overwrites
+//   put_manifest - (staff) store a validated manifest after checking every image's SHA-256 in the bucket;
+//                  only an owner session with approve=true marks it READY and records the approval
 //   plan   - read-only diff of what would change (default)
 //   attach - add missing release images to EXISTING products, then put them first
 //   retire - detach the old images, only for products whose release images are
@@ -14,9 +17,10 @@
 // The rail never creates products, publishes, or touches price, SKU, inventory,
 // fulfillment, channels, or digital-download attachments.
 
+import { createHash } from 'node:crypto';
 import { requireStaff, logIntegrationEvent } from '../../_integrationOAuth.js';
 import { SHOPIFY_ADAPTER, adminSupabase, ensureShopifyConnection, isCronRequest, readJsonBody, shopifyGraphQL, userErrorsOf } from '../../_shopifyAdmin.js';
-import { RELEASE_BUCKET, assetAttachKey, planProductMedia, reorderMoves, retireCandidates, toProductGid, validateManifest } from '../../../src/lib/shopifyMediaRelease.js';
+import { RELEASE_BUCKET, applyOwnerApproval, assetAttachKey, releaseUploadPath, planProductMedia, reorderMoves, retireCandidates, toProductGid, validateManifest } from '../../../src/lib/shopifyMediaRelease.js';
 
 const TIME_BUDGET_MS = 45_000;
 const SIGNED_URL_SECONDS = 60 * 60;
@@ -161,6 +165,40 @@ async function processProduct({ supabase, manifest, entry, mode, allowRetire }) 
   return result;
 }
 
+async function createUploadUrl(supabase, params) {
+  const path = releaseUploadPath(params.release_key, params.file_name);
+  if (!path) throw Object.assign(new Error('UPLOAD_PATH_INVALID'), { status: 400 });
+  const { data, error } = await supabase.storage.from(RELEASE_BUCKET).createSignedUploadUrl(path, { upsert: false });
+  if (error) throw Object.assign(new Error(`UPLOAD_URL_FAILED:${error.message}`), { status: /exist/i.test(error.message) ? 409 : 500 });
+  return { path, signed_url: data.signedUrl, expires_in_seconds: 7200 };
+}
+
+async function putManifest(supabase, params, staff) {
+  const incoming = typeof params.manifest === 'string' ? JSON.parse(params.manifest) : params.manifest;
+  if (!incoming || typeof incoming !== 'object') throw Object.assign(new Error('MANIFEST_REQUIRED'), { status: 400 });
+  const isOwner = staff?.role === 'owner' && staff?.governedRole === 'OWNER_OPERATOR';
+  const approval = applyOwnerApproval(incoming, { approve: params.approve === true, isOwner, actor: staff?.user?.id || null });
+  if (!approval.ok) throw Object.assign(new Error(approval.error), { status: 403 });
+  const manifest = approval.manifest;
+  const validation = validateManifest(manifest);
+  if (!validation.ok) throw Object.assign(new Error(`MANIFEST_INVALID:${validation.errors.join(',')}`), { status: 422 });
+  const mismatches = [];
+  for (const entry of manifest.products) {
+    for (const asset of entry.assets) {
+      const { data, error } = await supabase.storage.from(RELEASE_BUCKET).download(asset.path);
+      if (error || !data) { mismatches.push(`${asset.path}:MISSING`); continue; }
+      const digest = createHash('sha256').update(Buffer.from(await data.arrayBuffer())).digest('hex');
+      if (digest !== asset.sha256) mismatches.push(`${asset.path}:SHA256_MISMATCH`);
+    }
+  }
+  if (mismatches.length) throw Object.assign(new Error(`ASSETS_NOT_VERIFIED:${mismatches.join(',')}`), { status: 422 });
+  const body = Buffer.from(JSON.stringify(manifest, null, 2));
+  const { error } = await supabase.storage.from(RELEASE_BUCKET).upload(`${manifest.release_key}/manifest.json`, body, { contentType: 'application/json', upsert: true });
+  if (error) throw new Error(`MANIFEST_STORE_FAILED:${error.message}`);
+  await logIntegrationEvent({ supabase, adapterCode: SHOPIFY_ADAPTER, direction: 'OUTBOUND', eventType: manifest.status === 'READY' ? 'RELEASE_APPROVED' : 'RELEASE_MANIFEST_STORED', status: 'PROCESSED', payload: { release_key: manifest.release_key, status: manifest.status, products: manifest.products.length, assets: manifest.products.reduce((n, p) => n + p.assets.length, 0), approval: manifest.approval || null } });
+  return { release_key: manifest.release_key, status: manifest.status, approval: manifest.approval || null, assets_verified: manifest.products.reduce((n, p) => n + p.assets.length, 0) };
+}
+
 export default async function handler(req, res) {
   if (!['GET', 'POST'].includes(req.method)) return res.status(405).json({ success: false, error: 'Method not allowed' });
   const supabase = adminSupabase();
@@ -171,7 +209,10 @@ export default async function handler(req, res) {
     const body = req.method === 'POST' ? await readJsonBody(req) : {};
     const params = { ...(req.query || {}), ...body };
     const mode = cron ? 'sync' : String(params.mode || 'plan');
-    if (!['plan', 'attach', 'retire', 'sync'].includes(mode)) return res.status(400).json({ success: false, error: 'MODE_INVALID' });
+    if (!['plan', 'attach', 'retire', 'sync', 'upload_url', 'put_manifest'].includes(mode)) return res.status(400).json({ success: false, error: 'MODE_INVALID' });
+    if (mode === 'sync' && !cron) return res.status(400).json({ success: false, error: 'MODE_INVALID' });
+    if (mode === 'upload_url') return res.status(200).json({ success: true, ...(await createUploadUrl(supabase, params)) });
+    if (mode === 'put_manifest') return res.status(200).json({ success: true, ...(await putManifest(supabase, params, staff)) });
 
     // Scope and shop gate before anything else; also registers the connection.
     const connection = await ensureShopifyConnection({ supabase, authorizedBy: staff?.user?.id || null });

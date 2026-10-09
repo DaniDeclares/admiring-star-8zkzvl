@@ -110,3 +110,29 @@ export function retireCandidates(plan) {
   if (!plan.releaseReady) return [];
   return plan.otherMedia.map(media => media.id);
 }
+
+const UPLOAD_NAME_RE = /^[a-z0-9][a-z0-9_-]{0,80}\.(png|jpg|jpeg|webp)$/;
+
+// Signed upload URLs are issued only for one image inside one release folder.
+export function releaseUploadPath(releaseKey, fileName) {
+  if (!RELEASE_KEY_RE.test(String(releaseKey || ''))) return null;
+  const name = String(fileName || '').toLowerCase();
+  if (!UPLOAD_NAME_RE.test(name)) return null;
+  return `${releaseKey}/${name}`;
+}
+
+// Approval is never taken from the uploaded file: it is stripped, and only an
+// owner session asking to approve gets READY plus a server-recorded approval.
+export function applyOwnerApproval(manifest, { approve = false, isOwner = false, actor = null, now = new Date() } = {}) {
+  const next = { ...manifest };
+  delete next.approval;
+  if (approve) {
+    if (!isOwner || !actor) return { ok: false, error: 'OWNER_APPROVAL_REQUIRED' };
+    next.status = 'READY';
+    next.approval = { approved_by: String(actor), approved_at: now.toISOString() };
+  } else {
+    if (next.status === 'READY') next.status = 'DRAFT';
+    if (next.retire_replaced_media === true) next.retire_replaced_media = false;
+  }
+  return { ok: true, manifest: next };
+}

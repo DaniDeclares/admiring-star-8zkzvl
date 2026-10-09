@@ -1,4 +1,4 @@
-import { assetAttachKey, planProductMedia, reorderMoves, retireCandidates, toProductGid, validateManifest } from './shopifyMediaRelease';
+import { applyOwnerApproval, assetAttachKey, planProductMedia, releaseUploadPath, reorderMoves, retireCandidates, toProductGid, validateManifest } from './shopifyMediaRelease';
 
 const sha = c => c.repeat(64);
 const manifest = () => ({
@@ -100,5 +100,28 @@ describe('Shopify media release plan', () => {
       { id: 'new1', newPosition: '0' }, { id: 'new2', newPosition: '1' }, { id: 'old1', newPosition: '2' }, { id: 'old2', newPosition: '3' },
     ]);
     expect(reorderMoves({ attached, currentMedia: [{ id: 'new1' }, { id: 'new2' }, { id: 'old1' }] })).toEqual([]);
+  });
+});
+
+describe('Shopify media release uploads and approval', () => {
+  test('issues upload paths only for images inside a valid release folder', () => {
+    expect(releaseUploadPath('2026-10-08-burgundy', 'clean_1_main.png')).toBe('2026-10-08-burgundy/clean_1_main.png');
+    expect(releaseUploadPath('2026-10-08-burgundy', 'manifest.json')).toBeNull();
+    expect(releaseUploadPath('2026-10-08-burgundy', '../x.png')).toBeNull();
+    expect(releaseUploadPath('2026-10-08-burgundy', 'a/b.png')).toBeNull();
+    expect(releaseUploadPath('../etc', 'a.png')).toBeNull();
+  });
+
+  test('approval comes only from an owner session, never from the uploaded file', () => {
+    const forged = { ...manifest(), approval: { approved_by: 'someone', approved_at: '2026-01-01T00:00:00Z' }, retire_replaced_media: true };
+    const draft = applyOwnerApproval(forged, { approve: false, isOwner: true, actor: 'owner-id' });
+    expect(draft.manifest.status).toBe('DRAFT');
+    expect(draft.manifest.approval).toBe(undefined);
+    expect(draft.manifest.retire_replaced_media).toBe(false);
+    expect(applyOwnerApproval(forged, { approve: true, isOwner: false, actor: 'staff-id' })).toEqual({ ok: false, error: 'OWNER_APPROVAL_REQUIRED' });
+    const approved = applyOwnerApproval(forged, { approve: true, isOwner: true, actor: 'owner-id', now: new Date('2026-10-09T15:00:00Z') });
+    expect(approved.manifest.status).toBe('READY');
+    expect(approved.manifest.approval).toEqual({ approved_by: 'owner-id', approved_at: '2026-10-09T15:00:00.000Z' });
+    expect(validateManifest(approved.manifest).ok).toBe(true);
   });
 });

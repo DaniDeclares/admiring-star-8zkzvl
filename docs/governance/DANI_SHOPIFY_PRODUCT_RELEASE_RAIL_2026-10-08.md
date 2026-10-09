@@ -16,7 +16,10 @@ server-side rail instead of manual uploads.
   evidence in `dd_integration_event_log`. No parallel registry, queue or planner.
 
 ## How a release works
-1. Put the images and a `manifest.json` in the private bucket `dd-product-release-assets/<release_key>/`.
+1. Upload images with `mode: "upload_url"` (staff): one signed URL per image path inside the release folder,
+   valid 2 hours, never overwrites. Then store the manifest with `mode: "put_manifest"`: the server re-validates it
+   and checks every image's SHA-256 in the bucket. Approval is never read from the file: only an owner session with
+   `"approve": true` sets `READY` and records `approval.approved_by` / `approved_at`.
 2. The manifest maps each EXISTING Shopify product (id + expected title) to its images, in order (position 1 = main image),
    with alt text and SHA-256. Validation: `src/lib/shopifyMediaRelease.js`.
 3. Run `plan` (read-only) from Owner HQ / API, then `attach`. The daily cron (13:30 UTC) runs `sync` only for releases with
@@ -37,5 +40,7 @@ A product whose live title differs from `expected_title` is blocked, not guessed
 ## API
 - `GET /api/integrations/shopify-release-auth` (owner, merged in #599) — read-only credential smoke. Use it first after
   credentials are added; this rail does not duplicate it.
-- `POST /api/integrations/shopify/media-release` (staff) — body `{ "release_key": "...", "mode": "plan|attach|retire", "product_id": "optional", "confirm": false }`.
+- `POST /api/integrations/shopify/media-release` (staff) — body `{ "release_key": "...", "mode": "plan|attach|retire", "product_id": "optional", "confirm": false }`;
+  `{ "mode": "upload_url", "release_key": "...", "file_name": "x_1_main.png" }`;
+  `{ "mode": "put_manifest", "manifest": { ... }, "approve": false }`.
 - `GET /api/integrations/shopify/media-release` (Vercel cron, `CRON_SECRET`) — `sync` over READY releases.
