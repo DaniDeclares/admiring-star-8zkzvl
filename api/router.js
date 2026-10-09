@@ -26,6 +26,7 @@ export const ROUTES = {
   'integrations/notion/start': () => import('../api-handlers/integrations/notion/start.js'),
   'integrations/quickbooks/callback': () => import('../api-handlers/integrations/quickbooks/callback.js'),
   'integrations/quickbooks/start': () => import('../api-handlers/integrations/quickbooks/start.js'),
+  'integrations/shopify-release-auth': () => import('../api-handlers/integrations/shopify-release-auth.js'),
   'integrations/status': () => import('../api-handlers/integrations/status.js'),
   'integrations/thumbtack/webhook': () => import('../api-handlers/integrations/thumbtack/webhook.js'),
   'partner-inquiry': () => import('../api-handlers/partner-inquiry.js'),
