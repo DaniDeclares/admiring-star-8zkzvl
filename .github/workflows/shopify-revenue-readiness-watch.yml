@@ -48,8 +48,11 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            if (!fs.existsSync('shopify-watch.json')) { core.warning('Shopify readiness evidence missing; inspect failed preceding steps'); return; }
-            const data = JSON.parse(fs.readFileSync('shopify-watch.json', 'utf8'));
+            if (!fs.existsSync('shopify-watch.json')) { core.setFailed('Shopify readiness evidence missing; inspect failed preceding steps'); return; }
+            let data;
+            try { data = JSON.parse(fs.readFileSync('shopify-watch.json', 'utf8')); }
+            catch { core.setFailed('Shopify readiness evidence is malformed'); return; }
+            if (!Array.isArray(data.findings) || !Array.isArray(data.missingImages)) { core.setFailed('Shopify readiness evidence schema invalid'); return; }
             if (!data.findings.length) return;
             const title = '[Revenue watch] Shopify catalog readiness gaps';
             const {owner, repo} = context.repo;
