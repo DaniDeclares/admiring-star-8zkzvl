@@ -21,10 +21,14 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Test read-only ledger guard
         run: node --test scripts/checkProductionMigrationLedger.test.mjs
       - name: Reject duplicate local migration versions
+        env:
+          MIGRATION_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: node scripts/checkLocalMigrationVersions.mjs
