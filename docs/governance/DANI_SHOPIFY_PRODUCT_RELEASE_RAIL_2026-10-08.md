@@ -43,4 +43,6 @@ A product whose live title differs from `expected_title` is blocked, not guessed
 - `POST /api/integrations/shopify/media-release` (staff) — body `{ "release_key": "...", "mode": "plan|attach|retire", "product_id": "optional", "confirm": false }`;
   `{ "mode": "upload_url", "release_key": "...", "file_name": "x_1_main.png" }`;
   `{ "mode": "put_manifest", "manifest": { ... }, "approve": false }`.
+- `POST ... { "mode": "inspect", "release_key": "..." | "product_ids": [...] }` (staff) — read-only listing state for release QA:
+  status, Online Store publication, description, variants/prices, media order. Never writes.
 - `GET /api/integrations/shopify/media-release` (Vercel cron, `CRON_SECRET`) — `sync` over READY releases.
