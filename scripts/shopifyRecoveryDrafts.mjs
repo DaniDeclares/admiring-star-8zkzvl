@@ -17,14 +17,13 @@ export async function createApprovedDraft({historical,governed,credentials,execu
   const existing=await readAllShopifyProducts(credentials,request);
   const gate=draftEligibility({historical,governed,shopify:existing});
   if(!gate.eligible) return {status:'HOLD',reasons:gate.reasons};
-  // Product creation only: price/variant association requires a separate governed transaction.
-  // A zero-priced product must never be created, even as a draft.
-  const cents=governed.economics_snapshot.approved_price_cents;
-  const price=(cents/100).toFixed(2);
-  const data=await request({...credentials,query:`mutation($input:ProductCreateInput!){productCreate(product:$input){product{id title status variants(first:1){nodes{id price}}}userErrors{field message}}}`,
-    variables:{input:{title:historical.title,status:'DRAFT',vendor:'DANI DECLARES LLC',productType:'Governed Recovery',tags:['dani-recovery',historical.key]}}});
-  const result=data.productCreate;
+  // productSet creates the draft and its approved-priced variant atomically.
+  const price=(governed.economics_snapshot.approved_price_cents/100).toFixed(2);
+  const data=await request({...credentials,query:`mutation($input:ProductSetInput!){productSet(synchronous:true,input:$input){product{id title status variants(first:10){nodes{sku price}}}userErrors{field message}}}`,
+    variables:{input:{title:historical.title,status:'DRAFT',vendor:'DANI DECLARES LLC',productType:'Governed Recovery',tags:['dani-recovery',historical.key],variants:[{sku:governed.canonical_sku,price}]}}});
+  const result=data.productSet;
   if(result?.userErrors?.length || !result?.product?.id) throw Error('SHOPIFY_DRAFT_CREATE_FAILED');
-  // Do not publish or attach price until a separately verified variant pricing path is available.
-  return {status:'DRAFT_CREATED_PRICE_NOT_SET',id:result.product.id,approvedPrice:price};
+  const actual=result.product;
+  if(actual.status!=='DRAFT' || !actual.variants?.nodes?.some(v=>v.sku===governed.canonical_sku && Number(v.price)===Number(price))) throw Error('SHOPIFY_DRAFT_READBACK_MISMATCH');
+  return {status:'DRAFT_CREATED',id:actual.id,price};
 }
