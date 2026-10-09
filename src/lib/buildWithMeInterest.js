@@ -28,7 +28,8 @@ export const INTEREST_AREAS = {
 export const CONSENT_TEXT = 'I agree that DANI DECLARES LLC may contact me by email or phone about my interest. Submitting this form does not create a job, contract, or guarantee of work or income.';
 
 const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'];
-const clean = (value, max) => String(value ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+const stripControl = (text) => Array.from(text, ch => { const code = ch.charCodeAt(0); return code < 32 || code === 127 ? ' ' : ch; }).join('');
+const clean = (value, max) => stripControl(String(value ?? '')).replace(/\s+/g, ' ').trim().slice(0, max);
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
 export function normalizeInterestSubmission(body = {}, { now = new Date() } = {}) {
