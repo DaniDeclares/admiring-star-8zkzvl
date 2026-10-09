@@ -14,12 +14,13 @@ const FEATURED = [
 export default function ShopPage() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [catalogAvailable,setCatalogAvailable] = useState(false);
 
   useEffect(() => {
     fetch('/api/verify-commercial-intent?catalog=1')
       .then((r) => r.json())
-      .then((data) => setServices(data.success ? data.services || [] : []))
-      .catch(() => setServices([]))
+      .then((data) => {setCatalogAvailable(Boolean(data.success));setServices(data.success ? data.services || [] : []);})
+      .catch(() => {setCatalogAvailable(false);setServices([]);})
       .finally(() => setLoading(false));
   }, []);
 
@@ -33,6 +34,7 @@ export default function ShopPage() {
           <h1 className="mt-3 text-4xl sm:text-5xl font-black text-[#5b1624]">Products made for your next move.</h1>
           <p className="mt-5 text-lg leading-relaxed text-[#6d5b60]">From branded apparel and business cards to signs and custom production, choose a current offer or tell us what you want made.</p>
         </div>
+        {!loading && !catalogAvailable && <p role="status" className="mb-6 rounded-xl border border-[#d2a83f] bg-white p-4">Live catalog pricing is temporarily unavailable. Please request a verified quote before ordering.</p>}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {FEATURED.map((item) => {
             const service = byId.get(item.serviceId);
@@ -45,7 +47,7 @@ export default function ShopPage() {
                 <div className="mt-6 flex items-center justify-between gap-4">
                   <div>
                     <div className="text-xs uppercase tracking-wider font-black text-[#a8791c]">Current pricing</div>
-                    <div className="mt-1 text-xl font-black text-[#5b1624]">{loading ? 'Checking…' : service?.pricingLabel || 'Request a quote'}</div>
+                    <div className="mt-1 text-xl font-black text-[#5b1624]">{loading ? 'Checking…' : service?.pricingLabel || 'Quote required'}</div>
                   </div>
                   <Link to={`/request-service?service=${encodeURIComponent(item.serviceId)}`} className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#6b1f2b] px-4 py-3 text-white font-black text-sm">Order <ArrowRight className="w-4 h-4" /></Link>
                 </div>
