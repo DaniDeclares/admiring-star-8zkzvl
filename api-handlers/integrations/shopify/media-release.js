@@ -7,6 +7,8 @@
 //   upload_url   - (staff) one-time signed upload URL for one image in a release folder; never overwrites
 //   put_manifest - (staff) store a validated manifest after checking every image's SHA-256 in the bucket;
 //                  only an owner session with approve=true marks it READY and records the approval
+//   inspect      - (staff) read-only listing state for release verification: title, status, Online Store
+//                  publication, description, variants/prices, media order. Never writes.
 //   plan   - read-only diff of what would change (default)
 //   attach - add missing release images to EXISTING products, then put them first
 //   retire - detach the old images, only for products whose release images are
@@ -46,6 +48,36 @@ const REORDER_MUTATION = `mutation DaniReleaseReorder($id: ID!, $moves: [MoveInp
 const DETACH_MUTATION = `mutation DaniReleaseDetach($files: [FileUpdateInput!]!) {
   fileUpdate(files: $files) { files { id } userErrors { field message } }
 }`;
+
+const INSPECT_QUERY = `query DaniReleaseInspect($id: ID!) {
+  product(id: $id) {
+    id title handle status vendor productType tags publishedAt onlineStoreUrl onlineStorePreviewUrl
+    descriptionHtml totalInventory tracksInventory
+    variants(first: 20) { nodes { title sku price compareAtPrice taxable inventoryItem { requiresShipping tracked } } }
+    media(first: 20) { nodes { ... on MediaImage { id status alt image { url width height } } } }
+  }
+}`;
+
+async function inspectProducts(supabase, ids) {
+  const out = [];
+  for (const raw of ids) {
+    const gid = toProductGid(raw);
+    if (!gid) { out.push({ id: raw, error: 'PRODUCT_ID_INVALID' }); continue; }
+    const { data } = await shopifyGraphQL({ supabase, query: INSPECT_QUERY, variables: { id: gid } });
+    const p = data?.product;
+    if (!p) { out.push({ id: gid, error: 'PRODUCT_NOT_FOUND' }); continue; }
+    const text = String(p.descriptionHtml || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    out.push({
+      id: gid, title: p.title, handle: p.handle, status: p.status, vendor: p.vendor, product_type: p.productType, tags: p.tags,
+      published_at: p.publishedAt, online_store_url: p.onlineStoreUrl, preview_url: p.onlineStorePreviewUrl,
+      description_text: text.slice(0, 4000), description_chars: text.length,
+      total_inventory: p.totalInventory, tracks_inventory: p.tracksInventory,
+      variants: (p.variants?.nodes || []).map(v => ({ title: v.title, sku: v.sku, price: v.price, compare_at: v.compareAtPrice, taxable: v.taxable, requires_shipping: v.inventoryItem?.requiresShipping, tracked: v.inventoryItem?.tracked })),
+      media: (p.media?.nodes || []).filter(m => m.id).map((m, i) => ({ position: i + 1, status: m.status, alt: m.alt, file: String(m.image?.url || '').split('?')[0].split('/').pop(), width: m.image?.width, height: m.image?.height })),
+    });
+  }
+  return out;
+}
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -209,13 +241,18 @@ export default async function handler(req, res) {
     const body = req.method === 'POST' ? await readJsonBody(req) : {};
     const params = { ...(req.query || {}), ...body };
     const mode = cron ? 'sync' : String(params.mode || 'plan');
-    if (!['plan', 'attach', 'retire', 'sync', 'upload_url', 'put_manifest'].includes(mode)) return res.status(400).json({ success: false, error: 'MODE_INVALID' });
+    if (!['plan', 'attach', 'retire', 'sync', 'upload_url', 'put_manifest', 'inspect'].includes(mode)) return res.status(400).json({ success: false, error: 'MODE_INVALID' });
     if (mode === 'sync' && !cron) return res.status(400).json({ success: false, error: 'MODE_INVALID' });
     if (mode === 'upload_url') return res.status(200).json({ success: true, ...(await createUploadUrl(supabase, params)) });
     if (mode === 'put_manifest') return res.status(200).json({ success: true, ...(await putManifest(supabase, params, staff)) });
 
     // Scope and shop gate before anything else; also registers the connection.
     const connection = await ensureShopifyConnection({ supabase, authorizedBy: staff?.user?.id || null });
+    if (mode === 'inspect') {
+      const ids = params.product_ids || (params.product_id ? [params.product_id] : (await loadManifest(supabase, String(params.release_key || ''))).products.map(p => p.shopify_product_id));
+      if (!Array.isArray(ids) || ids.length === 0 || ids.length > 25) return res.status(400).json({ success: false, error: 'PRODUCT_IDS_INVALID' });
+      return res.status(200).json({ success: true, products: await inspectProducts(supabase, ids) });
+    }
     const manifests = params.release_key ? [await loadManifest(supabase, String(params.release_key))] : await listReadyReleases(supabase);
     const results = [];
     for (const manifest of manifests) {
