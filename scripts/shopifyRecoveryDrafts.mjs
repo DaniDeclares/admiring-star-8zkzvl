@@ -19,6 +19,9 @@ export async function createApprovedDraft({historical,governed,credentials,execu
   if(!gate.eligible) return {status:'HOLD',reasons:gate.reasons};
   // productSet creates the draft and its approved-priced variant atomically.
   const price=(governed.economics_snapshot.approved_price_cents/100).toFixed(2);
+  // A duplicate created concurrently is still possible; unattended writes stay disabled until
+  // a durable idempotency reservation and catalog writeback are implemented.
+  if(process.env.DANI_SHOPIFY_DRAFT_WRITE_ENABLED !== 'true') return {status:'HOLD',reasons:['DURABLE_IDEMPOTENCY_NOT_CONFIGURED']};
   const data=await request({...credentials,query:`mutation($input:ProductSetInput!){productSet(synchronous:true,input:$input){product{id title status variants(first:10){nodes{sku price}}}userErrors{field message}}}`,
     variables:{input:{title:historical.title,status:'DRAFT',vendor:'DANI DECLARES LLC',productType:'Governed Recovery',tags:['dani-recovery',historical.key],variants:[{sku:governed.canonical_sku,price}]}}});
   const result=data.productSet;
