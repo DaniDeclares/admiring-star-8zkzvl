@@ -1,0 +1,66 @@
+name: DANI Shopify Revenue Readiness Watch
+on:
+  schedule:
+    - cron: '15 12 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: dani-shopify-revenue-watch
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test history-first recovery gates
+        run: node --test scripts/reconcileShopifyProductHistory.test.mjs scripts/shopifyRecoveryDrafts.test.mjs scripts/shopifyWalkAway.test.mjs scripts/shopifyRecoveryAdapters.test.mjs
+      - name: Reconcile historical Cookout catalog (dry-run only)
+        env:
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          SHOPIFY_ADMIN_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ADMIN_ACCESS_TOKEN }}
+          DANI_CATALOG_API_URL: ${{ secrets.DANI_CATALOG_API_URL }}
+          DANI_CATALOG_API_KEY: ${{ secrets.DANI_CATALOG_API_KEY }}
+        run: node scripts/reconcileShopifyProductHistory.mjs > shopify-recovery-plan.json
+      - name: Read-only Shopify readiness audit
+        env:
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          SHOPIFY_ADMIN_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ADMIN_ACCESS_TOKEN }}
+        run: node scripts/watchShopifyRevenueReadiness.mjs > shopify-watch.json
+      - name: Upload read-only recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dani-shopify-recovery-readonly
+          path: |
+            shopify-recovery-plan.json
+            shopify-watch.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Report only new actionable findings
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('shopify-watch.json', 'utf8'));
+            if (!data.findings.length) return;
+            const title = '[Revenue watch] Shopify catalog readiness gaps';
+            const {owner, repo} = context.repo;
+            const existing = await github.paginate(github.rest.issues.listForRepo, {owner,repo,state:'open',per_page:100});
+            if (existing.some(x => x.title === title && !x.pull_request)) return;
+            const lines = [
+              'Automated read-only Shopify readiness check detected:',
+              ...data.findings.map(x => '- ' + x),
+              '',
+              'Active digital products without a cover image:',
+              ...data.missingImages.map(x => '- ' + x.title + ' (' + x.id + ')'),
+              '',
+              'No orders, charges, customer contact, or product changes were initiated.',
+              'Reconcile against existing Owner HQ and Shopify work before creating new tasks.'
+            ];
+            await github.rest.issues.create({owner,repo,title,body:lines.join('\n')});

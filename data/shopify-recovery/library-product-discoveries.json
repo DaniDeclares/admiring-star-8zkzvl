@@ -1,0 +1,56 @@
+{
+  "authority": "DISCOVERY_ONLY",
+  "sources": [
+    "Library: Dani Declares Digital Product Storefront.png",
+    "Library: Dani Declares Brand Merchandise System.png",
+    "Library: DANI_Custom_Business_Brand_Starter.pdf",
+    "Library: Cookout & Community Event Merch Flyer.png"
+  ],
+  "candidates": [
+    {
+      "name": "Custom Business Brand Starter",
+      "type": "digital",
+      "status": "VERIFY_EXISTING_SKU"
+    },
+    {
+      "name": "Service Quote & Profit Check Kit",
+      "type": "digital",
+      "status": "EXISTING_SHOPIFY_DRAFT"
+    },
+    {
+      "name": "Client Intake & Scope Change Kit",
+      "type": "digital",
+      "status": "EXISTING_SHOPIFY_DRAFT"
+    },
+    {
+      "name": "Property Inspection Photo Log Kit",
+      "type": "digital",
+      "status": "EXISTING_SHOPIFY_DRAFT"
+    },
+    {
+      "name": "Cookout Family Shirts",
+      "type": "merch",
+      "status": "VERIFY_ASSETS"
+    },
+    {
+      "name": "Cookout Matching Totes",
+      "type": "merch",
+      "status": "VERIFY_ASSETS"
+    },
+    {
+      "name": "Cookout Party Packs",
+      "type": "merch",
+      "status": "VERIFY_SUPPLIER"
+    },
+    {
+      "name": "Cookout Welcome Signs",
+      "type": "merch",
+      "status": "VERIFY_ASSETS"
+    },
+    {
+      "name": "Provider Network Apparel",
+      "type": "merch",
+      "status": "SEPARATE_UNIFORMS_AND_RETAIL"
+    }
+  ]
+}
