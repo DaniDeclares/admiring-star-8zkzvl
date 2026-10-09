@@ -36,6 +36,12 @@ export function underwritePackage({
   providerRate = OP1M_CONTENT_PACKAGE_POLICY.providerTargetRate,
   ownerRate = OP1M_CONTENT_PACKAGE_POLICY.ownerMeasurementRate,
 }) {
+  // Fail closed: zero/negative prices or non-finite labor must never clear a margin gate.
+  if (!Number.isFinite(price) || price <= 0) throw new RangeError('price must be positive and finite');
+  if (![providerMinutes, ownerCreativeMinutes, ownerQaAdminMinutes, ownerCustomerCommsMinutes, providerRate, ownerRate]
+    .every(value => Number.isFinite(value) && value >= 0)) {
+    throw new RangeError('labor minutes and rates must be finite and nonnegative');
+  }
   const providerLabor = providerMinutes / 60 * providerRate;
   const ownerLabor = (ownerCreativeMinutes + ownerQaAdminMinutes + ownerCustomerCommsMinutes) / 60 * ownerRate;
   const labor = providerLabor + ownerLabor;
