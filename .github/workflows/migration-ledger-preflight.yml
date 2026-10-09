@@ -4,12 +4,14 @@ on:
     paths:
       - 'scripts/checkProductionMigrationLedger.mjs'
       - 'scripts/checkProductionMigrationLedger.test.mjs'
+      - 'supabase/migrations/**'
       - '.github/workflows/migration-ledger-preflight.yml'
   push:
     branches: [main]
     paths:
       - 'scripts/checkProductionMigrationLedger.mjs'
       - 'scripts/checkProductionMigrationLedger.test.mjs'
+      - 'supabase/migrations/**'
       - '.github/workflows/migration-ledger-preflight.yml'
 permissions:
   contents: read
@@ -24,3 +26,5 @@ jobs:
           node-version: '22'
       - name: Test read-only ledger guard
         run: node --test scripts/checkProductionMigrationLedger.test.mjs
+      - name: Reject duplicate local migration versions
+        run: node scripts/checkLocalMigrationVersions.mjs
