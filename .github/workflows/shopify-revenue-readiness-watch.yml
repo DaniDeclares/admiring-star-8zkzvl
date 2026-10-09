@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test history-first recovery gates
-        run: node --test scripts/reconcileShopifyProductHistory.test.mjs
+        run: node --test scripts/reconcileShopifyProductHistory.test.mjs scripts/shopifyRecoveryDrafts.test.mjs
       - name: Reconcile historical Cookout catalog (dry-run only)
         env:
           SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
