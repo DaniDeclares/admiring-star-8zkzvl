@@ -19,10 +19,11 @@ server-side rail instead of manual uploads.
 1. Put the images and a `manifest.json` in the private bucket `dd-product-release-assets/<release_key>/`.
 2. The manifest maps each EXISTING Shopify product (id + expected title) to its images, in order (position 1 = main image),
    with alt text and SHA-256. Validation: `src/lib/shopifyMediaRelease.js`.
-3. Run `plan` (read-only) from Owner HQ / API, then `attach`. The daily cron (13:30 UTC) runs `sync` for releases with
-   `"status": "READY"`: it attaches missing images and puts them first.
+3. Run `plan` (read-only) from Owner HQ / API, then `attach`. The daily cron (13:30 UTC) runs `sync` only for releases with
+   `"status": "READY"` **and** a recorded owner approval (`"approval": {"approved_by": "...", "approved_at": "<ISO time>"}`);
+   a manifest without it is skipped and logged as `MEDIA_RELEASE_SKIPPED`. Credentials alone never cause product changes.
 4. Old images are detached (not deleted; the file stays in Shopify Files) only when every release image on that product is
-   `READY`, and only with `confirm: true` or a manifest that sets `"retire_replaced_media": true`.
+   `READY`, and only with `confirm: true` or an owner-approved manifest that sets `"retire_replaced_media": true`.
 
 ## Relationship to other Shopify work on main
 - #599 `shopify-release-auth`: credential smoke (reused, not duplicated).

@@ -26,6 +26,13 @@ export function validateManifest(manifest) {
   if (!RELEASE_KEY_RE.test(releaseKey)) errors.push('RELEASE_KEY_INVALID');
   if (!manifest.shop || !/^[a-z0-9-]+$/.test(String(manifest.shop))) errors.push('SHOP_INVALID');
   if (!['DRAFT', 'READY', 'COMPLETE', 'HOLD'].includes(manifest.status)) errors.push('STATUS_INVALID');
+  // Unattended runs act only on owner-approved releases: READY (attach) and
+  // retire_replaced_media (detach) both require a recorded approval.
+  if (manifest.status === 'READY' || manifest.retire_replaced_media === true) {
+    const approval = manifest.approval || {};
+    if (!approval.approved_by || !String(approval.approved_by).trim()) errors.push('APPROVAL_BY_MISSING');
+    if (!approval.approved_at || Number.isNaN(Date.parse(approval.approved_at))) errors.push('APPROVAL_AT_INVALID');
+  }
   if (!Array.isArray(manifest.products) || manifest.products.length === 0) errors.push('PRODUCTS_EMPTY');
 
   const seenProducts = new Set();

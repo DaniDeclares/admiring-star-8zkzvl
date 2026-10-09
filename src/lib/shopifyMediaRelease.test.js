@@ -5,6 +5,7 @@ const manifest = () => ({
   release_key: '2026-10-08-burgundy',
   shop: 'v0dqbe-j1',
   status: 'READY',
+  approval: { approved_by: 'owner:dani', approved_at: '2026-10-09T14:30:00Z' },
   products: [{
     shopify_product_id: '10343231422603',
     expected_title: 'DANI Cleaning Operator Job Kit',
@@ -39,6 +40,16 @@ describe('Shopify media release manifest', () => {
     m.products.push({ ...m.products[0], assets: [{ ...m.products[0].assets[0], path: '2026-10-08-burgundy/kit.zip' }] });
     const result = validateManifest(m);
     expect(result.errors).toEqual(expect.arrayContaining(['products[1].DUPLICATE_PRODUCT', 'products[1].assets[0].extension_NOT_IMAGE']));
+  });
+
+  test('READY and pre-approved retirement require a recorded owner approval', () => {
+    const m = manifest();
+    delete m.approval;
+    expect(validateManifest(m).errors).toEqual(expect.arrayContaining(['APPROVAL_BY_MISSING', 'APPROVAL_AT_INVALID']));
+    m.status = 'DRAFT';
+    expect(validateManifest(m).ok).toBe(true);
+    m.retire_replaced_media = true;
+    expect(validateManifest(m).errors).toEqual(expect.arrayContaining(['APPROVAL_BY_MISSING']));
   });
 
   test('normalises numeric product ids to Shopify GIDs', () => {
