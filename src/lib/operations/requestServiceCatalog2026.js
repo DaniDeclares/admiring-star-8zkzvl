@@ -30,3 +30,17 @@ export function requestCatalogServices(services=[],channelType='',frontDoorCode=
 export function selectRequestCatalogService(services=[],serviceId=''){
  return (services||[]).find(service=>service?.serviceId===serviceId)||null;
 }
+
+// A shared service link (/request-service?service=SKU) without channelType used to land on
+// the Resident channel even when the SKU is not authorized for CH01, so the form showed the
+// service as selected while the channel picker could not list it. Pick the channel the SKU
+// is actually authorized for. An explicit, authorized channelType in the link always wins;
+// this never widens authorization -- it only chooses among the SKU's own governed channels.
+const LINK_CHANNEL_PREFERENCE=['B2C','B2B','B2B_RE','B2B_APT','B2G'];
+
+export function channelTypeForLinkedService(service,requestedChannelType=''){
+ const authorized=Array.isArray(service?.authorizedChannels)?service.authorizedChannels:[];
+ if(requestedChannelType&&authorized.includes(governedChannel(requestedChannelType)))return requestedChannelType;
+ if(requestedChannelType&&!service)return requestedChannelType;
+ return LINK_CHANNEL_PREFERENCE.find(type=>authorized.includes(INTAKE_TO_CHANNEL[type]))||requestedChannelType||'B2C';
+}

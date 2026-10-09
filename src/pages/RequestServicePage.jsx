@@ -5,6 +5,7 @@ import {getServiceVisuals} from '../data/serviceVisuals2026.js';
 import {supabase} from '../lib/supabaseClient.js';
 import {captureServiceLifecycle} from '../lib/posthogAnalytics.js';
 import GovernedServicePicker from '../components/GovernedServicePicker.jsx';
+import {channelTypeForLinkedService} from '../lib/operations/requestServiceCatalog2026.js';
 const CHANNEL_OPTIONS=[{value:OPERATIONS_CHANNELS.B2C,label:'Resident / Household'},{value:OPERATIONS_CHANNELS.B2B_APT,label:'Property Management / Apartment Community'},{value:OPERATIONS_CHANNELS.B2B_RE,label:'Real Estate Professional / Brokerage'},{value:OPERATIONS_CHANNELS.B2B,label:'Business / Commercial'},{value:OPERATIONS_CHANNELS.B2G,label:'Government / Institution'}];
 const CHANNEL_TO_FRONT_DOOR_PREFIX={[OPERATIONS_CHANNELS.B2C]:'CH01',[OPERATIONS_CHANNELS.B2B_APT]:'CH02',[OPERATIONS_CHANNELS.B2B_RE]:'CH03',[OPERATIONS_CHANNELS.B2B]:'CH04',[OPERATIONS_CHANNELS.B2G]:'CH05'};
 const today=new Date().toISOString().slice(0,10);
@@ -19,7 +20,7 @@ export default function RequestServicePage(){
  const [form,setForm]=useState({name:'',email:'',phone:'',channelType:validInitialChannel,organizationName:'',locationAddress:'',locationCity:'',locationState:'GA',locationZip:'',requestedDate:'',requestedTime:'',budgetRange:'',details:'',serviceId:initialServiceId,frontDoorCode:initialFrontDoor});
  const [accessToken,setAccessToken]=useState(null);
  const [verifiedCommunity,setVerifiedCommunity]=useState(null);
- useEffect(()=>{fetch('/api/verify-commercial-intent?catalog=1').then(async r=>{const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not load the service catalog.');setServices(d.services||[]);setFrontDoors(d.frontDoors||[]);if(initialServiceId)setSelected((d.services||[]).find(s=>s.serviceId===initialServiceId)||null);}).catch(e=>setError(e.message||'We could not load the service catalog.')).finally(()=>setLoadingCatalog(false));},[initialServiceId]);
+ useEffect(()=>{fetch('/api/verify-commercial-intent?catalog=1').then(async r=>{const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'We could not load the service catalog.');setServices(d.services||[]);setFrontDoors(d.frontDoors||[]);if(initialServiceId){const linked=(d.services||[]).find(s=>s.serviceId===initialServiceId)||null;setSelected(linked);if(linked){const channelType=channelTypeForLinkedService(linked,initialChannelType);setForm(f=>f.channelType===channelType?f:{...f,channelType,frontDoorCode:channelType===initialChannelType?f.frontDoorCode:''});}}}).catch(e=>setError(e.message||'We could not load the service catalog.')).finally(()=>setLoadingCatalog(false));},[initialServiceId,initialChannelType]);
  // A resident may already be signed in (e.g. arriving from their portal to
  // request a service) -- if so, check whether their account was verified via
  // a real property invite so the CH01-B discount can actually be applied,
