@@ -1,6 +1,7 @@
 import { authenticatePortalRequest } from '../_portalAuth.js';
 
 const SHOP = 'v0dqbe-j1.myshopify.com';
+const SHOPIFY_TIMEOUT_MS = 10000;
 const API_VERSION = '2026-07';
 
 function reply(res, status, data) {
@@ -42,7 +43,7 @@ export default async function shopifyReleaseAuth(req, res) {
         client_id: clientId,
         client_secret: clientSecret,
       }),
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(SHOPIFY_TIMEOUT_MS),
     });
     if (!tokenResponse.ok) {
       return reply(res, 424, {
@@ -53,7 +54,7 @@ export default async function shopifyReleaseAuth(req, res) {
       });
     }
     const tokenPayload = await tokenResponse.json();
-    if (!tokenPayload.access_token) {
+    if (!tokenPayload || typeof tokenPayload.access_token !== 'string' || !tokenPayload.access_token) {
       return reply(res, 424, { ok: false, code: 'SHOPIFY_TOKEN_MISSING' });
     }
 
@@ -64,11 +65,12 @@ export default async function shopifyReleaseAuth(req, res) {
         'X-Shopify-Access-Token': tokenPayload.access_token,
       },
       body: JSON.stringify({ query: '{ shop { myshopifyDomain } }' }),
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(SHOPIFY_TIMEOUT_MS),
     });
-    const result = await probe.json();
+    // Shopify may return a non-JSON gateway error; never echo its body.
+    const result = await probe.json().catch(() => null);
     const returnedShop = result?.data?.shop?.myshopifyDomain;
-    if (!probe.ok || result.errors?.length || returnedShop !== SHOP) {
+    if (!probe.ok || !result || result.errors?.length || returnedShop !== SHOP) {
       return reply(res, 424, {
         ok: false,
         code: 'SHOPIFY_GRAPHQL_PROBE_FAILED',
