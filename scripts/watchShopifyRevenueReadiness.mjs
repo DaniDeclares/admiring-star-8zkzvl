@@ -45,7 +45,7 @@ export async function inspectShopifyReadiness(credentials, request = shopifyGrap
   return {
     checkedAt: new Date().toISOString(), scanned: products.length,
     incompleteScan: false, activeDigital: activeDigital.length, missingImages,
-    hasOrders, deliveryVerified: false, findings: [...findings, 'DIGITAL_DELIVERY_NOT_VERIFIED']
+    hasOrders, deliveryVerified: false, deliveryVerificationRequired: true, findings
   };
 }
 
