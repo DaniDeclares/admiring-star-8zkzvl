@@ -34,7 +34,8 @@ describe('CH01 service-specific requests start from the governed front door',()=
   expect(source).toContain('f.frontDoorCode?f:{...f,frontDoorCode:door}');
  });
  test('the selected service id always reaches the server CH01 gate, even when verification fails',()=>{
-  expect(source).toContain('body:JSON.stringify({...form,serviceType:');
+  // The whole form (including serviceId) is spread first; attribution rides alongside it.
+  expect(source).toContain('body:JSON.stringify({...form,marketingAttribution,serviceType:');
   expect(source).not.toContain('OPERATIONS_CHANNELS.B2C?authoritativeServiceId:form.serviceId');
  });
 });
