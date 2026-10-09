@@ -42,6 +42,35 @@ describe('Shopify release authentication safety', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
+  it('fails closed when the portal authentication service throws', async () => {
+    global.fetch = jest.fn();
+    authenticatePortalRequest.mockRejectedValue(new Error('database unavailable'));
+    const res = response();
+    await handler(request(), res);
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('does not contact Shopify when credentials are missing', async () => {
+    global.fetch = jest.fn();
+    authenticatePortalRequest.mockResolvedValue({ role: 'owner', governedRole: 'OWNER_OPERATOR' });
+    const oldId = process.env.SHOPIFY_CLIENT_ID;
+    const oldSecret = process.env.SHOPIFY_CLIENT_SECRET;
+    try {
+      delete process.env.SHOPIFY_CLIENT_ID;
+      delete process.env.SHOPIFY_CLIENT_SECRET;
+      const res = response();
+      await handler(request(), res);
+      expect(res.status).toHaveBeenCalledWith(503);
+      expect(global.fetch).not.toHaveBeenCalled();
+    } finally {
+      if (oldId === undefined) delete process.env.SHOPIFY_CLIENT_ID;
+      else process.env.SHOPIFY_CLIENT_ID = oldId;
+      if (oldSecret === undefined) delete process.env.SHOPIFY_CLIENT_SECRET;
+      else process.env.SHOPIFY_CLIENT_SECRET = oldSecret;
+    }
+  });
+
   it('requires governed OWNER_OPERATOR rather than role string alone', async () => {
     global.fetch = jest.fn();
     authenticatePortalRequest.mockResolvedValue({ role: 'owner', isStaff: true });
