@@ -89,3 +89,24 @@ describe('CH01 canonical resolver controls', () => {
   expect(result.reason).toBe('CH01_SUBCHANNEL_MISMATCH');
  });
 });
+
+const { getChannelFromRequest } = require('./governedCommercialGate2026.js');
+
+describe('five-channel checkout routing integrity', () => {
+  const request = (routing, extra = {}) => ({ property_details: { operationsRouting: routing, ...extra } });
+  test.each([['B2C','CH01'],['B2B_APT','CH02'],['B2B_RE','CH03'],['B2B','CH04'],['B2G','CH05']])('maps %s to %s', (input, expected) => {
+    expect(getChannelFromRequest(request({ channel: input }))).toBe(expected);
+  });
+  test('government intent cannot be downgraded to commercial checkout', () => {
+    expect(getChannelFromRequest(request({channel:'CH04'}, {commercialIntent:{channelCode:'B2G'}}))).toBe('CH05');
+  });
+  test('conflicting commercial channel identities fail closed', () => {
+    expect(getChannelFromRequest(request({channel:'CH02',channelCode:'CH03'}))).toBeNull();
+  });
+  test('unknown routing identities fail closed', () => {
+    expect(getChannelFromRequest(request({channel:'UNKNOWN'}))).toBeNull();
+  });
+  test('missing routing identities fail closed', () => {
+    expect(getChannelFromRequest(request({}))).toBeNull();
+  });
+});
