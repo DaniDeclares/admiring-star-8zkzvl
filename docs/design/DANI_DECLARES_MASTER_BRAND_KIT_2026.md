@@ -34,7 +34,7 @@ Use shared vars in new UI; `src/styles/tokens.css` and `src/data/brandKit.js` mu
 - Reference style: rich burgundy, ivory/off-white paper, fine antique-gold rules, editorial spacing, deliberate hierarchy.
 
 ## Company structure and channel handling
-- Master brand spans CH01 residents (property-activated/direct), CH03 property management, CH04 real estate, CH05 businesses; procurement readiness is separately governed, **not a new channel**.
+- Master brand spans the five official channels: CH01 Residents (A Property-Activated / B Direct), CH02 Property Management & Apartments, CH03 Real Estate & Brokerages, CH04 Businesses, and CH05 Government & Institutions. All 13 operating divisions use this identity.
 - House Manager / Home Operations are product and service names under DANI, not separate corporations.
 - Shadow & Sol is a separate entity and brand. No identity or financial commingling.
 
@@ -49,6 +49,11 @@ Use shared vars in new UI; `src/styles/tokens.css` and `src/data/brandKit.js` mu
 
 ## Photography and creative rules
 Prefer authentic images of administrative operations, property, real estate, events, products, logistics and actual DANI work. No fake customer outcomes, misleading government affiliations, private addresses/records, staged fabricated endorsements or generic AI-generated clutter. Media comes through existing DANI registry; confirm rights to publish.
+
+## Company-wide application — owner directive 2026-10-10
+This identity is mandatory for **every DANI DECLARES-owned touchpoint**, not only the website: customer and provider portals, Owner HQ, mobile views, emails and signatures, proposals, invoices, sales collateral, contracts and onboarding, social creatives, Canva source designs, Shopify digital-product covers and files, Printify/DTF merchandise, packaging, labels, QR signage, events, presentations, downloadable PDFs, printable/fillable worksheets, and templates. Reuse approved tokens for software and exact kit specifications for non-code artifacts. Preserve customer-owned branding for client jobs and separate Shadow & Sol branding; do not repaint unrelated client content.
+
+Legacy content must be inventoried and reconciled to its approved current version; **no older visual-system document, saved memory, AI prompt, Canva variant, Shopify listing, or agent output may override this kit**. Change existing assets in place or create governed revised versions; do not mass overwrite originals or silently alter externally sold/downloaded files. Confirm color accessibility, print suitability, logo integrity, permissions, and commercial release independently. Where automated asset updates are unavailable, record the exact source, owner, migration status, and blockers rather than claiming completion.
 
 ## Release and approval
 - Owner Home Command Center reference is visual authority; this document and `docs/design/DANI_CANONICAL_BRAND_PALETTE.md` are implementation guidance.
