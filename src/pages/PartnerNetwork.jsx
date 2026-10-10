@@ -88,6 +88,13 @@ export default function PartnerNetwork() {
           <a className={styles.primaryLink} href={octoberCampaignLink("LET_DANI_BUILD_YOU", { source: attribution.utm_source || "website", medium: attribution.utm_medium || "organic", content: "build-with-dani-page" }) || hireDaniLink(attribution)}>Hire DANI to help build my business →</a>
         </section>
 
+        <section className={styles.card} aria-labelledby="customer-build-title">
+          <p className={styles.eyebrow}>Build your own idea</p>
+          <h2 id="customer-build-title">Have a business, digital product, or AI-tool idea?</h2>
+          <p className={styles.muted}>You do not need to apply to work for DANI to request help with your project. Tell us what you are creating and where you need support. We will determine whether an existing DANI business service fits and provide a scoped quote. This is a service inquiry, not enrollment in a challenge or course. No prize, app launch, or revenue is promised.</p>
+          <a className={styles.primaryLink} href={hireDaniLink(attribution)}>Ask DANI to help build my idea →</a>
+        </section>
+
         <section className={styles.card} aria-labelledby="join-title">
           <h2 id="join-title">Build With DANI — providers and collaborators</h2>
           <p className={styles.muted}>This is a first step, not an application or a job offer. Paid service work only comes after DANI's provider application, agreement and verification.</p>
