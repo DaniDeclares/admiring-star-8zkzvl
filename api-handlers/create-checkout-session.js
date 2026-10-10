@@ -24,6 +24,7 @@ export default async function handler(req,res){
   const requestStatus=String(request.status||'').toLowerCase();
   if(requestStatus!=='payment_pending'&&!recurringAgreement)return json(res,409,{error:'This request is not currently awaiting payment.'});
   const channel=getChannelFromRequest(request);
+  if(!channel)return json(res,409,{error:'Verified, unambiguous channel identity is required before checkout.'});
   const routingSignals=[channel,request.property_details?.operationsRouting?.channel,request.property_details?.operationsRouting?.channelCode,request.property_details?.commercialIntent?.channelCode,request.property_details?.channelType,body.channelType].filter(Boolean).map(value=>String(value).trim().toUpperCase());
   if(routingSignals.some(value=>['CH05','B2G','GOV','GOVERNMENT','INSTITUTIONAL'].includes(value)))return json(res,403,{error:'Government and institutional procurement cannot use public checkout. Follow contract, purchase order and agency-approved invoicing terms.'});
   if(new Set(routingSignals.filter(value=>/^CH0[1-5]$/.test(value))).size>1)return json(res,409,{error:'Conflicting channel identity requires review before checkout.'});
