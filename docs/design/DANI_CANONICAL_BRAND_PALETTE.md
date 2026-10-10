@@ -33,3 +33,31 @@ The screenshot's aesthetic is editorial, polished and warm: **burgundy + warm iv
 - Future design systems and AI/code-generation agents: reference this file and `src/index.css`, never a paraphrased recollection from chat.
 
 **Scope:** This locks DANI DECLARES brand styling. It does not alter Shadow & Sol's independent identity, business channel definitions, commercial pricing, provider eligibility or Production deployment authority.
+
+
+## Accessible component usage matrix (2026-10-10 audit)
+These are reusable *semantic* combinations; do not create alternate brand hex values in features.
+
+| UI element | Background | Foreground | Detail |
+| --- | --- | --- | --- |
+| Primary action | var(--dd-burgundy) | var(--dd-cream) | Strong focus outline |
+| Secondary action | var(--dd-ivory) | var(--dd-burgundy) | var(--dd-gold) border |
+| Headings | var(--dd-ivory) or var(--dd-cream) | var(--dd-burgundy) | Gold rule permitted |
+| Card / planning worksheet | var(--dd-cream) | var(--dd-ink) | var(--dd-gold-soft) border |
+| Dense provider data | var(--dd-cream) | var(--dd-ink) | Low-chroma separators; burgundy status headings |
+| Supporting body text | var(--dd-cream) | var(--dd-ink) | Never gold as regular-sized text |
+| Active navigation | var(--dd-burgundy) | var(--dd-cream) | Do not convey active state through color alone |
+
+Measured WCAG normal-text contrast on the owner-approved palette:
+- Burgundy #800020 / Paper white #FFFDF6 = 10.64:1 (passes 4.5:1).
+- Burgundy #800020 / Warm ivory #F7F1E6 = 9.64:1 (passes 4.5:1).
+- Antique gold #B38A2D / Paper white #FFFDF6 = 3.13:1 (**fails** normal text).
+- Antique gold #B38A2D / Warm ivory #F7F1E6 = 2.83:1 (**fails** normal text).
+
+**Do not use antique gold for small/light-weight text or communicate essential information using a gold-only indicator.** Using gold for focus alone can also fail non-text contrast against ivory; test the complete component rather than assuming the palette value is adequate. Decorative gold elements without informational meaning have different requirements.
+
+## Brand integrity audit findings
+- src/index.css is the authoritative palette; the build verifier also checks matching values in src/data/brandKit.js and legacy aliases in src/styles/tokens.css.
+- A global token build pass does NOT prove every hard-coded legacy page complies. This is a **tracked partial migration**, not a declaration of system-wide visual completion.
+- PR #633 should land after exact-head checks and review; coordinate PR #631 (provider) and #632 (CH01) against the merged global tokens. Do not merge the consumer/provider changes independently against old design authority without reconciling.
+- Accessibility review must test actual buttons, tab states, form errors, print styles, keyboard focus, mobile responsive layout and insufficiently contrasting gold text.
