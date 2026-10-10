@@ -3,9 +3,16 @@ import crypto from 'crypto';
 // AES-256-GCM encryption for provider TINs (SSN/EIN). The key never touches
 // the database -- it lives only in the PROVIDER_W9_ENCRYPTION_KEY environment
 // variable (Vercel project settings), as a 64-character hex string (32 bytes).
+// True only when a usable key is present. Callers check this before asking a
+// provider for their TIN, so a missing key never costs them a typed-in SSN.
+export function isW9EncryptionConfigured() {
+  const hex = process.env.PROVIDER_W9_ENCRYPTION_KEY;
+  return Boolean(hex && /^[0-9a-fA-F]{64}$/.test(hex));
+}
+
 function getKey() {
   const hex = process.env.PROVIDER_W9_ENCRYPTION_KEY;
-  if (!hex || hex.length !== 64) {
+  if (!isW9EncryptionConfigured()) {
     throw new Error('PROVIDER_W9_ENCRYPTION_KEY is not configured. Set a 64-character hex string (32 bytes) in the environment before accepting W-9 submissions.');
   }
   return Buffer.from(hex, 'hex');
