@@ -97,7 +97,21 @@ describe('evaluateChannelGovernanceDecision', () => {
 });
 
 describe('non-CH01 direct checkout pricing', () => {
-  test.each(['CH02', 'CH03', 'CH04', 'CH05'])(
+  test.each([
+    { channelPricingType: null },
+    { channelPricingType: 'QUOTE' },
+    { channelPricingType: 'FIXED', channelPriceCents: null },
+    { channelPricingType: 'FIXED', channelPriceCents: 0 },
+    { channelPricingType: 'FIXED', channelPriceCents: 12500 },
+  ])('CH05 government procurement never uses public direct checkout (%j)', pricing => {
+    expect(checkoutEligibility(readyOffer, { channel: 'CH05', ...pricing })).toEqual({
+      eligible: false,
+      reason: 'GOVERNMENT_PROCUREMENT_NO_PUBLIC_CHECKOUT',
+      price: null,
+    });
+  });
+
+  test.each(['CH02', 'CH03', 'CH04'])(
     '%s keeps intake open but blocks direct checkout without exact locked channel pricing',
     channel => {
       expect(checkoutEligibility(readyOffer, { channel, channelPricingType: null })).toEqual({
@@ -108,7 +122,7 @@ describe('non-CH01 direct checkout pricing', () => {
     }
   );
 
-  test.each(['CH02', 'CH03', 'CH04', 'CH05'])(
+  test.each(['CH02', 'CH03', 'CH04'])(
     '%s routes quote-only exact channel pricing away from direct checkout',
     channel => {
       expect(checkoutEligibility(readyOffer, { channel, channelPricingType: 'QUOTE' })).toEqual({
@@ -119,7 +133,7 @@ describe('non-CH01 direct checkout pricing', () => {
     }
   );
 
-  test.each(['CH02', 'CH03', 'CH04', 'CH05'])(
+  test.each(['CH02', 'CH03', 'CH04'])(
     '%s blocks direct checkout when exact locked pricing has no positive amount',
     channel => {
       expect(checkoutEligibility(readyOffer, { channel, channelPricingType: 'FIXED', channelPriceCents: null })).toEqual({
@@ -135,7 +149,7 @@ describe('non-CH01 direct checkout pricing', () => {
     }
   );
 
-  test.each(['CH03', 'CH04', 'CH05'])(
+  test.each(['CH03', 'CH04'])(
     '%s permits the direct-checkout gate only when exact channel pricing has a positive direct price',
     channel => {
       expect(checkoutEligibility(readyOffer, { channel, channelPricingType: 'FIXED', channelPriceCents: 12500 })).toMatchObject({
