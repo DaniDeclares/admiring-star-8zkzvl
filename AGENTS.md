@@ -27,3 +27,6 @@ Every non-trivial change should register its branch/scope in `dd_agent_change_le
 
 ## Claude
 Claude is an authorized engineering collaborator, not a separate source of truth. Claude must follow this file and CLAUDE.md and consult the DANI Notion authority matrix before creating a new integration, database, project, or documentation system.
+
+## Canonical visual identity (owner approved 2026-10-10)
+DANI's approved **burgundy, warm ivory and antique gold** palette is centrally defined in `src/index.css`; reference `docs/design/DANI_CANONICAL_BRAND_PALETTE.md` before changing UI, printables or digital-product styling. Reuse `var(--dd-burgundy)`, `var(--dd-ivory)`, `var(--dd-cream)` and `var(--dd-gold)` rather than making new hexadecimal copies or alternate palettes. Maintain accessible contrast and route legacy hard-coded values through normal history-first PR review; do not overwrite other open design branches.
