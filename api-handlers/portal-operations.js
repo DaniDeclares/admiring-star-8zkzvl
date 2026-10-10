@@ -4,7 +4,7 @@ import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuil
 import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
-import { encryptTin, decryptTin } from './_w9Crypto.js';
+import { encryptTin, decryptTin, isW9EncryptionConfigured } from './_w9Crypto.js';
 import { mintAppointmentToken } from './_appointmentTokens.js';
 import Stripe from 'stripe';
 
@@ -470,7 +470,7 @@ async function getProviderSnapshot(supabase, providerId, userId, userSupabase = 
     if (directSnapshot) applicationSnapshot = directSnapshot;
   }
   const w9 = await getW9Status(supabase, userId);
-  applicationSnapshot = { ...applicationSnapshot, w9 };
+  applicationSnapshot = { ...applicationSnapshot, w9, w9SubmissionAvailable: isW9EncryptionConfigured() };
   if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], financials: { earnings: [], payables: [], payouts: [] }, payouts: [], messages: [] };
 
   // Financials are read through the provider-bound projection. The Worker App
@@ -765,6 +765,7 @@ export default async function handler(req, res) {
     // accessing the system... is the person identified on Form W-9" requirement.
     if (action === 'submit_provider_w9') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      if (!isW9EncryptionConfigured()) return fail(res, 'Electronic W-9 submission is temporarily unavailable. Nothing was saved; please try again later.', 503);
       const p = payload || {};
       const required = ['line1Name', 'classification', 'address', 'city', 'stateCode', 'zipCode', 'tinType', 'tin', 'signatureFullName'];
       for (const field of required) {
