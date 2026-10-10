@@ -34,7 +34,7 @@ Patterns adopted:
 
 ## DANI visual system
 
-Brand expression: cream/gold identity without decorative overload. Primary working surfaces are neutral white/warm-gray. Gold is the action/brand accent. Burgundy is not a dominant application surface. State colors are reserved for success/warning/failure/information.
+Brand expression: use the owner-approved Master Brand Kit (docs/design/DANI_DECLARES_MASTER_BRAND_KIT_2026.md) and canonical src/index.css tokens: primary burgundy #800020, deep burgundy #69001A, warm ivory #F7F1E6, paper white #FFFDF6, antique gold #B38A2D and soft gold #E8D5B0. Burgundy is the primary brand/action identity, not an optional accent; ivory and paper provide accessible workspace surfaces, gold is decorative/accent only for small text. Do not invent a cream/gold-only palette or let this dated design brief override the Master Brand Kit. State colors remain semantic and accessible.
 
 Typography: restrained scale; hierarchy comes from weight, spacing and alignment. Avoid giant marketing-site headings inside operational workspaces.
 
