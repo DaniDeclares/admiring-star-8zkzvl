@@ -113,7 +113,7 @@ jobs:
           # Semantic status colors and explicitly client-owned work are not recolored.
           node <<'NODE'
           const fs=require('fs'),m=require('/tmp/manifest.json');
-          const old=/#(?:6b1f2b|45141d|c9a45c|f6f0e4|4f1720|873340|dcc58f)\\b/ig;
+          const old=/#(?:6b1f2b|45141d|c9a45c|f6f0e4|4f1720|873340|dcc58f)\\b/i;
           const visual=/\\.(css|scss|jsx|tsx|html|svg)$/i;
           const affected=m.files.filter(f=>visual.test(f.path)&&!/(^|\\/)(shadow[-_]?(and[-_]?)?sol|client[-_]?owned)(\\/|$)/i.test(f.path));
           const bad=affected.filter(f=>old.test(f.content));
@@ -149,7 +149,7 @@ jobs:
           git push -u origin "$branch"
           url=$(gh pr create --base main --head "$branch" --draft \
             --title "DANI autobuild: $CANDIDATE_KEY" \
-            --body "Governed approved-work build. Candidate: $CANDIDATE_KEY. Bounded PATCH_MANIFEST_V1; repository build/tests passed. REVIEW REQUIRED: existing independent code/security review, existing promotion and release gates, exact deployed SHA verification, then downstream business proof. This PR is deliberately draft: it does not authorize merge, production mutation, publishing, outreach or money movement. Follow the existing governed promotion path; do not request duplicate owner approval for already approved bounded source work.")
+            --body "Governed approved-work build. Candidate: $CANDIDATE_KEY. Bounded PATCH_MANIFEST_V1; repository build/tests passed. REVIEW REQUIRED: approved Master Brand Kit v1.0 visual consistency and render/accessibility proof for DANI visual surfaces (Canva/PDF/storefront outputs require their own exported asset checks); existing independent code/security review, existing promotion and release gates, exact deployed SHA verification, then downstream business proof. This PR is deliberately draft: it does not authorize merge, production mutation, publishing, outreach or money movement. Follow the existing governed promotion path; do not request duplicate owner approval for already approved bounded source work.")
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
