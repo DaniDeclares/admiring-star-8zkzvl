@@ -289,6 +289,34 @@ async function getOwnerControlSnapshot(supabase) {
   const companyControllerErrors = [morningBrief, companyDomains, companyRuns, soakReceipts].filter(item => item.error);
   if (companyControllerErrors.length) throw companyControllerErrors[0].error;
 
+  // Read-only, outcome-labeled work handoff. Do not equate built PRs with live releases.
+  const outcomeSources = ['dd_autobuild_candidates','dd_promotion_candidates','dd_production_release_receipts'];
+  const [autobuildRaw, promotionRaw, releaseRaw] = (await Promise.all([
+    supabase.from('dd_autobuild_candidates').select('candidate_key,status,executor_state,blocker,pull_request_number,head_sha,built_at,proof').order('created_at',{ascending:false}).limit(150),
+    supabase.from('dd_promotion_candidates').select('candidate_key,source_reference,proof_status,owner_approval_status,production_verification_status,classification').order('updated_at',{ascending:false}).limit(100),
+    supabase.from('dd_production_release_receipts').select('id,candidate_id').limit(150),
+  ])).map((result,i)=>tolerateMissingTable(result,outcomeSources[i],degradedSources));
+  if ([autobuildRaw,promotionRaw,releaseRaw].some(x=>x.error)) throw [autobuildRaw,promotionRaw,releaseRaw].find(x=>x.error).error;
+  const autobuildRows=autobuildRaw.data||[], promotionRows=promotionRaw.data||[];
+  const eligibleEvidenceRows=autobuildRows.filter(x=>x.executor_state==='PR_OPENED' && x.pull_request_number && x.head_sha);
+  const outcomePipeline={
+    observedAt:new Date().toISOString(),
+    coverage:{
+      autobuild:autobuildRaw.error?'UNAVAILABLE': 'SAMPLED',
+      promotion:promotionRaw.error?'UNAVAILABLE':'SAMPLED',
+      release:releaseRaw.error?'UNAVAILABLE':'SAMPLED'
+    },
+    buildCandidatesObserved:autobuildRows.length,
+    buildPrEvidence:eligibleEvidenceRows.length,
+    techImplementationHeld:autobuildRows.filter(x=>x.executor_state==='HELD_IMPLEMENTATION').length,
+    blockedCandidates:autobuildRows.filter(x=>x.blocker).length,
+    promotionRecordsObserved:promotionRows.length,
+    productionVerifiedPromotionRecords:promotionRows.filter(x=>x.production_verification_status==='PASSED').length,
+    releaseReceiptsObserved:(releaseRaw.data||[]).length,
+    recentBuilds:eligibleEvidenceRows.slice(0,5).map(x=>({candidateKey:x.candidate_key,prNumber:x.pull_request_number,headSha:x.head_sha,reviewState:x.proof?.review_state||'NOT_VERIFIED',promotionState:x.proof?.promotion_state||'NOT_VERIFIED'})),
+    note:'These are source-specific records, not evidence that any new product was published, a lead was contacted, or money was collected. Historical promotion receipts are not automatically linked to autobuild PRs.'
+  };
+
   if (degradedSources.length) {
     // Best-effort: a failure recording the diagnostic must never itself break
     // Owner HQ, which is exactly the bug this whole fix targets.
@@ -325,6 +353,7 @@ async function getOwnerControlSnapshot(supabase) {
     revenueAgents: revenueAgents.data || [],
     ownerAttention: ownerAttention.data || [],
     morningBrief: morningBrief.data || null,
+    outcomePipeline,
     companyDomains: companyDomains.data || [],
     companyRuns: companyRuns.data || [],
     soakReceipts: soakReceipts.data || [],
