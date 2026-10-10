@@ -9,6 +9,9 @@ export async function inspectShopifyReadiness(credentials, request = shopifyGrap
   const cursors = new Set();
   let cursor = null;
   let hasOrders = false;
+  let inspectedOrders = 0;
+  let ordersScanIncomplete = false;
+  const paidOrderIds = new Set();
   do {
     const data = await request({
       ...credentials,
@@ -17,7 +20,10 @@ export async function inspectShopifyReadiness(credentials, request = shopifyGrap
           nodes { id title status featuredMedia { ... on MediaImage { id } } }
           pageInfo { hasNextPage endCursor }
         }
-        orders(first:1,sortKey:CREATED_AT,reverse:true) { nodes { id } }
+        orders(first:50,sortKey:CREATED_AT,reverse:true) {
+          nodes { id test tags displayFinancialStatus currentTotalPriceSet { shopMoney { amount currencyCode } } }
+          pageInfo { hasNextPage }
+        }
       }`,
       variables: { cursor }
     });
@@ -25,6 +31,18 @@ export async function inspectShopifyReadiness(credentials, request = shopifyGrap
     if (!page || !Array.isArray(page.nodes) || !page.pageInfo ||
         !data.orders || !Array.isArray(data.orders.nodes)) throw Error('SHOPIFY_READINESS_PAGE_INVALID');
     hasOrders ||= data.orders.nodes.length > 0;
+    // Only the first order page is a bounded recent sample; re-querying it on
+    // subsequent product pages must not inflate paid-order counts.
+    if (products.length === 0) {
+      inspectedOrders = data.orders.nodes.length;
+      ordersScanIncomplete = Boolean(data.orders.pageInfo?.hasNextPage);
+      for (const order of data.orders.nodes) {
+        if (order?.id && order.test === false &&
+            !(order.tags || []).some(tag => String(tag).toUpperCase() === 'TEST') &&
+            order.displayFinancialStatus === 'PAID' &&
+            Number(order.currentTotalPriceSet?.shopMoney?.amount || 0) > 0) paidOrderIds.add(order.id);
+      }
+    }
     for (const product of page.nodes) {
       if (!product?.id || ids.has(product.id)) throw Error('SHOPIFY_READINESS_DUPLICATE_OR_MISSING_ID');
       ids.add(product.id);
@@ -42,10 +60,15 @@ export async function inspectShopifyReadiness(credentials, request = shopifyGrap
   const findings = [];
   if (missingImages.length) findings.push('ACTIVE_DIGITAL_MISSING_COVER');
   if (!activeDigital.length) findings.push('NO_ACTIVE_DIGITAL_PRODUCTS');
+  if (hasOrders && paidOrderIds.size === 0) findings.push('NO_PAID_NON_TEST_ORDER_IN_RECENT_SAMPLE');
+  if (ordersScanIncomplete) findings.push('ORDER_SAMPLE_NOT_EXHAUSTIVE');
+  findings.push('BUYER_DIGITAL_DELIVERY_NOT_VERIFIED_BY_THIS_WATCH');
   return {
     checkedAt: new Date().toISOString(), scanned: products.length,
     incompleteScan: false, activeDigital: activeDigital.length, missingImages,
-    hasOrders, deliveryVerified: false, deliveryVerificationRequired: true, findings
+    hasOrders, inspectedOrders, ordersScanIncomplete,
+    paidNonTestOrdersObserved: paidOrderIds.size,
+    deliveryVerified: false, deliveryVerificationRequired: true, findings
   };
 }
 
