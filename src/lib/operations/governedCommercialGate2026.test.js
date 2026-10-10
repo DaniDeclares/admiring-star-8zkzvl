@@ -94,7 +94,7 @@ const { getChannelFromRequest } = require('./governedCommercialGate2026.js');
 
 describe('five-channel checkout routing integrity', () => {
   const request = (routing, extra = {}) => ({ property_details: { operationsRouting: routing, ...extra } });
-  test.each([['B2C','CH01'],['B2B_APT','CH02'],['B2B_RE','CH03'],['B2B','CH04'],['B2G','CH05']])('maps %s to %s', (input, expected) => {
+  test.each([['B2C','CH01'],['B2B_APT','CH02'],['B2B_RE','CH03'],['B2B','CH04'],['B2G','CH05'],['GOV','CH05'],['GOVERNMENT','CH05'],['INSTITUTIONAL','CH05'],['PROCUREMENT','CH05']])('maps %s to %s', (input, expected) => {
     expect(getChannelFromRequest(request({ channel: input }))).toBe(expected);
   });
   test('government intent cannot be downgraded to commercial checkout', () => {
