@@ -156,6 +156,21 @@ jobs:
           number=$(echo "$PR_URL" | sed -E 's#^.*/pull/([0-9]+)$#\1#')
           curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json"             -d "{\"status\":\"PR_OPENED\",\"executor_state\":\"PR_OPENED\",\"branch_name\":\"$BRANCH\",\"pull_request_number\":$number,\"pull_request_url\":\"$PR_URL\",\"head_sha\":\"$SHA\",\"built_at\":\"$(date -u +%FT%TZ)\",\"proof\":{\"executor\":\"github-actions\",\"run_id\":\"${{ github.run_id }}\",\"build_passed\":true,\"auto_merge\":false,\"production_direct_write\":false,\"review_state\":\"PENDING_INDEPENDENT_REVIEW\",\"promotion_state\":\"NOT_AUTHORIZED\",\"production_verification\":\"NOT_RUN\"}}"
 
+      - name: Route built PR to governed promotion review
+        if: steps.pr.outputs.url != ''
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          CANDIDATE_KEY: ${{ steps.claim.outputs.key }}
+        run: |
+          set -euo pipefail
+          node -e 'process.stdout.write(JSON.stringify({p_candidate_key:process.env.CANDIDATE_KEY}))' > /tmp/promotion-review-input.json
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_register_autobuild_promotion_review" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/promotion-review-input.json
+          echo "Autobuild PR handed to existing review register. Promotion remains unapproved." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Release unsupported or failed candidate
         if: always() && steps.claim.outputs.count == '1' && steps.pr.outputs.url == ''
         env:
