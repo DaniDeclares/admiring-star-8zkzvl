@@ -44,8 +44,70 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Claim one low-risk approved build
+      - name: Recover stranded PR review handoffs
         if: steps.guard.outputs.ready == 'true'
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          if curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_reconcile_autobuild_promotion_reviews" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" -d '{"p_limit":10}'; then
+            echo "Review-link recovery pass completed; inspect RPC receipt for recovered/failed records. No promotion authorized." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning title=Review-link recovery unavailable::Recovery failed; independent approved builds will continue. Investigate existing promotion RPC and migration state."
+            echo "Review-link recovery unavailable; repair as a separate Tech exception without stopping independent builds." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Quarantine expired build leases for Tech reconciliation
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_hold_expired_autobuild_leases" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" -d '{"p_limit":10}'
+          echo "Expired leases held for Tech verification of existing PRs; no duplicate build or owner reapproval." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Route approved nonexecutable briefs to existing Tech work
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_route_autobuild_briefs_to_tech" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" -d '{"p_limit":10}'
+          echo "Approved prose briefs routed to existing Tech queue for file-level implementation. No PR or deployment created." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Cap open PR backlog before leasing new builds
+        if: steps.guard.outputs.ready == 'true'
+        id: pr_capacity
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Fail closed if GitHub is unavailable. Do not lease a candidate we cannot finish.
+          gh pr list --state open --limit 100 --json number,headRefName > /tmp/dani-open-prs.json
+          node <<'NODE'
+          const fs=require('fs');
+          const prs=require('/tmp/dani-open-prs.json');
+          const total=prs.length;
+          const autobuild=prs.filter(p=>String(p.headRefName||'').startsWith('dani/autobuild-')).length;
+          // Limits constrain PR creation, not existing research, operational jobs or review recovery.
+          const allowed=total<12 && autobuild<3;
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'allowed='+allowed+'\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            '### PR capacity: '+total+' open repo PRs; '+autobuild+' generated autobuild PRs. New lease '+(allowed?'permitted':'held')+'. Existing approvals and candidates are preserved.\n');
+          if(!allowed)console.log('::notice title=PR backlog gate::No new candidate leased. Continue completing/reviewing existing PRs before creating more.');
+          NODE
+
+      - name: Claim one low-risk approved build
+        if: steps.guard.outputs.ready == 'true' && steps.pr_capacity.outputs.allowed == 'true'
         id: claim
         env:
           SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
@@ -73,11 +135,23 @@ jobs:
           const fs=require('fs');
           const c=require('/tmp/candidate.json')[0];
           let m;
-          try { m=JSON.parse(c.proposed_build); } catch { m=null; }
+          try { m=typeof c.proposed_build==='string' ? JSON.parse(c.proposed_build) : c.proposed_build; } catch { m=null; }
+          // Lossless conversion only: no inferred files, permissions or code from prose.
+          if (m && m.kind==='APPROVED_FILE_CHANGES_V1' && Array.isArray(m.files)) {
+            m={kind:'PATCH_MANIFEST_V1',files:m.files};
+            console.log('Recovered structured approved file changes into executable manifest');
+          }
           const bad = !m || m.kind!=='PATCH_MANIFEST_V1' || !Array.isArray(m.files) || !m.files.length ||
             m.files.some(f=>!f.path || typeof f.content!=='string' || f.path.startsWith('/') || f.path.includes('..') ||
               /(^|\/)(\.env|\.github\/workflows)(\/|$)/.test(f.path));
-          if (bad) process.exit(42);
+          if (bad) {
+            const source = String(c.source_type || 'UNKNOWN');
+            const reason = !m ? 'NOT_EXECUTABLE_JSON' : m.kind !== 'PATCH_MANIFEST_V1' ? 'UNSUPPORTED_BUILD_KIND' : 'UNSAFE_OR_EMPTY_PATCH_MANIFEST';
+            console.error('::error title=Approved-work handoff requires implementation::Candidate '+String(c.candidate_key||'unknown')+' from '+source+' cannot be executed: '+reason+'. Route through existing Tech implementation/specification work, not Owner approval.');
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY || '/tmp/autobuild-summary', '### Approved-work handoff held\\nCandidate: '+String(c.candidate_key||'unknown')+'\\nSource: '+source+'\\nReason: '+reason+'\\n\\nThis is a worker implementation-input defect, not a new owner-approval request.\\n');
+            fs.writeFileSync('/tmp/handoff-hold.json',JSON.stringify({reason,source,candidate_key:c.candidate_key}));
+            process.exit(42);
+          }
           fs.writeFileSync('/tmp/manifest.json',JSON.stringify(m));
           NODE
           echo "valid=true" >> "$GITHUB_OUTPUT"
@@ -96,6 +170,18 @@ jobs:
           NODE
           git diff --check
           test -n "$(git status --porcelain)"
+          # Brand and visual output follow existing Master Brand Kit PR #633.
+          # Reject known superseded DANI identity colors in modified visual source.
+          # Semantic status colors and explicitly client-owned work are not recolored.
+          node <<'NODE'
+          const fs=require('fs'),m=require('/tmp/manifest.json');
+          const old=/#(?:6b1f2b|45141d|c9a45c|f6f0e4|4f1720|873340|dcc58f)\b/i;
+          const visual=/\.(css|scss|jsx|tsx|html|svg)$/i;
+          const affected=m.files.filter(f=>visual.test(f.path)&&!/(^|\/)(shadow[-_]?(and[-_]?)?sol|client[-_]?owned)(\/|$)/i.test(f.path));
+          const bad=affected.filter(f=>old.test(f.content));
+          if(bad.length){console.error('::error title=Master Brand Kit conflict::Superseded DANI brand colors detected in '+bad.map(x=>x.path).join(', ')+'. Follow approved v1.0 primary #800020, deep #69001A, ivory #F7F1E6, paper #FFFDF6, antique gold #B38A2D and soft gold #E8D5B0.');process.exit(43);}
+          console.log('DANI canonical palette conflict check passed for '+affected.length+' modified visual-source files. Rendering/accessibility proof still required.');
+          NODE
 
       - name: Validate application
         if: steps.manifest.outputs.valid == 'true'
@@ -104,6 +190,9 @@ jobs:
           set -euo pipefail
           npm ci
           npm run build
+          # After approved Master Brand Kit PR #633 is integrated, enforce its full
+          # canonical-token and contrast checks on every autonomous code build.
+          if [ -f scripts/verifyDaniBrandPalette.mjs ]; then node scripts/verifyDaniBrandPalette.mjs; fi
           if npm run | grep -qE '^  test'; then CI=true npm test -- --watchAll=false; fi
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
@@ -123,24 +212,53 @@ jobs:
           git add -A
           git commit -m "autobuild: $CANDIDATE_KEY"
           git push -u origin "$branch"
-          url=$(gh pr create --base main --head "$branch"             --title "DANI autobuild: $CANDIDATE_KEY"             --body "Governed production autobuild. Low-risk approved candidate; bounded PATCH_MANIFEST_V1; build/tests required. This executor does not merge or deploy production.")
+          url=$(gh pr create --base main --head "$branch" --draft \
+            --title "DANI autobuild: $CANDIDATE_KEY" \
+            --body "Governed approved-work build. Candidate: $CANDIDATE_KEY. Bounded PATCH_MANIFEST_V1; repository build/tests passed. REVIEW REQUIRED: approved Master Brand Kit v1.0 visual consistency and render/accessibility proof for DANI visual surfaces (Canva/PDF/storefront outputs require their own exported asset checks); existing independent code/security review, existing promotion and release gates, exact deployed SHA verification, then downstream business proof. This PR is deliberately draft: it does not authorize merge, production mutation, publishing, outreach or money movement. Follow the existing governed promotion path; do not request duplicate owner approval for already approved bounded source work.")
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
-      - name: Record PR evidence
+      - name: Record PR evidence without overwriting prior approvals
         if: steps.pr.outputs.url != ''
         env:
           SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
           SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
-          ID: ${{ steps.claim.outputs.id }}
+          CANDIDATE_KEY: ${{ steps.claim.outputs.key }}
+          RUNNER: github-actions:${{ github.run_id }}-${{ github.run_attempt }}
           PR_URL: ${{ steps.pr.outputs.url }}
-          SHA: ${{ steps.pr.outputs.sha }}
+          HEAD_SHA: ${{ steps.pr.outputs.sha }}
           BRANCH: ${{ steps.pr.outputs.branch }}
+          RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
-          number=$(echo "$PR_URL" | sed -E 's#^.*/pull/([0-9]+)$#\1#')
-          curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json"             -d "{\"status\":\"PR_OPENED\",\"executor_state\":\"PR_OPENED\",\"branch_name\":\"$BRANCH\",\"pull_request_number\":$number,\"pull_request_url\":\"$PR_URL\",\"head_sha\":\"$SHA\",\"built_at\":\"$(date -u +%FT%TZ)\",\"proof\":{\"executor\":\"github-actions\",\"run_id\":\"${{ github.run_id }}\",\"build_passed\":true,\"auto_merge\":false,\"production_direct_write\":false}}"
+          node <<'NODE'
+          const fs=require('fs'),env=process.env;
+          const prNumber=Number((env.PR_URL.match(/\/pull\/(\d+)$/)||[])[1]);
+          if(!Number.isInteger(prNumber)||prNumber<1)throw Error('INVALID_PR_URL');
+          fs.writeFileSync('/tmp/pr-evidence.json',JSON.stringify({
+            p_candidate_key:env.CANDIDATE_KEY,p_worker_key:env.RUNNER,
+            p_pr_number:prNumber,p_pr_url:env.PR_URL,p_branch:env.BRANCH,
+            p_head_sha:env.HEAD_SHA,p_run_id:env.RUN_ID}));
+          NODE
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_record_autobuild_pr_evidence" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" --data-binary @/tmp/pr-evidence.json
+
+      - name: Route built PR to governed promotion review
+        if: steps.pr.outputs.url != ''
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          CANDIDATE_KEY: ${{ steps.claim.outputs.key }}
+        run: |
+          set -euo pipefail
+          node -e 'process.stdout.write(JSON.stringify({p_candidate_key:process.env.CANDIDATE_KEY}))' > /tmp/promotion-review-input.json
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_register_autobuild_promotion_review" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/promotion-review-input.json
+          echo "Autobuild PR handed to existing review register. Promotion remains unapproved." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Release unsupported or failed candidate
         if: always() && steps.claim.outputs.count == '1' && steps.pr.outputs.url == ''
@@ -150,4 +268,10 @@ jobs:
           ID: ${{ steps.claim.outputs.id }}
         run: |
           set -euo pipefail
-          curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json"             -d "{\"executor_state\":\"PENDING\",\"lease_owner\":null,\"leased_at\":null,\"lease_expires_at\":null,\"attempt_count\":1,\"last_error\":\"Executor run ${{ github.run_id }} did not produce a PR. Candidate remains pending; no production mutation occurred.\"}"
+          if [ -f /tmp/handoff-hold.json ]; then
+            # Keep the candidate recoverable, but stop the infinite same-input retry loop.
+            node -e 'const fs=require("fs");const h=require("/tmp/handoff-hold.json");fs.writeFileSync("/tmp/release.json",JSON.stringify({executor_state:"HELD_IMPLEMENTATION",blocker:"TECH_IMPLEMENTATION_INPUT:"+h.reason,lease_owner:null,leased_at:null,lease_expires_at:null,last_error:"Tech must supply an approved bounded file specification; owner approval is not being re-requested."}))'
+          else
+            node -e 'const fs=require("fs");fs.writeFileSync("/tmp/release.json",JSON.stringify({executor_state:"PENDING",lease_owner:null,leased_at:null,lease_expires_at:null,last_error:"Executor failed without PR; inspect GitHub Actions run before retry."}))'
+          fi
+          curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID" -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json" --data-binary @/tmp/release.json
