@@ -34,3 +34,30 @@ Do not copy or repost the creator's pages, layout, logo, or audio without permis
 - Track funnel: views -> consented downloads -> verified inquiries -> governed quotes -> collected payments -> completed jobs -> repeat business.
 - Privacy: no family calendar, minors' details, household financial information or access instructions in provider sheets or marketing tracking.
 - Specialist maintenance is qualified referral/coordination only unless approved and properly licensed.
+
+
+## 2026-10-10 — product-enabled service MVP (PR #632, not live)
+
+### Customer journey: one CH01 resident front door
+- Free Home Operations Starter on the existing ResidentWelcomePage: original HOME-01 through HOME-14 checklists grouped by cadence, printable, no account required and no customer/private data persisted.
+- Explicit opt-in to request help: links use current CH01-F01 through CH01-F05 query attributes and the existing request-service intake. Checklist use is *not* consent for contact and does not create verified buyer demand.
+- Existing system remains the authority for matching a live-ready SKU, approving the scope, pricing, quoting, payment, qualified provider routing, completion proof and QA.
+- First MVP measurable outcomes: starter page viewed -> request link opened -> consented intake submitted -> economically valid governed quote -> payment actually collected -> QA completion -> repeat service. Funnel analytics must not include checklist items, family names or household data.
+
+### Paid products: separate gated release
+- Resident Home Operations Starter: free preview/lead magnet, not a Shopify listing.
+- Resident Annual Home Operations Planner and print/digital bundle: previously documented candidate products, *not approved pricing*; validate the original assets and buyer value before checkout.
+- House Manager / Household Concierge: reconcile existing DNI-01D-001 and CH01 rate, scope, provider eligibility and LIVE_READY. Setup/retainer pricing is unapproved until the governed quote/economics path establishes it.
+- Shopify is the store/checkout and digital fulfillment rail only once canonical store, catalog identity, price, protected attachment, payment -> delivery -> refunds and logged-out purchase test are proven.
+- Do not activate a subscription, lifetime purchase, payment link, price, buyer list, or automated messages based solely on completion of the starter UI.
+
+### Acceptance
+1. Exact-head preview build and mobile/print accessibility check.
+2. All 14 checklist tasks render and print; changing checkboxes never writes to backend or creates an outreach record.
+3. Verify each CH01 front door reaches the existing service request page with attribution intact.
+4. Anonymous and authenticated customer tests show a usable experience without any third-party household record access.
+5. Record first genuine consented customer inquiries; only paid/verified outcomes count as demand for further interactive software.
+6. Keep family-sensitive storage, helper sharing, care plans and children's details out of this MVP. A later release requires explicit permission scopes, revocation, security tests and retention/deletion design.
+
+### Research-only competitor influence
+Dani Plan's organization/continuity model is inspiration for customer outcomes, not a licensed template or source of copied assets. No competing brand identity, claims of medical-record capabilities, HIPAA compliance or QR emergency access have been imported into DANI.
