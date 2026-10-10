@@ -77,7 +77,14 @@ jobs:
           const bad = !m || m.kind!=='PATCH_MANIFEST_V1' || !Array.isArray(m.files) || !m.files.length ||
             m.files.some(f=>!f.path || typeof f.content!=='string' || f.path.startsWith('/') || f.path.includes('..') ||
               /(^|\/)(\.env|\.github\/workflows)(\/|$)/.test(f.path));
-          if (bad) process.exit(42);
+          if (bad) {
+            const source = String(c.source_type || 'UNKNOWN');
+            const isStructured = !!m && typeof m === 'object';
+            const reason = !m ? 'NOT_EXECUTABLE_JSON' : m.kind !== 'PATCH_MANIFEST_V1' ? 'UNSUPPORTED_BUILD_KIND' : 'UNSAFE_OR_EMPTY_PATCH_MANIFEST';
+            console.error('::error title=Approved-work handoff requires implementation::Candidate '+String(c.candidate_key||'unknown')+' from '+source+' cannot be executed: '+reason+'. Route through existing Tech implementation/specification work, not Owner approval.');
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY || '/tmp/autobuild-summary', '### Approved-work handoff held\\nCandidate: '+String(c.candidate_key||'unknown')+'\\nSource: '+source+'\\nReason: '+reason+'\\n\\nThis is a worker implementation-input defect, not a new owner-approval request.\\n');
+            process.exit(42);
+          }
           fs.writeFileSync('/tmp/manifest.json',JSON.stringify(m));
           NODE
           echo "valid=true" >> "$GITHUB_OUTPUT"
