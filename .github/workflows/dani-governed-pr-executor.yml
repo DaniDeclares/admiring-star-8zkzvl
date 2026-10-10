@@ -51,10 +51,14 @@ jobs:
           SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
-          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_reconcile_autobuild_promotion_reviews" \
+          if curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_reconcile_autobuild_promotion_reviews" \
             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
-            -H "Content-Type: application/json" -d '{"p_limit":10}'
-          echo "Stranded approved-build PRs reconciled into existing review register; no promotion authorized." >> "$GITHUB_STEP_SUMMARY"
+            -H "Content-Type: application/json" -d '{"p_limit":10}'; then
+            echo "Review-link recovery pass completed; inspect RPC receipt for recovered/failed records. No promotion authorized." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning title=Review-link recovery unavailable::Recovery failed; independent approved builds will continue. Investigate existing promotion RPC and migration state."
+            echo "Review-link recovery unavailable; repair as a separate Tech exception without stopping independent builds." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Claim one low-risk approved build
         if: steps.guard.outputs.ready == 'true'
