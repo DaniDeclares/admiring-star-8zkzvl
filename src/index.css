@@ -19,6 +19,16 @@
   --dd-border-gold: rgba(179, 138, 45, 0.42);
   --dd-success: #2F6B4F;
   --dd-danger: #9B2C2C;
+  /* Semantic UI roles. All brand-facing components consume these aliases. */
+  --dd-action-bg: var(--dd-burgundy);
+  --dd-action-fg: var(--dd-cream);
+  --dd-action-hover: var(--dd-burgundy-deep);
+  --dd-page-bg: var(--dd-ivory);
+  --dd-surface-bg: var(--dd-cream);
+  --dd-heading-color: var(--dd-burgundy);
+  --dd-body-color: var(--dd-ink);
+  --dd-accent-rule: var(--dd-gold);
+  --dd-divider-color: var(--dd-gold-soft);
   --dd-font-serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
   --dd-font-sans: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --dd-content-max: 1240px;
