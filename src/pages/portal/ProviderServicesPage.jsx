@@ -18,6 +18,9 @@ export default function ProviderServicesPage() {
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState({});
   const [busy, setBusy] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [visibleCount, setVisibleCount] = useState(20);
+  const [catalogSearch, setCatalogSearch] = useState('');
   const [localMessage, setLocalMessage] = useState('');
   const [localError, setLocalError] = useState('');
   const catalogFetchStarted = useRef(false);
@@ -54,6 +57,7 @@ export default function ProviderServicesPage() {
   const isApprovedProvider = application?.application_status === 'APPROVED';
   const isSignedProvider = application?.agreement_status === 'EXECUTED';
   const existingServiceIds = useMemo(() => new Set(capabilities.map(c => c.canonical_sku).filter(Boolean)), [capabilities]);
+  const filteredServices = useMemo(() => capabilities.filter(item => `${item.capability_description || ''} ${item.canonical_sku || ''} ${item.authorization_status || ''}`.toLowerCase().includes(serviceSearch.trim().toLowerCase())), [capabilities, serviceSearch]);
 
   const toggleCategory = (categoryKey) => {
     setSelectedCategories(prev => { const next = { ...prev }; if (next[categoryKey]) delete next[categoryKey]; else next[categoryKey] = true; return next; });
@@ -89,21 +93,43 @@ export default function ProviderServicesPage() {
     <ProviderNav isApprovedProvider={isApprovedProvider} agreementSigned={isSignedProvider} />
     {(error || localError) && <div className="portal-alert" role="alert">{error || localError}</div>}
     {(message || localMessage) && <div className="portal-success" role="status">{message || localMessage}</div>}
-    <Card title="Current Services">
-      {capabilities.length ? capabilities.map(item => <div className="portal-row" key={item.id}><div><strong>{item.capability_description || item.canonical_sku}</strong><small>{item.canonical_sku ? `${item.canonical_sku} · ` : ''}{statusLabel(item.authorization_status)}</small></div><button disabled={busy} onClick={() => removeCapability(item.id)}>Remove</button></div>) : <Empty>No services on file yet.</Empty>}
+    <section className="provider-services-summary" aria-label="Selected service summary">
+      <div><strong>{capabilities.length}</strong><span>Saved services</span></div>
+      <div><strong>{capabilities.filter(item => item.authorization_status === 'AUTHORIZED').length}</strong><span>Authorized</span></div>
+      <div><strong>{capabilities.filter(item => item.authorization_status !== 'AUTHORIZED').length}</strong><span>Awaiting review or other status</span></div>
+    </section>
+    <Card title="Your saved services">
+      <p className="portal-note">Search your saved services. All selections remain on file unless you explicitly remove one. DANI reviews authorization separately.</p>
+      <label className="provider-search-label" htmlFor="provider-saved-service-search">Find a saved service</label>
+      <input id="provider-saved-service-search" className="provider-service-search" type="search" placeholder="Search by service name, SKU or status" value={serviceSearch} onChange={event => { setServiceSearch(event.target.value); setVisibleCount(20); }} />
+      <p className="provider-service-count" aria-live="polite">Showing {Math.min(visibleCount, filteredServices.length)} of {filteredServices.length} matching services</p>
+      {filteredServices.length ? filteredServices.slice(0, visibleCount).map(item => <div className="portal-row provider-service-row" key={item.id}>
+        <div><strong>{item.capability_description || item.canonical_sku}</strong><small>{item.canonical_sku ? `${item.canonical_sku} · ` : ''}{statusLabel(item.authorization_status)}</small></div>
+        <button type="button" className="provider-remove-service" disabled={busy} onClick={() => removeCapability(item.id)}>Remove</button>
+      </div>) : <Empty>{capabilities.length ? 'No saved services match your search.' : 'No services on file yet.'}</Empty>}
+      {visibleCount < filteredServices.length && <button type="button" className="provider-show-more" onClick={() => setVisibleCount(count => count + 20)}>Show 20 more services</button>}
     </Card>
-    <Card title="Add a Service">
+    <Card title="Request additional services">
+      <p className="portal-note">Choose only categories you can actually perform. A category currently requests <strong>all services listed inside it</strong>; expand it to check the scope first. Requests are reviewed, not automatically approved.</p>
       {catalogLoading ? <p>Loading service catalog…</p> : <>
-        <div style={{ display: 'grid', gap: 8, marginBottom: 14 }}>
-          {categories.filter(c => !servicesForCategory(c).every(s => existingServiceIds.has(s.sku))).map(category => {
-            const count = servicesForCategory(category).length;
-            return <label key={category.category_key} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: 10, border: '1px solid #eee', borderRadius: 8 }}>
-              <input type="checkbox" checked={Boolean(selectedCategories[category.category_key])} onChange={() => toggleCategory(category.category_key)} />
-              <span><strong>{category.label}</strong><br /><small style={{ color: '#666' }}>{category.description} · {count} service{count === 1 ? '' : 's'}</small></span>
-            </label>;
+        <label className="provider-search-label" htmlFor="provider-category-search">Find a category</label>
+        <input id="provider-category-search" className="provider-service-search" type="search" placeholder="Search available categories" value={catalogSearch} onChange={event => setCatalogSearch(event.target.value)} />
+        <div className="provider-category-list">
+          {categories.filter(c => !servicesForCategory(c).every(s => existingServiceIds.has(s.sku))).filter(category => `${category.label} ${category.description}`.toLowerCase().includes(catalogSearch.toLowerCase())).map(category => {
+            const available = servicesForCategory(category).filter(item => !existingServiceIds.has(item.sku));
+            const total = servicesForCategory(category).length;
+            if (!available.length) return null;
+            return <details className="provider-category" key={category.category_key}>
+              <summary><span><strong>{category.label}</strong><small>{category.description} · {total} total services</small></span><span className="provider-category-count">{available.length} not selected</span></summary>
+              <div className="provider-category-inside">
+                <label className="provider-category-select"><input type="checkbox" checked={Boolean(selectedCategories[category.category_key])} onChange={() => toggleCategory(category.category_key)} /> Request this entire category for review</label>
+                <p className="portal-note">Includes {total} services. Existing services are preserved; DANI will review the new request.</p>
+                <ul>{servicesForCategory(category).map(service => <li key={service.id}>{service.name}{existingServiceIds.has(service.sku) ? ' · Already saved' : ''}</li>)}</ul>
+              </div>
+            </details>;
           })}
         </div>
-        <button className="portal-primary" disabled={busy} onClick={submit}>{busy ? 'Submitting…' : 'Submit for review'}</button>
+        <button className="portal-primary" disabled={busy || !Object.values(selectedCategories).some(Boolean)} onClick={submit}>{busy ? 'Submitting…' : 'Submit selected categories for review'}</button>
       </>}
     </Card>
   </main>;
