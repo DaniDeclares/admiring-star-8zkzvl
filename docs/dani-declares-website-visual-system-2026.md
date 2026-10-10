@@ -2,17 +2,17 @@
 
 ## Purpose
 
-This document is the visual source-of-truth for the public website. It separates brand presentation from internal provider, finance, and operating information.
+This historical document is subordinate to `docs/design/DANI_DECLARES_MASTER_BRAND_KIT_2026.md`, the approved company-wide visual authority. The global CSS tokens in `src/index.css` own the actual values. It guides the public website only where consistent with that newer authority. It separates brand presentation from internal provider, finance, and operating information.
 
 ## Canonical brand direction
 
-- Deep Burgundy: `#6B1F2B`
-- Deep Burgundy: `#45141D`
-- Metallic Gold: `#C9A45C`
-- Soft Gold: `#E5D2A5`
-- Warm Ivory: `#F6F0E4`
-- Cream: `#FBF8F1`
-- Ink: `#24151A`
+- Primary Burgundy: `var(--dd-burgundy)` (`#800020`)
+- Deep Burgundy: `var(--dd-burgundy-deep)` (`#69001A`)
+- Antique Gold accent: `var(--dd-gold)` (`#B38A2D`)
+- Soft Gold detail: `var(--dd-gold-soft)` (`#E8D5B0`)
+- Warm Ivory: `var(--dd-ivory)` (`#F7F1E6`)
+- Paper White: `var(--dd-cream)` (`#FFFDF6`)
+- Ink: use the accessible semantic ink token from the approved Master Brand Kit
 - Serif display: Playfair Display / Cormorant Garamond / Georgia
 - Sans UI: DM Sans / system sans
 
