@@ -36,6 +36,7 @@ export function evaluateJobMarginReview(job = {}) {
     forecastMarginPercent: null, forecastContribution: null,
     forecastHours: null, forecastHoursOverrun: null, marginBreach: null,
     budgetAlert: null, budgetLevel: null, alertReasons: scopeChangeReview ? ['SCOPE_CHANGE_REVIEW'] : [],
+    newlyAppearedReasons: scopeChangeReview && !(Array.isArray(job.previousAlertReasons) && job.previousAlertReasons.includes('SCOPE_CHANGE_REVIEW')) ? ['SCOPE_CHANGE_REVIEW'] : [],
     ownerReviewRequired: scopeChangeReview,
     canAutoCharge: false, canAutoContact: false, canAutoReassign: false,
   };
@@ -74,8 +75,17 @@ export function evaluateJobMarginReview(job = {}) {
     ...(marginBreach ? ['FORECAST_MARGIN_ALERT'] : []),
     ...(budgetAlert ? [budgetAlert] : []),
   ];
+  // Independently compare issue identities, not just the hours severity.
+  // The caller must supply the previously acknowledged reasons from an
+  // existing governed owner-attention receipt. Without that evidence,
+  // treat active issues as unacknowledged rather than silently suppressing.
+  const previousIssues = Array.isArray(job.previousAlertReasons)
+    ? job.previousAlertReasons.filter(v => typeof v === 'string') : [];
+  const newlyAppearedReasons = alertReasons.filter(reason =>
+    reason.startsWith('HOURS_') ? reason === budgetAlert : !previousIssues.includes(reason));
   return {
     ...base,
+    newlyAppearedReasons,
     state: alertReasons.length ? 'OWNER_REVIEW_REQUIRED' : 'FORECAST_ONLY',
     holds,
     forecastHours, forecastHoursOverrun, forecastContribution: round(forecastContribution),
