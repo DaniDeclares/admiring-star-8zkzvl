@@ -924,6 +924,8 @@ export default async function handler(req, res) {
       if (!estimate?.client_email) return fail(res, 'Customer email is required for balance checkout.', 422);
       const { data: request, error: requestError } = await context.supabase.from('service_requests').select('id,property_details').eq('id', estimate.service_request_id).maybeSingle();
       if (requestError) throw requestError;
+      const checkoutChannelSignals=[invoiceRow.channel_code,invoiceRow.channel,request?.property_details?.commercialIntent?.channelCode,request?.property_details?.operationsRouting?.channelCode,request?.property_details?.channelCode,request?.property_details?.channelType].filter(Boolean).map(value=>String(value).trim().toUpperCase());
+      if(checkoutChannelSignals.some(value=>['CH05','B2G','GOV','GOVERNMENT','INSTITUTIONAL'].includes(value)))return fail(res,'Government procurement invoices must follow contract/PO and agency-approved payment terms; public balance checkout is prohibited.',403);
       const serviceId=String(request?.property_details?.commercialIntent?.serviceId||request?.property_details?.pricingServiceId||'').trim();
       const metadata={request_id:request?.id||'',service_id:serviceId,estimate_id:estimate.id,job_id:invoiceRow.job_id,invoice_id:invoiceRow.id,payment_type:'BALANCE_PAYMENT',balance_due:String(balance),full_estimate_amount:String(estimate.estimated_total||invoiceRow.total_amount||0)};
       const origin=`${req.headers['x-forwarded-proto']||'https'}://${req.headers['x-forwarded-host']||req.headers.host}`;
