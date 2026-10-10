@@ -22,6 +22,21 @@ const STATUS_TONES = {
 };
 function statusPillStyle(status) { return STATUS_TONES[String(status || '').toUpperCase()] || null; }
 
+function domainHealthExplanation(item) {
+  if (item.summary) return item.summary;
+  if (item.next_autonomous_action) return item.next_autonomous_action;
+  const state = String(item.status || 'UNKNOWN').toUpperCase();
+  if (state === 'GREEN') return 'Controller reports GREEN, but no supporting summary was supplied. Review evidence before treating this as verified health.';
+  if (state === 'YELLOW') return 'Controller reports YELLOW, but has not supplied a specific finding. Inspect source evidence and blockers.';
+  if (state === 'RED') return 'Controller reports RED without an explanation. Escalate for source-backed review.';
+  return 'No verifiable domain health conclusion is available yet. UNKNOWN does not mean zero activity.';
+}
+function domainObservedAt(value) {
+  if (!value) return 'Observation time unavailable';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'Observation time unavailable' : 'Observed ' + date.toLocaleString();
+}
+
 function SystemCard({ system }) {
   const body = <div className="owner-system-card">
     <div className="system-type">{system.type}</div><h3>{system.name}</h3>
@@ -105,7 +120,7 @@ function OwnerHq({ session }) {
 
       <section className="portal-card" id="research"><div className="owner-command-section-head"><div><p className="portal-eyebrow">Research + intelligence</p><h2>Research stays deep, not loud</h2><p className="owner-quiet">The home screen reports movement. Questions, sources, snapshots and evidence remain available below when you want to inspect them.</p></div><span className="portal-pill">{metrics.researchOpen} OPEN</span></div><details className="owner-command-details"><summary>Inspect current research work</summary>{(data?.researchWork||[]).slice(0,12).map(item=><div className="portal-row" key={item.id}><div><strong>{item.question}</strong><small>{item.priority} · {item.status} · {item.next_action||'Continue evidence collection'}</small></div><span className="portal-pill">{item.status}</span></div>)}</details><details className="owner-command-details"><summary>Inspect latest authority-source checks</summary>{(data?.researchSources||[]).slice(0,10).map(source=><div className="portal-row" key={source.id}><div><strong>{source.source_title}</strong><small>{source.authority_level} · {source.temporal_class} · HTTP {source.last_http_status??'—'}</small></div><span className="portal-pill">{source.last_error?'ERROR':'WATCHING'}</span></div>)}</details></section>
 
-      <section className="portal-card" id="tech"><p className="portal-eyebrow">Company controller</p><h2>Business + software health</h2><div className="owner-command-health">{(data?.companyDomains||[]).map(item=><div className="owner-health-item" key={item.domain}><strong>{item.domain.replaceAll('_',' ')}</strong><small>{item.summary||item.next_autonomous_action||'Awaiting verified evidence'}</small><span className="portal-pill" style={statusPillStyle(item.status)}>{item.status}</span></div>)}</div></section>
+      <section className="portal-card" id="tech"><p className="portal-eyebrow">Company controller</p><h2>Business + software health</h2><div className="owner-command-health">{(data?.companyDomains||[]).map(item=><div className="owner-health-item" key={item.domain}><strong>{item.domain.replaceAll('_',' ')}</strong><small>{domainHealthExplanation(item)}</small><small>{domainObservedAt(item.observed_at)}</small><span className="portal-pill" style={statusPillStyle(item.status)}>{item.status}</span></div>)}</div></section>
 
       <section className="portal-card" id="connections"><div className="owner-command-section-head"><div><p className="portal-eyebrow">Connected authority</p><h2>Open another system only when its authority matters</h2></div></div><details className="owner-command-details"><summary>Show connected systems</summary><div className="owner-system-grid" style={{marginTop:12}}>{OWNER_CONNECTED_SYSTEMS.map(system=><SystemCard key={system.key} system={system}/>)}</div></details></section>
 
