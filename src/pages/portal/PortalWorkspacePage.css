@@ -79,20 +79,6 @@
 @media(max-width:600px){.provider-services-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.provider-services-summary>div{padding:12px}.provider-services-summary strong{font-size:22px}.provider-services-summary span{font-size:10px}.provider-category>summary{align-items:flex-start;flex-direction:column}.provider-document-overview{grid-template-columns:1fr 1fr}.provider-document-overview>div{padding:12px}.provider-service-row{align-items:flex-start}.provider-remove-service{flex-shrink:0}}
 
 
-/* DANI provider design palette: burgundy accents with cream surfaces and gold detail. */
-.provider-navigation,.provider-documents-shell{--dani-burgundy:#6b1426;--dani-burgundy-dark:#4b1020;--dani-gold:#b8954b}
-.provider-nav-heading span,.provider-document-overview small{color:var(--dani-burgundy)}
-.provider-navigation .portal-tab.active{background:var(--dani-burgundy);border-color:var(--dani-burgundy);color:#fff}
-.provider-navigation .portal-tab:hover{border-color:#d4a6a9}
-.provider-navigation .portal-install-app{color:var(--dani-burgundy);border-color:#d4a6a9}
-.provider-service-row strong,.provider-document-upload strong{color:#4b1020}
-.provider-category>summary strong,.provider-services-summary strong{color:#4b1020}
-.provider-category-count,.provider-documents-back a{color:#6b1426}
-.provider-document-overview{border-top:3px solid #b8954b}
-.provider-documents-shell .provider-submit-documents,.provider-documents-shell .portal-primary{background:#6b1426;border-color:#6b1426;color:#fff}
-.provider-documents-shell .provider-submit-documents:hover,.provider-documents-shell .portal-primary:hover{background:#4b1020}
-
-
 /* Exact visual palette from the owner's Home Command Center reference (2026-10-10). */
 .portal-shell{background:var(--dd-cream)}
 .portal-shell .portal-card,.provider-onboarding-nav,.provider-work-nav,.provider-document-overview>div,.provider-services-summary>div{background:var(--dd-cream);border-color:var(--dd-gold-soft)}
