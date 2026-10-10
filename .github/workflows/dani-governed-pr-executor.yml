@@ -72,6 +72,18 @@ jobs:
             -H "Content-Type: application/json" -d '{"p_limit":10}'
           echo "Expired leases held for Tech verification of existing PRs; no duplicate build or owner reapproval." >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Route approved nonexecutable briefs to existing Tech work
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_route_autobuild_briefs_to_tech" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" -d '{"p_limit":10}'
+          echo "Approved prose briefs routed to existing Tech queue for file-level implementation. No PR or deployment created." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Cap open PR backlog before leasing new builds
         if: steps.guard.outputs.ready == 'true'
         id: pr_capacity
