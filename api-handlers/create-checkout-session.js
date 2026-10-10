@@ -26,8 +26,9 @@ export default async function handler(req,res){
   const channel=getChannelFromRequest(request);
   if(!channel)return json(res,409,{error:'Verified, unambiguous channel identity is required before checkout.'});
   const routingSignals=[channel,request.property_details?.operationsRouting?.channel,request.property_details?.operationsRouting?.channelCode,request.property_details?.commercialIntent?.channelCode,request.property_details?.channelType,body.channelType].filter(Boolean).map(value=>String(value).trim().toUpperCase());
+  const canonicalSignals=routingSignals.map(value=>({B2C:'CH01',B2B_APT:'CH02',B2B_RE:'CH03',B2B:'CH04',B2G:'CH05',GOV:'CH05',GOVERNMENT:'CH05',INSTITUTIONAL:'CH05',PROCUREMENT:'CH05',PUBLIC_SECTOR:'CH05'}[value]||value));
   if(routingSignals.some(value=>['CH05','B2G','GOV','GOVERNMENT','INSTITUTIONAL'].includes(value)))return json(res,403,{error:'Government and institutional procurement cannot use public checkout. Follow contract, purchase order and agency-approved invoicing terms.'});
-  if(new Set(routingSignals.filter(value=>/^CH0[1-5]$/.test(value))).size>1)return json(res,409,{error:'Conflicting channel identity requires review before checkout.'});
+  if(canonicalSignals.some(value=>!/^CH0[1-5]$/.test(value))||new Set(canonicalSignals).size!==1)return json(res,409,{error:'Conflicting or unknown channel identity requires review before checkout.'});
   if(channel!=='CH01'&&!recurringAgreement)return json(res,400,{error:'Direct checkout for this channel requires an accepted recurring agreement.'});
   const intent=request.property_details?.commercialIntent||{};
   const requestedServiceId=String(intent.serviceId||request.property_details?.pricingServiceId||'').trim();
