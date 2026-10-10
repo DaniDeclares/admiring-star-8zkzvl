@@ -180,35 +180,45 @@ create policy dd_platform_release_audit_staff_read
   to authenticated
   using ((select private.dd_is_staff_admin()));
 
--- CH01 already has a source-controlled 10-pass audit. Carry its latest assessment
--- into the universal registry rather than duplicating or rewriting it.
-insert into public.dd_platform_release_audit_10_pass
-  (channel_code, pass_number, pass_name, lifecycle_stage, status, current_state,
-   blocking_gap, green_exit_criteria, required_build, priority, audit_version)
-select
-  'CH01',
-  pass_number,
-  pass_name,
-  lifecycle_stage,
-  case status when 'RED' then 'RED' when 'YELLOW' then 'YELLOW' else 'NOT_PROVEN' end,
-  current_state,
-  blocking_gap,
-  green_exit_criteria,
-  required_build,
-  priority,
-  '2026-09-21-platform-v1'
-from public.dd_ch01_release_audit_10_pass
-where audit_version = (
-  select max(audit_version) from public.dd_ch01_release_audit_10_pass
-)
-on conflict(channel_code, pass_number, audit_version) do update set
-  status = excluded.status,
-  current_state = excluded.current_state,
-  blocking_gap = excluded.blocking_gap,
-  green_exit_criteria = excluded.green_exit_criteria,
-  required_build = excluded.required_build,
-  priority = excluded.priority,
-  updated_at = now();
+-- On a fresh ledger replay, the historical CH01 assessment relation may not
+-- exist: its physical creation was not captured in source. Do not fabricate
+-- ten approved audit passes. Copy observed history only when the source exists.
+do $$
+begin
+  if to_regclass('public.dd_ch01_release_audit_10_pass') is not null then
+    execute $historical_ch01_copy$
+      insert into public.dd_platform_release_audit_10_pass
+        (channel_code, pass_number, pass_name, lifecycle_stage, status, current_state,
+         blocking_gap, green_exit_criteria, required_build, priority, audit_version)
+      select
+        'CH01',
+        pass_number,
+        pass_name,
+        lifecycle_stage,
+        case status when 'RED' then 'RED' when 'YELLOW' then 'YELLOW' else 'NOT_PROVEN' end,
+        current_state,
+        blocking_gap,
+        green_exit_criteria,
+        required_build,
+        priority,
+        '2026-09-21-platform-v1'
+      from public.dd_ch01_release_audit_10_pass
+      where audit_version = (
+        select max(audit_version) from public.dd_ch01_release_audit_10_pass
+      )
+      on conflict(channel_code, pass_number, audit_version) do update set
+        status = excluded.status,
+        current_state = excluded.current_state,
+        blocking_gap = excluded.blocking_gap,
+        green_exit_criteria = excluded.green_exit_criteria,
+        required_build = excluded.required_build,
+        priority = excluded.priority,
+        updated_at = now()
+    $historical_ch01_copy$;
+  else
+    raise notice 'CH01 release audit history missing on fresh replay: NOT_PROVEN; restore verified source separately';
+  end if;
+end $$;
 
 -- Other channels are intentionally marked NOT_PROVEN until they receive their
 -- own evidence-backed 10-pass audit. CH02 has partial architecture/runtime work,
