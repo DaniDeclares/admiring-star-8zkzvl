@@ -17,3 +17,19 @@
 .dho-service-grid a{color:var(--dani-burgundy)}
 .dho-next{background:#f4e9e0;border-left:4px solid var(--dani-burgundy)}
 .dho-next strong{color:var(--dani-burgundy-dark)}
+
+
+/* Exact visual palette from the owner's Home Command Center reference (2026-10-10). */
+.dani-home-operations{--dani-burgundy:#800020;--dani-burgundy-dark:#800020;--dani-gold:#B38A2D;--dani-cream:#F7F1E6;background:#FFFDF6;color:#392F2A}
+.dho-hero{background:linear-gradient(115deg,#F7F1E6 0%,#FFFDF6 85%);border-top-color:#800020;border-bottom-color:#E8D5B0}
+.dho-hero h1,.dho-heading h2,.dho-services h2,.dho-next h2{color:#800020}
+.dho-eyebrow{color:#B38A2D}
+.dho-button-primary,.dho-filters button.is-active{background:#800020;border-color:#800020;color:#FFFDF6}
+.dho-button-primary:hover{background:#69001A}
+.dho-button-outline{border-color:#B38A2D;color:#800020}
+.dho-starter,.dho-service-grid article{background:#FFFDF6;border-color:#E8D5B0}
+.dho-progress,.dho-disclosure{background:#F7F1E6;border-color:#E8D5B0}
+.dho-progress strong,.dho-service-grid h3,.dho-service-grid a,.dho-next strong{color:#800020}
+.dho-service-grid article{border-top-color:#B38A2D}
+.dho-next{background:#F7F1E6;border-left-color:#B38A2D}
+.dho-task-list input{accent-color:#800020}
