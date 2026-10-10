@@ -71,7 +71,11 @@ export default function ProviderW9Page() {
       {w9.status === 'REJECTED' && <p className="portal-note" style={{ marginTop: 10 }}>DANI DECLARES could not verify this submission. Contact us, or submit a corrected W-9 below.</p>}
     </Card> : null}
 
-    {(!w9 || w9.status === 'REJECTED') && <Card title="Submit Your W-9">
+    {(!w9 || w9.status === 'REJECTED') && snapshot.w9SubmissionAvailable === false && <Card title="Submit Your W-9">
+      <p className="portal-note">Electronic W-9 submission is temporarily unavailable while DANI DECLARES finishes securing it. Please check back soon; you do not need to enter your tax ID yet.</p>
+    </Card>}
+
+    {(!w9 || w9.status === 'REJECTED') && snapshot.w9SubmissionAvailable !== false && <Card title="Submit Your W-9">
       <form onSubmit={submit} style={{ display: 'grid', gap: 16 }}>
         <div style={{ display: 'grid', gap: 10 }}>
           <label style={{ display: 'grid', gap: 5, fontWeight: 700 }}>Line 1 — Name (as shown on your tax return)

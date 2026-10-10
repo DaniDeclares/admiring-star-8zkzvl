@@ -1,5 +1,5 @@
-const CACHE='dani-app-shell-v3';
-const SHELL=['/portal','/portal/login','/manifest.json','/manifest-worker.json','/manifest-customer.json','/dani-declares-favicon.png'];
+const CACHE='dani-app-shell-v4';
+const SHELL=['/portal','/portal/login','/manifest.json','/manifest-worker.json','/manifest-customer.json','/dani-declares-favicon.png','/android-chrome-192x192.png','/android-chrome-512x512.png'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).catch(()=>null));
