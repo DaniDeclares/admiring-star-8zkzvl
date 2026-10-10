@@ -1,52 +1,85 @@
 /**
- * Read-only proposal classifier for DANI job economics.
- * Existing pricing, compensation, quote, payment, job, QA and tenant authority
- * remain in Supabase. Never use this helper to approve prices, charges or dispatch.
- * All monetary inputs are verified snapshots expressed in dollars.
+ * Pure, read-only job economics review. Not a price, payment, job or tenant authority.
+ * All amounts are verified inputs supplied by DANI's existing governed records.
+ * No database writes, notifications, billing, or dispatch side effects.
  */
-const number = v => typeof v === 'number' && Number.isFinite(v) && v >= 0;
-const rate = v => number(v) && v <= 100;
+const nonnegative = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
+const percentage = value => nonnegative(value) && value <= 100;
+const round = value => Math.round(value * 100) / 100;
+const LEVELS = [null, 'HOURS_50', 'HOURS_75', 'HOURS_90', 'HOURS_100'];
 
 export function evaluateJobMarginReview(job = {}) {
-  const holds = [];
-  if (!job.scopeApproved || !number(job.approvedHours) || job.approvedHours <= 0)
-    holds.push('SCOPE_UNVERIFIED');
-  if (job.paymentPathVerified !== true) holds.push('PAYMENT_PATH_UNVERIFIED');
-  if (job.laborRuleVerified !== true || !number(job.ownerHourlyRate))
-    holds.push('LABOR_AUTHORITY_UNVERIFIED');
-  if (!number(job.approvedRevenue) || job.approvedRevenue <= 0 ||
-      !number(job.actualHours) || !number(job.remainingHours) ||
-      !number(job.actualOtherDirectCosts) || !number(job.remainingOtherDirectCosts) ||
-      !number(job.overheadAllowance) || !number(job.processingAllowance) ||
-      !rate(job.minimumMarginPercent) || job.costEvidenceVerified !== true)
-    holds.push('ECONOMICS_UNVERIFIED');
+  const scopeVerified = job.scopeApproved === true &&
+    nonnegative(job.approvedHours) && job.approvedHours > 0;
+  const paymentVerified = job.paymentPathVerified === true;
+  const laborVerified = job.laborRuleVerified === true &&
+    nonnegative(job.ownerHourlyRate) && job.ownerHourlyRate > 0;
+  const economicsVerified = job.costEvidenceVerified === true &&
+    nonnegative(job.approvedRevenue) && job.approvedRevenue > 0 &&
+    nonnegative(job.actualHours) && nonnegative(job.remainingHours) &&
+    nonnegative(job.actualOtherDirectCosts) && nonnegative(job.remainingOtherDirectCosts) &&
+    nonnegative(job.overheadAllowance) && nonnegative(job.processingAllowance) &&
+    percentage(job.minimumMarginPercent);
 
-  const scopeChange = job.requestOutsideApprovedScope === true;
-  const result = { state:'HELD', holds, scopeChangeReview:scopeChange,
-    budgetAlert:null, forecastMarginPercent:null, forecastContribution:null,
-    canAutoCharge:false, canAutoContact:false, canAutoReassign:false };
-  if (holds.length) return result;
+  // Independent gates: fixing one must never clear another.
+  const gates = {
+    labor: laborVerified ? 'LABOR_AUTHORITY_VERIFIED' : 'LABOR_AUTHORITY_UNVERIFIED',
+    scope: scopeVerified ? 'SCOPE_VERIFIED' : 'SCOPE_UNVERIFIED',
+    payment: paymentVerified ? 'PAYMENT_PATH_VERIFIED' : 'PAYMENT_PATH_UNVERIFIED',
+    economics: economicsVerified ? 'ECONOMICS_INPUTS_VERIFIED' : 'ECONOMICS_UNVERIFIED',
+    measuredProfitability: 'MEASURED_MARGIN_UNVERIFIED',
+  };
+  const holds = Object.values(gates).filter(v => v.endsWith('_UNVERIFIED'));
+  const scopeChangeReview = job.requestOutsideApprovedScope === true;
+  const base = {
+    state: 'HELD', gates, holds, scopeChangeReview,
+    forecastMarginPercent: null, forecastContribution: null,
+    forecastHours: null, forecastHoursOverrun: null, marginBreach: null,
+    budgetAlert: null, budgetLevel: null, alertReasons: scopeChangeReview ? ['SCOPE_CHANGE_REVIEW'] : [],
+    ownerReviewRequired: scopeChangeReview,
+    canAutoCharge: false, canAutoContact: false, canAutoReassign: false,
+  };
 
-  const totalForecastHours=job.actualHours+job.remainingHours;
-  const ratio=100*job.actualHours/job.approvedHours;
-  const forecastCost=totalForecastHours*job.ownerHourlyRate+
-    job.actualOtherDirectCosts+job.remainingOtherDirectCosts+
-    job.overheadAllowance+job.processingAllowance;
-  const contribution=job.approvedRevenue-forecastCost;
-  const margin=100*contribution/job.approvedRevenue;
-  const forecastOverrun=totalForecastHours>job.approvedHours;
-  const marginBreach=margin<job.minimumMarginPercent;
-  const level=ratio>=100?'HOURS_100':ratio>=90?'HOURS_90':
-    ratio>=75?'HOURS_75':ratio>=50?'HOURS_50':null;
-  const previous=job.previousAlertLevel ?? null;
-  const order=[null,'HOURS_50','HOURS_75','HOURS_90','HOURS_100'];
-  const newlyCrossed=order.indexOf(level)>order.indexOf(previous);
-  return {...result, state: marginBreach?'FORECAST_MARGIN_ALERT':
-    forecastOverrun?'FORECAST_HOURS_OVERRUN':scopeChange?'SCOPE_CHANGE_REVIEW':'FORECAST_ONLY',
-    holds:[], approvedHours:job.approvedHours, actualHours:job.actualHours,
-    forecastHours:totalForecastHours, forecastHoursOverrun:forecastOverrun,
-    forecastMarginPercent:Math.round(margin*100)/100,
-    forecastContribution:Math.round(contribution*100)/100,
-    marginBreach, budgetAlert:newlyCrossed?level:null,
-    ownerReviewRequired:marginBreach||forecastOverrun||scopeChange||level==='HOURS_100'};
+  // A reconciled actual margin is distinct from a forecast and can be negative.
+  // Reconciliation requires explicit completion, QA and cost evidence, not a mere positive number.
+  if (job.jobComplete === true && job.qaReconciled === true &&
+      job.actualFinancialsReconciled === true &&
+      nonnegative(job.actualRevenueCollected) && job.actualRevenueCollected > 0 &&
+      nonnegative(job.actualTotalCosts)) {
+    gates.measuredProfitability = 'MEASURED_MARGIN_READY';
+    base.measuredMarginPercent = round(100 *
+      (job.actualRevenueCollected - job.actualTotalCosts) / job.actualRevenueCollected);
+  } else {
+    base.measuredMarginPercent = null;
+  }
+  const blocking = holds.filter(h => h !== 'MEASURED_MARGIN_UNVERIFIED');
+  if (blocking.length) return base;
+
+  const forecastHours = job.actualHours + job.remainingHours;
+  const forecastCost = forecastHours * job.ownerHourlyRate +
+    job.actualOtherDirectCosts + job.remainingOtherDirectCosts +
+    job.overheadAllowance + job.processingAllowance;
+  const forecastContribution = job.approvedRevenue - forecastCost;
+  const forecastMarginPercent = round(100 * forecastContribution / job.approvedRevenue);
+  const marginBreach = forecastMarginPercent < job.minimumMarginPercent;
+  const forecastHoursOverrun = forecastHours > job.approvedHours;
+  const usedPercent = 100 * job.actualHours / job.approvedHours;
+  const budgetLevel = usedPercent >= 100 ? 'HOURS_100' : usedPercent >= 90 ? 'HOURS_90' :
+    usedPercent >= 75 ? 'HOURS_75' : usedPercent >= 50 ? 'HOURS_50' : null;
+  const previous = LEVELS.includes(job.previousAlertLevel) ? job.previousAlertLevel : null;
+  const budgetAlert = LEVELS.indexOf(budgetLevel) > LEVELS.indexOf(previous) ? budgetLevel : null;
+  const alertReasons = [
+    ...(scopeChangeReview ? ['SCOPE_CHANGE_REVIEW'] : []),
+    ...(forecastHoursOverrun ? ['FORECAST_HOURS_OVERRUN'] : []),
+    ...(marginBreach ? ['FORECAST_MARGIN_ALERT'] : []),
+    ...(budgetAlert ? [budgetAlert] : []),
+  ];
+  return {
+    ...base,
+    state: alertReasons.length ? 'OWNER_REVIEW_REQUIRED' : 'FORECAST_ONLY',
+    holds,
+    forecastHours, forecastHoursOverrun, forecastContribution: round(forecastContribution),
+    forecastMarginPercent, marginBreach, budgetLevel, budgetAlert, alertReasons,
+    ownerReviewRequired: alertReasons.length > 0,
+  };
 }
