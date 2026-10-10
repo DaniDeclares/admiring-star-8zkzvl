@@ -113,9 +113,9 @@ jobs:
           # Semantic status colors and explicitly client-owned work are not recolored.
           node <<'NODE'
           const fs=require('fs'),m=require('/tmp/manifest.json');
-          const old=/#(?:6b1f2b|45141d|c9a45c|f6f0e4|4f1720|873340|dcc58f)\\b/i;
-          const visual=/\\.(css|scss|jsx|tsx|html|svg)$/i;
-          const affected=m.files.filter(f=>visual.test(f.path)&&!/(^|\\/)(shadow[-_]?(and[-_]?)?sol|client[-_]?owned)(\\/|$)/i.test(f.path));
+          const old=/#(?:6b1f2b|45141d|c9a45c|f6f0e4|4f1720|873340|dcc58f)\b/i;
+          const visual=/\.(css|scss|jsx|tsx|html|svg)$/i;
+          const affected=m.files.filter(f=>visual.test(f.path)&&!/(^|\/)(shadow[-_]?(and[-_]?)?sol|client[-_]?owned)(\/|$)/i.test(f.path));
           const bad=affected.filter(f=>old.test(f.content));
           if(bad.length){console.error('::error title=Master Brand Kit conflict::Superseded DANI brand colors detected in '+bad.map(x=>x.path).join(', ')+'. Follow approved v1.0 primary #800020, deep #69001A, ivory #F7F1E6, paper #FFFDF6, antique gold #B38A2D and soft gold #E8D5B0.');process.exit(43);}
           console.log('DANI canonical palette conflict check passed for '+affected.length+' modified visual-source files. Rendering/accessibility proof still required.');
