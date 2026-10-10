@@ -96,8 +96,9 @@ function OwnerHq({ session }) {
           <div className="portal-summary-tile"><strong>{data.outcomePipeline.buildPrEvidence}</strong><span>Build PRs with SHA evidence (sample)</span></div>
           <div className="portal-summary-tile"><strong>{data.outcomePipeline.techImplementationHeld}</strong><span>Held for Tech (sample)</span></div>
           <div className="portal-summary-tile"><strong>{data.outcomePipeline.productionVerifiedPromotionRecords}</strong><span>Promotion records marked verified</span></div>
-          <div className="portal-summary-tile"><strong>{data.outcomePipeline.releaseReceiptsObserved}</strong><span>Historical release receipts (sample)</span></div>
+          <div className="portal-summary-tile"><strong>{data.outcomePipeline.verifiedReleaseReceipts}</strong><span>Verified executed release receipts (sample)</span></div>
         </div><p className="owner-quiet">{data.outcomePipeline.note}</p>
+        <p className="owner-quiet">{data.outcomePipeline.autobuildMatchedPromotionRecords} exact autobuild-to-promotion candidate matches · {data.outcomePipeline.releaseReceiptsObserved} historical receipts inspected. Unmatched evidence never implies a completed release.</p>
         {data.outcomePipeline.recentBuilds?.map(x=><div className="portal-row" key={x.candidateKey}><div><strong>{x.candidateKey}</strong><small>PR #{x.prNumber} · commit {x.headSha?.slice(0,9)} · review {x.reviewState} · promotion {x.promotionState}</small></div><span className="portal-pill" style={statusPillStyle('PENDING')}>VERIFY</span></div>)}</> : <p className="owner-quiet">Build-to-release evidence unavailable. No completion inferred.</p>}
       </section>
 
