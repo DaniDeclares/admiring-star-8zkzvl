@@ -24,6 +24,7 @@ export default async function handler(req,res){
   const requestStatus=String(request.status||'').toLowerCase();
   if(requestStatus!=='payment_pending'&&!recurringAgreement)return json(res,409,{error:'This request is not currently awaiting payment.'});
   const channel=getChannelFromRequest(request);
+  if(channel==='CH05')return json(res,403,{error:'Government and institutional procurement cannot use public checkout. Follow contract, purchase order and agency-approved invoicing terms.'});
   if(channel!=='CH01'&&!recurringAgreement)return json(res,400,{error:'Direct checkout for this channel requires an accepted recurring agreement.'});
   const intent=request.property_details?.commercialIntent||{};
   const requestedServiceId=String(intent.serviceId||request.property_details?.pricingServiceId||'').trim();
