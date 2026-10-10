@@ -91,3 +91,19 @@
 .provider-document-overview{border-top:3px solid #b8954b}
 .provider-documents-shell .provider-submit-documents,.provider-documents-shell .portal-primary{background:#6b1426;border-color:#6b1426;color:#fff}
 .provider-documents-shell .provider-submit-documents:hover,.provider-documents-shell .portal-primary:hover{background:#4b1020}
+
+
+/* Exact visual palette from the owner's Home Command Center reference (2026-10-10). */
+.provider-navigation,.provider-documents-shell,.portal-shell{--dani-burgundy:#800020;--dani-burgundy-dark:#800020;--dani-gold:#B38A2D;--dani-cream:#F7F1E6}
+.portal-shell{background:#FFFDF6}
+.portal-shell .portal-card,.provider-onboarding-nav,.provider-work-nav,.provider-document-overview>div,.provider-services-summary>div{background:#FFFDF6;border-color:#E8D5B0}
+.provider-nav-heading span,.provider-document-overview small,.provider-category-count,.provider-documents-back a{color:#800020}
+.provider-navigation .portal-tab{background:#F7F1E6;border-color:#E8D5B0}
+.provider-navigation .portal-tab.active{background:#800020;border-color:#800020;color:#FFFDF6}
+.provider-navigation .portal-tab:hover{border-color:#B38A2D}
+.provider-navigation .portal-install-app{color:#800020;border-color:#B38A2D}
+.provider-service-row strong,.provider-document-upload strong,.provider-category>summary strong,.provider-services-summary strong{color:#800020}
+.provider-documents-shell .provider-submit-documents,.provider-documents-shell .portal-primary{background:#800020;border-color:#800020;color:#FFFDF6}
+.provider-documents-shell .provider-submit-documents:hover,.provider-documents-shell .portal-primary:hover{background:#69001A}
+.provider-document-upload,.provider-category,.provider-upload-queue{background:#F7F1E6;border-color:#E8D5B0}
+.provider-document-overview{border-top-color:#B38A2D}
