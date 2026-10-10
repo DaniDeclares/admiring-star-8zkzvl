@@ -135,7 +135,9 @@ jobs:
           git add -A
           git commit -m "autobuild: $CANDIDATE_KEY"
           git push -u origin "$branch"
-          url=$(gh pr create --base main --head "$branch"             --title "DANI autobuild: $CANDIDATE_KEY"             --body "Governed production autobuild. Low-risk approved candidate; bounded PATCH_MANIFEST_V1; build/tests required. This executor does not merge or deploy production.")
+          url=$(gh pr create --base main --head "$branch" --draft \
+            --title "DANI autobuild: $CANDIDATE_KEY" \
+            --body "Governed approved-work build. Candidate: $CANDIDATE_KEY. Bounded PATCH_MANIFEST_V1; repository build/tests passed. REVIEW REQUIRED: existing independent code/security review, existing promotion and release gates, exact deployed SHA verification, then downstream business proof. This PR is deliberately draft: it does not authorize merge, production mutation, publishing, outreach or money movement. Follow the existing governed promotion path; do not request duplicate owner approval for already approved bounded source work.")
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
