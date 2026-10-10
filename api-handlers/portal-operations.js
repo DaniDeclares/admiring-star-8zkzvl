@@ -919,7 +919,7 @@ export default async function handler(req, res) {
       const balance = Number(invoiceRow.balance_due || 0);
       if (!Number.isFinite(balance) || balance <= 0) return fail(res, 'This invoice has no outstanding balance.', 409);
       if (!invoiceRow.estimate_id || !invoiceRow.job_id) return fail(res, 'Balance checkout requires an estimate-linked job.', 409);
-      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('id,service_request_id,client_email,public_reference,estimated_total').eq('id', invoiceRow.estimate_id).maybeSingle();
+      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('id,service_request_id,client_email,public_reference,estimated_total,intake_answers').eq('id', invoiceRow.estimate_id).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate?.client_email) return fail(res, 'Customer email is required for balance checkout.', 422);
       const { data: request, error: requestError } = await context.supabase.from('service_requests').select('id,property_details').eq('id', estimate.service_request_id).maybeSingle();
