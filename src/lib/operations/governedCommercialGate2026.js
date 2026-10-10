@@ -39,6 +39,7 @@ function money(value) {
 
 function normalizeChannel(channelType, channel) {
   const normalizedType = String(channelType || '').trim().toUpperCase();
+  if (['GOV', 'GOVERNMENT', 'INSTITUTIONAL', 'PROCUREMENT', 'PUBLIC_SECTOR'].includes(normalizedType)) return 'CH05';
   return INTAKE_TO_CHANNEL[normalizedType] || String(channel || '').trim().toUpperCase();
 }
 
