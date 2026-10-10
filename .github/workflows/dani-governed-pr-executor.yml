@@ -166,6 +166,9 @@ jobs:
           set -euo pipefail
           npm ci
           npm run build
+          # After approved Master Brand Kit PR #633 is integrated, enforce its full
+          # canonical-token and contrast checks on every autonomous code build.
+          if [ -f scripts/verifyDaniBrandPalette.mjs ]; then node scripts/verifyDaniBrandPalette.mjs; fi
           if npm run | grep -qE '^  test'; then CI=true npm test -- --watchAll=false; fi
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
