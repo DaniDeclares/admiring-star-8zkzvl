@@ -60,8 +60,30 @@ jobs:
             echo "Review-link recovery unavailable; repair as a separate Tech exception without stopping independent builds." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Claim one low-risk approved build
+      - name: Cap open PR backlog before leasing new builds
         if: steps.guard.outputs.ready == 'true'
+        id: pr_capacity
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Fail closed if GitHub is unavailable. Do not lease a candidate we cannot finish.
+          gh pr list --state open --limit 100 --json number,headRefName > /tmp/dani-open-prs.json
+          node <<'NODE'
+          const fs=require('fs');
+          const prs=require('/tmp/dani-open-prs.json');
+          const total=prs.length;
+          const autobuild=prs.filter(p=>String(p.headRefName||'').startsWith('dani/autobuild-')).length;
+          // Limits constrain PR creation, not existing research, operational jobs or review recovery.
+          const allowed=total<12 && autobuild<3;
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'allowed='+allowed+'\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            '### PR capacity: '+total+' open repo PRs; '+autobuild+' generated autobuild PRs. New lease '+(allowed?'permitted':'held')+'. Existing approvals and candidates are preserved.\n');
+          if(!allowed)console.log('::notice title=PR backlog gate::No new candidate leased. Continue completing/reviewing existing PRs before creating more.');
+          NODE
+
+      - name: Claim one low-risk approved build
+        if: steps.guard.outputs.ready == 'true' && steps.pr_capacity.outputs.allowed == 'true'
         id: claim
         env:
           SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
