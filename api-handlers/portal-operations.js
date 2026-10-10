@@ -294,11 +294,14 @@ async function getOwnerControlSnapshot(supabase) {
   const [autobuildRaw, promotionRaw, releaseRaw] = (await Promise.all([
     supabase.from('dd_autobuild_candidates').select('candidate_key,status,executor_state,blocker,pull_request_number,head_sha,built_at,proof').order('created_at',{ascending:false}).limit(150),
     supabase.from('dd_promotion_candidates').select('candidate_key,source_reference,proof_status,owner_approval_status,production_verification_status,classification').order('updated_at',{ascending:false}).limit(100),
-    supabase.from('dd_production_release_receipts').select('id,candidate_id').limit(150),
+    supabase.from('dd_production_release_receipts').select('id,candidate_id,candidate_key,release_state,release_executed,verified_at').limit(150),
   ])).map((result,i)=>tolerateMissingTable(result,outcomeSources[i],degradedSources));
   if ([autobuildRaw,promotionRaw,releaseRaw].some(x=>x.error)) throw [autobuildRaw,promotionRaw,releaseRaw].find(x=>x.error).error;
   const autobuildRows=autobuildRaw.data||[], promotionRows=promotionRaw.data||[];
   const eligibleEvidenceRows=autobuildRows.filter(x=>x.executor_state==='PR_OPENED' && x.pull_request_number && x.head_sha);
+  const verifiedReleaseRows=(releaseRaw.data||[]).filter(x=>x.release_executed===true && x.verified_at);
+  const promotionKeys=new Set(promotionRows.map(x=>x.candidate_key));
+  const autobuildMatchedPromotion=eligibleEvidenceRows.filter(x=>promotionKeys.has(x.candidate_key));
   const outcomePipeline={
     observedAt:new Date().toISOString(),
     coverage:{
@@ -313,8 +316,10 @@ async function getOwnerControlSnapshot(supabase) {
     promotionRecordsObserved:promotionRows.length,
     productionVerifiedPromotionRecords:promotionRows.filter(x=>x.production_verification_status==='PASSED').length,
     releaseReceiptsObserved:(releaseRaw.data||[]).length,
+    verifiedReleaseReceipts:verifiedReleaseRows.length,
+    autobuildMatchedPromotionRecords:autobuildMatchedPromotion.length,
     recentBuilds:eligibleEvidenceRows.slice(0,5).map(x=>({candidateKey:x.candidate_key,prNumber:x.pull_request_number,headSha:x.head_sha,reviewState:x.proof?.review_state||'NOT_VERIFIED',promotionState:x.proof?.promotion_state||'NOT_VERIFIED'})),
-    note:'These are source-specific records, not evidence that any new product was published, a lead was contacted, or money was collected. Historical promotion receipts are not automatically linked to autobuild PRs.'
+    note:'These are source-specific records, not evidence that any new product was published, a lead was contacted, or money was collected. Exact candidate-key matches are required to link autobuild PRs to promotion records; a release counts as verified only when execution and verification timestamp are recorded.'
   };
 
   if (degradedSources.length) {
