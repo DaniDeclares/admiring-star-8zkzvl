@@ -30,6 +30,6 @@ export function assessMerchCandidate(candidate) {
   return { ready: true, reason: 'CANDIDATE_EVIDENCE_PRESENT', preFeeMarginCents: retail - cost, note: 'Shopify fees, returns, taxes and channel policy still require governed release validation; this does not publish a product.' };
 }
 
-if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).href) {
+if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1].startsWith('/') ? process.argv[1] : `${process.cwd()}/${process.argv[1]}`}`).href) {
   console.log('Printify integration is read-only. No products created or published.');
 }
