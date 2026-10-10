@@ -96,7 +96,7 @@ def main():
             print(f'REGISTRY_MISSING,{link_id},{name},{service_id},,')
             continue
 
-        stripe_price = stripe_link_amount(link_id)
+        # CH05 procurement must never be reconciled as a public Stripe Payment Link.\n        # Preserve the row as evidence, but fail closed rather than validating it.\n        if record['channel'] in ('CH05', 'GOV', 'B2G'):\n            print(f'PROHIBITED_GOVERNMENT_CHECKOUT,{link_id},{name},{service_id},,')\n            continue\n\n        stripe_price = stripe_link_amount(link_id)
         if stripe_price is None:
             print(f'AMOUNT_UNVERIFIED,{link_id},{name},{service_id},{record["price"]},')
             continue
