@@ -60,6 +60,18 @@ jobs:
             echo "Review-link recovery unavailable; repair as a separate Tech exception without stopping independent builds." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      - name: Quarantine expired build leases for Tech reconciliation
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_hold_expired_autobuild_leases" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" -d '{"p_limit":10}'
+          echo "Expired leases held for Tech verification of existing PRs; no duplicate build or owner reapproval." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Cap open PR backlog before leasing new builds
         if: steps.guard.outputs.ready == 'true'
         id: pr_capacity
