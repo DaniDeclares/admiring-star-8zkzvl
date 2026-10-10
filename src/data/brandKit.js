@@ -1,4 +1,4 @@
-// filename: src/data/brandKit.js — LOCKED BRAND COLOR & ECOSYSTEM DATA
+// filename: src/data/brandKit.js — CANONICAL BRAND METADATA - palette mirrors src/index.css tokens (PR #633)
 export const BRAND_KIT = {
   legalName: "DANI DECLARES LLC",
   brandName: "DANI DECLARES",
@@ -6,13 +6,13 @@ export const BRAND_KIT = {
   primaryTagline: "WE HANDLE THE EXECUTION.",
   secondaryTagline: "CONSIDER IT HANDLED.",
   colors: {
-    burgundy: "#6B1F2B",
-    burgundyDark: "#4F1720",
-    burgundyLight: "#873340",
-    ivory: "#F6F0E4",
-    cream: "#EDE2D0",
-    gold: "#C9A45C",
-    goldLight: "#DCC58F",
+    burgundy: "#800020",
+    burgundyDark: "#69001A",
+    burgundyLight: "#A64B62",
+    ivory: "#F7F1E6",
+    cream: "#FFFDF6",
+    gold: "#B38A2D",
+    goldLight: "#E8D5B0",
     dark: "#21191A"
   },
   hqLocation: "Tucker, Georgia 30084 (Serving Metro Atlanta, GA & Regional SC)",
