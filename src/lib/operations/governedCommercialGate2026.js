@@ -57,6 +57,7 @@ function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityR
 }
 
 function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType, channelPriceCents, hasLockedActivePricing, hasLockedActiveSubchannelPricing } = {}) {
+  if (channel === 'CH05') return { eligible: false, reason: 'GOVERNMENT_PROCUREMENT_NO_PUBLIC_CHECKOUT', price: null };
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
