@@ -48,3 +48,17 @@ Allowed audit dispositions: `PRESERVED`, `MISSING`, `BURIED`, `RENAMED`, `DUPLIC
 - Exactly one governed source of truth; no unverified code or registry change treated as successful business outcome.
 
 **Current state:** This document records the approved recovery requirement and audit acceptance contract. It does **not** certify that the full row-by-row Production audit, releases, or revenue proof have happened.
+
+## Chris / DANI horror merchandise market signal — 2026-10-10
+
+**Source:** owner-supplied Amazon listing snapshots, not a verified wholesale cost sheet or live purchase feed. Preserve as competitor intelligence for Chris's DTF/heat-press/custom merchandise scope; do not convert observed retail prices into approved DANI prices or advertise copyrighted movie imagery/characters without permission.
+
+| Observed listing | Snapshot retail | Review signal | Product idea |
+| --- | ---: | --- | --- |
+| Buryeah horror gift box: flannel throw 50×60, mug, cap, socks, notebook, keychain, candle, card, box | $41.99 | 4.8/5 from 51 ratings | Curated gift bundle, bundled packaging and upsells |
+| Huglanket horror wearable blanket hoodie | $39.99 | 4.8/5 from 111 ratings | Wearable personalized cozy apparel; equipment/material feasibility unverified |
+| Buryeah standalone horror throw 50×60 | $17.99 | 107 ratings (stars not captured) | Entry-price comparison for blankets |
+| Horror movie scratch-off challenge cards, Top 50 | $20.00 | 694 ratings (stars not captured) | Original-licensed movie-night/activity kit; content/rights verification required |
+| Suclain blanket, pillow cover, mug, socks gift set | $29.99 | 1 rating (stars not captured) | Lower-priced bundle reference |
+
+**Commercial disposition:** RESEARCH_ONLY. Document Chris provider production capabilities and unit cost/material sourcing, fulfillment lead time, licensing/brand rights, sample QA, packaging/shipping/returns, margin after labor and fees, and release/checkout evidence before promoting any DANI SKU. Avoid treating sponsored recommendations or marketplace ratings as proven demand for DANI.
