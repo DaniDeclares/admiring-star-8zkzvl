@@ -1,45 +1,92 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import './ResidentWelcomePage.css';
 
-const frontDoors = [
-  ["CH01-F01","Home Cleaning & Home Reset","Cleaning, deep resets and home-ready support when your space needs a reset."],
-  ["CH01-F02","Household Concierge & Errands","Practical household tasks and errands handled so your time stays yours."],
-  ["CH01-F03","Pet & Plant Care","Routine pet and indoor plant support through a governed service request."],
-  ["CH01-F04","Home Watch & Away Support","Documented household checks while you are away, with clear visit boundaries."],
-  ["CH01-F05","Move, Guest & Seasonal Support","Extra hands for moving, hosting, travel, seasonal changes and household transitions."]
+// Based on DANI's original Home Operations Task Library v1 (2026-10-08).
+// Presentation only: no private household data is saved, transmitted or shared.
+const TASKS = [
+  { key: 'HOME-01', group: 'Weekly', name: 'Household review', help: 'Review the family calendar, supplies and task owners.' },
+  { key: 'HOME-02', group: 'Weekly', name: 'Share responsibilities', help: 'Agree on safe, age-appropriate responsibilities.' },
+  { key: 'HOME-03', group: 'Weekly', name: 'Check essentials', help: 'Review pantry, refrigerator, freezer and household staples.' },
+  { key: 'HOME-04', group: 'Weekly', name: 'Plan flexible meals', help: 'Note meal ideas and what needs to be purchased.' },
+  { key: 'HOME-05', group: 'Weekly', name: 'Choose a home focus', help: 'Prioritize a cleaning or organization area.' },
+  { key: 'HOME-06', group: 'Monthly', name: 'Update the maintenance log', help: 'Record completed maintenance and what is due next.' },
+  { key: 'HOME-07', group: 'Weekly', name: 'Review household routines', help: 'Update morning, evening and school-day routines.' },
+  { key: 'HOME-08', group: 'As needed', name: 'Write a repeatable procedure', help: 'Document who does what, needed supplies and what finished means.' },
+  { key: 'HOME-09', group: 'Seasonal', name: 'Review emergency contacts privately', help: 'Review your household reunification and contact plan offline.' },
+  { key: 'HOME-10', group: 'Monthly', name: 'Review repeat decisions', help: 'Update default choices for familiar household tasks.' },
+  { key: 'HOME-11', group: 'Monthly', name: 'Review household spending', help: 'Discuss the budget without entering banking information here.' },
+  { key: 'HOME-12', group: 'Seasonal', name: 'Plan seasonal home upkeep', help: 'Identify inspections and qualified specialists as needed.' },
+  { key: 'HOME-13', group: 'Weekly', name: 'Decide what to delegate', help: 'Separate do-it-yourself tasks from professional service needs.' },
+  { key: 'HOME-14', group: 'Seasonal', name: 'Plan home resilience', help: 'Check supplies and consider gardening or preparedness projects.' },
+];
+const GROUPS = ['Weekly', 'Monthly', 'Seasonal', 'As needed'];
+const FRONT_DOORS = [
+  ['CH01-F01', 'Home Cleaning & Home Reset', 'Help making your space home-ready.'],
+  ['CH01-F02', 'Household Concierge & Errands', 'Household coordination and practical support.'],
+  ['CH01-F03', 'Pet & Plant Care', 'Routine pet and indoor plant support.'],
+  ['CH01-F04', 'Home Watch & Away Support', 'Defined check-ins while you are away.'],
+  ['CH01-F05', 'Move, Guest & Seasonal Support', 'Support during transitions, hosting and seasonal work.'],
 ];
 
 export default function ResidentWelcomePage() {
-  return <div style={{fontFamily:"Inter,system-ui,sans-serif",background:"#fbf8f4",minHeight:"100vh",color:"#211417"}}>
-    <section style={{background:"linear-gradient(145deg,#5d1325,#2a0b12)",color:"white",padding:"4.5rem 1.5rem"}}>
-      <div style={{maxWidth:980,margin:"0 auto",textAlign:"center"}}>
-        <div style={{fontSize:12,textTransform:"uppercase",letterSpacing:3,color:"#d7b980",fontWeight:800}}>DANI DECLARES • RESIDENT CONCIERGE</div>
-        <h1 style={{fontFamily:"Georgia,serif",fontSize:"clamp(2.4rem,7vw,4.5rem)",margin:"10px 0 14px",lineHeight:1.04}}>Tell us what kind of help your household needs.</h1>
-        <p style={{maxWidth:760,margin:"0 auto",color:"#eadde0",fontSize:18,lineHeight:1.65}}>Start with the situation you are trying to solve. We route the request into the right resident service path, confirm scope and timing, and show the applicable commercial path before work is scheduled.</p>
-        <div style={{display:"flex",justifyContent:"center",gap:12,flexWrap:"wrap",marginTop:24}}>
-          <Link to="/request-service?channelType=B2C" style={{background:"#d7b980",color:"#2a0b12",padding:"14px 22px",borderRadius:7,fontWeight:800,textDecoration:"none"}}>Start a resident request</Link>
-          <a href="tel:+14704857173" style={{border:"1px solid #d7b980",color:"white",padding:"14px 22px",borderRadius:7,fontWeight:700,textDecoration:"none"}}>(470) 485-7173</a>
+  const [checked, setChecked] = useState({});
+  const [activeGroup, setActiveGroup] = useState('Weekly');
+  const [showAll, setShowAll] = useState(false);
+  const complete = TASKS.filter(task => checked[task.key]).length;
+  const displayed = showAll ? TASKS : TASKS.filter(task => task.group === activeGroup);
+  return <main className="dani-home-operations">
+    <section className="dho-hero">
+      <div className="dho-width">
+        <p className="dho-eyebrow">DANI DECLARES · HOME OPERATIONS</p>
+        <h1>Less to remember. More gets handled.</h1>
+        <p className="dho-intro">Put your household routines, upcoming tasks and service needs in one manageable place. Start with a free planning checklist, then ask DANI for help when you want something professionally handled.</p>
+        <div className="dho-actions">
+          <a href="#starter" className="dho-button dho-button-primary">Start your household plan</a>
+          <Link className="dho-button dho-button-outline" to="/request-service?channelType=B2C&frontDoor=CH01-F02">Request household support</Link>
         </div>
       </div>
     </section>
-    <main style={{maxWidth:1040,margin:"0 auto",padding:"3.25rem 1.5rem 5rem"}}>
-      <section style={{marginBottom:28}}>
-        <div style={{fontSize:12,textTransform:"uppercase",letterSpacing:2.4,fontWeight:800,color:"#7a2637"}}>Five resident starting points</div>
-        <h2 style={{fontFamily:"Georgia,serif",fontSize:34,margin:"8px 0 10px"}}>One request. The right lane.</h2>
-        <p style={{color:"#65565a",lineHeight:1.7,maxWidth:760}}>These are starting points, not fixed packages. The actual service is selected from the governed catalog after your request is understood.</p>
+    <div className="dho-width">
+      <section id="starter" className="dho-starter" aria-labelledby="starter-title">
+        <div className="dho-heading">
+          <div><p className="dho-eyebrow">YOUR FREE STARTER</p><h2 id="starter-title">Home Operations Checklist</h2><p>Four simple planning rhythms. Check items as you work through them, or print a copy for your household.</p></div>
+          <div className="dho-progress" role="status" aria-live="polite"><strong>{complete} / {TASKS.length}</strong><span>Checked in this session</span></div>
+        </div>
+        <div className="dho-disclosure">Your checkmarks stay in this browser session only. This page does not save your household information, collect family details or create a service request.</div>
+        <div className="dho-filters" role="group" aria-label="Choose planning rhythm">
+          {GROUPS.map(group => <button key={group} type="button" aria-pressed={!showAll && activeGroup === group} className={!showAll && activeGroup === group ? 'is-active' : ''} onClick={() => { setActiveGroup(group); setShowAll(false); }}>{group}</button>)}
+          <button type="button" aria-pressed={showAll} className={showAll ? 'is-active' : ''} onClick={() => setShowAll(true)}>All tasks</button>
+        </div>
+        <ul className="dho-task-list">
+          {displayed.map(task => <li key={task.key}>
+            <label><input type="checkbox" checked={Boolean(checked[task.key])} onChange={event => setChecked(current => ({ ...current, [task.key]: event.target.checked }))} />
+              <span><strong>{task.name}</strong><small>{task.help}</small></span>
+            </label>
+            <span className="dho-task-frequency">{task.group}</span>
+          </li>)}
+        </ul>
+        <div className="dho-starter-actions">
+          <button type="button" className="dho-button dho-button-primary" onClick={() => window.print()}>Print my checklist</button>
+          <button type="button" className="dho-button dho-button-text" onClick={() => setChecked({})}>Clear checkmarks</button>
+        </div>
       </section>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:14}}>
-        {frontDoors.map(([code,title,detail])=><article key={code} style={{background:"white",border:"1px solid #e4d9d3",borderRadius:12,padding:22}}>
-          <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,fontWeight:800,color:"#a8791c"}}>{code}</div>
-          <h3 style={{margin:"8px 0 8px",color:"#66192b"}}>{title}</h3>
-          <p style={{margin:0,color:"#6b5c60",lineHeight:1.6}}>{detail}</p>
-          <Link to={"/request-service?channelType=B2C&frontDoor="+encodeURIComponent(code)} style={{display:"inline-block",marginTop:16,background:"#6b1426",color:"white",padding:"10px 15px",borderRadius:7,fontWeight:800,textDecoration:"none"}}>Start here</Link>
-        </article>)}
-      </div>
-      <section style={{marginTop:34,background:"#f2e8df",padding:22,borderRadius:10}}>
-        <h3 style={{marginTop:0}}>What happens next</h3>
-        <p style={{marginBottom:0,color:"#65565a",lineHeight:1.65}}>Your starting point travels with the request into intake. DANI DECLARES then confirms the service, scope, availability and applicable commercial path before fulfillment.</p>
+      <section className="dho-services" aria-labelledby="services-title">
+        <p className="dho-eyebrow">NEED AN EXTRA SET OF HANDS?</p>
+        <h2 id="services-title">Plan it yourself. Let DANI handle what needs support.</h2>
+        <p>This is a planning tool, not a purchase or a booking. If you want help, choose a starting point. DANI confirms your needs and applicable approved services before presenting a quote.</p>
+        <div className="dho-service-grid">
+          {FRONT_DOORS.map(([code,title,description]) => <article key={code}>
+            <h3>{title}</h3><p>{description}</p>
+            <Link to={`/request-service?channelType=B2C&frontDoor=${encodeURIComponent(code)}`}>Discuss this service <span aria-hidden="true">→</span></Link>
+          </article>)}
+        </div>
       </section>
-    </main>
-  </div>;
+      <section className="dho-next" aria-labelledby="next-title">
+        <div><p className="dho-eyebrow">WHAT HAPPENS NEXT</p><h2 id="next-title">From a household need to a handled result.</h2></div>
+        <ol><li><strong>Plan.</strong> Organize your own routines and tasks.</li><li><strong>Ask.</strong> Choose to send DANI a service request.</li><li><strong>Confirm.</strong> DANI reviews scope, pricing and availability.</li><li><strong>Execute.</strong> Approved work follows the existing assignment and quality process.</li></ol>
+        <p>Some maintenance requires licensed specialists. DANI only offers work covered by its verified service scope and qualified providers.</p>
+      </section>
+    </div>
+  </main>;
 }
