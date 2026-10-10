@@ -82,7 +82,11 @@ do $$
 declare v_crosswalk int; v_gated_004 int; v_ready_005 int; v_ready_012 int; v_offer_004 int; v_offer_005 int; v_offer_012 int;
 begin
   select count(*) into v_crosswalk from public.dd_ch02_offer_crosswalk c join public.dd_ch02_service_adjudication a on a.id=c.adjudication_id where a.sku in ('DNI-02A-005','DNI-02A-012');
-  if v_crosswalk <> 2 then raise exception 'Expected 2 CH02 crosswalk rows for 02A-005/012; found %',v_crosswalk; end if;
+  -- Adjudication is sourced from the CH02 availability-backed matrix.
+  -- Missing authorization is a hold, not permission to create synthetic rows.
+  if v_crosswalk <> 2 then
+    raise exception 'CH02_AUTHORIZATION_EVIDENCE_MISSING: expected 2 adjudicated crosswalk rows for 02A-005/012; found %. Verify historical CH02 availability, governed routing and provider eligibility.', v_crosswalk;
+  end if;
   select count(*) into v_gated_004 from public.dd_governed_service_offers where canonical_sku='DNI-02A-004' and commercial_offer_status='SELL_NOW' and fulfillment_gate_status='FULFILLMENT_GATED' and channel_availability_count=0 and authorized_provider_capability_count=0;
   if v_gated_004 <> 1 then raise exception 'DNI-02A-004 gate/count reconciliation failed'; end if;
   select count(*) into v_ready_005 from public.dd_governed_service_offers where canonical_sku='DNI-02A-005' and fulfillment_gate_status='READY' and channel_availability_count=1 and authorized_provider_capability_count=2;
