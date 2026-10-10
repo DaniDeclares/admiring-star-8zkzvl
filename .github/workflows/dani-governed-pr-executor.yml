@@ -99,8 +99,8 @@ jobs:
           const total=prs.length;
           const autobuild=prs.filter(p=>String(p.headRefName||'').startsWith('dani/autobuild-')).length;
           // Limits constrain PR creation, not existing research, operational jobs or review recovery.
-          // One reviewable autobuild slot; prevent a new PR pile-up while historical PRs close.
-          const allowed=total<24 && autobuild<1;
+          // Limits constrain PR creation, not existing research, operational jobs or review recovery.
+          const allowed=total<12 && autobuild<3;
           fs.appendFileSync(process.env.GITHUB_OUTPUT,'allowed='+allowed+'\n');
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
             '### PR capacity: '+total+' open repo PRs; '+autobuild+' generated autobuild PRs. New lease '+(allowed?'permitted':'held')+'. Existing approvals and candidates are preserved.\n');
