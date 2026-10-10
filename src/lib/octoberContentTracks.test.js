@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { OCTOBER_CONTENT_TRACKS, octoberCampaignLink, octoberTrackCanPublish } from './octoberContentTracks.js';
 
 describe('October content tracks', () => {
