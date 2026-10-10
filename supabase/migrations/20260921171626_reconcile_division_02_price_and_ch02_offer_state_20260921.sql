@@ -81,18 +81,35 @@ where a.channel_code='CH02'
 do $$
 declare v_crosswalk int; v_gated_004 int; v_ready_005 int; v_ready_012 int; v_offer_004 int; v_offer_005 int; v_offer_012 int;
 begin
-  select count(*) into v_crosswalk from public.dd_ch02_offer_crosswalk c join public.dd_ch02_service_adjudication a on a.id=c.adjudication_id where a.sku in ('DNI-02A-005','DNI-02A-012');
-  -- Adjudication is sourced from the CH02 availability-backed matrix.
-  -- Missing authorization is a hold, not permission to create synthetic rows.
-  if v_crosswalk <> 2 then
-    raise exception 'CH02_AUTHORIZATION_EVIDENCE_MISSING: expected 2 adjudicated crosswalk rows for 02A-005/012; found %. Verify historical CH02 availability, governed routing and provider eligibility.', v_crosswalk;
+  -- Reconstructible history contains no CH02 availability/adjudication for
+  -- 02A-005/012 as of this migration. Crosswalks must therefore remain absent.
+  select count(*) into v_crosswalk
+  from public.dd_ch02_offer_crosswalk c
+  join public.dd_ch02_service_adjudication a on a.id=c.adjudication_id
+  where a.channel_code='CH02' and a.sku in ('DNI-02A-005','DNI-02A-012');
+  if v_crosswalk <> 0 then
+    raise exception 'CH02_UNSUPPORTED_CROSSWALK: expected zero historically authorized crosswalks for 02A-005/012; found %',v_crosswalk;
   end if;
-  select count(*) into v_gated_004 from public.dd_governed_service_offers where canonical_sku='DNI-02A-004' and commercial_offer_status='SELL_NOW' and fulfillment_gate_status='FULFILLMENT_GATED' and channel_availability_count=0 and authorized_provider_capability_count=0;
+  select count(*) into v_gated_004 from public.dd_governed_service_offers
+  where canonical_sku='DNI-02A-004' and fulfillment_gate_status='FULFILLMENT_GATED'
+    and channel_availability_count=0 and authorized_provider_capability_count=0;
   if v_gated_004 <> 1 then raise exception 'DNI-02A-004 gate/count reconciliation failed'; end if;
-  select count(*) into v_ready_005 from public.dd_governed_service_offers where canonical_sku='DNI-02A-005' and fulfillment_gate_status='READY' and channel_availability_count=1 and authorized_provider_capability_count=2;
-  if v_ready_005 <> 1 then raise exception 'DNI-02A-005 gate/count reconciliation failed'; end if;
-  select count(*) into v_ready_012 from public.dd_governed_service_offers where canonical_sku='DNI-02A-012' and fulfillment_gate_status='READY' and channel_availability_count=1 and authorized_provider_capability_count=3;
-  if v_ready_012 <> 1 then raise exception 'DNI-02A-012 gate/count reconciliation failed'; end if;
+  -- Price repair is not commercial approval. Both loss-held offers must stay unsellable.
+  select count(*) into v_ready_005 from public.dd_governed_service_offers
+  where canonical_sku='DNI-02A-005' and commercial_offer_status='DO_NOT_SELL';
+  select count(*) into v_ready_012 from public.dd_governed_service_offers
+  where canonical_sku='DNI-02A-012' and commercial_offer_status='DO_NOT_SELL';
+  if v_ready_005 <> 1 or v_ready_012 <> 1 then
+    raise exception 'D02_LOSS_HOLD_NOT_PRESERVED: 005=% 012=%',v_ready_005,v_ready_012;
+  end if;
+  if exists (
+    select 1 from public.dd_service_channel_availability a
+    join public.services s on s.id=a.service_id
+    where s.sku in ('DNI-02A-005','DNI-02A-012')
+      and a.channel_code='CH02' and a.eligibility_status='ELIGIBLE'
+  ) then
+    raise exception 'D02_UNSUPPORTED_CH02_ELIGIBILITY: 005/012 lack historical channel approval';
+  end if;
   select count(*) into v_offer_004 from public.dd_governed_commercial_offers where canonical_sku='DNI-02A-004' and service_name='Commercial Space Reset' and customer_price_cents=20000 and pricing_model='PER_HOUR';
   select count(*) into v_offer_005 from public.dd_governed_commercial_offers where canonical_sku='DNI-02A-005' and service_name='Common Area Detail' and customer_price_cents=27500 and pricing_model='SOW_PROCUREMENT';
   select count(*) into v_offer_012 from public.dd_governed_commercial_offers where canonical_sku='DNI-02A-012' and service_name='Office Cleaning' and customer_price_cents=27500 and pricing_model='FIXED';
