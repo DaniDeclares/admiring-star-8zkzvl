@@ -1,10 +1,10 @@
-/* Design Tokens: Brand Colors & Basics (Dani Declares)
+/* Design Tokens: backward-compatible aliases to src/index.css canonical palette (DANI DECLARES)
    DO NOT DELETE: Used for standardized, scalable design system.
 */
 :root {
-  --color-burgundy: #800020;
-  --color-ivory: #f9f6f2;
-  --color-gold: #c8b273;
+  --color-burgundy: var(--dd-burgundy);
+  --color-ivory: var(--dd-ivory);
+  --color-gold: var(--dd-gold);
   --color-black: #161616;
   --color-gray: #eeeeee;
 
