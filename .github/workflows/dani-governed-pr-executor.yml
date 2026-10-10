@@ -154,19 +154,31 @@ jobs:
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
-      - name: Record PR evidence
+      - name: Record PR evidence without overwriting prior approvals
         if: steps.pr.outputs.url != ''
         env:
           SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
           SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
-          ID: ${{ steps.claim.outputs.id }}
+          CANDIDATE_KEY: ${{ steps.claim.outputs.key }}
+          RUNNER: github-actions:${{ github.run_id }}-${{ github.run_attempt }}
           PR_URL: ${{ steps.pr.outputs.url }}
-          SHA: ${{ steps.pr.outputs.sha }}
+          HEAD_SHA: ${{ steps.pr.outputs.sha }}
           BRANCH: ${{ steps.pr.outputs.branch }}
+          RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
-          number=$(echo "$PR_URL" | sed -E 's#^.*/pull/([0-9]+)$#\1#')
-          curl -fsS -X PATCH "$SB_URL/rest/v1/dd_autobuild_candidates?id=eq.$ID"             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -H "Content-Type: application/json"             -d "{\"status\":\"PR_OPENED\",\"executor_state\":\"PR_OPENED\",\"branch_name\":\"$BRANCH\",\"pull_request_number\":$number,\"pull_request_url\":\"$PR_URL\",\"head_sha\":\"$SHA\",\"built_at\":\"$(date -u +%FT%TZ)\",\"proof\":{\"executor\":\"github-actions\",\"run_id\":\"${{ github.run_id }}\",\"build_passed\":true,\"auto_merge\":false,\"production_direct_write\":false,\"review_state\":\"PENDING_INDEPENDENT_REVIEW\",\"promotion_state\":\"NOT_AUTHORIZED\",\"production_verification\":\"NOT_RUN\"}}"
+          node <<'NODE'
+          const fs=require('fs'),env=process.env;
+          const prNumber=Number((env.PR_URL.match(/\/pull\/(\d+)$/)||[])[1]);
+          if(!Number.isInteger(prNumber)||prNumber<1)throw Error('INVALID_PR_URL');
+          fs.writeFileSync('/tmp/pr-evidence.json',JSON.stringify({
+            p_candidate_key:env.CANDIDATE_KEY,p_worker_key:env.RUNNER,
+            p_pr_number:prNumber,p_pr_url:env.PR_URL,p_branch:env.BRANCH,
+            p_head_sha:env.HEAD_SHA,p_run_id:env.RUN_ID}));
+          NODE
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_record_autobuild_pr_evidence" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" --data-binary @/tmp/pr-evidence.json
 
       - name: Route built PR to governed promotion review
         if: steps.pr.outputs.url != ''
