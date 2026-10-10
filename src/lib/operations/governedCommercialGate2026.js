@@ -89,6 +89,7 @@ function getChannelFromRequest(request) {
   if (signals.includes('CH05')) return 'CH05'; // Procurement cannot be downgraded into a public checkout channel.
   const canonical = signals.filter(value => /^CH0[1-5]$/.test(value));
   if (new Set(canonical).size > 1) return null; // Contradictory channel identities fail closed.
+  if (signals.some(value => !/^CH0[1-5]$/.test(value))) return null; // Unknown routing identities cannot authorize checkout.
   return canonical[0] || null;
 }
 
