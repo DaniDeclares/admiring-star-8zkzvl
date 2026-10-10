@@ -110,3 +110,11 @@ describe('five-channel checkout routing integrity', () => {
     expect(getChannelFromRequest(request({}))).toBeNull();
   });
 });
+
+describe('government procurement payment hard stop', () => {
+  test('CH05 cannot become public checkout eligible even when an offer is otherwise LIVE_READY', () => {
+    const offer = { releaseState:'LIVE_READY', commercialOfferStatus:'SELL_NOW', fulfillmentGateStatus:'READY', pricingType:'FIXED', baseCustomerPrice:275, internalCost:'1 hr @ $75', marginEconomics:'AUDITED: margin 72.7%' };
+    const result = checkoutEligibility(offer, { channel:'CH05', channelPricingType:'FIXED', channelPriceCents:27500, hasLockedActivePricing:true });
+    expect(result).toEqual({eligible:false,reason:'GOVERNMENT_PROCUREMENT_NO_PUBLIC_CHECKOUT',price:null});
+  });
+});
