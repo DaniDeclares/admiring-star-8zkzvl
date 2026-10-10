@@ -44,6 +44,18 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Recover stranded PR review handoffs
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SB_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_reconcile_autobuild_promotion_reviews" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" -d '{"p_limit":10}'
+          echo "Stranded approved-build PRs reconciled into existing review register; no promotion authorized." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Claim one low-risk approved build
         if: steps.guard.outputs.ready == 'true'
         id: claim
