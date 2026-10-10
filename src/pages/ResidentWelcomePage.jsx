@@ -67,7 +67,7 @@ export default function ResidentWelcomePage() {
           </li>)}
         </ul>
         <div className="dho-starter-actions">
-          <button type="button" className="dho-button dho-button-primary" onClick={() => window.print()}>Print my checklist</button>
+          <button type="button" className="dho-button dho-button-primary" onClick={() => { setShowAll(true); window.setTimeout(() => window.print(), 100); }}>Print my checklist</button>
           <button type="button" className="dho-button dho-button-text" onClick={() => setChecked({})}>Clear checkmarks</button>
         </div>
       </section>
