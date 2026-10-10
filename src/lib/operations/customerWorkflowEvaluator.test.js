@@ -45,3 +45,12 @@ test('workflow evaluation is bounded', () => {
  expect(evaluateCustomerWorkflows([rule],event,auth)).toHaveLength(1);
  expect(() => evaluateCustomerWorkflows(new Array(101).fill(rule),event,auth)).toThrow();
 });
+
+test('forged event tenant and trigger never override server-authenticated scope', () => {
+ const forged={...event,tenantId:'orgB',signal:'PAYMENT_VERIFIED',attributes:{buyerVerified:true}};
+ const result=evaluateCustomerWorkflow(rule,forged,auth);
+ expect(result.eligible).toBe(false);
+ expect(result.candidate).toBeNull();
+ expect(result.reasons).toContain('TENANT_SCOPE_NOT_VERIFIED');
+ expect(result.reasons).toContain('TRIGGER_MISMATCH');
+});
