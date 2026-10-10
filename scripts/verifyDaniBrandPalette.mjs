@@ -37,9 +37,9 @@ const expectedMetadata = {
   goldLight: expected['--dd-gold-soft']
 };
 for (const [key, value] of Object.entries(expectedMetadata)) {
-  const pattern = new RegExp('\\\\b' + key + '\\\\s*:\\\\s*[\\\"\\\'](#[0-9a-fA-F]{6})[\\\"\\\']');
-  const match = brand.match(pattern);
-  if (!match || match[1].toUpperCase() !== value.toUpperCase()) {
+  const line = brand.split('\n').find(value => value.trim().startsWith(key + ':'));
+  const match = line?.match(/#[0-9a-fA-F]{6}/);
+  if (!match || match[0].toUpperCase() !== value.toUpperCase()) {
     throw new Error('BRAND_KIT colors.' + key + ' must match canonical CSS ' + value);
   }
 }
