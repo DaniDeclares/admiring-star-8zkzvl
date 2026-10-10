@@ -85,7 +85,11 @@ function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityRe
 
 function getChannelFromRequest(request) {
   const routing = request?.property_details?.operationsRouting || {};
-  return normalizeChannel(routing.channel, routing.channel);
+  const signals = [routing.channel, routing.channelCode, request?.property_details?.commercialIntent?.channelCode, request?.property_details?.channelType].filter(Boolean).map(value => normalizeChannel(value, value));
+  if (signals.includes('CH05')) return 'CH05'; // Procurement cannot be downgraded into a public checkout channel.
+  const canonical = signals.filter(value => /^CH0[1-5]$/.test(value));
+  if (new Set(canonical).size > 1) return null; // Contradictory channel identities fail closed.
+  return canonical[0] || null;
 }
 
 let modulePromise;
