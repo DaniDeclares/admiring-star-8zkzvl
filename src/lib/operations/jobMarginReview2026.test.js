@@ -3,7 +3,7 @@ import { evaluateJobMarginReview } from './jobMarginReview2026';
 const verified = {
   scopeApproved: true, approvedHours: 1, paymentPathVerified: true,
   laborRuleVerified: true, ownerHourlyRate: 75,
-  approvedRevenue: 129, actualHours: 0.5, remainingHours: 0.25,
+  approvedRevenue: 129, actualHours: 0.1, remainingHours: 0.3,
   actualOtherDirectCosts: 0, remainingOtherDirectCosts: 0,
   overheadAllowance: 19.35, processingAllowance: 3.74,
   minimumMarginPercent: 20, costEvidenceVerified: true,
@@ -56,6 +56,34 @@ describe('DANI fail-closed job margin and scope review (read-only)', () => {
     expect(evaluateJobMarginReview(data).budgetAlert).toBe('HOURS_75');
     expect(evaluateJobMarginReview({...data,previousAlertLevel:'HOURS_75'}).budgetAlert).toBeNull();
     expect(evaluateJobMarginReview({...data,previousAlertLevel:'HOURS_90'}).budgetAlert).toBeNull();
+  });
+
+  test('new scope and margin issues survive an unchanged hours threshold', () => {
+    const first=evaluateJobMarginReview({
+      ...verified,actualHours:0.8,remainingHours:0.1,
+      previousAlertLevel:'HOURS_75',previousAlertReasons:[],
+      requestOutsideApprovedScope:true,
+    });
+    expect(first.budgetAlert).toBeNull();
+    expect(first.newlyAppearedReasons).toContain('SCOPE_CHANGE_REVIEW');
+
+    const lowMargin=evaluateJobMarginReview({
+      ...verified,actualHours:0.8,remainingHours:0.6,
+      previousAlertLevel:'HOURS_75',
+      previousAlertReasons:['SCOPE_CHANGE_REVIEW','FORECAST_HOURS_OVERRUN'],
+      requestOutsideApprovedScope:true,
+    });
+    expect(lowMargin.newlyAppearedReasons).toContain('FORECAST_MARGIN_ALERT');
+    expect(lowMargin.newlyAppearedReasons).not.toContain('SCOPE_CHANGE_REVIEW');
+
+    const repeated=evaluateJobMarginReview({
+      ...verified,actualHours:0.8,remainingHours:0.6,
+      previousAlertLevel:'HOURS_75',
+      previousAlertReasons:['SCOPE_CHANGE_REVIEW','FORECAST_HOURS_OVERRUN','FORECAST_MARGIN_ALERT'],
+      requestOutsideApprovedScope:true,
+    });
+    expect(repeated.newlyAppearedReasons).toEqual([]);
+    expect(repeated.alertReasons).toContain('FORECAST_MARGIN_ALERT');
   });
 
   test('missing costs never become zero', () => {
