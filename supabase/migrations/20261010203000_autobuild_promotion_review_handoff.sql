@@ -19,7 +19,7 @@ begin
    proof_status,dependency_status,security_status,production_diff_status,
    rollback_status,owner_approval_status,production_verification_status,blocking_reason,evidence
  ) values (
-   v_key,coalesce(nullif(c.domain,''),'SOFTWARE_PLATFORM'),left(c.title,240),
+   v_key,coalesce(nullif(c.domain,''),'SOFTWARE_PLATFORM'),left(coalesce(nullif(c.title,''),c.candidate_key),240),
    'GitHub PR #'||c.pull_request_number||' @ '||c.head_sha,
    'PROMOTE_AFTER_FIX','UNPROVEN','UNCHECKED','UNCHECKED','UNCHECKED',
    'UNDEFINED','NOT_REQUESTED','NOT_RUN',
