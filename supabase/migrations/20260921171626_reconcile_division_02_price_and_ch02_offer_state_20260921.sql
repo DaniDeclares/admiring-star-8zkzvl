@@ -90,10 +90,22 @@ begin
   if v_crosswalk <> 0 then
     raise exception 'CH02_UNSUPPORTED_CROSSWALK: expected zero historically authorized crosswalks for 02A-005/012; found %',v_crosswalk;
   end if;
-  select count(*) into v_gated_004 from public.dd_governed_service_offers
-  where canonical_sku='DNI-02A-004' and fulfillment_gate_status='FULFILLMENT_GATED'
-    and channel_availability_count=0 and authorized_provider_capability_count=0;
-  if v_gated_004 <> 1 then raise exception 'DNI-02A-004 gate/count reconciliation failed'; end if;
+  -- 004's count is reconstructed from actual channel/provider records above.
+  -- Do not assert zero historical providers unless the ledger proves zero.
+  -- In particular, a price correction must not itself authorize public sale.
+  select count(*) into v_gated_004 from public.dd_governed_service_offers o
+  where o.canonical_sku='DNI-02A-004'
+    and o.channel_availability_count=(
+      select count(*)::int from public.dd_service_channel_availability a
+      where a.service_id=o.runtime_service_id and a.eligibility_status='ELIGIBLE'
+    )
+    and o.authorized_provider_capability_count=(
+      select count(*)::int from public.dd_provider_capabilities p
+      where p.service_id=o.runtime_service_id and p.is_authorized=true
+    )
+    and o.fulfillment_gate_status=case when o.authorized_provider_capability_count>0
+      then 'READY' else 'FULFILLMENT_GATED' end;
+  if v_gated_004 <> 1 then raise exception 'DNI-02A-004 evidence-backed gate/count reconciliation failed'; end if;
   -- Price repair is not commercial approval. Both loss-held offers must stay unsellable.
   select count(*) into v_ready_005 from public.dd_governed_service_offers
   where canonical_sku='DNI-02A-005' and commercial_offer_status='DO_NOT_SELL';
