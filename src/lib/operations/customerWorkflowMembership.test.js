@@ -31,3 +31,15 @@ test('database failure denies access',async()=>{
   const result=await resolveCustomerWorkflowMembership({supabase:db('customer','ACTIVE',true),authenticatedUserId:user,requestedOrganizationId:org});
   expect(result.identityAuthorized).toBe(false);
 });
+
+test('verified customer membership and active organization are required together', async()=>{
+  const a=await resolveCustomerWorkflowMembership({supabase:db('customer'),authenticatedUserId:user,requestedOrganizationId:org});
+  expect(a.tenantMembershipVerified).toBe(true);
+  expect(a.authenticatedTenantId).toBe(org);
+  const b=await resolveCustomerWorkflowMembership({supabase:db('customer','SUSPENDED'),authenticatedUserId:user,requestedOrganizationId:org});
+  expect(b.tenantMembershipVerified).toBe(false);
+});
+test('malformed organization identifier is never treated as membership proof',async()=>{
+  const a=await resolveCustomerWorkflowMembership({supabase:db('customer'),authenticatedUserId:user,requestedOrganizationId:'orgA'});
+  expect(a.identityAuthorized).toBe(false);
+});
