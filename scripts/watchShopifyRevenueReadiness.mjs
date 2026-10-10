@@ -1,37 +1,69 @@
 #!/usr/bin/env node
 // Read-only Shopify revenue readiness check. Never log tokens, customers, or order details.
-const domain = process.env.SHOPIFY_SHOP_DOMAIN;
-const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
-if (!domain || !token || !/^[a-z0-9-]+\.myshopify\.com$/.test(domain)) {
-  console.error('CONFIGURATION_REQUIRED: Shopify Admin shop domain/token not configured');
-  process.exit(2);
+// Reuse the canonical Shopify transport and fail closed on incomplete catalog evidence.
+import { shopifyGraphQL } from './shopifyRecoveryAdapters.mjs';
+
+export async function inspectShopifyReadiness(credentials, request = shopifyGraphQL) {
+  const products = [];
+  const ids = new Set();
+  const cursors = new Set();
+  let cursor = null;
+  let hasOrders = false;
+  do {
+    const data = await request({
+      ...credentials,
+      query: `query RevenueReadiness($cursor:String) {
+        products(first:100,after:$cursor) {
+          nodes { id title status featuredMedia { ... on MediaImage { id } } }
+          pageInfo { hasNextPage endCursor }
+        }
+        orders(first:1,sortKey:CREATED_AT,reverse:true) { nodes { id } }
+      }`,
+      variables: { cursor }
+    });
+    const page = data?.products;
+    if (!page || !Array.isArray(page.nodes) || !page.pageInfo ||
+        !data.orders || !Array.isArray(data.orders.nodes)) throw Error('SHOPIFY_READINESS_PAGE_INVALID');
+    hasOrders ||= data.orders.nodes.length > 0;
+    for (const product of page.nodes) {
+      if (!product?.id || ids.has(product.id)) throw Error('SHOPIFY_READINESS_DUPLICATE_OR_MISSING_ID');
+      ids.add(product.id);
+      products.push(product);
+    }
+    if (!page.pageInfo.hasNextPage) break;
+    const next = page.pageInfo.endCursor;
+    if (!next || next === cursor || cursors.has(next)) throw Error('SHOPIFY_READINESS_CURSOR_STALLED');
+    cursors.add(next);
+    cursor = next;
+  } while (true);
+  const activeDigital = products.filter(p => p.status === 'ACTIVE' && /kit|planner/i.test(p.title ?? ''));
+  // Titles are only a heuristic; delivery configuration still requires independent verification.
+  const missingImages = activeDigital.filter(p => !p.featuredMedia).map(p => ({ id: p.id, title: p.title }));
+  const findings = [];
+  if (missingImages.length) findings.push('ACTIVE_DIGITAL_MISSING_COVER');
+  if (!activeDigital.length) findings.push('NO_ACTIVE_DIGITAL_PRODUCTS');
+  return {
+    checkedAt: new Date().toISOString(), scanned: products.length,
+    incompleteScan: false, activeDigital: activeDigital.length, missingImages,
+    hasOrders, deliveryVerified: false, deliveryVerificationRequired: true, findings
+  };
 }
-const query = `query RevenueReadiness {
-  products(first: 100) {
-    edges { node { id title status productType featuredMedia { ... on MediaImage { id } } } }
-    pageInfo { hasNextPage }
+
+if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) {
+  const domain = process.env.SHOPIFY_SHOP_DOMAIN;
+  const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+  if (!domain || !token) {
+    console.error('CONFIGURATION_REQUIRED: Shopify Admin shop domain/token not configured');
+    process.exitCode = 2;
+  } else {
+    try {
+      const result = await inspectShopifyReadiness({ domain, token });
+      console.log(JSON.stringify(result));
+      if (result.findings.length) process.exitCode = 1;
+    } catch (error) {
+      // Avoid leaking upstream response content or credential-bearing URLs.
+      console.error('SHOPIFY_READINESS_FAILED code=' + (/^SHOPIFY_[A-Z_0-9]+$/.test(error.message) ? error.message : 'UNEXPECTED'));
+      process.exitCode = 2;
+    }
   }
-  orders(first: 1, sortKey: CREATED_AT, reverse: true) { edges { node { id } } }
-}`;
-const response = await fetch('https://' + domain + '/admin/api/2025-10/graphql.json', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': token },
-  body: JSON.stringify({ query }),
-  signal: AbortSignal.timeout(20000)
-});
-if (!response.ok) { console.error('SHOPIFY_READ_FAILED status=' + response.status); process.exit(2); }
-const body = await response.json();
-if (body.errors?.length || !body.data?.products) { console.error('SHOPIFY_QUERY_FAILED'); process.exit(2); }
-const products = body.data.products.edges.map(x => x.node);
-const activeDigital = products.filter(p => p.status === 'ACTIVE' && (/kit|planner/i.test(p.title)));
-const missingImages = activeDigital.filter(p => !p.featuredMedia).map(p => ({ id: p.id, title: p.title }));
-const result = { checkedAt: new Date().toISOString(), scanned: products.length,
-  incompleteScan: body.data.products.pageInfo.hasNextPage,
-  activeDigital: activeDigital.length, missingImages,
-  hasOrders: body.data.orders.edges.length > 0,
-  findings: [] };
-if (result.incompleteScan) result.findings.push('CATALOG_SCAN_INCOMPLETE');
-if (missingImages.length) result.findings.push('ACTIVE_DIGITAL_MISSING_COVER');
-if (activeDigital.length === 0) result.findings.push('NO_ACTIVE_DIGITAL_PRODUCTS');
-console.log(JSON.stringify(result));
-if (result.incompleteScan) process.exitCode = 1;
+}
