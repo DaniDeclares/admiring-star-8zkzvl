@@ -6,6 +6,8 @@ DO $proof$
 DECLARE
   v_bad text;
   v_missing int;
+  v_recurring_missing int;
+  v_other_missing int;
 BEGIN
   WITH required(sku) AS (
     VALUES ('DNI-04A-003'),('DNI-04A-016'),('DNI-04A-017'),
@@ -48,7 +50,21 @@ BEGIN
     AND p.release_state='LIVE_READY'
     AND (l.stripe_payment_link_id IS NULL OR c.sync_status IS DISTINCT FROM 'SYNCED_ACTIVE');
 
-  RAISE NOTICE 'CH05_IMMEDIATE_OFFER_PAYMENT_PATH_PASS: 5 focus SKUs have governed records; % LIVE_READY CH05 rows lack direct payment-link/sync evidence and require manual intake/payment-path review.', v_missing;
+  -- History rule: recurring retainers are consultation -> scoped quote -> prepaid recurring invoice,
+  -- NOT an immediate checkout path. Distinguish deliberate recurring absence from other gaps.
+  SELECT count(*) FILTER (WHERE p.pricing_type='RECURRING'),
+         count(*) FILTER (WHERE p.pricing_type IS DISTINCT FROM 'RECURRING')
+    INTO v_recurring_missing, v_other_missing
+  FROM public.dd_multidivision_sellability_priority_v1 p
+  LEFT JOIN public.dd_stripe_launch_register l ON l.canonical_sku=p.sku
+  LEFT JOIN public.dd_stripe_catalog_sync c ON c.canonical_sku=p.sku
+  WHERE p.division_slug='administrative-business-operations'
+    AND p.release_state='LIVE_READY'
+    AND (l.stripe_payment_link_id IS NULL OR c.sync_status IS DISTINCT FROM 'SYNCED_ACTIVE');
+  IF v_missing IS DISTINCT FROM v_recurring_missing + v_other_missing THEN
+    RAISE EXCEPTION 'CH05_PAYMENT_PATH_AUDIT_COUNT_MISMATCH';
+  END IF;
+  RAISE NOTICE 'CH05_IMMEDIATE_OFFER_PAYMENT_PATH_PASS: 5 focus SKUs have governed records; % LIVE_READY CH05 rows lack direct-payment evidence (% recurring quote-first, % other require investigation). No retainer auto-checkout implied.', v_missing, v_recurring_missing, v_other_missing;
 END $proof$;
 
 -- Scope: this does not test actual Stripe HTTP status, customer intake usability,
