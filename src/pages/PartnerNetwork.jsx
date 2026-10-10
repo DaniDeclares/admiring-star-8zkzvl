@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./PartnerNetwork.module.css"; // kept: its global element styles predate this page
 import styles from "./BuildWithMe.module.css";
+import { octoberCampaignLink } from "../lib/octoberContentTracks.js";
 import { CONSENT_TEXT, INTEREST_AREAS, PARTICIPATION_INTERESTS, hireDaniLink } from "../lib/buildWithMeInterest.js";
 
 const SUBMIT_TIMEOUT_MS = 20000;
@@ -82,13 +83,13 @@ export default function PartnerNetwork() {
 
         <section className={styles.card} aria-labelledby="hire-title">
           <p className={styles.eyebrow}>For business owners</p>
-          <h2 id="hire-title">Want DANI to help build your business?</h2>
+          <h2 id="hire-title">Let DANI Build You — business-building help for customers</h2>
           <p className={styles.muted}>DANI DECLARES is building its own company in public. We also take on paid work helping other businesses get organized and handled: admin backlog, digital setup, marketing support and day-to-day coordination. Tell us what you need and we'll confirm scope, timing and a quote before any work starts. No outcome or revenue is guaranteed.</p>
-          <a className={styles.primaryLink} href={hireDaniLink(attribution)}>Hire DANI to help build my business →</a>
+          <a className={styles.primaryLink} href={octoberCampaignLink("LET_DANI_BUILD_YOU", { source: attribution.utm_source || "website", medium: attribution.utm_medium || "organic", content: "build-with-dani-page" }) || hireDaniLink(attribution)}>Hire DANI to help build my business →</a>
         </section>
 
         <section className={styles.card} aria-labelledby="join-title">
-          <h2 id="join-title">Raise your hand</h2>
+          <h2 id="join-title">Build With DANI — providers and collaborators</h2>
           <p className={styles.muted}>This is a first step, not an application or a job offer. Paid service work only comes after DANI's provider application, agreement and verification.</p>
 
           {state.done ? (
