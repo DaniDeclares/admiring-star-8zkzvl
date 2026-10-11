@@ -17,7 +17,10 @@
         "original_sha256": "acb553ee96838aeee3ce5ea60261059e0e69ee0cf091666ca5f86db09b33a1e6",
         "lossless_copy": "products/seasonal-art-2026/approved/design-001-i-aint-afraid-of-no-signatures/MASTER-owner-approved-lossless.png",
         "lossless_sha256": "a028ef195023ddf02ca4d6cda68e49005cfa088bbf4464a2bfecb8ed566fca97",
-        "pixels": [1254, 1254],
+        "pixels": [
+          1254,
+          1254
+        ],
         "mode": "RGB, opaque black background (no transparency)",
         "immutable": true
       },
@@ -27,7 +30,18 @@
         "Historical card drafts, shirt-ready prototypes and rejected realtor drafts are not this design."
       ],
       "derivatives": [
-        { "kind": "EDSR_X4_UPSCALE", "generative": false, "note": "Non-generative 4x upscale to 5016 px so the art reaches print resolution; local file, delivered to owner, not stored in git." }
+        {
+          "kind": "EDSR_X4_UPSCALE",
+          "generative": false,
+          "note": "Non-generative 4x upscale to 5016 px so the art reaches print resolution; local file, delivered to owner, not stored in git."
+        },
+        {
+          "kind": "BACKGROUND_REMOVED_TRANSPARENT",
+          "generative": false,
+          "owner_requested": "2026-10-11 (no background color; usable on any garment color)",
+          "tool": "tools/product-art/remove_background_design001.py",
+          "note": "Only the pure-black background is removed; all art pixels are untouched apart from soft edge alpha. Cream top lettering reads weakly on white/sand/gray garments; black, forest green and red read well. Residual tiny dark flecks between lettering drips possible. Owner has not yet signed off on this derivative as a commercial print file."
+        }
       ],
       "gates": {
         "printify_blueprint_and_print_area_confirmed": false,
@@ -43,7 +57,7 @@
       "known_risks": [
         "Slogan echoes a famous film catchphrase; trademark/IP review not performed.",
         "Master is 1254 px; print files are upscaled, not redrawn, so very fine detail is limited.",
-        "Opaque black background prints as a black rectangle on non-black garments."
+        "Transparent version: interior black art (blazer, hair, hood, mug) disappears into black garments; cream top lettering is low contrast on light garments."
       ]
     }
   ]

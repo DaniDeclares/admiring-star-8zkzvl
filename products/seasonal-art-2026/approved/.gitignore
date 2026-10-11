@@ -1,3 +1,4 @@
 # large production derivatives are delivered to the owner directly, not stored in git
 */derivatives/master-*.png
 */derivatives/print-canvas-*.png
+*/derivatives/transparent-*.png
