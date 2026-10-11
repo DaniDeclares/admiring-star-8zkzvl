@@ -505,18 +505,8 @@ jobs:
           # remains a hard failure.
           path = Path("supabase/migrations/20260925003836_shiletha_job_assignment_slot_scoped_override_v2.sql")
           sql = path.read_text()
-          needle = """  if v_provider_id is null or v_wp_id is null or v_slot_id is null then
-    raise exception 'Prerequisite Shiletha intake / work package / slot rows not found -- run 20260925000500 first';
-  end if;"""
-          replacement = """  if v_provider_id is null and v_wp_id is null and v_slot_id is null
-     and not exists (select 1 from public.dd_jobs where id = v_job_id) then
-    raise notice 'Historical Krystal job and Shiletha assignment tuple absent in clean replay; skipping job-scoped override and assignment.';
-    return;
-  elsif v_provider_id is null or v_wp_id is null or v_slot_id is null then
-    raise exception 'Partial Shiletha assignment prerequisite drift: provider %, work package %, slot %, job %',
-      v_provider_id, v_wp_id, v_slot_id,
-      exists (select 1 from public.dd_jobs where id = v_job_id);
-  end if;"""
+          needle = "  if v_provider_id is null or v_wp_id is null or v_slot_id is null then\n    raise exception 'Prerequisite Shiletha intake / work package / slot rows not found -- run 20260925000500 first';\n  end if;"
+          replacement = "  if v_provider_id is null and v_wp_id is null and v_slot_id is null\n     and not exists (select 1 from public.dd_jobs where id = v_job_id) then\n    raise notice 'Historical Krystal job and Shiletha assignment tuple absent in clean replay; skipping job-scoped override and assignment.';\n    return;\n  elsif v_provider_id is null or v_wp_id is null or v_slot_id is null then\n    raise exception 'Partial Shiletha assignment prerequisite drift: provider %, work package %, slot %, job %',\n      v_provider_id, v_wp_id, v_slot_id,\n      exists (select 1 from public.dd_jobs where id = v_job_id);\n  end if;"
           if needle not in sql:
               raise SystemExit("Shiletha assignment prerequisite guard drifted; refusing broad replay rewrite")
           sql = sql.replace(needle, replacement, 1)
