@@ -5,10 +5,13 @@ For every row in supabase/production-ledger/manifest.json, in ledger order, choo
   * the repo source file with identical SQL (renamed to the ledger version when its filename drifted).
 Allowlisted prerequisite files keep their own source version. Tester-only/source-only migrations are NOT included.
 Fails closed: any ledger row without a verified SQL source is an error, never silently skipped.
-Usage: assemble_production_replay_workspace.py <repoRoot> <outMigrationsDir> [--report report.json]"""
+Hybrid mode (--legacy-cutoff VERSION): every repo source file with a version below VERSION is kept as-is (the existing replay
+set and its documented shims were proven in CI up to that point); from VERSION onward the set is the Production ledger lineage.
+Usage: assemble_production_replay_workspace.py <repoRoot> <outMigrationsDir> [--report report.json] [--legacy-cutoff VERSION]"""
 import sys, os, json, re, hashlib, shutil
 root, out = sys.argv[1], sys.argv[2]
 report_path = sys.argv[sys.argv.index('--report') + 1] if '--report' in sys.argv else None
+cutoff = sys.argv[sys.argv.index('--legacy-cutoff') + 1] if '--legacy-cutoff' in sys.argv else None
 led = os.path.join(root, 'supabase/production-ledger'); mig = os.path.join(root, 'supabase/migrations')
 manifest = json.load(open(os.path.join(led, 'manifest.json')))
 def nws(sql):
@@ -21,10 +24,17 @@ for f in os.listdir(mig):
 os.makedirs(out, exist_ok=True)
 for f in os.listdir(out):
     if f.endswith('.sql'): os.remove(os.path.join(out, f))
-errors, used = [], {'archived': 0, 'source_same_version': 0, 'source_renamed': 0, 'prerequisites': 0}
+errors, used = [], {'legacy_source_below_cutoff': 0, 'archived': 0, 'source_same_version': 0, 'source_renamed': 0, 'prerequisites': 0}
 chosen_src = set()
+if cutoff:
+    for fs in src.values():
+        for f in fs:
+            if f.split('_', 1)[0] < cutoff:
+                shutil.copy(os.path.join(mig, f), os.path.join(out, f)); chosen_src.add(f); used['legacy_source_below_cutoff'] += 1
 for r in manifest['rows']:
     v, n, want = r['version'], r['name'], r['sql_nws_md5']
+    if cutoff and v < cutoff:
+        continue
     dest = f'{v}_{n}.sql'
     if r['class'] == 'LEDGER_ROW_WITHOUT_STATEMENTS':
         f = next((x for x in src.get(v, []) if x.endswith(f'{n}.sql')), None)
@@ -47,6 +57,8 @@ for r in manifest['rows']:
     open(os.path.join(out, dest), 'w', encoding='utf8').write(text)
 prereq = [l.strip() for l in open(os.path.join(led, 'replay-prerequisites.txt')) if l.strip() and not l.startswith('#')]
 for f in prereq:
+    if cutoff and f.split('_', 1)[0] < cutoff:
+        continue
     p = os.path.join(mig, f)
     if not os.path.exists(p): errors.append(f'prerequisite missing from source: {f}'); continue
     shutil.copy(p, os.path.join(out, f)); used['prerequisites'] += 1

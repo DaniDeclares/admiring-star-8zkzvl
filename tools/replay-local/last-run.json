@@ -1,0 +1,86 @@
+[
+ {
+  "file": "20260820145744_pass_a_portal_identity_and_evidence_rls_v2.sql",
+  "error": "column \"owner_id\" does not exist"
+ },
+ {
+  "file": "20260919141500_provider_intake_staging_and_identity_grant_hardening.sql",
+  "error": "PRECONDITION_FAILED: expected the 3 known dd_portal_identities policies, found 2; grant revoke aborted so a since-changed policy set is not silently narrowed further"
+ },
+ {
+  "file": "20260920170000_harden_portal_signup_recovery.sql",
+  "error": "relation \"public.dd_provider_intake_staging\" does not exist"
+ },
+ {
+  "file": "20260920204622_20260920170000_harden_portal_signup_recovery.sql",
+  "error": "relation \"public.dd_provider_intake_staging\" does not exist"
+ },
+ {
+  "file": "20260921212921_enforce_provider_application_capability_gating.sql",
+  "error": "relation \"public.dd_provider_intake_staging\" does not exist"
+ },
+ {
+  "file": "20260924210000_honor_client_capability_authorization_on_intake.sql",
+  "error": "relation \"public.dd_provider_intake_staging\" does not exist"
+ },
+ {
+  "file": "20260924230347_restore_provider_capability_gating_from_verified_tester.sql",
+  "error": "relation \"public.dd_provider_intake_staging\" does not exist"
+ },
+ {
+  "file": "20260924233100_restrict_internal_controller_function_grants.sql",
+  "error": "function private.dd_expire_stale_intake_staging() does not exist"
+ },
+ {
+  "file": "20260924233125_restrict_internal_controller_function_grants.sql",
+  "error": "function private.dd_expire_stale_intake_staging() does not exist"
+ },
+ {
+  "file": "20261003173410_staged_intake_incomplete_does_not_block_login.sql",
+  "error": "relation \"public.dd_provider_intake_staging\" does not exist"
+ },
+ {
+  "file": "20261003184925_provider_staging_missing_payload_guard_reconciled.sql",
+  "error": "function \"private.dd_consume_provider_intake_staging_impl(uuid)\" does not exist"
+ },
+ {
+  "file": "20261006233600_reconcile_verified_stripe_marketing_services_07a001_010_v2.sql",
+  "error": "insert or update on table \"dd_stripe_catalog_sync\" violates foreign key constraint \"dd_stripe_catalog_sync_source_service_id_fkey\""
+ },
+ {
+  "file": "20261006235422_activate_cross_channel_content_engine_and_profile_audit_v2.sql",
+  "error": "relation \"public.dd_content_draft_queue\" does not exist"
+ },
+ {
+  "file": "20261007003150_reconcile_dni08a019_live_stripe_initial_payment.sql",
+  "error": "insert or update on table \"dd_stripe_catalog_sync\" violates foreign key constraint \"dd_stripe_catalog_sync_source_service_id_fkey\""
+ },
+ {
+  "file": "20261007003355_reconcile_and_prove_dni08a017_018.sql",
+  "error": "insert or update on table \"dd_stripe_catalog_sync\" violates foreign key constraint \"dd_stripe_catalog_sync_source_service_id_fkey\""
+ },
+ {
+  "file": "20261007003635_reconcile_and_prove_dni08a007_008_010_011_012.sql",
+  "error": "insert or update on table \"dd_stripe_catalog_sync\" violates foreign key constraint \"dd_stripe_catalog_sync_source_service_id_fkey\""
+ },
+ {
+  "file": "20261007004019_reconcile_and_prove_remaining_fixed_business_development_services.sql",
+  "error": "insert or update on table \"dd_stripe_catalog_sync\" violates foreign key constraint \"dd_stripe_catalog_sync_source_service_id_fkey\""
+ },
+ {
+  "file": "20261007011038_prove_recurring_dynamic_payment_path.sql",
+  "error": "RECURRING_PAYMENT_PATH_PROOF_FAILED:DNI-01G-001:{\"sku\": \"DNI-01G-001\", \"failed\": 3, \"status\": \"FAIL\", \"receipt\": \"90527334-5ee2-4ccd-890f-877f3fdfb65b\", \"assertions\": [{\"non_payment_release_gates_green\": false}, {\"canoni"
+ },
+ {
+  "file": "20261007011218_prove_recurring_runtime_and_regression.sql",
+  "error": "RECURRING_RUNTIME_PROOF_FAILED:DNI-01G-001:{\"sku\": \"DNI-01G-001\", \"failed\": 4, \"status\": \"FAIL\", \"receipt\": \"634da792-5758-4776-8978-6b233d093c29\", \"assertions\": [{\"all_pre_runtime_release_gates_green\": false}, {\"canonic"
+ },
+ {
+  "file": "20261007014029_ch01_holiday_commercial_release_governed.sql",
+  "error": "Holiday CH01 candidate DNI-01D-004 failed pre-release governed gates"
+ },
+ {
+  "file": "20261007014229_ch01_holiday_outcome_routing.sql",
+  "error": "relation \"public.dd_execution_package_routing\" does not exist"
+ }
+]
