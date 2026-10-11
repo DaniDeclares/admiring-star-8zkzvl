@@ -523,6 +523,73 @@ jobs:
           prerequisite = "create table if not exists public.dd_research_implementation_queue (\n  id uuid primary key default gen_random_uuid(),\n  implementation_key text not null unique,\n  research_work_id uuid not null,\n  program_key text not null,\n  work_key text not null,\n  action_class text not null,\n  target_environment text not null default 'PRODUCTION',\n  proposed_change jsonb not null default '{}'::jsonb,\n  evidence_snapshot jsonb not null default '{}'::jsonb,\n  acceptance_criteria text not null,\n  risk_tier text not null default 'LOW',\n  permission_class text not null default 'REVIEW_REQUIRED',\n  status text not null default 'HOLD',\n  blocker text,\n  autobuild_candidate_id uuid,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now(),\n  constraint dd_research_implementation_queue_target_environment_check check (target_environment='PRODUCTION'),\n  constraint dd_research_implementation_queue_action_class_check check (action_class in ('DATABASE_REFRESH','REVERIFY','TEST_FIXTURE','OBSERVABILITY','DOCUMENTATION','PRODUCTION_WIRING','CODE_BUILD')),\n  constraint dd_research_implementation_queue_permission_class_check check (permission_class in ('AUTO_PR_BUILD','REVIEW_REQUIRED')),\n  constraint dd_research_implementation_queue_status_check check (status in ('READY','ROUTED','ESCALATED','BLOCKED','COMPLETED','FAILED'))\n);\nalter table public.dd_research_implementation_queue enable row level security;\nrevoke all on public.dd_research_implementation_queue from public, anon, authenticated;\ngrant all on public.dd_research_implementation_queue to service_role;"
           sql = prerequisite + "\n\n" + sql
           path.write_text(sql)
+
+          # Production has this exact operating-model discovery family with
+          # RLS enabled, no client policies, service-role-only access, and no
+          # foreign keys. Its Production ledger has consumers but no creator
+          # receipt; Tester's 20260925084820 creator includes Tester-only FKs
+          # and seeded research rows. Reconstruct only the verified Production
+          # schemas in disposable replay before the first consumer; seed no rows.
+          path = Path("supabase/migrations/20260926134320_promote_research_quality_loop.sql")
+          sql = path.read_text()
+          prerequisite = """create table if not exists public.dd_research_discovery_targets (
+            id uuid primary key default gen_random_uuid(),
+            program_key text not null,
+            target_key text not null unique,
+            company_name text not null,
+            homepage_url text not null,
+            github_org_or_repo_url text,
+            target_type text not null default 'PEER_COMPANY',
+            status text not null default 'ACTIVE',
+            discovery_interval_minutes integer not null default 1440,
+            next_discovery_at timestamptz not null default now(),
+            last_discovered_at timestamptz,
+            last_error text,
+            metadata jsonb not null default '{}'::jsonb,
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now()
+          );
+          create table if not exists public.dd_research_discovered_assets (
+            id uuid primary key default gen_random_uuid(),
+            target_id uuid not null,
+            asset_key text not null,
+            asset_type text not null,
+            asset_url text not null,
+            title text,
+            authority_level text not null default 'PUBLIC_PRIMARY',
+            discovery_method text not null,
+            content_hash text,
+            tech_signals jsonb not null default '[]'::jsonb,
+            metadata jsonb not null default '{}'::jsonb,
+            first_discovered_at timestamptz not null default now(),
+            last_seen_at timestamptz not null default now(),
+            unique(target_id, asset_key)
+          );
+          create table if not exists public.dd_research_operating_model_findings (
+            id uuid primary key default gen_random_uuid(),
+            target_id uuid not null,
+            finding_key text not null,
+            finding_type text not null,
+            finding_text text not null,
+            confidence text not null default 'OBSERVED',
+            evidence_urls jsonb not null default '[]'::jsonb,
+            metadata jsonb not null default '{}'::jsonb,
+            first_observed_at timestamptz not null default now(),
+            last_observed_at timestamptz not null default now(),
+            unique(target_id, finding_key)
+          );
+          alter table public.dd_research_discovery_targets enable row level security;
+          alter table public.dd_research_discovered_assets enable row level security;
+          alter table public.dd_research_operating_model_findings enable row level security;
+          revoke all on public.dd_research_discovery_targets from public, anon, authenticated;
+          revoke all on public.dd_research_discovered_assets from public, anon, authenticated;
+          revoke all on public.dd_research_operating_model_findings from public, anon, authenticated;
+          grant all on public.dd_research_discovery_targets to service_role;
+          grant all on public.dd_research_discovered_assets to service_role;
+          grant all on public.dd_research_operating_model_findings to service_role;
+          """
+          sql = prerequisite + "\n" + sql
+          path.write_text(sql)
           PY
 
       - name: Initialize isolated local Supabase config
