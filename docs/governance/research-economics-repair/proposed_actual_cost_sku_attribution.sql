@@ -3,7 +3,7 @@
 -- Never uses job titles, scope text or notes. Unlinked, ambiguous or mixed-scope costs stay unassigned.
 -- Attribution paths, strongest first:
 --   SNAPSHOT        dd_job_cost_actuals.estimate_component_snapshot_id -> dd_estimate_component_snapshots.canonical_sku
---   WORK_ORDER      dd_jobs.work_order_id -> dd_work_orders.service_id -> services.sku (offer_sku only if it equals a services.sku)
+--   WORK_ORDER      dd_jobs.work_order_id -> dd_work_orders.service_id / canonical_sku / offer_sku, each resolved to services.sku; all non-null values must agree
 --   ESTIMATE_SINGLE dd_jobs.estimate_id -> snapshot lines; used only when exactly one distinct canonical_sku exists
 -- Conflicting paths (different SKUs) => CONFLICT. Several SKUs on the estimate and no stronger path => MIXED_SCOPE.
 create or replace view public.dd_job_cost_sku_attribution_v1 with (security_invoker=true) as
@@ -18,10 +18,15 @@ with cost as (
 ), p_snap as (
   select c.cost_id, s.canonical_sku sku from cost c join public.dd_estimate_component_snapshots s on s.id=c.estimate_component_snapshot_id where s.canonical_sku is not null
 ), p_wo as (
+  -- dd_work_orders carries service_id, canonical_sku and offer_sku; each must resolve to an existing services.sku, and they must agree
   select c.cost_id,
-         case when sv.sku is not null and w.offer_sku is not null and sv.sku<>w.offer_sku then '__CONFLICT__'
-              else coalesce(sv.sku, (select x.sku from public.services x where x.sku=w.offer_sku)) end sku
-  from cost c join public.dd_jobs j on j.id=c.job_id join public.dd_work_orders w on w.id=j.work_order_id left join public.services sv on sv.id=w.service_id
+         case when k.n>1 then '__CONFLICT__' else k.one end sku
+  from cost c join public.dd_jobs j on j.id=c.job_id join public.dd_work_orders w on w.id=j.work_order_id
+  left join public.services sv on sv.id=w.service_id
+  cross join lateral (select count(distinct s) n, min(s) one from unnest(array[
+       sv.sku,
+       (select x.sku from public.services x where x.sku=w.canonical_sku),
+       (select x.sku from public.services x where x.sku=w.offer_sku)]) s where s is not null) k
 ), est as (
   select j.id job_id, count(distinct s.canonical_sku) sku_n, min(s.canonical_sku) one_sku
   from public.dd_jobs j join public.dd_estimate_component_snapshots s on s.estimate_id=j.estimate_id

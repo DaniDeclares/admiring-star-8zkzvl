@@ -14,4 +14,4 @@ View under test: `proposed_actual_cost_sku_attribution.sql` (not applied). Fixtu
 | Two live labor rows with different amounts, same job and link | conflicting_amounts, both ineligible |
 | Unverified source type | evidence_grade UNVERIFIED, ineligible |
 Roll-up (eligible rows only): A = fulfillment 78 (60 + 18), transaction 4.33, acquisition 42.40, SINGLE_JOB; B = fulfillment 75, SINGLE_JOB.
-Production data check (read-only): the only job with cost rows (DD-KRYSTAL-20260924) has no estimate, no snapshot and a work order with no service or SKU, so all 3 recorded rows are UNASSIGNED_NO_LINK today. Its customer price is 160.00 while the PayPal gross is 110.00, a revenue discrepancy to reconcile before any use.
+Production data check (read-only): the only job with cost rows (DD-KRYSTAL-20260924) has no estimate, no snapshot and a work order with no service or SKU, so all 3 recorded rows are UNASSIGNED_NO_LINK today. The job is customer-payment reconciled and closed ($50.00 Zelle deposit + $110.00 PayPal balance = $160.00); only the missing SKU link is open.
