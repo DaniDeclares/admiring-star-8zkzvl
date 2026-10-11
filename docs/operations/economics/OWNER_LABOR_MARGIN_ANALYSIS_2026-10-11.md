@@ -35,6 +35,6 @@ The three live remote services under this model: Virtual Assistant (04A-001, $14
 ## What this implies (no action taken)
 - Do not mark more offers LIVE_READY without a way to deliver them profitably. LIVE_READY is a release state; margin is a separate gate and stays closed.
 - Next evidence to collect: actual hours and the owner's standardized rate from the first fulfilled jobs (feeds `dd_job_economics_feedback`, the existing calibration path). The existing `job margin review` evaluator (#630) already treats unmeasured margins as unverified.
-- Owner decisions that cannot be settled from existing authority: (a) which standardized owner rate applies per tier ($30 benchmark vs $60/$75/$90 build-phase), (b) whether any of the 80 services at or below ~35% (80 of 101 modelled) should be repriced or rescoped.
+- Owner decisions that cannot be settled from existing authority: (a) which standardized owner rate applies per tier ($30 benchmark vs $60/$75/$90 build-phase), (b) whether any of the 80 services at or below ~35% (81 of 101 modelled) should be repriced or rescoped.
 
 Files: `live_ready_margin_model_2026-10-11.{csv,json}` (per-SKU), generator `tools/economics/live_ready_margin_model.py`.

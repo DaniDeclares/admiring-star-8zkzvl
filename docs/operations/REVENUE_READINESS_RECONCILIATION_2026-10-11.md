@@ -36,7 +36,7 @@ The 2026-10-09 brief says no provider can pass because Stripe Connect is require
 - Migration `20261010030034 provider_manual_payout_rail_readiness` is in the Production ledger (repo source `20261010030000`).
 - `dd_provider_payout_clearance_policy` `MANUAL_PAYOUT_RAIL`: owner_approved=true, external_payout_authorized=true (rationale: owner approved manual Zelle/PayPal rail 2026-10-09; requires each provider's PAYOUT_SETUP item VERIFIED by authorized staff).
 - `dd_provider_assignment_readiness_v1` now requires `stripe_payout_ready OR manual_payout_ready`, plus application approved, agreement, identity, compliance, insurance, and W-9 for individuals.
-- Current state of 51 providers: 49 `APPLICATION_NOT_APPROVED`, 2 `W9_REQUIRED`; 0 assignment-ready.
+- Current state of 51 providers: 49 `APPLICATION_NOT_APPROVED` (corrected: these 49 have no application record at all; see PROVIDER_READINESS_BREAKDOWN_2026-10-11.md), 2 `W9_REQUIRED`; 0 assignment-ready.
 Conclusion: Stripe Connect is a payout-rail prerequisite folded into the assignment gate (original migration `20260922190000` made it mandatory; the manual-rail alternative is now live). It is no longer the blocking item. The blocker is provider approval and W-9, which are owner/staff actions. No gate was weakened and no account was created. Status: SUPERSEDED defect; dispatch itself LEGITIMATELY_HELD.
 
 ## 6. Release-machinery classification (unchanged, for the consolidated report)
