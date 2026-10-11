@@ -1,23 +1,355 @@
 [
  {
+  "file": "20260820000002_b2b_retainers_and_public_write_hardening.sql",
+  "error": "relation \"public.dd_task_templates\" does not exist"
+ },
+ {
+  "file": "20260820000004_pass_a1_portal_role_alignment.sql",
+  "error": "relation \"public.dd_portal_identities\" does not exist"
+ },
+ {
+  "file": "20260820000005_pass_a4_10_guarded_outbox_cron.sql",
+  "error": "schema \"private\" does not exist"
+ },
+ {
+  "file": "20260820000007_pass_a5_evidence_access_hardening.sql",
+  "error": "schema \"private\" does not exist"
+ },
+ {
+  "file": "20260820000009_provider_network_routing_engine.sql",
+  "error": "relation \"public.dd_provider_organizations\" does not exist"
+ },
+ {
+  "file": "20260820000010_provider_routing_notifications.sql",
+  "error": "schema \"private\" does not exist"
+ },
+ {
   "file": "20260820145744_pass_a_portal_identity_and_evidence_rls_v2.sql",
   "error": "column \"owner_id\" does not exist"
+ },
+ {
+  "file": "20260823194155_quarantine_legacy_commercial_pricing.sql",
+  "error": "column \"status\" does not exist"
+ },
+ {
+  "file": "20260905000001_p0_fulfillment_state_machine_alignment.sql",
+  "error": "missing FROM-clause entry for table \"c\""
+ },
+ {
+  "file": "20260917001856_price_32_unpriced_sell_now_services.sql",
+  "error": "null value in column \"service_id\" of relation \"dd_service_pricing_rules\" violates not-null constraint"
+ },
+ {
+  "file": "20260917014659_reconcile_and_price_wedding_officiant_services.sql",
+  "error": "insert or update on table \"dd_service_pricing_rules\" violates foreign key constraint \"dd_service_pricing_rules_service_id_fkey\""
+ },
+ {
+  "file": "20260918005712_add_pet_mess_yardsale_engraving_services.sql",
+  "error": "insert or update on table \"dd_provider_capabilities\" violates foreign key constraint \"dd_provider_capabilities_provider_id_fkey\""
+ },
+ {
+  "file": "20260918020500_activate_cass_division_04_bookkeeping_authorization.sql",
+  "error": "insert or update on table \"dd_providers\" violates foreign key constraint \"dd_providers_org_id_fkey\""
+ },
+ {
+  "file": "20260918021058_authorize_christopher_walker_dtf_computer_capabilities.sql",
+  "error": "new row for relation \"dd_provider_organizations\" violates check constraint \"dd_provider_organizations_vendor_type_check\""
+ },
+ {
+  "file": "20260918021414_authorize_cayla_wanzer_cleaning_and_plant_care.sql",
+  "error": "new row for relation \"dd_provider_organizations\" violates check constraint \"dd_provider_organizations_vendor_type_check\""
+ },
+ {
+  "file": "20260918022314_price_and_authorize_remaining_division_05_notary_candidates.sql",
+  "error": "insert or update on table \"dd_provider_capabilities\" violates foreign key constraint \"dd_provider_capabilities_provider_id_fkey\""
+ },
+ {
+  "file": "20260918024628_fix_division_02_pricing_from_master_pricebook.sql",
+  "error": "insert or update on table \"dd_provider_capabilities\" violates foreign key constraint \"dd_provider_capabilities_provider_id_fkey\""
+ },
+ {
+  "file": "20260918024749_add_division_04_master_pricebook_services.sql",
+  "error": "insert or update on table \"dd_provider_capabilities\" violates foreign key constraint \"dd_provider_capabilities_provider_id_fkey\""
+ },
+ {
+  "file": "20260918024917_add_division_06_master_pricebook_website_services.sql",
+  "error": "insert or update on table \"dd_provider_capabilities\" violates foreign key constraint \"dd_provider_capabilities_provider_id_fkey\""
+ },
+ {
+  "file": "20260918024942_add_division_10_events_and_premium_destination_planning.sql",
+  "error": "insert or update on table \"dd_provider_capabilities\" violates foreign key constraint \"dd_provider_capabilities_provider_id_fkey\""
+ },
+ {
+  "file": "20260918025002_add_division_11_merch_brand_products.sql",
+  "error": "insert or update on table \"dd_provider_capabilities\" violates foreign key constraint \"dd_provider_capabilities_provider_id_fkey\""
+ },
+ {
+  "file": "20260918030615_expand_division_10_destination_event_addons.sql",
+  "error": "insert or update on table \"dd_provider_capabilities\" violates foreign key constraint \"dd_provider_capabilities_provider_id_fkey\""
+ },
+ {
+  "file": "20260918111540_authorize_danielle_cayla_mobile_vehicle_detailing.sql",
+  "error": "insert or update on table \"dd_provider_capabilities\" violates foreign key constraint \"dd_provider_capabilities_provider_id_fkey\""
+ },
+ {
+  "file": "20260918134516_remove_legacy_provider_document_rpc_overload.sql",
+  "error": "function public.dd_record_provider_application_document(uuid, text, text, text, text, date, uuid) does not exist"
+ },
+ {
+  "file": "20260919000124_create_pricing_engines_registry_and_backfill.sql",
+  "error": "Eligible population drifted: expected 279, found 0. Re-run classification before backfilling."
+ },
+ {
+  "file": "20260919000931_create_joseph_sink_provider_record_nawfside.sql",
+  "error": "insert or update on table \"dd_providers\" violates foreign key constraint \"dd_providers_org_id_fkey\""
+ },
+ {
+  "file": "20260919011621_reconcile_dni_01b_008_pricing_and_channel_seed.sql",
+  "error": "DNI-01B-008 canonical SELL_NOW service not found"
+ },
+ {
+  "file": "20260919020718_verify_division_04a_admin_stripe_checkout_activation.sql",
+  "error": "Expected 19 fully-active Division 04A launch register rows, found 0"
+ },
+ {
+  "file": "20260919023839_authorize_danielle_division_04a_admin_services.sql",
+  "error": "Expected 19 Danielle ADMIN_BUSINESS_OPS capability rows for the 04A batch, found 0"
+ },
+ {
+  "file": "20260919030648_verify_notary_division_channel_availability.sql",
+  "error": "Expected 104 (26x4) active notary channel-availability rows, found 0"
+ },
+ {
+  "file": "20260919114818_division_02_sow_governance_and_quote_schema.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260919120614_division_01_engine_backfill_and_close_gate_bypass.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260919122040_create_service_readiness_v1.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260919123034_readiness_sweep_channel_gaps_and_engine_backfill.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260919124837_readiness_sweep_pass2_pricing_engine_completeness.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260919125441_upgrade_service_readiness_v1_granular_facts.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260919125611_readiness_sweep_pass3_close_remaining_channel_gaps.sql",
+  "error": "relation \"public.dd_service_readiness_v1\" does not exist"
+ },
+ {
+  "file": "20260919132958_fix_readiness_v1_real_checkout_mechanism.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260919133727_fix_readiness_v1_security_invoker.sql",
+  "error": "relation \"public.dd_service_readiness_v1\" does not exist"
+ },
+ {
+  "file": "20260919134103_add_missing_foreign_key_indexes.sql",
+  "error": "column \"pricing_engine_code\" does not exist"
  },
  {
   "file": "20260919141500_provider_intake_staging_and_identity_grant_hardening.sql",
   "error": "PRECONDITION_FAILED: expected the 3 known dd_portal_identities policies, found 2; grant revoke aborted so a since-changed policy set is not silently narrowed further"
  },
  {
+  "file": "20260919170912_owner_fulfillment_runtime_gate.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260919171122_restore_service_readiness_original_before_owner_data_patch_v2.sql",
+  "error": "view \"dd_service_readiness_v1\" does not exist"
+ },
+ {
+  "file": "20260919172850_implement_owner_default_fulfillment_all_217.sql",
+  "error": "Owner fulfillment candidate drift: expected 217, found 0"
+ },
+ {
+  "file": "20260919182821_sync_unambiguous_legacy_service_prices_from_pricing_rules.sql",
+  "error": "relation \"public.vw_legacy_price_reconciliation\" does not exist"
+ },
+ {
+  "file": "20260919184253_add_owner_compliance_crosswalk_audit_view.sql",
+  "error": "column \"pricing_engine_code\" does not exist"
+ },
+ {
+  "file": "20260919192149_create_read_only_compliance_readiness_staging_2026.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260919192912_add_service_economic_evidence_baselines.sql",
+  "error": "FAIL-CLOSED: expected 24 theoretical baselines, found 0"
+ },
+ {
+  "file": "20260919193221_correct_d04_002_travel_baseline_state.sql",
+  "error": "relation \"public.dd_service_economic_baselines\" does not exist"
+ },
+ {
+  "file": "20260919195301_add_div01_quote_reconstruction_view_20260919.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260920020956_govern_dni_01a_003_bedroom_tiers.sql",
+  "error": "column \"pricing_engine_code\" of relation \"services\" does not exist"
+ },
+ {
+  "file": "20260920023032_service_release_contract_v1.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260920023118_20260920023032_service_release_contract_v1.sql",
+  "error": "column s.pricing_engine_code does not exist"
+ },
+ {
+  "file": "20260920023220_20260920024500_service_release_contract_gate_corrections.sql",
+  "error": "view \"dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20260920024500_service_release_contract_gate_corrections.sql",
+  "error": "view \"dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20260920030000_gate06_five_node_fulfillment_invariant.sql",
+  "error": "view \"dd_service_release_contract_v1\" does not exist"
+ },
+ {
   "file": "20260920170000_harden_portal_signup_recovery.sql",
   "error": "relation \"public.dd_provider_intake_staging\" does not exist"
+ },
+ {
+  "file": "20260920193000_ch01_research_to_system_lock.sql",
+  "error": "relation \"public.dd_channel_strategy_contracts\" does not exist"
  },
  {
   "file": "20260920204622_20260920170000_harden_portal_signup_recovery.sql",
   "error": "relation \"public.dd_provider_intake_staging\" does not exist"
  },
  {
+  "file": "20260920210458_enforce_ch02_governance_contract_v3.sql",
+  "error": "relation \"public.dd_ch02_service_adjudication\" does not exist"
+ },
+ {
+  "file": "20260920213047_create_ch02_sellable_catalog_v1.sql",
+  "error": "column a.source_master_record_id does not exist"
+ },
+ {
+  "file": "20260920213122_harden_ch02_sellable_catalog_identity.sql",
+  "error": "column a.source_master_record_id does not exist"
+ },
+ {
+  "file": "20260920213939_20260920235000_create_ch02_commercial_control_layer_v1.sql",
+  "error": "relation \"public.dd_ch02_sellable_catalog\" does not exist"
+ },
+ {
+  "file": "20260920222000_enforce_ch02_governance_contract.sql",
+  "error": "CH02 reconciliation failed: expected 175/76/24/75, got 0/0/0/0"
+ },
+ {
+  "file": "20260920233000_harden_ch02_governance_integrity.sql",
+  "error": "column a.source_master_record_id does not exist"
+ },
+ {
+  "file": "20260920235000_create_ch02_commercial_control_layer_v1.sql",
+  "error": "relation \"public.dd_ch02_sellable_catalog\" does not exist"
+ },
+ {
+  "file": "20260921132137_lock_ch01_canonical_service_resolution.sql",
+  "error": "relation \"public.dd_ch01_service_adjudication\" does not exist"
+ },
+ {
+  "file": "20260921171626_reconcile_division_02_price_and_ch02_offer_state_20260921.sql",
+  "error": "relation \"public.dd_ch02_offer_crosswalk\" does not exist"
+ },
+ {
+  "file": "20260921180221_20260921130000_bound_dni_01a_001_and_audit_economics.sql",
+  "error": "relation \"public.dd_service_economic_baselines\" does not exist"
+ },
+ {
+  "file": "20260921180426_20260921131500_fix_release_margin_parser.sql",
+  "error": "relation \"dd_service_release_verifications\" does not exist"
+ },
+ {
+  "file": "20260921180452_20260921132000_correct_release_margin_regex.sql",
+  "error": "relation \"dd_service_release_verifications\" does not exist"
+ },
+ {
+  "file": "20260921185000_add_economics_release_gate.sql",
+  "error": "relation \"public.dd_service_release_verifications\" does not exist"
+ },
+ {
   "file": "20260921212921_enforce_provider_application_capability_gating.sql",
   "error": "relation \"public.dd_provider_intake_staging\" does not exist"
+ },
+ {
+  "file": "20260922043101_canonical_service_readiness_authority.sql",
+  "error": "relation \"public.dd_service_readiness_v1\" does not exist"
+ },
+ {
+  "file": "20260922043228_enforce_release_authority_security_invoker.sql",
+  "error": "relation \"public.dd_service_readiness_v1\" does not exist"
+ },
+ {
+  "file": "20260922095234_launch_portfolio_danielle_chris.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20260922095932_release_gate_component_economics_authority.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20260922100135_owner_fulfillment_authority_and_wave1_routing.sql",
+  "error": "relation \"public.dd_launch_portfolio\" does not exist"
+ },
+ {
+  "file": "20260922100742_verify_live_stripe_deep_structural_reset.sql",
+  "error": "relation \"public.dd_service_release_verifications\" does not exist"
+ },
+ {
+  "file": "20260922110000_phase1_launch_fulfillment_cohort.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20260922151258_verify_d04_live_stripe_catalog.sql",
+  "error": "relation \"public.dd_service_release_verifications\" does not exist"
+ },
+ {
+  "file": "20260922160000_d06_economics_foundation.sql",
+  "error": "relation \"public.dd_launch_portfolio\" does not exist"
+ },
+ {
+  "file": "20260922175107_recurring_release_payment_gate.sql",
+  "error": "relation \"public.dd_service_release_contract_legacy_v1\" does not exist"
+ },
+ {
+  "file": "20260924025342_reconcile_verified_d02_fulfillment_gates.sql",
+  "error": "relation \"public.dd_launch_portfolio\" does not exist"
+ },
+ {
+  "file": "20260924030029_backfill_owner_approved_d02_package_channel_authorization.sql",
+  "error": "relation \"public.dd_launch_portfolio\" does not exist"
+ },
+ {
+  "file": "20260924030039_promote_remaining_evidence_backed_d02_services.sql",
+  "error": "relation \"public.dd_launch_portfolio\" does not exist"
+ },
+ {
+  "file": "20260924030145_activate_existing_d02_package_channel_eligibility.sql",
+  "error": "relation \"public.dd_launch_portfolio\" does not exist"
+ },
+ {
+  "file": "20260924030151_promote_d02_package_services_after_channel_activation.sql",
+  "error": "relation \"public.dd_launch_portfolio\" does not exist"
  },
  {
   "file": "20260924210000_honor_client_capability_authorization_on_intake.sql",
@@ -36,6 +368,54 @@
   "error": "function private.dd_expire_stale_intake_staging() does not exist"
  },
  {
+  "file": "20260925003836_shiletha_job_assignment_slot_scoped_override_v2.sql",
+  "error": "Prerequisite Shiletha intake / work package / slot rows not found -- run 20260925000500 first"
+ },
+ {
+  "file": "20260926134313_promote_research_implementation_routing.sql",
+  "error": "relation \"public.dd_research_implementation_queue\" does not exist"
+ },
+ {
+  "file": "20260926134320_promote_research_quality_loop.sql",
+  "error": "relation \"public.dd_research_operating_model_findings\" does not exist"
+ },
+ {
+  "file": "20260928014250_morning_clockin_readiness_v1.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20260928085128_provider_remediation_queue_v1.sql",
+  "error": "relation \"public.dd_morning_clockin_readiness_v1\" does not exist"
+ },
+ {
+  "file": "20260928105000_sales_qualification_guardrails.sql",
+  "error": "relation \"public.dd_service_canonical_readiness_v1\" does not exist"
+ },
+ {
+  "file": "20260930111908_upgrade_revenue_readiness_catalog_reconciliation.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20260930112046_dedupe_governed_offer_authority_in_release_views.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20260930112253_refine_service_release_reconciliation_subclasses.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20260930135000_reconcile_resident_refresh_release_diagnostics.sql",
+  "error": "relation \"dd_service_release_verifications\" does not exist"
+ },
+ {
+  "file": "20261001045644_reconcile_sales_closeability_runtime.sql",
+  "error": "relation \"public.dd_service_canonical_readiness_v1\" does not exist"
+ },
+ {
+  "file": "20261001104241_reconcile_service_readiness_conflict_against_locked_adjudication_v2.sql",
+  "error": "relation \"public.dd_service_readiness_v1\" does not exist"
+ },
+ {
   "file": "20261003173410_staged_intake_incomplete_does_not_block_login.sql",
   "error": "relation \"public.dd_provider_intake_staging\" does not exist"
  },
@@ -44,16 +424,56 @@
   "error": "function \"private.dd_consume_provider_intake_staging_impl(uuid)\" does not exist"
  },
  {
+  "file": "20261006220030_prove_demanded_ch02_sow_release_paths.sql",
+  "error": "relation \"public.dd_service_release_verifications\" does not exist"
+ },
+ {
+  "file": "20261006231449_governed_sales_followup_cadence_v1.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20261006232949_restore_owner_home_admin_services_sell_now.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20261006233055_restore_owner_home_business_formation_and_dtf_sell_now.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20261006233150_operation_1m_execution_positioning_and_cross_division_research.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
   "file": "20261006233600_reconcile_verified_stripe_marketing_services_07a001_010_v2.sql",
   "error": "insert or update on table \"dd_stripe_catalog_sync\" violates foreign key constraint \"dd_stripe_catalog_sync_source_service_id_fkey\""
  },
  {
-  "file": "20261006235422_activate_cross_channel_content_engine_and_profile_audit_v2.sql",
-  "error": "relation \"public.dd_content_draft_queue\" does not exist"
+  "file": "20261006233625_mark_live_stripe_verified_marketing_07a001_010.sql",
+  "error": "relation \"public.dd_service_release_verifications\" does not exist"
+ },
+ {
+  "file": "20261006233650_prove_marketing_services_runtime_07a001_010.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20261006233809_add_owner_home_marketing_priority.sql",
+  "error": "relation \"public.dd_owner_home_service_priority\" does not exist"
+ },
+ {
+  "file": "20261006233855_create_multidivision_sellability_priority_queue.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20261006235759_cross_channel_execution_architecture_v1.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
  },
  {
   "file": "20261007003150_reconcile_dni08a019_live_stripe_initial_payment.sql",
   "error": "insert or update on table \"dd_stripe_catalog_sync\" violates foreign key constraint \"dd_stripe_catalog_sync_source_service_id_fkey\""
+ },
+ {
+  "file": "20261007003238_prove_dni08a019_runtime_release.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
  },
  {
   "file": "20261007003355_reconcile_and_prove_dni08a017_018.sql",
@@ -64,23 +484,51 @@
   "error": "insert or update on table \"dd_stripe_catalog_sync\" violates foreign key constraint \"dd_stripe_catalog_sync_source_service_id_fkey\""
  },
  {
+  "file": "20261007003702_add_live_business_development_owner_home_priority.sql",
+  "error": "relation \"public.dd_owner_home_service_priority\" does not exist"
+ },
+ {
   "file": "20261007004019_reconcile_and_prove_remaining_fixed_business_development_services.sql",
   "error": "insert or update on table \"dd_stripe_catalog_sync\" violates foreign key constraint \"dd_stripe_catalog_sync_source_service_id_fkey\""
  },
  {
+  "file": "20261007004108_prove_fixed_real_estate_runtime_services.sql",
+  "error": "relation \"public.dd_owner_home_service_priority\" does not exist"
+ },
+ {
+  "file": "20261007005720_operation_1m_ch03_ch04_execution_queues.sql",
+  "error": "relation \"public.dd_owner_home_live_sellable_v1\" does not exist"
+ },
+ {
+  "file": "20261007005835_operation_1m_ch03_ch04_queue_fail_closed.sql",
+  "error": "relation \"public.dd_channel_execution_front_doors_v1\" does not exist"
+ },
+ {
+  "file": "20261007010649_recurring_dynamic_payment_path_release_gate.sql",
+  "error": "relation \"dd_service_release_verifications\" does not exist"
+ },
+ {
   "file": "20261007011038_prove_recurring_dynamic_payment_path.sql",
-  "error": "RECURRING_PAYMENT_PATH_PROOF_FAILED:DNI-01G-001:{\"sku\": \"DNI-01G-001\", \"failed\": 3, \"status\": \"FAIL\", \"receipt\": \"90527334-5ee2-4ccd-890f-877f3fdfb65b\", \"assertions\": [{\"non_payment_release_gates_green\": false}, {\"canoni"
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
  },
  {
   "file": "20261007011218_prove_recurring_runtime_and_regression.sql",
-  "error": "RECURRING_RUNTIME_PROOF_FAILED:DNI-01G-001:{\"sku\": \"DNI-01G-001\", \"failed\": 4, \"status\": \"FAIL\", \"receipt\": \"634da792-5758-4776-8978-6b233d093c29\", \"assertions\": [{\"all_pre_runtime_release_gates_green\": false}, {\"canonic"
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
+ },
+ {
+  "file": "20261007011411_refine_recurring_release_gate_preserve_fixed_monthly.sql",
+  "error": "relation \"dd_service_release_verifications\" does not exist"
+ },
+ {
+  "file": "20261007012126_buyer_queue_need_evidence_integrity.sql",
+  "error": "relation \"dd_owner_home_live_sellable_v1\" does not exist"
  },
  {
   "file": "20261007014029_ch01_holiday_commercial_release_governed.sql",
-  "error": "Holiday CH01 candidate DNI-01D-004 failed pre-release governed gates"
+  "error": "relation \"public.dd_service_release_contract_legacy_v1\" does not exist"
  },
  {
-  "file": "20261007014229_ch01_holiday_outcome_routing.sql",
-  "error": "relation \"public.dd_execution_package_routing\" does not exist"
+  "file": "20261009003550_commercial_readiness_diagnostic_v1.sql",
+  "error": "relation \"public.dd_service_release_contract_v1\" does not exist"
  }
 ]
