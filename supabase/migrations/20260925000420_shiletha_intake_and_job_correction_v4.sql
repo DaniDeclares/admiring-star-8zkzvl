@@ -8,6 +8,18 @@ declare
   v_scheduled_start timestamptz := '2026-09-25 08:30:00-04:00'::timestamptz;
   v_scheduled_end timestamptz := '2026-09-25 10:30:00-04:00'::timestamptz;
 begin
+  -- This is a historical, job-scoped Production correction, not a seed.
+  -- The parent job was created operationally and is absent in an empty replay.
+  -- Preserve its Production behavior only when the original job exists;
+  -- never invent a customer/job, orphan a work package, or authorize dispatch.
+  if not exists (
+    select 1 from public.dd_jobs
+    where id = v_job_id
+      and public_reference = 'DD-KRYSTAL-20260924'
+  ) then
+    raise notice 'Historical Krystal job not present with expected identity; skipping job-scoped provider intake and work package.';
+    return;
+  end if;
 
   update public.dd_jobs
   set
