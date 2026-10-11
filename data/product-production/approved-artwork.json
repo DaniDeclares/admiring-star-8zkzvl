@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "generated": "2026-10-11",
+  "authority": "Owner creative approval (message of 2026-10-11, relayed with the approved file). Inventory only: not release, price or publication authority.",
+  "designs": [
+    {
+      "key": "halloween-design-001-i-aint-afraid-of-no-signatures",
+      "collection": "DANI DECLARES Halloween - Notary & Signing Agent",
+      "slogan": "I Ain't Afraid of No Signatures",
+      "character_variant": "001",
+      "character_variant_note": "First approved character. Interchangeable characters are a planned feature; each future variant needs separate owner approval. Personalization is NOT available or proven.",
+      "creative_status": "OWNER_APPROVED_EXACT_AS_SHOWN",
+      "production_status": "NOT_VERIFIED",
+      "publication_eligible": false,
+      "master": {
+        "original_file": "products/seasonal-art-2026/approved/design-001-i-aint-afraid-of-no-signatures/MASTER-owner-approved-original.webp",
+        "original_sha256": "acb553ee96838aeee3ce5ea60261059e0e69ee0cf091666ca5f86db09b33a1e6",
+        "lossless_copy": "products/seasonal-art-2026/approved/design-001-i-aint-afraid-of-no-signatures/MASTER-owner-approved-lossless.png",
+        "lossless_sha256": "a028ef195023ddf02ca4d6cda68e49005cfa088bbf4464a2bfecb8ed566fca97",
+        "pixels": [1254, 1254],
+        "mode": "RGB, opaque black background (no transparency)",
+        "immutable": true
+      },
+      "rules": [
+        "Do not regenerate, restyle, recolor, re-letter or recompose the master.",
+        "Production derivatives are separate files; a derivative that changes the look (for example removing the black background) needs an owner preview first.",
+        "Historical card drafts, shirt-ready prototypes and rejected realtor drafts are not this design."
+      ],
+      "derivatives": [
+        { "kind": "EDSR_X4_UPSCALE", "generative": false, "note": "Non-generative 4x upscale to 5016 px so the art reaches print resolution; local file, delivered to owner, not stored in git." }
+      ],
+      "gates": {
+        "printify_blueprint_and_print_area_confirmed": false,
+        "provider_selected": false,
+        "mockups_made": false,
+        "delivered_cost_and_shipping_verified": false,
+        "margin_50_percent_floor_passed": false,
+        "ip_trademark_review": false,
+        "shopify_listing_ready": false,
+        "checkout_and_fulfillment_test_passed": false,
+        "owner_publication_approval": false
+      },
+      "known_risks": [
+        "Slogan echoes a famous film catchphrase; trademark/IP review not performed.",
+        "Master is 1254 px; print files are upscaled, not redrawn, so very fine detail is limited.",
+        "Opaque black background prints as a black rectangle on non-black garments."
+      ]
+    }
+  ]
+}
