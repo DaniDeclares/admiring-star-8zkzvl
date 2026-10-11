@@ -37,3 +37,11 @@ All four need owner authorisation and Tester validation before any Production mi
 ## Not verified here
 
 Worker internals of the research controller beyond observed run history, and the Production intake function's acceptance rules, were not re-read in this pass.
+
+## Update after implementation (same day)
+Repairs 1 and 2 and the freshness design were implemented and validated in Tester only; see `RESEARCH_ECONOMICS_REPAIR_RESULTS_2026-10-11.md`.
+
+Corrections to this document:
+- The "worker" is a source watcher: it snapshots governed URLs and records observation-only signals. It does not extract prices, so per-service dispatch feeds a research session through the validated ingest contract.
+- Coverage authority is `dd_service_channel_availability` (agrees with the capability matrix): 155 services SCOPED, 230 without channel authority.
+- Actual job costs exist in Production (3 recorded rows: owner-confirmed, PayPal-verified, bank-verified), and quote-like evidence exists in `dd_provider_payout_bands` and `dd_component_cost_baselines`; the claim above that no source exists for validated quotes and actual costs was wrong.
