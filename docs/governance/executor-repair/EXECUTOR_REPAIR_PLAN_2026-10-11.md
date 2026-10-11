@@ -21,7 +21,7 @@ All seven are `CREATE OR REPLACE FUNCTION` plus grants (service_role only). No t
 - Tables and every referenced column exist in Production (`dd_autobuild_candidates`, `dd_promotion_candidates`, `dd_code_repair_policy`, `dd_code_repair_work_queue`).
 - `dd_code_repair_policy` `PLATFORM_SAFE_MANIFEST_V2` is `ACTIVE`.
 - `dd_code_repair_work_queue.work_key` and `dd_promotion_candidates.candidate_key` have unique constraints, so the migrations' `ON CONFLICT` clauses are valid.
-- `dd_autobuild_structured_files_eligible` does **not** exist in Production, so #6 cannot work without #1. #230000 cannot work without #6.
+- `dd_autobuild_structured_files_eligible` does **not** exist in Production, so #6 cannot work without #1. Migration 7 (230000) cannot work without #6.
 - Production's current claim function has no service-role check and only accepts `PATCH_MANIFEST_V1` with no path validation. The repo's replacement is stricter (service role only; allows `PATCH_MANIFEST_V1` and `APPROVED_FILE_CHANGES_V1`; at most 20 files; rejects absolute paths, `..`, `.env`, `.github`).
 - Candidate backlog: 40 BLOCKED/PENDING, 9 MANIFEST_READY/PENDING, 1 PR_OPENED/PENDING, 1 PR_OPENED/PR_OPENED. Durable; nothing lost while the lane is down.
 
@@ -35,4 +35,4 @@ Limits: fixtures are fabricated, the local shim is not Supabase, and this is not
 3. Production: read back the pre-state (claim definition hash), apply, read back functions, confirm the executor workflow's next scheduled run no longer reports missing RPCs and the 49 candidates keep their states.
 4. Keep `rollback.sql` ready. The workflow stays fail-closed throughout.
 
-Two things to decide before step 1: #601's ledger-replay (PR #591) is still held, so a new migration set adds sources the replay must absorb; and #637 carries migration 7, so it should not merge before 1-6 are applied.
+Two things to decide before step 1: PR #591's ledger replay is still held, so a new migration set adds sources the replay must absorb; and #637 carries migration 7, so it should not merge before 1-6 are applied.
