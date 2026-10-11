@@ -1,0 +1,12 @@
+# Source-only migrations that are NOT in the Production ledger but recreate objects Production already had when its recorded migrations ran
+# (historical forensic reconstructions recovered from PR #520 by PR #591). They replay under their own source versions.
+# Each line is a full migration file name in supabase/migrations. Add a line only with evidence that a Production-ledger migration needs it.
+20260828005155_forensic_recover_provider_evidence_tables.sql
+20260828234917_forensic_recover_service_reconciliation_tables.sql
+20260830011945_forensic_recover_division01_master_skus.sql
+20260830025609_forensic_recover_governed_commercial_offers.sql
+20260901132315_forensic_recover_business_decision_register.sql
+20260902012755_forensic_recover_portal_roles_and_fos_baseline.sql
+20260902014209_forensic_recover_unrecorded_columns.sql
+20260914073817_forensic_recover_stripe_launch_register.sql
+20260914074108_forensic_recover_specials_underwriting_register.sql
