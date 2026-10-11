@@ -78,10 +78,10 @@ end $$;
 
 create or replace function public.dd_claim_scheduled_operating_work(p_worker_key text,p_work_type text default null,p_limit integer default 10)
 returns setof public.dd_scheduled_operating_work language sql security definer set search_path='public','private'
-as $ select * from private.dd_claim_scheduled_operating_work(p_worker_key,p_work_type,p_limit) $;
+as $$ select * from private.dd_claim_scheduled_operating_work(p_worker_key,p_work_type,p_limit) $$;
 create or replace function public.dd_finish_scheduled_operating_work(p_id uuid,p_worker_key text,p_claim_token text,p_success boolean,p_receipt jsonb,p_blocker text default null)
 returns jsonb language sql security definer set search_path='public','private'
-as $ select private.dd_finish_scheduled_operating_work(p_id,p_worker_key,p_claim_token,p_success,p_receipt,p_blocker) $;
+as $$ select private.dd_finish_scheduled_operating_work(p_id,p_worker_key,p_claim_token,p_success,p_receipt,p_blocker) $$;
 create or replace function public.dd_requeue_expired_scheduled_work_leases()
 returns integer language sql security definer set search_path='public','private'
 as $$ select private.dd_requeue_expired_scheduled_work_leases() $$;
