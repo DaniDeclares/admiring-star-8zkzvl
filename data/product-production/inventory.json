@@ -3311,7 +3311,16 @@
    "aliases": [],
    "production_candidate": null,
    "notes": "Customer file NOT located in Drive search; cannot inspect.",
-   "publication_eligible": false
+   "publication_eligible": false,
+   "revision": {
+    "status": "DRAFT_V2_BUILT_NOT_PUBLISHED",
+    "files": [
+     "products/digital/weekly-operations-planner/DANI_Small_Business_Weekly_Ops_Planner_v2_printable.pdf",
+     "products/digital/weekly-operations-planner/DANI_Small_Business_Weekly_Ops_Planner_v2_tracker.xlsx"
+    ],
+    "price_unchanged_usd": 15,
+    "blocker": "Source file found in Drive (DANI_Small_Business_Weekly_Ops_Planner.pdf, 6 blank pages). Owner approval; verify live Shopify delivery and purchaser links before replacing the download."
+   }
   },
   {
    "key": "digital-7-day-home-reset-kit",
@@ -3329,7 +3338,15 @@
    "aliases": [],
    "production_candidate": null,
    "notes": "Customer file NOT located in Drive search; cannot inspect.",
-   "publication_eligible": false
+   "publication_eligible": false,
+   "revision": {
+    "status": "DRAFT_V2_BUILT_NOT_PUBLISHED",
+    "files": [
+     "products/digital/home-reset-kit/DANI_7_Day_Home_Reset_Kit_v2_printable.pdf"
+    ],
+    "price_unchanged_usd": 9,
+    "blocker": "Original customer file NOT found (Oct 8 sprint doc lists an 8-page PDF as a conversation artifact). v2 rebuilt from the product name and sprint description; confirm it is an acceptable replacement before any download change. Owner approval; verify live Shopify delivery."
+   }
   },
   {
    "key": "digital-service-quote-profit-check",

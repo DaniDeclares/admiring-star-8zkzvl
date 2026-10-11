@@ -13,7 +13,7 @@ Machine-readable authority for this record: `data/product-production/inventory.j
 | Draft artwork files rendered | 44 (4500×5400, 300 dpi metadata, transparent background, self-contained badge, min 127 px edge margin) |
 | Artwork approved by owner | 0 |
 | Digital rows tracked | 40: 13 exist in Shopify, 25 new required, 2 historical/unverified groups (Cookout Crew, ELI10) |
-| Digital products repaired or newly built | 1 draft (Cleaning Operator Job Kit v2: printable PDF + calculator); 0 published |
+| Digital products repaired or newly built | 3 drafts (Cleaning Operator Job Kit v2, Weekly Operations Planner v2, 7-Day Home Reset Kit v2; PDFs plus two workbooks); 0 published |
 | Passed underwriting / genuinely sellable | 0 |
 | Chris's horror merchandise | 0 records found (Supabase, Drive, Notion, repo); blocked |
 
@@ -35,7 +35,8 @@ LOW: 39, LOW_MEDIUM: 4, MEDIUM: 1. "Witch Better Have My Signatures" parodies a 
 
 ## Existing digital products
 - Cleaning Operator Job Kit ($19): edition 2 built as a draft (10-page fillable PDF plus calculator workbook) in `products/digital/cleaning-operator-job-kit/`. Not published; delivery replacement not done. See its README.
-- Small Business Weekly Operations Planner ($15) and 7-Day Home Reset Kit ($9): customer files not found in Drive search. Cannot inspect or repair until the files are supplied.
+- Small Business Weekly Operations Planner ($15): the Drive file was found (6 mostly blank pages) and rebuilt as a 12-page fillable planner plus tracker workbook, draft in `products/digital/weekly-operations-planner/`.
+- 7-Day Home Reset Kit ($9): the original file was not found anywhere searched. A 13-page fillable edition was rebuilt from the product description, draft in `products/digital/home-reset-kit/`; it must not replace the customer download until the owner confirms.
 
 ## Blockers
 1. No Shopify or Printify access in this session (no connector, token is server-side). Live listings, product IDs, variants and delivery links are unverified.
