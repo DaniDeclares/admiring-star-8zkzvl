@@ -90,3 +90,20 @@ Defects to fix before wiring into Owner HQ: (1) `holds` is computed before the m
 
 ### Products
 See `docs/operations/PRODUCT_PRODUCTION_2026-10-11.md` and PR #638.
+
+### Governed PR executor: dependency gap (verified 2026-10-11 PM; supersedes the earlier "warn and continue" idea)
+Main's scheduled `DANI Governed PR Executor` has failed on every run since #636 merged (runs 71–74). It fails closed at step 6, before any candidate is claimed. The workflow calls six Production RPCs; only one exists in Production (`pg_proc` read):
+
+| RPC | Used by step | In Production | Migration (in source, not applied) |
+|---|---|---|---|
+| `dd_claim_autobuild_candidate` | claim | yes (older body) | `20261010201500` replaces it |
+| `dd_reconcile_autobuild_promotion_reviews` | recover stranded handoffs | **no** | `20261010210000` |
+| `dd_hold_expired_autobuild_leases` | quarantine expired leases | **no** | `20261010213000` |
+| `dd_route_autobuild_briefs_to_tech` | route briefs to Tech | **no** | `20261010214500` (atomicity fix is `20261010230000` in #637) |
+| `dd_record_autobuild_pr_evidence` | record PR evidence | **no** | `20261010204500` |
+| `dd_register_autobuild_promotion_review` | route built PR to review | **no** | `20261010203000` |
+
+None of the six migrations is applied in Tester either (Tester ledger ends 20261010163007 and Tester lacks `dd_claim_autobuild_candidate` entirely), so #636 merged workflow code ahead of any database proof.
+Why warn-and-continue was wrong: letting the two recovery steps pass would reach claim, open a PR, then fail at "record PR evidence" because that RPC is also missing, leaving a PR with no durable record and no lease reconciliation. The earlier commit doing this was reverted on #638.
+Current state is fail-closed and safe: no new leases or PRs. Backlog is durable in `dd_autobuild_candidates` (49 pending candidates: 40 BLOCKED and 9 MANIFEST_READY, all BUILD_BRIEF_V1; 2 PR_OPENED; 0 expired leases), so nothing is lost while it is red.
+The executor is NOT healthy and must not be reported healthy until the six migrations (in order, with `20261010230000`) are installed through the governed path with a Tester syntax proof and a Production readback. Needs owner authorization to apply to Production.
