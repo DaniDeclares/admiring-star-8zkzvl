@@ -1,0 +1,62 @@
+[
+ {
+  "folder": "diy-marketing-starter-kit",
+  "name": "DIY Marketing Starter Kit",
+  "orig_name": "DANI_DIY_Marketing_Starter_Kit_COMPLETE_17pg.pdf",
+  "orig_sha": "8546dafa67489614e9c21c03b42e2ba58d017f37f6b2a786b5dcd695cde5dc8c",
+  "orig_zip": "DANI_Complete_Marketing_Kits_17pg_24pg.zip",
+  "stem": "DANI_DIY_Marketing_Starter_Kit_v2",
+  "builder": "build_diy_marketing.py",
+  "summary": "All seven days, offer builder, customer-language research, three-post plan, conversation scripts, tracker and scorecard, plus all 15 original local-service captions (now a 7-page caption library with fillable numbered gaps instead of bracket placeholders). Added: proof-permission checklist, labelled worked example, inquiry log, week-2 plan."
+ },
+ {
+  "folder": "no-face-reels-voiceover-kit",
+  "name": "No-Face Reels & Voiceover Kit",
+  "orig_name": "DANI_No_Face_Reels_Voiceover_Kit_COMPLETE_24pg.pdf",
+  "orig_sha": "9e618a21930118786ba538d289fb6c6394227f954ffd073955429bd2133a873a",
+  "orig_zip": "DANI_Complete_Marketing_Kits_17pg_24pg.zip",
+  "stem": "DANI_No_Face_Reels_Voiceover_Kit_v2",
+  "builder": "build_reels.py",
+  "summary": "All 10 worksheet pages, 20 scripts, 15 shot sequences, 5 text-only templates and 30 hook patterns preserved (parsed from the original); fillable \"my version\" columns, a 20-second video map with example, a safety and permission page. Bracket templates replaced by plain wording."
+ },
+ {
+  "folder": "home-command-center",
+  "name": "Home Command Center",
+  "orig_name": "Home_Command_Center_Enhanced.pdf",
+  "orig_sha": "96c2995c0c1a8efa8757b6f28f6f81aaf28e8d9e839a258b0a53c9f2a8090ab5",
+  "orig_zip": "DANI_Upgraded_PDF_Workbooks_2026-10-10_1.zip",
+  "stem": "DANI_Home_Command_Center_v2",
+  "builder": "build_home_command_center.py",
+  "summary": "Every page preserved and made fillable; added a hard-day plan and a weekly household meeting page; the example week is labelled as an illustration."
+ },
+ {
+  "folder": "house-manager-operations-kit",
+  "name": "House Manager Operations Kit",
+  "orig_name": "92b27542-DANI_House_Manager_Operations_Kit_COMPLETE_22pg.pdf",
+  "orig_sha": "e526afff40d42522d99e50903dbe6dc8712a058b4cc703fc6d3d4b4a120f78c7",
+  "orig_zip": "(direct upload)",
+  "stem": "DANI_House_Manager_Operations_Kit_v2",
+  "builder": "build_house_manager.py",
+  "summary": "All 22 pages preserved as fillable worksheets; underscores became real fields; examples are labelled; access codes and passwords are never requested."
+ },
+ {
+  "folder": "property-inspection-photo-log",
+  "name": "Property Inspection & Photo Log",
+  "orig_name": "DANI_Property_Inspection_Photo_Log.pdf",
+  "orig_sha": "27d622d86caab5fdb5dfed9f735c2bb26c08be4eb29d66a8a00a409d0cccdaa3",
+  "orig_zip": "DANI_Property_Inspection_Photo_Log_3.zip",
+  "stem": "DANI_Property_Inspection_Photo_Log_v2",
+  "builder": "build_inspection_intake.py",
+  "summary": "All seven sections and the worked example preserved; added a room-by-room checklist, photo log, issue log and closeout checklist. The pocket app and CSV tracker in the original zip stay the companion files."
+ },
+ {
+  "folder": "client-intake-scope-change",
+  "name": "Client Intake & Scope Change",
+  "orig_name": "DANI_Client_Intake_Scope_Change.pdf",
+  "orig_sha": "a39be66a421a20ddec40cd74d4f3113d111545f3e3894c2032f56af8207fd3bb",
+  "orig_zip": "DANI_Client_Intake_Scope_Change_3.zip",
+  "stem": "DANI_Client_Intake_Scope_Change_v2",
+  "builder": "build_inspection_intake.py",
+  "summary": "All seven sections and the worked example preserved; added first-contact, qualification, baseline scope, change request log, communications timeline and closeout forms. The pocket app and CSV tracker stay the companion files."
+ }
+]

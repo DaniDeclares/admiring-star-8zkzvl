@@ -25,7 +25,8 @@ class Kit:
         _fonts()
         self.c = canvas.Canvas(path, pagesize=letter)
         self.c.setTitle(title); self.c.setAuthor('DANI DECLARES LLC'); self.c.setSubject(subject)
-        self.page = 0; self.fields = 0; self.footer_label = footer_label; self.n = 0; self.edition = 'Edition 2'
+        self.c.setViewerPreference('DisplayDocTitle', 'true'); self.c.showOutline()
+        self.ink = os.environ.get('DANI_INK_SAVER') == '1'; self.page = 0; self.fields = 0; self.footer_label = footer_label; self.n = 0; self.edition = 'Edition 2'
 
     # ---- page frame ----
     def _footer(self):
@@ -36,24 +37,35 @@ class Kit:
         c.drawRightString(W - 48, 30, str(self.page))
     def header(self, title, sub):
         c = self.c; self.page += 1
-        c.setFillColor(CREAM); c.rect(0, 0, W, H, stroke=0, fill=1)
-        c.setFillColor(BURG); c.rect(0, H - 86, W, 86, stroke=0, fill=1)
-        c.setFillColor(GOLD); c.rect(0, H - 90, W, 4, stroke=0, fill=1)
-        c.setFillColor(CREAM); c.setFont('Head', 22); c.drawString(48, H - 48, title)
-        c.setFont('Body', 11.5); c.drawString(48, H - 68, sub)
+        key = f'pg{self.page}'; c.bookmarkPage(key); c.addOutlineEntry(title, key, level=0)
+        if self.ink:
+            # ink-saver: white page, no filled band; same layout, burgundy type and a gold rule
+            c.setFillColor(BURG); c.setFont('Head', 22); c.drawString(48, H - 48, title)
+            c.setFillColor(INK); c.setFont('Body', 11.5); c.drawString(48, H - 68, sub)
+            c.setFillColor(GOLD); c.rect(48, H - 78, W - 96, 2, stroke=0, fill=1)
+        else:
+            c.setFillColor(CREAM); c.rect(0, 0, W, H, stroke=0, fill=1)
+            c.setFillColor(BURG); c.rect(0, H - 86, W, 86, stroke=0, fill=1)
+            c.setFillColor(GOLD); c.rect(0, H - 90, W, 4, stroke=0, fill=1)
+            c.setFillColor(CREAM); c.setFont('Head', 22); c.drawString(48, H - 48, title)
+            c.setFont('Body', 11.5); c.drawString(48, H - 68, sub)
         self._footer()
     def cover(self, line1, line2, tagline, note):
         c = self.c; self.page += 1
-        c.setFillColor(BURG); c.rect(0, 0, W, H, stroke=0, fill=1)
+        fg = BURG if self.ink else CREAM
+        if not self.ink: c.setFillColor(BURG); c.rect(0, 0, W, H, stroke=0, fill=1)
         c.setFillColor(GOLD); c.rect(60, H - 180, W - 120, 3, stroke=0, fill=1); c.rect(60, 150, W - 120, 3, stroke=0, fill=1)
-        c.setFillColor(CREAM); c.setFont('BodyB', 13); c.drawCentredString(W / 2, H - 150, 'D A N I   D E C L A R E S')
+        c.setFillColor(fg); c.setFont('BodyB', 13); c.drawCentredString(W / 2, H - 150, 'D A N I   D E C L A R E S')
         c.setFont('Head', 42); c.drawCentredString(W / 2, H / 2 + 70, line1); c.drawCentredString(W / 2, H / 2 + 14, line2)
         c.setFont('Body', 16); c.drawCentredString(W / 2, H / 2 - 36, tagline)
         c.setFont('Body', 13); c.drawCentredString(W / 2, H / 2 - 80, note)
-        c.setFillColor(SOFT); c.setFont('Body', 11); c.drawCentredString(W / 2, 112, self.edition + '  |  We handle the execution.')
+        c.setFillColor(INK if self.ink else SOFT); c.setFont('Body', 11); c.drawCentredString(W / 2, 112, self.edition + '  |  We handle the execution.')
         c.showPage()
     def end_page(self): self.c.showPage()
-    def save(self): self.c.save(); return self.page, self.fields
+    def save(self):
+        self.c.save()
+        _finalize(self.c._filename)
+        return self.page, self.fields
 
     # ---- primitives ----
     def text(self, lines, x, y, size=11.5, lead=15.5, font='Body', color=None):
@@ -74,14 +86,14 @@ class Kit:
     def field(self, label, x, y, w, h=17):
         c = self.c; self.n += 1; self.fields += 1
         c.setFillColor(INK); c.setFont('BodyB', 10); c.drawString(x, y + h + 3, label)
-        c.acroForm.textfield(name=f'f{self.n}', x=x, y=y, width=w, height=h, borderStyle='underlined', borderColor=SOFT, fillColor=IVORY, textColor=INK, fontName='Helvetica', fontSize=10, borderWidth=1, forceBorder=True)
+        c.acroForm.textfield(name=f'f{self.n}', tooltip=label, x=x, y=y, width=w, height=h, borderStyle='underlined', borderColor=SOFT, fillColor=IVORY, textColor=INK, fontName='Helvetica', fontSize=10, borderWidth=1, forceBorder=True)
     def area(self, label, x, y, w, h):
         c = self.c; self.n += 1; self.fields += 1
         c.setFillColor(INK); c.setFont('BodyB', 10); c.drawString(x, y + h + 3, label)
-        c.acroForm.textfield(name=f'f{self.n}', x=x, y=y, width=w, height=h, borderStyle='solid', borderColor=SOFT, fillColor=IVORY, textColor=INK, fontName='Helvetica', fontSize=10, borderWidth=1, fieldFlags='multiline', forceBorder=True)
+        c.acroForm.textfield(name=f'f{self.n}', tooltip=label, x=x, y=y, width=w, height=h, borderStyle='solid', borderColor=SOFT, fillColor=IVORY, textColor=INK, fontName='Helvetica', fontSize=10, borderWidth=1, fieldFlags='multiline', forceBorder=True)
     def check(self, label, x, y, size=11):
         c = self.c; self.n += 1; self.fields += 1
-        c.acroForm.checkbox(name=f'c{self.n}', x=x, y=y - 2, size=13, borderColor=BURG, fillColor=IVORY, borderWidth=1.2, forceBorder=True)
+        c.acroForm.checkbox(name=f'c{self.n}', tooltip=label, x=x, y=y - 2, size=13, borderColor=BURG, fillColor=IVORY, borderWidth=1.2, forceBorder=True)
         c.setFillColor(INK); c.setFont('Body', size); c.drawString(x + 21, y + 1, label)
     def panel(self, x, y_top, w, h, title=None):
         c = self.c
@@ -110,7 +122,7 @@ class Kit:
             y -= row_h; cx = x
             for ci, w_ in enumerate(widths):
                 self.n += 1; self.fields += 1
-                c.acroForm.textfield(name=f'{name}{self.n}', x=cx, y=y, width=w_, height=row_h, borderStyle='solid', borderColor=SOFT, fillColor=CREAM if r % 2 else IVORY, textColor=INK, fontName='Helvetica', fontSize=9.5, borderWidth=.6, forceBorder=True)
+                c.acroForm.textfield(name=f'{name}{self.n}', tooltip=f'{headers[ci]}, row {r + 1}', x=cx, y=y, width=w_, height=row_h, borderStyle='solid', borderColor=SOFT, fillColor=CREAM if r % 2 else IVORY, textColor=INK, fontName='Helvetica', fontSize=9.5, borderWidth=.6, forceBorder=True)
                 cx += w_
         return y - 10
     def table_pre(self, headers, widths, data, x, y_top, row_h=26, name='tp', blank_rows=0, size=9.5):
@@ -140,7 +152,7 @@ class Kit:
                         c.drawString(cx + 5, ty, l); ty -= size + 1.5
                 else:
                     self.n += 1; self.fields += 1
-                    c.acroForm.textfield(name=f'{name}{self.n}', x=cx, y=y, width=w_, height=row_h, borderStyle='solid', borderColor=SOFT, fillColor=CREAM if r % 2 else IVORY, textColor=INK, fontName='Helvetica', fontSize=9.5, borderWidth=.6, forceBorder=True)
+                    c.acroForm.textfield(name=f'{name}{self.n}', tooltip=f'{headers[ci]}, row {r + 1}', x=cx, y=y, width=w_, height=row_h, borderStyle='solid', borderColor=SOFT, fillColor=CREAM if r % 2 else IVORY, textColor=INK, fontName='Helvetica', fontSize=9.5, borderWidth=.6, forceBorder=True)
                 cx += w_
         return y - 10
     def numbered(self, title, steps, x, y_top, w):
@@ -157,3 +169,12 @@ class Kit:
         self.panel(x, y_top, w, h, title)
         self.text(lines, x + 14, y_top - 40, 11, 15.5)
         return y_top - h - 12
+
+
+def _finalize(path):
+    """Declare the document language (accessibility) without altering pages or form fields."""
+    from pypdf import PdfReader, PdfWriter
+    from pypdf.generic import NameObject, TextStringObject
+    w = PdfWriter(clone_from=PdfReader(path))
+    w._root_object[NameObject('/Lang')] = TextStringObject('en-US')
+    with open(path, 'wb') as f: w.write(f)

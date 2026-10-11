@@ -1,0 +1,107 @@
+[
+ {
+  "n": "01",
+  "title": "The touchpoint checklist",
+  "kind": "Teaching",
+  "topic": "Cleaning",
+  "copy": "A quick-looking room isn't always a complete reset. Check these three easy-to-miss touchpoints: handles, switches, and the area around the sink. Start with the surfaces your household uses most, and always follow the surface manufacturer's cleaning directions. SAVE this checklist for your next cleaning day. What spot do you forget most often?"
+ },
+ {
+  "n": "02",
+  "title": "Organize for the real habit",
+  "kind": "Teaching",
+  "topic": "Organizing",
+  "copy": "Before buying another bin, choose one spot and watch what actually happens there. Where do items land? Where are they used? Where do they get put back? Move the storage location closer to the habit, then label it simply. Start with one drawer or shelf. Which spot in your home needs a better system?"
+ },
+ {
+  "n": "03",
+  "title": "One safe household handoff",
+  "kind": "Teaching",
+  "topic": "Estate / household support",
+  "copy": "The best household handoff isn't the longest one. Start with four fields: priority, approved task, status, and next owner. Keep keys, access codes, family schedules and private contact details in a protected system\u2014not on a public board. Small routines make shared responsibilities easier. SAVE this four-field format."
+ },
+ {
+  "n": "04",
+  "title": "The four inbox decisions",
+  "kind": "Teaching",
+  "topic": "Virtual assistance",
+  "copy": "An inbox gets lighter when each message receives a decision: reply, schedule, delegate or archive. For messages that need later attention, add one dated next action to your approved tracker. Never export sensitive client data into an unsecured sheet. Try it on ten messages today and tell us which decision saved you time."
+ },
+ {
+  "n": "05",
+  "title": "One offer, one action",
+  "kind": "Teaching",
+  "topic": "Cross-industry",
+  "copy": "If your service post asks people to do five different things, try simplifying it. Name one customer problem, one deliverable and one next step. EXAMPLE: 'Need help getting your guest room ready? Ask about our scoped setup service. Message GUEST for availability.' Replace the example with what you truly offer and can deliver. Which service will you focus on this week?"
+ },
+ {
+  "n": "06",
+  "title": "Before-and-after with scope",
+  "kind": "Proof",
+  "topic": "Cleaning",
+  "copy": "BEFORE / AFTER: [Insert your own permission-cleared photos of the same area.] Scope: [specific approved room or surface]. Work completed: [actual tasks]. Time spent: [actual duration or omit]. We show results with matching angles and truthful descriptions\u2014never an entire-home claim for a single counter. Want help with a similar space? [Approved booking link]."
+ },
+ {
+  "n": "07",
+  "title": "A one-shelf reset",
+  "kind": "Proof",
+  "topic": "Organizing",
+  "copy": "ONE SPACE, ONE CHANGE. [Insert a real, approved photo pair or label this as a staged example.] The goal was [customer-approved organizing objective]. We changed [actual shelf/drawer system], and the household chose [approved decisions]. Every space is different; this shows the method, not a guaranteed outcome. Ask about [approved service or quote link]."
+ },
+ {
+  "n": "08",
+  "title": "Show the workflow, not the client data",
+  "kind": "Proof",
+  "topic": "Virtual assistance",
+  "copy": "Here is how a small admin task can move from request to completion. [Share a demo board using fictional entries.] Step 1: record the task. Step 2: assign an owner. Step 3: confirm the next action. Step 4: mark the result. This is a process demonstration, not a client testimonial. Need a scoped admin workflow? [Contact link]."
+ },
+ {
+  "n": "09",
+  "title": "The weekly handoff example",
+  "kind": "Proof",
+  "topic": "Estate / household support",
+  "copy": "A clearer handoff can start with a single page. [Show an entirely fictional example or a permission-cleared, redacted one.] What it includes: approved priorities, completed tasks and what still needs confirmation. What it leaves out: children, keys, private schedules and contact details. This demonstrates our documentation approach. [Service inquiry link]."
+ },
+ {
+  "n": "10",
+  "title": "A real workday snapshot",
+  "kind": "Proof",
+  "topic": "Cross-industry",
+  "copy": "TODAY'S SCOPE: [actual approved assignment]. START: [what was ready]. ACTION: [three specific steps performed]. HANDOFF: [what was completed or referred]. Add only photos you created or are authorized to share; do not invent customer feedback, savings or transformations. This is what clear, documented service work looks like. [Approved booking link]."
+ },
+ {
+  "n": "11",
+  "title": "A clear cleaning inquiry",
+  "kind": "Offer",
+  "topic": "Cleaning",
+  "copy": "Need help with [approved cleaning task] in [service area]? Our [specific service name] covers [accurate included scope] starting at [approved rate or 'custom quote']. [List one important exclusion or scope boundary.] To check availability, send [preferred contact method] with your area, room count and top priority. [Direct booking link]."
+ },
+ {
+  "n": "12",
+  "title": "Start with one area",
+  "kind": "Offer",
+  "topic": "Organizing",
+  "copy": "One pantry or closet can be enough for a first organizing session. [Business name] offers [approved organizing service] in [service area]. We begin by confirming the space, goal and expected hours; belongings are never discarded without your approval. Pricing: [approved hourly rate or quote path]. Send 'ORGANIZE' through [contact link] to ask about availability."
+ },
+ {
+  "n": "13",
+  "title": "Remove one repeated admin task",
+  "kind": "Offer",
+  "topic": "Virtual assistance",
+  "copy": "Spending too much time on [specific recurring admin task]? [Business name] offers [approved service] for [clearly defined deliverable]. We confirm the task, access permissions, turnaround and price before starting. We do not promise guaranteed sales or handle sensitive credentials outside approved systems. Ask about [service name]: [working inquiry link]."
+ },
+ {
+  "n": "14",
+  "title": "Set up a household workflow",
+  "kind": "Offer",
+  "topic": "Estate / household support",
+  "copy": "Need a more reliable rhythm for [approved household activity]? [Business name] can discuss [specific approved service], [service area] and the responsibilities involved. We'll define what is included, what needs your approval and whether a qualified outside provider is required. Request scope and availability here: [working booking link]."
+ },
+ {
+  "n": "15",
+  "title": "One-week focus offer",
+  "kind": "Offer",
+  "topic": "Cross-industry",
+  "copy": "THIS WEEK'S SERVICE SPOTLIGHT: [approved offer name]. FOR: [specific type of customer]. INCLUDES: [three accurate deliverables]. DOES NOT INCLUDE: [important exclusion]. PRICE: [approved amount or quote path]. SERVICE AREA / REMOTE: [verified coverage]. NEXT STEP: [working inquiry link]. Only post after confirming availability and the exact offer terms."
+ }
+]

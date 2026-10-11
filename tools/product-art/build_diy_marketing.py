@@ -1,6 +1,6 @@
 """DIY Marketing Starter Kit, edition 2 (draft): rebuilt from the owner's COMPLETE 17-page kit. Fillable, worked examples
 labelled as examples, no bracket placeholders, no internal wording."""
-import sys, os
+import sys, os, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from kit_lib import Kit
 from kit_blocks import render
@@ -8,6 +8,30 @@ out = sys.argv[1]
 k = Kit(out, 'DIY Marketing Starter Kit', 'A seven-day, consent-first marketing plan for a local service business', 'DIY Marketing Starter Kit')
 k.edition = 'Edition 2 draft'
 k.cover('DIY Marketing', 'Starter Kit', 'Seven days to one clear offer and real conversations', 'Fillable on screen. Print-ready. No spam, no invented proof.')
+
+CAPS = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_diy/diy_captions.json')))
+def cap_blocks(c):
+    brs = re.findall(r'\[([^\]]+)\]', c['copy'])
+    n = [0]
+    def mark(m):
+        n[0] += 1; return f'({n[0]})'
+    text = re.sub(r'\[([^\]]+)\]', mark, c['copy'])
+    text = text.replace('fictional', 'invented')
+    blocks = [('note', f"{c['n']}. {c['title']}  ({c['kind']}, {c['topic']})", text, 10.4, 13.6)]
+    if brs:
+        rows = [[f'({i + 1}) ' + (b[0].upper() + b[1:]).rstrip('.').replace('Insert your own', 'Add your own').replace('Insert a', 'Add a').replace('fictional', 'invented')] for i, b in enumerate(brs)]
+        blocks.append(('table', ['What goes in the numbered gap', 'My answer'], [236, 268], rows, 0, 22, f'cap{c["n"]}', 9.2))
+    else:
+        blocks.append(('fields', ['Adapt this for my business (one change I will make)'], 1))
+    return blocks
+CAP_PAGES = []
+SPANS = [(0, 3), (3, 5), (5, 7), (7, 9), (9, 11), (11, 13), (13, 15)]
+for pi, (lo, hi) in enumerate(SPANS, 1):
+    blocks = []
+    for c in CAPS[lo:hi]: blocks += cap_blocks(c)
+    kinds = ' and '.join(sorted({c['kind'].lower() for c in CAPS[lo:hi]}))
+    CAP_PAGES.append(dict(title=f'Caption library {lo + 1}-{hi}', sub=f'Page {pi} of {len(SPANS)}. Fill every numbered gap with true facts ({kinds})', blocks=blocks))
+
 EX = 'Worked example: a home-cleaning business. Replace every example with your own facts.'
 pages = [
  dict(title='Start here', sub='A seven-day plan for a local service business', blocks=[
@@ -44,6 +68,7 @@ pages = [
   ('note', 'Show (scope stated)', 'One space, one change. This is the hall closet after an organizing session: two shelves, one bin per category, labels the client chose. Every space is different; this shows a method, not a guaranteed result. Want help with a similar space? Ask about availability.'),
   ('note', 'Offer', 'I help busy households with standard home cleaning in my service area. Starting prices are on my request page, and I confirm scope before I quote. Message me for the next open dates.'),
   ('note', 'Check before posting', 'Replace every example detail with real ones. Remove any claim you cannot prove. Add the price or quote path. Read platform and group rules first.')]),
+ *CAP_PAGES,
  dict(title='Day 5: conversations, not spam', sub='Message only people who asked, or who agreed to hear from you', blocks=[
   ('note', 'Reply to a question', 'Thanks for asking. Yes, I do this work in my service area, and I can send the list of what a visit includes. Would you like the details, or an estimate for your space? (Add your own service, area and inclusions below, in your own voice.)'),
   ('area', 'My version of this reply', 64),
