@@ -13,7 +13,7 @@ Machine-readable authority for this record: `data/product-production/inventory.j
 | Draft artwork files rendered | 44 (4500×5400, 300 dpi metadata, transparent background, self-contained badge, min 127 px edge margin) |
 | Artwork approved by owner | 0 |
 | Digital rows tracked | 40: 13 exist in Shopify, 25 new required, 2 historical/unverified groups (Cookout Crew, ELI10) |
-| Digital products repaired or newly built | 0 so far |
+| Digital products repaired or newly built | 1 draft (Cleaning Operator Job Kit v2: printable PDF + calculator); 0 published |
 | Passed underwriting / genuinely sellable | 0 |
 | Chris's horror merchandise | 0 records found (Supabase, Drive, Notion, repo); blocked |
 
@@ -34,7 +34,7 @@ Owner-uploaded Etsy-style references were used for art direction only (see `refe
 LOW: 39, LOW_MEDIUM: 4, MEDIUM: 1. "Witch Better Have My Signatures" parodies a well-known song title and needs an owner or counsel decision. Four song/film-title echoes need a trademark search. "Jingling All the Way to the Post Office" must not imply USPS affiliation.
 
 ## Existing digital products
-- Cleaning Operator Job Kit ($19): Drive file `DANI_Cleaning_Operator_Job_Kit.pdf` (2026-10-08) read. It is 7 pages of blank worksheets with a licence note: no worked example, no pricing/profit calculator, no completion checklist. Improvement is pending.
+- Cleaning Operator Job Kit ($19): edition 2 built as a draft (10-page fillable PDF plus calculator workbook) in `products/digital/cleaning-operator-job-kit/`. Not published; delivery replacement not done. See its README.
 - Small Business Weekly Operations Planner ($15) and 7-Day Home Reset Kit ($9): customer files not found in Drive search. Cannot inspect or repair until the files are supplied.
 
 ## Blockers
@@ -47,5 +47,5 @@ LOW: 39, LOW_MEDIUM: 4, MEDIUM: 1. "Witch Better Have My Signatures" parodies a 
 ## Next actions
 1. Owner: provide the planner and reset-kit files or a Shopify export; confirm the Shopify price and status conflicts.
 2. Owner: approve, reject or edit the 44 draft designs from the contact sheets.
-3. Rebuild the Cleaning Operator Job Kit as a printable plus fillable edition, then the other two once their files exist.
+3. Owner review of the Job Kit v2; then repair the other two once their files exist.
 4. After the Vercel limit resets and the Printify protections are deployed, verify Printify blueprints and costs read-only before any listing.

@@ -3284,7 +3284,16 @@
    "aliases": [],
    "production_candidate": null,
    "notes": "Drive file DANI_Cleaning_Operator_Job_Kit.pdf (2026-10-08): 7 pages of blank worksheets, no worked examples, no calculator.",
-   "publication_eligible": false
+   "publication_eligible": false,
+   "revision": {
+    "status": "DRAFT_V2_BUILT_NOT_PUBLISHED",
+    "files": [
+     "products/digital/cleaning-operator-job-kit/DANI_Cleaning_Operator_Job_Kit_v2_printable.pdf",
+     "products/digital/cleaning-operator-job-kit/DANI_Cleaning_Operator_Job_Kit_v2_calculator.xlsx"
+    ],
+    "price_unchanged_usd": 19,
+    "blocker": "Owner approval; verify live Shopify delivery and purchaser links before replacing the download"
+   }
   },
   {
    "key": "digital-small-business-weekly-operations-planner",
