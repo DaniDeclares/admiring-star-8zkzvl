@@ -32,7 +32,7 @@ create table if not exists public.dd_agent_decision_snapshots (
  tool_result_refs jsonb not null default '[]'::jsonb, decision text not null, decision_reason_code text,
  created_at timestamptz not null default now()
 );
-create or replace function public.dd_prevent_snapshot_mutation() returns trigger language plpgsql set search_path = public, pg_temp as $
+create or replace function public.dd_prevent_snapshot_mutation() returns trigger language plpgsql set search_path = public, pg_temp as $$
 begin raise exception 'dd_agent_decision_snapshots is append-only'; end $$;
 drop trigger if exists dd_agent_decision_snapshots_immutable on public.dd_agent_decision_snapshots;
 create trigger dd_agent_decision_snapshots_immutable before update or delete on public.dd_agent_decision_snapshots
