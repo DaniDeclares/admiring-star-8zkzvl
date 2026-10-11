@@ -43,3 +43,9 @@ Conclusion: Stripe Connect is a payout-rail prerequisite folded into the assignm
 - Governed PR executor missing Tech-routing RPCs: BROKEN (fail-closed, 49 candidates durable).
 - #591 replay: LEGITIMATELY_HELD (four exceptions proposed, none applied).
 - #638 / #630 / #637: held for CI and owner approval; no merge or deploy.
+
+## 7. Quote builder audit (`src/lib/operations/quoteBuilder2026.js`)
+- Quote price path: `loadRules` → `dd_service_pricing_rules` (ACTIVE), then `calculate` uses `rule.base_price_cents`, falling back to `services.starting_price` / `public_price_low`. `services.base_price_cents` is **not** a price source for quotes.
+- The only read of `services.base_price_cents` is the specials de-duplication (`resolveCanonicalOffers`, `exactCommercialMatch`). A stale or NULL value makes a matching special look like a price conflict (`UNRESOLVED_PRICE_CONFLICT` variant, extra operator noise). It fails safe: no customer price is taken from it.
+- Gap vs the checkout gate: `loadRules` filtered ACTIVE only, while `governedCommercialGate2026` requires ACTIVE + LOCKED. Production today has 2,270 ACTIVE rules, all LOCKED (the 5 non-LOCKED are PENDING_RECONCILIATION), so no live exposure.
+- Smallest safe correction (prepared, not applied): add `.eq('lock_status','LOCKED')` to `loadRules`, export it, add a regression test. Quote builder tests: 7 pass. Saved as `docs/governance/proposed-patches/quote-builder-locked-pricing-authority.patch`. It is runtime code, so it does not belong in #638 (docs/data only). It needs its own branch and PR by the owner's instruction; none exists. (A scratch branch pushed by mistake was deleted.)

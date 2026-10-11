@@ -1,0 +1,66 @@
+From 97911c5a6b787b99ec829f3ce7201b47581b2100 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 11 Oct 2026 17:09:06 +0000
+Subject: [PATCH] Quote builder: read only ACTIVE+LOCKED pricing rules,
+ matching the checkout gate
+
+loadRules now filters lock_status=LOCKED (Production has 0 ACTIVE rules that are
+unlocked, so no behaviour change today; the guard stops a future unlocked rule
+from pricing a quote). services.base_price_cents stays a display column and is
+not a price source. Exports loadRules and adds a regression test.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_016Dra1Z5Cc9cu6xmk8ysswV
+---
+ src/lib/operations/quoteBuilder2026.js      |  6 ++++--
+ src/lib/operations/quoteBuilder2026.test.js | 16 +++++++++++++++-
+ 2 files changed, 19 insertions(+), 3 deletions(-)
+
+diff --git a/src/lib/operations/quoteBuilder2026.js b/src/lib/operations/quoteBuilder2026.js
+index a9cb750..2e21b7e 100644
+--- a/src/lib/operations/quoteBuilder2026.js
++++ b/src/lib/operations/quoteBuilder2026.js
+@@ -149,8 +149,10 @@ export async function getQuoteCatalog(supabase) {
+ 
+   return resolveCanonicalOffers(governed, specialRows, new Map());
+ }
+-async function loadRules(supabase, serviceId, channelCode) {
+-  const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').order('effective_date',{ascending:false});
++// Quote pricing reads only ACTIVE + LOCKED rules, the same authority governedCommercialGate2026 uses.
++// services.base_price_cents is a display column and is never a price source here.
++export async function loadRules(supabase, serviceId, channelCode) {
++  const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').eq('lock_status', 'LOCKED').order('effective_date',{ascending:false});
+   if (error) throw error;
+   return data || [];
+ }
+diff --git a/src/lib/operations/quoteBuilder2026.test.js b/src/lib/operations/quoteBuilder2026.test.js
+index 29b0bc1..bc90349 100644
+--- a/src/lib/operations/quoteBuilder2026.test.js
++++ b/src/lib/operations/quoteBuilder2026.test.js
+@@ -1,4 +1,4 @@
+-import { calculate, resolveCanonicalOffers } from './quoteBuilder2026.js';
++import { calculate, resolveCanonicalOffers, loadRules } from './quoteBuilder2026.js';
+ 
+ const governed = [
+   { sku:'DNI-01F-001', name:'Holiday & Seasonal Home Decorating', base_price_cents:10000, sourceType:'GOVERNED' },
+@@ -74,3 +74,17 @@ test('keeps D11 apparel under review until an authoritative total-price formula
+     expect(result.needsReview).toBe(true);
+   }
+ });
++
++describe('quote pricing authority', () => {
++  test('loadRules reads only ACTIVE and LOCKED pricing rules', async () => {
++    const filters = [];
++    const chain = {
++      select: () => chain,
++      eq: (column, value) => { filters.push([column, value]); return chain; },
++      order: () => Promise.resolve({ data: [{ id: 'r1', base_price_cents: 12900 }], error: null })
++    };
++    const rules = await loadRules({ from: () => chain }, 'svc-1', 'CH04');
++    expect(rules).toEqual([{ id: 'r1', base_price_cents: 12900 }]);
++    expect(filters).toEqual(expect.arrayContaining([['status', 'ACTIVE'], ['lock_status', 'LOCKED']]));
++  });
++});
+-- 
+2.43.0
+
