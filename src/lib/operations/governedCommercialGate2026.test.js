@@ -89,3 +89,32 @@ describe('CH01 canonical resolver controls', () => {
   expect(result.reason).toBe('CH01_SUBCHANNEL_MISMATCH');
  });
 });
+
+const { getChannelFromRequest } = require('./governedCommercialGate2026.js');
+
+describe('five-channel checkout routing integrity', () => {
+  const request = (routing, extra = {}) => ({ property_details: { operationsRouting: routing, ...extra } });
+  test.each([['B2C','CH01'],['B2B_APT','CH02'],['B2B_RE','CH03'],['B2B','CH04'],['B2G','CH05'],['GOV','CH05'],['GOVERNMENT','CH05'],['INSTITUTIONAL','CH05'],['PROCUREMENT','CH05']])('maps %s to %s', (input, expected) => {
+    expect(getChannelFromRequest(request({ channel: input }))).toBe(expected);
+  });
+  test('government intent cannot be downgraded to commercial checkout', () => {
+    expect(getChannelFromRequest(request({channel:'CH04'}, {commercialIntent:{channelCode:'B2G'}}))).toBe('CH05');
+  });
+  test('conflicting commercial channel identities fail closed', () => {
+    expect(getChannelFromRequest(request({channel:'CH02',channelCode:'CH03'}))).toBeNull();
+  });
+  test('unknown routing identities fail closed', () => {
+    expect(getChannelFromRequest(request({channel:'UNKNOWN'}))).toBeNull();
+  });
+  test('missing routing identities fail closed', () => {
+    expect(getChannelFromRequest(request({}))).toBeNull();
+  });
+});
+
+describe('government procurement payment hard stop', () => {
+  test('CH05 cannot become public checkout eligible even when an offer is otherwise LIVE_READY', () => {
+    const offer = { releaseState:'LIVE_READY', commercialOfferStatus:'SELL_NOW', fulfillmentGateStatus:'READY', pricingType:'FIXED', baseCustomerPrice:275, internalCost:'1 hr @ $75', marginEconomics:'AUDITED: margin 72.7%' };
+    const result = checkoutEligibility(offer, { channel:'CH05', channelPricingType:'FIXED', channelPriceCents:27500, hasLockedActivePricing:true });
+    expect(result).toEqual({eligible:false,reason:'GOVERNMENT_PROCUREMENT_NO_PUBLIC_CHECKOUT',price:null});
+  });
+});

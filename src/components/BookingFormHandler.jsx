@@ -82,7 +82,7 @@ export default function BookingFormHandler() {
       <button 
         type="submit" 
         disabled={loading} 
-        style={{ backgroundColor: '#6B1F2B', color: '#F6F0E4', padding: '12px', borderRadius: '4px', fontWeight: '800', cursor: 'pointer', border: 'none' }}>
+        style={{ backgroundColor: 'var(--dd-burgundy)', color: 'var(--dd-cream)', padding: '12px', borderRadius: '4px', fontWeight: '800', cursor: 'pointer', border: 'none' }}>
         {loading ? 'Submitting...' : 'TELL US WHAT YOU NEED →'}
       </button>
 

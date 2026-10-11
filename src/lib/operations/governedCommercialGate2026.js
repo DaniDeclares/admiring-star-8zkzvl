@@ -39,6 +39,7 @@ function money(value) {
 
 function normalizeChannel(channelType, channel) {
   const normalizedType = String(channelType || '').trim().toUpperCase();
+  if (['GOV', 'GOVERNMENT', 'INSTITUTIONAL', 'PROCUREMENT', 'PUBLIC_SECTOR'].includes(normalizedType)) return 'CH05';
   return INTAKE_TO_CHANNEL[normalizedType] || String(channel || '').trim().toUpperCase();
 }
 
@@ -57,6 +58,7 @@ function resolveGovernedPrice(offer, { channel, subchannel, isVerifiedCommunityR
 }
 
 function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityResident, channelPricingType, channelPriceCents, hasLockedActivePricing, hasLockedActiveSubchannelPricing } = {}) {
+  if (channel === 'CH05') return { eligible: false, reason: 'GOVERNMENT_PROCUREMENT_NO_PUBLIC_CHECKOUT', price: null };
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
@@ -85,7 +87,12 @@ function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityRe
 
 function getChannelFromRequest(request) {
   const routing = request?.property_details?.operationsRouting || {};
-  return normalizeChannel(routing.channel, routing.channel);
+  const signals = [routing.channel, routing.channelCode, request?.property_details?.commercialIntent?.channelCode, request?.property_details?.channelType].filter(Boolean).map(value => normalizeChannel(value, value));
+  if (signals.includes('CH05')) return 'CH05'; // Procurement cannot be downgraded into a public checkout channel.
+  const canonical = signals.filter(value => /^CH0[1-5]$/.test(value));
+  if (new Set(canonical).size > 1) return null; // Contradictory channel identities fail closed.
+  if (signals.some(value => !/^CH0[1-5]$/.test(value))) return null; // Unknown routing identities cannot authorize checkout.
+  return canonical[0] || null;
 }
 
 let modulePromise;

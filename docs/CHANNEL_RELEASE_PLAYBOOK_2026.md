@@ -147,7 +147,7 @@ Before GREEN:
 - deposit/payment terms match the commercial contract;
 - quote-to-job conversion is tested.
 
-## 10. Public/runtime smoke test
+### CH05 procurement payment prohibition (hard release gate)\n\nCH05 Government & Institutional Procurement is a distinct authorized channel, not a consumer checkout audience. No CH05 offer may generate, activate, display, or validate a public Stripe Payment Link, Checkout Session, direct-pay button, or consumer deposit request. CH05 must use solicitation/qualification → award and signed contract or purchase order → authorized performance → compliant invoice → agency-approved payment terms. An agency-authorized electronic invoice or remittance does not grant permission for public checkout. Fail closed if channel identity is missing or contradictory; do not silently fall back to CH04 or CH01. Historical CH02 property-management records remain CH02 and must not be renumbered.\n\nRelease regression proof must exercise CH01–CH04 permitted paths, CH05 public-checkout rejection, CH05 procurement invoice path, and ambiguous-channel rejection. Existing public payment links associated with CH05 require review and controlled deactivation; never silently delete historical financial evidence.\n\n## 10. Public/runtime smoke test
 
 Test the entire path, not isolated components:
 
