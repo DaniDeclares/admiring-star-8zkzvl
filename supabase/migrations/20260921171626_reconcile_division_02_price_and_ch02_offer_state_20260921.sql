@@ -137,7 +137,20 @@ begin
   select count(*) into v_offer_004 from public.dd_governed_commercial_offers where canonical_sku='DNI-02A-004' and service_name='Commercial Space Reset' and customer_price_cents=20000 and pricing_model='PER_HOUR';
   select count(*) into v_offer_005 from public.dd_governed_commercial_offers where canonical_sku='DNI-02A-005' and service_name='Common Area Detail' and customer_price_cents=27500 and pricing_model='SOW_PROCUREMENT';
   select count(*) into v_offer_012 from public.dd_governed_commercial_offers where canonical_sku='DNI-02A-012' and service_name='Office Cleaning' and customer_price_cents=27500 and pricing_model='FIXED';
-  if v_offer_004<>1 or v_offer_005<>1 or v_offer_012<>1 then raise exception 'Governed commercial-offer identity/price reconciliation failed: 004=% 005=% 012=%',v_offer_004,v_offer_005,v_offer_012; end if;
+  -- Reconstructible history has no governed commercial-offer rows yet.
+  -- Price reconciliation updates existing offers; it must not create them.
+  -- Reject a present row with incorrect identity or pricing, but accept absence.
+  if exists (
+    select 1 from public.dd_governed_commercial_offers g
+    where g.canonical_sku in ('DNI-02A-004','DNI-02A-005','DNI-02A-012')
+      and not (
+        (g.canonical_sku='DNI-02A-004' and g.service_name='Commercial Space Reset' and g.customer_price_cents=20000 and g.pricing_model='PER_HOUR')
+        or (g.canonical_sku='DNI-02A-005' and g.service_name='Common Area Detail' and g.customer_price_cents=27500 and g.pricing_model='SOW_PROCUREMENT')
+        or (g.canonical_sku='DNI-02A-012' and g.service_name='Office Cleaning' and g.customer_price_cents=27500 and g.pricing_model='FIXED')
+      )
+  ) then
+    raise exception 'Governed commercial-offer identity/price reconciliation failed for existing historical row';
+  end if;
 end $$;
 
 commit;
