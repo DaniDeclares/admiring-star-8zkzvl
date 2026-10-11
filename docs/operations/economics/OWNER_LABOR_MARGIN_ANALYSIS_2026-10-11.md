@@ -24,7 +24,7 @@ No service is economically VERIFIED, so none is margin-approved. All 108 are cla
 | Needs cost evidence (close to floor) | 19 | 35-49% | Real hours. Includes 04A-001, 003, 004, 005, 007, 008, 009, 010, 014-019 and 06A-005/007/009, 03A-002/019 |
 | Needs pricing or scope revision | 26 | 10-34% | Owner decision on price/scope; hours evidence alone unlikely to reach 50% |
 | Needs pricing or scope revision (severe) | 32 | 0-9% | Same; priced at roughly cost |
-| Below cost | 22 | negative | Same; includes most 08A items (hours x $90 exceeds price) and 03A-011/013, 01D-009/011, 01F-003 |
+| Below cost | 23 | negative | Same; includes most 08A items (hours x $90 exceeds price) and 03A-011/013, 01D-009/011, 01F-003 |
 | No cost basis | 5 | n/a | 01D-005, 01F-001, 01G-001 (PENDING_RECONCILIATION), 06A-016, 06A-017 (no cost row) |
 | Not modelled per item | 2 | n/a | 11A-017/018 (DTF/heat press: setup fee only; per-item pricing separate) |
 
@@ -35,6 +35,6 @@ The three live remote services under this model: Virtual Assistant (04A-001, $14
 ## What this implies (no action taken)
 - Do not mark more offers LIVE_READY without a way to deliver them profitably. LIVE_READY is a release state; margin is a separate gate and stays closed.
 - Next evidence to collect: actual hours and the owner's standardized rate from the first fulfilled jobs (feeds `dd_job_economics_feedback`, the existing calibration path). The existing `job margin review` evaluator (#630) already treats unmeasured margins as unverified.
-- Owner decisions that cannot be settled from existing authority: (a) which standardized owner rate applies per tier ($30 benchmark vs $60/$75/$90 build-phase), (b) whether any of the 80 services at or below ~35% should be repriced or rescoped.
+- Owner decisions that cannot be settled from existing authority: (a) which standardized owner rate applies per tier ($30 benchmark vs $60/$75/$90 build-phase), (b) whether any of the 80 services at or below ~35% (80 of 101 modelled) should be repriced or rescoped.
 
 Files: `live_ready_margin_model_2026-10-11.{csv,json}` (per-SKU), generator `tools/economics/live_ready_margin_model.py`.
