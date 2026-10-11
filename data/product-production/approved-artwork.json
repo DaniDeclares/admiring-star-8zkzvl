@@ -112,7 +112,20 @@
         ]
       },
       "protected_scene": "Lettering, black cat washing dishes, cleaning effects, broom, purple feather duster, composition",
-      "canva_status": "NOT_UPLOADED: sandbox network policy returns 403 for www.canva.com upload host; no Canva asset exists from this session"
+      "canva_status": "REFERENCE_ASSET_UPLOADED_AND_VERIFIED_IN_CANVA; original approved merchandise presentation only, NOT transparent print master or interchangeable layers. Claude's separate sandbox upload to www.canva.com failed HTTP 403; that failure does not negate the existing ChatGPT Canva upload.",
+      "canva_reference": {
+        "asset_id": "MAHXvu7jtdc",
+        "asset_name": "D2 OWNER APPROVED BASE — Witch Please Merchandise Presentation — 2026-10-11",
+        "verified_date": "2026-10-11",
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "kind": "owner-approved flattened merchandise reference",
+        "production_master": false,
+        "character_layers_created": false,
+        "variant_art_approved": false
+      }
     },
     {
       "key": "fall-design-003-pumpkin-spice-real-estate-advice",
