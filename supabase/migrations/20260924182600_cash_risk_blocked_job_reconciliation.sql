@@ -27,8 +27,18 @@
 --
 -- No change to the #395 columns, table, or the byte-for-byte-preserved
 -- parts of dd_refresh_company_domain_state(). Additive and idempotent.
+--
+-- Ordering note: by filename timestamp this migration runs before
+-- 20260924182836_job_cash_at_risk_signal.sql, which also adds these columns.
+-- Ensure they exist here so clean replay does not depend on later migration order.
 
 begin;
+
+alter table public.dd_jobs
+  add column if not exists revenue_total numeric,
+  add column if not exists deposit_expected numeric,
+  add column if not exists balance_due numeric,
+  add column if not exists acquisition_cost numeric;
 
 create or replace function public.dd_compute_job_cash_risk(p_lookahead_hours int default 72)
 returns jsonb
