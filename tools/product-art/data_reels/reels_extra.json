@@ -1,0 +1,138 @@
+{
+ "hooks": [
+  "The first thing I check before starting [service].",
+  "A safer way to organize [task] without overspending.",
+  "What happens during a real [service] visit.",
+  "Three questions to ask before booking [service].",
+  "The tool I actually use for [task]\u2014and when I don't.",
+  "Here is what a scoped [service] appointment includes.",
+  "How to prepare for a [service] visit in five minutes.",
+  "Why I document the handoff after [task].",
+  "A common [industry] mistake\u2014and a practical alternative.",
+  "How I tell whether [service] needs a specialist.",
+  "If your [area/task] keeps piling up, start here.",
+  "You don't need a perfect home to begin.",
+  "One small reset for a busy [day/season].",
+  "When your schedule is full, simplify [task].",
+  "This is the part of [task] you can delegate.",
+  "An easier way to keep [documents/supplies] together.",
+  "Feeling behind on [task]? Try one bounded step.",
+  "The two-minute preparation that makes [task] easier.",
+  "Before spending Saturday on [task], consider this.",
+  "One system that helps avoid redoing [task].",
+  "What's hiding in the back of your [supply zone]?",
+  "The overlooked step before you [task].",
+  "What most [buyer type] forget to ask about [service].",
+  "Three places that reveal the next organizing priority.",
+  "Can you spot the missing item on this checklist?",
+  "What this labeled bin is actually solving.",
+  "A peek inside the process\u2014not a client's private details.",
+  "Why this simple checklist gets used every visit.",
+  "Which of these two layouts is easier to maintain?",
+  "One small question that changes the [task] plan."
+ ],
+ "seq": [
+  {
+   "n": "01",
+   "title": "Cleaning supply check",
+   "body": "Labelled safe supplies \u2192 gloves and cloths \u2192 organized caddy. Overlay: \u201cKnow your materials before a reset.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "02",
+   "title": "Entry reset",
+   "body": "Clear entry shelf \u2192 sort keys and shoes \u2192 tidy landing tray. Overlay: \u201cStart where clutter enters.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "03",
+   "title": "Laundry sort",
+   "body": "Empty baskets \u2192 fabric-care label \u2192 separated piles. Overlay: \u201cRead the label first.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "04",
+   "title": "Bed linen refresh",
+   "body": "Folded clean linens \u2192 fitted-sheet corner \u2192 finished bed. Overlay: \u201cOne reset that helps a room feel ready.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "05",
+   "title": "Kitchen counter workflow",
+   "body": "Empty work surface \u2192 labeled tools \u2192 orderly finished surface. Overlay: \u201cMake the sequence visible.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "06",
+   "title": "Pantry zones",
+   "body": "Empty bins \u2192 grouping items \u2192 labels on shelves. Overlay: \u201cZones beat mystery piles.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "07",
+   "title": "Closet edit",
+   "body": "Hangers on rail \u2192 keep/relocate bins \u2192 sorted section. Overlay: \u201cTry one section.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "08",
+   "title": "Supply refill",
+   "body": "Inventory checklist \u2192 capped containers \u2192 organized storage. Overlay: \u201cRestock what the list proves is low.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "09",
+   "title": "Virtual inbox categories",
+   "body": "Blurred demo inbox \u2192 labels \u2192 non-sensitive task board. Overlay: \u201cEach message needs a decision.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "10",
+   "title": "Calendar prep",
+   "body": "Blank demo schedule \u2192 buffer block \u2192 priority note. Overlay: \u201cProtect the gap between appointments.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "11",
+   "title": "Client intake handoff",
+   "body": "Fictional intake sheet \u2192 scope checklist \u2192 approved handoff folder. Overlay: \u201cA clear scope prevents mix-ups.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "12",
+   "title": "Household routine board",
+   "body": "Blank routine board \u2192 role labels \u2192 checked example. Overlay: \u201cGive each task a clear owner.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "13",
+   "title": "Guest room prep",
+   "body": "Fresh towel stack \u2192 bedside essentials \u2192 tidy guest space. Overlay: \u201cSmall practical comforts matter.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "14",
+   "title": "Field documentation",
+   "body": "Empty example log \u2192 photo-number placeholder \u2192 completed sample checklist. Overlay: \u201cLog the evidence without revealing private data.\u201d. CTA: [one factual next step]."
+  },
+  {
+   "n": "15",
+   "title": "Weekly business review",
+   "body": "Anonymized figures \u2192 quote status columns \u2192 weekly next-actions. Overlay: \u201cCount paid work separately from inquiries.\u201d. CTA: [one factual next step]."
+  }
+ ],
+ "tp": [
+  {
+   "n": "01",
+   "title": "Three-step practical tip",
+   "body": "0\u20133s: \u201cA calmer pantry starts here\u201d | 3\u20138s: \u201cGroup by use\u201d | 8\u201313s: \u201cLabel only what helps\u201d | 13\u201318s: \u201cWant a scoped organizing quote?\u201d. Visual: Show hands organizing your own pantry; no narration needed."
+  },
+  {
+   "n": "02",
+   "title": "Before / process / after",
+   "body": "0\u20133s: \u201cOne shelf, three stages\u201d | 3\u20138s: \u201cBefore (used with permission)\u201d | 8\u201313s: \u201cSorting and resetting\u201d | 13\u201318s: \u201cAfter \u2014 ask how our service works\u201d. Visual: Do not imply the example is a real customer result unless it is."
+  },
+  {
+   "n": "03",
+   "title": "Service scope explainer",
+   "body": "0\u20134s: \u201cWhat is in a [service] visit?\u201d | 4\u20139s: \u201c[included step one]\u201d | 9\u201314s: \u201c[included step two]\u201d | 14\u201320s: \u201cAsk for the full scope at [link]\u201d. Visual: Only include deliverables your business actually offers."
+  },
+  {
+   "n": "04",
+   "title": "Myth versus careful fact",
+   "body": "0\u20134s: \u201cMyth: [common assumption]\u201d | 4\u201310s: \u201cReality: [verified qualification]\u201d | 10\u201316s: \u201cCheck [manufacturer/professional guidance]\u201d | 16\u201321s: \u201cSave this reminder\u201d. Visual: Never turn unverified household safety claims into a tip."
+  },
+  {
+   "n": "05",
+   "title": "A quick process checklist",
+   "body": "0\u20134s: \u201cBefore [task], check these three things\u201d | 4\u20139s: \u201c1. [check]\u201d | 9\u201314s: \u201c2. [check]\u201d | 14\u201319s: \u201c3. [check]\u201d | 19\u201323s: \u201cNeed help? [real booking route]\u201d. Visual: Film staged or permission-based shots, not private records. SOUND + ACCESSIBILITY Original silent footage works. If adding audio, use music you are permitted to use; trending audio is optional, not a requirement. Keep captions readable and avoid flicker."
+  }
+ ]
+}
