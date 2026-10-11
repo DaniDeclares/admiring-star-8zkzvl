@@ -7,6 +7,7 @@ const verified = {
   actualOtherDirectCosts: 0, remainingOtherDirectCosts: 0,
   overheadAllowance: 19.35, processingAllowance: 3.74,
   minimumMarginPercent: 20, costEvidenceVerified: true,
+  confirmedZeroFields: ['actualOtherDirectCosts', 'remainingOtherDirectCosts'],
 };
 
 describe('DANI fail-closed job margin and scope review (read-only)', () => {
@@ -108,5 +109,40 @@ describe('DANI fail-closed job margin and scope review (read-only)', () => {
     expect(r.state).toBe('HELD');
     expect(r.scopeChangeReview).toBe(true);
     expect(r.forecastMarginPercent).toBeNull();
+  });
+
+  test('an explicit zero is not accepted as known without confirmation', () => {
+    for (const field of ['remainingHours', 'actualOtherDirectCosts', 'remainingOtherDirectCosts', 'overheadAllowance']) {
+      const r = evaluateJobMarginReview({ ...verified, [field]: 0, confirmedZeroFields: [] });
+      expect(r.gates.economics).toBe('ECONOMICS_UNVERIFIED');
+      expect(r.unconfirmedZeroFields).toContain(field);
+      expect(r.forecastMarginPercent).toBeNull();
+      expect(r.state).toBe('HELD');
+    }
+    const ok = evaluateJobMarginReview({ ...verified, remainingHours: 0, confirmedZeroFields: ['remainingHours', 'actualOtherDirectCosts', 'remainingOtherDirectCosts'] });
+    expect(ok.gates.economics).toBe('ECONOMICS_INPUTS_VERIFIED');
+    expect(ok.forecastMarginPercent).not.toBeNull();
+  });
+
+  test('reconciled measured margin is not left listed as an unverified hold', () => {
+    const open = evaluateJobMarginReview(verified);
+    expect(open.holds).toContain('MEASURED_MARGIN_UNVERIFIED');
+    const done = evaluateJobMarginReview({ ...verified, jobComplete: true, qaReconciled: true,
+      actualFinancialsReconciled: true, actualRevenueCollected: 129, actualTotalCosts: 100 });
+    expect(done.gates.measuredProfitability).toBe('MEASURED_MARGIN_READY');
+    expect(done.holds).not.toContain('MEASURED_MARGIN_UNVERIFIED');
+  });
+
+  test('owner notification is due only for newly appeared reasons', () => {
+    const data = { ...verified, actualHours: 0.8, remainingHours: 0.6, previousAlertLevel: 'HOURS_75', requestOutsideApprovedScope: true };
+    const first = evaluateJobMarginReview({ ...data, previousAlertReasons: [] });
+    expect(first.ownerReviewRequired).toBe(true);
+    expect(first.ownerNotificationDue).toBe(true);
+    const acknowledged = evaluateJobMarginReview({ ...data, previousAlertReasons: ['SCOPE_CHANGE_REVIEW', 'FORECAST_HOURS_OVERRUN', 'FORECAST_MARGIN_ALERT'] });
+    expect(acknowledged.ownerReviewRequired).toBe(true);
+    expect(acknowledged.ownerNotificationDue).toBe(false);
+    const heldScope = evaluateJobMarginReview({ scopeApproved: false, requestOutsideApprovedScope: true, previousAlertReasons: ['SCOPE_CHANGE_REVIEW'] });
+    expect(heldScope.ownerNotificationDue).toBe(false);
+    expect(evaluateJobMarginReview({ scopeApproved: false, requestOutsideApprovedScope: true }).ownerNotificationDue).toBe(true);
   });
 });

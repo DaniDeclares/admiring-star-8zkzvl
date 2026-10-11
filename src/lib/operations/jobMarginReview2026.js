@@ -7,6 +7,11 @@ const nonnegative = value => typeof value === 'number' && Number.isFinite(value)
 const percentage = value => nonnegative(value) && value <= 100;
 const round = value => Math.round(value * 100) / 100;
 const LEVELS = [null, 'HOURS_50', 'HOURS_75', 'HOURS_90', 'HOURS_100'];
+// An input of exactly 0 is indistinguishable from "not recorded". It is accepted only when the caller names the
+// field in `confirmedZeroFields`, which must come from governed evidence (e.g. a recorded "no supplies used").
+const ZERO_SENSITIVE = ['actualHours', 'remainingHours', 'actualOtherDirectCosts', 'remainingOtherDirectCosts', 'overheadAllowance', 'processingAllowance'];
+const unconfirmedZeros = job => ZERO_SENSITIVE.filter(f => job[f] === 0 &&
+  !(Array.isArray(job.confirmedZeroFields) && job.confirmedZeroFields.includes(f)));
 
 export function evaluateJobMarginReview(job = {}) {
   const scopeVerified = job.scopeApproved === true &&
@@ -14,7 +19,8 @@ export function evaluateJobMarginReview(job = {}) {
   const paymentVerified = job.paymentPathVerified === true;
   const laborVerified = job.laborRuleVerified === true &&
     nonnegative(job.ownerHourlyRate) && job.ownerHourlyRate > 0;
-  const economicsVerified = job.costEvidenceVerified === true &&
+  const zerosUnconfirmed = unconfirmedZeros(job);
+  const economicsVerified = job.costEvidenceVerified === true && zerosUnconfirmed.length === 0 &&
     nonnegative(job.approvedRevenue) && job.approvedRevenue > 0 &&
     nonnegative(job.actualHours) && nonnegative(job.remainingHours) &&
     nonnegative(job.actualOtherDirectCosts) && nonnegative(job.remainingOtherDirectCosts) &&
@@ -29,15 +35,18 @@ export function evaluateJobMarginReview(job = {}) {
     economics: economicsVerified ? 'ECONOMICS_INPUTS_VERIFIED' : 'ECONOMICS_UNVERIFIED',
     measuredProfitability: 'MEASURED_MARGIN_UNVERIFIED',
   };
-  const holds = Object.values(gates).filter(v => v.endsWith('_UNVERIFIED'));
+  const holdsOf = g => Object.values(g).filter(v => v.endsWith('_UNVERIFIED'));
+  let holds = holdsOf(gates);
   const scopeChangeReview = job.requestOutsideApprovedScope === true;
   const base = {
-    state: 'HELD', gates, holds, scopeChangeReview,
+    state: 'HELD', gates, holds, scopeChangeReview, unconfirmedZeroFields: zerosUnconfirmed,
     forecastMarginPercent: null, forecastContribution: null,
     forecastHours: null, forecastHoursOverrun: null, marginBreach: null,
     budgetAlert: null, budgetLevel: null, alertReasons: scopeChangeReview ? ['SCOPE_CHANGE_REVIEW'] : [],
     newlyAppearedReasons: scopeChangeReview && !(Array.isArray(job.previousAlertReasons) && job.previousAlertReasons.includes('SCOPE_CHANGE_REVIEW')) ? ['SCOPE_CHANGE_REVIEW'] : [],
     ownerReviewRequired: scopeChangeReview,
+    // Notify only for reasons not already acknowledged; ownerReviewRequired stays true while any issue is active.
+    ownerNotificationDue: scopeChangeReview && !(Array.isArray(job.previousAlertReasons) && job.previousAlertReasons.includes('SCOPE_CHANGE_REVIEW')),
     canAutoCharge: false, canAutoContact: false, canAutoReassign: false,
   };
 
@@ -50,6 +59,8 @@ export function evaluateJobMarginReview(job = {}) {
     gates.measuredProfitability = 'MEASURED_MARGIN_READY';
     base.measuredMarginPercent = round(100 *
       (job.actualRevenueCollected - job.actualTotalCosts) / job.actualRevenueCollected);
+    holds = holdsOf(gates);
+    base.holds = holds;
   } else {
     base.measuredMarginPercent = null;
   }
@@ -91,5 +102,6 @@ export function evaluateJobMarginReview(job = {}) {
     forecastHours, forecastHoursOverrun, forecastContribution: round(forecastContribution),
     forecastMarginPercent, marginBreach, budgetLevel, budgetAlert, alertReasons,
     ownerReviewRequired: alertReasons.length > 0,
+    ownerNotificationDue: newlyAppearedReasons.length > 0,
   };
 }
