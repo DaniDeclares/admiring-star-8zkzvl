@@ -67,16 +67,10 @@ jobs:
           SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
-          # The RPC ships in migration 20261010213000, which is not yet applied to Production. Until it is, a missing
-          # RPC must not stop the independent build steps below (same pattern as the review-link recovery step).
-          if curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_hold_expired_autobuild_leases" \
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_hold_expired_autobuild_leases" \
             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
-            -H "Content-Type: application/json" -d '{"p_limit":10}'; then
-            echo "Expired leases held for Tech verification of existing PRs; no duplicate build or owner reapproval." >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "::warning title=Expired-lease hold unavailable::dd_hold_expired_autobuild_leases is not callable (migration not applied to Production?). Continuing with independent steps."
-            echo "Expired-lease hold unavailable; apply and verify migration 20261010213000 through the Production release gate." >> "$GITHUB_STEP_SUMMARY"
-          fi
+            -H "Content-Type: application/json" -d '{"p_limit":10}'
+          echo "Expired leases held for Tech verification of existing PRs; no duplicate build or owner reapproval." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Route approved nonexecutable briefs to existing Tech work
         if: steps.guard.outputs.ready == 'true'
@@ -85,15 +79,10 @@ jobs:
           SB_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
-          # Ships in migration 20261010214500 (not yet applied to Production); a missing RPC must not stop independent builds.
-          if curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_route_autobuild_briefs_to_tech" \
+          curl -fsS -X POST "$SB_URL/rest/v1/rpc/dd_route_autobuild_briefs_to_tech" \
             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
-            -H "Content-Type: application/json" -d '{"p_limit":10}'; then
-            echo "Approved prose briefs routed to existing Tech queue for file-level implementation. No PR or deployment created." >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "::warning title=Brief routing unavailable::dd_route_autobuild_briefs_to_tech is not callable (migration not applied to Production?). Continuing with independent steps."
-            echo "Brief routing unavailable; apply and verify migration 20261010214500 through the Production release gate." >> "$GITHUB_STEP_SUMMARY"
-          fi
+            -H "Content-Type: application/json" -d '{"p_limit":10}'
+          echo "Approved prose briefs routed to existing Tech queue for file-level implementation. No PR or deployment created." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Cap open PR backlog before leasing new builds
         if: steps.guard.outputs.ready == 'true'
