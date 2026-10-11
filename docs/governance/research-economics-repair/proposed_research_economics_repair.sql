@@ -248,3 +248,12 @@ begin
  get diagnostics n=row_count;
  return jsonb_build_object('status','COMPLETED','staged',n,'source_class','TESTER_RESEARCH','production_mutation',false);
 end $$;
+
+-- ---------------------------------------------------------------- consumer routing (applied to Tester 2026-10-11)
+-- The executor only re-triggers the same source watcher, so per-service items are consumed by a research session.
+-- Claim = status RESEARCHING + last_researched_at (the same 2-hour lease the executor already honours: it skips
+-- RESEARCHING rows younger than 2h). FOR UPDATE SKIP LOCKED prevents double claims. No new worker, queue or scheduler.
+-- Functions: dd_claim_pricing_research_items(p_limit<=10, p_claimant) and dd_release_pricing_research_item(work_key, outcome, reason).
+-- Release: failure outcomes re-queue with a 24h retry_after until 3 attempts, then park BLOCKED/RETRY_LIMIT_REACHED with
+-- owner_decision_required=true; NEEDS_OWNER parks immediately. Completion happens through dd_record_service_market_observation.
+-- (Full bodies are in the live Tester definitions; see tester_proof_consumer_routing.md for the verified behaviour.)
