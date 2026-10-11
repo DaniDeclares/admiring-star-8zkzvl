@@ -1,4 +1,4 @@
-import { calculate, resolveCanonicalOffers } from './quoteBuilder2026.js';
+import { calculate, resolveCanonicalOffers, loadRules } from './quoteBuilder2026.js';
 
 const governed = [
   { sku:'DNI-01F-001', name:'Holiday & Seasonal Home Decorating', base_price_cents:10000, sourceType:'GOVERNED' },
@@ -73,4 +73,18 @@ test('keeps D11 apparel under review until an authoritative total-price formula 
     expect(result.reviewFlags).toContain('APPAREL_TOTAL_PRICE_REVIEW');
     expect(result.needsReview).toBe(true);
   }
+});
+
+describe('quote pricing authority', () => {
+  test('loadRules reads only ACTIVE and LOCKED pricing rules', async () => {
+    const filters = [];
+    const chain = {
+      select: () => chain,
+      eq: (column, value) => { filters.push([column, value]); return chain; },
+      order: () => Promise.resolve({ data: [{ id: 'r1', base_price_cents: 12900 }], error: null })
+    };
+    const rules = await loadRules({ from: () => chain }, 'svc-1', 'CH04');
+    expect(rules).toEqual([{ id: 'r1', base_price_cents: 12900 }]);
+    expect(filters).toEqual(expect.arrayContaining([['status', 'ACTIVE'], ['lock_status', 'LOCKED']]));
+  });
 });

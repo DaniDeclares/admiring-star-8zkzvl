@@ -149,8 +149,10 @@ export async function getQuoteCatalog(supabase) {
 
   return resolveCanonicalOffers(governed, specialRows, new Map());
 }
-async function loadRules(supabase, serviceId, channelCode) {
-  const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').order('effective_date',{ascending:false});
+// Quote pricing reads only ACTIVE + LOCKED rules, the same authority governedCommercialGate2026 uses.
+// services.base_price_cents is a display column and is never a price source here.
+export async function loadRules(supabase, serviceId, channelCode) {
+  const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').eq('lock_status', 'LOCKED').order('effective_date',{ascending:false});
   if (error) throw error;
   return data || [];
 }
