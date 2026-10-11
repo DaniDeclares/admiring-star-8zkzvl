@@ -59,6 +59,172 @@
         "Master is 1254 px; print files are upscaled, not redrawn, so very fine detail is limited.",
         "Transparent version: interior black art (blazer, hair, hood, mug) disappears into black garments; cream top lettering is low contrast on light garments."
       ]
+    },
+    {
+      "key": "halloween-design-002-witch-please-i-clean",
+      "collection": "DANI DECLARES Halloween - Cleaning & Home Services",
+      "slogan": "Witch, Please! I Clean!",
+      "creative_status": "OWNER_APPROVED_DIRECTION_ONLY",
+      "production_status": "NO_PRODUCTION_MASTER_ON_FILE",
+      "publication_eligible": false,
+      "concept": "Stylish witch on a broom dusting high areas, self-operating mop, helpful black cat washing dishes, orange-and-purple magic, bold Halloween type. No ghost or skeleton from Design 1.",
+      "reference_sheet": "design-2-witch-please-i-clean-merchandise-sheet.webp",
+      "master": null,
+      "blocker": "Need the actual clean transparent PNG master (and its hash) from the owner/ChatGPT. The sheet is not a master.",
+      "gates": {
+        "master_file_received": false,
+        "printify_blueprint_and_print_area_confirmed": false,
+        "provider_selected": false,
+        "mockups_made": false,
+        "delivered_cost_and_shipping_verified": false,
+        "margin_50_percent_floor_passed": false,
+        "ip_trademark_review": false,
+        "shopify_listing_ready": false,
+        "checkout_and_fulfillment_test_passed": false,
+        "owner_publication_approval": false
+      }
+    },
+    {
+      "key": "fall-design-003-pumpkin-spice-real-estate-advice",
+      "collection": "DANI DECLARES Autumn - Real Estate Professionals",
+      "slogan": "Pumpkin Spice & Real Estate Advice",
+      "creative_status": "DIRECTION_ONLY_FINAL_SIMPLIFIED_MASTER_NOT_APPROVED",
+      "production_status": "NO_PRODUCTION_MASTER_ON_FILE",
+      "publication_eligible": false,
+      "concept": "Cozy indoor professional setting, stylish real-estate character, orange/cream/black/brown/gold palette, interchangeable characters, simplified layouts of one character plus at most two supporting items.",
+      "reference_sheets": [
+        "design-3-scene-and-character-selector-sheet.webp",
+        "design-3-merchandise-and-9-characters-sheet.webp",
+        "design-3-full-scene-merchandise-sheet.webp"
+      ],
+      "master": null,
+      "blocker": "Owner has not approved a final simplified production master. The three sheets show different compositions (two-item desk scene; full-scene with house and sold sign), so no single one can be assumed final.",
+      "gates": {
+        "master_file_received": false,
+        "creative_master_approved": false,
+        "printify_blueprint_and_print_area_confirmed": false,
+        "provider_selected": false,
+        "mockups_made": false,
+        "delivered_cost_and_shipping_verified": false,
+        "margin_50_percent_floor_passed": false,
+        "ip_trademark_review": false,
+        "shopify_listing_ready": false,
+        "checkout_and_fulfillment_test_passed": false,
+        "owner_publication_approval": false
+      }
     }
-  ]
+  ],
+  "reference_sheets": {
+    "note": "Owner/ChatGPT presentation sheets (opaque 1536x1024 images, or a sheet with partial alpha). They are references for look, layouts and character options. NONE is a clean transparent production master: any checkerboard in them is baked into the picture. Do not cut production files out of these sheets.",
+    "files": {
+      "design-1-notary-merchandise-sheet.webp": {
+        "file": "products/seasonal-art-2026/owner-references/2026-10-11/design-1-notary-merchandise-sheet.webp",
+        "sha256": "2e02f544a6df0408ec14552b3074c8bd8336cb726f7c45751dba42503180e1d4"
+      },
+      "design-2-witch-please-i-clean-merchandise-sheet.webp": {
+        "file": "products/seasonal-art-2026/owner-references/2026-10-11/design-2-witch-please-i-clean-merchandise-sheet.webp",
+        "sha256": "9da66c5a2cf15fabb56c4c062daa72ffde31a314fe29ab397b0b9e5725afc82c"
+      },
+      "design-3-full-scene-merchandise-sheet.webp": {
+        "file": "products/seasonal-art-2026/owner-references/2026-10-11/design-3-full-scene-merchandise-sheet.webp",
+        "sha256": "9537dbd2c65364b410455968495675c8cd388e26d51dcb9e43f174714c0344d4"
+      },
+      "design-3-merchandise-and-9-characters-sheet.webp": {
+        "file": "products/seasonal-art-2026/owner-references/2026-10-11/design-3-merchandise-and-9-characters-sheet.webp",
+        "sha256": "09b23da02e3bda64d4c0de68716726d43b8c3a15f21f734fe654faa46a376698"
+      },
+      "design-3-scene-and-character-selector-sheet.webp": {
+        "file": "products/seasonal-art-2026/owner-references/2026-10-11/design-3-scene-and-character-selector-sheet.webp",
+        "sha256": "f104bb0dfd36a53c26e59b3d0058a29c01446768be2612f17238f927a73a2528"
+      }
+    }
+  },
+  "character_variants": {
+    "rules": [
+      "Swap complete character groups (face, hair, body, arms, hands, clothing, held props) - never recolor parts.",
+      "Each variant needs owner approval and a stable id before it can be offered.",
+      "Do not auto-pair hairstyle with ethnicity; customers choose the whole look.",
+      "Personalization (Level B) and photo personalization are NOT live."
+    ],
+    "variants": [
+      {
+        "id": "D1-C001",
+        "design": "halloween-design-001-i-aint-afraid-of-no-signatures",
+        "label": "Curly updo, glasses, black blazer (as approved)",
+        "status": "APPROVED_MASTER_LOCKED"
+      },
+      {
+        "id": "D3-C001",
+        "design": "fall-design-003-pumpkin-spice-real-estate-advice",
+        "label": "4C fro (dark skin)",
+        "status": "CONCEPT_ON_REFERENCE_SHEET_NOT_APPROVED_MASTER"
+      },
+      {
+        "id": "D3-C002",
+        "design": "fall-design-003-pumpkin-spice-real-estate-advice",
+        "label": "Natural curls (medium-dark)",
+        "status": "CONCEPT_ON_REFERENCE_SHEET_NOT_APPROVED_MASTER"
+      },
+      {
+        "id": "D3-C003",
+        "design": "fall-design-003-pumpkin-spice-real-estate-advice",
+        "label": "Puff (medium)",
+        "status": "CONCEPT_ON_REFERENCE_SHEET_NOT_APPROVED_MASTER"
+      },
+      {
+        "id": "D3-C004",
+        "design": "fall-design-003-pumpkin-spice-real-estate-advice",
+        "label": "Braids (medium)",
+        "status": "CONCEPT_ON_REFERENCE_SHEET_NOT_APPROVED_MASTER"
+      },
+      {
+        "id": "D3-C005",
+        "design": "fall-design-003-pumpkin-spice-real-estate-advice",
+        "label": "Locs (medium)",
+        "status": "CONCEPT_ON_REFERENCE_SHEET_NOT_APPROVED_MASTER"
+      },
+      {
+        "id": "D3-C006",
+        "design": "fall-design-003-pumpkin-spice-real-estate-advice",
+        "label": "Straight, Asian look (light-medium)",
+        "status": "CONCEPT_ON_REFERENCE_SHEET_NOT_APPROVED_MASTER"
+      },
+      {
+        "id": "D3-C007",
+        "design": "fall-design-003-pumpkin-spice-real-estate-advice",
+        "label": "Wavy, Asian look (medium)",
+        "status": "CONCEPT_ON_REFERENCE_SHEET_NOT_APPROVED_MASTER"
+      },
+      {
+        "id": "D3-C008",
+        "design": "fall-design-003-pumpkin-spice-real-estate-advice",
+        "label": "Curly highlights (light)",
+        "status": "CONCEPT_ON_REFERENCE_SHEET_NOT_APPROVED_MASTER"
+      },
+      {
+        "id": "D3-C009",
+        "design": "fall-design-003-pumpkin-spice-real-estate-advice",
+        "label": "Blonde puff (light)",
+        "status": "CONCEPT_ON_REFERENCE_SHEET_NOT_APPROVED_MASTER"
+      }
+    ]
+  },
+  "layout_approaches": {
+    "FULL_SCENE": [
+      "tee",
+      "crewneck",
+      "hoodie",
+      "tote",
+      "blanket",
+      "poster"
+    ],
+    "COMPACT": [
+      "mug",
+      "small accessories"
+    ],
+    "WRAPAROUND": [
+      "tumbler"
+    ],
+    "note": "Layout approaches, not separate SKUs. Real print areas must come from the Printify/other supplier blueprint for each product before any production file is made."
+  }
 }
