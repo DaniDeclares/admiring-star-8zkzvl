@@ -74,3 +74,19 @@ Rendered-page and screenshot QA, Stripe/Shopify/Gmail status (the Stripe connect
 2. Decide the #591 replay-scope option in section A, then reconstruct the 103 missing sources.
 3. Merge #637 only after a Production deployment shows correct role-gated responses.
 4. Owner-only: provider identity/tax/agreement completion; consent confirmation for any outreach.
+
+## Update (2026-10-11 later)
+
+### Vercel
+- Hobby build limit appears lifted: previews for this branch built and went READY (46b2ce7, 14ad62f). Still no deployment for main `b73e92f`; Production still runs `cf875ff`. A Production deployment needs owner authorization. Each push also costs a build, so pushes were kept few.
+
+### PR #591 / Option 1 (see `docs/governance/PRODUCTION_REPLAY_SCOPE_2026-10-11.md`)
+- Reconciled all 677 Production ledger rows against #591 source by SQL hash: 549 identical, 20 identical but renamed, 78 missing, 23 + 5 drifted, 2 with no recorded SQL. The earlier "103 missing" was overstated; 25 of those exist in source under another version. True gap: 78 missing + 28 drifted.
+- Exact ledger SQL for those 106 is archived (hash-verified) and a deterministic assembler builds a Production-lineage replay set (686 files, zero errors). Tester-only files, including `20260930140500`, are excluded and still need their own promotion preflight. Replay not yet run on this set; wiring into #591's workflow needs that branch.
+
+### PR #630 evaluator review (`jobMarginReview2026.js`, read only)
+Sound: unknown inputs hold the job (nothing defaults to zero), gates are independent, no side-effect flags are ever true, hour thresholds and previous-level dedup work.
+Defects to fix before wiring into Owner HQ: (1) `holds` is computed before the measured-margin gate updates, so it can still list `MEASURED_MARGIN_UNVERIFIED` after reconciliation; (2) `state`/`ownerReviewRequired` stay true for already-acknowledged reasons, so a consumer must key notifications on `newlyAppearedReasons`, not on state, or alerts will repeat; (3) an explicit 0 for remaining hours or costs passes validation and is only protected by the `costEvidenceVerified` flag, so the caller must derive that flag from real evidence. Not changed (not my branch).
+
+### Products
+See `docs/operations/PRODUCT_PRODUCTION_2026-10-11.md` and PR #638.
