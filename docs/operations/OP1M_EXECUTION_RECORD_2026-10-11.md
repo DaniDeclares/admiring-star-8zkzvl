@@ -107,3 +107,24 @@ None of the six migrations is applied in Tester either (Tester ledger ends 20261
 Why warn-and-continue was wrong: letting the two recovery steps pass would reach claim, open a PR, then fail at "record PR evidence" because that RPC is also missing, leaving a PR with no durable record and no lease reconciliation. The earlier commit doing this was reverted on #638.
 Current state is fail-closed and safe: no new leases or PRs. Backlog is durable in `dd_autobuild_candidates` (49 pending candidates: 40 BLOCKED and 9 MANIFEST_READY, all BUILD_BRIEF_V1; 2 PR_OPENED; 0 expired leases), so nothing is lost while it is red.
 The executor is NOT healthy and must not be reported healthy until the six migrations (in order, with `20261010230000`) are installed through the governed path with a Tester syntax proof and a Production readback. Needs owner authorization to apply to Production.
+
+## Owner-supplied revenue-readiness inputs (received 2026-10-11)
+
+Four files were supplied without instructions: `2026-10-09-addable-offers.md`, `remote_ranked_2.csv` (88 rows), `remote_services_2.csv` (188 rows), and `DANI_Catalog__Revenue_Readiness___Oct_9.docx`. They are dated 2026-10-09 and describe a read-only Production snapshot. They are **reference inputs, not authority**: Production Supabase remains the source of truth and every figure must be re-read before it is used for a public change.
+
+What was done: nothing was changed. No price, listing, release state, quote, or outreach was altered from these files.
+
+Material points carried into planning (all unchanged, all need owner decisions):
+- 108 of 397 public services are LIVE_READY (88 remote). None is online-checkout eligible: the app economics gate needs a non-draft cost and a margin of at least 50%, and 106 of the 108 have draft costs. The release contract and the economics gate disagree.
+- Sellable now by quote then invoice: the 88 remote services (business channels only) plus the three live remote services and Shopify kits. Owner-fulfilled hourly estimates ($80–177) rely on unaudited draft hours and assume owner pay is income; they are not margin approvals.
+- Data defects flagged by the owner's analysis and not repaired here: `base_price_cents` vs `starting_price` mismatch (55), customer price text vs price on file (11+), 16 SKUs with both DO_NOT_SELL and SELL rows (DNI-01D-005 and DNI-01G-001 are LIVE_READY), duplicate "Vendor Coordination" (DNI-02A-019 / DNI-10A-006), labor-rate conflict for DNI-04A-001..020 ($30 vs $75–90/hr).
+- Held for owner review (legal-adjacent / reputational): business-formation help including EIN Application Assistance ($299; the IRS issues EINs free) and similar DNI-06A items; the document's top-20 list includes them, so ranking by hourly must not promote them.
+- Tier-2 Guest Room & Hospitality Setup ($85, DNI-01D-009) is the only residential item flagged clean in records; it still needs a Production re-read before promotion.
+- The brief lists the Shopify storefront password as an owner decision and the store name "My Store 2". Neither was touched; no Shopify access exists in this session.
+- Provider dispatch defect (zero of 51 providers can pass because a Stripe Connect record is required but never created) overlaps the #637 provider work. Fix scope belongs to the owner-approved business-rule change, not this session.
+
+SHA-256 of the received files: see `docs/operations/` provenance list below.
+    d55e16a2ae744aabf277c64da0bd5b9c0eeab1bb4878ba37795415553c4f9cc9 a54557d3-2026-10-09-addable-offers.md
+    42652cc00b3e5286b9c9228c1ef47690188c962de86727f3649c90ddc9db1eab 9388f783-remote_ranked_2.csv
+    c412394cebf87dc8f14e31c08604f64bc02e5ebedaa7b754dcc1ce24eca35670 23d4576d-remote_services_2.csv
+    3d5473e47623299219ce236146a9cbbb11157e1d2ee16740766d1aa1f67bb58a f18f86b0-DANI_Catalog__Revenue_Readiness___Oct_9.docx
