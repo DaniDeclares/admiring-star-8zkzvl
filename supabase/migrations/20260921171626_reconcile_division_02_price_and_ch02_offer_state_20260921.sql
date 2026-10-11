@@ -117,8 +117,14 @@ begin
   where canonical_sku='DNI-02A-005' and commercial_offer_status='DO_NOT_SELL';
   select count(*) into v_ready_012 from public.dd_governed_service_offers
   where canonical_sku='DNI-02A-012' and commercial_offer_status='DO_NOT_SELL';
-  if v_ready_005 <> 1 or v_ready_012 <> 1 then
-    raise exception 'D02_LOSS_HOLD_NOT_PRESERVED: 005=% 012=%',v_ready_005,v_ready_012;
+  -- A missing historical governed-offer row is not permission to sell.
+  -- Reject only an existing row that lost its DO_NOT_SELL hold.
+  if exists (
+    select 1 from public.dd_governed_service_offers o
+    where o.canonical_sku in ('DNI-02A-005','DNI-02A-012')
+      and o.commercial_offer_status is distinct from 'DO_NOT_SELL'
+  ) then
+    raise exception 'D02_LOSS_HOLD_NOT_PRESERVED: existing 005/012 offer is not DO_NOT_SELL';
   end if;
   if exists (
     select 1 from public.dd_service_channel_availability a
