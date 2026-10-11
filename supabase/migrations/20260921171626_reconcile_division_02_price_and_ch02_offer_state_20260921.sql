@@ -90,32 +90,27 @@ begin
   if v_crosswalk <> 0 then
     raise exception 'CH02_UNSUPPORTED_CROSSWALK: expected zero historically authorized crosswalks for 02A-005/012; found %',v_crosswalk;
   end if;
-  -- 004's count is reconstructed from actual channel/provider records above.
-  -- Do not assert zero historical providers unless the ledger proves zero.
-  -- In particular, a price correction must not itself authorize public sale.
+  -- The reconstructible ledger has no governed-service-offer row for 004
+  -- at this point. Do not synthesize an offer or invent fulfillment authority.
+  -- If the row exists in a different historical state, its recorded counts
+  -- must still agree with underlying authorization evidence.
   select count(*) into v_gated_004 from public.dd_governed_service_offers o
   where o.canonical_sku='DNI-02A-004'
-    and o.channel_availability_count=(
-      select count(*)::int from public.dd_service_channel_availability a
-      where a.service_id=o.runtime_service_id and a.eligibility_status='ELIGIBLE'
-    )
-    and o.authorized_provider_capability_count=(
-      select count(*)::int from public.dd_provider_capabilities p
-      where p.service_id=o.runtime_service_id and p.is_authorized=true
-    )
-    and o.fulfillment_gate_status=case when o.authorized_provider_capability_count>0
-      then 'READY' else 'FULFILLMENT_GATED' end;
-  if v_gated_004 <> 1 then
-    raise exception 'DNI-02A-004 evidence-backed gate/count reconciliation failed: matched=%; rows=%',
-      v_gated_004,
-      (select coalesce(jsonb_agg(jsonb_build_object(
-        'sku',o.canonical_sku,'runtime_service_id',o.runtime_service_id,
-        'channel_count',o.channel_availability_count,
-        'provider_count',o.authorized_provider_capability_count,
-        'fulfillment_gate',o.fulfillment_gate_status,
-        'actual_channel_count',(select count(*) from public.dd_service_channel_availability a where a.service_id=o.runtime_service_id and a.eligibility_status='ELIGIBLE'),
-        'actual_provider_count',(select count(*) from public.dd_provider_capabilities p where p.service_id=o.runtime_service_id and p.is_authorized=true)
-      )), '[]'::jsonb) from public.dd_governed_service_offers o where o.canonical_sku='DNI-02A-004');
+    and (
+      o.channel_availability_count <> (
+        select count(*)::int from public.dd_service_channel_availability a
+        where a.service_id=o.runtime_service_id and a.eligibility_status='ELIGIBLE'
+      )
+      or o.authorized_provider_capability_count <> (
+        select count(*)::int from public.dd_provider_capabilities p
+        where p.service_id=o.runtime_service_id and p.is_authorized=true
+      )
+      or o.fulfillment_gate_status is distinct from case
+        when o.authorized_provider_capability_count>0 then 'READY'
+        else 'FULFILLMENT_GATED' end
+    );
+  if v_gated_004 <> 0 then
+    raise exception 'DNI-02A-004 historical offer exists with inconsistent authorization evidence';
   end if;
   -- Price repair is not commercial approval. Both loss-held offers must stay unsellable.
   select count(*) into v_ready_005 from public.dd_governed_service_offers
