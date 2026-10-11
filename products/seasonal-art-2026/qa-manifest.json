@@ -1,227 +1,222 @@
 {
- "generated": "2026-10-11",
- "files": 44,
- "total_bytes": 10646044,
- "items": [
-  {
-   "key": "merch-halloween-notary-boo-it-s-notarized",
-   "bytes": 231488,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-notary-resting-notary-face",
-   "bytes": 239398,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-notary-witch-better-have-my-signatures",
-   "bytes": 264647,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-notary-no-tricks-just-signatures",
-   "bytes": 252061,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-cleaning-i-clean-up-your-nightmares",
-   "bytes": 239706,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-cleaning-too-ghoul-for-dirty-floors",
-   "bytes": 244118,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-cleaning-witch-please-i-clean",
-   "bytes": 219970,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-cleaning-sweeping-away-the-spooky",
-   "bytes": 252438,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-real-estate-selling-houses-not-haunted-ones",
-   "bytes": 251223,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-real-estate-your-boo-tiful-new-home-awaits",
-   "bytes": 242947,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-real-estate-haunted-by-pending-closings",
-   "bytes": 226093,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-real-estate-the-only-thing-scary-is-this-market",
-   "bytes": 256732,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-admin-booked-boo-sy",
-   "bytes": 229562,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-admin-running-on-coffee-chaos",
-   "bytes": 260553,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-admin-my-inbox-is-a-haunted-house",
-   "bytes": 245413,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-admin-deadlines-are-my-villain-origin-story",
-   "bytes": 241873,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-delivery-special-delivery-from-the-other-side",
-   "bytes": 262073,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-delivery-boo-crew-express",
-   "bytes": 217188,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-delivery-dead-tired-still-delivering",
-   "bytes": 246721,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-halloween-delivery-frightfully-fast-deliveries",
-   "bytes": 249928,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-fall-notary-pumpkin-spice-notary-stamps",
-   "bytes": 240992,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-fall-notary-fall-into-a-perfect-signing",
-   "bytes": 223092,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-fall-cleaning-fall-leaves-fresh-cleans",
-   "bytes": 224943,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-fall-cleaning-sweater-weather-sparkling-floors",
-   "bytes": 221543,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-fall-real-estate-falling-for-new-listings",
-   "bytes": 223461,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-fall-real-estate-pumpkins-properties-pending-contracts",
-   "bytes": 226249,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-fall-real-estate-pumpkin-spice-real-estate-advice",
-   "bytes": 236233,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-fall-admin-booked-blessed-pumpkin-obsessed",
-   "bytes": 232187,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-fall-admin-fall-hustle-winter-goals",
-   "bytes": 226760,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-notary-jingling-all-the-way-to-the-signing-table",
-   "bytes": 282863,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-notary-all-i-want-for-christmas-is-a-fully-signed-package",
-   "bytes": 301655,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-notary-santa-s-favorite-notary",
-   "bytes": 238646,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-cleaning-sleighing-dirt-all-season",
-   "bytes": 243504,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-cleaning-merry-clean-mas",
-   "bytes": 196740,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-cleaning-making-spirits-bright-baseboards-white",
-   "bytes": 248639,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-delivery-jingling-all-the-way-to-the-post-office",
-   "bytes": 265053,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-delivery-sleighing-deliveries",
-   "bytes": 226512,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-delivery-north-pole-express-holiday-delivery-crew",
-   "bytes": 236877,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-real-estate-home-for-the-holidays-i-can-help-with-that",
-   "bytes": 242262,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-real-estate-sleighing-closings",
-   "bytes": 220277,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-real-estate-all-i-want-for-christmas-is-clear-to-close",
-   "bytes": 256937,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-admin-making-a-list-checking-my-invoices-twice",
-   "bytes": 284346,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-admin-booked-busy-feeling-festive",
-   "bytes": 246330,
-   "min_margin_px": 127
-  },
-  {
-   "key": "merch-christmas-admin-ceo-of-holiday-chaos",
-   "bytes": 225811,
-   "min_margin_px": 127
-  }
- ]
+  "generated": "2026-10-11",
+  "files": 43,
+  "total_bytes": 10409811,
+  "items": [
+    {
+      "key": "merch-halloween-notary-boo-it-s-notarized",
+      "bytes": 231488,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-notary-resting-notary-face",
+      "bytes": 239398,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-notary-witch-better-have-my-signatures",
+      "bytes": 264647,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-notary-no-tricks-just-signatures",
+      "bytes": 252061,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-cleaning-i-clean-up-your-nightmares",
+      "bytes": 239706,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-cleaning-too-ghoul-for-dirty-floors",
+      "bytes": 244118,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-cleaning-witch-please-i-clean",
+      "bytes": 219970,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-cleaning-sweeping-away-the-spooky",
+      "bytes": 252438,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-real-estate-selling-houses-not-haunted-ones",
+      "bytes": 251223,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-real-estate-your-boo-tiful-new-home-awaits",
+      "bytes": 242947,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-real-estate-haunted-by-pending-closings",
+      "bytes": 226093,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-real-estate-the-only-thing-scary-is-this-market",
+      "bytes": 256732,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-admin-booked-boo-sy",
+      "bytes": 229562,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-admin-running-on-coffee-chaos",
+      "bytes": 260553,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-admin-my-inbox-is-a-haunted-house",
+      "bytes": 245413,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-admin-deadlines-are-my-villain-origin-story",
+      "bytes": 241873,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-delivery-special-delivery-from-the-other-side",
+      "bytes": 262073,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-delivery-boo-crew-express",
+      "bytes": 217188,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-delivery-dead-tired-still-delivering",
+      "bytes": 246721,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-halloween-delivery-frightfully-fast-deliveries",
+      "bytes": 249928,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-fall-notary-pumpkin-spice-notary-stamps",
+      "bytes": 240992,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-fall-notary-fall-into-a-perfect-signing",
+      "bytes": 223092,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-fall-cleaning-fall-leaves-fresh-cleans",
+      "bytes": 224943,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-fall-cleaning-sweater-weather-sparkling-floors",
+      "bytes": 221543,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-fall-real-estate-falling-for-new-listings",
+      "bytes": 223461,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-fall-real-estate-pumpkins-properties-pending-contracts",
+      "bytes": 226249,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-fall-admin-booked-blessed-pumpkin-obsessed",
+      "bytes": 232187,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-fall-admin-fall-hustle-winter-goals",
+      "bytes": 226760,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-notary-jingling-all-the-way-to-the-signing-table",
+      "bytes": 282863,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-notary-all-i-want-for-christmas-is-a-fully-signed-package",
+      "bytes": 301655,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-notary-santa-s-favorite-notary",
+      "bytes": 238646,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-cleaning-sleighing-dirt-all-season",
+      "bytes": 243504,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-cleaning-merry-clean-mas",
+      "bytes": 196740,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-cleaning-making-spirits-bright-baseboards-white",
+      "bytes": 248639,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-delivery-jingling-all-the-way-to-the-post-office",
+      "bytes": 265053,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-delivery-sleighing-deliveries",
+      "bytes": 226512,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-delivery-north-pole-express-holiday-delivery-crew",
+      "bytes": 236877,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-real-estate-home-for-the-holidays-i-can-help-with-that",
+      "bytes": 242262,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-real-estate-sleighing-closings",
+      "bytes": 220277,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-real-estate-all-i-want-for-christmas-is-clear-to-close",
+      "bytes": 256937,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-admin-making-a-list-checking-my-invoices-twice",
+      "bytes": 284346,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-admin-booked-busy-feeling-festive",
+      "bytes": 246330,
+      "min_margin_px": 127
+    },
+    {
+      "key": "merch-christmas-admin-ceo-of-holiday-chaos",
+      "bytes": 225811,
+      "min_margin_px": 127
+    }
+  ]
 }

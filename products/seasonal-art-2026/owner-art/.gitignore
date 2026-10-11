@@ -1,0 +1,3 @@
+# large print masters are delivered to the owner directly, not stored in git
+*/master-*.png
+*/print-canvas-*.png

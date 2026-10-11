@@ -7,7 +7,6 @@ SRC = 'products/seasonal-art-2026'; OUT = f'{SRC}/shirt-ready'
 JOBS = {
  'boo-its-notarized':        f'{SRC}/halloween/merch-halloween-notary-boo-it-s-notarized.png',
  'witch-please-i-clean':     f'{SRC}/halloween/merch-halloween-cleaning-witch-please-i-clean.png',
- 'pumpkin-spice-real-estate':f'{SRC}/fall/merch-fall-real-estate-pumpkin-spice-real-estate-advice.png',
 }
 CREAM = np.array([245, 235, 210], float)
 def build(path):
