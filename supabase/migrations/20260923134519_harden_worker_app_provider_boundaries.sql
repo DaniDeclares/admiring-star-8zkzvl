@@ -1,4 +1,31 @@
 
+-- Forensic prerequisite: provider earnings ledger is required by
+-- dd_get_my_provider_financials but has no CREATE in the recovered ledger.
+-- Schema is limited to columns referenced by that RPC. Not a commercial
+-- authorization or payout activation.
+create table if not exists public.dd_provider_earnings_ledger (
+  id uuid primary key default gen_random_uuid(),
+  provider_id uuid,
+  work_order_id uuid,
+  earning_type text,
+  base_amount numeric not null default 0,
+  bonus_amount numeric not null default 0,
+  reimbursement_amount numeric not null default 0,
+  adjustment_amount numeric not null default 0,
+  total_approved_amount numeric not null default 0,
+  currency text not null default 'USD',
+  earning_status text,
+  hold_reason text,
+  approved_at timestamptz,
+  scheduled_payout_date date,
+  paid_at timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table public.dd_provider_earnings_ledger enable row level security;
+drop policy if exists dd_provider_earnings_ledger_service_role on public.dd_provider_earnings_ledger;
+create policy dd_provider_earnings_ledger_service_role on public.dd_provider_earnings_ledger
+  for all to service_role using (true) with check (true);
+
 -- 1) Align job state constraint with governed job functions.
 alter table public.dd_jobs drop constraint if exists dd_jobs_job_status_check;
 alter table public.dd_jobs add constraint dd_jobs_job_status_check
