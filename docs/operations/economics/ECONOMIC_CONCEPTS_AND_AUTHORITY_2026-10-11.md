@@ -27,3 +27,14 @@ The earlier analysis used the stored $90 for Tier 3. Re-running with DEC-LABOR-0
 
 ## What this does not decide
 The rate applying to each service (which tier the work really is) and whether a given service should be repriced, rescoped or delivered differently remain owner decisions. See `alternatives_by_sku_2026-10-11.csv` for per-SKU levers; nothing there is a proposed price.
+
+## Alternatives for services below the floor (evidence status, nothing repriced)
+`alternatives_by_sku_2026-10-11.csv` gives, per SKU, the three levers the evidence supports:
+- **Scope lever:** the most hours the current price can carry at the approved rate (`max_hours_at_price`) and the percentage of the draft hours that would have to go (`hours_cut_needed_pct`).
+- **Price lever:** the price that would clear 50% at the draft hours (`price_to_clear_floor`) and the increase that implies (`price_increase_needed_pct`). It is arithmetic, not a recommended price; market fit and the owner's price locks are not considered.
+- **Fulfillment lever:** the evidence is thin. Production has **zero** rows in `dd_provider_rate_cards` with a service SKU, so no negotiated or contracted provider rate exists for any of these services. Provider-wage benchmarks exist only as research rows for cleaning (about $30), movers (about $21), errands (about $21) and pet care ($15.50-$16.40), none for admin, formation, marketing or business-development work. Outsourcing those services therefore cannot be quantified from existing records; that is an evidence gap, not a recommendation to outsource.
+
+Path labels in the CSV: `VALIDATE_REAL_TIME_FIRST` (8 services within 15% of the floor by hours or price: DNI-04A-001, 04A-007, 04A-008, 04A-010, 04A-015, 04A-017, 04A-018, 03A-019), `SCOPE_OR_PRICE_ADJUSTMENT_CANDIDATE` (17), `REVISE_SCOPE_PRICE_AND_FULFILLMENT_MODEL` (75), `NEEDS_COST_EVIDENCE` (5), `NOT_MODELED_PER_ITEM` (2), `VERIFY_HOURS_ONLY` (1). Research Assistant (DNI-04A-009) is live and sells by quote today but sits at 30% at the approved $100 Tier 3 rate, so it needs price, scope or fulfillment review, not just time validation.
+
+## Where to start for revenue (recommendation, not an action)
+Run the time-and-cost validation (`time_and_cost_validation_workbook.xlsx`) on the services that are both close to the floor and already sell: Virtual Assistant (04A-001, 46.8%), Document Formatting (04A-007, 43.1%) and Project Coordination / Meeting Support (04A-010 at 42.6%, 04A-008 at 47.1%), keeping Research Assistant (04A-009) under price and scope review. Acquisition cost is logged per job because it is a real cost the model omits.
