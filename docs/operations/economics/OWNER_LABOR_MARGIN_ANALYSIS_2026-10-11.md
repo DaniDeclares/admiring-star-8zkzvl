@@ -1,3 +1,5 @@
+> **Correction (2026-10-11, later):** the Tier 3 rate used below ($90) was an agent-set draft. The owner-approved authority is DEC-LABOR-001 ($60/$75/$100). With $100, 86 of 101 modelled services are below 35% and 50 are below cost. See `ECONOMIC_CONCEPTS_AND_AUTHORITY_2026-10-11.md`; the CSV/JSON now use the approved rates, with the $90 result kept as a sensitivity column. The tables below show the earlier $90 run and are superseded by those files.
+
 # Owner-labor-inclusive margin analysis, 108 LIVE_READY services (2026-10-11)
 
 Decision applied (from owner direction): owner-delivered labor is an economic cost, not free labor. Three things are kept apart:

@@ -1,4 +1,5 @@
-"""Owner-labor-inclusive margin model for LIVE_READY services (analysis only).
+"""Owner-labor-inclusive margin model (rev 2: rates reconciled to DEC-LABOR-001, owner-approved 2026-09-01:
+Tier 1 $60, Tier 2 $75, Tier 3 $100. Stored $90 rows came from an agent-set 2026-09-18 draft rate and are shown as a sensitivity). for LIVE_READY services (analysis only).
 
 Reads: remote_services CSV (Production snapshot, 2026-10-09) + extras below (Production
 dd_master_service_universe.internal_cost, read 2026-10-11). Writes JSON/CSV. Changes nothing.
@@ -10,6 +11,7 @@ best status any service can reach is ECONOMICALLY_UNVERIFIED with an indicative 
 """
 import csv, json, re, sys
 FLOOR = 0.50
+APPROVED_RATE = {60: 60.0, 75: 75.0, 90: 100.0}   # DEC-LABOR-001; the stored $90 Tier 3 rows map to the approved $100
 FEE = 0.029
 # (sku, price, hours, rate, other_direct) from dd_master_service_universe.internal_cost
 EXTRAS = [
@@ -39,7 +41,9 @@ out = []
 for sku, d in sorted(rows.items()):
     if d.get('hours') is None:
         out.append(dict(sku=sku, price=d.get('price'), status=d.get('status', 'NO_COST_BASIS'))); continue
-    p, h, rate, o = d['price'], d['hours'], d['rate'], d['other']
+    p, h, stored_rate, o = d['price'], d['hours'], d['rate'], d['other']
+    rate = APPROVED_RATE[int(stored_rate)]
+    m_stored = (p - (h * stored_rate + o + FEE * p)) / p
     cost = h * rate + o + FEE * p
     margin = (p - cost) / p
     max_hours = max(0.0, ((1 - FLOOR - FEE) * p - o) / rate)
@@ -47,8 +51,9 @@ for sku, d in sorted(rows.items()):
     status = 'UNVERIFIED_INDICATIVE_PASS' if margin >= FLOOR else (
         'UNVERIFIED_INDICATIVE_FAIL_SCOPE_OR_PRICE_REVIEW')
     m30 = (p - (h * 30 + o + FEE * p)) / p
-    out.append(dict(sku=sku, price=p, hours=h, rate=rate, other=round(o, 2), draft=d['draft'], remote=d['remote'],
+    out.append(dict(sku=sku, price=p, hours=h, rate=rate, stored_rate=stored_rate, other=round(o, 2), draft=d['draft'], remote=d['remote'],
         sensitivity_margin_pct_at_30_per_hr=round(m30 * 100, 1),
+        sensitivity_margin_pct_at_stored_rate=round(m_stored * 100, 1),
         indicative_margin_pct=round(margin * 100, 1), hours_cap_at_current_price=round(max_hours, 2),
         price_that_would_clear_floor_at_these_hours=round(floor_price, 2), status=status))
 json.dump(out, open(sys.argv[2], 'w'), indent=1)
