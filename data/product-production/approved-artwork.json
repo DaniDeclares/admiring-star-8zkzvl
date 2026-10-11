@@ -82,7 +82,37 @@
         "shopify_listing_ready": false,
         "checkout_and_fulfillment_test_passed": false,
         "owner_publication_approval": false
-      }
+      },
+      "default_character": "DANI Original witch (resembles owner); protected, never overwritten by variants",
+      "owner_approved_customization_categories": {
+        "approved_2026-10-11": true,
+        "scope": "choices only; artwork for each variant NOT yet created or approved",
+        "skin_tone": [
+          "Deep brown",
+          "Medium brown",
+          "Light brown",
+          "Fair"
+        ],
+        "hairstyle": [
+          "Curly updo",
+          "Afro",
+          "Braids",
+          "Locs",
+          "Straight",
+          "Wavy"
+        ],
+        "glasses": [
+          "Glasses",
+          "No glasses"
+        ],
+        "outfit": [
+          "Original black and orange",
+          "Black and purple",
+          "Black and gold"
+        ]
+      },
+      "protected_scene": "Lettering, black cat washing dishes, cleaning effects, broom, purple feather duster, composition",
+      "canva_status": "NOT_UPLOADED: sandbox network policy returns 403 for www.canva.com upload host; no Canva asset exists from this session"
     },
     {
       "key": "fall-design-003-pumpkin-spice-real-estate-advice",
