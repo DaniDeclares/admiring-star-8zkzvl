@@ -6612,6 +6612,8 @@
 }
 ],
 "notes": [
-"Two Production ledger rows (20261006010000, 20261006230000) store no SQL statements. Their repo source files are used unverified; this is the only unverifiable part of the lineage."
-]
+"Two Production ledger rows (20261006010000, 20261006230000) store no SQL statements. Their repo source files are used unverified; this is the only unverifiable part of the lineage.",
+"Hybrid mode: ledger rows below the cutoff are replayed from repo source as before (including the drifted repo versions, whose differences from the ledger are recorded in this manifest); from the cutoff onward the ledger lineage is replayed."
+],
+"legacy_cutoff": "20260930140500"
 }

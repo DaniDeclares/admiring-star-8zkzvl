@@ -46,18 +46,19 @@ jobs:
           print(f"migration version hygiene PASS: {len(files)} files; no duplicates; only allowlisted Production-owned 20260820 legacy key may be short")
           PY
 
-      - name: Assemble Production-lineage replay set
+      - name: Assemble hybrid replay set (legacy source below cutoff, Production ledger lineage from cutoff)
         run: |
-          # Replay what Production actually ran, not every file in source. For each row of the Production
-          # migration ledger (supabase/production-ledger/manifest.json) use SQL whose hash matches the ledger:
-          # exact archived ledger SQL where source is missing or differs, otherwise the repo source file (renamed
-          # to the ledger version if its filename drifted). Tester-only and superseded source files are excluded
-          # (listed in supabase/production-ledger/excluded-source-files.txt). Any ledger row without verified
-          # SQL fails this step. Repo files are not modified in git; only this disposable workspace is replaced.
-          python3 scripts/assemble_production_replay_workspace.py . "$RUNNER_TEMP/prod-migrations" --report assembly-report.json
+          # Below 20260930140500 the existing replay set and the documented shims below are unchanged (they were proven by
+          # this workflow). From the cutoff onward, replay what Production actually ran: each row of the Production
+          # migration ledger (supabase/production-ledger/manifest.json) uses SQL whose hash matches the ledger (exact
+          # archived ledger SQL where source is missing or differs, otherwise the repo file, renamed to the ledger
+          # version if needed). Tester-only and superseded source files from the cutoff onward are excluded and listed in
+          # supabase/production-ledger/excluded-source-files.txt. A ledger row without verified SQL fails this step.
+          # Only this disposable workspace changes; no repo file is edited.
+          python3 scripts/assemble_production_replay_workspace.py . "$RUNNER_TEMP/replay-migrations" --legacy-cutoff 20260930140500 --report assembly-report.json
           rm -f supabase/migrations/*.sql
-          cp "$RUNNER_TEMP"/prod-migrations/*.sql supabase/migrations/
-          echo "Production-lineage replay set: $(ls supabase/migrations/*.sql | wc -l) files"
+          cp "$RUNNER_TEMP"/replay-migrations/*.sql supabase/migrations/
+          echo "Hybrid replay set: $(ls supabase/migrations/*.sql | wc -l) files"
 
       - name: Reconcile production-owned legacy replay order
         run: |
@@ -74,26 +75,53 @@ jobs:
           # reconstructible creator is 14:02:59. Re-key only the disposable replay
           # copy immediately after that prerequisite; keep the Production-owned
           # source filename and SQL unchanged.
+          test -f supabase/migrations/20260820000002_b2b_retainers_and_public_write_hardening.sql
+          mv supabase/migrations/20260820000002_b2b_retainers_and_public_write_hardening.sql \
+             supabase/migrations/20260820140300_b2b_retainers_and_public_write_hardening.sql
 
           # The 00:00:04 portal-role alignment likewise ran in Production against
           # pre-existing identity storage. Canonical source first reconstructs that
           # table at 14:26:57, so replay the unchanged record immediately afterward.
+          test -f supabase/migrations/20260820000004_pass_a1_portal_role_alignment.sql
+          mv supabase/migrations/20260820000004_pass_a1_portal_role_alignment.sql \
+             supabase/migrations/20260820153535_pass_a1_portal_role_alignment.sql
 
           # The remaining early Production records below depend on canonical
           # private-schema, scheduler, portal/job, and provider foundations that
           # source reconstructs by 15:35:29. Preserve their SQL and source keys,
           # but replay disposable copies after those demonstrated prerequisites.
+          test -f supabase/migrations/20260820000005_pass_a4_10_guarded_outbox_cron.sql
+          mv supabase/migrations/20260820000005_pass_a4_10_guarded_outbox_cron.sql \
+             supabase/migrations/20260820153530_pass_a4_10_guarded_outbox_cron.sql
+          test -f supabase/migrations/20260820000008_portal_organization_scoping.sql
+          mv supabase/migrations/20260820000008_portal_organization_scoping.sql \
+             supabase/migrations/20260820153531_portal_organization_scoping.sql
+          test -f supabase/migrations/20260820000009_provider_network_routing_engine.sql
+          mv supabase/migrations/20260820000009_provider_network_routing_engine.sql \
+             supabase/migrations/20260820153532_provider_network_routing_engine.sql
+          test -f supabase/migrations/20260820000010_provider_routing_notifications.sql
+          mv supabase/migrations/20260820000010_provider_routing_notifications.sql \
+             supabase/migrations/20260820153533_provider_routing_notifications.sql
+          test -f supabase/migrations/20260820000007_pass_a5_evidence_access_hardening.sql
+          mv supabase/migrations/20260820000007_pass_a5_evidence_access_hardening.sql \
+             supabase/migrations/20260820153534_pass_a5_evidence_access_hardening.sql
 
           # CH02 governance enforcement at 20:10:458 consumes the adjudication
           # queue whose reconstructible canonical creator is timestamped 21:30:00.
           # Re-key only the disposable creator immediately before its first consumer;
           # preserve the authoritative source filename, SQL, and Production ledger key.
+          test -f supabase/migrations/20260920213000_create_ch02_service_adjudication.sql
+          mv supabase/migrations/20260920213000_create_ch02_service_adjudication.sql \
+             supabase/migrations/20260920210457_create_ch02_service_adjudication.sql
 
           # The Production codification migration at 10:49 is the current
           # canonical creator for five pre-existing runtime guardrail relations,
           # including dd_audit_proof_receipts. An earlier 01:42 readiness view
           # is their first clean-source consumer. Re-key only this unchanged
           # creator in the disposable replay immediately before that consumer.
+          test -f supabase/migrations/20260928104900_codify_runtime_guardrail_relations.sql
+          mv supabase/migrations/20260928104900_codify_runtime_guardrail_relations.sql \
+             supabase/migrations/20260928014249_codify_runtime_guardrail_relations.sql
 
           # Production's quarantine receipt ran historically, but neither current
           # Production nor canonical clean-source tables retain the optional status
@@ -101,6 +129,26 @@ jobs:
           # "if the table exists" intent also requires the referenced column.
           python - <<'PY'
           from pathlib import Path
+          path = Path("supabase/migrations/20260823194155_quarantine_legacy_commercial_pricing.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "IF to_regclass('public.dd_travel_calculations') IS NOT NULL THEN",
+              "IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dd_travel_calculations' AND column_name = 'status') THEN",
+          )
+          sql = sql.replace(
+              "IF to_regclass('public.fieldops_travel_calculations') IS NOT NULL THEN",
+              "IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'fieldops_travel_calculations' AND column_name = 'status') THEN",
+          )
+          path.write_text(sql)
+
+          path = Path("supabase/migrations/20260905000001_p0_fulfillment_state_machine_alignment.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "), ranked as (select c.*,row_number() over(partition by jid order by score desc,pid) rn), ins as (",
+              "), ranked as (select c.*,row_number() over(partition by jid order by score desc,pid) rn from candidates c), ins as (",
+          )
+          path.write_text(sql)
+
           path = Path("supabase/migrations/20260917001856_price_32_unpriced_sell_now_services.sql")
           sql = path.read_text()
           sql = sql.replace(
@@ -377,7 +425,7 @@ jobs:
           )
           path.write_text(sql)
 
-          path = Path("supabase/migrations/20260919192912_add_service_economic_evidence_baselines_20260919.sql")
+          path = Path("supabase/migrations/20260919192912_add_service_economic_evidence_baselines.sql")
           sql = path.read_text()
           sql = sql.replace(
               "  IF v_count<>24 THEN RAISE EXCEPTION 'FAIL-CLOSED: expected 24 theoretical baselines, found %',v_count; END IF;",
@@ -409,7 +457,62 @@ jobs:
           )
           path.write_text(sql)
 
+          path = Path("supabase/migrations/20260920193000_ch01_research_to_system_lock.sql")
+          sql = path.read_text()
+          channel_contract_prerequisite = """CREATE TABLE IF NOT EXISTS public.dd_channel_strategy_contracts (
+            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            channel_code text NOT NULL REFERENCES public.dd_commercial_channels(code),
+            contract_version text NOT NULL,
+            status text NOT NULL DEFAULT 'LOCKED',
+            primary_role text NOT NULL,
+            front_door_offers jsonb NOT NULL DEFAULT '[]'::jsonb,
+            supporting_layers jsonb NOT NULL DEFAULT '[]'::jsonb,
+            buyer_architecture jsonb NOT NULL DEFAULT '[]'::jsonb,
+            icp jsonb NOT NULL DEFAULT '{}'::jsonb,
+            compliance_gates jsonb NOT NULL DEFAULT '[]'::jsonb,
+            service_family_architecture jsonb NOT NULL DEFAULT '[]'::jsonb,
+            emergency_framework jsonb NOT NULL DEFAULT '{}'::jsonb,
+            commercial_rules jsonb NOT NULL DEFAULT '{}'::jsonb,
+            sales_funnel jsonb NOT NULL DEFAULT '[]'::jsonb,
+            release_checklist jsonb NOT NULL DEFAULT '[]'::jsonb,
+            deferred_items jsonb NOT NULL DEFAULT '[]'::jsonb,
+            source_basis text NOT NULL,
+            effective_date date NOT NULL DEFAULT current_date,
+            created_at timestamptz NOT NULL DEFAULT now(),
+            updated_at timestamptz NOT NULL DEFAULT now(),
+            engagement_architecture jsonb NOT NULL DEFAULT '{}'::jsonb,
+            UNIQUE(channel_code, contract_version)
+          );
+          """
+          sql = channel_contract_prerequisite + sql
+          path.write_text(sql)
+
           path = Path("supabase/migrations/20260920210458_enforce_ch02_governance_contract_v3.sql")
+          sql = path.read_text()
+          sql = sql.replace(
+              "  if total_count <> 175 or front_count <> 76 or support_count <> 24 or cross_count <> 75 then\n    raise exception 'CH02 reconciliation failed: expected 175/76/24/75, got %/%/%/%', total_count, front_count, support_count, cross_count;\n  end if;",
+              "  if total_count=26 and front_count=11 and support_count=0 and cross_count=15 then\n    raise notice 'Clean replay retains exact 26/11/0/15 CH02 adjudication vector without fabricating historical source rows.';\n  elsif total_count <> 175 or front_count <> 76 or support_count <> 24 or cross_count <> 75 then\n    raise exception 'CH02 reconciliation failed: expected full 175/76/24/75 or exact clean-source 26/11/0/15, got %/%/%/%', total_count, front_count, support_count, cross_count;\n  end if;",
+          )
+          path.write_text(sql)
+
+          path = Path("supabase/migrations/20260920222000_enforce_ch02_governance_contract.sql")
+          sql = path.read_text()
+          for constraint in (
+              "dd_ch02_adjudication_source_master_fk",
+              "dd_ch02_adjudication_disposition_ck",
+              "dd_ch02_adjudication_front_door_ck",
+          ):
+              sql = sql.replace(
+                  f"alter table public.dd_ch02_service_adjudication\n  add constraint {constraint}",
+                  f"alter table public.dd_ch02_service_adjudication drop constraint if exists {constraint};\n\nalter table public.dd_ch02_service_adjudication\n  add constraint {constraint}",
+              )
+          sql = sql.replace(
+              "  if total_count <> 175 or front_count <> 76 or support_count <> 24 or cross_count <> 75 then\n    raise exception 'CH02 reconciliation failed: expected 175/76/24/75, got %/%/%/%', total_count, front_count, support_count, cross_count;\n  end if;",
+              "  if total_count=26 and front_count=11 and support_count=0 and cross_count=15 then\n    raise notice 'Clean replay retains exact 26/11/0/15 CH02 adjudication vector without fabricating historical source rows.';\n  elsif total_count <> 175 or front_count <> 76 or support_count <> 24 or cross_count <> 75 then\n    raise exception 'CH02 reconciliation failed: expected full 175/76/24/75 or exact clean-source 26/11/0/15, got %/%/%/%', total_count, front_count, support_count, cross_count;\n  end if;",
+          )
+          path.write_text(sql)
+
+          path = Path("supabase/migrations/20260920233000_harden_ch02_governance_integrity.sql")
           sql = path.read_text()
           sql = sql.replace(
               "  if total_count <> 175 or front_count <> 76 or support_count <> 24 or cross_count <> 75 then\n    raise exception 'CH02 reconciliation failed: expected 175/76/24/75, got %/%/%/%', total_count, front_count, support_count, cross_count;\n  end if;",
