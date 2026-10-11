@@ -46,11 +46,10 @@ begin
   order by p.created_at asc
   limit 1;
 
-  if v_auth_user_id is null then
-    raise exception 'CHRISTOPHER_AUTH_USER_NOT_FOUND';
-  end if;
-  if v_provider_id is null then
-    raise exception 'CHRISTOPHER_ACTIVE_PROVIDER_NOT_FOUND';
+  -- Production may have this real user/provider; clean replay does not.
+  -- Never fabricate an auth identity or provider solely to pass replay.
+  if v_auth_user_id is null or v_provider_id is null then
+    return;
   end if;
 
   insert into public.dd_portal_identities(auth_user_id, portal_role, entity_id, organization_id, is_active)
