@@ -1,0 +1,3924 @@
+{
+ "schemaVersion": 1,
+ "generated": "2026-10-11",
+ "authority": "INVENTORY_ONLY_NOT_RELEASE_AUTHORITY",
+ "merch": [
+  {
+   "key": "merch-halloween-notary-boo-it-s-notarized",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Notary / Signing Agent",
+   "slogan": "Boo! It's Notarized!",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-notary-boo-it-s-notarized.png",
+    "sha256": "7aac9f60822e49cb9670605b0841aa6b3d576f3d07be426a237a38e79bcf804b",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Boo! It's",
+     "Notarized!"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-notary-resting-notary-face",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Notary / Signing Agent",
+   "slogan": "Resting Notary Face",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-notary-resting-notary-face.png",
+    "sha256": "bf9170d736b62f22745ee800366223b9c2c19bc2ffa693a571fc10faaddf1951",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Resting",
+     "Notary Face"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-notary-witch-better-have-my-signatures",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Notary / Signing Agent",
+   "slogan": "Witch Better Have My Signatures",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "MEDIUM",
+    "note": "Parody of a well-known song title/lyric; owner or counsel decision before any listing.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-notary-witch-better-have-my-signatures.png",
+    "sha256": "1cbc5fd1c6797f18be31e38d13af32de623df5c330e1331dda3079d166ec4e58",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Witch Better",
+     "Have My",
+     "Signatures"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-notary-no-tricks-just-signatures",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Notary / Signing Agent",
+   "slogan": "No Tricks, Just Signatures",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-notary-no-tricks-just-signatures.png",
+    "sha256": "055ce979b63deb8054f29881c3338e397da7922d6185d194190e7b223d0d713e",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 440,
+    "lines": [
+     "No Tricks, Just",
+     "Signatures"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-cleaning-i-clean-up-your-nightmares",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Cleaning",
+   "slogan": "I Clean Up Your Nightmares",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-cleaning-i-clean-up-your-nightmares.png",
+    "sha256": "d2b114a80bd049ff8408a33e7d254e27267219ebb74e668aa8aa9f3e569f46d1",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "I Clean",
+     "Up Your",
+     "Nightmares"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-cleaning-too-ghoul-for-dirty-floors",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Cleaning",
+   "slogan": "Too Ghoul for Dirty Floors",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-cleaning-too-ghoul-for-dirty-floors.png",
+    "sha256": "1f2e2e2f3c4954ba64ff97d0d22bc02ecbb36bce1babd1b6be7c2173a1336164",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 476,
+    "lines": [
+     "Too Ghoul for",
+     "Dirty Floors"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-cleaning-witch-please-i-clean",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Cleaning",
+   "slogan": "Witch, Please. I Clean.",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-cleaning-witch-please-i-clean.png",
+    "sha256": "5485d0a8fa2e00f67bf5df69630c10eb17c0e036cc89dbed0ea31487a07fb53a",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Witch,",
+     "Please.",
+     "I Clean."
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-cleaning-sweeping-away-the-spooky",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Cleaning",
+   "slogan": "Sweeping Away the Spooky",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-cleaning-sweeping-away-the-spooky.png",
+    "sha256": "499802a79c8c3388fd15c9f04fb7eb181303ece281df05d2e6e910ea139e499b",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Sweeping",
+     "Away the",
+     "Spooky"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-real-estate-selling-houses-not-haunted-ones",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Real Estate",
+   "slogan": "Selling Houses, Not Haunted Ones",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-real-estate-selling-houses-not-haunted-ones.png",
+    "sha256": "4d5ddedc90a898ee420f5c32edd1a33727a5ebfd101a1ec140e518a1d280595b",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 476,
+    "lines": [
+     "Selling",
+     "Houses, Not",
+     "Haunted Ones"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-real-estate-your-boo-tiful-new-home-awaits",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Real Estate",
+   "slogan": "Your Boo-tiful New Home Awaits",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-real-estate-your-boo-tiful-new-home-awaits.png",
+    "sha256": "4c08fb318460e06da06b111893bc003e6d3ba54d8dfa090425d3105816c93433",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 444,
+    "lines": [
+     "Your Boo-tiful",
+     "New Home",
+     "Awaits"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-real-estate-haunted-by-pending-closings",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Real Estate",
+   "slogan": "Haunted by Pending Closings",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-real-estate-haunted-by-pending-closings.png",
+    "sha256": "2a4681b714034e35fffdf3d055f2e4fb6dee989b1de7495e10c1c2cb438390a7",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 364,
+    "lines": [
+     "Haunted by",
+     "Pending Closings"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-real-estate-the-only-thing-scary-is-this-market",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Real Estate",
+   "slogan": "The Only Thing Scary Is This Market",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-real-estate-the-only-thing-scary-is-this-market.png",
+    "sha256": "d5764a29ae8601c628f54f1c9f40c664c3e8173c4df4568dc9d1c2b215b76114",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 452,
+    "lines": [
+     "The Only",
+     "Thing Scary Is",
+     "This Market"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-admin-booked-boo-sy",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Entrepreneurs / Admin",
+   "slogan": "Booked & Boo-sy",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-admin-booked-boo-sy.png",
+    "sha256": "beeee64f15e4d5956676f2dec67548adf73a957888ea3fdea6cdb2840b3c12df",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Booked",
+     "& Boo-sy"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-admin-running-on-coffee-chaos",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Entrepreneurs / Admin",
+   "slogan": "Running on Coffee & Chaos",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-admin-running-on-coffee-chaos.png",
+    "sha256": "767148a6e6facd30c15f8caac7fc3f8e65fa009c54815ffac30a978b24d165c5",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Running",
+     "on Coffee",
+     "& Chaos"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-admin-my-inbox-is-a-haunted-house",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Entrepreneurs / Admin",
+   "slogan": "My Inbox Is a Haunted House",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-admin-my-inbox-is-a-haunted-house.png",
+    "sha256": "f74b070ea1531a65c1dc680e272ac2e1fd3e5d164720e5e47c33df9c4fa9db25",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 432,
+    "lines": [
+     "My Inbox Is a",
+     "Haunted House"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-admin-deadlines-are-my-villain-origin-story",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Entrepreneurs / Admin",
+   "slogan": "Deadlines Are My Villain Origin Story",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-admin-deadlines-are-my-villain-origin-story.png",
+    "sha256": "4fb9222b2ea3af52e1f074e59990137bc718a1883fd6eabf183e4a099d870187",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 312,
+    "lines": [
+     "Deadlines Are My",
+     "Villain Origin Story"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-delivery-special-delivery-from-the-other-side",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Delivery / Mobile Providers",
+   "slogan": "Special Delivery From the Other Side",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-delivery-special-delivery-from-the-other-side.png",
+    "sha256": "7b36b0db604abbd3dc6cfa0bfb75c3c89b91dec55d15e4a30154418b411004f1",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 452,
+    "lines": [
+     "Special",
+     "Delivery From",
+     "the Other Side"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-delivery-boo-crew-express",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Delivery / Mobile Providers",
+   "slogan": "Boo Crew Express",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-delivery-boo-crew-express.png",
+    "sha256": "3ffacdbd1221f75f4c8de4ebc2ac9560b496fe80cf13f87d70fce43709a78e1e",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Boo Crew",
+     "Express"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-delivery-dead-tired-still-delivering",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Delivery / Mobile Providers",
+   "slogan": "Dead Tired, Still Delivering",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-delivery-dead-tired-still-delivering.png",
+    "sha256": "c392e10aeec240b7be37737bbb1f14be0ffcc385df8245ded1bf7a1cbe4e0972",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 440,
+    "lines": [
+     "Dead Tired,",
+     "Still Delivering"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-halloween-delivery-frightfully-fast-deliveries",
+   "kind": "MERCH_DESIGN",
+   "season": "HALLOWEEN",
+   "profession": "Delivery / Mobile Providers",
+   "slogan": "Frightfully Fast Deliveries",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "retro Halloween: ghosts, pumpkins, vintage lettering; warm orange, cream, black, muted complements",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/halloween/merch-halloween-delivery-frightfully-fast-deliveries.png",
+    "sha256": "78c3f558c704f406f18406f2c2cf9ef45e527dde5f35372615c3868dff9e2599",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 444,
+    "lines": [
+     "Frightfully",
+     "Fast Deliveries"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-fall-notary-pumpkin-spice-notary-stamps",
+   "kind": "MERCH_DESIGN",
+   "season": "FALL",
+   "profession": "Notary / Signing Agent",
+   "slogan": "Pumpkin Spice & Notary Stamps",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "cozy retro autumn: pumpkins, leaves; rust, caramel, sage, oatmeal, cream; vintage type",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/fall/merch-fall-notary-pumpkin-spice-notary-stamps.png",
+    "sha256": "c28b6e4548d782debc42fdfbe4b324e0ae1722bdd3718c9649c0052fd2036ebf",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 416,
+    "lines": [
+     "Pumpkin Spice",
+     "& Notary",
+     "Stamps"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-fall-notary-fall-into-a-perfect-signing",
+   "kind": "MERCH_DESIGN",
+   "season": "FALL",
+   "profession": "Notary / Signing Agent",
+   "slogan": "Fall Into a Perfect Signing",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "cozy retro autumn: pumpkins, leaves; rust, caramel, sage, oatmeal, cream; vintage type",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/fall/merch-fall-notary-fall-into-a-perfect-signing.png",
+    "sha256": "2a4e5c9270206273576066cc8cc58f2bfbee7822e3a7c2fea9dee975c6d33049",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 408,
+    "lines": [
+     "Fall Into a",
+     "Perfect Signing"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-fall-cleaning-fall-leaves-fresh-cleans",
+   "kind": "MERCH_DESIGN",
+   "season": "FALL",
+   "profession": "Cleaning",
+   "slogan": "Fall Leaves & Fresh Cleans",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "cozy retro autumn: pumpkins, leaves; rust, caramel, sage, oatmeal, cream; vintage type",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/fall/merch-fall-cleaning-fall-leaves-fresh-cleans.png",
+    "sha256": "393679fdaa3bf8808c1439d94fa733457b45aa582f06815911a8573b2a3dc9b6",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 480,
+    "lines": [
+     "Fall Leaves &",
+     "Fresh Cleans"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-fall-cleaning-sweater-weather-sparkling-floors",
+   "kind": "MERCH_DESIGN",
+   "season": "FALL",
+   "profession": "Cleaning",
+   "slogan": "Sweater Weather, Sparkling Floors",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW_MEDIUM",
+    "note": "Echoes a recording-artist song title; run a trademark search.",
+    "cleared": false
+   },
+   "art_direction": "cozy retro autumn: pumpkins, leaves; rust, caramel, sage, oatmeal, cream; vintage type",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/fall/merch-fall-cleaning-sweater-weather-sparkling-floors.png",
+    "sha256": "c4d825c5d4d87e992f70d030296afb44e0f53ea30196e377827e37d9dd606ea6",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 364,
+    "lines": [
+     "Sweater Weather,",
+     "Sparkling Floors"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-fall-real-estate-falling-for-new-listings",
+   "kind": "MERCH_DESIGN",
+   "season": "FALL",
+   "profession": "Real Estate",
+   "slogan": "Falling for New Listings",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "cozy retro autumn: pumpkins, leaves; rust, caramel, sage, oatmeal, cream; vintage type",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/fall/merch-fall-real-estate-falling-for-new-listings.png",
+    "sha256": "226dd0c51a42a17f7c28c0ecfa370783a81264f9846c558291c15f36745a895e",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 488,
+    "lines": [
+     "Falling for",
+     "New Listings"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-fall-real-estate-pumpkins-properties-pending-contracts",
+   "kind": "MERCH_DESIGN",
+   "season": "FALL",
+   "profession": "Real Estate",
+   "slogan": "Pumpkins, Properties & Pending Contracts",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "cozy retro autumn: pumpkins, leaves; rust, caramel, sage, oatmeal, cream; vintage type",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/fall/merch-fall-real-estate-pumpkins-properties-pending-contracts.png",
+    "sha256": "c3c16ed74198d09ca5460ac30597f14c0c0889c08effb4b732f14037421c864b",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 340,
+    "lines": [
+     "Pumpkins,",
+     "Properties &",
+     "Pending Contracts"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-fall-real-estate-pumpkin-spice-real-estate-advice",
+   "kind": "MERCH_DESIGN",
+   "season": "FALL",
+   "profession": "Real Estate",
+   "slogan": "Pumpkin Spice & Real Estate Advice",
+   "signature_priority": true,
+   "priority": "P0",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "cozy retro autumn: pumpkins, leaves; rust, caramel, sage, oatmeal, cream; vintage type",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/fall/merch-fall-real-estate-pumpkin-spice-real-estate-advice.png",
+    "sha256": "e1f30c0254d43ba7c6253596648ade1cf6d2d82abb200844714a10b3f308bebf",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 416,
+    "lines": [
+     "Pumpkin Spice",
+     "& Real Estate",
+     "Advice"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-fall-admin-booked-blessed-pumpkin-obsessed",
+   "kind": "MERCH_DESIGN",
+   "season": "FALL",
+   "profession": "Entrepreneurs / Admin",
+   "slogan": "Booked, Blessed & Pumpkin Obsessed",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "cozy retro autumn: pumpkins, leaves; rust, caramel, sage, oatmeal, cream; vintage type",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/fall/merch-fall-admin-booked-blessed-pumpkin-obsessed.png",
+    "sha256": "c1e00e9bf9e22f64d0120618afcef6fb23128546396cf5100e3d333b8912dc73",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 332,
+    "lines": [
+     "Booked, Blessed &",
+     "Pumpkin Obsessed"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-fall-admin-fall-hustle-winter-goals",
+   "kind": "MERCH_DESIGN",
+   "season": "FALL",
+   "profession": "Entrepreneurs / Admin",
+   "slogan": "Fall Hustle, Winter Goals",
+   "signature_priority": false,
+   "priority": "P1",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "cozy retro autumn: pumpkins, leaves; rust, caramel, sage, oatmeal, cream; vintage type",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/fall/merch-fall-admin-fall-hustle-winter-goals.png",
+    "sha256": "def1100c4687553335eb2a2b95eafdb71b77462bdbe36d7061eb41d2a5330742",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 468,
+    "lines": [
+     "Fall Hustle,",
+     "Winter Goals"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-notary-jingling-all-the-way-to-the-signing-table",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Notary / Signing Agent",
+   "slogan": "Jingling All the Way to the Signing Table",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Allusion to a film title; run a trademark search.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-notary-jingling-all-the-way-to-the-signing-table.png",
+    "sha256": "fa310d72fd1c639c9247192a21ef2160646bd8a55838168372c5e0762ce94da7",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 448,
+    "lines": [
+     "Jingling All",
+     "the Way to the",
+     "Signing Table"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-notary-all-i-want-for-christmas-is-a-fully-signed-package",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Notary / Signing Agent",
+   "slogan": "All I Want for Christmas Is a Fully Signed Package",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW_MEDIUM",
+    "note": "Echoes a famous song title; titles are generally not protectable but run a trademark search.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-notary-all-i-want-for-christmas-is-a-fully-signed-package.png",
+    "sha256": "8461987408dc02862243ddfe7253ce4b169213feff9cd6bc3434027643a88500",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 448,
+    "lines": [
+     "All I Want for",
+     "Christmas Is",
+     "a Fully Signed",
+     "Package"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-notary-santa-s-favorite-notary",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Notary / Signing Agent",
+   "slogan": "Santa's Favorite Notary",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-notary-santa-s-favorite-notary.png",
+    "sha256": "1c2c221df88cb7b217e5df0c9ac67ab63ad41dea2b9e6875b2bd7df994db5751",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Santa's",
+     "Favorite",
+     "Notary"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-cleaning-sleighing-dirt-all-season",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Cleaning",
+   "slogan": "Sleighing Dirt All Season",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-cleaning-sleighing-dirt-all-season.png",
+    "sha256": "6d113e89dbeca0c8dff462c958fb9b3441d6d4a64b5f280548d7ba5b178a1a01",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Sleighing",
+     "Dirt All",
+     "Season"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-cleaning-merry-clean-mas",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Cleaning",
+   "slogan": "Merry Clean-Mas",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Common pun; run a trademark search for cleaning-industry marks.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-cleaning-merry-clean-mas.png",
+    "sha256": "634ec123e165cb09250276a4b8ee4af6ff47811d568919475c43f6b47f5acc31",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 368,
+    "lines": [
+     "Merry Clean-Mas"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-cleaning-making-spirits-bright-baseboards-white",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Cleaning",
+   "slogan": "Making Spirits Bright & Baseboards White",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-cleaning-making-spirits-bright-baseboards-white.png",
+    "sha256": "2ce24a45fb608893e1e95e9eefef198c60d9aab20649a6263a88e5be6fb2d85d",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 344,
+    "lines": [
+     "Making",
+     "Spirits Bright &",
+     "Baseboards White"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-delivery-jingling-all-the-way-to-the-post-office",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Courier / Delivery",
+   "slogan": "Jingling All the Way to the Post Office",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Allusion to a film title; also avoid implying USPS affiliation or using USPS marks.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-delivery-jingling-all-the-way-to-the-post-office.png",
+    "sha256": "cb1b967db785ebc1bf722178409ed01a4a1910f9d9b6d725dfea7f5d497d722f",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 464,
+    "lines": [
+     "Jingling All",
+     "the Way to the",
+     "Post Office"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-delivery-sleighing-deliveries",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Courier / Delivery",
+   "slogan": "Sleighing Deliveries",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-delivery-sleighing-deliveries.png",
+    "sha256": "a71c13afb333b8f510d0d3b144a9a901ef1cb2c6e3223f6fe1c735e43504b67e",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Sleighing",
+     "Deliveries"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-delivery-north-pole-express-holiday-delivery-crew",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Courier / Delivery",
+   "slogan": "North Pole Express — Holiday Delivery Crew",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW_MEDIUM",
+    "note": "'Express' train-themed names are used by third parties; run a trademark search.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-delivery-north-pole-express-holiday-delivery-crew.png",
+    "sha256": "017387ee672d25de302d742070c5955e43f3503d2c2c7b2eb82220b8800289c0",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "North Pole",
+     "Express"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-real-estate-home-for-the-holidays-i-can-help-with-that",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Real Estate",
+   "slogan": "Home for the Holidays — I Can Help With That",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Common song/film title phrase; run a trademark search.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-real-estate-home-for-the-holidays-i-can-help-with-that.png",
+    "sha256": "4e9e90723fe4a52d8c1c1123b9ffd1b9b543418e11a8283ba83d6be172982f04",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Home for",
+     "the Holidays"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-real-estate-sleighing-closings",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Real Estate",
+   "slogan": "Sleighing Closings",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-real-estate-sleighing-closings.png",
+    "sha256": "e8772760e5bb673afa059dfa64babc1fc980171976331d39e03cdf4adf0b762c",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 520,
+    "lines": [
+     "Sleighing",
+     "Closings"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-real-estate-all-i-want-for-christmas-is-clear-to-close",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Real Estate",
+   "slogan": "All I Want for Christmas Is Clear to Close",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW_MEDIUM",
+    "note": "Echoes a famous song title; titles are generally not protectable but run a trademark search.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-real-estate-all-i-want-for-christmas-is-clear-to-close.png",
+    "sha256": "610443b4782972bda7854ae4ce6fb37b5e43c79e4823808ee3ce80a4967db3ac",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 436,
+    "lines": [
+     "All I Want for",
+     "Christmas Is",
+     "Clear to Close"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-admin-making-a-list-checking-my-invoices-twice",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Small Business / Admin",
+   "slogan": "Making a List, Checking My Invoices Twice",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "tote"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Allusion to a 1934 song lyric; short common phrase.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-admin-making-a-list-checking-my-invoices-twice.png",
+    "sha256": "bc39dd87d99320355932094745f3d73bff2394b1604696e39ab89335a87ddfaa",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 448,
+    "lines": [
+     "Making a List,",
+     "Checking My",
+     "Invoices Twice"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-admin-booked-busy-feeling-festive",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Small Business / Admin",
+   "slogan": "Booked, Busy & Feeling Festive",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-admin-booked-busy-feeling-festive.png",
+    "sha256": "d5f610bc84daec1a5b58dc85a2a4b5da70f3b3ed0e84cff0ad17e51fba3c993a",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 428,
+    "lines": [
+     "Booked, Busy &",
+     "Feeling Festive"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  },
+  {
+   "key": "merch-christmas-admin-ceo-of-holiday-chaos",
+   "kind": "MERCH_DESIGN",
+   "season": "CHRISTMAS",
+   "profession": "Small Business / Admin",
+   "slogan": "CEO of Holiday Chaos",
+   "signature_priority": false,
+   "priority": "P2",
+   "candidate_product_types": [
+    "tee",
+    "crewneck",
+    "hoodie",
+    "mug",
+    "sticker",
+    "tote",
+    "tumbler"
+   ],
+   "product_type_basis": "Heuristic only: length, season, buyer use. Printify blueprint, provider, print area and variant costs NOT verified.",
+   "ip_screening": {
+    "level": "LOW",
+    "note": "Original wording; no third-party mark identified in screening. No trademark search performed.",
+    "cleared": false
+   },
+   "art_direction": "festive retro: red, green, gold, cream; bows, candy canes, ornaments",
+   "source": "Owner-approved concept list, session prompt 2026-10-11",
+   "exists_in_shopify": false,
+   "exists_in_printify": "UNVERIFIED (no Printify access in session)",
+   "exists_in_dani_merch_candidates": false,
+   "artwork": {
+    "status": "DRAFT_RENDERED_NOT_APPROVED",
+    "file": "products/seasonal-art-2026/christmas/merch-christmas-admin-ceo-of-holiday-chaos.png",
+    "sha256": "c249da813659be5a734bd610f90f2b9bb2d83f394225cf48ecddb969901902b6",
+    "pixels": [
+     4500,
+     5400
+    ],
+    "dpi": 300,
+    "transparent_background": true,
+    "min_edge_margin_px": 127,
+    "font_size_px": 440,
+    "lines": [
+     "CEO of",
+     "Holiday Chaos"
+    ],
+    "self_contained_badge": true,
+    "fonts": [
+     "Shrikhand (OFL)",
+     "Alfa Slab One (OFL)",
+     "Oswald (OFL)"
+    ],
+    "checks_not_done": [
+     "Printify blueprint print-area/size confirmation",
+     "physical or Printify mockup",
+     "owner visual approval",
+     "IP/trademark search"
+    ]
+   },
+   "economics": {
+    "print_cost_cents": null,
+    "shipping_cost_cents": null,
+    "retail_price_cents": null,
+    "margin_floor_pct": 30,
+    "net_margin_verified": false,
+    "price_authority": "NONE"
+   },
+   "gates": {
+    "originalArtworkApproved": false,
+    "providerAndVariantVerified": false,
+    "fulfillmentReviewed": false,
+    "shopifyReleaseApproved": false
+   },
+   "release_state": "ARTWORK_DRAFT_RENDERED",
+   "publication_eligible": false,
+   "blocker": "Artwork, Printify spec/cost verification, IP search, sample, owner price + release approval"
+  }
+ ],
+ "digital": [
+  {
+   "key": "digital-cleaning-operator-job-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Cleaning Operator Job Kit",
+   "collection": "Existing governed ($19)",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI Cleaning Operator Job Kit",
+    "price_usd": 19,
+    "sku": "DD-DIG-CLEAN-OP-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "ACTIVE"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Drive file DANI_Cleaning_Operator_Job_Kit.pdf (2026-10-08): 7 pages of blank worksheets, no worked examples, no calculator.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-small-business-weekly-operations-planner",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Small Business Weekly Operations Planner",
+   "collection": "Existing governed ($15)",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI Small Business Weekly Operations Planner",
+    "price_usd": 15,
+    "sku": "DD-DIG-WEEKLY-OPS-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "ACTIVE"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Customer file NOT located in Drive search; cannot inspect.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-7-day-home-reset-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "7-Day Home Reset Kit",
+   "collection": "Existing governed ($9)",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI 7-Day Home Reset Kit",
+    "price_usd": 9,
+    "sku": "DD-DIG-RESET-7D-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "ACTIVE"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Customer file NOT located in Drive search; cannot inspect.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-service-quote-profit-check",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Service Quote & Profit Check",
+   "collection": "Business Operator",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI Service Quote & Profit Check Kit",
+    "price_usd": 19,
+    "sku": "DD-DIG-QUOTE-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "DRAFT $19"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-client-intake-scope-change",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Client Intake & Scope Change",
+   "collection": "Business Operator",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI Client Intake & Scope Change Kit",
+    "price_usd": 15,
+    "sku": "DD-DIG-INTAKE-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "DRAFT $15"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-property-inspection-photo-log",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Property Inspection & Photo Log",
+   "collection": "Business Operator",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI Property Inspection Photo Log Kit",
+    "price_usd": 19,
+    "sku": "DD-DIG-INSPECT-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "DRAFT $19"
+   },
+   "aliases": [],
+   "production_candidate": [
+    "DDP-PROP-001",
+    "FIELD_PHOTO_LOG_KIT_V1"
+   ],
+   "notes": "Possible overlap with Production candidates DDP-PROP-001 (Turnover Evidence + Photo Index Kit) and FIELD_PHOTO_LOG_KIT_V1.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-diy-marketing-starter-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "DIY Marketing Starter Kit",
+   "collection": "Business Operator",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI DIY Marketing Starter Kit for Service Businesses",
+    "price_usd": 19,
+    "sku": "DD-DIG-MARKETING-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "DRAFT $0"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "PRICE CONFLICT: $0 draft per Drive handoff; $19 ACTIVE per Notion. No recorded owner approval of $19.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-no-face-reels-voiceover-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "No-Face Reels & Voiceover Kit",
+   "collection": "Business Operator",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI No-Face Reels & Voiceover Content Kit",
+    "price_usd": 29,
+    "sku": "DD-DIG-VOICEOVER-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "DRAFT $0"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "PRICE CONFLICT: $0 draft per Drive handoff; $29 ACTIVE per Notion. No recorded owner approval.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-marketing-no-face-content-bundle",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Marketing & No-Face Content Bundle",
+   "collection": "Business Operator",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI Marketing & No-Face Content Bundle",
+    "price_usd": 39,
+    "sku": "DD-DIG-MARKETING-CONTENT-BUNDLE-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "ABSENT from Drive baseline"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Not in Drive baseline (11 products); present in Notion (14). VERSION CONFLICT; price approval not recorded.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-flagship-dani-small-business-operations-growth-planner",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Flagship DANI Small Business Operations & Growth Planner",
+   "collection": "Business Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Assemble from verified reusable components after existing planner is repaired.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-home-command-center",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Home Command Center",
+   "collection": "Home & Holiday",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI Home Command Center",
+    "price_usd": 12,
+    "sku": "DD-DIG-HOME-CENTER-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "DRAFT $0"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "PRICE CONFLICT: $0 draft vs $12 ACTIVE. Owner brand reference: Home Command Center.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-house-manager-operations-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "House Manager Operations Kit",
+   "collection": "Home & Holiday",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI House Manager Operations Kit",
+    "price_usd": 19,
+    "sku": "DD-DIG-HOUSE-MGR-01",
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "DRAFT $0"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "PRICE CONFLICT: $0 draft vs $19 ACTIVE.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-home-manual-binder",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Home Manual Binder",
+   "collection": "Home & Holiday",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI Home Manual Binder",
+    "price_usd": 12,
+    "sku": null,
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "ABSENT from Drive baseline"
+   },
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "No SKU in Shopify; VERSION CONFLICT.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-holiday-home-planner-holiday-home-command-center",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Holiday Home Planner / Holiday Home Command Center",
+   "collection": "Home & Holiday",
+   "state": "EXISTS_IN_SHOPIFY",
+   "shopify": {
+    "shopify_title": "DANI Holiday Home Planner",
+    "price_usd": 12,
+    "sku": null,
+    "status_notion_2026_10_10": "ACTIVE",
+    "status_drive_handoff_2026_10_10": "ABSENT from Drive baseline"
+   },
+   "aliases": [
+    "Holiday Home Planner",
+    "Holiday Home Command Center"
+   ],
+   "production_candidate": null,
+   "notes": "Treated as ONE product (owner wrote the two names as aliases). No SKU in Shopify. Seasonally time-critical.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-30-day-cleaning-rotation",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "30-Day Cleaning Rotation",
+   "collection": "Home & Holiday",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-family-meal-grocery-planner",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Family Meal & Grocery Planner",
+   "collection": "Home & Holiday",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-resident-home-operations-planner",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Resident Home Operations Planner",
+   "collection": "Home & Holiday",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Resident-facing; CH01 consistency with Home Operations work in PR #632.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-independent-provider-starter-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Independent Provider Starter Kit",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Retail product; DANI required onboarding/eligibility/dispatch materials stay free and separate.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-field-job-execution-evidence-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Field Job Execution & Evidence Kit",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": [
+    "DDP-FIELD-001"
+   ],
+   "notes": "Overlaps Production candidate DDP-FIELD-001 (Field Service Daily Proof Packet). Owner mapping needed.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-provider-pricing-profit-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Provider Pricing & Profit Kit",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": [
+    "JOB_PROFIT_CALCULATOR_V1"
+   ],
+   "notes": "Overlaps Service Quote & Profit Check / JOB_PROFIT_CALCULATOR_V1. Do not duplicate.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-provider-business-operations-planner",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Provider Business Operations Planner",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Likely overlaps Weekly Operations Planner; confirm differentiation before building.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-property-turn-field-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Property Turn & Field Kit",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [
+    "Provider Field Starter"
+   ],
+   "production_candidate": [
+    "DDP-PROP-001",
+    "DDP-PROP-002"
+   ],
+   "notes": "Overlaps DDP-PROP-001 and DDP-PROP-002 (assets exist: v2_2026-10-06 fillable PDFs).",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-cleaning",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — cleaning",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-maintenance",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — maintenance",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-notary",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — notary",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": [
+    "DDP-NOTARY-001"
+   ],
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-laundry",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — laundry",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-pet-care",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — pet care",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-roadside-assistance",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — roadside assistance",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-events",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — events",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-real-estate",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — real estate",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-administrative-services",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — administrative services",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-specialized-operator-kit-custom-merchandise",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Specialized operator kit — custom merchandise",
+   "collection": "Provider & Field Operator",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Specialized edition; underwrite after the base kits exist.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-holiday-cleaning-business-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Holiday Cleaning Business Kit",
+   "collection": "Holiday Provider Digital",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Seasonally time-critical.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-gift-wrapping-holiday-decorating-operator-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Gift Wrapping & Holiday Decorating Operator Kit",
+   "collection": "Holiday Provider Digital",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Seasonally time-critical.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-holiday-custom-merch-seller-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Holiday Custom Merch Seller Kit",
+   "collection": "Holiday Provider Digital",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Seasonally time-critical.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-holiday-event-party-support-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Holiday Event & Party Support Kit",
+   "collection": "Holiday Provider Digital",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Seasonally time-critical.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-holiday-pet-care-provider-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Holiday Pet Care Provider Kit",
+   "collection": "Holiday Provider Digital",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Seasonally time-critical.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-holiday-property-maintenance-kit",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Holiday Property & Maintenance Kit",
+   "collection": "Holiday Provider Digital",
+   "state": "NEW_REQUIRED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "Seasonally time-critical.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-cookout-crew-products-shirts-totes-party-packs-signs",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "Cookout Crew products (shirts, totes, party packs, signs)",
+   "collection": "Recovered history",
+   "state": "HISTORICAL_UNVERIFIED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "data/shopify-recovery/cookout-history.json; no approved prices; not in Shopify.",
+   "publication_eligible": false
+  },
+  {
+   "key": "digital-eli10-educational-ebooks-8-subject-candidates",
+   "kind": "DIGITAL_PRODUCT",
+   "name": "ELI10 educational ebooks (8 subject candidates)",
+   "collection": "Recovered history",
+   "state": "HISTORICAL_UNVERIFIED",
+   "shopify": null,
+   "aliases": [],
+   "production_candidate": null,
+   "notes": "No manuscripts, covers or prices found.",
+   "publication_eligible": false
+  }
+ ],
+ "horror": {
+  "status": "NO_RECORDS_FOUND",
+  "searched": [
+   "Supabase dd_merch_product_candidates (prod)",
+   "Drive title/fullText searches",
+   "Notion search",
+   "repo data/"
+  ],
+  "blocker": "No prior horror concepts, ownership, licensing or capacity records located. Need Chris-horror source files or owner restatement. Do not assume capacity/costs. Prefer original art; no licensed film characters."
+ },
+ "production_candidates_existing": [
+  "DDP-NOTARY-001",
+  "DDP-NOTARY-002",
+  "DDP-CLEAN-001",
+  "DDP-WORKFORCE-001",
+  "DDP-WORKFORCE-002",
+  "DDP-WORKFORCE-003",
+  "DDP-FIELD-001",
+  "DDP-PROP-001",
+  "DDP-PROP-002"
+ ],
+ "reference_inputs": [
+  {
+   "key": "ref-fall-tis-the-season-sweatshirt",
+   "received": "2026-10-11 owner upload",
+   "kind": "THIRD_PARTY_MARKETPLACE_PHOTO",
+   "use": "ART_DIRECTION_ONLY",
+   "takeaway": "Watercolor pumpkin / spiced-latte / football cluster with script lettering on a sand sweatshirt.",
+   "guardrail": "Do not reproduce artwork, lettering or composition."
+  },
+  {
+   "key": "ref-fall-vibes-leaf-and-ghost",
+   "received": "2026-10-11 owner upload",
+   "kind": "THIRD_PARTY_MARKETPLACE_PHOTO",
+   "use": "ART_DIRECTION_ONLY",
+   "takeaway": "Retro rubber-hose cartoon characters (maple leaf + ghost) with groovy rounded lettering; muted rust/peach/cream palette.",
+   "guardrail": "Do not reproduce the characters or lettering. A character-driven retro variant would need original characters."
+  },
+  {
+   "key": "ref-pumpkin-spice-and-real-estate-advice-listing",
+   "received": "2026-10-11 owner upload",
+   "kind": "THIRD_PARTY_MARKETPLACE_PHOTO",
+   "use": "MARKET_EVIDENCE",
+   "takeaway": "The phrase \"Pumpkin Spice and Real Estate Advice\" is already sold by at least one third-party seller (illustrated coffee cups, script + caps lettering). The wording is not exclusive to DANI.",
+   "guardrail": "Differentiate through original art; do not copy the cup illustrations. Run a trademark search before listing.",
+   "affects": "merch-fall-real-estate-pumpkin-spice-real-estate-advice"
+  },
+  {
+   "key": "ref-christmas-cleaning-humor-shirts",
+   "received": "2026-10-11 owner upload (christmas_cleaning_shirts)",
+   "kind": "THIRD_PARTY_MARKETPLACE_PHOTO",
+   "use": "ART_DIRECTION_ONLY",
+   "takeaway": "Cleaning-humor holiday shirts: script + snowflakes, counting-list typography, Santa/Mrs. Claus cartoon, vacuum gag. Shows demand for profession-specific Christmas humor.",
+   "guardrail": "Do not reproduce slogans (\"Baby, it's clean inside\", \"5 Golden Sweeps...\") or illustrations."
+  },
+  {
+   "key": "ref-ugly-sweater-but-did-you-document-it",
+   "received": "2026-10-11 owner upload (but_did_you_document_it)",
+   "kind": "THIRD_PARTY_MARKETPLACE_PHOTO",
+   "use": "CONCEPT_SUGGESTION_PENDING_OWNER_CONFIRMATION",
+   "takeaway": "Knit-pattern \"ugly Christmas sweater\" layout with the line \"But did you document it\". Fits DANI evidence culture (notary, property turns, field providers).",
+   "guardrail": "Not in the 44 approved concepts and not added as one. If the owner approves the slogan, build an ORIGINAL knit-style layout; do not reuse the reference pattern, motifs or typeface. Run a trademark search on the phrase."
+  }
+ ],
+ "dedup_findings": {
+  "conflicts": [
+   "Shopify baseline differs between Drive handoff (4 active + 7 draft, several $0) and Notion 2026-10-10 (14 active, no drafts, none $0). Four formerly $0 drafts and the Holiday Planner/Manual Binder/Bundle appear active at prices with no recorded owner approval. Cannot verify live: no Shopify access in this session.",
+   "Production candidates DDP-FIELD-001, DDP-PROP-001/002 overlap requested provider kits (Field Job Execution & Evidence Kit; Property Turn & Field Kit).",
+   "Holiday Home Planner and Holiday Home Command Center treated as one product."
+  ],
+  "sources": [
+   "Supabase prod dd_merch_product_candidates (9), dd_digital_product_candidates (7)",
+   "Drive: Historical Product Recovery Handoff 2026-10-10",
+   "Notion: Weekend Catalog & Marketing Drafts 2026-10-10",
+   "repo data/shopify-recovery/*"
+  ]
+ }
+}
