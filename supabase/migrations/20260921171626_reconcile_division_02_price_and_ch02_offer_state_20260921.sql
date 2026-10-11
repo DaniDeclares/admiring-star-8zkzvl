@@ -105,7 +105,18 @@ begin
     )
     and o.fulfillment_gate_status=case when o.authorized_provider_capability_count>0
       then 'READY' else 'FULFILLMENT_GATED' end;
-  if v_gated_004 <> 1 then raise exception 'DNI-02A-004 evidence-backed gate/count reconciliation failed'; end if;
+  if v_gated_004 <> 1 then
+    raise exception 'DNI-02A-004 evidence-backed gate/count reconciliation failed: matched=%; rows=%',
+      v_gated_004,
+      (select coalesce(jsonb_agg(jsonb_build_object(
+        'sku',o.canonical_sku,'runtime_service_id',o.runtime_service_id,
+        'channel_count',o.channel_availability_count,
+        'provider_count',o.authorized_provider_capability_count,
+        'fulfillment_gate',o.fulfillment_gate_status,
+        'actual_channel_count',(select count(*) from public.dd_service_channel_availability a where a.service_id=o.runtime_service_id and a.eligibility_status='ELIGIBLE'),
+        'actual_provider_count',(select count(*) from public.dd_provider_capabilities p where p.service_id=o.runtime_service_id and p.is_authorized=true)
+      )), '[]'::jsonb) from public.dd_governed_service_offers o where o.canonical_sku='DNI-02A-004');
+  end if;
   -- Price repair is not commercial approval. Both loss-held offers must stay unsellable.
   select count(*) into v_ready_005 from public.dd_governed_service_offers
   where canonical_sku='DNI-02A-005' and commercial_offer_status='DO_NOT_SELL';
