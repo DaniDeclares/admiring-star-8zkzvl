@@ -100,6 +100,15 @@ jobs:
           mv supabase/migrations/20260920213000_create_ch02_service_adjudication.sql \
              supabase/migrations/20260920210457_create_ch02_service_adjudication.sql
 
+          # The Production codification migration at 10:49 is the current
+          # canonical creator for five pre-existing runtime guardrail relations,
+          # including dd_audit_proof_receipts. An earlier 01:42 readiness view
+          # is their first clean-source consumer. Re-key only this unchanged
+          # creator in the disposable replay immediately before that consumer.
+          test -f supabase/migrations/20260928104900_codify_runtime_guardrail_relations.sql
+          mv supabase/migrations/20260928104900_codify_runtime_guardrail_relations.sql \
+             supabase/migrations/20260928014249_codify_runtime_guardrail_relations.sql
+
           # Production's quarantine receipt ran historically, but neither current
           # Production nor canonical clean-source tables retain the optional status
           # columns it targeted. Patch only the disposable replay copy so its stated
