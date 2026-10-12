@@ -68,6 +68,15 @@ describe('LIVE_READY checkout release gate', () => {
     ).reason).toBe('SERVICE_NOT_LIVE_READY:RUNTIME_ACCURACY');
   });
 
+  test.each(['ECONOMICS_NOT_RECONCILED', 'PAYMENT_LEDGER', 'RUNTIME_ACCURACY'])(
+    'blocks LIVE_READY / SELL_NOW when independent gate %s is unresolved', (blockingGate) => {
+      expect(checkoutEligibility(
+        { ...readyOffer, blockingGate },
+        { channel: 'CH01', subchannel: 'CH01-A' }
+      )).toEqual({ eligible: false, reason: `SERVICE_BLOCKED:${blockingGate}`, price: null });
+    }
+  );
+
   test('allows a fully released service through the legacy checkout gates', () => {
     expect(checkoutEligibility(
       readyOffer,
