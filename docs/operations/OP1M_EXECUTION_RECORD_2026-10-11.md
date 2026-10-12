@@ -206,3 +206,10 @@ Production sales-queue check (my access works; the other tool's request was bloc
 - Stonemark Management: 1 row, EMAIL_ONLY, 1 email 9/30, source confidence SINGLE_SOURCE, no suppression.
 - General Services Corporation / Dunwoody Crossing: no row. No Spalding/Spaulding property rows. No StoneBridge/ZRS rows.
 Implications: one prior email each to Stonemark and Atlantic Pacific, no replies on file; sending a sister-property introduction would be a second touch to the same account, so respect cadence and treat the parent account as one relationship. GSC is a new account (contact discovery needed). Public directory names and titles are leads only; no paid enrichment (Apollo or Lusha) was run and no credits were spent. Territory membership (5-mile) of each property is unverified. Nothing was sent, created, or merged.
+
+### Hambrick Road / Park at 500 note (relayed research, 2026-10-12; not verified by me)
+Relayed from ChatGPT: three communities on Hambrick Road (Park at 500, Ashgrove, Clifton Glen). Park at 500 reportedly has county-assessor ownership "HADC Park at 500 LLC" (Housing Authority of DeKalb County affiliate) and is managed by HDC Management, with a published HDC management team; a 2025 DeKalb County transitional-housing investment is mentioned. Ashgrove and Clifton Glen: current owner and manager unverified. HubSpot has no exact-name records for these.
+What this changes in DANI records:
+- The 10/03 DANI email to a `dekalbhousing.org` "residents" address (bounced) went to the owner affiliate, not to the manager or a vendor contact. Do not retry that address.
+- Park at 500 has two separate routes: (1) property operations through the management company's vendor onboarding (quote-only, CH02); (2) any Housing Authority or County work follows the governed government procurement path (CH05), never ordinary checkout or a cold sales email.
+- No CRM record, Asana task, or outreach was created from this note; there is no Park at 500 row in the sales queue. Verification of ownership, current manager, and the correct vendor contact is still needed before a record is created.
