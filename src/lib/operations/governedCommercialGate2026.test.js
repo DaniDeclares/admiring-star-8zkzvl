@@ -1,4 +1,6 @@
-import { economicGateFromOffer, checkoutEligibility, resolveCH01CommercialSelection } from './governedCommercialGate2026.mjs';
+import { resolveCH01CommercialSelection } from './governedCommercialGate2026.mjs';
+// Checkout is implemented in the CommonJS server module, not the ESM resolver.
+const { economicGateFromOffer, checkoutEligibility } = require('./governedCommercialGate2026.js');
 
 jest.mock('../../../lib/prisma.js', () => ({
   __esModule: true,
@@ -77,6 +79,32 @@ describe('LIVE_READY checkout release gate', () => {
     }
   );
 
+  test.each(['NONE', 'CLEARED', 'PASS'])(
+    'allows canonical cleared blocker %s to proceed through other gates', (blockingGate) => {
+      expect(checkoutEligibility({ ...readyOffer, blockingGate }, { channel: 'CH01', subchannel: 'CH01-A' }).eligible).toBe(true);
+    }
+  );
+  test('unrecognized blocker fails closed', () => {
+    expect(checkoutEligibility({ ...readyOffer, blockingGate: 'UNRECOGNIZED_GATE' }, { channel: 'CH01', subchannel: 'CH01-A' }).reason).toBe('SERVICE_BLOCKED:UNRECOGNIZED_GATE');
+  });
+  test('missing blocker retains existing permissive policy pending release contract review', () => {
+    expect(checkoutEligibility({ ...readyOffer, blockingGate: null }, { channel: 'CH01', subchannel: 'CH01-A' }).eligible).toBe(true);
+  });
+  test.each(['HOLD', 'BLOCKED', 'INTAKE_ONLY'])(
+    'rejects non-released state %s', (releaseState) => {
+      expect(checkoutEligibility({ ...readyOffer, releaseState }, { channel: 'CH01', subchannel: 'CH01-A' }).eligible).toBe(false);
+    }
+  );
+  test('quote-required offer cannot use direct checkout', () => {
+    expect(checkoutEligibility({ ...readyOffer, pricingType: 'STARTING_AT' }, { channel: 'CH01', subchannel: 'CH01-A' }).reason).toBe('QUOTE_REQUIRED');
+  });
+  test('cleared blocker does not bypass economics, fulfillment, or channel checks', () => {
+    const opts = { channel: 'CH01', subchannel: 'CH01-A' };
+    expect(checkoutEligibility({ ...readyOffer, internalCost: 'PENDING_RECONCILIATION' }, opts).reason).toBe('ECONOMICS_NOT_RECONCILED');
+    expect(checkoutEligibility({ ...readyOffer, fulfillmentGateStatus: 'HOLD' }, opts).reason).toBe('FULFILLMENT_NOT_READY');
+    expect(checkoutEligibility({ ...readyOffer, commercialOfferStatus: 'HOLD' }, opts).reason).toBe('COMMERCIAL_NOT_SELL_NOW');
+    expect(checkoutEligibility({ ...readyOffer, ch01LockedActivePricing: false }, opts).reason).toBe('CH01_CHANNEL_PRICING_NOT_LOCKED');
+  });
   test('allows a fully released service through the legacy checkout gates', () => {
     expect(checkoutEligibility(
       readyOffer,
