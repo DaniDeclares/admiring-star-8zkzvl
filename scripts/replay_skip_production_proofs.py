@@ -8,6 +8,10 @@ receipts. A schema-only replay has no Production business data, so it can never 
 NOT_PROVEN. This does NOT prove the payment path and must never be read as commercial readiness: every skipped proof
 stays an explicit Production runtime verification obligation.
 
+Two modes, both exact-file allowlisted:
+  * "trailing"    : DDL + grants first, then ONE trailing DO block that executes the proof (the default);
+  * "whole_block" : a file that is nothing but ONE DO block with NO DDL at all (a Production data-release/proof action).
+                    Skipping it removes no schema lineage. Used only where owner rule 3 applies; reported as such.
 Fail closed:
   * the file for each allowlisted ledger version must be present and its sha256 must equal the pinned value;
   * the block to remove must start with the pinned text, be the ONLY top-level DO block, and run to end of file;
@@ -51,6 +55,18 @@ ALLOWLIST = [
                       "service dropped; each target at the regression gate). The replay does not prove it.",
     },
 ]
+ALLOWLIST.append({
+    "version": "20261007014029",
+    "source_file": "20261007014029_ch01_holiday_commercial_release_governed.sql (supabase/production-ledger)",
+    "sha256": "20598ca4572b8d6b290741a6039600b42de6e391fd2a4231f4565f454ffdaa94",
+    "mode": "whole_block",
+    "block_start": "do $$\ndeclare\n  v_sha text := '5e3c5d840aeac362609b8ea49ac6b856c29dbce1';",
+    "proof_function": "(none: the file contains no DDL)",
+    "keeps": [],
+    "obligation": "Production runtime verification of the CH01 holiday commercial release: governed gates for the seven candidate "
+                  "SKUs, the PASS evidence receipts, the SELL_NOW offer status and the DNI-01F-002 lighting fail-close. The "
+                  "replay neither performs nor proves any of it; no release state was changed.",
+})
 SKU_RE = re.compile(r"'(DNI-[0-9A-Z]+-\d+)'")
 
 
@@ -71,15 +87,22 @@ def skip(directory):
             raise SystemExit("sha256 mismatch for %s (%s): got %s, pinned %s; refusing to modify" % (
                 entry["version"], entry["source_file"], digest, entry["sha256"]))
         text = raw.decode("utf8")
-        if text.count("\nDO $$") != 1:
-            raise SystemExit("EXPECTED exactly one top-level DO block in %s, found %d" % (entry["version"], text.count("\nDO $$")))
-        start = text.index("\nDO $$") + 1
+        mode = entry.get("mode", "trailing")
+        matches = list(re.finditer(r"(?im)^do \$\$", text))
+        if len(matches) != 1:
+            raise SystemExit("EXPECTED exactly one top-level DO block in %s, found %d" % (entry["version"], len(matches)))
+        start = matches[0].start()
         block = text[start:]
         if not block.startswith(entry["block_start"]):
             raise SystemExit("DO block in %s does not start with the pinned text; refusing" % entry["version"])
-        if not re.search(r"END \$\$;\s*$", block):
+        if not re.search(r"(?i)END \$\$;\s*$", block):
             raise SystemExit("DO block in %s is not the trailing statement; refusing" % entry["version"])
         head = text[:start]
+        if mode == "whole_block":
+            if head.strip() != "":
+                raise SystemExit("%s: whole_block mode requires the file to contain nothing before the DO block; refusing" % entry["version"])
+            if re.search(r"(?im)^\s*(create|alter|drop|grant|revoke|comment\s+on)\b", text):
+                raise SystemExit("%s: whole_block mode requires a file with no DDL; refusing" % entry["version"])
         for keep in entry["keeps"]:
             if keep not in head:
                 raise SystemExit("%s: required DDL/grant missing after removal: %s" % (entry["version"], keep))
@@ -94,7 +117,15 @@ def skip(directory):
             "source_file": entry["source_file"],
             "file_sha256": digest,
             "proof_function_kept": entry["proof_function"],
-            "skipped": "trailing proof execution (DO block)",
+            "mode": mode,
+            "skipped": ("trailing proof execution (DO block)" if mode == "trailing"
+                        else "entire file: one DDL-free Production data-release/proof DO block"),
+            "reason": "The block asserts live Production business data (and writes PASS evidence receipts) that a schema-only "
+                      "replay cannot have; the source assertions are left unchanged in the repo.",
+            "removed_statement_sha256": sha256_bytes(block.encode("utf8")),
+            "removed_statement_bytes": len(block.encode("utf8")),
+            "removed_statement_first_line": block.splitlines()[0],
+            "removed_statement_last_line": block.rstrip().splitlines()[-1],
             "target_skus": skus,
             "status": "NOT_PROVEN",
             "obligation": entry["obligation"],
