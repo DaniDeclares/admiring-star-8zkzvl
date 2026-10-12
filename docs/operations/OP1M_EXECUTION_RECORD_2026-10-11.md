@@ -136,3 +136,20 @@ State only; nothing was deployed, retried, or changed.
 - Latest Production deployment is still `dpl_7oAbP2prZQ9SpXQVfdD6gNusFbin`, `main` @ `cf875ff`, READY, created 2026-10-10T22:56Z. Production is therefore not serving `b73e92f`.
 - Whether the Hobby rate limit has reset cannot be read from deployment listings; the absence of any `b73e92f` deployment is consistent with the limit still applying or with no build having been requested. Verify by the owner triggering or confirming a build, which this routine was not authorized to do.
 - Next action (owner): decide whether to trigger a Production build of `b73e92f`; then confirm READY and function against the live site (READY alone is not proof).
+
+## 9:00 AM Oct 13 readiness pass (2026-10-12, read-only plus Asana tasks)
+AUDITED: Production service_requests, governed follow-up view, sales queue, Vercel production deployments, repo attribution code, Asana OP1M project `1219248953323716`.
+FOUND:
+- Service requests: 16 total; 11 `routed` (oldest 2026-08-29), 3 `proposal_pending` (newest 2026-10-11), 1 `scheduled` (the only one with a quote), 1 cancelled. 0 carry campaign attribution. The 3 proposal_pending and the 11 routed requests are the real inquiries needing owner response.
+- `dd_governed_sales_followup_candidates_v1`: 9 rows, all due 2026-10-12, all matched to `DNI-02A-009` (LIVE_READY, quote-eligible, not checkout-ready). Named: Asset Living, Atlanta Area Property & Management, DHC, Evernest, Fort Knox, Fortis, Golden Gate, HomeOwners Advantage / Five Star, Sapir Realty.
+- S-named CH02 accounts: Sapir Realty (5 duplicate rows), Stonemark (emailed 9/30), Summerfield (never contacted); Southern Homes and Rentals and Sharp Management are SUPPRESSED. Dunwoody Exchange: no row in sales queue, HubSpot, or Gmail.
+- Conflict to resolve: lead metadata (set 2026-10-06) cites a "CH02 pilot baseline Essential 750 / Operations 1550 / Portfolio 2500, 30 pct hard floor". Those are not governed prices and the 30% floor contradicts the owner's 50% floor. Do not quote them. `outreach_authorized` is false on the Asset Living target.
+- Sales queue consent: 0 verified `consent_marketing`; 2 do-not-contact.
+- Production lags main: Production is `cf875ff`; main is `b73e92f` with no Vercel deployment.
+AUTHORITY: Supabase Production (sales queue, requests, release contract); Vercel (deployment); Asana (execution tasks).
+CHANGES MADE: 4 Asana tasks added to OP1M for 2026-10-13 (CH02 follow-ups, link click-verification, post-draft approval, unlinked provider applications). No Production, price, release-state or outreach change.
+NOT SAFE (needs owner): any send to the follow-up list (consent unverified), provider approvals, Production build of `b73e92f`, promoting the cost-attribution view.
+VERIFIED: counts above from live Production reads. NOT VERIFIED: public site behavior, checkout, Shopify delivery (no browser, site blocked, Shopify sign-in expired).
+REMAINING RISKS: 0 services economically verified; 0 dispatch-ready providers; attribution never exercised.
+REVENUE IMPACT: $160.00 verified collected; nothing new.
+FIRST REVENUE ACTION: respond to the 3 `proposal_pending` requests, then call the Sapir/Summerfield/Stonemark follow-ups quote-only.
