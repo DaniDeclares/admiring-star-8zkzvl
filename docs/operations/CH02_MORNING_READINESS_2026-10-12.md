@@ -9,11 +9,11 @@ Scope: read-only queries of Production Supabase (`ajxezpczaemunlcmqlgl`), HubSpo
 
 ## Providers (Production, `dd_morning_provider_readiness_v1`)
 - 51 active provider records; 0 approved-active, 0 operational-ready, 0 dispatch-ready, 0 payout-ready.
-- 49 have no application record; 2 await application approval. Nothing is awaiting W-9, agreement, identity, compliance or payout rail because those steps cannot start without an application.
+- 49 have no application record; 2 await application approval. Cross-check: `dd_provider_applications` holds 5 SUBMITTED applications; only 2 carry a `provider_id` (the 2 awaiting approval), 3 have no provider link. Agreement is EXECUTED on 4 of 5, tax form RECEIVED on 1, identity and compliance PENDING on all 5. Linking the 3 unlinked applications needs an identity match by the owner or an approved repair, not a guess. Nothing is awaiting W-9, agreement, identity, compliance or payout rail because those steps cannot start without an application.
 - No reminders were sent by this audit. Sending requires the existing onboarding coordinator and its opt-out and no-recontact gates.
 
 ## CH02 packages and services
-- All 7 CH02 outcome packages in `dd_governed_packages` are `INTAKE_ONLY`, no package price, "routing only; priced through component SKUs". There is no approved bundle price or retainer package.
+- All 6 CH02 outcome packages (PKG-CH02-F01..F04; an earlier draft of this note said 7, which was a miscount) in `dd_governed_packages` are `INTAKE_ONLY`, no package price, "routing only; priced through component SKUs". There is no approved bundle price or retainer package.
 - CH02 service availability: 134 ACTIVE, 11 ELIGIBLE, 1 QUOTE_REQUIRED, 41 PENDING.
 - Release state of the ACTIVE/ELIGIBLE/QUOTE_REQUIRED CH02 services: 56 LIVE_READY (49 fixed one-time, 5 recurring monthly, 2 SOW/procurement), 82 HOLD, 10 BLOCKED. Only 1 CH02 service shows a verified Stripe price plus payment path (a monthly fixed service, state HOLD). The other LIVE_READY services show no verified Stripe price, so they are quote-first, not checkout-ready.
 - Contract artifact types on file: MSA, SOW, Work Order, Portfolio Agreement. Their approved terms were not verified in this pass.
