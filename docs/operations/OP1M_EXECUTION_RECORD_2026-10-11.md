@@ -182,3 +182,19 @@ Rules for any contact: quote-only and scoped to actual hours; no bundle, retaine
 
 Draft call opener (for the owner to adapt): "Hi, this is Dani with DANI DECLARES. We handle the execution on apartment turns: cleaning, make-ready, and condition documentation. I emailed on the 30th about [community]. Would a short walkthrough of one unit be useful so we can send you a scoped quote?"
 Draft follow-up email (not sent): subject "Following up: apartment turn support"; two sentences restating the 9/30 note, offering one unit walkthrough, no prices, opt-out line.
+
+### Apartment blitz reconciliation, first pass (2026-10-12, read-only)
+Sources checked: `dd_sales_queue` (named accounts), Gmail search for the named communities, HubSpot company search. No send, no record created or merged.
+
+| Target | What the records show | Status |
+|---|---|---|
+| RPM Living / District at Parkview | One RPM row, SUPPRESSED: `ACTIVE_VENDOR_MANAGEMENT_TICKET_1337776`, disposition EXISTING_VENDOR_REVISIT, 2 attempts, last 10/01. No District at Parkview property row exists. | HOLD. Follow the open vendor ticket via the community-manager / NetVendor route RPM gave; no generic intro. |
+| Acento (Lakeview, INDIGO, Woodgate) | One Acento row, 3 attempts, last 10/06; an unsent Gmail draft already targets the contact. Lakeview mailbox was emailed 7/31, 9/28, 10/06; the only reply on file is an out-of-office auto-reply (7/31). No INDIGO or Woodgate rows. | HOLD a 4th send. Reconcile the existing draft first; find INDIGO/Woodgate community-manager routes. |
+| East Ponce Village | Not in sales queue or HubSpot. An email on 10/03 to the old Blue Parc address bounced (mailer-daemon). | CONTACT DISCOVERY. Do not reuse that address; owner supplied a leasing-office phone route. |
+| Park at 500 (Stone Mountain) | Not in sales queue. An email on 10/03 to a dekalbhousing.org "residents" address bounced (postmaster). | CONTACT DISCOVERY. Find the actual management/vendor contact. |
+| Golden Gate Management | 2 rows: one BOUNCED, one SENT. | Do not resend to the bounced address; recover a valid manager route. |
+| Wildwood / Peak Living | 3 attempts, last 10/04; an unsent Gmail draft already targets the contact. | HOLD; reconcile the draft before any send. |
+| Dunwoody Exchange, The Savoy, Camden Creekstone, Five Oaks, Emerald Creek, Linden Ridge, Hairston Woods, The Pointe, Midwood Gardens, Mirador/Venterra | No sales-queue row by these names; no HubSpot match for Dunwoody or Ponce; Gmail shows no correspondence for Savoy, Dunwoody Exchange, or Creekstone. | CONTACT DISCOVERY / research-only. Verify property, management company and contact before any CRM record. |
+| Portfolio accounts with rows | Asset Living (sent 9/30), Atlantic Pacific (sent 9/30), Bay (sent, context incomplete), Keyrenter (sent 10/06, context incomplete), One Source Atlanta (2 rows, one SUPPRESSED), Vision (sent, context incomplete), Cobalt (SUPPRESSED, recent outreach), Integral (sent 10/06), Summerfield (callable, never contacted), Bridge and ResiHome (no contact route), Willow Bridge (SUPPRESSED, context incomplete) | Eligible follow-ups are limited to rows with a verified route that are not suppressed or paused; see the 9-candidate table above. |
+NOT DONE: the two five-mile territory censuses (SM-5 around Park at 500, CH-5 around Ashford Dunwoody / Savoy Dr). They need a geocoder and a property-data source; this session has no verified geographic or property dataset, so no distances or complete lists are claimed. The map in the owner's relayed note is unverified. "The Savoy" (4306 N Shallowford Rd) is a candidate for the S-named apartment, not confirmed.
+Next safe step: build the territory lists in the existing CRM tables from a verified source, then classify each row ready / contact-discovery / held. Nothing may be sent without the owner's approval of the specific message.
