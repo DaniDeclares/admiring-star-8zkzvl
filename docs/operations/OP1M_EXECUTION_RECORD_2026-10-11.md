@@ -153,3 +153,12 @@ VERIFIED: counts above from live Production reads. NOT VERIFIED: public site beh
 REMAINING RISKS: 0 services economically verified; 0 dispatch-ready providers; attribution never exercised.
 REVENUE IMPACT: $160.00 verified collected; nothing new.
 FIRST REVENUE ACTION: respond to the 3 `proposal_pending` requests, then call the Sapir/Summerfield/Stonemark follow-ups quote-only.
+
+### Correction (2026-10-12): the "3 proposal_pending" requests are not real customer inquiries
+My earlier addendum called the 3 `proposal_pending` and 11 `routed` requests "the real inquiries." Reading them shows that was wrong:
+- 2026-09-20 (CH02, 5 apartment turns, 2 pet-damage, 1 eviction haul-out): submitted with DANI's own sales mailbox (`danideclaresns`), organization "ddl inc". Looks like an internal scenario test; no quote, scope NOT_STARTED. Confirm with owner.
+- 2026-10-09 (CH04): request text says "TEST ONLY ... Not a real customer. Do not quote or schedule."
+- 2026-10-11 (CH02, labeled Property Turnover): inbound vendor-referral solicitation from "The Cradle Holdings Facility Solutions" asking DANI to send an intake profile and verify coverage "before Tuesday". Unverified, not a buyer. Do not send an intake profile; treat as an unverified solicitation.
+- 2026-09-23 routed CH01 two-story house request (Stone Mountain): unverified; wording echoes the 9/20 test. Confirm with owner.
+- All other `routed` rows are tests, probes or junk text; one cancelled row is a state-machine test. The 1 `scheduled` request is the completed Thumbtack job ($160 collected).
+Net: there is no verified open inbound customer demand. The revenue path tomorrow is the permitted CH02 follow-ups, quote-only. Asana task `1219397649342143` carries the same correction. No customer or lead data was changed.
