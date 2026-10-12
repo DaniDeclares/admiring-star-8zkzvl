@@ -8,6 +8,8 @@ on:
       - '.github/workflows/supabase-migration-replay.yml'
       - 'scripts/replay_shim_provider_guard_format.py'
       - 'scripts/test_replay_shim_provider_guard_format.py'
+      - 'scripts/replay_seed_services_07a.py'
+      - 'scripts/test_replay_seed_services_07a.py'
   workflow_dispatch:
 
 permissions:
@@ -49,7 +51,9 @@ jobs:
           PY
 
       - name: Test provider staging guard formatting shim (pristine checkout)
-        run: python3 scripts/test_replay_shim_provider_guard_format.py
+        run: |
+          python3 scripts/test_replay_shim_provider_guard_format.py
+          python3 scripts/test_replay_seed_services_07a.py
 
       - name: Assemble hybrid replay set (legacy source below cutoff, Production ledger lineage from cutoff)
         run: |
@@ -72,6 +76,13 @@ jobs:
           # minified text exactly. Rewrite whitespace of that one predicate in this disposable workspace only; the shim
           # fails closed if anything other than whitespace would change. No repo migration or archived ledger SQL is edited.
           python3 scripts/replay_shim_provider_guard_format.py supabase/migrations
+
+      - name: Seed identifier-only services prerequisite for 20261006233600 (replay workspace only)
+        run: |
+          # 20261006233600 (archived Production SQL) references ten Production services UUIDs that are runtime data, not
+          # migration output. Write one identifier-only prerequisite migration into this disposable workspace so the
+          # foreign key is satisfied (never disabled). Fails closed if the migration's UUIDs and the seed diverge.
+          python3 scripts/replay_seed_services_07a.py supabase/migrations
 
       - name: Reconcile production-owned legacy replay order
         run: |
