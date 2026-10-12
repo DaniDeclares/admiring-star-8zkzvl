@@ -42,3 +42,18 @@ Week check-in from building DANI. What is real: our first customer job is comple
 
 ## Next action if this stops
 Verify links from a network that can reach danideclares.com, then enter priorities 1-5 in Asana, then (only if approved) schedule drafts 1, 2 and 4.
+
+## Addendum, 2026-10-12 ~01:30Z: attribution trace and tool limits (read-only)
+**Attribution path, traced in code and Production:**
+- `src/pages/RequestServicePage.jsx` reads `utm_source/medium/campaign/content`, `audience` and `ref` from the page URL and posts them as `marketingAttribution` to `/api/intake-webhook`.
+- `api-handlers/intake-webhook.js` stores the sanitized tags at `service_requests.property_details.marketingAttribution` (null if no tags).
+- `dd_acquisition_tagged_requests_v1` joins `upper(utm_content)` to `dd_acquisition_content_v1.content_key`; `dd_op1m_capture_intake_attribution_v1` exists in Production.
+- Production state: 16 service requests, 0 carry `marketingAttribution`, 1 request since PR #613 merged; 0 attribution rows; all 10 content rows are DRAFT.
+- Conclusion: attribution is not being lost in code. The path has never been exercised because no tagged link has been published or clicked. Not yet proven end to end, and only `/request-service` carries tags. Shopify product pages, the provider-application route, and HubSpot forms were not traced.
+- Required for a valid test: a link whose `utm_content` equals a `content_key` exactly (for example `B2B:FB:TRIAL`), submitted once on the live site. Could not run from this sandbox (site blocked).
+
+**Tool limits in this session (so nobody assumes otherwise):**
+- No Microsoft Edge extension or browser tool is available to this session; `danideclares.com` is blocked by the sandbox proxy. Browser verification of links, forms, checkout, PDF download and HubSpot handoffs was NOT performed.
+- The Shopify connector requires re-sign-in here, so the delivery-file hash comparison for the Home Reset PDF was NOT performed. Test order #1001 evidence is as reported by the owner and ChatGPT, not independently verified.
+- Cost-attribution regression: my 10/11 fixtures covered conflicting amounts, VOID/correction, conflicting structured paths, and acquisition/transaction/fulfillment classes against the proposed view. Two later migrations changed the applied Tester view, so those cases should be re-run on it. NOT re-run in this pass. Production unchanged.
+- No Asana/HQ entries were created; no posts were published, scheduled or sent.
