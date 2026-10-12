@@ -6,6 +6,12 @@ on:
       - 'supabase/migrations/**'
       - 'supabase/config.toml'
       - '.github/workflows/supabase-migration-replay.yml'
+      - 'scripts/replay_shim_provider_guard_format.py'
+      - 'scripts/test_replay_shim_provider_guard_format.py'
+      - 'scripts/replay_seed_services_prerequisite.py'
+      - 'scripts/test_replay_seed_services_prerequisite.py'
+      - 'scripts/replay_skip_production_proofs.py'
+      - 'scripts/test_replay_skip_production_proofs.py'
   workflow_dispatch:
 
 permissions:
@@ -46,6 +52,12 @@ jobs:
           print(f"migration version hygiene PASS: {len(files)} files; no duplicates; only allowlisted Production-owned 20260820 legacy key may be short")
           PY
 
+      - name: Test provider staging guard formatting shim (pristine checkout)
+        run: |
+          python3 scripts/test_replay_shim_provider_guard_format.py
+          python3 scripts/test_replay_seed_services_prerequisite.py
+          python3 scripts/test_replay_skip_production_proofs.py
+
       - name: Assemble hybrid replay set (legacy source below cutoff, Production ledger lineage from cutoff)
         run: |
           # Below 20260930140500 the existing replay set and the documented shims below are unchanged (they were proven by
@@ -59,6 +71,30 @@ jobs:
           rm -f supabase/migrations/*.sql
           cp "$RUNNER_TEMP"/replay-migrations/*.sql supabase/migrations/
           echo "Hybrid replay set: $(ls supabase/migrations/*.sql | wc -l) files"
+
+      - name: Normalize provider staging guard formatting (replay workspace only)
+        run: |
+          # Production's applied 20261003173410 function is minified; the repo source for that ledger row is the formatted
+          # (whitespace-identical) 20261003163000. The archived Production reconciliation 20261003184925 matches the
+          # minified text exactly. Rewrite whitespace of that one predicate in this disposable workspace only; the shim
+          # fails closed if anything other than whitespace would change. No repo migration or archived ledger SQL is edited.
+          python3 scripts/replay_shim_provider_guard_format.py supabase/migrations
+
+      - name: Seed identifier-only services prerequisite for the Stripe catalog reconciliations (replay workspace only)
+        run: |
+          # The archived Production SQL from 20261006233600 onward (DNI-07A, DNI-08A) references Production services UUIDs that are runtime data, not
+          # migration output. Write one identifier-only prerequisite migration (29 rows) into this disposable workspace so the
+          # foreign key is satisfied (never disabled). Fails closed if the migration's UUIDs and the seed diverge.
+          python3 scripts/replay_seed_services_prerequisite.py supabase/migrations
+
+      - name: Skip Production-data proof executions (replay workspace only; recorded NOT_PROVEN)
+        run: |
+          # Owner decision 2026-10-12 (Option A): some archived migrations create a proof function (DDL + grants) and then
+          # execute it in one trailing DO block that asserts live Production business data and writes PASS receipts. A
+          # schema-only replay cannot satisfy that. Remove ONLY that trailing execution, for an exact, sha256-pinned
+          # allowlist, in this disposable workspace. Each skipped proof is reported NOT_PROVEN (never PASS) and remains a
+          # Production runtime verification obligation; replay success is NOT commercial readiness.
+          python3 scripts/replay_skip_production_proofs.py supabase/migrations "$RUNNER_TEMP/skipped-production-proofs.json"
 
       - name: Reconcile production-owned legacy replay order
         run: |
