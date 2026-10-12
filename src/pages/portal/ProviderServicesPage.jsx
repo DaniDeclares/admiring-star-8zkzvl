@@ -20,6 +20,7 @@ export default function ProviderServicesPage() {
   const [busy, setBusy] = useState(false);
   const [localMessage, setLocalMessage] = useState('');
   const [localError, setLocalError] = useState('');
+  const [catalogError, setCatalogError] = useState('');
   const catalogFetchStarted = useRef(false);
 
   useEffect(() => {
@@ -32,8 +33,8 @@ export default function ProviderServicesPage() {
         supabase.from('dd_provider_capability_categories').select('*').order('display_order'),
       ]);
       if (cancelled) return;
-      if (!servicesResult.error) setCatalogServices(servicesResult.data || []);
-      if (!categoriesResult.error) setCategories(categoriesResult.data || []);
+      if (servicesResult.error || categoriesResult.error) setCatalogError('Service catalog is unavailable. Please refresh before choosing services.');
+      else { setCatalogServices(servicesResult.data || []); setCategories(categoriesResult.data || []); }
       setCatalogLoading(false);
     })();
     return () => { cancelled = true; };
@@ -64,15 +65,23 @@ export default function ProviderServicesPage() {
     if (!activeCategories.length) { setLocalError('Select at least one service category to add.'); return; }
     setBusy(true); setLocalError(''); setLocalMessage('');
     try {
+      if (catalogError || catalogLoading) throw new Error('Service catalog is not ready. Please refresh.');
+      let submitted = 0;
       for (const category of activeCategories) {
         const serviceIds = servicesForCategory(category).map(s => s.id);
         if (!serviceIds.length) continue;
         // eslint-disable-next-line no-await-in-loop
-        await act('request_provider_capabilities', { serviceIds, capabilityKey: category.capability_key });
+        const response = await fetch('/api/portal-operations', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ action: 'request_provider_capabilities', serviceIds, capabilityKey: category.capability_key }) });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) throw new Error(result.error || `Could not submit ${category.label}.`);
+        submitted += 1;
       }
+      if (!submitted) throw new Error('No matching services were available to request.');
       setSelectedCategories({});
       setLocalMessage('Your requested services were submitted for DANI DECLARES review.');
-    } finally { setBusy(false); }
+      await load();
+    } catch (e) { setLocalError(e.message || 'Service request failed. Please try again.'); }
+    finally { setBusy(false); }
   };
 
   const removeCapability = async (capabilityId) => {
@@ -92,7 +101,7 @@ export default function ProviderServicesPage() {
     <Card title="Current Services">
       {capabilities.length ? capabilities.map(item => <div className="portal-row" key={item.id}><div><strong>{item.capability_description || item.canonical_sku}</strong><small>{item.canonical_sku ? `${item.canonical_sku} · ` : ''}{statusLabel(item.authorization_status)}</small></div><button disabled={busy} onClick={() => removeCapability(item.id)}>Remove</button></div>) : <Empty>No services on file yet.</Empty>}
     </Card>
-    <Card title="Add a Service">
+    <Card title="Add a Service"><p className="portal-note">Step 1: choose categories. Step 2: submit for staff review. Selection does not authorize you for dispatch.</p>{catalogError && <div className="portal-alert" role="alert">{catalogError}</div>}
       {catalogLoading ? <p>Loading service catalog…</p> : <>
         <div style={{ display: 'grid', gap: 8, marginBottom: 14 }}>
           {categories.filter(c => !servicesForCategory(c).every(s => existingServiceIds.has(s.sku))).map(category => {
@@ -103,7 +112,7 @@ export default function ProviderServicesPage() {
             </label>;
           })}
         </div>
-        <button className="portal-primary" disabled={busy} onClick={submit}>{busy ? 'Submitting…' : 'Submit for review'}</button>
+        <button className="portal-primary" disabled={busy || catalogLoading || Boolean(catalogError)} onClick={submit}>{busy ? 'Submitting…' : 'Submit for review'}</button>
       </>}
     </Card>
   </main>;
