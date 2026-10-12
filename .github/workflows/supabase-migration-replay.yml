@@ -60,6 +60,15 @@ jobs:
           cp "$RUNNER_TEMP"/replay-migrations/*.sql supabase/migrations/
           echo "Hybrid replay set: $(ls supabase/migrations/*.sql | wc -l) files"
 
+      - name: Normalize provider staging guard formatting (replay workspace only)
+        run: |
+          # Production's applied 20261003173410 function is minified; the repo source for that ledger row is the formatted
+          # (whitespace-identical) 20261003163000. The archived Production reconciliation 20261003184925 matches the
+          # minified text exactly. Rewrite whitespace of that one predicate in this disposable workspace only; the shim
+          # fails closed if anything other than whitespace would change. No repo migration or archived ledger SQL is edited.
+          python3 scripts/test_replay_shim_provider_guard_format.py
+          python3 scripts/replay_shim_provider_guard_format.py supabase/migrations
+
       - name: Reconcile production-owned legacy replay order
         run: |
           # Production owns migration key 20260820 (preserved by PR #413), but its
