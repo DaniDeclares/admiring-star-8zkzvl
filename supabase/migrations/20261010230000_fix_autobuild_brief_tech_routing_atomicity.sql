@@ -12,7 +12,9 @@ declare
 begin
   -- SECURITY DEFINER current_user is the function owner, not the RPC caller.
   -- Accept an authenticated service_role JWT or a direct privileged session.
-  if coalesce(current_setting('request.jwt.claim.role',true),'') <> 'service_role'
+  -- PostgREST no longer sets the legacy request.jwt.claim.role GUC; read the claims JSON like auth.role() does.
+  if coalesce(nullif(current_setting('request.jwt.claim.role',true),''),
+              nullif(current_setting('request.jwt.claims',true),'')::jsonb ->> 'role','') <> 'service_role'
      and session_user not in ('postgres','service_role') then
     raise exception 'service role required';
   end if;
