@@ -1,0 +1,11 @@
+const { classifyVendorEvidence, normalizeUrl } = require('./vendorOpportunityEvidence');
+const assert = require('node:assert/strict');
+const base = { company: 'Example PM', url: 'https://example.com/vendors?utm_source=x', title: 'Vendor application for turnover cleaning' };
+const first = classifyVendorEvidence(base);
+assert.equal(first.status, 'OWNER_REVIEW');
+assert.equal(first.feeFreeVerified, false);
+assert.equal(classifyVendorEvidence(base, { [first.key]: first.evidence }).status, 'UNCHANGED');
+assert.equal(classifyVendorEvidence({ ...base, body: 'Enroll via NetVendor' }).status, 'THIRD_PARTY_REVIEW');
+assert.equal(classifyVendorEvidence({ ...base, title: 'Resident leasing application' }).status, 'IGNORE');
+assert.equal(normalizeUrl(base.url), 'https://example.com/vendors');
+console.log('vendor evidence checks passed');
