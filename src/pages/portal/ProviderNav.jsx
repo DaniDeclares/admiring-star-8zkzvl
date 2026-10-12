@@ -41,12 +41,12 @@ export default function ProviderNav({ isApprovedProvider, agreementSigned, showA
     window.alert(isiOS ? 'On iPhone/iPad: tap Share, then “Add to Home Screen,” then Add.' : 'Open your browser menu and choose “Install app” or “Add to Home screen.”');
   };
   const tabs = showAccounting ? [...TABS.slice(0, 5), { to: '/portal/accounting', label: 'Financial Ops', locked: true, needsAgreement: true }, ...TABS.slice(5)] : TABS;
-  return <><nav className="portal-tabs">{tabs.map(tab => {
+  return <><nav className="portal-tabs" aria-label="Provider workspace navigation">{tabs.map(tab => {
     const active = location.pathname === tab.to;
     const lockedForAgreement = tab.needsAgreement && !agreementSigned;
     const lockedForApproval = tab.locked && !isApprovedProvider;
     const showLock = lockedForAgreement || lockedForApproval;
     const lockTitle = lockedForAgreement ? 'Unlocks once you sign the Provider Agreement' : 'Unlocks once your application is approved';
-    return <Link key={tab.to} to={tab.to} className={`portal-tab${active ? ' active' : ''}${showLock ? ' locked' : ''}`}>{tab.label}{showLock && <span className="portal-tab-lock" title={lockTitle}>🔒</span>}</Link>;
+    return <Link key={tab.to} to={tab.to} className={`portal-tab${active ? ' active' : ''}${showLock ? ' locked' : ''}`} aria-current={active ? 'page' : undefined} title={showLock ? lockTitle : undefined}>{tab.label}{showLock && <span className="portal-tab-lock" title={lockTitle}>🔒</span>}</Link>;
   })}</nav>{!standalone && <button type="button" className="portal-install-app" onClick={install}>Install Worker App</button>}</>;
 }
