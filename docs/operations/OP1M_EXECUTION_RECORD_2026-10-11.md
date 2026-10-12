@@ -128,3 +128,11 @@ SHA-256 of the received files: see `docs/operations/` provenance list below.
     42652cc00b3e5286b9c9228c1ef47690188c962de86727f3649c90ddc9db1eab 9388f783-remote_ranked_2.csv
     c412394cebf87dc8f14e31c08604f64bc02e5ebedaa7b754dcc1ce24eca35670 23d4576d-remote_services_2.csv
     3d5473e47623299219ce236146a9cbbb11157e1d2ee16740766d1aa1f67bb58a f18f86b0-DANI_Catalog__Revenue_Readiness___Oct_9.docx
+
+## Vercel deploy check for main `b73e92f` (scheduled routine, 2026-10-12 04:50 UTC)
+State only; nothing was deployed, retried, or changed.
+- `origin/main` head is `b73e92f` ("Handle relative CLI invocation for safe Printify audit entrypoint"); this branch already contains it (merge of main was a no-op).
+- Vercel project `prj_sjL4eMox6OLrt6daRuJxUJeKA1Ba`, deployments filtered by sha `b73e92f`: **0 deployments exist**. Vercel has not built that commit (no READY, ERROR, or CANCELED entry).
+- Latest Production deployment is still `dpl_7oAbP2prZQ9SpXQVfdD6gNusFbin`, `main` @ `cf875ff`, READY, created 2026-10-10T22:56Z. Production is therefore not serving `b73e92f`.
+- Whether the Hobby rate limit has reset cannot be read from deployment listings; the absence of any `b73e92f` deployment is consistent with the limit still applying or with no build having been requested. Verify by the owner triggering or confirming a build, which this routine was not authorized to do.
+- Next action (owner): decide whether to trigger a Production build of `b73e92f`; then confirm READY and function against the live site (READY alone is not proof).
