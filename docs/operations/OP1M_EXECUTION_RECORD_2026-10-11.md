@@ -162,3 +162,23 @@ My earlier addendum called the 3 `proposal_pending` and 11 `routed` requests "th
 - 2026-09-23 routed CH01 two-story house request (Stone Mountain): unverified; wording echoes the 9/20 test. Confirm with owner.
 - All other `routed` rows are tests, probes or junk text; one cancelled row is a state-machine test. The 1 `scheduled` request is the completed Thumbtack job ($160 collected).
 Net: there is no verified open inbound customer demand. The revenue path tomorrow is the permitted CH02 follow-ups, quote-only. Asana task `1219397649342143` carries the same correction. No customer or lead data was changed.
+
+### Follow-up reconciliation, 9 governed candidates (2026-10-12, read-only)
+Source: `dd_governed_sales_followup_candidates_v1` plus `dd_sales_queue`. No contact details recorded here. No record was created, changed, or contacted.
+
+| Account | Cadence state | Prior touch | Route on file | Action |
+|---|---|---|---|---|
+| Asset Living | NORMAL, permitted since 10/05 | 1 email 9/30, no reply | phone + email | Owner may call (named decision maker on file) or follow up by email. `outreach_authorized=false` in lead metadata: owner must set or accept that explicitly. |
+| DHC Property Management | NORMAL, permitted since 10/05 | 1 email 9/30 | phone + email | Same as above |
+| Sapir Realty | NORMAL, permitted since 10/05 | 2 attempts, last 9/30 | phone + email | Same as above. 5 duplicate rows exist; contact once, then merge duplicates through the existing dedupe path |
+| Fortis Property Management | NORMAL, permitted since 10/05 | 1 email 9/30 | email only | Email follow-up only |
+| Golden Gate Management | NORMAL | 1 email | email only | Email follow-up only; no permitted-from date, confirm cadence first |
+| Atlanta Area Property & Mgmt | PAUSED | none | phone | Do not contact today |
+| Evernest | PAUSED | 2 LinkedIn attempts | phone | Do not contact today |
+| Fort Knox | PAUSED | none | phone | Do not contact today |
+| HomeOwners Advantage / Five Star | PAUSED | none | phone | Do not contact today |
+Other S-named accounts: Stonemark (emailed 9/30, not in the governed list), Summerfield (never contacted, not in the governed list), Southern Homes and Rentals and Sharp Management (SUPPRESSED). Dunwoody Exchange has no CRM, sales-queue, or Gmail record: do not create one from a name; add it only after the owner supplies the source and contact.
+Rules for any contact: quote-only and scoped to actual hours; no bundle, retainer, or "pilot baseline" prices; no crew-availability promise; honor SUPPRESSED, PAUSED, and do-not-contact states. Nothing here may be sent without the owner's explicit approval of the specific message.
+
+Draft call opener (for the owner to adapt): "Hi, this is Dani with DANI DECLARES. We handle the execution on apartment turns: cleaning, make-ready, and condition documentation. I emailed on the 30th about [community]. Would a short walkthrough of one unit be useful so we can send you a scoped quote?"
+Draft follow-up email (not sent): subject "Following up: apartment turn support"; two sentences restating the 9/30 note, offering one unit walkthrough, no prices, opt-out line.
