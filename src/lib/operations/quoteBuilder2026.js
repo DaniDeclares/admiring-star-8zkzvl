@@ -149,8 +149,10 @@ export async function getQuoteCatalog(supabase) {
 
   return resolveCanonicalOffers(governed, specialRows, new Map());
 }
-async function loadRules(supabase, serviceId, channelCode) {
-  const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').order('effective_date',{ascending:false});
+// Quote pricing reads only ACTIVE + LOCKED rules, the same authority governedCommercialGate2026 uses.
+// services.base_price_cents is a display column and is never a price source here.
+export async function loadRules(supabase, serviceId, channelCode) {
+  const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').eq('lock_status', 'LOCKED').order('effective_date',{ascending:false});
   if (error) throw error;
   return data || [];
 }
@@ -215,6 +217,7 @@ export function isHourlyBilled(service, rule) {
 // multiplier. Introducing condition-based pricing automation is a deliberate future commercial-
 // policy decision requiring documented tiers/formulas/testing/re-audit -- do not add it here as
 // an implicit fix.
+function schemaUiMode(service) { return service?.quote_input_schema?.ui_mode; }
 function configuredBasePrice(service, rule, answers) {
   const schema = service?.quote_input_schema || {};
   const model = schema.pricing_model;
@@ -323,8 +326,17 @@ export function calculate(service, rule, answers) {
   if (materials>0) reviewFlags.push('MATERIALS_CONFIRMATION');
   if (passThrough>0) reviewFlags.push('PASS_THROUGH_CONFIRMATION');
   if (taxRate===0) reviewFlags.push('TAX_REVIEW');
+  // Fail closed: with no ACTIVE+LOCKED rule price, the display price on the service row is not authority.
+  // Apparel and bedroom-tier models price from their own governed schema, and DANI specials carry their own price.
+  if (service.sourceType !== 'DANI_SPECIALS' && model !== 'BEDROOM_TIER' && schemaUiMode(service) !== 'APPAREL_PRODUCTION' && rule?.base_price_cents == null) reviewFlags.push('NO_LOCKED_PRICE_RULE');
   if (Number(a.manual_base_price||0)>0) reviewFlags.push('MANUAL_BASE_IGNORED_GOVERNED_PRICING');
   return { baseSubtotal:money(base), residentDiscount:money(discount), travelFee:money(travelFee), rushFee:money(rushFee), materials:money(materials), sourcingFee:money(sourcingFee), passThrough:money(passThrough), tax:money(tax), taxRate, estimatedTotal:money(total), depositDue:money(deposit), reviewFlags, needsReview:reviewFlags.length>0, isHourly:hourly, ratePerUnit:money(ruleBase) };
+}
+
+// loadRules returns newest effective_date first; the newest rule carrying a price wins.
+export function selectBaseRule(rules) {
+  const list = Array.isArray(rules) ? rules : [];
+  return list.find(r=>r.base_price_cents!=null)||list[0]||null;
 }
 
 async function resolveQuoteLine(supabase, serviceSku, channelCode, marketContext = null, componentRole = 'PRIMARY') {
@@ -372,7 +384,7 @@ async function resolveQuoteLine(supabase, serviceSku, channelCode, marketContext
   if (!governedService) throw new Error(`The service record ${canonicalSku} could not be resolved.`);
 
   const rules = await loadRules(supabase, governedService.id, channelCode);
-  const baseRule=rules.find(r=>r.base_price_cents!=null)||rules[0]||null;
+  const baseRule=selectBaseRule(rules);
   const marketRule=marketContext?.market?.id ? await loadMarketRule(supabase,{marketId:marketContext.market.id,serviceId:governedService.id,channelCode}) : null;
   let rule=marketRule?.price_override_cents!=null
     ? {...(baseRule||{}),base_price_cents:marketRule.price_override_cents,market_rule_id:marketRule.id,market_code:marketContext.market.market_code,market_pricing_status:marketRule.status}
