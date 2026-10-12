@@ -5,7 +5,10 @@ returns jsonb language plpgsql security definer set search_path='public','pg_tem
 as $$
 declare c public.dd_autobuild_candidates%rowtype; v_key text; v_id uuid;
 begin
- if current_user not in ('postgres','service_role') then raise exception 'service role required'; end if;
+ -- SECURITY DEFINER: current_user is the function owner here, so it cannot identify the caller. Use the JWT role
+ -- (claims JSON, as Supabase auth.role() does; PostgREST no longer sets the legacy per-claim GUC) or a direct privileged session.
+ if coalesce(nullif(current_setting('request.jwt.claim.role',true),''),nullif(current_setting('request.jwt.claims',true),'')::jsonb ->> 'role','') <> 'service_role'
+    and session_user not in ('postgres','service_role') then raise exception 'service role required'; end if;
  select * into c from public.dd_autobuild_candidates where candidate_key=p_candidate_key for update;
  if not found then raise exception 'autobuild candidate missing'; end if;
  if c.status<>'PR_OPENED' or c.executor_state<>'PR_OPENED' or c.pull_request_number is null
