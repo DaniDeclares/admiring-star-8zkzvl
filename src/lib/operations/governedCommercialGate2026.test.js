@@ -87,8 +87,9 @@ describe('LIVE_READY checkout release gate', () => {
   test('unrecognized blocker fails closed', () => {
     expect(checkoutEligibility({ ...readyOffer, blockingGate: 'UNRECOGNIZED_GATE' }, { channel: 'CH01', subchannel: 'CH01-A' }).reason).toBe('SERVICE_BLOCKED:UNRECOGNIZED_GATE');
   });
-  test('missing blocker retains existing permissive policy pending release contract review', () => {
-    expect(checkoutEligibility({ ...readyOffer, blockingGate: null }, { channel: 'CH01', subchannel: 'CH01-A' }).eligible).toBe(true);
+  test.each([null, undefined, ''])('missing blocker %s fails closed before checkout', (blockingGate) => {
+    expect(checkoutEligibility({ ...readyOffer, blockingGate }, { channel: 'CH01', subchannel: 'CH01-A' }))
+      .toEqual({ eligible: false, reason: 'SERVICE_BLOCKER_UNVERIFIED', price: null });
   });
   test.each(['HOLD', 'BLOCKED', 'INTAKE_ONLY'])(
     'rejects non-released state %s', (releaseState) => {
