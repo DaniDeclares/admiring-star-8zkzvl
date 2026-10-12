@@ -46,6 +46,9 @@ jobs:
           print(f"migration version hygiene PASS: {len(files)} files; no duplicates; only allowlisted Production-owned 20260820 legacy key may be short")
           PY
 
+      - name: Test provider staging guard formatting shim (pristine checkout)
+        run: python3 scripts/test_replay_shim_provider_guard_format.py
+
       - name: Assemble hybrid replay set (legacy source below cutoff, Production ledger lineage from cutoff)
         run: |
           # Below 20260930140500 the existing replay set and the documented shims below are unchanged (they were proven by
@@ -66,7 +69,6 @@ jobs:
           # (whitespace-identical) 20261003163000. The archived Production reconciliation 20261003184925 matches the
           # minified text exactly. Rewrite whitespace of that one predicate in this disposable workspace only; the shim
           # fails closed if anything other than whitespace would change. No repo migration or archived ledger SQL is edited.
-          python3 scripts/test_replay_shim_provider_guard_format.py
           python3 scripts/replay_shim_provider_guard_format.py supabase/migrations
 
       - name: Reconcile production-owned legacy replay order
