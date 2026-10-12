@@ -58,7 +58,34 @@
         "Slogan echoes a famous film catchphrase; trademark/IP review not performed.",
         "Master is 1254 px; print files are upscaled, not redrawn, so very fine detail is limited.",
         "Transparent version: interior black art (blazer, hair, hood, mug) disappears into black garments; cream top lettering is low contrast on light garments."
-      ]
+      ],
+      "owner_approved_customization_categories": {
+        "approved_2026-10-12": true,
+        "scope": "choices only; component artwork not yet created",
+        "skin": "4 tones, same face structure",
+        "hair": "style independent of color, professional look",
+        "outfit": [
+          "Black (master)",
+          "Cream",
+          "Deep purple",
+          "Burgundy"
+        ],
+        "stamp": [
+          "Gold",
+          "Silver",
+          "Black",
+          "Rose gold"
+        ],
+        "desk_accents": [
+          "Mug color",
+          "Pen set",
+          "Small candle"
+        ]
+      },
+      "owner_approved_improvements": {
+        "approved_2026-10-12": true,
+        "dark_outline_on_cream_top_lettering": "APPROVED as a separate light-garment derivative only; master unchanged; not yet made"
+      }
     },
     {
       "key": "halloween-design-002-witch-please-i-clean",
@@ -109,7 +136,8 @@
           "Original black and orange",
           "Black and purple",
           "Black and gold"
-        ]
+        ],
+        "approved_2026-10-12": true
       },
       "protected_scene": "Lettering, black cat washing dishes, cleaning effects, broom, purple feather duster, composition",
       "canva_status": "REFERENCE_ASSET_UPLOADED_AND_VERIFIED_IN_CANVA; original approved merchandise presentation only, NOT transparent print master or interchangeable layers. Claude's separate sandbox upload to www.canva.com failed HTTP 403; that failure does not negate the existing ChatGPT Canva upload.",
@@ -130,9 +158,9 @@
     {
       "key": "fall-design-003-pumpkin-spice-real-estate-advice",
       "collection": "DANI DECLARES Autumn - Real Estate Professionals",
-      "slogan": "Pumpkin Spice & Real Estate Advice",
-      "creative_status": "DIRECTION_ONLY_FINAL_SIMPLIFIED_MASTER_NOT_APPROVED",
-      "production_status": "NO_PRODUCTION_MASTER_ON_FILE",
+      "slogan": "Pumpkin Spice & REAL ESTATE",
+      "creative_status": "OWNER_APPROVED_PLAIN_CUP_MASTER_2026-10-12",
+      "production_status": "NOT_VERIFIED",
       "publication_eligible": false,
       "concept": "Cozy indoor professional setting, stylish real-estate character, orange/cream/black/brown/gold palette, interchangeable characters, simplified layouts of one character plus at most two supporting items.",
       "reference_sheets": [
@@ -140,11 +168,20 @@
         "design-3-merchandise-and-9-characters-sheet.webp",
         "design-3-full-scene-merchandise-sheet.webp"
       ],
-      "master": null,
-      "blocker": "Owner has not approved a final simplified production master. The three sheets show different compositions (two-item desk scene; full-scene with house and sold sign), so no single one can be assumed final.",
+      "master": {
+        "original_file": "products/seasonal-art-2026/owner-art/pumpkin-spice-real-estate-plain-cup/SOURCE-owner-pasted-2026-10-12.jpg",
+        "original_sha256": "2871b9e68e2342d5e52f2feb7b6ce654f15559256c5ab127789246e746f370aa",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "mode": "RGB JPG, flat cream background",
+        "immutable": true
+      },
+      "blocker": "Master and transparent copy approved. Still needed: print-resolution upscale, Printify blueprint/print areas, supplier cost and margin check, listing and test checkout.",
       "gates": {
-        "master_file_received": false,
-        "creative_master_approved": false,
+        "master_file_received": true,
+        "creative_master_approved": true,
         "printify_blueprint_and_print_area_confirmed": false,
         "provider_selected": false,
         "mockups_made": false,
@@ -154,6 +191,69 @@
         "shopify_listing_ready": false,
         "checkout_and_fulfillment_test_passed": false,
         "owner_publication_approval": false
+      },
+      "transparent_derivative": {
+        "file": "products/seasonal-art-2026/owner-art/pumpkin-spice-real-estate-plain-cup/transparent-1024-CANDIDATE.png",
+        "sha256": "044dcbc9969342cc2a9eaddecb4ac8a05cb3fa05cc863eff0241b3bf4cb9044d",
+        "owner_approved": true,
+        "approved_on": "2026-10-12",
+        "known_issues": [
+          "dark \"& REAL ESTATE\" lettering low contrast on black garments",
+          "cream desk wash under laptop retained",
+          "possible light fringe on script over saturated colors",
+          "1024 px: needs non-generative upscale for print"
+        ]
+      },
+      "superseded_compositions": [
+        "laptop-woman with branded cup: rejected, cup branding off",
+        "cups-and-SOLD-sign art: not the locked character master"
+      ],
+      "owner_approved_customization_categories": {
+        "approved_2026-10-12": true,
+        "scope": "choices only; component artwork not yet created",
+        "skin": [
+          "Deep brown",
+          "Medium brown (master)",
+          "Light caramel",
+          "Fair"
+        ],
+        "hairstyle": [
+          "Curly high updo (master)",
+          "Soft afro",
+          "Box-braids updo",
+          "Locs / twisted updo"
+        ],
+        "hair_color": [
+          "Natural black",
+          "Chocolate brown",
+          "Honey blonde",
+          "Burgundy"
+        ],
+        "outfit": [
+          "Black (master)",
+          "Cream/ivory",
+          "Pumpkin orange",
+          "Olive green"
+        ],
+        "cup": [
+          "Plain white + black lid (master)",
+          "Clear iced",
+          "Orange ceramic",
+          "Matte black"
+        ],
+        "laptop": [
+          "Black (master)",
+          "Gold",
+          "Rose gold",
+          "Silver"
+        ],
+        "desk_accents_optional": [
+          "Notebook + pen (master)",
+          "Phone",
+          "Small leaf",
+          "Candle"
+        ],
+        "cup_rule": "zero branding"
       }
     }
   ],

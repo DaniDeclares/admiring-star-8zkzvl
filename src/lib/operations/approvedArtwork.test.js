@@ -10,13 +10,13 @@ describe('approved artwork records (inventory only, not release authority)', () 
   test('masters exist and match their recorded sha256', () => {
     for (const d of rec.designs.filter(x => x.master)) {
       expect(sha(d.master.original_file)).toBe(d.master.original_sha256);
-      expect(sha(d.master.lossless_copy)).toBe(d.master.lossless_sha256);
+      if (d.master.lossless_copy) expect(sha(d.master.lossless_copy)).toBe(d.master.lossless_sha256);
     }
   });
   test('no design is publication-eligible and every release gate starts closed', () => {
     for (const d of rec.designs) {
       expect(d.publication_eligible).toBe(false);
-      expect(Object.values(d.gates).every(v => v === false)).toBe(true);
+      expect(Object.entries(d.gates).filter(([k]) => !['master_file_received', 'creative_master_approved'].includes(k)).every(([, v]) => v === false)).toBe(true);
       expect(['NOT_VERIFIED', 'NO_PRODUCTION_MASTER_ON_FILE']).toContain(d.production_status);
     }
   });
