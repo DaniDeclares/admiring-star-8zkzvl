@@ -1,4 +1,4 @@
-import { calculate, resolveCanonicalOffers, loadRules, selectBaseRule } from './quoteBuilder2026.js';
+import { calculate, resolveCanonicalOffers, loadRules, selectBaseRule, missingLockedPriceFlag } from './quoteBuilder2026.js';
 
 const governed = [
   { sku:'DNI-01F-001', name:'Holiday & Seasonal Home Decorating', base_price_cents:10000, sourceType:'GOVERNED' },
@@ -95,15 +95,16 @@ describe('locked price authority in the quote calculation', () => {
     const c = calculate(service, { base_price_cents: 20000, pricing_type:'FIXED' }, { tax_rate_percent: 6 });
     expect(c.baseSubtotal).toBe(200);
     expect(c.reviewFlags).not.toContain('NO_LOCKED_PRICE_RULE');
+    expect(missingLockedPriceFlag(service, { base_price_cents: 20000 })).toBeNull();
   });
-  test('missing locked rule fails closed: flagged for review, never silently priced as final', () => {
-    const c = calculate(service, null, { tax_rate_percent: 6 });
-    expect(c.reviewFlags).toContain('NO_LOCKED_PRICE_RULE');
-    expect(c.needsReview).toBe(true);
+  test('client previews (no rule passed) are not flagged by calculate()', () => {
+    expect(calculate(service, null, {}).reviewFlags).not.toContain('NO_LOCKED_PRICE_RULE');
+  });
+  test('missing locked rule fails closed on the server-resolved path', () => {
+    expect(missingLockedPriceFlag(service, null)).toBe('NO_LOCKED_PRICE_RULE');
   });
   test('a rule row without a price does not count as locked pricing', () => {
-    const c = calculate(service, { id: 'r-empty', base_price_cents: null }, {});
-    expect(c.reviewFlags).toContain('NO_LOCKED_PRICE_RULE');
+    expect(missingLockedPriceFlag(service, { id: 'r-empty', base_price_cents: null })).toBe('NO_LOCKED_PRICE_RULE');
   });
   test('conflicting rules: the newest priced rule wins and unpriced rows are skipped', () => {
     expect(selectBaseRule([{ id:'new', base_price_cents: 15000 }, { id:'old', base_price_cents: 9000 }]).id).toBe('new');
@@ -120,8 +121,9 @@ describe('locked price authority in the quote calculation', () => {
     await loadRules({ from: () => chain }, 'svc-3', 'CH04');
     expect(filters).toEqual(expect.arrayContaining([['status','ACTIVE'],['lock_status','LOCKED']]));
   });
-  test('apparel and bedroom-tier models keep their own governed price source', () => {
-    const apparel = calculate({ sourceType:'GOVERNED', quote_input_schema:{ ui_mode:'APPAREL_PRODUCTION' }, starting_price: 25 }, null, {});
-    expect(apparel.reviewFlags).not.toContain('NO_LOCKED_PRICE_RULE');
+  test('apparel, bedroom-tier and DANI special models keep their own governed price source', () => {
+    expect(missingLockedPriceFlag({ sourceType:'GOVERNED', quote_input_schema:{ ui_mode:'APPAREL_PRODUCTION' } }, null)).toBeNull();
+    expect(missingLockedPriceFlag({ sourceType:'GOVERNED', quote_input_schema:{ pricing_model:'BEDROOM_TIER' } }, null)).toBeNull();
+    expect(missingLockedPriceFlag({ sourceType:'DANI_SPECIALS', quote_input_schema:{} }, null)).toBeNull();
   });
 });

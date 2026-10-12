@@ -217,7 +217,15 @@ export function isHourlyBilled(service, rule) {
 // multiplier. Introducing condition-based pricing automation is a deliberate future commercial-
 // policy decision requiring documented tiers/formulas/testing/re-audit -- do not add it here as
 // an implicit fix.
-function schemaUiMode(service) { return service?.quote_input_schema?.ui_mode; }
+// Fail closed: with no ACTIVE+LOCKED rule price, the display price on the service row is not authority.
+// Only the server-resolved quote applies this (client previews call calculate() with no rule on purpose).
+// Apparel and bedroom-tier models price from their own governed schema, and DANI specials carry their own price.
+export function missingLockedPriceFlag(service, rule) {
+  const schema = service?.quote_input_schema || {};
+  if (service?.sourceType === 'DANI_SPECIALS') return null;
+  if (schema.pricing_model === 'BEDROOM_TIER' || schema.ui_mode === 'APPAREL_PRODUCTION') return null;
+  return rule?.base_price_cents == null ? 'NO_LOCKED_PRICE_RULE' : null;
+}
 function configuredBasePrice(service, rule, answers) {
   const schema = service?.quote_input_schema || {};
   const model = schema.pricing_model;
@@ -326,9 +334,6 @@ export function calculate(service, rule, answers) {
   if (materials>0) reviewFlags.push('MATERIALS_CONFIRMATION');
   if (passThrough>0) reviewFlags.push('PASS_THROUGH_CONFIRMATION');
   if (taxRate===0) reviewFlags.push('TAX_REVIEW');
-  // Fail closed: with no ACTIVE+LOCKED rule price, the display price on the service row is not authority.
-  // Apparel and bedroom-tier models price from their own governed schema, and DANI specials carry their own price.
-  if (service.sourceType !== 'DANI_SPECIALS' && model !== 'BEDROOM_TIER' && schemaUiMode(service) !== 'APPAREL_PRODUCTION' && rule?.base_price_cents == null) reviewFlags.push('NO_LOCKED_PRICE_RULE');
   if (Number(a.manual_base_price||0)>0) reviewFlags.push('MANUAL_BASE_IGNORED_GOVERNED_PRICING');
   return { baseSubtotal:money(base), residentDiscount:money(discount), travelFee:money(travelFee), rushFee:money(rushFee), materials:money(materials), sourcingFee:money(sourcingFee), passThrough:money(passThrough), tax:money(tax), taxRate, estimatedTotal:money(total), depositDue:money(deposit), reviewFlags, needsReview:reviewFlags.length>0, isHourly:hourly, ratePerUnit:money(ruleBase) };
 }
@@ -463,6 +468,11 @@ export async function createEstimate(supabase, body) {
     };
     validateQuoteLineContract(calcService, itemAnswers, item, requestedLineItems);
     const calculation = calculate(calcService, resolved.rule, itemAnswers);
+    const noLockedPrice = missingLockedPriceFlag(calcService, resolved.rule);
+    if (noLockedPrice) {
+      calculation.reviewFlags = [...new Set([...(calculation.reviewFlags || []), noLockedPrice])];
+      calculation.needsReview = true;
+    }
     const marketNeedsReview = marketContext.stateCode==='SC' && !resolved.marketRule;
     if(marketNeedsReview){
       calculation.reviewFlags=[...new Set([...(calculation.reviewFlags||[]),'SC_MARKET_RESEARCH_REQUIRED'])];
