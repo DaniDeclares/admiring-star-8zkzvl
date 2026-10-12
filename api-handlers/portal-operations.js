@@ -954,11 +954,17 @@ export default async function handler(req, res) {
       const balance = Number(invoiceRow.balance_due || 0);
       if (!Number.isFinite(balance) || balance <= 0) return fail(res, 'This invoice has no outstanding balance.', 409);
       if (!invoiceRow.estimate_id || !invoiceRow.job_id) return fail(res, 'Balance checkout requires an estimate-linked job.', 409);
-      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('id,service_request_id,client_email,public_reference,estimated_total').eq('id', invoiceRow.estimate_id).maybeSingle();
+      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('id,service_request_id,client_email,public_reference,estimated_total,intake_answers').eq('id', invoiceRow.estimate_id).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate?.client_email) return fail(res, 'Customer email is required for balance checkout.', 422);
       const { data: request, error: requestError } = await context.supabase.from('service_requests').select('id,property_details').eq('id', estimate.service_request_id).maybeSingle();
       if (requestError) throw requestError;
+      const checkoutChannelSignals=[invoiceRow.channel_code,invoiceRow.channel,estimate.intake_answers?.channelCode,request?.property_details?.commercialIntent?.channelCode,request?.property_details?.operationsRouting?.channelCode,request?.property_details?.operationsRouting?.channel,request?.property_details?.channelCode,request?.property_details?.channelType].filter(Boolean).map(value=>String(value).trim().toUpperCase());
+      if(checkoutChannelSignals.some(value=>['CH05','B2G','GOV','GOVERNMENT','INSTITUTIONAL'].includes(value)))return fail(res,'Government procurement invoices must follow contract/PO and agency-approved payment terms; public balance checkout is prohibited.',403);
+      const normalizedCheckoutChannels=checkoutChannelSignals.map(value=>({B2C:'CH01',B2B_APT:'CH02',B2B_RE:'CH03',B2B:'CH04',B2G:'CH05',GOV:'CH05',GOVERNMENT:'CH05',INSTITUTIONAL:'CH05',PROCUREMENT:'CH05',PUBLIC_SECTOR:'CH05'}[value]||value));
+      if(normalizedCheckoutChannels.includes('CH05'))return fail(res,'Government procurement requires agency-approved invoicing, not public balance checkout.',403);
+      if(normalizedCheckoutChannels.length===0)return fail(res,'Verified channel identity is required before balance checkout.',409);
+      if(normalizedCheckoutChannels.some(value=>!/^CH0[1-5]$/.test(value))||new Set(normalizedCheckoutChannels).size!==1)return fail(res,'Verified, unambiguous channel identity is required before balance checkout.',409);
       const serviceId=String(request?.property_details?.commercialIntent?.serviceId||request?.property_details?.pricingServiceId||'').trim();
       const metadata={request_id:request?.id||'',service_id:serviceId,estimate_id:estimate.id,job_id:invoiceRow.job_id,invoice_id:invoiceRow.id,payment_type:'BALANCE_PAYMENT',balance_due:String(balance),full_estimate_amount:String(estimate.estimated_total||invoiceRow.total_amount||0)};
       const origin=`${req.headers['x-forwarded-proto']||'https'}://${req.headers['x-forwarded-host']||req.headers.host}`;

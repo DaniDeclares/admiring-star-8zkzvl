@@ -1,12 +1,12 @@
 /* DANI DECLARES LLC — LOCKED BRAND COLOR SYSTEM */
 :root {
-  --brand-burgundy: #6B1F2B;
-  --brand-burgundy-dark: #4F1720;
-  --brand-burgundy-light: #873340;
-  --brand-ivory: #F6F0E4;
-  --brand-cream: #EDE2D0;
-  --brand-gold: #C9A45C;
-  --brand-gold-light: #DCC58F;
+  --brand-burgundy: var(--dd-burgundy);
+  --brand-burgundy-dark: var(--dd-burgundy-deep);
+  --brand-burgundy-light: var(--dd-burgundy);
+  --brand-ivory: var(--dd-ivory);
+  --brand-cream: var(--dd-cream);
+  --brand-gold: var(--dd-gold);
+  --brand-gold-light: var(--dd-gold-soft);
   --brand-dark: #21191A;
   --font-serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
   --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;

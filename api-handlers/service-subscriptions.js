@@ -58,6 +58,7 @@ export default async function handler(req,res){
    if(estimate.data.estimate_status.toLowerCase()!=='approved')return fail(res,409,'Approve the scoped estimate first');
    const request=await sb.from('service_requests').select('*').eq('id',estimate.data.service_request_id).single();if(request.error)throw request.error;
    const terms=validateRecurringTerms(body.terms);
+   if(terms.channel==='CH05')return fail(res,403,'Government procurement cannot enter the consumer recurring checkout lifecycle; use contract/PO and agency-approved invoicing.');
    if(terms.channel!==getChannelFromRequest(request.data)||terms.channel!==estimate.data.intake_answers?.channelCode)return fail(res,409,'Exact request channel required');
    const sku=estimate.data.intake_answers?.serviceSku;
    if(!sku)return fail(res,409,'Canonical estimate service identity required');
@@ -88,6 +89,7 @@ export default async function handler(req,res){
    if(!ownsRecurringRequest(ctx,request.data))return fail(res,403,'This agreement belongs to another account');
    const serviceId=request.data.property_details?.commercialIntent?.serviceId||request.data.property_details?.pricingServiceId;
    const channel=getChannelFromRequest(request.data);
+   if(channel==='CH05')return fail(res,403,'Government procurement cannot enter Stripe subscription checkout.');
    req.body={requestId:request.data.id,serviceId,email:ctx.user.email};
    // Server-only authorization marker. This cannot be supplied by the public checkout request:
    // it is created only after authenticated customer ownership + accepted owner-approved recurring terms.
