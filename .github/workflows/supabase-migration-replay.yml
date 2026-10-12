@@ -6,6 +6,8 @@ on:
       - 'supabase/migrations/**'
       - 'supabase/config.toml'
       - '.github/workflows/supabase-migration-replay.yml'
+      - 'scripts/replay_shim_provider_guard_format.py'
+      - 'scripts/test_replay_shim_provider_guard_format.py'
   workflow_dispatch:
 
 permissions:
