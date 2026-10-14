@@ -38,7 +38,7 @@ async function auditCsv() {
     const cells = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map((v) => v.replace(/^\"|\"$/g, ''));
     const record = Object.fromEntries(headers.map((h, i) => [h, cells[i] ?? '']));
     const classification = classifyName(record.Name);
-    const procurement = /(^|\\b)(government|public sector|procurement|agency|purchase order)(\\b|$)/i.test(record.Name || '');
+    const procurement = /(^|\b)(government|public sector|procurement|agency|purchase order)(\b|$)/i.test(record.Name || '');
     rows.push({
       source: 'payment_links.csv',
       paymentLinkId: record.id,
@@ -79,7 +79,7 @@ async function auditLive() {
     for (const item of items.data) {
       const name = item.description || item.price?.nickname || '';
       const classification = classifyName(name);
-      const procurement = /(^|\\b)(government|public sector|procurement|agency|purchase order)(\\b|$)/i.test(name);
+      const procurement = /(^|\b)(government|public sector|procurement|agency|purchase order)(\b|$)/i.test(name);
       rows.push({
         source: 'STRIPE_LIVE_API',
         paymentLinkId: link.id,
