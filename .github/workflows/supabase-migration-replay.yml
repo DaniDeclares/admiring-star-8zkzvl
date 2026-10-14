@@ -1,6 +1,19 @@
 name: Supabase Migration Replay
 
 on:
+  push:
+    branches:
+      - codex/reconstruct-production-migration-ledger
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - '.github/workflows/supabase-migration-replay.yml'
+      - 'scripts/replay_shim_provider_guard_format.py'
+      - 'scripts/test_replay_shim_provider_guard_format.py'
+      - 'scripts/replay_seed_services_prerequisite.py'
+      - 'scripts/test_replay_seed_services_prerequisite.py'
+      - 'scripts/replay_skip_production_proofs.py'
+      - 'scripts/test_replay_skip_production_proofs.py'
   pull_request:
     paths:
       - 'supabase/migrations/**'
