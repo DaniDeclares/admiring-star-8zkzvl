@@ -5,7 +5,10 @@ returns jsonb language plpgsql security definer set search_path='public','pg_tem
 as $$
 declare v record; v_handled integer:=0; v_failed integer:=0; v_errors jsonb:='[]'::jsonb;
 begin
- if current_user not in ('postgres','service_role') then raise exception 'service role required'; end if;
+ -- SECURITY DEFINER: current_user is the function owner here, so it cannot identify the caller. Use the JWT role
+ -- (claims JSON, as Supabase auth.role() does; PostgREST no longer sets the legacy per-claim GUC) or a direct privileged session.
+ if coalesce(nullif(current_setting('request.jwt.claim.role',true),''),nullif(current_setting('request.jwt.claims',true),'')::jsonb ->> 'role','') <> 'service_role'
+    and session_user not in ('postgres','service_role') then raise exception 'service role required'; end if;
  if p_limit is null or p_limit<1 or p_limit>25 then raise exception 'bounded batch required'; end if;
  for v in
    select c.candidate_key from public.dd_autobuild_candidates c
