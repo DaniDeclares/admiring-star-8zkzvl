@@ -41,9 +41,9 @@ begin
     and jsonb_array_length(v->'files') between 1 and 20
     and not exists (
       select 1 from jsonb_array_elements(v->'files') f
-      where jsonb_typeof(f)<>'object'
-        or jsonb_typeof(f->'path')<>'string'
-        or jsonb_typeof(f->'content')<>'string'
+      where jsonb_typeof(f) is distinct from 'object'
+        or jsonb_typeof(f->'path') is distinct from 'string'
+        or jsonb_typeof(f->'content') is distinct from 'string'
         or length(f->>'path') not between 1 and 260
         or left(f->>'path',1)='/'
         or (f->>'path') like '%..%'
