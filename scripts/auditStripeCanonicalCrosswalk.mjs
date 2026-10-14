@@ -6,7 +6,7 @@ const root = process.cwd();
 const csvPath = process.env.PAYMENT_LINKS_CSV || path.join(root, 'payment_links.csv');
 const outputPath = process.env.CROSSWALK_OUTPUT || path.join(root, 'tmp', 'stripe-canonical-crosswalk.json');
 
-const normalize = (value = '') => value.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim();
+const normalize = (value = '') => String(value).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim();
 
 // Conservative aliases only. A name match is never an amount match.
 const aliases = new Map([
@@ -29,7 +29,7 @@ function classifyName(name) {
 async function auditCsv() {
   const raw = await fs.readFile(csvPath, 'utf8');
   const lines = raw.trim().split(/\r?\n/);
-  const headers = lines.shift().split(',');
+  const headers = lines.shift().split(',').map((h) => h.trim());
   const rows = [];
 
   for (const line of lines) {
@@ -38,6 +38,7 @@ async function auditCsv() {
     const cells = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map((v) => v.replace(/^\"|\"$/g, ''));
     const record = Object.fromEntries(headers.map((h, i) => [h, cells[i] ?? '']));
     const classification = classifyName(record.Name);
+    const procurement = /(^|\\b)(government|public sector|procurement|agency|purchase order)(\\b|$)/i.test(record.Name || '');
     rows.push({
       source: 'payment_links.csv',
       paymentLinkId: record.id,
@@ -46,9 +47,9 @@ async function auditCsv() {
       url: record.Url,
       name: record.Name,
       ...classification,
-      disposition: classification.canonicalOfferId ? 'MATCHED_REVIEW' : 'UNMAPPED',
+      disposition: procurement ? 'PROCUREMENT_PUBLIC_CHECKOUT_FORBIDDEN' : classification.canonicalOfferId ? 'MATCHED_REVIEW' : 'UNMAPPED',
       amountVerification: 'NOT_AVAILABLE_IN_CSV',
-      requiredNextStep: classification.canonicalOfferId ? 'VERIFY_STRIPE_PRICE_AMOUNT_AND_PRODUCT' : 'BUSINESS_DISPOSITION_REQUIRED',
+      requiredNextStep: procurement ? 'REVIEW_CHANNEL_POLICY_AND_INVOICE_PATH' : classification.canonicalOfferId ? 'VERIFY_STRIPE_PRICE_AMOUNT_AND_PRODUCT' : 'BUSINESS_DISPOSITION_REQUIRED',
     });
   }
 
@@ -78,6 +79,7 @@ async function auditLive() {
     for (const item of items.data) {
       const name = item.description || item.price?.nickname || '';
       const classification = classifyName(name);
+      const procurement = /(^|\\b)(government|public sector|procurement|agency|purchase order)(\\b|$)/i.test(name);
       rows.push({
         source: 'STRIPE_LIVE_API',
         paymentLinkId: link.id,
@@ -91,8 +93,8 @@ async function auditLive() {
         currency: item.currency ?? link.currency ?? null,
         quantity: item.quantity ?? null,
         ...classification,
-        disposition: classification.canonicalOfferId ? 'MATCHED_REVIEW' : 'UNMAPPED',
-        requiredNextStep: classification.canonicalOfferId ? 'COMPARE_AMOUNT_TO_CANONICAL_REGISTRY' : 'BUSINESS_DISPOSITION_REQUIRED',
+        disposition: procurement ? 'PROCUREMENT_PUBLIC_CHECKOUT_FORBIDDEN' : classification.canonicalOfferId ? 'MATCHED_REVIEW' : 'UNMAPPED',
+        requiredNextStep: procurement ? 'REVIEW_CHANNEL_POLICY_AND_INVOICE_PATH' : classification.canonicalOfferId ? 'COMPARE_AMOUNT_TO_CANONICAL_REGISTRY' : 'BUSINESS_DISPOSITION_REQUIRED',
       });
     }
   }
