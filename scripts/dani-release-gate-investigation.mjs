@@ -30,7 +30,8 @@ if (!verification?.regression_verified_at) missing.push('regression_verified_at'
 const evidenceComplete = Boolean(verification?.runtime_verified_at && verification?.production_smoke_verified_at && verification?.regression_verified_at);
 const currentSha = process.env.GITHUB_SHA || '';
 const evidenceMatchesCommit = Boolean(currentSha && verification?.verification_commit_sha === currentSha);
-const state = release?.release_state === 'LIVE_READY' && evidenceComplete && evidenceMatchesCommit ? 'EVIDENCE_READY' : 'HELD_OR_UNVERIFIED';
+const commercialGatesPass = Boolean(release && release.blocking_gate == null && release.payment_ledger_ok === true && release.fulfillment_matrix_ok === true && release.quote_path_ok === true && release.runtime_accuracy_ok === true && release.regression_verified === true && release.production_smoke_verified === true);
+const state = release?.release_state === 'LIVE_READY' && evidenceComplete && evidenceMatchesCommit && commercialGatesPass ? 'EVIDENCE_READY' : 'HELD_OR_UNVERIFIED';
 const lines = [
   `# CH01 Release Gate Investigation — ${sku}`,
   '',
@@ -39,6 +40,7 @@ const lines = [
   `- Blocking gate: \`${release?.blocking_gate ?? 'UNKNOWN'}\``,
   `- Missing verification evidence: ${missing.length ? missing.map(x => `\`${x}\``).join(', ') : 'none'}`,
   `- Evidence commit matches current commit: ${evidenceMatchesCommit}`,
+  `- Commercial and fulfillment gates pass: ${commercialGatesPass}`,
   `- Evidence environment: TESTER (not Production)`,
   `- Source SHA: \`${process.env.GITHUB_SHA || 'unknown'}\``,
   `- Run ID: \`${process.env.GITHUB_RUN_ID || 'local'}\``,
