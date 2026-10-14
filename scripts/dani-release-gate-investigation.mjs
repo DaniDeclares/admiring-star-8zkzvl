@@ -27,7 +27,10 @@ if (!verification?.runtime_verified_at) missing.push('runtime_verified_at');
 if (!verification?.production_smoke_verified_at) missing.push('production_smoke_verified_at');
 if (!verification?.regression_verified_at) missing.push('regression_verified_at');
 
-const state = release?.release_state === 'LIVE_READY' ? 'GREEN' : 'HELD';
+const evidenceComplete = Boolean(verification?.runtime_verified_at && verification?.production_smoke_verified_at && verification?.regression_verified_at);
+const currentSha = process.env.GITHUB_SHA || '';
+const evidenceMatchesCommit = Boolean(currentSha && verification?.verification_commit_sha === currentSha);
+const state = release?.release_state === 'LIVE_READY' && evidenceComplete && evidenceMatchesCommit ? 'EVIDENCE_READY' : 'HELD_OR_UNVERIFIED';
 const lines = [
   `# CH01 Release Gate Investigation — ${sku}`,
   '',
@@ -35,6 +38,8 @@ const lines = [
   `- Release: \`${release?.release_state ?? 'UNKNOWN'}\``,
   `- Blocking gate: \`${release?.blocking_gate ?? 'UNKNOWN'}\``,
   `- Missing verification evidence: ${missing.length ? missing.map(x => `\`${x}\``).join(', ') : 'none'}`,
+  `- Evidence commit matches current commit: ${evidenceMatchesCommit}`,
+  `- Evidence environment: TESTER (not Production)`,
   `- Source SHA: \`${process.env.GITHUB_SHA || 'unknown'}\``,
   `- Run ID: \`${process.env.GITHUB_RUN_ID || 'local'}\``,
   '',
