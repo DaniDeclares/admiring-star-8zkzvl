@@ -39,6 +39,9 @@ jobs:
       - name: ✅ Run tests
         run: npm test -- --watchAll=false
 
+      - name: ✅ Run Stripe crosswalk regression
+        run: node --test scripts/auditStripeCanonicalCrosswalk.test.mjs
+
       - name: 🏗️ Build project
         run: npm run build
 
