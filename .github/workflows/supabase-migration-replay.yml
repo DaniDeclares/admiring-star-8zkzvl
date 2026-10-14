@@ -651,6 +651,36 @@ jobs:
           path.write_text(sql)
           PY
 
+      - name: Reconstruct verified GovCon territory table for RLS replay only
+        run: |
+          # Production has this 9-column relation (5 live rows) and the recorded RLS
+          # consumer, but no creator in the assembled ledger lineage. Never seed
+          # territory rows, copy Tester data, or alter the authoritative migration.
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("supabase/migrations/20260910203157_secure_govcon_acquisition_territories_rls.sql")
+          sql = path.read_text()
+          expected = 'ALTER TABLE "public"."dd_govcon_acquisition_territories" ENABLE ROW LEVEL SECURITY;'
+          if sql.count(expected) != 1 or not sql.lstrip().startswith(expected):
+              raise SystemExit("GovCon RLS consumer drifted; refusing replay prerequisite")
+          prerequisite = """create table public.dd_govcon_acquisition_territories (
+            id uuid primary key default gen_random_uuid(),
+            tier text not null unique,
+            name text not null,
+            description text not null,
+            pursuit_rule text not null,
+            sort_order integer not null,
+            is_active boolean not null default true,
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now()
+          );
+          alter table public.dd_govcon_acquisition_territories enable row level security;
+          revoke all on public.dd_govcon_acquisition_territories from public, anon, authenticated;
+          """
+          path.write_text(prerequisite + "\n" + sql)
+          print("Reconstructed GovCon territory schema for disposable replay only; zero rows seeded")
+          PY
+
       - name: Initialize isolated local Supabase config
         run: test -f supabase/config.toml || supabase init
 
