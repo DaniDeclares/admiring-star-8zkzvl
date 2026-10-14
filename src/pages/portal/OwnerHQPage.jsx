@@ -22,6 +22,35 @@ const STATUS_TONES = {
 };
 function statusPillStyle(status) { return STATUS_TONES[String(status || '').toUpperCase()] || null; }
 
+function domainHealthExplanation(item) {
+  if (item.summary) return item.summary;
+  if (item.next_autonomous_action) return item.next_autonomous_action;
+  const state = String(item.status || 'UNKNOWN').toUpperCase();
+  if (state === 'GREEN') return 'Controller reports GREEN, but no supporting summary was supplied. Review evidence before treating this as verified health.';
+  if (state === 'YELLOW') return 'Controller reports YELLOW, but has not supplied a specific finding. Inspect source evidence and blockers.';
+  if (state === 'RED') return 'Controller reports RED without an explanation. Escalate for source-backed review.';
+  return 'No verifiable domain health conclusion is available yet. UNKNOWN does not mean zero activity.';
+}
+function domainEvidenceNote(item) {
+  const note = item?.evidence?.note;
+  if (typeof note === 'string' && note.trim()) return 'Source coverage: ' + note;
+  const derivedBy = item?.evidence?.derived_by;
+  if (derivedBy === 'dd_refresh_company_domain_state') return 'Automated rule evaluated; no source-specific explanation recorded.';
+  return 'Source-level evidence not explained in this controller row.';
+}
+function researchSourceCheck(source) {
+  if (source.last_error) return 'FETCH ERROR';
+  if (source.last_http_status == null) return 'NOT CHECKED';
+  const code = Number(source.last_http_status);
+  if (code >= 200 && code < 300) return 'FETCH OK';
+  return 'HTTP ' + code;
+}
+function domainObservedAt(value) {
+  if (!value) return 'Observation time unavailable';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'Observation time unavailable' : 'Observed ' + date.toLocaleString();
+}
+
 function SystemCard({ system }) {
   const body = <div className="owner-system-card">
     <div className="system-type">{system.type}</div><h3>{system.name}</h3>
@@ -71,6 +100,8 @@ function OwnerHq({ session }) {
   const brief=data?.morningBrief; const supportReady=brief?.overnight_verified?.support_ready; const servicesTotal=brief?.business_health?.SERVICE_CATALOG?.metrics?.services_total ?? brief?.overnight_verified?.services_total;
   const supportLabel = Number.isFinite(Number(supportReady)) && Number(servicesTotal)>0 ? `${supportReady}/${servicesTotal}` : '—';
   const companyState=brief?.company_status||'UNKNOWN';
+  const localHour=new Date().getHours();
+  const ownerGreeting=localHour<12?'Good morning':localHour<17?'Good afternoon':'Good evening';
 
   return <main className="portal-shell owner-command-shell">
     <nav className="owner-command-nav" aria-label="Owner HQ">
@@ -84,9 +115,21 @@ function OwnerHq({ session }) {
     </nav>
 
     <div className="owner-command-main" id="overview">
-      <header className="portal-hero"><div><p className="portal-eyebrow">Owner HQ</p><h1>Good afternoon, Danielle.</h1><p>Company truth, next actions and agent outcomes. Deep system detail stays available when you need it.</p></div><div className="portal-hero-actions"><div className="portal-account-badge">Signed in as <strong>{session.user?.email}</strong></div><div className="portal-actions"><button className="portal-refresh" onClick={load}>Refresh</button><Link className="portal-primary" to="/portal/operations">Open operations</Link></div></div></header>
+      <header className="portal-hero"><div><p className="portal-eyebrow">Owner HQ</p><h1>{ownerGreeting}, Danielle.</h1><p>Company truth, next actions and agent outcomes. Deep system detail stays available when you need it.</p></div><div className="portal-hero-actions"><div className="portal-account-badge">Signed in as <strong>{session.user?.email}</strong></div><div className="portal-actions"><button className="portal-refresh" onClick={load}>Refresh</button><Link className="portal-primary" to="/portal/operations">Open operations</Link></div></div></header>
 
       {brief && <section className="portal-card owner-command-brief"><div className="owner-command-section-head"><div><p className="portal-eyebrow">While you were away</p><h2>{brief.headline || 'DANI operating brief'}</h2><p>Verified state only · generated {brief.generated_at ? new Date(brief.generated_at).toLocaleString() : '—'}</p></div><span className="portal-pill" style={statusPillStyle(companyState)}>{companyState}</span></div><div className="portal-summary-grid"><a className="portal-summary-tile" href="#attention"><strong>{metrics.ownerAttention}</strong><span>Needs Danielle now</span></a><Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Revenue actions due</span></Link><Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.activeJobs}</strong><span>Active jobs</span></Link><a className="portal-summary-tile" href="#agents"><strong>{metrics.agentCompleted}</strong><span>Recent agent completions</span></a><a className="portal-summary-tile" href="#research"><strong>{brief.overnight_verified?.research_queued ?? metrics.researchOpen}</strong><span>Research in motion</span></a><Link className="portal-summary-tile" to="/portal/services"><strong>{supportLabel}</strong><span>Support-ready services</span></Link></div></section>}
+
+      <section className="portal-card" id="execution-outcomes" aria-label="Approved work execution outcomes">
+        <div className="owner-command-section-head"><div><p className="portal-eyebrow">What moved while you were away</p><h2>Build → review → release evidence</h2><p className="owner-quiet">Source-specific evidence, not a claim of new sales or live products. Observed {data?.outcomePipeline?.observedAt ? new Date(data.outcomePipeline.observedAt).toLocaleString() : '—'}.</p></div><Link className="owner-command-more" to="/portal/operations">Open operations →</Link></div>
+        {data?.outcomePipeline ? <><div className="portal-summary-grid">
+          <div className="portal-summary-tile"><strong>{data.outcomePipeline.buildPrEvidence}</strong><span>Build PRs with SHA evidence (sample)</span></div>
+          <div className="portal-summary-tile"><strong>{data.outcomePipeline.techImplementationHeld}</strong><span>Held for Tech (sample)</span></div>
+          <div className="portal-summary-tile"><strong>{data.outcomePipeline.productionVerifiedPromotionRecords}</strong><span>Promotion records marked verified</span></div>
+          <div className="portal-summary-tile"><strong>{data.outcomePipeline.verifiedReleaseReceipts}</strong><span>Verified executed release receipts (sample)</span></div>
+        </div><p className="owner-quiet">{data.outcomePipeline.note}</p>
+        <p className="owner-quiet">{data.outcomePipeline.autobuildMatchedPromotionRecords} exact autobuild-to-promotion candidate matches · {data.outcomePipeline.releaseReceiptsObserved} historical receipts inspected. Unmatched evidence never implies a completed release.</p>
+        {data.outcomePipeline.recentBuilds?.map(x=><div className="portal-row" key={x.candidateKey}><div><strong>{x.candidateKey}</strong><small>PR #{x.prNumber} · commit {x.headSha?.slice(0,9)} · review {x.reviewState} · promotion {x.promotionState}</small></div><span className="portal-pill" style={statusPillStyle('PENDING')}>VERIFY</span></div>)}</> : <p className="owner-quiet">Build-to-release evidence unavailable. No completion inferred.</p>}
+      </section>
 
       <div className="owner-command-grid">
         <section className="portal-card" id="attention"><div className="owner-command-section-head"><div><p className="portal-eyebrow">Needs your attention</p><h2>Danielle queue</h2><p className="owner-quiet">Only owner-only or genuinely interruptive work belongs here.</p></div><span className="portal-pill" style={metrics.ownerAttention?statusPillStyle('HIGH'):statusPillStyle('GREEN')}>{metrics.ownerAttention||'CLEAR'}</span></div>{metrics.ownerAttentionRows.length?metrics.ownerAttentionRows.slice(0,5).map(item=><div className="portal-row" key={item.id}><div><strong>{item.reason}</strong><small>{item.domain} · {item.metadata?.governor?.next_action||item.recommended_action}</small></div><span className="portal-pill" style={statusPillStyle(item.priority)}>{item.priority}</span></div>):<div className="portal-success">Nothing needs Danielle right now.</div>}{metrics.deferredOwnerAttentionRows.length>0&&<details className="owner-command-details"><summary>{metrics.deferredOwnerAttentionRows.length} deferred/system-held items</summary>{metrics.deferredOwnerAttentionRows.slice(0,8).map(item=><div className="portal-row" key={item.id}><div><strong>{item.reason}</strong><small>{item.metadata?.governor?.state?.replaceAll('_',' ').toLowerCase()}</small></div></div>)}</details>}</section>
@@ -103,9 +146,9 @@ function OwnerHq({ session }) {
 
       <section className="portal-card" id="money"><div className="owner-command-section-head"><div><p className="portal-eyebrow">Exception center</p><h2>Money, communications and governed holds</h2></div></div><div className="portal-summary-grid"><a className="portal-summary-tile" href="#money"><strong>{metrics.accountingExceptions}</strong><span>Accounting exceptions</span></a><a className="portal-summary-tile" href="#money"><strong>{metrics.communicationAttention}</strong><span>Replies needing review</span></a><a className="portal-summary-tile" href="#money"><strong>{metrics.outboxExceptions}</strong><span>External actions incomplete</span></a></div><details className="owner-command-details"><summary>Inspect open accounting exceptions</summary>{(data?.accountingExceptions||[]).slice(0,12).map(item=><div className="portal-row" key={item.id}><div><strong>{item.exception_type}</strong><small>{item.assigned_lane} · {item.description}</small></div><span className="portal-pill">{item.requires_owner_decision?'OWNER':'ACCOUNTING'}</span></div>)}</details><details className="owner-command-details"><summary>Inspect inbound communications</summary>{(data?.communicationAttention||[]).slice(0,8).map(item=><div className="portal-row" key={item.id}><div><strong>{item.subject||'Inbound business communication'}</strong><small>{item.sender_address||'Unknown sender'} · {item.relationship_type||'UNMATCHED'}</small></div><span className="portal-pill" style={statusPillStyle(item.priority)}>{item.priority}</span></div>)}</details></section>
 
-      <section className="portal-card" id="research"><div className="owner-command-section-head"><div><p className="portal-eyebrow">Research + intelligence</p><h2>Research stays deep, not loud</h2><p className="owner-quiet">The home screen reports movement. Questions, sources, snapshots and evidence remain available below when you want to inspect them.</p></div><span className="portal-pill">{metrics.researchOpen} OPEN</span></div><details className="owner-command-details"><summary>Inspect current research work</summary>{(data?.researchWork||[]).slice(0,12).map(item=><div className="portal-row" key={item.id}><div><strong>{item.question}</strong><small>{item.priority} · {item.status} · {item.next_action||'Continue evidence collection'}</small></div><span className="portal-pill">{item.status}</span></div>)}</details><details className="owner-command-details"><summary>Inspect latest authority-source checks</summary>{(data?.researchSources||[]).slice(0,10).map(source=><div className="portal-row" key={source.id}><div><strong>{source.source_title}</strong><small>{source.authority_level} · {source.temporal_class} · HTTP {source.last_http_status??'—'}</small></div><span className="portal-pill">{source.last_error?'ERROR':'WATCHING'}</span></div>)}</details></section>
+      <section className="portal-card" id="research"><div className="owner-command-section-head"><div><p className="portal-eyebrow">Research + intelligence</p><h2>Research stays deep, not loud</h2><p className="owner-quiet">A successful HTTP fetch proves reachability, not that research evidence has been extracted, linked, or validated.</p><p className="owner-quiet">The home screen reports movement. Questions, sources, snapshots and evidence remain available below when you want to inspect them.</p></div><span className="portal-pill">{metrics.researchOpen} OPEN</span></div><details className="owner-command-details"><summary>Inspect current research work</summary>{(data?.researchWork||[]).slice(0,12).map(item=><div className="portal-row" key={item.id}><div><strong>{item.question}</strong><small>{item.priority} · {item.status} · {item.next_action||'Continue evidence collection'}</small></div><span className="portal-pill">{item.status}</span></div>)}</details><details className="owner-command-details"><summary>Inspect latest authority-source checks</summary>{(data?.researchSources||[]).slice(0,10).map(source=><div className="portal-row" key={source.id}><div><strong>{source.source_title}</strong><small>{source.authority_level} · {source.temporal_class} · HTTP {source.last_http_status??'—'}</small></div><span className="portal-pill" style={statusPillStyle(source.last_error?'RED':source.last_http_status>=200&&source.last_http_status<300?'AUDITABLE':'UNKNOWN')}>{researchSourceCheck(source)}</span></div>)}</details></section>
 
-      <section className="portal-card" id="tech"><p className="portal-eyebrow">Company controller</p><h2>Business + software health</h2><div className="owner-command-health">{(data?.companyDomains||[]).map(item=><div className="owner-health-item" key={item.domain}><strong>{item.domain.replaceAll('_',' ')}</strong><small>{item.summary||item.next_autonomous_action||'Awaiting verified evidence'}</small><span className="portal-pill" style={statusPillStyle(item.status)}>{item.status}</span></div>)}</div></section>
+      <section className="portal-card" id="tech"><p className="portal-eyebrow">Company controller</p><h2>Business + software health</h2><div className="owner-command-health">{(data?.companyDomains||[]).map(item=><div className="owner-health-item" key={item.domain}><strong>{item.domain.replaceAll('_',' ')}</strong><small>{domainHealthExplanation(item)}</small><small>{domainObservedAt(item.observed_at)}</small><small>{domainEvidenceNote(item)}</small><span className="portal-pill" style={statusPillStyle(item.status)}>{item.status}</span></div>)}</div></section>
 
       <section className="portal-card" id="connections"><div className="owner-command-section-head"><div><p className="portal-eyebrow">Connected authority</p><h2>Open another system only when its authority matters</h2></div></div><details className="owner-command-details"><summary>Show connected systems</summary><div className="owner-system-grid" style={{marginTop:12}}>{OWNER_CONNECTED_SYSTEMS.map(system=><SystemCard key={system.key} system={system}/>)}</div></details></section>
 

@@ -35,6 +35,7 @@ export default function VendorOnboardingUploadPage() {
   const [capabilities, setCapabilities] = useState([]);
   const [selectedCapabilities, setSelectedCapabilities] = useState({});
   const [providerFiles, setProviderFiles] = useState({});
+  const [activeDocType, setActiveDocType] = useState('');
   const [documentNumbers, setDocumentNumbers] = useState({});
   const [companyFiles, setCompanyFiles] = useState([]);
   const [busy, setBusy] = useState(false);
@@ -185,58 +186,75 @@ export default function VendorOnboardingUploadPage() {
     } finally { setBusy(false); }
   };
 
-  if (loading) return <main style={{maxWidth:820,margin:'0 auto',padding:'64px 24px'}}><p>Loading onboarding…</p></main>;
+  const extraDocs = PROVIDER_DOCS.filter(doc => !['PROVIDER_PRICE_SHEET', 'W9'].includes(doc.key));
+  const priceSheetDoc = PROVIDER_DOCS.find(doc => doc.key === 'PROVIDER_PRICE_SHEET');
+  const selectedCount = Object.values(providerFiles).filter(Boolean).length;
+  const renderProviderDoc = doc => <div className="provider-document-upload" key={doc.key}>
+    <label htmlFor={`provider-document-${doc.key}`}><strong>{doc.label}</strong><span>{doc.help}</span></label>
+    <input id={`provider-document-${doc.key}`} type="file" accept={ACCEPT} onChange={e => setProviderFile(doc.key, e.target.files?.[0] || null)} />
+    {providerFiles[doc.key] && <p className="provider-file-confirmation">Selected: {providerFiles[doc.key].name}</p>}
+    {providerFiles[doc.key] && capabilities.length > 0 && <label className="provider-document-detail">Service this document supports (optional)
+      <select value={selectedCapabilities[doc.key] || ''} onChange={e => setSelectedCapabilities(prev => ({...prev,[doc.key]:e.target.value || null}))}>
+        <option value="">General application document</option>
+        {capabilities.map(cap => <option key={cap.id} value={cap.id}>{cap.canonical_sku} — {cap.capability_description}</option>)}
+      </select>
+    </label>}
+    {providerFiles[doc.key] && doc.hasNumber && <label className="provider-document-detail">Reference number (optional)
+      <input type="text" value={documentNumbers[doc.key] || ''} onChange={e => setDocumentNumbers(prev => ({...prev,[doc.key]:e.target.value}))} />
+    </label>}
+  </div>;
+
+  if (loading) return <main className="portal-shell"><p>Loading onboarding…</p></main>;
 
   if (providerMode) {
-    return <main style={{maxWidth:900,margin:'0 auto',padding:'64px 24px'}}>
-      <p style={{letterSpacing:'.12em',fontSize:12,fontWeight:700}}>DANI DECLARES PROVIDER</p>
-      <h1>Complete your provider onboarding.</h1>
-      <p style={{fontSize:18,lineHeight:1.6}}>Upload the evidence requested for your provider application. DANI DECLARES reviews these documents before any qualification or authorization decision.</p>
-      {userEmail && <p className="portal-account-badge">Signed in as <strong>{userEmail}</strong><button type="button" onClick={signOut}>Sign out</button></p>}
+    return <main className="portal-shell provider-documents-shell">
+      <header className="portal-hero"><div><p className="portal-eyebrow">DANI DECLARES PROVIDER</p><h1>Documents & verification</h1><p>Send the documents your application needs. Each submission is private and must be reviewed before any service can be authorized.</p></div>
+        {userEmail && <p className="portal-account-badge">Signed in as <strong>{userEmail}</strong><button type="button" onClick={signOut}>Sign out</button></p>}
+      </header>
       <ProviderNav isApprovedProvider={application?.application_status === 'APPROVED'} agreementSigned={application?.agreement_status === 'EXECUTED'} />
-      {application && <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,margin:'24px 0'}}>
-        <strong>{application.legal_name || 'Provider application'}</strong>
-        <p style={{margin:'8px 0 0'}}>Application status: <strong>{application.application_status}</strong></p>
-        <p style={{margin:'8px 0 0'}}>Provider type: <strong>{application.applicant_type || applicantType || 'INDIVIDUAL'}</strong> · Price sheet: <strong>{applicantType === 'BUSINESS' ? 'Required' : 'Optional'}</strong></p>
-        <p style={{margin:'8px 0 0'}}>Compliance: <strong>{application.compliance_status}</strong></p>
-        <p style={{margin:'8px 0 0'}}>Document statuses — W-9: {application.tax_form_status} · Insurance: {application.insurance_status} · ID: {application.identity_status} · Agreement: {application.agreement_status}</p>
-      </div>}
-      {application?.agreement_status !== 'EXECUTED' ? <div style={{padding:20,border:'1px solid #b45309',borderRadius:12,background:'#fffbeb'}}>
-        <strong>Sign your Provider Agreement first</strong>
-        <p style={{marginBottom:12}}>DANI DECLARES requires a signed Provider Agreement before reviewing any documents you submit. This takes about a minute.</p>
-        <Link to="/portal/provider-agreement" style={{fontWeight:700}}>Sign the Provider Agreement →</Link>
-      </div> : <form onSubmit={submitProvider}>
-        <div style={{display:'grid',gap:16}}>
-          {PROVIDER_DOCS.map(doc => <label key={doc.key} style={{display:'grid',gap:6,padding:16,border:'1px solid #ddd',borderRadius:10}}>
-            <strong>{doc.label}</strong><span style={{fontSize:14}}>{doc.help}</span>
-            <input type="file" accept={ACCEPT} onChange={e=>setProviderFile(doc.key,e.target.files?.[0] || null)} />
-            {providerFiles[doc.key] && <span style={{fontSize:14}}>Selected: {providerFiles[doc.key].name}</span>}
-            {capabilities.length > 0 && <div style={{display:'grid',gap:6}}>
-              <span style={{fontSize:14,fontWeight:600}}>Capability this document supports (optional)</span>
-              <select
-                value={selectedCapabilities[doc.key] || ''}
-                onChange={e=>setSelectedCapabilities(prev=>({...prev,[doc.key]:e.target.value || null}))}
-                style={{padding:8,border:'1px solid #ccc',borderRadius:6}}
-              >
-                <option value="">General application document</option>
-                {capabilities.map(cap => <option key={cap.id} value={cap.id}>{cap.canonical_sku} — {cap.capability_description}</option>)}
-              </select>
-              <span style={{fontSize:12,color:'#555'}}>Use this for a license, certification, auto-insurance, or other evidence tied to a specific capability. General documents can be left unlinked.</span>
-            </div>}
-            {doc.hasNumber && <input type="text" placeholder="Reference / ID number (optional)" value={documentNumbers[doc.key] || ''} onChange={e=>setDocumentNumbers(prev=>({...prev,[doc.key]:e.target.value}))} style={{padding:8,border:'1px solid #ccc',borderRadius:6}} />}
-          </label>)}
-        </div>
-        {error && <div role="alert" style={{padding:12,marginTop:16,border:'1px solid #b91c1c',borderRadius:8}}>{error}</div>}
-        {message && <div role="status" style={{padding:12,marginTop:16,border:'1px solid #15803d',borderRadius:8}}>{message}</div>}
-        <button type="submit" disabled={busy} style={{marginTop:20,padding:'12px 18px',fontWeight:700}}>{busy ? 'Submitting…' : 'Submit provider documents'}</button>
+      {application && <section className="provider-document-overview">
+        <div><small>APPLICATION</small><strong>{application.legal_name || 'Provider application'}</strong><span>{application.application_status}</span></div>
+        <div><small>ELECTRONIC W-9</small><strong>{application.tax_form_status === 'RECEIVED' || application.tax_form_status === 'VERIFIED' ? 'On file' : 'Needs attention'}</strong><span>{application.tax_form_status}</span></div>
+        <div><small>IDENTITY</small><strong>{application.identity_status === 'VERIFIED' ? 'Verified' : 'Pending review'}</strong><span>{application.identity_status}</span></div>
+        <div><small>BUSINESS RATE CARD</small><strong>{applicantType === 'BUSINESS' ? 'Required for business providers' : 'Optional'}</strong><span>For commercial review</span></div>
+      </section>}
+      {application?.agreement_status !== 'EXECUTED' ? <section className="portal-card">
+        <h2>First, review your Provider Agreement</h2><p>Your agreement must be on file before submitting documents.</p>
+        <Link className="portal-primary" to="/portal/provider-agreement">Open agreement →</Link>
+      </section> : <form className="provider-documents-form" onSubmit={submitProvider}>
+        <section className="portal-card">
+          <p className="portal-eyebrow">STEP 1 · REQUIRED DOCUMENTS</p>
+          <h2>Complete the essentials</h2>
+          <p className="portal-note">Only upload documents that match their type. A marketing PDF cannot replace an ID, insurance certificate, or tax form.</p>
+          {applicantType === 'BUSINESS' && renderProviderDoc(priceSheetDoc)}
+          {applicantType !== 'BUSINESS' && <p className="portal-note">An individual provider may submit supporting documents without a business rate card.</p>}
+          {application?.tax_form_status === 'RECEIVED' || application?.tax_form_status === 'VERIFIED'
+            ? <div className="provider-document-done"><strong>Electronic W-9 received</strong><span>Your W-9 is already on file. You do not need to upload a duplicate here.</span></div>
+            : <div className="provider-document-done"><strong>Electronic W-9 available</strong><span>Use the secure <Link to="/portal/w9">W-9 form</Link> rather than sending your tax number in an ordinary document.</span></div>}
+          <p className="provider-document-footnote">Identity and insurance evidence will be reviewed according to the services you request. Choose the appropriate document type below when DANI requests it.</p>
+        </section>
+        <section className="portal-card">
+          <p className="portal-eyebrow">STEP 2 · SUPPORTING EVIDENCE</p>
+          <h2>Add a document if needed</h2>
+          <p className="portal-note">Instead of filling out every document field, select the type of evidence you want to upload. You can add more than one type before submitting.</p>
+          <label className="provider-search-label" htmlFor="provider-document-type">Document category</label>
+          <select id="provider-document-type" value={activeDocType} onChange={e => setActiveDocType(e.target.value)}>
+            <option value="">Choose the document you are uploading…</option>
+            {extraDocs.map(doc => <option key={doc.key} value={doc.key}>{doc.label}</option>)}
+            {applicantType !== 'BUSINESS' && <option value="PROVIDER_PRICE_SHEET">My optional rate card</option>}
+          </select>
+          {activeDocType && renderProviderDoc(PROVIDER_DOCS.find(doc => doc.key === activeDocType))}
+          {selectedCount > 0 && <div className="provider-upload-queue"><strong>{selectedCount} document type{selectedCount === 1 ? '' : 's'} selected</strong>
+            <ul>{Object.entries(providerFiles).filter(([,file]) => Boolean(file)).map(([type,file]) => <li key={type}>{PROVIDER_DOCS.find(doc => doc.key === type)?.label}: {file.name} <button type="button" onClick={() => setProviderFile(type,null)}>Remove</button></li>)}</ul>
+          </div>}
+          <details className="provider-optional-upload"><summary>Need to submit a paper W-9 instead?</summary><p>Use this only if DANI requested a document. The electronic W-9 above is preferred.</p>{renderProviderDoc(PROVIDER_DOCS.find(doc => doc.key === 'W9'))}</details>
+        </section>
+        {error && <div className="portal-alert" role="alert">{error}</div>}
+        {message && <div className="portal-success" role="status">{message}</div>}
+        <button type="submit" className="portal-primary provider-submit-documents" disabled={busy || selectedCount === 0}>{busy ? 'Submitting…' : `Submit ${selectedCount} document type${selectedCount === 1 ? '' : 's'} for review`}</button>
+        <p className="portal-note">Uploading is not verification, provider approval, or permission to accept work. Never upload passwords or banking credentials.</p>
       </form>}
-      <div style={{padding:20,border:'1px solid #ddd',borderRadius:12,marginTop:24}}>
-        <strong>Pricing note</strong>
-        <p style={{marginBottom:8}}>You may submit your own rates. Individual providers are not required to provide a price sheet. Business providers must provide one for commercial review. DANI DECLARES still sets and publishes customer pricing; provider-submitted rates are used for economics, negotiation, and fulfillment planning.</p>
-        <strong>Important</strong>
-        <p style={{marginBottom:0}}>Document receipt is not approval. Provider qualification, verification, authorization, and dispatch eligibility remain separate decisions. Do not upload passwords, banking credentials, or unnecessary sensitive information.</p>
-      </div>
-      <p style={{marginTop:32}}><Link to="/portal">Return to portal</Link> · <Link to="/portal/login">Sign in</Link></p>
+      <p className="provider-documents-back"><Link to="/portal">← Back to onboarding overview</Link></p>
     </main>;
   }
 

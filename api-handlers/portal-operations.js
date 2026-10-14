@@ -4,7 +4,7 @@ import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuil
 import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
-import { encryptTin, decryptTin } from './_w9Crypto.js';
+import { encryptTin, decryptTin, isW9EncryptionConfigured } from './_w9Crypto.js';
 import { mintAppointmentToken } from './_appointmentTokens.js';
 import Stripe from 'stripe';
 
@@ -289,6 +289,39 @@ async function getOwnerControlSnapshot(supabase) {
   const companyControllerErrors = [morningBrief, companyDomains, companyRuns, soakReceipts].filter(item => item.error);
   if (companyControllerErrors.length) throw companyControllerErrors[0].error;
 
+  // Read-only, outcome-labeled work handoff. Do not equate built PRs with live releases.
+  const outcomeSources = ['dd_autobuild_candidates','dd_promotion_candidates','dd_production_release_receipts'];
+  const [autobuildRaw, promotionRaw, releaseRaw] = (await Promise.all([
+    supabase.from('dd_autobuild_candidates').select('candidate_key,status,executor_state,blocker,pull_request_number,head_sha,built_at,proof').order('created_at',{ascending:false}).limit(150),
+    supabase.from('dd_promotion_candidates').select('candidate_key,source_reference,proof_status,owner_approval_status,production_verification_status,classification,evidence').order('updated_at',{ascending:false}).limit(100),
+    supabase.from('dd_production_release_receipts').select('id,candidate_id,candidate_key,release_state,release_executed,verified_at').limit(150),
+  ])).map((result,i)=>tolerateMissingTable(result,outcomeSources[i],degradedSources));
+  if ([autobuildRaw,promotionRaw,releaseRaw].some(x=>x.error)) throw [autobuildRaw,promotionRaw,releaseRaw].find(x=>x.error).error;
+  const autobuildRows=autobuildRaw.data||[], promotionRows=promotionRaw.data||[];
+  const eligibleEvidenceRows=autobuildRows.filter(x=>x.executor_state==='PR_OPENED' && x.pull_request_number && x.head_sha);
+  const verifiedReleaseRows=(releaseRaw.data||[]).filter(x=>x.release_executed===true && x.verified_at);
+  const promotionKeys=new Set(promotionRows.map(x=>x.evidence?.autobuild_candidate_key||x.candidate_key));
+  const autobuildMatchedPromotion=eligibleEvidenceRows.filter(x=>promotionKeys.has(x.candidate_key));
+  const outcomePipeline={
+    observedAt:new Date().toISOString(),
+    coverage:{
+      autobuild:autobuildRaw.error?'UNAVAILABLE': 'SAMPLED',
+      promotion:promotionRaw.error?'UNAVAILABLE':'SAMPLED',
+      release:releaseRaw.error?'UNAVAILABLE':'SAMPLED'
+    },
+    buildCandidatesObserved:autobuildRows.length,
+    buildPrEvidence:eligibleEvidenceRows.length,
+    techImplementationHeld:autobuildRows.filter(x=>x.executor_state==='HELD_IMPLEMENTATION').length,
+    blockedCandidates:autobuildRows.filter(x=>x.blocker).length,
+    promotionRecordsObserved:promotionRows.length,
+    productionVerifiedPromotionRecords:promotionRows.filter(x=>x.production_verification_status==='PASSED').length,
+    releaseReceiptsObserved:(releaseRaw.data||[]).length,
+    verifiedReleaseReceipts:verifiedReleaseRows.length,
+    autobuildMatchedPromotionRecords:autobuildMatchedPromotion.length,
+    recentBuilds:eligibleEvidenceRows.slice(0,5).map(x=>({candidateKey:x.candidate_key,prNumber:x.pull_request_number,headSha:x.head_sha,reviewState:x.proof?.review_state||'NOT_VERIFIED',promotionState:x.proof?.promotion_state||'NOT_VERIFIED'})),
+    note:'These are source-specific records, not evidence that any new product was published, a lead was contacted, or money was collected. Explicit canonical autobuild candidate lineage is required to link PRs to promotion records; a release counts as verified only when execution and verification timestamp are recorded.'
+  };
+
   if (degradedSources.length) {
     // Best-effort: a failure recording the diagnostic must never itself break
     // Owner HQ, which is exactly the bug this whole fix targets.
@@ -325,6 +358,7 @@ async function getOwnerControlSnapshot(supabase) {
     revenueAgents: revenueAgents.data || [],
     ownerAttention: ownerAttention.data || [],
     morningBrief: morningBrief.data || null,
+    outcomePipeline,
     companyDomains: companyDomains.data || [],
     companyRuns: companyRuns.data || [],
     soakReceipts: soakReceipts.data || [],
@@ -436,7 +470,7 @@ async function getProviderSnapshot(supabase, providerId, userId, userSupabase = 
     if (directSnapshot) applicationSnapshot = directSnapshot;
   }
   const w9 = await getW9Status(supabase, userId);
-  applicationSnapshot = { ...applicationSnapshot, w9 };
+  applicationSnapshot = { ...applicationSnapshot, w9, w9SubmissionAvailable: isW9EncryptionConfigured() };
   if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], financials: { earnings: [], payables: [], payouts: [] }, payouts: [], messages: [] };
 
   // Financials are read through the provider-bound projection. The Worker App
@@ -731,6 +765,7 @@ export default async function handler(req, res) {
     // accessing the system... is the person identified on Form W-9" requirement.
     if (action === 'submit_provider_w9') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      if (!isW9EncryptionConfigured()) return fail(res, 'Electronic W-9 submission is temporarily unavailable. Nothing was saved; please try again later.', 503);
       const p = payload || {};
       const required = ['line1Name', 'classification', 'address', 'city', 'stateCode', 'zipCode', 'tinType', 'tin', 'signatureFullName'];
       for (const field of required) {
