@@ -1,1 +1,30 @@
-PLACEHOLDER
+name: Supabase Migration Replay
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - '.github/workflows/supabase-migration-replay.yml'
+      - 'scripts/replay_shim_provider_guard_format.py'
+      - 'scripts/test_replay_shim_provider_guard_format.py'
+      - 'scripts/replay_seed_services_prerequisite.py'
+      - 'scripts/test_replay_seed_services_prerequisite.py'
+      - 'scripts/replay_skip_production_proofs.py'
+      - 'scripts/test_replay_skip_production_proofs.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-migration-replay-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout candidate source
+        uses: actions/checkout@v4
