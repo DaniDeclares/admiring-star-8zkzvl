@@ -1,22 +1,25 @@
 
 do $$
 declare
-  v_receipt uuid := gen_random_uuid();
-  v_now timestamptz := now();
-  v_pass int := 0;
-  v_fail int := 0;
-  v_uri text := 'db://dd_audit_proof_receipts/' || gen_random_uuid()::text;
+  v_receipt uuid:=gen_random_uuid();
+  v_now timestamptz:=now();
+  v_pass int:=0;
+  v_fail int:=0;
+  v_uri text;
   v_run text;
   v_kind text;
   v_sha constant text := 'ec9c7d7eeb0259746c86c9da6cf2ae06292aaa4b';
 begin
-  v_receipt := gen_random_uuid();
-  v_uri := 'db://dd_audit_proof_receipts/' || v_receipt::text;
-  v_run := v_receipt::text;
+  v_uri:='db://dd_audit_proof_receipts/'||v_receipt::text;
+  v_run:=v_receipt::text;
 
   if exists(
     select 1 from public.services s
-    where s.sku='DNI-08A-019' and s.is_active=true and s.starting_price is not null
+    where s.sku='DNI-08A-019'
+      and s.is_active=true
+      and s.name='Business Expansion Plan'
+      and s.pricing_type='FIXED'
+      and s.starting_price=750
   ) then v_pass:=v_pass+1; else v_fail:=v_fail+1; end if;
 
   if exists(
@@ -30,6 +33,7 @@ begin
       and r.fulfillment_matrix_ok
       and r.payment_ledger_ok
       and r.stripe_price_verified
+      and r.unresolved_rule_count=0
   ) then v_pass:=v_pass+1; else v_fail:=v_fail+1; end if;
 
   if exists(
