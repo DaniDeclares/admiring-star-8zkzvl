@@ -3,6 +3,7 @@ import ProviderNav from './ProviderNav.jsx';
 import { Card, Empty, statusLabel, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 import './PortalWorkspacePage.css';
+import { submitProviderCapabilityRequests } from './providerServiceRequests.js';
 
 // Lets an already-active provider add or remove services after signup instead
 // of only ever picking from the onboarding wizard once (Thumbtack-style:
@@ -23,6 +24,7 @@ export default function ProviderServicesPage() {
   const [catalogSearch, setCatalogSearch] = useState('');
   const [localMessage, setLocalMessage] = useState('');
   const [localError, setLocalError] = useState('');
+  const [catalogError, setCatalogError] = useState('');
   const catalogFetchStarted = useRef(false);
 
   useEffect(() => {
@@ -35,8 +37,12 @@ export default function ProviderServicesPage() {
         supabase.from('dd_provider_capability_categories').select('*').order('display_order'),
       ]);
       if (cancelled) return;
-      if (!servicesResult.error) setCatalogServices(servicesResult.data || []);
-      if (!categoriesResult.error) setCategories(categoriesResult.data || []);
+      if (servicesResult.error || categoriesResult.error) {
+        setCatalogError('Service catalog is unavailable. Please refresh before choosing services.');
+      } else {
+        setCatalogServices(servicesResult.data || []);
+        setCategories(categoriesResult.data || []);
+      }
       setCatalogLoading(false);
     })();
     return () => { cancelled = true; };
@@ -68,14 +74,21 @@ export default function ProviderServicesPage() {
     if (!activeCategories.length) { setLocalError('Select at least one service category to add.'); return; }
     setBusy(true); setLocalError(''); setLocalMessage('');
     try {
-      for (const category of activeCategories) {
-        const serviceIds = servicesForCategory(category).map(s => s.id);
-        if (!serviceIds.length) continue;
-        // eslint-disable-next-line no-await-in-loop
-        await act('request_provider_capabilities', { serviceIds, capabilityKey: category.capability_key });
-      }
+      if (catalogError || catalogLoading) throw new Error('Service catalog is not ready. Please refresh.');
+      await submitProviderCapabilityRequests({
+        categories: activeCategories,
+        servicesForCategory,
+        accessToken: session?.access_token,
+      });
       setSelectedCategories({});
       setLocalMessage('Your requested services were submitted for DANI DECLARES review.');
+      await load();
+    } catch (requestError) {
+      const partial = Number(requestError?.submittedCount || 0);
+      setLocalError(partial
+        ? `${partial} categor${partial === 1 ? 'y was' : 'ies were'} submitted, then the request stopped: ${requestError.message} Refresh before retrying.`
+        : (requestError?.message || 'Service request failed. Please try again.'));
+      if (partial) await load();
     } finally { setBusy(false); }
   };
 
@@ -111,6 +124,7 @@ export default function ProviderServicesPage() {
     </Card>
     <Card title="Request additional services">
       <p className="portal-note">Choose only categories you can actually perform. A category currently requests <strong>all services listed inside it</strong>; expand it to check the scope first. Requests are reviewed, not automatically approved.</p>
+      {catalogError && <div className="portal-alert" role="alert">{catalogError}</div>}
       {catalogLoading ? <p>Loading service catalog…</p> : <>
         <label className="provider-search-label" htmlFor="provider-category-search">Find a category</label>
         <input id="provider-category-search" className="provider-service-search" type="search" placeholder="Search available categories" value={catalogSearch} onChange={event => setCatalogSearch(event.target.value)} />
@@ -129,7 +143,7 @@ export default function ProviderServicesPage() {
             </details>;
           })}
         </div>
-        <button className="portal-primary" disabled={busy || !Object.values(selectedCategories).some(Boolean)} onClick={submit}>{busy ? 'Submitting…' : 'Submit selected categories for review'}</button>
+        <button className="portal-primary" disabled={busy || catalogLoading || Boolean(catalogError) || !Object.values(selectedCategories).some(Boolean)} onClick={submit}>{busy ? 'Submitting…' : 'Submit selected categories for review'}</button>
       </>}
     </Card>
   </main>;
