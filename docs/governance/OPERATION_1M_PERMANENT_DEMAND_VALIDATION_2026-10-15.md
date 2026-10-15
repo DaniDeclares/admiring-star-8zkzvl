@@ -52,3 +52,14 @@ Do not infer permission from `decision`; `release_authorized` remains false unti
 4. Apply the same skeptical review to new services, packages, marketing ideas, government bids, investments, leverage and software integrations.
 
 **Permanent rule:** IDEA → SKEPTICAL VALIDATION → SMALLEST PAID TEST → GOVERNED BUILD → RELEASE QA → REAL PURCHASE → FULFILLMENT → ACCOUNTING → LEARNING. Never substitute AI confidence for evidence.
+
+## Wealth Operating Framework — same project, no parallel architecture
+The existing owner HQ, commercial authority, owner-attention governor and execution workers must incorporate five advisory perspectives:
+1. **Wealth Architect:** distinguish annual company revenue, operating profit, owner earnings and personal net worth; use verified balances, debts and household obligations before setting personal allocation targets.
+2. **Daily capital discipline:** favor verified paid demand, positive contribution, controlled cash exposure, feasible fulfillment and measurable outcomes over likes, catalog size and speculative projections.
+3. **Revenue portfolio:** compare existing services, digital downloads, merchandise and recurring contracts on verified contribution, owner effort, capacity, repeatability and customer demand; do not manufacture five income streams.
+4. **Asset acquisition:** review reserves, liquidity, business reinvestment, property and investment alternatives only after confirming source-of-funds, downside, time horizon and authorization.
+5. **Leverage:** evaluate provider capacity, automation, partnerships and proposed financing using repayment exposure, failure cases, owner workload and authorization; no automatic borrowing or investing.
+
+### Existing-system implementation boundary
+The pure `evaluateDemandValidation` helper in `src/lib/aiExecutionGovernor.js` is advisory. It requires explicit `demandValidationRequired` from an existing caller and cannot silently block already-authorized fulfillment or existing sales. It must not be mistaken for a database enforcement gate. Future integration should pass actual verified demand/cost facts from canonical records, preserve owner-attention ranking as the sole attention surface, and add tests for UNKNOWN demand, nonpositive contribution, unverified fulfillment, unresolved authority and no implied publication permission. No production promotion until existing CI, replay and migration gates pass.
