@@ -7,7 +7,28 @@ declare
   v_offer_count integer;
   v_rule_count integer;
   v_bad_rule_count integer;
+  v_receipt_count integer;
 begin
+  select count(distinct proof_kind)
+    into v_receipt_count
+  from public.dd_service_release_evidence_receipts
+  where canonical_sku = 'DNI-01A-001'
+    and source_sha = '2c92c6acb707ee6233a0bcac11ac45b25d4dc1cf'
+    and workflow_run_id = '38754859880'
+    and proof_result = 'PASS'
+    and (
+      (proof_kind in ('RUNTIME','REGRESSION') and proof_environment = 'TESTER')
+      or (proof_kind = 'PRODUCTION_SMOKE' and proof_environment = 'PRODUCTION')
+    );
+
+  if v_receipt_count = 0 then
+    raise notice 'DNI-01A-001 activation deferred: clean replay has no runtime receipts';
+    return;
+  elsif v_receipt_count <> 3 then
+    raise exception 'DNI-01A-001 exact-main governed proof receipt set is incomplete: % of 3',
+      v_receipt_count;
+  end if;
+
   select id into strict v_service_id
   from public.services
   where sku = 'DNI-01A-001'
@@ -68,21 +89,6 @@ begin
   if v_rule_count < 1 or v_bad_rule_count <> 0 then
     raise exception 'DNI-01A-001 locked $140 pricing authority drifted: rules %, mismatches %',
       v_rule_count, v_bad_rule_count;
-  end if;
-
-  if (
-    select count(distinct proof_kind)
-    from public.dd_service_release_evidence_receipts
-    where canonical_sku = 'DNI-01A-001'
-      and source_sha = '2c92c6acb707ee6233a0bcac11ac45b25d4dc1cf'
-      and workflow_run_id = '38754859880'
-      and proof_result = 'PASS'
-      and (
-        (proof_kind in ('RUNTIME','REGRESSION') and proof_environment = 'TESTER')
-        or (proof_kind = 'PRODUCTION_SMOKE' and proof_environment = 'PRODUCTION')
-      )
-  ) <> 3 then
-    raise exception 'DNI-01A-001 exact-main governed proof receipt set is incomplete';
   end if;
 
   update public.dd_governed_service_offers
