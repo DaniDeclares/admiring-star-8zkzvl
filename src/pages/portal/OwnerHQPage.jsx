@@ -59,6 +59,17 @@ function SystemCard({ system }) {
   return system.external ? <a href={system.href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}}>{body}</a> : <Link to={system.href} style={{textDecoration:'none'}}>{body}</Link>;
 }
 
+export function OwnerStartWorking({ salesDue = 0 }) {
+  return <section className="portal-card" aria-label="Start working">
+    <div className="owner-command-section-head"><div><p className="portal-eyebrow">Start here</p><h2>Move today's work forward</h2><p className="owner-quiet">Open the existing sales queue to call, record outcomes, and follow up. Counts are dated actions to review, not confirmed buyers or permission to contact.</p></div></div>
+    <div className="portal-actions">
+      <Link className="portal-primary" to="/portal/acquisition">Review sales actions ({salesDue} due)</Link>
+      <Link to="/portal/operations">Jobs &amp; operations</Link>
+      <a href="#attention">Owner decisions</a>
+    </div>
+  </section>;
+}
+
 function OwnerHq({ session }) {
   const [data, setData] = useState(null); const [loading, setLoading] = useState(true); const [error, setError] = useState('');
   const didTrackLoad = useRef(false); const pollTimer = useRef(null); const authBlocked = useRef(false);
@@ -115,7 +126,9 @@ function OwnerHq({ session }) {
     </nav>
 
     <div className="owner-command-main" id="overview">
-      <header className="portal-hero"><div><p className="portal-eyebrow">Owner HQ</p><h1>{ownerGreeting}, Danielle.</h1><p>Company truth, next actions and agent outcomes. Deep system detail stays available when you need it.</p></div><div className="portal-hero-actions"><div className="portal-account-badge">Signed in as <strong>{session.user?.email}</strong></div><div className="portal-actions"><button className="portal-refresh" onClick={load}>Refresh</button><Link className="portal-primary" to="/portal/operations">Open operations</Link></div></div></header>
+      <header className="portal-hero"><div><p className="portal-eyebrow">Owner HQ</p><h1>{ownerGreeting}, Danielle.</h1><p>Company truth, next actions and agent outcomes. Deep system detail stays available when you need it.</p></div><div className="portal-hero-actions"><div className="portal-account-badge">Signed in as <strong>{session.user?.email}</strong></div><div className="portal-actions"><button className="portal-refresh" onClick={load}>Refresh</button><Link className="portal-primary" to="/portal/acquisition">Review sales actions</Link><Link to="/portal/operations">Open operations</Link></div></div></header>
+
+      <OwnerStartWorking salesDue={metrics.salesDue} />
 
       {brief && <section className="portal-card owner-command-brief"><div className="owner-command-section-head"><div><p className="portal-eyebrow">While you were away</p><h2>{brief.headline || 'DANI operating brief'}</h2><p>Verified state only · generated {brief.generated_at ? new Date(brief.generated_at).toLocaleString() : '—'}</p></div><span className="portal-pill" style={statusPillStyle(companyState)}>{companyState}</span></div><div className="portal-summary-grid"><a className="portal-summary-tile" href="#attention"><strong>{metrics.ownerAttention}</strong><span>Needs Danielle now</span></a><Link className="portal-summary-tile" to="/portal/acquisition"><strong>{metrics.salesDue}</strong><span>Revenue actions due</span></Link><Link className="portal-summary-tile" to="/portal/operations"><strong>{metrics.activeJobs}</strong><span>Active jobs</span></Link><a className="portal-summary-tile" href="#agents"><strong>{metrics.agentCompleted}</strong><span>Recent agent completions</span></a><a className="portal-summary-tile" href="#research"><strong>{brief.overnight_verified?.research_queued ?? metrics.researchOpen}</strong><span>Research in motion</span></a><Link className="portal-summary-tile" to="/portal/services"><strong>{supportLabel}</strong><span>Support-ready services</span></Link></div></section>}
 
