@@ -15,6 +15,9 @@ export const EXECUTION_TIERS = Object.freeze({
 });
 
 const OWNER_GATED_ACTIONS = new Set([
+  'DEBT_COMMITMENT',
+  'INVESTMENT_COMMITMENT',
+  'INVENTORY_PURCHASE',
   'OUTBOUND_MESSAGE',
   'PRICING_CHANGE',
   'MONEY_MOVEMENT',
@@ -43,6 +46,34 @@ const BOUNDED_KINDS = new Set([
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))];
+}
+
+/** Advisory pre-build validation: no side effects and never grants release authority. */
+export function evaluateDemandValidation(input = {}) {
+  const evidence = Array.isArray(input.paidDemandEvidence) ? input.paidDemandEvidence.filter(Boolean) : [];
+  const costsKnown = Number.isFinite(input.expectedPrice) && Number.isFinite(input.variableCost);
+  const contribution = costsKnown ? input.expectedPrice - input.variableCost : null;
+  const risks = [];
+  if (!evidence.length) risks.push('paid demand unverified');
+  if (!costsKnown) risks.push('unit economics unverified');
+  if (contribution !== null && contribution <= 0) risks.push('nonpositive contribution');
+  if (input.fulfillmentVerified !== true) risks.push('fulfillment unverified');
+  if (input.authorityResolved !== true) risks.push('commercial authority unresolved');
+  const decision = input.authorityResolved !== true ? 'MODIFY'
+    : !costsKnown ? 'MODIFY'
+    : contribution <= 0 ? 'MODIFY'
+    : !evidence.length ? 'NARROW'
+    : input.fulfillmentVerified !== true ? 'MODIFY'
+    : 'PROCEED';
+  return {
+    decision,
+    demandState: evidence.length ? 'EVIDENCED' : 'UNKNOWN',
+    contribution,
+    risks,
+    releaseAuthorized: false,
+    ownerApprovalRequired: input.ownerApprovalRequired === true,
+    nextAction: risks.length ? 'RUN_SMALLEST_REVERSIBLE_TEST' : 'FOLLOW_EXISTING_RELEASE_GATES',
+  };
 }
 
 export function routeExecutionTask(task = {}) {
@@ -84,8 +115,15 @@ export function routeExecutionTask(task = {}) {
     tier === EXECUTION_TIERS.FRONTIER_REVIEW ||
     actions.has('PRODUCTION_MUTATION');
 
+  const demandValidation = task.demandValidationRequired === true
+    ? evaluateDemandValidation(task.demandValidation || {}) : null;
+  if (demandValidation && demandValidation.decision !== 'PROCEED') {
+    reasons.push('demand validation requires evidence or a bounded test before new build');
+  }
+
   return {
     tier,
+    demandValidation,
     ownerApprovalRequired,
     independentReviewRequired,
     workerSelection: 'CHEAPEST_VERIFIED_CAPABLE',

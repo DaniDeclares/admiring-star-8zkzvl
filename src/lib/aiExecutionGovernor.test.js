@@ -1,5 +1,6 @@
 import {
   EXECUTION_TIERS,
+  evaluateDemandValidation,
   evaluateExecutionResult,
   routeExecutionTask,
 } from './aiExecutionGovernor';
@@ -37,16 +38,123 @@ describe('aiExecutionGovernor', () => {
     expect(route.independentReviewRequired).toBe(true);
   });
 
-  test('preserves owner approval for governed actions without inventing a new gate', () => {
-    const route = routeExecutionTask({
-      kind: 'KNOWN_RECONCILIATION',
+  test.each(['PRICING_CHANGE', 'DEBT_COMMITMENT', 'INVESTMENT_COMMITMENT', 'INVENTORY_PURCHASE'])(
+    'preserves owner approval for governed action %s without inventing a new gate',
+    (action) => {
+      const route = routeExecutionTask({
+        kind: 'KNOWN_RECONCILIATION',
+        deterministic: true,
+        knownProcedure: true,
+        authorityResolved: true,
+        actions: [action],
+      });
+      expect(route.tier).toBe(EXECUTION_TIERS.DETERMINISTIC);
+      expect(route.ownerApprovalRequired).toBe(true);
+    },
+  );
+
+  test('keeps missing demand evidence UNKNOWN and never grants release', () => {
+    expect(evaluateDemandValidation({
+      expectedPrice: 100,
+      variableCost: 40,
+      fulfillmentVerified: true,
+      authorityResolved: true,
+    })).toEqual(expect.objectContaining({
+      decision: 'NARROW',
+      demandState: 'UNKNOWN',
+      contribution: 60,
+      releaseAuthorized: false,
+      nextAction: 'RUN_SMALLEST_REVERSIBLE_TEST',
+    }));
+  });
+
+  test('holds paid demand when unit economics are unknown', () => {
+    const assessment = evaluateDemandValidation({
+      paidDemandEvidence: ['paid-order-1'],
+      fulfillmentVerified: true,
+      authorityResolved: true,
+    });
+    expect(assessment.decision).toBe('MODIFY');
+    expect(assessment.contribution).toBeNull();
+    expect(assessment.risks).toContain('unit economics unverified');
+    expect(assessment.releaseAuthorized).toBe(false);
+  });
+
+  test('rejects nonpositive contribution even when paid demand exists', () => {
+    const assessment = evaluateDemandValidation({
+      paidDemandEvidence: ['paid-order-1'],
+      expectedPrice: 100,
+      variableCost: 100,
+      fulfillmentVerified: true,
+      authorityResolved: true,
+    });
+    expect(assessment.decision).toBe('MODIFY');
+    expect(assessment.risks).toContain('nonpositive contribution');
+    expect(assessment.releaseAuthorized).toBe(false);
+  });
+
+  test.each([
+    [{ fulfillmentVerified: false, authorityResolved: true }, 'fulfillment unverified'],
+    [{ fulfillmentVerified: true, authorityResolved: false }, 'commercial authority unresolved'],
+  ])('holds evidenced demand when a required authority fact is unresolved', (facts, risk) => {
+    const assessment = evaluateDemandValidation({
+      paidDemandEvidence: ['paid-order-1'],
+      expectedPrice: 100,
+      variableCost: 40,
+      ...facts,
+    });
+    expect(assessment.decision).toBe('MODIFY');
+    expect(assessment.risks).toContain(risk);
+    expect(assessment.releaseAuthorized).toBe(false);
+  });
+
+  test('a favorable advisory result still follows the existing release gates', () => {
+    const assessment = evaluateDemandValidation({
+      paidDemandEvidence: ['paid-order-1'],
+      expectedPrice: 100,
+      variableCost: 40,
+      fulfillmentVerified: true,
+      authorityResolved: true,
+    });
+    expect(assessment).toEqual(expect.objectContaining({
+      decision: 'PROCEED',
+      demandState: 'EVIDENCED',
+      contribution: 60,
+      risks: [],
+      releaseAuthorized: false,
+      nextAction: 'FOLLOW_EXISTING_RELEASE_GATES',
+    }));
+  });
+
+  test('demand validation is opt-in and advisory to the existing router', () => {
+    const withoutValidation = routeExecutionTask({
+      kind: 'HASH_COMPARE',
       deterministic: true,
       knownProcedure: true,
       authorityResolved: true,
-      actions: ['PRICING_CHANGE'],
     });
-    expect(route.tier).toBe(EXECUTION_TIERS.DETERMINISTIC);
-    expect(route.ownerApprovalRequired).toBe(true);
+    expect(withoutValidation.demandValidation).toBeNull();
+
+    const withValidation = routeExecutionTask({
+      kind: 'HASH_COMPARE',
+      deterministic: true,
+      knownProcedure: true,
+      authorityResolved: true,
+      demandValidationRequired: true,
+      demandValidation: {
+        expectedPrice: 100,
+        variableCost: 40,
+        fulfillmentVerified: true,
+        authorityResolved: true,
+      },
+    });
+    expect(withValidation.tier).toBe(EXECUTION_TIERS.DETERMINISTIC);
+    expect(withValidation.ownerApprovalRequired).toBe(false);
+    expect(withValidation.demandValidation.decision).toBe('NARROW');
+    expect(withValidation.demandValidation.releaseAuthorized).toBe(false);
+    expect(withValidation.reasons).toContain(
+      'demand validation requires evidence or a bounded test before new build',
+    );
   });
 
   test('failed verification escalates rather than looping at the same tier', () => {
