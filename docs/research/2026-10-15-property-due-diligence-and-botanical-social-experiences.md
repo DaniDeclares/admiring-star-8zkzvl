@@ -45,3 +45,37 @@ Validate demand with documented buyer/customer interest rather than social likes
 
 ## Production gate
 Current migration reconstruction branch `codex/migration-ledger-reconstruction-from-main` remains separate. This note must not be cherry-picked into its gated replay until its isolated replay proof is green and release governance permits changes. No production write, public publishing, outreach, pricing, checkout or sales execution is authorized by this research note.
+
+## Intake 3 — CyberClash-style learning mechanics, without duplicating training infrastructure
+Source: user-provided cyberclash.io reference and feature description; treat product feature claims as research until directly verified. No affiliation, copied proprietary questions, or claim that third-party preparation grants CompTIA/Cisco certification.
+
+Existing DANI provider onboarding/eligibility/evidence/QA improvements to evaluate:
+- Spaced-repetition prompts for safety, scope, customer communication and field checklists.
+- Short scenario-based assessments tied to the actual authorized service and dispatch role.
+- Practical evidence submissions, graded by existing review/QA workflow rather than automated certification.
+- Optional friendly quiz challenges for engagement, never a substitute for required training, credentials or background checks.
+- Progress and remediation in the existing provider record; keep service authorization as an explicit governed decision.
+
+Shadow & Sol educational adaptation: age-appropriate botany, gardening, preparedness and practical-skills learning paths; practice questions, reflection and proof-of-work portfolios. Preserve child privacy and separate nonprofit records and spending.
+
+Before implementation: audit current onboarding and training schema/UI; compare mechanisms, accessibility, privacy, effort, and provider completion; choose a minimal extension to existing surfaces. No new training platform, certification claims, tables or parallel queues by default.
+
+## Intake 4 — Multifamily acquisition and lawful funding-stack research
+Source: user-provided social-video screenshots describing a hypothetical eight-unit listing and funding stack. Figures are *illustrative claims*, not verified property records or available financing.
+
+Claimed example: $450,000 acquisition listing; eight units at $1,000/month = $8,000 gross/month if fully occupied; proposed $600,000 sources: $330,000 CDFI/bank loan, $150,000 city program, $90,000 bank-funded program, $30,000 developer cash. Arithmetic alone does not prove underwriting, grant eligibility, stack compatibility, property condition, or sufficient rehab budget.
+
+Attach to existing property acquisition, due diligence, government/funding research and commercial property services:
+- Parcel/address/ownership, zoning, title/easements, inspections, environmental, insurance and permit research.
+- Actual rent roll, collections, leases, vacancy, taxes, insurance, operating expenses, reserves and capital needs.
+- Rehab scope, licensed contractor bids, contingency, closing/holding costs, appraisal, stabilized NOI, debt service, DSCR and exit scenarios.
+- Each funding source: administrator, eligible geography, eligible applicant/entity, affordability/tenant obligations, eligible uses, award type (grant vs loan vs credit), match requirements, deadlines, lien priority, stacking prohibitions, approvals and documentary evidence.
+- Research HUD multifamily programs, CDFIs, state/local affordable housing programs, FHLBank AHP and housing tax credits only where applicable; do not label any as approved, universally available, or unrestricted.
+- DANI near-term monetization remains property documentation, make-ready, dispatch and administrative services for existing owners; owner property acquisition is a separate long-term investment objective, not a newly LIVE_READY offer.
+
+## Priority and dependency lock — 2026-10-15
+All four intakes (property due diligence, botanical experiences, learning mechanics, multifamily funding) remain research-only. They are subordinate to the active Production migration reconstruction and must not alter its branch or release machinery.
+
+Active reconstruction branch: `codex/migration-ledger-reconstruction-from-main`, head `dfcdee4483b8b0fd3416aca776c9d1332135ad40` when this note was authored. Draft verification PR #661 was opened to obtain PR-triggered isolated replay proof; creation of a PR is NOT a passing replay. The earlier run #141 certified 106 archived SQL files but failed migration-version hygiene before assembly; hygiene validation was moved after disposable hybrid assembly in `dfcdee44`. Confirm PR #661 workflow job logs and fully green isolated replay before release audit, merges, Production changes or sales operations.
+
+After green replay, audit existing approved SKUs and public links against actual catalog, scope, provider availability, prices, payment proof, buyer flow, QA and lifecycle. Promote only offers that satisfy existing LIVE_READY gates. Then execute existing sales and fulfillment workflows. Do not treat research ideas as sellable products.
