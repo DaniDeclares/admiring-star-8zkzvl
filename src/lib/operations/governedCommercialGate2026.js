@@ -61,6 +61,12 @@ function checkoutEligibility(offer, { channel, subchannel, isVerifiedCommunityRe
   if (channel === 'CH05') return { eligible: false, reason: 'GOVERNMENT_PROCUREMENT_NO_PUBLIC_CHECKOUT', price: null };
   if (!offer) return { eligible: false, reason: 'NO_GOVERNED_OFFER', price: null };
   if (offer.releaseState !== 'LIVE_READY') return { eligible: false, reason: `SERVICE_NOT_LIVE_READY:${offer.blockingGate || 'RELEASE_CONTRACT'}`, price: null };
+  // LIVE_READY may use a null blocker to mean no independent hold. A populated
+  // unresolved blocker must still fail closed and can never be overridden by the label.
+  const blocker = String(offer.blockingGate || '').trim().toUpperCase();
+  if (blocker && !['NONE', 'CLEARED', 'PASS'].includes(blocker)) {
+    return { eligible: false, reason: `SERVICE_BLOCKED:${blocker}`, price: null };
+  }
   if (offer.commercialOfferStatus !== 'SELL_NOW') return { eligible: false, reason: 'COMMERCIAL_NOT_SELL_NOW', price: null };
   if (offer.fulfillmentGateStatus !== 'READY') return { eligible: false, reason: 'FULFILLMENT_NOT_READY', price: null };
   if (isQuoteRequired(offer)) return { eligible: false, reason: 'QUOTE_REQUIRED', price: null };
