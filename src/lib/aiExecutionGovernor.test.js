@@ -68,6 +68,18 @@ describe('aiExecutionGovernor', () => {
     }));
   });
 
+  test('holds paid demand when unit economics are unknown', () => {
+    const assessment = evaluateDemandValidation({
+      paidDemandEvidence: ['paid-order-1'],
+      fulfillmentVerified: true,
+      authorityResolved: true,
+    });
+    expect(assessment.decision).toBe('MODIFY');
+    expect(assessment.contribution).toBeNull();
+    expect(assessment.risks).toContain('unit economics unverified');
+    expect(assessment.releaseAuthorized).toBe(false);
+  });
+
   test('rejects nonpositive contribution even when paid demand exists', () => {
     const assessment = evaluateDemandValidation({
       paidDemandEvidence: ['paid-order-1'],
