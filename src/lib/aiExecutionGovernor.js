@@ -60,7 +60,8 @@ export function evaluateDemandValidation(input = {}) {
   if (input.fulfillmentVerified !== true) risks.push('fulfillment unverified');
   if (input.authorityResolved !== true) risks.push('commercial authority unresolved');
   const decision = input.authorityResolved !== true ? 'MODIFY'
-    : contribution !== null && contribution <= 0 ? 'MODIFY'
+    : !costsKnown ? 'MODIFY'
+    : contribution <= 0 ? 'MODIFY'
     : !evidence.length ? 'NARROW'
     : input.fulfillmentVerified !== true ? 'MODIFY'
     : 'PROCEED';
