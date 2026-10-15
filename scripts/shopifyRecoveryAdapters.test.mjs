@@ -21,3 +21,41 @@ test('governed candidate pages continue until short page',async()=>{
 test('failed catalog page aborts without partial success',async()=>{
  await assert.rejects(readAllGovernedCandidates({url:'https://example.supabase.co',key:'test',fetcher:async()=>({ok:false,status:503})}),/GOVERNED_HTTP_503/);
 });
+
+import {inspectShopifyReadiness} from './watchShopifyRevenueReadiness.mjs';
+test('readiness paginates and retains delivery verification hold', async () => {
+ let n=0;
+ const request=async () => {
+  n++;
+  return {products:{nodes:[{id:String(n),title:'Example Kit',status:'ACTIVE',featuredMedia:null}],pageInfo:{hasNextPage:n===1,endCursor:'page'+n}},orders:{nodes:[]}};
+ };
+ const result=await inspectShopifyReadiness({},request);
+ assert.equal(n,2);
+ assert.equal(result.scanned,2);
+ assert.equal(result.deliveryVerified,false);
+ assert.equal(result.deliveryVerificationRequired,true);
+ assert.ok(result.findings.includes('ACTIVE_DIGITAL_MISSING_COVER'));
+});
+test('readiness fails on repeated products', async () => {
+ let n=0;
+ const request=async () => ({products:{nodes:[{id:'same',title:'Kit',status:'ACTIVE'}],pageInfo:{hasNextPage:++n===1,endCursor:'next'}},orders:{nodes:[]}});
+ await assert.rejects(inspectShopifyReadiness({},request),/DUPLICATE_OR_MISSING_ID/);
+});
+test('readiness rejects missing page data', async () => {
+ await assert.rejects(inspectShopifyReadiness({},async () => ({products:null,orders:{nodes:[]}})),/PAGE_INVALID/);
+});
+
+test('paid Shopify evidence excludes zero-dollar and test orders without claiming delivery', async () => {
+ const result=await inspectShopifyReadiness({},async()=>({
+  products:{nodes:[{id:'p1',title:'Home Reset Kit',status:'ACTIVE',featuredMedia:{id:'media'}}],pageInfo:{hasNextPage:false,endCursor:null}},
+  orders:{nodes:[
+   {id:'test',test:true,tags:[],displayFinancialStatus:'PAID',currentTotalPriceSet:{shopMoney:{amount:'20.00'}}},
+   {id:'zero',test:false,tags:[],displayFinancialStatus:'PAID',currentTotalPriceSet:{shopMoney:{amount:'0.00'}}},
+   {id:'paid',test:false,tags:[],displayFinancialStatus:'PAID',currentTotalPriceSet:{shopMoney:{amount:'19.00'}}}
+  ],pageInfo:{hasNextPage:false}}
+ }));
+ assert.equal(result.paidNonTestOrdersObserved,1);
+ assert.equal(result.inspectedOrders,3);
+ assert.equal(result.deliveryVerified,false);
+ assert.ok(result.findings.includes('BUYER_DIGITAL_DELIVERY_NOT_VERIFIED_BY_THIS_WATCH'));
+});
