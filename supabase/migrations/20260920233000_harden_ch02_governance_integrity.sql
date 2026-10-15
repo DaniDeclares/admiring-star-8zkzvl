@@ -14,7 +14,7 @@ begin
     where a.channel_code = 'CH02'
     group by a.id, a.source_master_record_id
     having count(m.id) <> 1
-       or max(m.id) is distinct from a.source_master_record_id
+       or bool_or(m.id is distinct from a.source_master_record_id)
   ) then
     raise exception 'CH02 canonical master identity is ambiguous, missing, or does not match the recorded source_master_record_id';
   end if;
