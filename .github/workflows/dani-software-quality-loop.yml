@@ -29,6 +29,8 @@ jobs:
       - run: npm ci
       - name: Unit and integration tests
         run: npm test -- --watchAll=false
+      - name: Stripe crosswalk regression
+        run: node --test scripts/auditStripeCanonicalCrosswalk.test.mjs
       - name: Production build
         run: npm run build
 

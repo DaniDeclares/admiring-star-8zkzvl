@@ -1,12 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import Stripe from 'stripe';
 
 const root = process.cwd();
 const csvPath = process.env.PAYMENT_LINKS_CSV || path.join(root, 'payment_links.csv');
 const outputPath = process.env.CROSSWALK_OUTPUT || path.join(root, 'tmp', 'stripe-canonical-crosswalk.json');
 
-const normalize = (value = '') => value.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim();
+const normalize = (value = '') => String(value).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim();
 
 // Conservative aliases only. A name match is never an amount match.
 const aliases = new Map([
@@ -20,24 +21,42 @@ const aliases = new Map([
   ['property reset deposit', 'B2B-TURN-RESET'],
 ]);
 
-function classifyName(name) {
+export function classifyName(name) {
   const canonicalOfferId = aliases.get(normalize(name));
   if (!canonicalOfferId) return { canonicalOfferId: null, disposition: 'UNMAPPED' };
   return { canonicalOfferId, disposition: 'MATCHED_REVIEW' };
 }
 
-async function auditCsv() {
-  const raw = await fs.readFile(csvPath, 'utf8');
+export function isProcurementName(name) {
+  return /(^|\b)(government|public sector|procurement|purchase order)(\b|$)/i.test(String(name || ''));
+}
+
+function governedDisposition(name, classification, matchedNextStep) {
+  if (isProcurementName(name)) {
+    return {
+      disposition: 'PROCUREMENT_PUBLIC_CHECKOUT_FORBIDDEN',
+      requiredNextStep: 'REVIEW_CHANNEL_POLICY_AND_INVOICE_PATH',
+    };
+  }
+  return {
+    disposition: classification.canonicalOfferId ? 'MATCHED_REVIEW' : 'UNMAPPED',
+    requiredNextStep: classification.canonicalOfferId ? matchedNextStep : 'BUSINESS_DISPOSITION_REQUIRED',
+  };
+}
+
+export async function auditCsv({ sourcePath = csvPath } = {}) {
+  const raw = await fs.readFile(sourcePath, 'utf8');
   const lines = raw.trim().split(/\r?\n/);
-  const headers = lines.shift().split(',');
+  const headers = lines.shift().split(',').map((header) => header.trim());
   const rows = [];
 
   for (const line of lines) {
     // CSV is an exported Stripe inventory with no amount/product/price columns.
     // Preserve it as an evidence source, but do not pretend a price was verified.
-    const cells = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map((v) => v.replace(/^\"|\"$/g, ''));
-    const record = Object.fromEntries(headers.map((h, i) => [h, cells[i] ?? '']));
+    const cells = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map((value) => value.replace(/^\"|\"$/g, ''));
+    const record = Object.fromEntries(headers.map((header, index) => [header, cells[index] ?? '']));
     const classification = classifyName(record.Name);
+    const governed = governedDisposition(record.Name, classification, 'VERIFY_STRIPE_PRICE_AMOUNT_AND_PRODUCT');
     rows.push({
       source: 'payment_links.csv',
       paymentLinkId: record.id,
@@ -46,9 +65,8 @@ async function auditCsv() {
       url: record.Url,
       name: record.Name,
       ...classification,
-      disposition: classification.canonicalOfferId ? 'MATCHED_REVIEW' : 'UNMAPPED',
+      ...governed,
       amountVerification: 'NOT_AVAILABLE_IN_CSV',
-      requiredNextStep: classification.canonicalOfferId ? 'VERIFY_STRIPE_PRICE_AMOUNT_AND_PRODUCT' : 'BUSINESS_DISPOSITION_REQUIRED',
     });
   }
 
@@ -66,18 +84,23 @@ async function listAllPaymentLinks(stripe) {
   return links;
 }
 
-async function auditLive() {
-  const secret = process.env.STRIPE_SECRET_KEY;
-  if (!secret) throw new Error('STRIPE_SECRET_KEY is required for live mode. No mutation is performed.');
-  const stripe = new Stripe(secret);
-  const links = await listAllPaymentLinks(stripe);
+export async function auditLive({ stripe } = {}) {
+  let client = stripe;
+  if (!client) {
+    const secret = process.env.STRIPE_SECRET_KEY;
+    if (!secret) throw new Error('STRIPE_SECRET_KEY is required for live mode. No mutation is performed.');
+    client = new Stripe(secret);
+  }
+
+  const links = await listAllPaymentLinks(client);
   const rows = [];
 
   for (const link of links) {
-    const items = await stripe.paymentLinks.listLineItems(link.id, { limit: 100 });
+    const items = await client.paymentLinks.listLineItems(link.id, { limit: 100 });
     for (const item of items.data) {
       const name = item.description || item.price?.nickname || '';
       const classification = classifyName(name);
+      const governed = governedDisposition(name, classification, 'COMPARE_AMOUNT_TO_CANONICAL_REGISTRY');
       rows.push({
         source: 'STRIPE_LIVE_API',
         paymentLinkId: link.id,
@@ -91,8 +114,7 @@ async function auditLive() {
         currency: item.currency ?? link.currency ?? null,
         quantity: item.quantity ?? null,
         ...classification,
-        disposition: classification.canonicalOfferId ? 'MATCHED_REVIEW' : 'UNMAPPED',
-        requiredNextStep: classification.canonicalOfferId ? 'COMPARE_AMOUNT_TO_CANONICAL_REGISTRY' : 'BUSINESS_DISPOSITION_REQUIRED',
+        ...governed,
       });
     }
   }
@@ -100,7 +122,7 @@ async function auditLive() {
   return { mode: 'STRIPE_LIVE_API', rows };
 }
 
-const main = async () => {
+export async function main() {
   const report = process.env.STRIPE_SECRET_KEY ? await auditLive() : await auditCsv();
   const counts = report.rows.reduce((acc, row) => {
     acc[row.disposition] = (acc[row.disposition] || 0) + 1;
@@ -122,9 +144,12 @@ const main = async () => {
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
   console.log(JSON.stringify({ outputPath, mode: payload.mode, counts: payload.counts }, null, 2));
-};
+}
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+const invokedUrl = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : '';
+if (import.meta.url === invokedUrl) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}
