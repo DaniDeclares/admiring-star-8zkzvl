@@ -149,8 +149,10 @@ export async function getQuoteCatalog(supabase) {
 
   return resolveCanonicalOffers(governed, specialRows, new Map());
 }
-async function loadRules(supabase, serviceId, channelCode) {
-  const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').order('effective_date',{ascending:false});
+// Quote pricing reads only ACTIVE + LOCKED rules, the same authority governedCommercialGate2026 uses.
+// services.base_price_cents is a display column and is never a price source here.
+export async function loadRules(supabase, serviceId, channelCode) {
+  const { data, error } = await supabase.from('dd_service_pricing_rules').select('id,channel_code,pricing_type,billing_cycle,base_price_cents,resident_discount_eligible,lock_status,status').eq('service_id', serviceId).eq('channel_code', channelCode).eq('status', 'ACTIVE').eq('lock_status', 'LOCKED').order('effective_date',{ascending:false});
   if (error) throw error;
   return data || [];
 }
@@ -215,6 +217,15 @@ export function isHourlyBilled(service, rule) {
 // multiplier. Introducing condition-based pricing automation is a deliberate future commercial-
 // policy decision requiring documented tiers/formulas/testing/re-audit -- do not add it here as
 // an implicit fix.
+// Fail closed: with no ACTIVE+LOCKED rule price, the display price on the service row is not authority.
+// Only the server-resolved quote applies this (client previews call calculate() with no rule on purpose).
+// Apparel and bedroom-tier models price from their own governed schema, and DANI specials carry their own price.
+export function missingLockedPriceFlag(service, rule) {
+  const schema = service?.quote_input_schema || {};
+  if (service?.sourceType === 'DANI_SPECIALS') return null;
+  if (schema.pricing_model === 'BEDROOM_TIER' || schema.ui_mode === 'APPAREL_PRODUCTION') return null;
+  return rule?.base_price_cents == null ? 'NO_LOCKED_PRICE_RULE' : null;
+}
 function configuredBasePrice(service, rule, answers) {
   const schema = service?.quote_input_schema || {};
   const model = schema.pricing_model;
@@ -327,6 +338,12 @@ export function calculate(service, rule, answers) {
   return { baseSubtotal:money(base), residentDiscount:money(discount), travelFee:money(travelFee), rushFee:money(rushFee), materials:money(materials), sourcingFee:money(sourcingFee), passThrough:money(passThrough), tax:money(tax), taxRate, estimatedTotal:money(total), depositDue:money(deposit), reviewFlags, needsReview:reviewFlags.length>0, isHourly:hourly, ratePerUnit:money(ruleBase) };
 }
 
+// loadRules returns newest effective_date first; the newest rule carrying a price wins.
+export function selectBaseRule(rules) {
+  const list = Array.isArray(rules) ? rules : [];
+  return list.find(r=>r.base_price_cents!=null)||list[0]||null;
+}
+
 async function resolveQuoteLine(supabase, serviceSku, channelCode, marketContext = null, componentRole = 'PRIMARY') {
   const sku = String(serviceSku || '').trim();
   if (!sku) throw new Error('Choose a service.');
@@ -372,7 +389,7 @@ async function resolveQuoteLine(supabase, serviceSku, channelCode, marketContext
   if (!governedService) throw new Error(`The service record ${canonicalSku} could not be resolved.`);
 
   const rules = await loadRules(supabase, governedService.id, channelCode);
-  const baseRule=rules.find(r=>r.base_price_cents!=null)||rules[0]||null;
+  const baseRule=selectBaseRule(rules);
   const marketRule=marketContext?.market?.id ? await loadMarketRule(supabase,{marketId:marketContext.market.id,serviceId:governedService.id,channelCode}) : null;
   let rule=marketRule?.price_override_cents!=null
     ? {...(baseRule||{}),base_price_cents:marketRule.price_override_cents,market_rule_id:marketRule.id,market_code:marketContext.market.market_code,market_pricing_status:marketRule.status}
@@ -451,6 +468,11 @@ export async function createEstimate(supabase, body) {
     };
     validateQuoteLineContract(calcService, itemAnswers, item, requestedLineItems);
     const calculation = calculate(calcService, resolved.rule, itemAnswers);
+    const noLockedPrice = missingLockedPriceFlag(calcService, resolved.rule);
+    if (noLockedPrice) {
+      calculation.reviewFlags = [...new Set([...(calculation.reviewFlags || []), noLockedPrice])];
+      calculation.needsReview = true;
+    }
     const marketNeedsReview = marketContext.stateCode==='SC' && !resolved.marketRule;
     if(marketNeedsReview){
       calculation.reviewFlags=[...new Set([...(calculation.reviewFlags||[]),'SC_MARKET_RESEARCH_REQUIRED'])];
