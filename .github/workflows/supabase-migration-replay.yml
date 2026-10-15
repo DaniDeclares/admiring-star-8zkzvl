@@ -741,6 +741,25 @@ jobs:
           print("Reconstructed GovCon territory schema for disposable replay only; zero rows seeded")
           PY
 
+      - name: Guard legacy travel quarantine against absent status columns (disposable replay only)
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          path = Path("supabase/migrations/20260823_quarantine_legacy_commercial_pricing.sql")
+          original = path.read_text()
+          replacements = {
+              "IF to_regclass('public.dd_travel_calculations') IS NOT NULL THEN": "IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dd_travel_calculations' AND column_name = 'status') THEN",
+              "IF to_regclass('public.fieldops_travel_calculations') IS NOT NULL THEN": "IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'fieldops_travel_calculations' AND column_name = 'status') THEN",
+          }
+          for old, new in replacements.items():
+              if original.count(old) != 1:
+                  raise SystemExit(f"Unexpected historical travel quarantine SQL: {old}")
+              original = original.replace(old, new)
+          path.write_text(original)
+          print("Replay-only schema guard applied; historical tracked SQL untouched; patched SHA256:", hashlib.sha256(original.encode()).hexdigest())
+          PY
+
       - name: Initialize isolated local Supabase config
         run: test -f supabase/config.toml || supabase init
 
