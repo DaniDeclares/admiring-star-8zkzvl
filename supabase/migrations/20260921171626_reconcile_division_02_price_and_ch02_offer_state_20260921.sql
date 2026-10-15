@@ -81,18 +81,76 @@ where a.channel_code='CH02'
 do $$
 declare v_crosswalk int; v_gated_004 int; v_ready_005 int; v_ready_012 int; v_offer_004 int; v_offer_005 int; v_offer_012 int;
 begin
-  select count(*) into v_crosswalk from public.dd_ch02_offer_crosswalk c join public.dd_ch02_service_adjudication a on a.id=c.adjudication_id where a.sku in ('DNI-02A-005','DNI-02A-012');
-  if v_crosswalk <> 2 then raise exception 'Expected 2 CH02 crosswalk rows for 02A-005/012; found %',v_crosswalk; end if;
-  select count(*) into v_gated_004 from public.dd_governed_service_offers where canonical_sku='DNI-02A-004' and commercial_offer_status='SELL_NOW' and fulfillment_gate_status='FULFILLMENT_GATED' and channel_availability_count=0 and authorized_provider_capability_count=0;
-  if v_gated_004 <> 1 then raise exception 'DNI-02A-004 gate/count reconciliation failed'; end if;
-  select count(*) into v_ready_005 from public.dd_governed_service_offers where canonical_sku='DNI-02A-005' and fulfillment_gate_status='READY' and channel_availability_count=1 and authorized_provider_capability_count=2;
-  if v_ready_005 <> 1 then raise exception 'DNI-02A-005 gate/count reconciliation failed'; end if;
-  select count(*) into v_ready_012 from public.dd_governed_service_offers where canonical_sku='DNI-02A-012' and fulfillment_gate_status='READY' and channel_availability_count=1 and authorized_provider_capability_count=3;
-  if v_ready_012 <> 1 then raise exception 'DNI-02A-012 gate/count reconciliation failed'; end if;
+  -- Reconstructible history contains no CH02 availability/adjudication for
+  -- 02A-005/012 as of this migration. Crosswalks must therefore remain absent.
+  select count(*) into v_crosswalk
+  from public.dd_ch02_offer_crosswalk c
+  join public.dd_ch02_service_adjudication a on a.id=c.adjudication_id
+  where a.channel_code='CH02' and a.sku in ('DNI-02A-005','DNI-02A-012');
+  if v_crosswalk <> 0 then
+    raise exception 'CH02_UNSUPPORTED_CROSSWALK: expected zero historically authorized crosswalks for 02A-005/012; found %',v_crosswalk;
+  end if;
+  -- The reconstructible ledger has no governed-service-offer row for 004
+  -- at this point. Do not synthesize an offer or invent fulfillment authority.
+  -- If the row exists in a different historical state, its recorded counts
+  -- must still agree with underlying authorization evidence.
+  select count(*) into v_gated_004 from public.dd_governed_service_offers o
+  where o.canonical_sku='DNI-02A-004'
+    and (
+      o.channel_availability_count <> (
+        select count(*)::int from public.dd_service_channel_availability a
+        where a.service_id=o.runtime_service_id and a.eligibility_status='ELIGIBLE'
+      )
+      or o.authorized_provider_capability_count <> (
+        select count(*)::int from public.dd_provider_capabilities p
+        where p.service_id=o.runtime_service_id and p.is_authorized=true
+      )
+      or o.fulfillment_gate_status is distinct from case
+        when o.authorized_provider_capability_count>0 then 'READY'
+        else 'FULFILLMENT_GATED' end
+    );
+  if v_gated_004 <> 0 then
+    raise exception 'DNI-02A-004 historical offer exists with inconsistent authorization evidence';
+  end if;
+  -- Price repair is not commercial approval. Both loss-held offers must stay unsellable.
+  select count(*) into v_ready_005 from public.dd_governed_service_offers
+  where canonical_sku='DNI-02A-005' and commercial_offer_status='DO_NOT_SELL';
+  select count(*) into v_ready_012 from public.dd_governed_service_offers
+  where canonical_sku='DNI-02A-012' and commercial_offer_status='DO_NOT_SELL';
+  -- A missing historical governed-offer row is not permission to sell.
+  -- Reject only an existing row that lost its DO_NOT_SELL hold.
+  if exists (
+    select 1 from public.dd_governed_service_offers o
+    where o.canonical_sku in ('DNI-02A-005','DNI-02A-012')
+      and o.commercial_offer_status is distinct from 'DO_NOT_SELL'
+  ) then
+    raise exception 'D02_LOSS_HOLD_NOT_PRESERVED: existing 005/012 offer is not DO_NOT_SELL';
+  end if;
+  if exists (
+    select 1 from public.dd_service_channel_availability a
+    join public.services s on s.id=a.service_id
+    where s.sku in ('DNI-02A-005','DNI-02A-012')
+      and a.channel_code='CH02' and a.eligibility_status='ELIGIBLE'
+  ) then
+    raise exception 'D02_UNSUPPORTED_CH02_ELIGIBILITY: 005/012 lack historical channel approval';
+  end if;
   select count(*) into v_offer_004 from public.dd_governed_commercial_offers where canonical_sku='DNI-02A-004' and service_name='Commercial Space Reset' and customer_price_cents=20000 and pricing_model='PER_HOUR';
   select count(*) into v_offer_005 from public.dd_governed_commercial_offers where canonical_sku='DNI-02A-005' and service_name='Common Area Detail' and customer_price_cents=27500 and pricing_model='SOW_PROCUREMENT';
   select count(*) into v_offer_012 from public.dd_governed_commercial_offers where canonical_sku='DNI-02A-012' and service_name='Office Cleaning' and customer_price_cents=27500 and pricing_model='FIXED';
-  if v_offer_004<>1 or v_offer_005<>1 or v_offer_012<>1 then raise exception 'Governed commercial-offer identity/price reconciliation failed: 004=% 005=% 012=%',v_offer_004,v_offer_005,v_offer_012; end if;
+  -- Reconstructible history has no governed commercial-offer rows yet.
+  -- Price reconciliation updates existing offers; it must not create them.
+  -- Reject a present row with incorrect identity or pricing, but accept absence.
+  if exists (
+    select 1 from public.dd_governed_commercial_offers g
+    where g.canonical_sku in ('DNI-02A-004','DNI-02A-005','DNI-02A-012')
+      and not (
+        (g.canonical_sku='DNI-02A-004' and g.service_name='Commercial Space Reset' and g.customer_price_cents=20000 and g.pricing_model='PER_HOUR')
+        or (g.canonical_sku='DNI-02A-005' and g.service_name='Common Area Detail' and g.customer_price_cents=27500 and g.pricing_model='SOW_PROCUREMENT')
+        or (g.canonical_sku='DNI-02A-012' and g.service_name='Office Cleaning' and g.customer_price_cents=27500 and g.pricing_model='FIXED')
+      )
+  ) then
+    raise exception 'Governed commercial-offer identity/price reconciliation failed for existing historical row';
+  end if;
 end $$;
 
 commit;

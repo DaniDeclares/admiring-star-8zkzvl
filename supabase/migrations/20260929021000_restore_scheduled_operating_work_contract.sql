@@ -38,6 +38,6 @@ comment on function private.dd_finish_scheduled_operating_work(uuid,text,text,bo
 
 create or replace function public.dd_finish_scheduled_operating_work(p_id uuid,p_worker_key text,p_claim_token text,p_success boolean,p_receipt jsonb,p_blocker text default null)
 returns jsonb language sql security definer set search_path='public','private'
-as $ select private.dd_finish_scheduled_operating_work(p_id,p_worker_key,p_claim_token,p_success,p_receipt,p_blocker) $;
+as $$ select private.dd_finish_scheduled_operating_work(p_id,p_worker_key,p_claim_token,p_success,p_receipt,p_blocker) $$;
 revoke all on function public.dd_finish_scheduled_operating_work(uuid,text,text,boolean,jsonb,text) from public,anon,authenticated;
 grant execute on function public.dd_finish_scheduled_operating_work(uuid,text,text,boolean,jsonb,text) to service_role;

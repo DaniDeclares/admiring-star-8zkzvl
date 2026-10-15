@@ -33,7 +33,7 @@ create table if not exists public.dd_external_action_dead_letters (
 create or replace function public.dd_enqueue_external_action(
  p_correlation_id uuid,p_action_key text,p_action_type text,p_destination_system text,
  p_authoritative_table text,p_authoritative_record_id text,p_payload jsonb,p_idempotency_key text,p_max_attempts integer default 3
-) returns uuid language plpgsql set search_path = public, pg_temp as $
+) returns uuid language plpgsql set search_path = public, pg_temp as $$
 declare v_id uuid;
 begin
  insert into public.dd_external_action_outbox(correlation_id,action_key,action_type,destination_system,authoritative_table,authoritative_record_id,payload,payload_hash,idempotency_key,max_attempts)
@@ -43,7 +43,7 @@ begin
  return v_id;
 end $$;
 create or replace function public.dd_claim_external_actions(p_worker_key text,p_limit integer default 10)
-returns setof public.dd_external_action_outbox language plpgsql set search_path = public, pg_temp as $
+returns setof public.dd_external_action_outbox language plpgsql set search_path = public, pg_temp as $$
 begin
  return query with candidates as (
   select id from public.dd_external_action_outbox

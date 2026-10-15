@@ -2,6 +2,32 @@
 -- Read-only authority view combining application, W-9, agreements, compliance,
 -- insurance expiration, Stripe Connect status and payout eligibility.
 -- Does not create/update applicant records or initiate Stripe actions.
+-- Reconstruct the existing Production schema before its first recorded view reference.
+-- Definition sourced from the audited Production-catalog parity snapshot;
+-- no Connect account rows or payout eligibility are created.
+create table if not exists public.dd_provider_stripe_connect_accounts (
+  id uuid primary key default gen_random_uuid(),
+  provider_id uuid not null unique references public.dd_providers(id) on delete cascade,
+  stripe_account_id text,
+  connect_api_model text not null default 'ACCOUNTS_V2',
+  onboarding_mode text not null default 'EMBEDDED',
+  onboarding_status text not null default 'NOT_STARTED',
+  transfers_status text not null default 'NOT_REQUESTED',
+  tax_reporting_status text not null default 'NOT_STARTED',
+  payout_destination_status text not null default 'NOT_STARTED',
+  payouts_enabled boolean not null default false,
+  requirements_due jsonb not null default '[]'::jsonb,
+  last_stripe_event_at timestamptz,
+  last_sync_at timestamptz,
+  last_error text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.dd_provider_stripe_connect_accounts enable row level security;
+revoke all on public.dd_provider_stripe_connect_accounts from anon, authenticated;
+
+
 create or replace view public.dd_provider_assignment_readiness_v1 with (security_invoker = true) as
 with req as (
   select provider_org_id,
