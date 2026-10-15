@@ -79,3 +79,17 @@ All four intakes (property due diligence, botanical experiences, learning mechan
 Active reconstruction branch: `codex/migration-ledger-reconstruction-from-main`, head `dfcdee4483b8b0fd3416aca776c9d1332135ad40` when this note was authored. Draft verification PR #661 was opened to obtain PR-triggered isolated replay proof; creation of a PR is NOT a passing replay. The earlier run #141 certified 106 archived SQL files but failed migration-version hygiene before assembly; hygiene validation was moved after disposable hybrid assembly in `dfcdee44`. Confirm PR #661 workflow job logs and fully green isolated replay before release audit, merges, Production changes or sales operations.
 
 After green replay, audit existing approved SKUs and public links against actual catalog, scope, provider availability, prices, payment proof, buyer flow, QA and lifecycle. Promote only offers that satisfy existing LIVE_READY gates. Then execute existing sales and fulfillment workflows. Do not treat research ideas as sellable products.
+
+## Intake 5 — Social-media business prompts and side-hustle ranking: convert to offer-to-cash, not new ventures
+Sources: user-shared creator post listing ten business-startup prompts and screenshot ranking SideShift, Etsy, Dropship.me, day trading, Swagbucks and an adult-oriented platform. The creator's ranking and income claims are not validated. Do not infer profitability or recommend speculation as a business cash strategy.
+
+Reuse DANI's existing opportunity → governed matching → locked pricing and margin check → provider capacity → public inquiry/checkout → payment → dispatch → QA → repeat lifecycle. Adapt the ten prompts as a checklist: demand evidence; buyer segment; approved SKU match; economics; accurate existing landing page; conversion post; authorized follow-up; locked-price adjudication; LIVE_READY launch. Business naming and creation of a second company are out of scope. Require proof of actual purchase and fulfillability; never equate a created offer with a verified buyer or collected revenue.
+
+## Immediate sales emphasis — October 2026 and holidays
+Priority 1: existing CH01 Resident Refresh/deep resets plus previously defined holiday guest-room setup, decorating and gift wrapping, subject to catalog and capacity proof.
+Priority 2: existing CH01 event/party preparation and post-event resets for Halloween, Thanksgiving, Christmas and New Year demand.
+Priority 3: existing property-management make-ready/unit turns, property documentation and commercial office resets; mobile notary/admin remain year-round cash opportunities.
+
+Treat holiday specials as *positioning or combinations of existing approved scopes*, not automatically discounted prices. Any new bundle, promotional discount, seasonal SKU, public claim, provider scope, changed price or checkout link requires the ordinary underwriting and release approvals. No unsupported urgency or guaranteed delivery. Avoid government procurement consumer checkout routes.
+
+Deadline context: user seeks near-term collected cash ahead of October 23 family birthday. Prioritize short fulfillment cycles and collected payments, not speculative side hustles or new product development. This research-only note does not authorize social publishing, outreach, quotes, Stripe actions or release audit before isolated Production replay passes and existing release gates authorize action.
