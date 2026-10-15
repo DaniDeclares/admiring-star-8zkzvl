@@ -92,6 +92,31 @@ jobs:
           cp "$RUNNER_TEMP"/replay-migrations/*.sql supabase/migrations/
           echo "Hybrid replay set: $(ls supabase/migrations/*.sql | wc -l) files"
 
+      - name: Resolve two known legacy source version collisions (disposable replay only)
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          root = Path("supabase/migrations")
+          # Both original files are retained in Git and their SQL is copied byte-for-byte.
+          # Only the disposable replay filename/version changes to make both executable.
+          remaps = {
+              "20260930122500_register_openai_api_planned_adapter.sql": "20260930122501_register_openai_api_planned_adapter.sql",
+              "20260930124500_scope_overlapping_provider_capability_categories.sql": "20260930124501_scope_overlapping_provider_capability_categories.sql",
+          }
+          evidence = []
+          for source_name, target_name in remaps.items():
+              source, target = root / source_name, root / target_name
+              assert source.is_file(), f"expected legacy migration missing: {source_name}"
+              assert not target.exists(), f"replay remap destination already exists: {target_name}"
+              before = source.read_bytes()
+              source.rename(target)
+              assert target.read_bytes() == before, f"replay SQL changed: {source_name}"
+              evidence.append({"original": source_name, "replay_only": target_name, "sha256": hashlib.sha256(before).hexdigest()})
+          Path("replay-legacy-version-remaps.json").write_text(json.dumps(evidence, indent=2) + "\\n")
+          print(json.dumps(evidence, indent=2))
+          PY
+
       - name: Validate assembled replay migration version hygiene
         run: |
           python - <<'PY'
