@@ -6,6 +6,7 @@ on:
       - codex/migration-ledger-reconstruction-from-main
     paths:
       - 'supabase/migrations/**'
+      - 'supabase/production-ledger/**'
       - 'supabase/config.toml'
       - '.github/workflows/supabase-migration-replay.yml'
       - 'scripts/replay_shim_provider_guard_format.py'
@@ -17,6 +18,7 @@ on:
   pull_request:
     paths:
       - 'supabase/migrations/**'
+      - 'supabase/production-ledger/**'
       - 'supabase/config.toml'
       - '.github/workflows/supabase-migration-replay.yml'
       - 'scripts/replay_shim_provider_guard_format.py'
