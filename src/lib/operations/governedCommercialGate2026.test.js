@@ -68,6 +68,33 @@ describe('LIVE_READY checkout release gate', () => {
     ).reason).toBe('SERVICE_NOT_LIVE_READY:RUNTIME_ACCURACY');
   });
 
+  test.each(['ECONOMICS_NOT_RECONCILED', 'PAYMENT_LEDGER', 'RUNTIME_ACCURACY'])(
+    'blocks LIVE_READY / SELL_NOW when populated independent gate %s is unresolved', blockingGate => {
+      const offer = { ...readyOffer, blockingGate };
+      const options = { channel: 'CH01', subchannel: 'CH01-A' };
+      const expected = { eligible: false, reason: `SERVICE_BLOCKED:${blockingGate}`, price: null };
+      expect(checkoutEligibility(offer, options)).toEqual(expected);
+      expect(checkoutEligibilityCjs(offer, options)).toEqual(expected);
+    }
+  );
+
+  test.each(['NONE', 'CLEARED', 'PASS', null, undefined, ''])(
+    'keeps ESM and CommonJS parity for cleared or legacy-empty blocker %s', blockingGate => {
+      const offer = { ...readyOffer, blockingGate };
+      const options = { channel: 'CH01', subchannel: 'CH01-A' };
+      expect(checkoutEligibility(offer, options)).toEqual(checkoutEligibilityCjs(offer, options));
+      expect(checkoutEligibility(offer, options).eligible).toBe(true);
+    }
+  );
+
+  test('a cleared blocker does not bypass economics, fulfillment, commercial, or channel pricing gates', () => {
+    const options = { channel: 'CH01', subchannel: 'CH01-A' };
+    expect(checkoutEligibility({ ...readyOffer, internalCost: 'PENDING_RECONCILIATION' }, options).reason).toBe('ECONOMICS_NOT_RECONCILED');
+    expect(checkoutEligibility({ ...readyOffer, fulfillmentGateStatus: 'HOLD' }, options).reason).toBe('FULFILLMENT_NOT_READY');
+    expect(checkoutEligibility({ ...readyOffer, commercialOfferStatus: 'HOLD' }, options).reason).toBe('COMMERCIAL_NOT_SELL_NOW');
+    expect(checkoutEligibility({ ...readyOffer, ch01LockedActivePricing: false }, options).reason).toBe('CH01_CHANNEL_PRICING_NOT_LOCKED');
+  });
+
   test('allows a fully released service through the legacy checkout gates', () => {
     expect(checkoutEligibility(
       readyOffer,
@@ -90,7 +117,7 @@ describe('CH01 canonical resolver controls', () => {
  });
 });
 
-const { getChannelFromRequest } = require('./governedCommercialGate2026.js');
+const { getChannelFromRequest, checkoutEligibility: checkoutEligibilityCjs } = require('./governedCommercialGate2026.js');
 
 describe('five-channel checkout routing integrity', () => {
   const request = (routing, extra = {}) => ({ property_details: { operationsRouting: routing, ...extra } });
