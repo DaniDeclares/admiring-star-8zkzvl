@@ -1,0 +1,11 @@
+alter view public.dd_provider_intelligence_v1 set (security_invoker = true);
+alter view public.dd_provider_intelligence_summary_v1 set (security_invoker = true);
+alter view public.dd_company_owner_attention_v1 set (security_invoker = true);
+alter view public.dd_contextual_support_actions_v1 set (security_invoker = true);
+alter view public.dd_support_command_center_v1 set (security_invoker = true);
+alter view public.dd_support_readiness_summary_v1 set (security_invoker = true);
+alter view public.dd_operator_command_center_v1 set (security_invoker = true);
+alter view public.dd_commercial_intelligence_summary_v1 set (security_invoker = true);
+revoke all on public.dd_provider_intelligence_v1, public.dd_provider_intelligence_summary_v1, public.dd_company_owner_attention_v1, public.dd_contextual_support_actions_v1, public.dd_support_command_center_v1, public.dd_support_readiness_summary_v1, public.dd_operator_command_center_v1, public.dd_commercial_intelligence_summary_v1 from public, anon, authenticated;
+revoke all on public.dd_provider_intelligence_v1, public.dd_provider_intelligence_summary_v1, public.dd_company_owner_attention_v1, public.dd_contextual_support_actions_v1, public.dd_support_command_center_v1, public.dd_support_readiness_summary_v1, public.dd_operator_command_center_v1, public.dd_commercial_intelligence_summary_v1 from service_role;
+grant select on public.dd_provider_intelligence_v1, public.dd_provider_intelligence_summary_v1, public.dd_company_owner_attention_v1, public.dd_contextual_support_actions_v1, public.dd_support_command_center_v1, public.dd_support_readiness_summary_v1, public.dd_operator_command_center_v1, public.dd_commercial_intelligence_summary_v1 to service_role;
