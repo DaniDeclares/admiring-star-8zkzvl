@@ -774,6 +774,20 @@ jobs:
           print("Preserved count=1 and canonical identity check with PostgreSQL-supported text aggregation")
           PY
 
+      - name: Guard missing CH01 historical audit source (disposable replay only)
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("supabase/migrations/20260921032000_full_platform_release_controls.sql")
+          sql = path.read_text()
+          needle = "from public.dd_ch01_release_audit_10_pass\nwhere audit_version = (\n  select max(audit_version) from public.dd_ch01_release_audit_10_pass\n)"
+          replacement = "from (select null::integer as pass_number, null::text as pass_name, null::text as lifecycle_stage, null::text as status, null::text as current_state, null::text as blocking_gap, null::text as green_exit_criteria, null::text as required_build, null::text as priority, null::text as audit_version where false) as missing_ch01_source"
+          if sql.count(needle) != 1:
+              raise SystemExit("CH01 audit import drifted; fail closed")
+          path.write_text(sql.replace(needle, replacement))
+          print("CH01 historical audit source unavailable; imported zero rows, NOT_PROVEN")
+          PY
+
       - name: Initialize isolated local Supabase config
         run: test -f supabase/config.toml || supabase init
 
