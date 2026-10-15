@@ -47,13 +47,9 @@ begin
    evidence_ids=excluded.evidence_ids,evidence_count=excluded.evidence_count,
    confirmed_authority_levels=excluded.confirmed_authority_levels,state=excluded.state,
    proposed_action_class=excluded.proposed_action_class,proposed_build=excluded.proposed_build,
-   acceptance_criteria=excluded.acceptance_criteria,disposition='SHADOW_ONLY',blocker=excluded.blocker,
-   updated_at=now();
-
- get diagnostics v_rows = row_count;
- select count(*) into v_proposals from public.dd_research_synthesis_shadow where disposition='SHADOW_ONLY' and state='PROPOSAL_READY';
-
- return jsonb_build_object(
-   'status','COMPLETED','rows_upserted',v_rows,'proposal_ready',v_proposals,
-   'schema_mutation_by_worker',false,'business_state_mutation',false,'money_action',false,'external_contact',false,'production_promotion',false);
+   acceptance_criteria=excluded.acceptance_criteria,blocker=excluded.blocker,
+   observed_at=excluded.observed_at,updated_at=now();
+ get diagnostics v_rows=row_count;
+ select count(*) into v_proposals from public.dd_research_synthesis_shadow where state='PROPOSAL_READY';
+ return jsonb_build_object('status','COMPLETED','environment','PRODUCTION','mode','SHADOW_ONLY','observed_or_refreshed',v_rows,'proposal_ready',v_proposals,'autobuild',false,'schema_mutation_by_worker',false,'business_state_mutation',false,'money_action',false,'external_contact',false,'production_promotion',false);
 end $function$;
