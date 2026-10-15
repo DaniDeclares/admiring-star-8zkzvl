@@ -6,6 +6,7 @@ on:
       - codex/reconstruct-production-migration-ledger
     paths:
       - 'supabase/migrations/**'
+      - 'supabase/production-ledger/**'
       - 'supabase/config.toml'
       - '.github/workflows/supabase-migration-replay.yml'
       - 'scripts/replay_shim_provider_guard_format.py'
@@ -17,6 +18,7 @@ on:
   pull_request:
     paths:
       - 'supabase/migrations/**'
+      - 'supabase/production-ledger/**'
       - 'supabase/config.toml'
       - '.github/workflows/supabase-migration-replay.yml'
       - 'scripts/replay_shim_provider_guard_format.py'
@@ -41,6 +43,33 @@ jobs:
     steps:
       - name: Checkout candidate source
         uses: actions/checkout@v4
+
+      - name: Certify all 106 archived SQL files against exact proven source
+        run: |
+          git fetch --no-tags --depth=1 origin codex/reconstruct-production-ledger-current-main
+          python3 - <<'PY'
+          import hashlib, pathlib, subprocess
+          prefix = 'supabase/production-ledger/'
+          source_ref = 'FETCH_HEAD'
+          source_paths = subprocess.check_output(
+              ['git', 'ls-tree', '-r', '--name-only', source_ref, '--', prefix],
+              text=True,
+          ).splitlines()
+          source_paths = sorted(p for p in source_paths if p.endswith('.sql'))
+          local_paths = sorted(p.as_posix() for p in pathlib.Path(prefix).glob('*.sql'))
+          if len(source_paths) != 106 or local_paths != source_paths:
+              raise SystemExit(
+                  f'Archive inventory mismatch: source={len(source_paths)} '
+                  f'branch={len(local_paths)} missing={sorted(set(source_paths)-set(local_paths))} '
+                  f'extra={sorted(set(local_paths)-set(source_paths))}'
+              )
+          for path in source_paths:
+              source_bytes = subprocess.check_output(['git', 'show', f'{source_ref}:{path}'])
+              local_bytes = pathlib.Path(path).read_bytes()
+              if hashlib.sha256(source_bytes).digest() != hashlib.sha256(local_bytes).digest():
+                  raise SystemExit(f'Archive SHA-256 mismatch: {path}')
+          print('ARCHIVE SHA-256 PASS: all 106 exact source SQL files; no missing or extra files')
+          PY
 
       - name: Install pinned Supabase CLI
         uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359
