@@ -56,8 +56,8 @@ export const CHANNELS = Object.freeze([
 ]);
 
 export const CH01_SUBCHANNELS = Object.freeze([
-  { id: 'CH01-A', name: 'Regular Resident Concierge' },
-  { id: 'CH01-B', name: 'Apartment Resident Concierge' },
+  { id: 'CH01-A', name: 'Property-Activated Residents' },
+  { id: 'CH01-B', name: 'Direct Residents' },
 ]);
 
 export const MARKETS = Object.freeze([
