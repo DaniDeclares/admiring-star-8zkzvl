@@ -7,7 +7,15 @@ const MAX_RETRIES = Number(process.env.NOTIFICATION_MAX_RETRIES || 5);
 const BATCH_SIZE = Math.min(100, Math.max(1, Number(process.env.NOTIFICATION_BATCH_SIZE || 20)));
 const DEFAULT_RESEND_FROM = 'notifications@danideclares.com';
 
-async function sendEmail(payload) {
+function providerFailure(status, body) {
+  const safeCode = String(body?.name || body?.code || 'UNKNOWN').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+  const error = new Error(`RESEND_${status}:${safeCode}`);
+  error.status = status;
+  error.permanent = status === 400 || status === 401 || status === 403 || status === 404 || status === 422;
+  return error;
+}
+
+async function sendEmail(payload, eventKey) {
   const apiKey = process.env.RESEND_API_KEY;
   const configuredFrom = process.env.RESEND_FROM_EMAIL || process.env.NOTIFICATION_FROM_EMAIL;
   // Resend's onboarding sender is test-only. Never allow it into production delivery.
@@ -17,7 +25,12 @@ async function sendEmail(payload) {
   if (!apiKey) throw new Error('RESEND_NOT_CONFIGURED');
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      // The same business notification retains one provider key across bounded retries.
+      'Idempotency-Key': `dd-${crypto.createHash('sha256').update(eventKey).digest('hex').slice(0, 60)}`,
+    },
     body: JSON.stringify({
       from,
       to: payload.to,
@@ -29,7 +42,11 @@ async function sendEmail(payload) {
       }),
     }),
   });
-  if (!response.ok) throw new Error(`RESEND_${response.status}`);
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw providerFailure(response.status, body);
+  }
+  return response.json().catch(() => ({}));
 }
 
 async function sendSms(payload) {
@@ -53,7 +70,7 @@ async function sendSms(payload) {
 }
 
 async function deliver(item) {
-  if (item.channel === 'EMAIL') return sendEmail(item.payload || {});
+  if (item.channel === 'EMAIL') return sendEmail(item.payload || {}, item.event_key);
   if (item.channel === 'SMS') return sendSms(item.payload || {});
   if (item.channel === 'INTERNAL') return;
   throw new Error(`UNSUPPORTED_OUTBOX_CHANNEL:${item.channel}`);
@@ -235,17 +252,21 @@ export default async function handler(req, res) {
           where id = ${item.id}::uuid and status in ('PENDING','FAILED') and attempts < ${MAX_RETRIES}
         `;
         if (!claimed) continue;
-        await deliver(item);
+        const delivery = await deliver(item);
+        // Retain the provider acceptance ID for audit without copying message contents.
+        if (delivery?.id) {
+          await prisma.$executeRaw`update public.dd_event_outbox set payload = jsonb_set(payload, '{provider_email_id}', to_jsonb(${String(delivery.id)}::text), true) where id = ${'${item.id}'}::uuid`;
+        }
         await prisma.$executeRaw`
           update public.dd_event_outbox set status = 'PROCESSED', processed_at = now(), updated_at = now(), last_error = null where id = ${item.id}::uuid
         `;
         results.push({ eventKey: item.event_key, status: 'PROCESSED' });
       } catch (error) {
         const attempts = Number(item.attempts || 0) + 1;
-        const terminal = attempts >= MAX_RETRIES;
+        const terminal = Boolean(error.permanent) || attempts >= MAX_RETRIES;
         const delayMinutes = Math.min(60, 2 ** Math.min(attempts, 5));
         await prisma.$executeRaw`
-          update public.dd_event_outbox set status = 'FAILED', last_error = ${String(error.message || error)}, available_at = ${terminal ? new Date() : new Date(Date.now() + delayMinutes * 60 * 1000)}, updated_at = now() where id = ${item.id}::uuid
+          update public.dd_event_outbox set status = 'FAILED', attempts = ${terminal ? MAX_RETRIES : attempts}, last_error = ${String(error.message || error)}, available_at = ${terminal ? new Date() : new Date(Date.now() + delayMinutes * 60 * 1000)}, updated_at = now() where id = ${item.id}::uuid
         `;
         results.push({ eventKey: item.event_key, status: 'FAILED', terminal, error: String(error.message || error) });
       }
