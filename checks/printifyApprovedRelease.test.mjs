@@ -52,7 +52,7 @@ test('dry-run inspects without mutating', async () => {
   assert.equal(urls.length,3);
 });
 
-const existingSource = {...source, visible: false, variants: source.variants.map(v=>v.id===56 ? {...v,is_enabled:false} : v)};
+const existingSource = {...source, visible: false, variants: source.variants.map(v=>v.id===56 ? {...v,is_enabled:false,price:3000} : {...v,price:3000})};
 const existingApproval = {...approval, approvedRetailCents: 3000};
 const existingArgs = {shops, shopId: '22', product: existingSource, siblings:[existingSource], approval: existingApproval};
 test('publish existing Printify product, not a duplicate clone', () => {
