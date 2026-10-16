@@ -52,7 +52,9 @@ before(async () => {
   await db.$executeRawUnsafe(ddl);
   const migration = readFileSync(new URL('../supabase/migrations/20261016201500_dd_event_outbox_delivery_reconciliation.sql',import.meta.url),'utf8');
   assert.doesNotMatch(migration,/truncate|drop table|delete from/i);
-  for (const statement of migration.split(';').filter(sql=>sql.replace(/--[^\n]*/g,'').trim())) await db.$executeRawUnsafe(statement);
+  // Match semicolon-delimited statements without splitting quoted SQL comment values.
+  const statements = migration.replace(/--[^\n]*/g, '').match(/(?:[^;']|'(?:''|[^'])*')+/g) || [];
+  for (const statement of statements.filter(sql=>sql.trim())) await db.$executeRawUnsafe(statement);
   console.log(JSON.stringify({ testedCommit: process.env.OUTBOX_TEST_COMMIT || execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
     database:localReplay ? 'isolated Supabase replay' : 'loopback/outbox_pr664', provider:'fake, no network', schema:'owning table DDL + PR migration' }));
 });
