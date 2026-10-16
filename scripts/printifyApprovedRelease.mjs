@@ -8,7 +8,7 @@ const tagFor = sku => 'DANI-SKU-' + sku.toUpperCase();
 
 export async function printifyRequest(token, path, { method = 'GET', body, fetcher = fetch } = {}) {
   if (!token) throw Error('PRINTIFY_TOKEN_MISSING');
-  if (!/^\\/(shops\\.json|shops\\/\\d+\\/products(?:\\.json|\\/[^/]+(?:\\.json|\\/publish\\.json)))$/.test(path)) {
+  if (!(path === '/shops.json' || /^\/shops\/[0-9]+\/products(?:\.json|\/[a-zA-Z0-9]+(?:\.json|\/publish\.json))$/.test(path))) {
     throw Error('PRINTIFY_PATH_NOT_ALLOWED');
   }
   const response = await fetcher(BASE + path, {
@@ -30,7 +30,7 @@ export async function listPrintifyShops({ token, fetcher = fetch }) {
 }
 
 export async function listAllPrintifyProducts({ token, shopId, fetcher = fetch }) {
-  if (!/^\\d+$/.test(String(shopId))) throw Error('PRINTIFY_SHOP_ID_INVALID');
+  if (!/^[0-9]+$/.test(String(shopId))) throw Error('PRINTIFY_SHOP_ID_INVALID');
   const all = [];
   for (let page = 1; page <= 100; page++) {
     const result = await printifyRequest(token, '/shops/' + shopId + '/products.json', {
