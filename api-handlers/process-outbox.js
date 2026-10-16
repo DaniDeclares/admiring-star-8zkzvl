@@ -23,30 +23,31 @@ async function sendEmail(payload, eventKey) {
     ? configuredFrom
     : DEFAULT_RESEND_FROM;
   if (!apiKey) throw new Error('RESEND_NOT_CONFIGURED');
+  const frozenBody = JSON.stringify({
+    from, to: payload.to,
+    subject: payload.subject || 'Dani Declares Update',
+    html: payload.html || renderTransactionalEmail({
+      template: payload.template, data: payload.templateData, fallbackText: payload.text || '',
+    }),
+  });
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
+      'User-Agent': 'DANI-notification-worker',
       // The same business notification retains one provider key across bounded retries.
       'Idempotency-Key': `dd-${crypto.createHash('sha256').update(eventKey).digest('hex').slice(0, 60)}`,
     },
-    body: JSON.stringify({
-      from,
-      to: payload.to,
-      subject: payload.subject || 'Dani Declares Update',
-      html: payload.html || renderTransactionalEmail({
-        template: payload.template,
-        data: payload.templateData,
-        fallbackText: payload.text || '',
-      }),
-    }),
+    body: frozenBody,
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw providerFailure(response.status, body);
   }
-  return response.json().catch(() => ({}));
+  const accepted = await response.json().catch(() => ({}));
+  if (!accepted?.id) throw new Error('RESEND_ACCEPTANCE_UNCERTAIN');
+  return accepted;
 }
 
 async function sendSms(payload) {
@@ -253,9 +254,9 @@ export default async function handler(req, res) {
         `;
         if (!claimed) continue;
         const delivery = await deliver(item);
-        // Retain the provider acceptance ID for audit without copying message contents.
+        // Retain the provider acceptance ID without changing the original message body.
         if (delivery?.id) {
-          await prisma.$executeRaw`update public.dd_event_outbox set payload = jsonb_set(payload, '{provider_email_id}', to_jsonb(${String(delivery.id)}::text), true) where id = ${'${item.id}'}::uuid`;
+          await prisma.$executeRaw`update public.dd_event_outbox set payload = jsonb_set(payload, '{provider_email_id}', to_jsonb(${String(delivery.id)}::text), true) where id = ${item.id}::uuid`;
         }
         await prisma.$executeRaw`
           update public.dd_event_outbox set status = 'PROCESSED', processed_at = now(), updated_at = now(), last_error = null where id = ${item.id}::uuid
@@ -263,12 +264,14 @@ export default async function handler(req, res) {
         results.push({ eventKey: item.event_key, status: 'PROCESSED' });
       } catch (error) {
         const attempts = Number(item.attempts || 0) + 1;
-        const terminal = Boolean(error.permanent) || attempts >= MAX_RETRIES;
+        // An unknown transport result may have been accepted. Never blindly resend it.
+        const uncertain = item.channel === 'EMAIL' && !error.permanent;
+        const terminal = uncertain || Boolean(error.permanent) || attempts >= MAX_RETRIES;
         const delayMinutes = Math.min(60, 2 ** Math.min(attempts, 5));
         await prisma.$executeRaw`
           update public.dd_event_outbox set status = 'FAILED', attempts = ${terminal ? MAX_RETRIES : attempts}, last_error = ${String(error.message || error)}, available_at = ${terminal ? new Date() : new Date(Date.now() + delayMinutes * 60 * 1000)}, updated_at = now() where id = ${item.id}::uuid
         `;
-        results.push({ eventKey: item.event_key, status: 'FAILED', terminal, error: String(error.message || error) });
+        results.push({ eventKey: item.event_key, status: 'FAILED', terminal, requiresReconciliation: uncertain, error: String(error.message || error) });
       }
     }
     let researchResults = [];
