@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { assessApprovedClone, releaseApprovedClone } from '../scripts/printifyApprovedRelease.mjs';
+import { assessApprovedClone, assessApprovedExistingPublication, publishApprovedExisting, releaseApprovedClone } from '../scripts/printifyApprovedRelease.mjs';
 const shops = [
   { id: '11', title: 'Original Printify Store', sales_channel: 'disconnected' },
   { id: '22', title: 'My Store 2', sales_channel: 'Shopify' }
@@ -50,4 +50,37 @@ test('dry-run inspects without mutating', async () => {
   const result = await releaseApprovedClone({token:'fake', sourceShopId:'11', targetShopId:'22', productId:'s1', approval, fetcher:fakeFetch});
   assert.equal(result.status,'READY_TO_CREATE');
   assert.equal(urls.length,3);
+});
+
+const existingSource = {...source, visible: false};
+const existingApproval = {...approval, approvedRetailCents: 3000};
+const existingArgs = {shops, shopId: '22', product: existingSource, siblings:[existingSource], approval: existingApproval};
+test('publish existing Printify product, not a duplicate clone', () => {
+  assert.equal(assessApprovedExistingPublication(existingArgs).status,'READY_TO_PUBLISH_EXISTING');
+});
+test('already published Printify product is never republished', () => {
+  assert.equal(assessApprovedExistingPublication({...existingArgs,product:{...existingSource,visible:true}}).status,'ALREADY_PUBLISHED');
+});
+test('non-Shopify target and missing commercial proof must hold', () => {
+  assert.ok(assessApprovedExistingPublication({...existingArgs,shops:[shops[0]]}).reasons.includes('SHOP_NOT_ACCESSIBLE'));
+  assert.ok(assessApprovedExistingPublication({...existingArgs,approval:{...approval,approved:false}}).reasons.includes('OWNER_RELEASE_NOT_APPROVED'));
+});
+test('do not publish unapproved or unavailable variants', () => {
+  assert.ok(assessApprovedExistingPublication({...existingArgs,product:{...existingSource,variants:[{...existingSource.variants[0],is_enabled:true,is_available:false}]}}).reasons.includes('ENABLED_VARIANT_OUT_OF_STOCK'));
+  assert.ok(assessApprovedExistingPublication({...existingArgs,product:{...existingSource,variants:[...existingSource.variants.map(v=>({...v,is_enabled:true,is_available:true}))]}}).reasons.includes('ALL_ENABLED_VARIANTS_MUST_BE_APPROVED'));
+});
+test('existing publication inspection is read-only until authorized',async()=>{
+  const accesses = [];
+  const fakeFetch=async(url,options)=>{
+    accesses.push({url,method:options?.method||'GET'});
+    let data;
+    if(url.endsWith('/shops.json')) data=shops;
+    else if(url.includes('/shops/22/products/s1.json')) data=existingSource;
+    else if(url.includes('/shops/22/products.json')) data={data:[existingSource],last_page:1};
+    else throw Error('UNEXPECTED_API_CALL');
+    return {ok:true,status:200,json:async()=>data};
+  };
+  const result=await publishApprovedExisting({token:'test',shopId:'22',productId:'s1',approval:existingApproval,fetcher:fakeFetch});
+  assert.equal(result.status,'READY_TO_PUBLISH_EXISTING');
+  assert.ok(accesses.every(x=>x.method==='GET'));
 });

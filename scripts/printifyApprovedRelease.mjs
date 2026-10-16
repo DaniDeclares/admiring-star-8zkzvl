@@ -146,6 +146,64 @@ export async function releaseApprovedClone({ token, sourceShopId, targetShopId, 
 }
 
 
+// Existing products in a Shopify-connected Printify shop must be published IN
+// PLACE. Cloning would create duplicates and disconnect order reconciliation.
+export function assessApprovedExistingPublication({ shops, shopId, product, siblings, approval }) {
+  const reasons = [];
+  const shop = shops.find(s => s.id === String(shopId));
+  if (!shop) reasons.push('SHOP_NOT_ACCESSIBLE');
+  if (shop && !/shopify/i.test(shop.sales_channel)) reasons.push('SHOP_NOT_CONNECTED_TO_SHOPIFY');
+  if (!approval?.expectedTargetShopTitle || shop?.title !== approval.expectedTargetShopTitle) reasons.push('CONNECTED_SHOP_IDENTITY_MISMATCH');
+  if (!product?.id || product?.title !== approval?.expectedSourceTitle) reasons.push('PRODUCT_IDENTITY_MISMATCH');
+  if (!approval?.approved || !approval?.approvedBy || !approval?.approvedAt || !approval?.shopifyReleaseApproved) reasons.push('OWNER_RELEASE_NOT_APPROVED');
+  if (!approval?.artworkRightsVerified || !approval?.printQualityApproved || !approval?.fulfillmentReviewed) reasons.push('ARTWORK_OR_FULFILLMENT_NOT_VERIFIED');
+  if (!approval?.shippingCostApproved || !Number.isSafeInteger(approval?.shippingCostCents) || approval.shippingCostCents < 0 ||
+      !Number.isSafeInteger(approval?.minimumPreFeeMarginCents) || approval.minimumPreFeeMarginCents < 1) reasons.push('ECONOMICS_UNVERIFIED');
+  if (!approval?.canonicalSku || !/^[a-z0-9-]{4,80}$/i.test(approval.canonicalSku)) reasons.push('CANONICAL_SKU_INVALID');
+  if (product?.is_locked) reasons.push('PRINTIFY_PRODUCT_LOCKED');
+  const enabled = (product?.variants || []).filter(v => v.is_enabled);
+  const ids = approval?.approvedVariantIds;
+  if (!enabled.length || !Array.isArray(ids) || !ids.length || ids.length !== enabled.length ||
+      new Set(ids).size !== ids.length || !ids.every(id => Number.isInteger(id) && enabled.some(v => v.id === id))) {
+    reasons.push('ALL_ENABLED_VARIANTS_MUST_BE_APPROVED');
+  }
+  if (enabled.some(v => v.is_available !== true)) reasons.push('ENABLED_VARIANT_OUT_OF_STOCK');
+  for (const v of enabled) {
+    if (!Number.isSafeInteger(v.price) || !Number.isSafeInteger(v.cost) || v.cost < 0 || v.price <= 0 ||
+        !Number.isSafeInteger(approval?.shippingCostCents) || !Number.isSafeInteger(approval?.minimumPreFeeMarginCents) ||
+        v.price - v.cost - approval.shippingCostCents < approval.minimumPreFeeMarginCents) {
+      reasons.push('UNVERIFIED_OR_INSUFFICIENT_VARIANT_MARGIN'); break;
+    }
+  }
+  const areas = product?.print_areas || [];
+  if (!areas.length || enabled.some(v => !areas.some(a => a.variant_ids?.includes(v.id))) ||
+      areas.some(a => !a.placeholders?.length || a.placeholders.some(p => !p.position ||
+        !p.images?.length || p.images.some(i => !i.id || !Number.isFinite(i.x) || !Number.isFinite(i.y) || !Number.isFinite(i.scale))))) {
+    reasons.push('ORIGINAL_ARTWORK_PRINT_AREAS_UNVERIFIED');
+  }
+  if ((siblings || []).some(p => p.id !== product?.id && nameKey(p.title) === nameKey(product?.title))) reasons.push('DUPLICATE_PRODUCT_TITLE_IN_PRINTIFY');
+  if (product?.visible === true) return { status: 'ALREADY_PUBLISHED', productId: product.id, shopId: String(shopId), reasons: [...new Set(reasons)], shopifyPublished: 'UNVERIFIED_CHECK_SHOPIFY' };
+  return { status: reasons.length ? 'HOLD' : 'READY_TO_PUBLISH_EXISTING', reasons: [...new Set(reasons)], productId: product?.id || null, shopId: String(shopId), approvedVariantCount: enabled.length };
+}
+
+export async function publishApprovedExisting({ token, shopId, productId, approval, execute = false, fetcher = fetch }) {
+  const shops = await listPrintifyShops({ token, fetcher });
+  const product = await printifyRequest(token, '/shops/' + shopId + '/products/' + productId + '.json', { fetcher });
+  const siblings = await listAllPrintifyProducts({ token, shopId, fetcher });
+  const plan = assessApprovedExistingPublication({ shops, shopId, product, siblings, approval });
+  if (plan.status !== 'READY_TO_PUBLISH_EXISTING' || !execute) return plan;
+  if (process.env.DANI_PRINTIFY_SINGLE_WRITER !== 'true') return { ...plan, status: 'HOLD', reasons: ['SINGLE_WRITER_LOCK_NOT_CONFIRMED'] };
+  // Re-read immediately before mutation: external action is irreversible enough
+  // that stale publication, price or inventory must not silently slip through.
+  const fresh = await printifyRequest(token, '/shops/' + shopId + '/products/' + productId + '.json', { fetcher });
+  const freshPlan = assessApprovedExistingPublication({ shops, shopId, product: fresh, siblings, approval });
+  if (freshPlan.status !== 'READY_TO_PUBLISH_EXISTING') return freshPlan;
+  await printifyRequest(token, '/shops/' + shopId + '/products/' + productId + '/publish.json', {
+    method: 'POST', body: { title: true, description: true, images: true, variants: true, tags: true, keyFeatures: true }, fetcher
+  });
+  return { status: 'PRINTIFY_PUBLISH_REQUESTED', productId, shopId: String(shopId), shopifyPublished: 'UNVERIFIED_CHECK_SHOPIFY' };
+}
+
 export async function releaseApprovedBatch({ token, sourceShopId, targetShopId, products, execute = false, publish = false, fetcher = fetch }) {
   if (!Array.isArray(products) || !products.length || products.length > 30) throw Error('APPROVED_BATCH_SIZE_INVALID');
   const seen = new Set();
@@ -165,10 +223,12 @@ export async function releaseApprovedBatch({ token, sourceShopId, targetShopId, 
     }
     const approval = { ...item.approval, expectedSourceTitle: item.expectedSourceTitle };
     try {
-      const result = await releaseApprovedClone({
-        token, sourceShopId, targetShopId, productId: matches[0].id,
-        approval, execute, publish, fetcher
-      });
+      const result = String(sourceShopId) === String(targetShopId)
+        ? await publishApprovedExisting({ token, shopId: targetShopId, productId: matches[0].id, approval, execute: execute && publish, fetcher })
+        : await releaseApprovedClone({
+          token, sourceShopId, targetShopId, productId: matches[0].id,
+          approval, execute, publish, fetcher
+        });
       results.push({ title: item.expectedSourceTitle, ...result });
     } catch (error) {
       // A failed create might have succeeded remotely; do not retry blindly.
@@ -191,7 +251,9 @@ async function main() {
   };
   const result = Array.isArray(manifest.products)
     ? await releaseApprovedBatch({ ...options, products: manifest.products })
-    : await releaseApprovedClone({ ...options, productId: manifest.sourceProductId, approval: manifest.approval });
+    : String(options.sourceShopId) === String(options.targetShopId)
+      ? await publishApprovedExisting({ token, shopId: options.targetShopId, productId: manifest.sourceProductId, approval: manifest.approval, execute: options.execute && options.publish })
+      : await releaseApprovedClone({ ...options, productId: manifest.sourceProductId, approval: manifest.approval });
   console.log(JSON.stringify(result, null, 2));
 }
 
