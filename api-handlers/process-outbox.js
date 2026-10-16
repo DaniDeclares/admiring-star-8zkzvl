@@ -244,86 +244,119 @@ export default async function handler(req, res) {
   const headerSecret = req.headers['x-cron-secret'];
   if (authorization !== `Bearer ${CRON_SECRET}` && headerSecret !== CRON_SECRET) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    // One atomic claim per row. A crash leaves PROCESSING for manual reconciliation;
-    // never requeue an event that might have reached an external provider.
+    // Claims are leases, not permission to send. Expired in-flight sends are
+    // reconciled without dispatch; historical exhausted rows are never claimed.
     const items = await prisma.$queryRaw`
       with eligible as (
         select id from public.dd_event_outbox
-        where status in ('PENDING','FAILED') and available_at <= now()
-          and attempts < ${MAX_RETRIES}
+        where (
+          (status in ('PENDING','FAILED') and available_at <= now()
+            and (delivery_outcome is null or delivery_outcome = 'RETRYABLE'))
+          or (status = 'PROCESSING' and claimed_at < now() - interval '10 minutes')
+        ) and attempts < ${MAX_RETRIES}
         order by created_at limit ${BATCH_SIZE} for update skip locked
       )
       update public.dd_event_outbox o
       set status = 'PROCESSING', attempts = o.attempts + 1,
           claim_token = gen_random_uuid(), claimed_at = now(), updated_at = now()
       from eligible where o.id = eligible.id
-      returning o.id, o.event_key, o.event_type, o.channel, o.payload,
-                o.frozen_request, o.request_fingerprint, o.provider_email_id,
-                o.first_attempt_at, o.claim_token, o.attempts, o.delivery_outcome
+      returning o.id, o.event_key, o.channel, o.payload, o.frozen_request,
+        o.request_fingerprint, o.provider_email_id, o.first_attempt_at,
+        o.claim_token, o.attempts, o.delivery_outcome
     `;
     const results = [];
     for (const item of items) {
+      const transition = async (query) => {
+        const rows = await query();
+        if (rows.length !== 1) throw Object.assign(new Error('CLAIM_LOST'), { claimLost: true });
+        return rows[0];
+      };
       try {
         if (item.provider_email_id || item.delivery_outcome === 'ACCEPTED') {
-          await prisma.$executeRaw`
+          await transition(() => prisma.$queryRaw`
             update public.dd_event_outbox set status='PROCESSED',
               delivery_outcome='ACCEPTED', processed_at=now(), updated_at=now()
             where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-          `;
+              and status='PROCESSING' returning id
+          `);
           results.push({ eventKey:item.event_key, status:'RECONCILED' });
+          continue;
+        }
+        // Persisted intent means the previous request may still be in flight.
+        // Reclaim ownership for reconciliation, but never authorize a new send.
+        if (item.first_attempt_at) {
+          await transition(() => prisma.$queryRaw`
+            update public.dd_event_outbox set status='FAILED',
+              delivery_outcome='UNCERTAIN', updated_at=now()
+            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
+              and status='PROCESSING' returning id
+          `);
+          results.push({ eventKey:item.event_key, status:'RECONCILIATION_REQUIRED' });
           continue;
         }
         let frozen = item.frozen_request;
         if (item.channel === 'EMAIL') {
-          const candidate = buildEmailRequest(item.payload || {});
+          const candidate = frozen || buildEmailRequest(item.payload || {});
           const digest = fingerprint(candidate);
-          // Existing first-attempt evidence cannot be overwritten or re-fingerprinted.
           if (item.request_fingerprint && item.request_fingerprint !== digest) {
             throw Object.assign(new Error('FROZEN_REQUEST_MISMATCH'), { permanent:true });
           }
-          frozen = frozen || candidate;
-          if (item.first_attempt_at && Date.now() - new Date(item.first_attempt_at).getTime() >= 23 * 3600000) {
-            throw Object.assign(new Error('PROVIDER_DEDUP_WINDOW_EXPIRED'), { permanent:true });
-          }
-          // Persist frozen request and first-attempt timestamp before any network effect.
-          await prisma.$executeRaw`
+          frozen = candidate;
+          // The intent write doubles as a final ownership check before dispatch.
+          await transition(() => prisma.$queryRaw`
             update public.dd_event_outbox
             set notification_identity=coalesce(notification_identity,event_key),
-                frozen_request=coalesce(frozen_request,${JSON.stringify(frozen)}::jsonb),
-                request_fingerprint=coalesce(request_fingerprint,${digest}),
-                first_attempt_at=coalesce(first_attempt_at,now()), updated_at=now()
+              frozen_request=coalesce(frozen_request,${JSON.stringify(frozen)}::jsonb),
+              request_fingerprint=coalesce(request_fingerprint,${digest}),
+              first_attempt_at=coalesce(first_attempt_at,now()), updated_at=now()
             where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-          `;
+              and status='PROCESSING' and first_attempt_at is null
+              and (delivery_outcome is null or delivery_outcome='RETRYABLE')
+            returning id
+          `);
+        } else {
+          // Non-email transports have no proven same-key provider deduplication.
+          // Do not automatically dispatch recovered non-email claims.
+          await transition(() => prisma.$queryRaw`
+            update public.dd_event_outbox set status='FAILED',
+              delivery_outcome='UNCERTAIN', updated_at=now()
+            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
+              and status='PROCESSING' returning id
+          `);
+          results.push({ eventKey:item.event_key, status:'RECONCILIATION_REQUIRED' });
+          continue;
         }
         const delivery = await deliver({ ...item, frozen_request:frozen });
-        if (item.channel === 'EMAIL') {
-          await prisma.$executeRaw`
-            update public.dd_event_outbox set provider_email_id=${String(delivery.id)},
-              delivery_outcome='ACCEPTED', status='PROCESSED', processed_at=now(),
-              last_error=null, updated_at=now()
-            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-          `;
-        } else {
-          await prisma.$executeRaw`
-            update public.dd_event_outbox set status='PROCESSED', processed_at=now(),
-              last_error=null, updated_at=now()
-            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-          `;
-        }
+        await transition(() => prisma.$queryRaw`
+          update public.dd_event_outbox set provider_email_id=${String(delivery.id)},
+            delivery_outcome='ACCEPTED', status='PROCESSED', processed_at=now(),
+            last_error=null, updated_at=now()
+          where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
+            and status='PROCESSING' returning id
+        `);
         results.push({ eventKey:item.event_key, status:'PROCESSED' });
       } catch (error) {
-        const permanent = Boolean(error.permanent);
-        const uncertain = item.channel === 'EMAIL' && !permanent;
-        // No automatic replay for ambiguous outcomes. Permanent errors also stop unchanged retries.
-        const outcome = uncertain ? 'UNCERTAIN' : 'REJECTED';
-        await prisma.$executeRaw`
-          update public.dd_event_outbox set status='FAILED',
-            attempts=${MAX_RETRIES}, delivery_outcome=${outcome},
-            last_error=${String(error.message || error).slice(0,180)},
-            updated_at=now()
-          where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-        `;
-        results.push({ eventKey:item.event_key, status:'FAILED', requiresReconciliation:uncertain });
+        if (error.claimLost) {
+          results.push({ eventKey:item.event_key, status:'CLAIM_LOST' });
+          continue;
+        }
+        const outcome = error.permanent ? 'REJECTED' : 'UNCERTAIN';
+        try {
+          await transition(() => prisma.$queryRaw`
+            update public.dd_event_outbox set status='FAILED',
+              delivery_outcome=${outcome},
+              last_error=${String(error.message || error).slice(0,180)}, updated_at=now()
+            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
+              and status='PROCESSING' returning id
+          `);
+          results.push({ eventKey:item.event_key, status:'FAILED', outcome });
+        } catch (persistError) {
+          if (persistError.claimLost) {
+            results.push({ eventKey:item.event_key, status:'CLAIM_LOST' });
+          } else {
+            throw persistError;
+          }
+        }
       }
     }
     let researchResults = [];
