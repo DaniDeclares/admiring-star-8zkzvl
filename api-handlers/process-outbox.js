@@ -1,88 +1,9 @@
 import crypto from 'node:crypto';
 import prisma from '../lib/prisma.js';
+import { processNotificationOutbox } from '../lib/notificationOutbox.mjs';
 import { renderTransactionalEmail } from './daniTransactionalEmailTemplates.js';
 
 const CRON_SECRET = process.env.CRON_SECRET;
-const MAX_RETRIES = Number(process.env.NOTIFICATION_MAX_RETRIES || 5);
-const BATCH_SIZE = Math.min(100, Math.max(1, Number(process.env.NOTIFICATION_BATCH_SIZE || 20)));
-const DEFAULT_RESEND_FROM = 'notifications@danideclares.com';
-
-function providerFailure(status, body) {
-  const safeCode = String(body?.name || body?.code || 'UNKNOWN').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
-  const error = new Error(`RESEND_${status}:${safeCode}`);
-  error.status = status;
-  error.permanent = status === 400 || status === 401 || status === 403 || status === 404 || status === 422;
-  return error;
-}
-
-function buildEmailRequest(payload) {
-  const configuredFrom = process.env.RESEND_FROM_EMAIL || process.env.NOTIFICATION_FROM_EMAIL;
-  const from = configuredFrom && !configuredFrom.endsWith('@resend.dev')
-    ? configuredFrom : DEFAULT_RESEND_FROM;
-  return {
-    from, to: payload.to,
-    subject: payload.subject || 'Dani Declares Update',
-    html: payload.html || renderTransactionalEmail({
-      template: payload.template, data: payload.templateData, fallbackText: payload.text || '',
-    }),
-  };
-}
-function fingerprint(body) {
-  // Canonicalized before persistence. The full frozen request remains private in DB.
-  return crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
-}
-async function sendEmail(payload, eventKey) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const body = payload;
-  if (!apiKey) throw new Error('RESEND_NOT_CONFIGURED');
-  const frozenBody = JSON.stringify(body);
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'User-Agent': 'DANI-notification-worker',
-      // The same business notification retains one provider key across bounded retries.
-      'Idempotency-Key': `dd-${crypto.createHash('sha256').update(eventKey).digest('hex').slice(0, 60)}`,
-    },
-    body: frozenBody,
-  });
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw providerFailure(response.status, body);
-  }
-  const accepted = await response.json().catch(() => ({}));
-  if (!accepted?.id) throw new Error('RESEND_ACCEPTANCE_UNCERTAIN');
-  return accepted;
-}
-
-async function sendSms(payload) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const apiKeySid = process.env.TWILIO_API_KEY_SID;
-  const apiKeySecret = process.env.TWILIO_API_KEY_SECRET;
-  const from = process.env.TWILIO_FROM_NUMBER || process.env.TWILIO_PHONE_NUMBER;
-  if (!accountSid || !apiKeySid || !apiKeySecret || !from) throw new Error('TWILIO_NOT_CONFIGURED');
-  const body = new URLSearchParams({
-    To: payload.to,
-    From: from,
-    Body: payload.text || payload.message || 'Dani Declares update.',
-  });
-  const auth = Buffer.from(`${apiKeySid}:${apiKeySecret}`).toString('base64');
-  const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
-    method: 'POST',
-    headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  });
-  if (!response.ok) throw new Error(`TWILIO_${response.status}`);
-}
-
-async function deliver(item) {
-  if (item.channel === 'EMAIL') return sendEmail(item.frozen_request, item.event_key);
-  if (item.channel === 'SMS') return sendSms(item.payload || {});
-  if (item.channel === 'INTERNAL') return;
-  throw new Error(`UNSUPPORTED_OUTBOX_CHANNEL:${item.channel}`);
-}
-
 function cleanResearchText(value) {
   return String(value || '')
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
@@ -244,121 +165,9 @@ export default async function handler(req, res) {
   const headerSecret = req.headers['x-cron-secret'];
   if (authorization !== `Bearer ${CRON_SECRET}` && headerSecret !== CRON_SECRET) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    // Claims are leases, not permission to send. Expired in-flight sends are
-    // reconciled without dispatch; historical exhausted rows are never claimed.
-    const items = await prisma.$queryRaw`
-      with eligible as (
-        select id from public.dd_event_outbox
-        where (
-          (status in ('PENDING','FAILED') and available_at <= now()
-            and (delivery_outcome is null or delivery_outcome = 'RETRYABLE'))
-          or (status = 'PROCESSING' and claimed_at < now() - interval '10 minutes')
-        ) and attempts < ${MAX_RETRIES}
-        order by created_at limit ${BATCH_SIZE} for update skip locked
-      )
-      update public.dd_event_outbox o
-      set status = 'PROCESSING', attempts = o.attempts + 1,
-          claim_token = gen_random_uuid(), claimed_at = now(), updated_at = now()
-      from eligible where o.id = eligible.id
-      returning o.id, o.event_key, o.channel, o.payload, o.frozen_request,
-        o.request_fingerprint, o.provider_email_id, o.first_attempt_at,
-        o.claim_token, o.attempts, o.delivery_outcome
-    `;
-    const results = [];
-    for (const item of items) {
-      const transition = async (query) => {
-        const rows = await query();
-        if (rows.length !== 1) throw Object.assign(new Error('CLAIM_LOST'), { claimLost: true });
-        return rows[0];
-      };
-      try {
-        if (item.provider_email_id || item.delivery_outcome === 'ACCEPTED') {
-          await transition(() => prisma.$queryRaw`
-            update public.dd_event_outbox set status='PROCESSED',
-              delivery_outcome='ACCEPTED', processed_at=now(), updated_at=now()
-            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-              and status='PROCESSING' returning id
-          `);
-          results.push({ eventKey:item.event_key, status:'RECONCILED' });
-          continue;
-        }
-        // Persisted intent means the previous request may still be in flight.
-        // Reclaim ownership for reconciliation, but never authorize a new send.
-        if (item.first_attempt_at) {
-          await transition(() => prisma.$queryRaw`
-            update public.dd_event_outbox set status='FAILED',
-              delivery_outcome='UNCERTAIN', updated_at=now()
-            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-              and status='PROCESSING' returning id
-          `);
-          results.push({ eventKey:item.event_key, status:'RECONCILIATION_REQUIRED' });
-          continue;
-        }
-        let frozen = item.frozen_request;
-        if (item.channel === 'EMAIL') {
-          const candidate = frozen || buildEmailRequest(item.payload || {});
-          const digest = fingerprint(candidate);
-          if (item.request_fingerprint && item.request_fingerprint !== digest) {
-            throw Object.assign(new Error('FROZEN_REQUEST_MISMATCH'), { permanent:true });
-          }
-          frozen = candidate;
-          // The intent write doubles as a final ownership check before dispatch.
-          await transition(() => prisma.$queryRaw`
-            update public.dd_event_outbox
-            set notification_identity=coalesce(notification_identity,event_key),
-              frozen_request=coalesce(frozen_request,${JSON.stringify(frozen)}::jsonb),
-              request_fingerprint=coalesce(request_fingerprint,${digest}),
-              first_attempt_at=coalesce(first_attempt_at,now()), updated_at=now()
-            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-              and status='PROCESSING' and first_attempt_at is null
-              and (delivery_outcome is null or delivery_outcome='RETRYABLE')
-            returning id
-          `);
-        } else {
-          // Non-email transports have no proven same-key provider deduplication.
-          // Do not automatically dispatch recovered non-email claims.
-          await transition(() => prisma.$queryRaw`
-            update public.dd_event_outbox set status='FAILED',
-              delivery_outcome='UNCERTAIN', updated_at=now()
-            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-              and status='PROCESSING' returning id
-          `);
-          results.push({ eventKey:item.event_key, status:'RECONCILIATION_REQUIRED' });
-          continue;
-        }
-        const delivery = await deliver({ ...item, frozen_request:frozen });
-        await transition(() => prisma.$queryRaw`
-          update public.dd_event_outbox set provider_email_id=${String(delivery.id)},
-            delivery_outcome='ACCEPTED', status='PROCESSED', processed_at=now(),
-            last_error=null, updated_at=now()
-          where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-            and status='PROCESSING' returning id
-        `);
-        results.push({ eventKey:item.event_key, status:'PROCESSED' });
-      } catch (error) {
-        if (error.claimLost) {
-          results.push({ eventKey:item.event_key, status:'CLAIM_LOST' });
-          continue;
-        }
-        const outcome = error.permanent ? 'REJECTED' : 'UNCERTAIN';
-        try {
-          await transition(() => prisma.$queryRaw`
-            update public.dd_event_outbox set status='FAILED',
-              delivery_outcome=${outcome},
-              last_error=${String(error.message || error).slice(0,180)}, updated_at=now()
-            where id=${item.id}::uuid and claim_token=${item.claim_token}::uuid
-              and status='PROCESSING' returning id
-          `);
-          results.push({ eventKey:item.event_key, status:'FAILED', outcome });
-        } catch (persistError) {
-          if (persistError.claimLost) {
-            results.push({ eventKey:item.event_key, status:'CLAIM_LOST' });
-          } else {
-            throw persistError;
-          }
-        }
-      }
-    }
+    const { results, maxRetries } = await processNotificationOutbox({
+      db: prisma, renderEmail: renderTransactionalEmail,
+    });
     let researchResults = [];
     try {
       researchResults = await processResearchSources();
@@ -366,7 +175,7 @@ export default async function handler(req, res) {
       console.error('Research watcher failed:', researchError);
       researchResults = [{ status: 'FAILED', error: String(researchError?.message || researchError) }];
     }
-    return res.status(200).json({ success: true, processed: results.length, maxRetries: MAX_RETRIES, results, research: { checked: researchResults.length, results: researchResults } });
+    return res.status(200).json({ success: true, processed: results.length, maxRetries, results, research: { checked: researchResults.length, results: researchResults } });
   } catch (error) {
     console.error('Outbox worker failed:', error);
     return res.status(500).json({ error: 'Outbox processing failed' });

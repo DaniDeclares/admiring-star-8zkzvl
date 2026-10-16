@@ -13,6 +13,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      outbox-postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic
+          POSTGRES_DB: outbox_pr664
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d outbox_pr664"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
     strategy:
       matrix:
         node-version: [22.x]
@@ -20,6 +32,8 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: ⚙️ Set up Node.js
         uses: actions/setup-node@v4
@@ -41,6 +55,12 @@ jobs:
 
       - name: ✅ Run Stripe crosswalk regression
         run: node --test scripts/auditStripeCanonicalCrosswalk.test.mjs
+
+      - name: Outbox behavioral and concurrent database regression
+        env:
+          OUTBOX_TEST_DATABASE_URL: postgresql://postgres:synthetic@127.0.0.1:5432/outbox_pr664?connection_limit=4
+          OUTBOX_TEST_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: npm run test:outbox
 
       - name: 🏗️ Build project
         run: npm run build

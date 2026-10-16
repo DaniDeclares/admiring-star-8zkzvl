@@ -8,6 +8,9 @@ on:
       - 'supabase/migrations/**'
       - 'supabase/production-ledger/**'
       - 'supabase/config.toml'
+      - 'lib/notificationOutbox.mjs'
+      - 'api-handlers/process-outbox.js'
+      - 'tests/notification-outbox-contract.test.mjs'
       - '.github/workflows/supabase-migration-replay.yml'
       - 'scripts/replay_shim_provider_guard_format.py'
       - 'scripts/test_replay_shim_provider_guard_format.py'
@@ -20,6 +23,9 @@ on:
       - 'supabase/migrations/**'
       - 'supabase/production-ledger/**'
       - 'supabase/config.toml'
+      - 'lib/notificationOutbox.mjs'
+      - 'api-handlers/process-outbox.js'
+      - 'tests/notification-outbox-contract.test.mjs'
       - '.github/workflows/supabase-migration-replay.yml'
       - 'scripts/replay_shim_provider_guard_format.py'
       - 'scripts/test_replay_shim_provider_guard_format.py'
@@ -43,6 +49,8 @@ jobs:
     steps:
       - name: Checkout candidate source
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Certify all 106 archived SQL files against exact proven source
         run: |
@@ -731,6 +739,21 @@ jobs:
 
       - name: Replay migrations from scratch without seed data
         run: supabase db reset --no-seed
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Install worker test dependencies
+        run: npm ci
+
+      - name: Execute outbox against fully migrated isolated Supabase
+        env:
+          OUTBOX_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres?connection_limit=4
+          OUTBOX_TEST_CONTEXT: ISOLATED_SUPABASE_REPLAY
+          OUTBOX_TEST_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: npm run test:outbox
 
       - name: Stop isolated local Supabase
         if: always()
