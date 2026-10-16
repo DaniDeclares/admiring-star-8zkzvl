@@ -259,7 +259,7 @@ export default async function handler(req, res) {
       from eligible where o.id = eligible.id
       returning o.id, o.event_key, o.event_type, o.channel, o.payload,
                 o.frozen_request, o.request_fingerprint, o.provider_email_id,
-                o.first_attempt_at, o.claim_token, o.attempts
+                o.first_attempt_at, o.claim_token, o.attempts, o.delivery_outcome
     `;
     const results = [];
     for (const item of items) {
