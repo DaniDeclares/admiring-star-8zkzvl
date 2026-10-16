@@ -39,6 +39,9 @@ jobs:
       - name: ✅ Run tests
         run: npm test -- --watchAll=false
 
+      - name: ✅ Verify Printify automatic release gates
+        run: node --test checks/printifyApprovedRelease.test.mjs
+
       - name: ✅ Run Stripe crosswalk regression
         run: node --test scripts/auditStripeCanonicalCrosswalk.test.mjs
 
