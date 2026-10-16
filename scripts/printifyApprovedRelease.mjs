@@ -145,6 +145,39 @@ export async function releaseApprovedClone({ token, sourceShopId, targetShopId, 
   return { status: 'PRINTIFY_PUBLISH_REQUESTED', productId: created.id, shopId: String(targetShopId), shopifyPublished: 'UNVERIFIED_CHECK_SHOPIFY' };
 }
 
+
+export async function releaseApprovedBatch({ token, sourceShopId, targetShopId, products, execute = false, publish = false, fetcher = fetch }) {
+  if (!Array.isArray(products) || !products.length || products.length > 30) throw Error('APPROVED_BATCH_SIZE_INVALID');
+  const seen = new Set();
+  for (const product of products) {
+    const name = nameKey(product.expectedSourceTitle);
+    if (!name || seen.has(name)) throw Error('DUPLICATE_OR_EMPTY_SOURCE_TITLE');
+    seen.add(name);
+  }
+  const origin = await listAllPrintifyProducts({ token, shopId: sourceShopId, fetcher });
+  const results = [];
+  // Sequential by design. No concurrent product creation or hidden retries.
+  for (const item of products) {
+    const matches = origin.filter(p => nameKey(p.title) === nameKey(item.expectedSourceTitle));
+    if (matches.length !== 1) {
+      results.push({ title: item.expectedSourceTitle, status: 'HOLD', reasons: [matches.length ? 'AMBIGUOUS_SOURCE_TITLE' : 'SOURCE_PRODUCT_NOT_FOUND'] });
+      continue;
+    }
+    const approval = { ...item.approval, expectedSourceTitle: item.expectedSourceTitle };
+    try {
+      const result = await releaseApprovedClone({
+        token, sourceShopId, targetShopId, productId: matches[0].id,
+        approval, execute, publish, fetcher
+      });
+      results.push({ title: item.expectedSourceTitle, ...result });
+    } catch (error) {
+      // A failed create might have succeeded remotely; do not retry blindly.
+      results.push({ title: item.expectedSourceTitle, status: 'HOLD_RECONCILE_BEFORE_RETRY', reasons: [error.message] });
+    }
+  }
+  return { total: products.length, results, publishConfirmedInShopify: false };
+}
+
 async function main() {
   const token = process.env.PRINTIFY_API_TOKEN;
   const shops = await listPrintifyShops({ token });
@@ -152,12 +185,13 @@ async function main() {
   const manifestPath = process.argv[process.argv.indexOf('--manifest') + 1];
   if (!process.argv.includes('--manifest') || !manifestPath || manifestPath.startsWith('--')) throw Error('MANIFEST_REQUIRED');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-  const result = await releaseApprovedClone({
-    token, sourceShopId: manifest.sourceShopId,
-    targetShopId: manifest.targetShopId,
-    productId: manifest.sourceProductId, approval: manifest.approval,
+  const options = {
+    token, sourceShopId: manifest.sourceShopId, targetShopId: manifest.targetShopId,
     execute: process.argv.includes('--execute'), publish: process.argv.includes('--publish')
-  });
+  };
+  const result = Array.isArray(manifest.products)
+    ? await releaseApprovedBatch({ ...options, products: manifest.products })
+    : await releaseApprovedClone({ ...options, productId: manifest.sourceProductId, approval: manifest.approval });
   console.log(JSON.stringify(result, null, 2));
 }
 

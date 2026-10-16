@@ -1,0 +1,194 @@
+{
+  "purpose": "DANI original Printify products, owner-visible inventory 2026-10-16. HOLD until exact shop IDs and commerce evidence are verified. No automatic approval.",
+  "sourceShopId": null,
+  "targetShopId": null,
+  "products": [
+    {
+      "expectedSourceTitle": "Witchy Please I Clean Witch Broom Design T-Shirt",
+      "approval": {
+        "canonicalSku": "DD-MERCH-WITCH-TEE",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Witch Please I Can Tote Bag | Purple Halloween Design",
+      "approval": {
+        "canonicalSku": "DD-MERCH-WITCH-TOTE",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Witch Please I Clean Graphic Hoodie",
+      "approval": {
+        "canonicalSku": "DD-MERCH-WITCH-HOODIE",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Funny Purple Bubble Text Dad Hat, Embroidered Cap",
+      "approval": {
+        "canonicalSku": "DD-MERCH-WITCH-HAT",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Witch Please I Can! Halloween Apron | Purple Witch Design",
+      "approval": {
+        "canonicalSku": "DD-MERCH-WITCH-APRON",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Witch Please Clean Purple Halloween Ceramic Mug",
+      "approval": {
+        "canonicalSku": "DD-MERCH-WITCH-MUG",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Pumpkin Spice Real Estate Advice Hoodie",
+      "approval": {
+        "canonicalSku": "DD-MERCH-PUMPKIN-HOODIE",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Pumpkin Spice Real Estate Advice T-Shirt, Coffee and Autumn Design",
+      "approval": {
+        "canonicalSku": "DD-MERCH-PUMPKIN-TEE",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Pumpkin Spice Real Estate Beverage Illustration Ceramic Mug",
+      "approval": {
+        "canonicalSku": "DD-MERCH-PUMPKIN-MUG",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Pumpkin Spice Real Estate Advice Tote Bag | Autumn Coffee Design",
+      "approval": {
+        "canonicalSku": "DD-MERCH-PUMPKIN-TOTE",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    },
+    {
+      "expectedSourceTitle": "Funny Ghost “I Ain’t Afraid of No Signatures” T-Shirt",
+      "approval": {
+        "canonicalSku": "DD-MERCH-GHOST-TEE",
+        "expectedTargetShopTitle": "My Store 2",
+        "approved": false,
+        "artworkRightsVerified": false,
+        "printQualityApproved": false,
+        "fulfillmentReviewed": false,
+        "shippingCostApproved": false,
+        "shopifyReleaseApproved": false,
+        "approvedRetailCents": null,
+        "shippingCostCents": null,
+        "minimumPreFeeMarginCents": null,
+        "approvedVariantIds": []
+      }
+    }
+  ]
+}
