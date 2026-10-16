@@ -21,10 +21,18 @@ test('email evidence is saved before provider send', () => {
   const frozen = worker.indexOf('first_attempt_at=coalesce(first_attempt_at,now())');
   const send = worker.indexOf('const delivery = await deliver(');
   assert.ok(frozen > 0 && send > frozen);
-  assert.match(worker, /PROVIDER_DEDUP_WINDOW_EXPIRED/);
+  assert.match(worker, /RECONCILIATION_REQUIRED/);
   assert.match(worker, /FROZEN_REQUEST_MISMATCH/);
 });
 test('failed historical events cannot be silently reset', () => {
   assert.match(worker, /attempts=\$\{MAX_RETRIES\}/);
   assert.match(worker, /delivery_outcome=\$\{outcome\}/);
+});
+
+test('expired claims require ownership and uncertain outcomes do not dispatch', () => {
+  assert.match(worker, /claimed_at < now\(\) - interval '10 minutes'/);
+  assert.match(worker, /if \(item\.first_attempt_at\)/);
+  assert.match(worker, /delivery_outcome='UNCERTAIN'/);
+  assert.match(worker, /if \(rows\.length !== 1\)/);
+  assert.match(worker, /first_attempt_at is null/);
 });
