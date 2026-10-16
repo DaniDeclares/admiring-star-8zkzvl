@@ -49,12 +49,22 @@ before(async () => {
   const base = readFileSync(new URL('../supabase/migrations/20260820140315_ddos_accounting_gateways_g8.sql',import.meta.url),'utf8');
   const ddl = base.split('\n').find(line=>line.startsWith('create table if not exists public.dd_event_outbox '));
   assert.ok(ddl);
-  await db.$executeRawUnsafe(ddl);
   const migration = readFileSync(new URL('../supabase/migrations/20261016201500_dd_event_outbox_delivery_reconciliation.sql',import.meta.url),'utf8');
   assert.doesNotMatch(migration,/truncate|drop table|delete from/i);
-  // Match semicolon-delimited statements without splitting quoted SQL comment values.
-  const statements = migration.replace(/--[^\n]*/g, '').match(/(?:[^;']|'(?:''|[^'])*')+/g) || [];
-  for (const statement of statements.filter(sql=>sql.trim())) await db.$executeRawUnsafe(statement);
+  if (localReplay) {
+    // Prove the full replay applied the candidate; do not repair its schema in setup.
+    const ledger = await db.$queryRaw`select version from supabase_migrations.schema_migrations where version='20261016201500'`;
+    assert.equal(ledger.length,1,'full replay must include the exact candidate migration');
+    const columns = await db.$queryRaw`select column_name from information_schema.columns where table_schema='public' and table_name='dd_event_outbox'`;
+    for (const column of ['provider_email_id','provider_sms_id','first_attempt_at','sms_attempt_started_at','claim_token','frozen_request']) {
+      assert.ok(columns.some(row=>row.column_name===column),`candidate column missing: ${column}`);
+    }
+  } else {
+    await db.$executeRawUnsafe(ddl);
+    // Match statements without splitting quoted SQL comment values.
+    const statements = migration.replace(/--[^\n]*/g, '').match(/(?:[^;']|'(?:''|[^'])*')+/g) || [];
+    for (const statement of statements.filter(sql=>sql.trim())) await db.$executeRawUnsafe(statement);
+  }
   console.log(JSON.stringify({ testedCommit: process.env.OUTBOX_TEST_COMMIT || execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
     database:localReplay ? 'isolated Supabase replay' : 'loopback/outbox_pr664', provider:'fake, no network', schema:'owning table DDL + PR migration' }));
 });

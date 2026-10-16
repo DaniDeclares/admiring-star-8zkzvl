@@ -122,6 +122,19 @@ jobs:
           cp "$RUNNER_TEMP"/replay-migrations/*.sql supabase/migrations/
           echo "Hybrid replay set: $(ls supabase/migrations/*.sql | wc -l) files"
 
+      - name: Include exact candidate outbox migration in isolated replay
+        run: |
+          # The hybrid ledger intentionally excludes unpromoted source migrations.
+          # This scoped candidate must also be applied, rather than silently testing
+          # only the already-applied Production baseline. Never replace ledger SQL.
+          candidate=20261016201500_dd_event_outbox_delivery_reconciliation.sql
+          git show "HEAD:supabase/migrations/$candidate" > "$RUNNER_TEMP/$candidate"
+          if test -f "supabase/migrations/$candidate"; then
+            cmp "$RUNNER_TEMP/$candidate" "supabase/migrations/$candidate"
+          else
+            cp "$RUNNER_TEMP/$candidate" "supabase/migrations/$candidate"
+          fi
+
       - name: Normalize provider staging guard formatting (replay workspace only)
         run: |
           # Production's applied 20261003173410 function is minified; the repo source for that ledger row is the formatted
