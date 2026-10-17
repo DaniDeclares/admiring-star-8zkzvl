@@ -22,7 +22,7 @@ test('created draft uses explicit unpublished state and exact payload readback',
  const prior=process.env.DANI_PRINTIFY_SINGLE_WRITER;
  process.env.DANI_PRINTIFY_SINGLE_WRITER='true';
  const receipts=[];
- const expectedProduct={id:'new1',title:spec.title,tags:['DANI-SKU-'+spec.sku,'customer-retail'],blueprint_id:1,print_provider_id:2,published:false,visible:true,
+ const expectedProduct={id:'new1',title:spec.title,tags:['DANI-SKU-'+spec.sku,'customer-retail'],blueprint_id:1,print_provider_id:2,visible:false,
    variants:[{id:20,price:2499,is_enabled:true,is_default:true}],
    print_areas:[{variant_ids:[20],placeholders:[{position:'front',images:[{id:'approved',x:.5,y:.5,scale:1,angle:0}]}]}]};
  const fetcher=async(url,options={})=>{let data;
@@ -72,6 +72,64 @@ test('post-create payload mismatch is receipted as unconfirmed without retry',as
    if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
  }
 });
+test('create request failure is receipted as an uncertain outcome',async()=>{
+ const prior=process.env.DANI_PRINTIFY_SINGLE_WRITER;
+ process.env.DANI_PRINTIFY_SINGLE_WRITER='true';
+ const receipts=[];
+ const fetcher=async(url,options={})=>{let data;
+   if(url.endsWith('/shops.json')) data=shops;
+   else if(url.endsWith('/shops/1/products/old.json')) data=original;
+   else if(url.includes('/shops/2/products.json?')) data={data:[],last_page:1};
+   else if(url.endsWith('/variants.json')) data={variants:catalog.variants};
+   else if(url.endsWith('/shipping.json')) data=catalog.shipping;
+   else if(url.endsWith('/shops/2/products.json') && options.method==='POST') throw Error('PROVIDER_TIMEOUT');
+   else throw Error('UNEXPECTED_URL: '+url);
+   return {ok:true,status:200,json:async()=>data};
+ };
+ try {
+   const result=await createApprovedExpansionDraft({token:'test',spec,candidate,execute:true,fetcher,
+     reserve:async()=>({reserved:true,claimId:'claim-timeout'}),receipt:async x=>receipts.push(x)});
+   assert.equal(result.status,'PRINTIFY_CREATE_UNCONFIRMED');
+   assert.equal(result.printifyProductId,null);
+   assert.ok(result.reasons.includes('PRINTIFY_CREATE_OUTCOME_UNKNOWN'));
+   assert.equal(receipts[0].state,'PRINTIFY_CREATE_UNCONFIRMED');
+ } finally {
+   if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
+ }
+});
+test('null readback and success-receipt failure preserve the product identity',async()=>{
+ const prior=process.env.DANI_PRINTIFY_SINGLE_WRITER;
+ process.env.DANI_PRINTIFY_SINGLE_WRITER='true';
+ const makeFetcher=readback=>async(url,options={})=>{let data;
+   if(url.endsWith('/shops.json')) data=shops;
+   else if(url.endsWith('/shops/1/products/old.json')) data=original;
+   else if(url.includes('/shops/2/products.json?')) data={data:[],last_page:1};
+   else if(url.endsWith('/variants.json')) data={variants:catalog.variants};
+   else if(url.endsWith('/shipping.json')) data=catalog.shipping;
+   else if(url.endsWith('/shops/2/products.json') && options.method==='POST') data={id:'new-receipt'};
+   else if(url.endsWith('/shops/2/products/new-receipt.json')) data=readback;
+   else throw Error('UNEXPECTED_URL: '+url);
+   return {ok:true,status:200,json:async()=>data};
+ };
+ try {
+   const nullReceipts=[];
+   const nullResult=await createApprovedExpansionDraft({token:'test',spec,candidate,execute:true,fetcher:makeFetcher(null),
+     reserve:async()=>({reserved:true,claimId:'claim-null'}),receipt:async x=>nullReceipts.push(x)});
+   assert.equal(nullResult.status,'PRINTIFY_CREATE_UNCONFIRMED');
+   assert.equal(nullResult.printifyProductId,'new-receipt');
+   const good={id:'new-receipt',title:spec.title,tags:['DANI-SKU-'+spec.sku,'customer-retail'],blueprint_id:1,print_provider_id:2,visible:false,
+     variants:[{id:20,price:2499,is_enabled:true,is_default:true}],
+     print_areas:[{variant_ids:[20],placeholders:[{position:'front',images:[{id:'approved',x:.5,y:.5,scale:1,angle:0}]}]}]};
+   const receiptResult=await createApprovedExpansionDraft({token:'test',spec,candidate,execute:true,fetcher:makeFetcher(good),
+     reserve:async()=>({reserved:true,claimId:'claim-receipt'}),receipt:async()=>{throw Error('LEDGER_DOWN')}});
+   assert.equal(receiptResult.status,'PRINTIFY_DRAFT_CREATED_RECEIPT_FAILED');
+   assert.equal(receiptResult.printifyProductId,'new-receipt');
+   assert.deepEqual(receiptResult.reasons,['DURABLE_RECEIPT_WRITE_FAILED']);
+ } finally {
+   if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
+ }
+});
+
 test('without execute, only GET requests happen',async()=>{
  const calls=[];
  const fetcher=async(url,options)=>{calls.push({url,method:options?.method});let data;
