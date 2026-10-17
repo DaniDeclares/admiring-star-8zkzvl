@@ -57,17 +57,24 @@ async function sendSms(payload) {
 async function assertExternalOutboxAllowed(item) {
   if (item.channel !== 'EMAIL' && item.channel !== 'SMS') return;
   const payload = item.payload || {};
+  const estimateOrigin = /estimate|quote|proposal/i.test([
+    item.aggregate_type, item.event_type, payload.eventType, payload.template,
+  ].filter(Boolean).join(' '));
   const estimateId = String(payload.estimateId || payload.estimate_id ||
     (String(item.aggregate_type || '').toLowerCase().includes('estimate') ? item.aggregate_id || '' : '')).trim();
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(estimateId)) {
-    // Without a traceable estimate reference we cannot assert estimate-level
-    // protection; other events still use their own source-specific gates.
-    return;
+  if (!estimateId) {
+    if (estimateOrigin || payload.is_test === true) throw new Error('OUTBOX_ESTIMATE_ORIGIN_UNCLASSIFIED');
+    return; // Unrelated communications retain their existing delivery flow.
   }
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(estimateId)) {
+    throw new Error('OUTBOX_INVALID_ESTIMATE_REFERENCE');
+  }
+  // Missing column, database failure, and missing referenced estimate all fail closed.
   const rows = await prisma.$queryRaw`
     select is_test from public.dd_estimates where id = ${estimateId}::uuid limit 1
   `;
-  if (rows[0]?.is_test === true) throw new Error('TEST_ESTIMATE_OUTBOUND_BLOCKED');
+  if (rows.length !== 1) throw new Error('OUTBOX_ESTIMATE_NOT_FOUND');
+  if (rows[0].is_test !== false) throw new Error('TEST_ESTIMATE_OUTBOUND_BLOCKED');
 }
 
 async function deliver(item) {
