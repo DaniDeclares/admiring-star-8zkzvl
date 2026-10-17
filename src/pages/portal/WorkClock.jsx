@@ -11,6 +11,7 @@ export default function WorkClock({session,mode='owner',jobId=null}) {
   const [error,setError]=useState('');
   const [notice,setNotice]=useState('');
   const [now,setNow]=useState(Date.now());
+  const [refreshCount,setRefreshCount]=useState(0);
   const owner=mode==='owner';
   useEffect(()=>{const tick=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(tick);},[]);
   useEffect(()=>{
@@ -30,7 +31,7 @@ export default function WorkClock({session,mode='owner',jobId=null}) {
     };
     load();
     return()=>{cancelled=true;controller.abort();};
-  },[session?.access_token,jobId]);
+  },[session?.access_token,jobId,refreshCount]);
   const submit=async event=>{
     if(!owner||!session?.access_token||busy)return;
     setBusy(true);setError('');setNotice('');
@@ -64,21 +65,21 @@ export default function WorkClock({session,mode='owner',jobId=null}) {
     <div className="owner-command-section-head"><div>
       <p className="portal-eyebrow">{owner?'Owner HQ · Labor evidence':'DANI FIELD · Job time'}</p>
       <h2>{owner?'Clock in / Clock out':'Recorded job time'}</h2>
-      <p className="portal-note">{owner?'Time your home preparation, Monday sales work or Printify products. This is internal research, not a customer booking or provider payroll.':'This uses the existing provider job ledger; your Start/Pause/Resume/Submit buttons control work time. Break minutes are excluded.'}</p>
+      <p className="portal-note">{owner?'Use this clock in your HQ browser on your computer. Server-side punches continue if you leave the tab. This is internal time research, never a customer booking or provider payroll.':'This uses the existing provider job ledger; your Start/Pause/Resume/Submit buttons control work time. Break minutes are excluded.'}</p>
     </div></div>
     {error&&<div className="portal-alert" role="alert">{error}</div>}
     {notice&&<div className="portal-success" role="status">{notice}</div>}
     {clock?.activeElsewhere&&<div className="portal-alert" role="alert">Another job or clock segment is active on this account. End it there before starting a new task.</div>}
     {owner&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))',gap:12,marginTop:12}}>
       <label>Work stream
-        <select disabled={busy||!!active} value={study} onChange={e=>{setStudy(e.target.value);setTask(DANI_CLOCK_TASKS[e.target.value][0][0]);}} style={{display:'block',width:'100%',padding:10,marginTop:4}}>
+        <select disabled={busy||!!active||paused} value={study} onChange={e=>{setStudy(e.target.value);setTask(DANI_CLOCK_TASKS[e.target.value][0][0]);}} style={{display:'block',width:'100%',padding:10,marginTop:4}}>
           <option value="MAINTENANCE_PREP">Home maintenance preparation</option>
           <option value="MONDAY_SALES">Monday sales readiness</option>
           <option value="PRINTIFY_MERCH">Printify merchandise</option>
         </select>
       </label>
       <label>Work block
-        <select disabled={busy||!!active} value={task} onChange={e=>setTask(e.target.value)} style={{display:'block',width:'100%',padding:10,marginTop:4}}>
+        <select disabled={busy||!!active||paused} value={task} onChange={e=>setTask(e.target.value)} style={{display:'block',width:'100%',padding:10,marginTop:4}}>
           {studyTasks.map(([id,label])=><option key={id} value={id}>{label}</option>)}
         </select>
       </label>
@@ -88,8 +89,9 @@ export default function WorkClock({session,mode='owner',jobId=null}) {
       <div className="portal-summary-tile"><strong>{active?'CLOCKED IN':paused?'PAUSED':'CLOCKED OUT'}</strong><span>{active?clockInfo?.label:paused?'Break not counted':'Ready for next task'}</span></div>
       {active&&<div className="portal-summary-tile"><strong>{fmt(clockInfo.minutes)}</strong><span>Current uninterrupted work block</span></div>}
     </div>
+    {owner&&<button type="button" className="secondary" disabled={busy} onClick={()=>setRefreshCount(n=>n+1)} style={{marginTop:12}}>Refresh saved punches</button>}
     {owner&&<div className="portal-actions" style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:16}}>
-      <button className="portal-primary" type="button" disabled={busy||!!active||clock?.activeElsewhere} onClick={()=>submit('START')}>Clock in</button>
+      <button className="portal-primary" type="button" disabled={busy||!!active||paused||clock?.activeElsewhere} onClick={()=>submit('START')}>Clock in</button>
       <button type="button" disabled={busy||!active} onClick={()=>submit('PAUSE')}>Pause / Break</button>
       <button type="button" disabled={busy||!paused||clock?.activeElsewhere} onClick={()=>submit('RESUME')}>Resume prior task</button>
       <button className="secondary" type="button" disabled={busy||(!active&&!paused)} onClick={()=>submit('CLOCK_OUT')}>Clock out</button>
