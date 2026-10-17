@@ -106,9 +106,11 @@ export function useProviderWorkspace() {
       if (actionEventName(action)) captureServiceLifecycle(actionEventName(action), { route: window.location.pathname });
       setMessage('Updated successfully.');
       await load();
+      return true;
     } catch (e) {
       captureServiceLifecycle('fulfillment_blocked', { route: window.location.pathname, gate_state: 'portal_action_failed' });
       setError(e?.message || 'Action failed.');
+      return false;
     }
   };
   const uploadEvidence = async (task, file) => {

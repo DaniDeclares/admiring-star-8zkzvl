@@ -1,4 +1,5 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
+import { getWorkClockSnapshot, applyWorkClockAction } from '../src/lib/operations/workClock2026.mjs';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
 import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
@@ -589,6 +590,10 @@ export default async function handler(req, res) {
   try {
     const context = await authenticatePortalRequest(req);
     if (context.error) return fail(res, context.error, context.status);
+    if (req.method === 'GET' && req.query?.workClock === '1') {
+      try { return ok(res, await getWorkClockSnapshot(context, req.query?.jobId || null)); }
+      catch (error) { return fail(res, error.message || 'Time clock unavailable.', error.status || 500); }
+    }
     if (req.method === 'GET') {
       const notificationPreferences = await getNotificationPreferences(context.supabase, context.user.id);
       if (!context.isStaff) {
@@ -635,6 +640,11 @@ export default async function handler(req, res) {
     }
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
     const { action, ...payload } = req.body || {};
+    if (action === 'work_clock') {
+      if (context.role !== 'owner' || !context.isStaff) return fail(res, 'Owner HQ time clock required.',403);
+      try { return ok(res, await applyWorkClockAction(context, payload)); }
+      catch (error) { return fail(res, error.message || 'Time clock unavailable.', error.status || 500); }
+    }
     if (action === 'estimate_decision') {
       if (context.isStaff || !context.identity) return fail(res, 'Customer portal action required.', 403);
       const estimateId = String(payload.estimateId || '').trim();
@@ -1317,6 +1327,18 @@ export default async function handler(req, res) {
       const { data: job, error: jobError } = await context.supabase.from('dd_jobs').select('id,assigned_to,job_status').eq('id', jobId).single();
       if (jobError || !job) return fail(res, 'Job not found.', 404);
       if (!context.isStaff && String(job.assigned_to || '') !== String(providerId)) return fail(res, 'Job is not assigned to this provider.', 403);
+      // Keep existing field event workflow while writing correct segmented punch
+      // evidence to the EXISTING time ledger, not a parallel timer.
+      const clockActions={WORK_STARTED:'START',WORK_PAUSED:'PAUSE',WORK_RESUMED:'RESUME',WORK_COMPLETED:'CLOCK_OUT'};
+      if(clockActions[eventType]) {
+        try {
+          const snapshot=eventType==='WORK_COMPLETED'?await getWorkClockSnapshot(context,jobId):null;
+          // Historical jobs may have started before clock activation.
+          if(eventType!=='WORK_COMPLETED'||snapshot.clock.running||snapshot.clock.entries[0]?.entry_status==='PAUSED'){
+            await applyWorkClockAction(context,{event:clockActions[eventType],jobId,assignmentId,taskCode:'FIELD_WORK'});
+          }
+        } catch(error){return fail(res,error.message||'Work time update failed.',error.status||400);}
+      }
       const { data: event, error: eventError } = await context.supabase.from('dd_provider_field_events').insert({
         provider_id: providerId, job_id: jobId, assignment_id: assignmentId || null, event_type: eventType,
         latitude: latitude == null ? null : Number(latitude), longitude: longitude == null ? null : Number(longitude),
@@ -1324,32 +1346,7 @@ export default async function handler(req, res) {
       }).select().single();
       if (eventError) throw eventError;
 
-      const now = new Date().toISOString();
-      if (eventType === 'WORK_STARTED') {
-        const { data: openEntry } = await context.supabase.from('dd_provider_time_entries').select('id').eq('provider_id', providerId).eq('job_id', jobId).in('entry_status',['OPEN','PAUSED']).limit(1).maybeSingle();
-        if (!openEntry) {
-          await context.supabase.from('dd_provider_time_entries').insert({
-            provider_id: providerId, job_id: jobId, assignment_id: assignmentId || null, time_type: 'ON_SITE',
-            entry_status: 'OPEN', started_at: now,
-            start_latitude: latitude == null ? null : Number(latitude), start_longitude: longitude == null ? null : Number(longitude),
-            start_accuracy_meters: accuracyMeters == null ? null : Number(accuracyMeters), source: 'DANI_FIELD'
-          });
-        }
-        await context.supabase.from('dd_jobs').update({ job_status: 'in_progress' }).eq('id', jobId);
-      } else if (eventType === 'WORK_PAUSED') {
-        const { data: entry } = await context.supabase.from('dd_provider_time_entries').select('id').eq('provider_id', providerId).eq('job_id', jobId).eq('entry_status','OPEN').order('started_at',{ascending:false}).limit(1).maybeSingle();
-        if (entry) await context.supabase.from('dd_provider_time_entries').update({ entry_status:'PAUSED', updated_at:now }).eq('id', entry.id);
-      } else if (eventType === 'WORK_RESUMED') {
-        const { data: entry } = await context.supabase.from('dd_provider_time_entries').select('id').eq('provider_id', providerId).eq('job_id', jobId).eq('entry_status','PAUSED').order('started_at',{ascending:false}).limit(1).maybeSingle();
-        if (entry) await context.supabase.from('dd_provider_time_entries').update({ entry_status:'OPEN', updated_at:now }).eq('id', entry.id);
-      } else if (eventType === 'WORK_COMPLETED') {
-        const { data: entries } = await context.supabase.from('dd_provider_time_entries').select('id,entry_status').eq('provider_id', providerId).eq('job_id', jobId).in('entry_status',['OPEN','PAUSED']);
-        for (const entry of entries || []) await context.supabase.from('dd_provider_time_entries').update({
-          entry_status:'CLOSED', ended_at:now, end_latitude: latitude == null ? null : Number(latitude),
-          end_longitude: longitude == null ? null : Number(longitude), end_accuracy_meters: accuracyMeters == null ? null : Number(accuracyMeters),
-          updated_at:now
-        }).eq('id', entry.id);
-      }
+
       return ok(res, { fieldEvent: event });
     }
     if (action === 'assignment_response') {

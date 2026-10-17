@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import ProviderNav from './ProviderNav.jsx';
+import WorkClock from './WorkClock.jsx';
 import { Card, Empty, LockedCard, formatDate, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
 import './PortalWorkspacePage.css';
 
@@ -52,15 +53,16 @@ export default function ProviderFieldPage() {
     try {
       const location = await getLocation();
       const governedAction = eventType === 'WORK_STARTED' ? 'start_my_job' : eventType === 'WORK_COMPLETED' ? 'complete_my_job' : null;
-      if (governedAction) {
-        await act(governedAction, { jobId: assignment.job_id });
-      } else {
-        await act('field_event', {
-          jobId: assignment.job_id,
-          assignmentId: assignment.id,
-          eventType,
-          ...location
-        });
+      const fieldPayload={jobId:assignment.job_id,assignmentId:assignment.id,eventType,...location};
+      if(eventType==='WORK_STARTED'){
+        if(await act('start_my_job',{jobId:assignment.job_id})===false)return;
+        await act('field_event',fieldPayload);
+      }else if(eventType==='WORK_COMPLETED'){
+        // Seal the time ledger before QA/completion; no clock-out means no closeout.
+        if(await act('field_event',fieldPayload)===false)return;
+        await act('complete_my_job',{jobId:assignment.job_id});
+      }else{
+        await act('field_event',fieldPayload);
       }
     } finally {
       setBusy(prev => ({ ...prev, [key]: false }));
@@ -117,6 +119,7 @@ export default function ProviderFieldPage() {
               return <button key={action.event} disabled={busy[key]} onClick={() => sendEvent(assignment, action.event)}>{busy[key] ? 'Updating…' : action.label}</button>;
             })}
           </div>
+          {assignment.assignment_status==='ACCEPTED'&&<WorkClock mode="provider" session={session} jobId={assignment.job_id} assignmentId={assignment.id}/>}
         </Card>;
       }) : <Card title="Today"><Empty>No dispatched work is waiting for you.</Empty></Card>}
 
