@@ -3,7 +3,7 @@ import {DANI_CLOCK_TASKS,minutesForEntry,summarizeEntries} from '../../lib/opera
 
 const DEFAULT_STUDY='MAINTENANCE_PREP';
 const fmt=minutes=>{const n=Math.max(0,Math.floor(minutes));return Math.floor(n/60)+'h '+String(n%60).padStart(2,'0')+'m';};
-export default function WorkClock({session,mode='owner',jobId=null,assignmentId=null}) {
+export default function WorkClock({session,mode='owner',jobId=null}) {
   const [study,setStudy]=useState(DEFAULT_STUDY);
   const [task,setTask]=useState('ACCESS_SAFETY');
   const [clock,setClock]=useState(null);
@@ -49,7 +49,7 @@ export default function WorkClock({session,mode='owner',jobId=null,assignmentId=
     }catch(e){setError(e.message||'Clock update failed. Please refresh before retrying.');}
     finally{setBusy(false);}
   };
-  const rows=clock?.entries||[];
+  const rows=useMemo(()=>clock?.entries||[],[clock]);
   const active=clock?.running||null;
   const latest=rows[0]||null;
   const paused=!active&&latest?.entry_status==='PAUSED';
