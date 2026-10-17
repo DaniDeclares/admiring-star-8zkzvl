@@ -1,0 +1,194 @@
+{
+  "purpose": "DANI ORIGINAL three owner-approved art families into additional Printify formats without replacement generation, duplicate listings, or provider uniform charges",
+  "asOf": "2026-10-16",
+  "targetShop": "My Store 2",
+  "originalElevenProductsExisting": true,
+  "originalElevenOnlineStorePublished": true,
+  "sourceOfTruth": "PRINTIFY",
+  "artResolutionPixels": "1374x1145",
+  "upsamplingDoesNotAddNativeDetail": true,
+  "art": {
+    "WITCH": {
+      "sourceFile": "Witch, Please! I Clean! Sticker(2).png",
+      "originalSha256": "cf2a010d0d1c70abbbada11cc4b6484e8dee100daf8e34dc7b328f7a3e9bcbbb",
+      "shopifyFilesUrl": "https://cdn.shopify.com/s/files/1/0763/0825/0763/files/DANI-Witch-Please-I-Clean-Original-Approved-Art.png?v=1792200648"
+    },
+    "GHOST": {
+      "sourceFile": "Ghostly Signature Swagger(3).png",
+      "originalSha256": "4c831d4396317312f56ece1b01454f7df9aec94ca29fba1a0274168e18f31c0e",
+      "shopifyFilesUrl": "https://cdn.shopify.com/s/files/1/0763/0825/0763/files/DANI-Ghost-Notary-Approved-Art.png?v=1792200573"
+    },
+    "PUMPKIN": {
+      "sourceFile": "Pumpkin Spice Real Estate Advice (2)(2).png",
+      "originalSha256": "cc4f3f6990d2882e254b32e41e84668e94a4279b411cddc46652c4dbf55f52c1",
+      "shopifyFilesUrl": "https://cdn.shopify.com/s/files/1/0763/0825/0763/files/DANI-Pumpkin-Spice-Real-Estate-Approved-Art.png?v=1792200582"
+    }
+  },
+  "products": [
+    {
+      "sku": "DDM-GHOST-HOODIE",
+      "candidateKey": "merch-expansion-20261016-ghost-hoodie",
+      "title": "Ghost Notary Hoodie",
+      "artFamily": "GHOST",
+      "format": "HOODIE",
+      "audience": "CUSTOMER_RETAIL",
+      "provisionalRetailUSD": [
+        "53.99",
+        "56.99",
+        "58.99"
+      ],
+      "sourcePattern": "existing Witch Lane Seven LS14001 hoodie template; replace art",
+      "printifyProductId": null,
+      "shopifyProductId": null,
+      "printifyBlueprintId": null,
+      "printProviderId": null,
+      "priceApprovedForThisProduct": false,
+      "actualCostVerified": false,
+      "shippingAndFeesVerified": false,
+      "itemPrintProofApproved": false,
+      "ownerReleaseApproval": false,
+      "sourceOriginalArtSha256": "4c831d4396317312f56ece1b01454f7df9aec94ca29fba1a0274168e18f31c0e",
+      "status": "CANDIDATE_NOT_CREATED"
+    },
+    {
+      "sku": "DDM-GHOST-MUG",
+      "candidateKey": "merch-expansion-20261016-ghost-mug",
+      "title": "Ghost Notary Mug",
+      "artFamily": "GHOST",
+      "format": "MUG",
+      "audience": "CUSTOMER_RETAIL",
+      "provisionalRetailUSD": [
+        "17.99"
+      ],
+      "sourcePattern": "existing Printify Choice 11oz pumpkin mug template; replace art",
+      "printifyProductId": null,
+      "shopifyProductId": null,
+      "printifyBlueprintId": null,
+      "printProviderId": null,
+      "priceApprovedForThisProduct": false,
+      "actualCostVerified": false,
+      "shippingAndFeesVerified": false,
+      "itemPrintProofApproved": false,
+      "ownerReleaseApproval": false,
+      "sourceOriginalArtSha256": "4c831d4396317312f56ece1b01454f7df9aec94ca29fba1a0274168e18f31c0e",
+      "status": "CANDIDATE_NOT_CREATED"
+    },
+    {
+      "sku": "DDM-GHOST-TOTE",
+      "candidateKey": "merch-expansion-20261016-ghost-tote",
+      "title": "Ghost Notary Tote",
+      "artFamily": "GHOST",
+      "format": "TOTE",
+      "audience": "CUSTOMER_RETAIL",
+      "provisionalRetailUSD": [
+        "26.99",
+        "32.99",
+        "35.99"
+      ],
+      "sourcePattern": "existing Pumpkin Spice AOP tote template; replace art",
+      "printifyProductId": null,
+      "shopifyProductId": null,
+      "printifyBlueprintId": null,
+      "printProviderId": null,
+      "priceApprovedForThisProduct": false,
+      "actualCostVerified": false,
+      "shippingAndFeesVerified": false,
+      "itemPrintProofApproved": false,
+      "ownerReleaseApproval": false,
+      "sourceOriginalArtSha256": "4c831d4396317312f56ece1b01454f7df9aec94ca29fba1a0274168e18f31c0e",
+      "status": "CANDIDATE_NOT_CREATED"
+    },
+    {
+      "sku": "DDM-PUMPKIN-CREWNECK",
+      "candidateKey": "merch-expansion-20261016-pumpkin-crewneck",
+      "title": "Pumpkin Spice Realtor Crewneck",
+      "artFamily": "PUMPKIN",
+      "format": "CREWNECK",
+      "audience": "CUSTOMER_RETAIL",
+      "provisionalRetailUSD": [
+        "39.99",
+        "49.99"
+      ],
+      "sourcePattern": "new Printify crewneck blueprint required",
+      "printifyProductId": null,
+      "shopifyProductId": null,
+      "printifyBlueprintId": null,
+      "printProviderId": null,
+      "priceApprovedForThisProduct": false,
+      "actualCostVerified": false,
+      "shippingAndFeesVerified": false,
+      "itemPrintProofApproved": false,
+      "ownerReleaseApproval": false,
+      "sourceOriginalArtSha256": "cc4f3f6990d2882e254b32e41e84668e94a4279b411cddc46652c4dbf55f52c1",
+      "status": "CANDIDATE_NOT_CREATED"
+    },
+    {
+      "sku": "DDM-WITCH-CREWNECK",
+      "candidateKey": "merch-expansion-20261016-witch-crewneck",
+      "title": "Witch Please I Clean Crewneck",
+      "artFamily": "WITCH",
+      "format": "CREWNECK",
+      "audience": "CUSTOMER_RETAIL",
+      "provisionalRetailUSD": [
+        "34.99",
+        "42.99"
+      ],
+      "sourcePattern": "new Printify crewneck blueprint required; reuse prior candidate",
+      "printifyProductId": null,
+      "shopifyProductId": null,
+      "printifyBlueprintId": null,
+      "printProviderId": null,
+      "priceApprovedForThisProduct": false,
+      "actualCostVerified": false,
+      "shippingAndFeesVerified": false,
+      "itemPrintProofApproved": false,
+      "ownerReleaseApproval": false,
+      "sourceOriginalArtSha256": "cf2a010d0d1c70abbbada11cc4b6484e8dee100daf8e34dc7b328f7a3e9bcbbb",
+      "status": "CANDIDATE_NOT_CREATED"
+    },
+    {
+      "sku": "DDM-WITCH-FIELD-NOTEBOOK",
+      "candidateKey": "merch-expansion-20261016-witch-field-notebook",
+      "title": "Witch Please Cleaning Notes Notebook",
+      "artFamily": "WITCH",
+      "format": "SPIRAL_NOTEBOOK",
+      "audience": "PROVIDER_OPTIONAL_RETAIL",
+      "provisionalRetailUSD": [
+        "19.99",
+        "24.99"
+      ],
+      "sourcePattern": "new Printify notebook blueprint required; optional not company issued",
+      "printifyProductId": null,
+      "shopifyProductId": null,
+      "printifyBlueprintId": null,
+      "printProviderId": null,
+      "priceApprovedForThisProduct": false,
+      "actualCostVerified": false,
+      "shippingAndFeesVerified": false,
+      "itemPrintProofApproved": false,
+      "ownerReleaseApproval": false,
+      "sourceOriginalArtSha256": "cf2a010d0d1c70abbbada11cc4b6484e8dee100daf8e34dc7b328f7a3e9bcbbb",
+      "status": "CANDIDATE_NOT_CREATED"
+    }
+  ],
+  "holdForEmbroidery": [
+    {
+      "sku": "DDM-GHOST-HAT",
+      "sourceOriginalArtSha256": "4c831d4396317312f56ece1b01454f7df9aec94ca29fba1a0274168e18f31c0e",
+      "why": "Detailed gradient/text artwork needs separate embroidery-safe artwork approval or printed method"
+    },
+    {
+      "sku": "DDM-PUMPKIN-HAT",
+      "sourceOriginalArtSha256": "cc4f3f6990d2882e254b32e41e84668e94a4279b411cddc46652c4dbf55f52c1",
+      "why": "Detailed gradients/home and lettering need embroidery-safe artwork approval or printed method"
+    }
+  ],
+  "policy": {
+    "noAIReplacementArt": true,
+    "duplicateExistingProduct": false,
+    "minimumApprovedNetMarginPct": 30,
+    "providerGearRetailOptional": true,
+    "issuedUniformsCompanyPaid": true,
+    "doNotPublishOrCreateWithoutVerifiedIntegrationAndApproval": true
+  }
+}
