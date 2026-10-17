@@ -52,7 +52,33 @@ async function sendSms(payload) {
   if (!response.ok) throw new Error(`TWILIO_${response.status}`);
 }
 
+// Defense in depth: keep synthetic estimate events out of every external channel.
+// Requires the is_test migration to have been applied before this worker deploys.
+async function assertExternalOutboxAllowed(item) {
+  if (item.channel !== 'EMAIL' && item.channel !== 'SMS') return;
+  const payload = item.payload || {};
+  const estimateOrigin = /estimate|quote|proposal/i.test([
+    item.aggregate_type, item.event_type, payload.eventType, payload.template,
+  ].filter(Boolean).join(' '));
+  const estimateId = String(payload.estimateId || payload.estimate_id ||
+    (String(item.aggregate_type || '').toLowerCase().includes('estimate') ? item.aggregate_id || '' : '')).trim();
+  if (!estimateId) {
+    if (estimateOrigin || payload.is_test === true) throw new Error('OUTBOX_ESTIMATE_ORIGIN_UNCLASSIFIED');
+    return; // Unrelated communications retain their existing delivery flow.
+  }
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(estimateId)) {
+    throw new Error('OUTBOX_INVALID_ESTIMATE_REFERENCE');
+  }
+  // Missing column, database failure, and missing referenced estimate all fail closed.
+  const rows = await prisma.$queryRaw`
+    select is_test from public.dd_estimates where id = ${estimateId}::uuid limit 1
+  `;
+  if (rows.length !== 1) throw new Error('OUTBOX_ESTIMATE_NOT_FOUND');
+  if (rows[0].is_test !== false) throw new Error('TEST_ESTIMATE_OUTBOUND_BLOCKED');
+}
+
 async function deliver(item) {
+  await assertExternalOutboxAllowed(item);
   if (item.channel === 'EMAIL') return sendEmail(item.payload || {});
   if (item.channel === 'SMS') return sendSms(item.payload || {});
   if (item.channel === 'INTERNAL') return;
