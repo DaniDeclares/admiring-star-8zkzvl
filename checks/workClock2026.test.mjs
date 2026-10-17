@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
-import {DANI_CLOCK_TASKS,allowedStudyTask,clockAccess,minutesForEntry,summarizeEntries} from '../src/lib/operations/workClock2026.js';
+import {DANI_CLOCK_TASKS,allowedStudyTask,clockAccess,minutesForEntry,summarizeEntries} from '../src/lib/operations/workClock2026.mjs';
 test('owner cleaning and revenue timing categories remain separate',()=>{
   assert.equal(allowedStudyTask('MAINTENANCE_PREP','ACCESS_SAFETY'),true);
   assert.equal(allowedStudyTask('PRINTIFY_MERCH','PRICE_SHIPPING'),true);
