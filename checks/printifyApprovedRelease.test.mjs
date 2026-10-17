@@ -71,6 +71,26 @@ test('successful create with failed readback returns reconcilable product ID', a
     if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
   }
 });
+test('successful create with null readback preserves reconcilable product ID', async () => {
+  const prior=process.env.DANI_PRINTIFY_SINGLE_WRITER;
+  process.env.DANI_PRINTIFY_SINGLE_WRITER='true';
+  const fakeFetch=async(url,options={})=>{
+    if(url.endsWith('/shops.json')) return {ok:true,status:200,json:async()=>shops};
+    if(url.endsWith('/shops/11/products/s1.json')) return {ok:true,status:200,json:async()=>source};
+    if(url.includes('/shops/22/products.json?')) return {ok:true,status:200,json:async()=>({data:[],last_page:1})};
+    if(url.endsWith('/shops/22/products.json') && options.method==='POST') return {ok:true,status:200,json:async()=>({id:'created-null'})};
+    if(url.endsWith('/shops/22/products/created-null.json')) return {ok:true,status:200,json:async()=>null};
+    throw Error('UNEXPECTED_URL '+url);
+  };
+  try {
+    const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,fetcher:fakeFetch});
+    assert.equal(result.status,'PRINTIFY_CREATE_UNCONFIRMED');
+    assert.equal(result.productId,'created-null');
+    assert.deepEqual(result.reasons,['PRINTIFY_CREATE_READBACK_MISMATCH']);
+  } finally {
+    if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
+  }
+});
 test('same-shop execute without publish fails loudly before any API call', async () => {
   await assert.rejects(
     releaseApprovedBatch({token:'fake',sourceShopId:'22',targetShopId:'22',products:[{expectedSourceTitle:'x',approval:{}}],execute:true,publish:false,fetcher:async()=>{throw Error('API_SHOULD_NOT_RUN')}}),
