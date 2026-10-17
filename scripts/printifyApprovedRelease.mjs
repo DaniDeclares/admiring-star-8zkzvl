@@ -143,8 +143,8 @@ export async function releaseApprovedClone({ token, sourceShopId, targetShopId, 
   } catch (error) {
     return { status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: created.id, shopId: String(targetShopId), reasons: [error.message] };
   }
-  if (verified.id !== created.id || verified.title !== (approval.destinationTitle || source.title) ||
-      !(verified.tags || []).includes(tagFor(approval.canonicalSku))) {
+  if (verified?.id !== created.id || verified?.title !== (approval.destinationTitle || source.title) ||
+      !(verified?.tags || []).includes(tagFor(approval.canonicalSku))) {
     return { status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: created.id, shopId: String(targetShopId), reasons: ['PRINTIFY_CREATE_READBACK_MISMATCH'] };
   }
   if (!publish) return { status: 'PRINTIFY_DRAFT_CREATED', productId: created.id, shopId: String(targetShopId), shopifyPublished: false };
