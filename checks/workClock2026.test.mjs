@@ -55,3 +55,15 @@ test('Vercel CommonJS can load the shared clock without ERR_REQUIRE_ESM',()=>{
  assert.match(api,/from '\.\.\/src\/lib\/operations\/workClock2026\.js'/);
  assert.doesNotMatch(api,/workClock2026\.mjs/);
 });
+
+test('server and browser clock packages keep task catalogs and duration rules identical',()=>{
+ const require=createRequire(import.meta.url);
+ const server=require('../src/lib/operations/workClock2026.js');
+ assert.deepEqual(server.DANI_CLOCK_TASKS,DANI_CLOCK_TASKS);
+ const records=[
+   {started_at:'2026-10-17T09:00:00Z',ended_at:'2026-10-17T09:22:30Z',entry_status:'CLOSED',metadata:{study_code:'MAINTENANCE_PREP',task_code:'ACCESS_SAFETY'}},
+   {started_at:'2026-10-17T10:00:00Z',entry_status:'OPEN',metadata:{study_code:'PRINTIFY_MERCH',task_code:'PUBLISH_QA'}}
+ ];
+ const at=new Date('2026-10-17T10:11:00Z');
+ assert.deepEqual(server.summarizeEntries(records,at),summarizeEntries(records,at));
+});
