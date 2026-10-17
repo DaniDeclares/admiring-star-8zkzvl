@@ -1,5 +1,5 @@
 import React, {useEffect,useMemo,useState} from 'react';
-import {DANI_CLOCK_TASKS,minutesForEntry,summarizeEntries} from '../../lib/operations/workClock2026.js';
+import {DANI_CLOCK_TASKS,minutesForEntry,summarizeEntries} from '../../lib/operations/workClock2026.mjs';
 
 const DEFAULT_STUDY='MAINTENANCE_PREP';
 const fmt=minutes=>{const n=Math.max(0,Math.floor(minutes));return Math.floor(n/60)+'h '+String(n%60).padStart(2,'0')+'m';};
