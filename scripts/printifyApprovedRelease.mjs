@@ -134,10 +134,19 @@ export async function releaseApprovedClone({ token, sourceShopId, targetShopId, 
   const created = await printifyRequest(token, '/shops/' + targetShopId + '/products.json', {
     method: 'POST', body: clonePayload(source, approval), fetcher
   });
-  if (!created?.id) throw Error('PRINTIFY_CREATE_READBACK_MISSING');
-  const verified = await printifyRequest(token, '/shops/' + targetShopId + '/products/' + created.id + '.json', { fetcher });
+  if (!created?.id) {
+    return { status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: null, shopId: String(targetShopId), reasons: ['PRINTIFY_CREATE_READBACK_MISSING'] };
+  }
+  let verified;
+  try {
+    verified = await printifyRequest(token, '/shops/' + targetShopId + '/products/' + created.id + '.json', { fetcher });
+  } catch (error) {
+    return { status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: created.id, shopId: String(targetShopId), reasons: [error.message] };
+  }
   if (verified.id !== created.id || verified.title !== (approval.destinationTitle || source.title) ||
-      !(verified.tags || []).includes(tagFor(approval.canonicalSku))) throw Error('PRINTIFY_CREATE_READBACK_MISMATCH');
+      !(verified.tags || []).includes(tagFor(approval.canonicalSku))) {
+    return { status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: created.id, shopId: String(targetShopId), reasons: ['PRINTIFY_CREATE_READBACK_MISMATCH'] };
+  }
   if (!publish) return { status: 'PRINTIFY_DRAFT_CREATED', productId: created.id, shopId: String(targetShopId), shopifyPublished: false };
   await printifyRequest(token, '/shops/' + targetShopId + '/products/' + created.id + '/publish.json', {
     method: 'POST', body: { title: true, description: true, images: true, variants: true, tags: true }, fetcher
@@ -206,6 +215,7 @@ export async function publishApprovedExisting({ token, shopId, productId, approv
 
 export async function releaseApprovedBatch({ token, sourceShopId, targetShopId, products, execute = false, publish = false, fetcher = fetch }) {
   if (!Array.isArray(products) || !products.length || products.length > 30) throw Error('APPROVED_BATCH_SIZE_INVALID');
+  if (String(sourceShopId) === String(targetShopId) && execute && !publish) throw Error('EXECUTE_REQUIRES_PUBLISH_FOR_EXISTING');
   const seen = new Set();
   for (const product of products) {
     const name = nameKey(product.expectedSourceTitle);
@@ -249,6 +259,9 @@ async function main() {
     token, sourceShopId: manifest.sourceShopId, targetShopId: manifest.targetShopId,
     execute: process.argv.includes('--execute'), publish: process.argv.includes('--publish')
   };
+  if (!Array.isArray(manifest.products) && String(options.sourceShopId) === String(options.targetShopId) && options.execute && !options.publish) {
+    throw Error('EXECUTE_REQUIRES_PUBLISH_FOR_EXISTING');
+  }
   const result = Array.isArray(manifest.products)
     ? await releaseApprovedBatch({ ...options, products: manifest.products })
     : String(options.sourceShopId) === String(options.targetShopId)
