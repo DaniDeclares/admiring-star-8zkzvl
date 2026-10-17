@@ -78,14 +78,14 @@ test('successful create with null readback preserves reconcilable product ID', a
     if(url.endsWith('/shops.json')) return {ok:true,status:200,json:async()=>shops};
     if(url.endsWith('/shops/11/products/s1.json')) return {ok:true,status:200,json:async()=>source};
     if(url.includes('/shops/22/products.json?')) return {ok:true,status:200,json:async()=>({data:[],last_page:1})};
-    if(url.endsWith('/shops/22/products.json') && options.method==='POST') return {ok:true,status:200,json:async()=>({id:'created-null'})};
-    if(url.endsWith('/shops/22/products/created-null.json')) return {ok:true,status:200,json:async()=>null};
+    if(url.endsWith('/shops/22/products.json') && options.method==='POST') return {ok:true,status:200,json:async()=>({id:'creatednull'})};
+    if(url.endsWith('/shops/22/products/creatednull.json')) return {ok:true,status:200,json:async()=>null};
     throw Error('UNEXPECTED_URL '+url);
   };
   try {
     const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,fetcher:fakeFetch});
     assert.equal(result.status,'PRINTIFY_CREATE_UNCONFIRMED');
-    assert.equal(result.productId,'created-null');
+    assert.equal(result.productId,'creatednull');
     assert.deepEqual(result.reasons,['PRINTIFY_CREATE_READBACK_MISMATCH']);
   } finally {
     if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
