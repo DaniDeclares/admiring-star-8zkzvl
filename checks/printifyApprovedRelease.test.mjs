@@ -160,15 +160,15 @@ test('publish failure preserves created product ID and durable receipt', async (
     if(url.endsWith('/shops.json')) return {ok:true,status:200,json:async()=>shops};
     if(url.endsWith('/shops/11/products/s1.json')) return {ok:true,status:200,json:async()=>source};
     if(url.includes('/shops/22/products.json?')) return {ok:true,status:200,json:async()=>({data:[],last_page:1})};
-    if(url.endsWith('/shops/22/products.json') && options.method==='POST') return {ok:true,status:200,json:async()=>({id:'created-publish'})};
-    if(url.endsWith('/shops/22/products/created-publish.json')) return {ok:true,status:200,json:async()=>({...source,id:'created-publish',title:source.title,tags:['DANI-SKU-'+approval.canonicalSku],variants:[{...source.variants[0],price:3000}]})};
-    if(url.endsWith('/shops/22/products/created-publish/publish.json')) return {ok:false,status:503,json:async()=>({})};
+    if(url.endsWith('/shops/22/products.json') && options.method==='POST') return {ok:true,status:200,json:async()=>({id:'createdpublish'})};
+    if(url.endsWith('/shops/22/products/createdpublish.json')) return {ok:true,status:200,json:async()=>({...source,id:'createdpublish',title:source.title,tags:['DANI-SKU-'+approval.canonicalSku],variants:[{...source.variants[0],price:3000}]})};
+    if(url.endsWith('/shops/22/products/createdpublish/publish.json')) return {ok:false,status:503,json:async()=>({})};
     throw Error('UNEXPECTED_URL '+url);
   };
   try {
     const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,publish:true,fetcher:fakeFetch,reserve:async()=>({reserved:true,claimId:'claim-publish'}),receipt:async x=>receipts.push(x)});
     assert.equal(result.status,'PRINTIFY_PUBLISH_UNCONFIRMED');
-    assert.equal(result.productId,'created-publish');
+    assert.equal(result.productId,'createdpublish');
     assert.equal(receipts[0].state,'PRINTIFY_PUBLISH_UNCONFIRMED');
   } finally {
     if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
