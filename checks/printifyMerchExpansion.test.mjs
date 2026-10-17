@@ -28,3 +28,33 @@ test('without execute, only GET requests happen',async()=>{
  assert.equal(result.status,'READY_TO_CREATE_DRAFT');
  assert.ok(calls.every(x=>x.method==='GET'));
 });
+
+
+test('user-provided approved art expansion manifest never implies live Printify products', async () => {
+  const { readFileSync } = await import('node:fs');
+  const m=JSON.parse(readFileSync(new URL('../data/product-production/original-art-merch-expansion-20261016.json', import.meta.url), 'utf8'));
+  assert.equal(Object.keys(m.art).length,3);
+  assert.equal(m.products.length,6);
+  assert.equal(m.originalElevenProductsExisting,true);
+  assert.equal(m.policy.noAIReplacementArt,true);
+  assert.equal(m.policy.minimumApprovedNetMarginPct,30);
+  const skus=m.products.map(p=>p.sku);
+  assert.equal(new Set(skus).size,skus.length);
+  for(const [family,art] of Object.entries(m.art)) {
+    assert.match(art.originalSha256,/^[0-9a-f]{64}$/);
+    assert.ok(art.shopifyFilesUrl.startsWith('https://cdn.shopify.com/'));
+    assert.ok(art.sourceFile.endsWith('.png'),family);
+  }
+  for(const p of m.products){
+    assert.equal(p.status,'CANDIDATE_NOT_CREATED');
+    assert.equal(p.shopifyProductId,null);
+    assert.equal(p.printifyProductId,null);
+    assert.equal(p.ownerReleaseApproval,false);
+    assert.equal(p.itemPrintProofApproved,false);
+    assert.equal(p.actualCostVerified,false);
+    assert.equal(p.priceApprovedForThisProduct,false);
+    assert.equal(p.sourceOriginalArtSha256,m.art[p.artFamily].originalSha256);
+    if(p.audience==='PROVIDER_OPTIONAL_RETAIL')assert.equal(m.policy.issuedUniformsCompanyPaid,true);
+  }
+  assert.equal(m.holdForEmbroidery.length,2);
+});
