@@ -27,6 +27,11 @@ const fakeProvider = async (url, request) => {
   calls.push({ channel, key:request.headers['Idempotency-Key'], body:String(request.body) });
   if (mode === 'TIMEOUT') throw new Error('synthetic recipient@example.invalid private payload');
   if (mode === '403' || mode === '422') return { ok:false, status:Number(mode), json:async()=>({ name:'private-provider-body' }) };
+  if (mode === '429_ONCE') {
+    mode = 'ACCEPT';
+    return { ok:false, status:429, headers:{ get:name=>name.toLowerCase()==='retry-after'?'1':null },
+      json:async()=>({ name:'private-provider-body' }) };
+  }
   return { ok:true, json:async()=>channel === 'EMAIL' ? { id:'synthetic-email-'+calls.length } : { sid:'synthetic-sms-'+calls.length } };
 };
 const run = (overrides={}) => processNotificationOutbox({ db, env, renderEmail, fetchImpl:fakeProvider, ...overrides });
@@ -104,6 +109,17 @@ test('misclassified uncertain records cannot be cleared by configuration recover
 for (const status of ['403','422']) test(`provider ${status} is terminal and not replayed`,async()=>{
   await reset(); mode=status; const id=await insert(); await run(); await run(); const row=await get(id);
   assert.equal(row.delivery_outcome,'REJECTED'); assert.equal(calls.length,1); receipt('terminal '+status,[row]);
+});
+
+for (const channel of ['EMAIL','SMS']) test(`${channel} provider 429 clears only its rejected intent and retries`,async()=>{
+  await reset(); mode='429_ONCE'; const id=await insert(channel); await run(); let row=await get(id);
+  assert.equal(row.status,'FAILED'); assert.equal(row.delivery_outcome,'RETRYABLE'); assert.equal(row.attempts,1);
+  assert.equal(row.first_attempt_at,null); assert.equal(row.sms_attempt_started_at,null); assert.equal(calls.length,1);
+  await db.$executeRaw`update public.dd_event_outbox set available_at=now() where id=${id}::uuid`;
+  await run(); row=await get(id);
+  assert.equal(row.status,'PROCESSED'); assert.equal(row.delivery_outcome,'ACCEPTED'); assert.equal(row.attempts,2);
+  assert.equal(calls.length,2); assert.equal(Boolean(row.first_attempt_at),channel==='EMAIL');
+  assert.equal(Boolean(row.sms_attempt_started_at),channel==='SMS'); receipt('rate limit retry '+channel,[row]);
 });
 
 test('timeout after possible acceptance is held without replay or private errors',async()=>{
