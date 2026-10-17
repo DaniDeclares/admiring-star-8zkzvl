@@ -112,7 +112,7 @@ jobs:
           # Preserve this PR's new additive Owner HQ clock migration. The hybrid
           # assembly intentionally replays Production ledger history only; without
           # appending the candidate, CI could pass without executing its DDL.
-          clock_migration="20261017020000_owner_provider_work_clock_existing_ledger.sql"
+          clock_migration="20261017061526_owner_provider_work_clock_existing_ledger.sql"
           test -f "supabase/migrations/$clock_migration"
           cp "supabase/migrations/$clock_migration" "$RUNNER_TEMP/$clock_migration"
           python3 scripts/assemble_production_replay_workspace.py . "$RUNNER_TEMP/replay-migrations" --legacy-cutoff 20260930140500 --report assembly-report.json
