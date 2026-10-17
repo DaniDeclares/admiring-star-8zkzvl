@@ -17,12 +17,25 @@ export function AccountBadge({ session }) {
     if(busy)return;
     setBusy(true);setError('');
     try {
+      let redirected=false;
+      const redirectAfterSignOut=()=>{
+        if(redirected)return;
+        redirected=true;
+        window.location.assign('/portal/login');
+      };
+      const signOutOperation=supabase.auth.signOut({scope:'local'});
+      // The SDK operation cannot be cancelled. If it completes after the
+      // visible timeout, redirect anyway so a shared device never retains
+      // the prior workspace on screen.
+      void signOutOperation.then(({error:lateError})=>{
+        if(!lateError)redirectAfterSignOut();
+      }).catch(()=>{});
       const {error:authError}=await Promise.race([
-        supabase.auth.signOut({scope:'local'}),
+        signOutOperation,
         new Promise((_,reject)=>window.setTimeout(()=>reject(new Error('Sign-out timed out. Please retry.')),12000))
       ]);
       if(authError)throw authError;
-      window.location.assign('/portal/login');
+      redirectAfterSignOut();
     } catch(e) {
       setError(e?.message||'Sign-out failed. Please retry.');
       setBusy(false);
@@ -50,10 +63,10 @@ export function useProviderWorkspace() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const hydratedRef = useRef(false);
+  const snapshotRef = useRef(null);
 
   const load = useCallback(async () => {
-    if (!hydratedRef.current) setLoading(true);
+    if (!snapshotRef.current) setLoading(true);
     setError('');
     try {
       const sessionResult = await Promise.race([
@@ -64,6 +77,7 @@ export function useProviderWorkspace() {
       const activeSession = sessionResult.data?.session;
       if (!activeSession) {
         setSession(null);
+        snapshotRef.current = null;
         setSnapshot(null);
         setError('Please sign in to access your DANI DECLARES workspace.');
         return;
@@ -86,6 +100,7 @@ export function useProviderWorkspace() {
       const body = await response.json().catch(() => ({}));
       if (response.status === 401 || response.status === 403) {
         setSession(null);
+        snapshotRef.current = null;
         setSnapshot(null);
         setError(body.error || 'Your DANI DECLARES session expired. Please sign in again.');
         return;
@@ -93,6 +108,7 @@ export function useProviderWorkspace() {
       if (!response.ok || !body.success) {
         throw new Error(body.error || `Portal data could not be loaded (HTTP ${response.status}).`);
       }
+      snapshotRef.current = body;
       setSnapshot(body);
     } catch (e) {
       const messageText = e?.name === 'AbortError'
@@ -100,7 +116,6 @@ export function useProviderWorkspace() {
         : (e?.message || 'Portal data could not be loaded.');
       setError(messageText);
     } finally {
-      hydratedRef.current=true;
       setLoading(false);
     }
   }, []);
