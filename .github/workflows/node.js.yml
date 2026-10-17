@@ -42,6 +42,9 @@ jobs:
       - name: ✅ Verify Printify automatic release gates
         run: node --test checks/printifyApprovedRelease.test.mjs
 
+      - name: ✅ Validate provider/customer merch expansion gates
+        run: node --test checks/printifyMerchExpansion.test.mjs
+
       - name: ✅ Run Stripe crosswalk regression
         run: node --test scripts/auditStripeCanonicalCrosswalk.test.mjs
 

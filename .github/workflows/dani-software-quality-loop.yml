@@ -31,6 +31,8 @@ jobs:
         run: npm test -- --watchAll=false
       - name: Printify original-artwork release regression
         run: node --test checks/printifyApprovedRelease.test.mjs
+      - name: Provider/customer merch expansion regression
+        run: node --test checks/printifyMerchExpansion.test.mjs
       - name: Stripe crosswalk regression
         run: node --test scripts/auditStripeCanonicalCrosswalk.test.mjs
       - name: Production build
