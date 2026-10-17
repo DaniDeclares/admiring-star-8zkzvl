@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {DANI_CLOCK_TASKS,allowedStudyTask,clockAccess,minutesForEntry,summarizeEntries} from '../src/lib/operations/workClock2026.mjs';
 test('owner cleaning and revenue timing categories remain separate',()=>{
   assert.equal(allowedStudyTask('MAINTENANCE_PREP','ACCESS_SAFETY'),true);
@@ -27,4 +28,19 @@ test('paused intervals exclude breaks and keep labor categories separated',()=>{
 test('closed interval missing end cannot accrue more time',()=>{
   assert.equal(minutesForEntry({started_at:'2026-10-17T10:00:00Z',entry_status:'CLOSED'},new Date('2026-10-17T18:00:00Z')),0);
   assert.equal(minutesForEntry({started_at:'not-a-date',entry_status:'OPEN'}),0);
+});
+
+test('owner clock endpoint denies provider access and avoids provider job mutation',()=>{
+ const api=readFileSync(new URL('../api-handlers/portal-operations.js',import.meta.url),'utf8');
+ const field=api.split("if (action === 'field_event') {")[1]?.split("if (action === 'assignment_response') {")[0];
+ assert.ok(field && !field.includes('applyWorkClockAction'),'Field actions must stay unchanged until an atomic provider transition exists.');
+ const get=api.split("req.query?.workClock === '1'")[1]?.split("if (req.method === 'GET')")[0];
+ const post=api.split("action === 'work_clock'")[1]?.split("if (action === 'estimate_decision')")[0];
+ assert.match(get||'',/context.role !== 'owner'/);
+ assert.match(post||'',/context.role !== 'owner'/);
+});
+test('owner clock remains visible if HQ summary fails',()=>{
+ const page=readFileSync(new URL('../src/pages/portal/OwnerHQPage.jsx',import.meta.url),'utf8');
+ assert.match(page,/if \(error\) return <main[^\n]+<WorkClock mode="owner"/);
+ assert.match(page,/if \(loading\) return <main[^\n]+<WorkClock mode="owner"/);
 });
