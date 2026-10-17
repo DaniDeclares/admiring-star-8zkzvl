@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
 import {DANI_CLOCK_TASKS,allowedStudyTask,clockAccess,minutesForEntry,summarizeEntries} from '../src/lib/operations/workClock2026.mjs';
 test('owner cleaning and revenue timing categories remain separate',()=>{
   assert.equal(allowedStudyTask('MAINTENANCE_PREP','ACCESS_SAFETY'),true);
@@ -43,4 +44,26 @@ test('owner clock remains visible if HQ summary fails',()=>{
  const page=readFileSync(new URL('../src/pages/portal/OwnerHQPage.jsx',import.meta.url),'utf8');
  assert.match(page,/if \(error\) return <main[^\n]+<WorkClock mode="owner"/);
  assert.match(page,/if \(loading\) return <main[^\n]+<WorkClock mode="owner"/);
+});
+
+test('Vercel CommonJS can load the shared clock without ERR_REQUIRE_ESM',()=>{
+ const require=createRequire(import.meta.url);
+ const clock=require('../src/lib/operations/workClock2026.js');
+ assert.equal(clock.allowedStudyTask('MAINTENANCE_PREP','ACCESS_SAFETY'),true);
+ assert.equal(typeof clock.applyWorkClockAction,'function');
+ const api=readFileSync(new URL('../api-handlers/portal-operations.js',import.meta.url),'utf8');
+ assert.match(api,/from '\.\.\/src\/lib\/operations\/workClock2026\.js'/);
+ assert.doesNotMatch(api,/workClock2026\.mjs/);
+});
+
+test('server and browser clock packages keep task catalogs and duration rules identical',()=>{
+ const require=createRequire(import.meta.url);
+ const server=require('../src/lib/operations/workClock2026.js');
+ assert.deepEqual(server.DANI_CLOCK_TASKS,DANI_CLOCK_TASKS);
+ const records=[
+   {started_at:'2026-10-17T09:00:00Z',ended_at:'2026-10-17T09:22:30Z',entry_status:'CLOSED',metadata:{study_code:'MAINTENANCE_PREP',task_code:'ACCESS_SAFETY'}},
+   {started_at:'2026-10-17T10:00:00Z',entry_status:'OPEN',metadata:{study_code:'PRINTIFY_MERCH',task_code:'PUBLISH_QA'}}
+ ];
+ const at=new Date('2026-10-17T10:11:00Z');
+ assert.deepEqual(server.summarizeEntries(records,at),summarizeEntries(records,at));
 });

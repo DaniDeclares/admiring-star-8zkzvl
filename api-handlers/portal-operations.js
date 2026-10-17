@@ -1,5 +1,5 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
-import { getWorkClockSnapshot, applyWorkClockAction } from '../src/lib/operations/workClock2026.mjs';
+import { getWorkClockSnapshot, applyWorkClockAction } from '../src/lib/operations/workClock2026.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
 import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
