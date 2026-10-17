@@ -52,7 +52,6 @@ export default function ProviderFieldPage() {
     setLocalError('');
     try {
       const location = await getLocation();
-      const governedAction = eventType === 'WORK_STARTED' ? 'start_my_job' : eventType === 'WORK_COMPLETED' ? 'complete_my_job' : null;
       const fieldPayload={jobId:assignment.job_id,assignmentId:assignment.id,eventType,...location};
       if(eventType==='WORK_STARTED'){
         if(await act('start_my_job',{jobId:assignment.job_id})===false)return;
@@ -119,7 +118,7 @@ export default function ProviderFieldPage() {
               return <button key={action.event} disabled={busy[key]} onClick={() => sendEvent(assignment, action.event)}>{busy[key] ? 'Updating…' : action.label}</button>;
             })}
           </div>
-          {assignment.assignment_status==='ACCEPTED'&&<WorkClock mode="provider" session={session} jobId={assignment.job_id} assignmentId={assignment.id}/>}
+          {assignment.assignment_status==='ACCEPTED'&&<WorkClock mode="provider" session={session} jobId={assignment.job_id}/>}
         </Card>;
       }) : <Card title="Today"><Empty>No dispatched work is waiting for you.</Empty></Card>}
 
