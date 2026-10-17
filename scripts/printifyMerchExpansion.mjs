@@ -7,6 +7,43 @@ const finiteInt = n => Number.isSafeInteger(n) && n >= 0;
 const tag = sku => 'DANI-SKU-' + String(sku).toUpperCase();
 const API = 'https://api.printify.com/v1';
 
+function supplierShippingProfile(shipping, variantId, countryCode) {
+  const country = String(countryCode || '').toUpperCase();
+  if (!country) return null;
+  return (shipping?.profiles || []).find(profile =>
+    Array.isArray(profile.variant_ids) && profile.variant_ids.includes(variantId) &&
+    Array.isArray(profile.countries) && profile.countries.map(String).map(x => x.toUpperCase()).includes(country)
+  ) || null;
+}
+
+function explicitlyUnpublished(product) {
+  const status = String(product?.publishing_status || product?.publication_status || '').toLowerCase();
+  return ['draft', 'unpublished', 'not_published'].includes(status) || product?.published === false;
+}
+
+function sameDraftPayload(product, payload) {
+  if (Number(product?.blueprint_id) !== Number(payload.blueprint_id) ||
+      Number(product?.print_provider_id) !== Number(payload.print_provider_id)) return false;
+  const enabled = (product?.variants || []).filter(v => v.is_enabled === true);
+  if (enabled.length !== payload.variants.length) return false;
+  if (!payload.variants.every(expected => enabled.some(actual =>
+    Number(actual.id) === Number(expected.id) && Number(actual.price) === Number(expected.price)
+  ))) return false;
+  const expectedIds = new Set(payload.variants.map(v => Number(v.id)));
+  const simplifyAreas = areas => (areas || [])
+    .filter(area => (area.variant_ids || []).some(id => expectedIds.has(Number(id))))
+    .map(area => ({
+      variant_ids: (area.variant_ids || []).map(Number).filter(id => expectedIds.has(id)).sort((a,b) => a-b),
+      placeholders: (area.placeholders || []).map(p => ({
+        position: p.position,
+        images: (p.images || []).map(i => ({
+          id: String(i.id), x: Number(i.x), y: Number(i.y), scale: Number(i.scale), angle: Number(i.angle || 0)
+        })).sort((a,b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))
+      })).sort((a,b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))
+    })).sort((a,b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  return JSON.stringify(simplifyAreas(product?.print_areas)) === JSON.stringify(simplifyAreas(payload.print_areas));
+}
+
 export async function inspectBlueprint({token, blueprintId, providerId, fetcher=fetch}) {
   if (!Number.isInteger(blueprintId) || blueprintId <= 0 || !Number.isInteger(providerId) || providerId <= 0) throw Error('BLUEPRINT_OR_PROVIDER_INVALID');
   const root = API + '/catalog/blueprints/' + blueprintId + '/print_providers/' + providerId;
@@ -47,10 +84,15 @@ export function assessExpansion({spec,candidate,shops,original,existing,catalog}
   for(const selected of spec.variants||[]) {
     const v=catalog.variants.find(x=>x.id===selected.id);
     if(!v || v.is_available===false || !Number.isInteger(selected.id)) {hold.push('CATALOG_VARIANT_UNAVAILABLE');continue;}
-    // Printify's catalog may describe cost as price (cents); never infer missing fields.
-    const cost=finiteInt(v.cost)?v.cost:v.price;
+    // Catalog variant retail fields are not supplier fulfillment-cost evidence.
+    const cost=selected.verifiedUnitCostCents;
     const shipping=selected.verifiedShippingCents;
-    if(!finiteInt(cost) || !finiteInt(shipping) || !selected.shippingEvidenceId || !selected.printAreaCompatible) {hold.push('UNIT_COST_SHIPPING_OR_PRINT_AREA_UNVERIFIED');continue;}
+    const profile=supplierShippingProfile(catalog.shipping,selected.id,spec.shippingDestinationCountry);
+    const profileCost=profile?.first_item?.cost;
+    const profileCurrency=String(profile?.first_item?.currency || '').toUpperCase();
+    if(!finiteInt(cost) || !selected.unitCostEvidenceId || !finiteInt(shipping) || !selected.shippingEvidenceId ||
+        !profile || !finiteInt(profileCost) || profileCurrency!=='USD' || profileCost!==shipping ||
+        !selected.printAreaCompatible) {hold.push('UNIT_COST_SHIPPING_OR_PRINT_AREA_UNVERIFIED');continue;}
     if(finiteInt(econ.approved_price_cents) && finiteInt(econ.fee_reserve_pct) && finiteInt(econ.min_net_margin_pct)) {
       const fees=Math.ceil(econ.approved_price_cents*econ.fee_reserve_pct/100);
       const net=econ.approved_price_cents-cost-shipping-fees;
@@ -81,10 +123,30 @@ export async function createApprovedExpansionDraft({token,spec,candidate,execute
   // Reserve unique SKU in DANI's existing ledger before any external mutation.
   const claimed=await reserve({candidateId:candidate.id,sku:spec.sku,expectedPublicationState:'READY'});
   if(!claimed?.reserved || !claimed.claimId) return {...plan,status:'HOLD',reasons:['IDEMPOTENCY_RESERVATION_DENIED']};
-  const created=await printifyRequest(token,'/shops/'+spec.shopId+'/products.json',{method:'POST',body:draftPayload(spec,candidate.economics_snapshot.approved_price_cents),fetcher});
-  if(!created?.id) throw Error('PRINTIFY_CREATE_UNCERTAIN_RECONCILE_BEFORE_RETRY');
-  const check=await printifyRequest(token,'/shops/'+spec.shopId+'/products/'+created.id+'.json',{fetcher});
-  if(check.id!==created.id || !check.tags?.includes(tag(spec.sku)) || check.visible===true) throw Error('PRINTIFY_DRAFT_READBACK_MISMATCH_RECONCILE_BEFORE_RETRY');
+  const payload=draftPayload(spec,candidate.economics_snapshot.approved_price_cents);
+  const created=await printifyRequest(token,'/shops/'+spec.shopId+'/products.json',{method:'POST',body:payload,fetcher});
+  const unconfirmed=async(productId,reasons)=>{
+    const result={status:'PRINTIFY_CREATE_UNCONFIRMED',sku:spec.sku,printifyProductId:productId || null,shopId:String(spec.shopId),reasons,shopifyPublished:'UNVERIFIED'};
+    try {
+      await receipt({claimId:claimed.claimId,sku:spec.sku,printifyProductId:productId || null,state:'PRINTIFY_CREATE_UNCONFIRMED',reasons});
+    } catch {
+      result.reasons=[...reasons,'DURABLE_RECEIPT_WRITE_FAILED'];
+    }
+    return result;
+  };
+  if(!created?.id) return unconfirmed(null,['PRINTIFY_CREATE_RESPONSE_ID_MISSING']);
+  let check;
+  try {
+    check=await printifyRequest(token,'/shops/'+spec.shopId+'/products/'+created.id+'.json',{fetcher});
+  } catch(error) {
+    return unconfirmed(created.id,[error.message]);
+  }
+  const mismatch=[];
+  if(check.id!==created.id) mismatch.push('PRODUCT_ID_MISMATCH');
+  if(!check.tags?.includes(tag(spec.sku))) mismatch.push('CANONICAL_SKU_TAG_MISSING');
+  if(!explicitlyUnpublished(check)) mismatch.push('PUBLICATION_STATE_UNCONFIRMED');
+  if(!sameDraftPayload(check,payload)) mismatch.push('CREATED_PAYLOAD_MISMATCH');
+  if(mismatch.length) return unconfirmed(created.id,mismatch);
   await receipt({claimId:claimed.claimId,sku:spec.sku,printifyProductId:created.id,state:'PRINTIFY_DRAFT_CREATED_NOT_PUBLISHED'});
   return {status:'PRINTIFY_DRAFT_CREATED_NOT_PUBLISHED',sku:spec.sku,printifyProductId:created.id,shopifyPublished:false};
 }
