@@ -1,5 +1,5 @@
 import React, {useEffect,useMemo,useState} from 'react';
-import clockModule from '../../lib/operations/workClock2026.js';
+const clockModule = require('../../lib/operations/workClock2026.js');
 const { DANI_CLOCK_TASKS, minutesForEntry, summarizeEntries } = clockModule;
 
 const DEFAULT_STUDY='MAINTENANCE_PREP';
