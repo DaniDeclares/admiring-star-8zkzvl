@@ -22,7 +22,7 @@ test('created draft uses explicit unpublished state and exact payload readback',
  const prior=process.env.DANI_PRINTIFY_SINGLE_WRITER;
  process.env.DANI_PRINTIFY_SINGLE_WRITER='true';
  const receipts=[];
- const expectedProduct={id:'new-1',title:spec.title,tags:['DANI-SKU-'+spec.sku,'customer-retail'],blueprint_id:1,print_provider_id:2,published:false,visible:true,
+ const expectedProduct={id:'new1',title:spec.title,tags:['DANI-SKU-'+spec.sku,'customer-retail'],blueprint_id:1,print_provider_id:2,published:false,visible:true,
    variants:[{id:20,price:2499,is_enabled:true,is_default:true}],
    print_areas:[{variant_ids:[20],placeholders:[{position:'front',images:[{id:'approved',x:.5,y:.5,scale:1,angle:0}]}]}]};
  const fetcher=async(url,options={})=>{let data;
@@ -31,8 +31,8 @@ test('created draft uses explicit unpublished state and exact payload readback',
    else if(url.includes('/shops/2/products.json?')) data={data:[],last_page:1};
    else if(url.endsWith('/variants.json')) data={variants:catalog.variants};
    else if(url.endsWith('/shipping.json')) data=catalog.shipping;
-   else if(url.endsWith('/shops/2/products.json') && options.method==='POST') data={id:'new-1'};
-   else if(url.endsWith('/shops/2/products/new-1.json')) data=expectedProduct;
+   else if(url.endsWith('/shops/2/products.json') && options.method==='POST') data={id:'new1'};
+   else if(url.endsWith('/shops/2/products/new1.json')) data=expectedProduct;
    else throw Error('UNEXPECTED_URL: '+url);
    return {ok:true,status:200,json:async()=>data};
  };
@@ -40,7 +40,7 @@ test('created draft uses explicit unpublished state and exact payload readback',
    const result=await createApprovedExpansionDraft({token:'test',spec,candidate,execute:true,fetcher,
      reserve:async()=>({reserved:true,claimId:'claim-1'}),receipt:async x=>receipts.push(x)});
    assert.equal(result.status,'PRINTIFY_DRAFT_CREATED_NOT_PUBLISHED');
-   assert.equal(result.printifyProductId,'new-1');
+   assert.equal(result.printifyProductId,'new1');
    assert.equal(receipts[0].state,'PRINTIFY_DRAFT_CREATED_NOT_PUBLISHED');
  } finally {
    if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
@@ -56,8 +56,8 @@ test('post-create payload mismatch is receipted as unconfirmed without retry',as
    else if(url.includes('/shops/2/products.json?')) data={data:[],last_page:1};
    else if(url.endsWith('/variants.json')) data={variants:catalog.variants};
    else if(url.endsWith('/shipping.json')) data=catalog.shipping;
-   else if(url.endsWith('/shops/2/products.json') && options.method==='POST') data={id:'new-2'};
-   else if(url.endsWith('/shops/2/products/new-2.json')) data={id:'new-2',tags:['DANI-SKU-'+spec.sku],blueprint_id:1,print_provider_id:2,published:false,variants:[{id:20,price:1,is_enabled:true}],print_areas:[]};
+   else if(url.endsWith('/shops/2/products.json') && options.method==='POST') data={id:'new2'};
+   else if(url.endsWith('/shops/2/products/new2.json')) data={id:'new2',tags:['DANI-SKU-'+spec.sku],blueprint_id:1,print_provider_id:2,published:false,variants:[{id:20,price:1,is_enabled:true}],print_areas:[]};
    else throw Error('UNEXPECTED_URL: '+url);
    return {ok:true,status:200,json:async()=>data};
  };
@@ -65,7 +65,7 @@ test('post-create payload mismatch is receipted as unconfirmed without retry',as
    const result=await createApprovedExpansionDraft({token:'test',spec,candidate,execute:true,fetcher,
      reserve:async()=>({reserved:true,claimId:'claim-2'}),receipt:async x=>receipts.push(x)});
    assert.equal(result.status,'PRINTIFY_CREATE_UNCONFIRMED');
-   assert.equal(result.printifyProductId,'new-2');
+   assert.equal(result.printifyProductId,'new2');
    assert.ok(result.reasons.includes('CREATED_PAYLOAD_MISMATCH'));
    assert.equal(receipts[0].state,'PRINTIFY_CREATE_UNCONFIRMED');
  } finally {
@@ -79,7 +79,7 @@ test('without execute, only GET requests happen',async()=>{
  else if(url.endsWith('/shops/1/products/old.json')) data=original;
  else if(url.includes('/shops/2/products.json?')) data={data:[],last_page:1};
  else if(url.endsWith('/variants.json')) data={variants:catalog.variants};
- else if(url.endsWith('/shipping.json')) data={profiles:[]};
+ else if(url.endsWith('/shipping.json')) data=catalog.shipping;
  else throw Error('UNEXPECTED_URL: '+url);
  return {ok:true,status:200,json:async()=>data};};
  const result=await createApprovedExpansionDraft({token:'test',spec,candidate,fetcher});
