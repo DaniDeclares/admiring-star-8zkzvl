@@ -937,6 +937,7 @@ export default async function handler(req, res) {
       const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
+      if (estimate.is_test === true) return fail(res, 'TEST_ESTIMATE_EXTERNAL_ACTION_BLOCKED: synthetic quotes cannot issue external invoices or customer notifications.', 409);
       if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'Only READY_TO_SEND estimates can be delivered.', 409);
       if (estimate.economics_status !== 'PASS') return fail(res, 'Quote economics must PASS before delivery.', 409);
       if (!['PENDING_PAYMENT','READY'].includes(String(estimate.assignment_readiness_status || '').toUpperCase())) return fail(res, 'Quote fulfillment must be commercially resolved before delivery.', 409);
@@ -999,6 +1000,7 @@ export default async function handler(req, res) {
       const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
+      if (estimate.is_test === true) return fail(res, 'TEST_ESTIMATE_EXTERNAL_ACTION_BLOCKED: synthetic quotes cannot issue external invoices or customer notifications.', 409);
       if (!isStaffRequest) {
         if (context.role !== 'customer') return fail(res, 'Customer portal payment action required.', 403);
         if (!estimate.service_request_id) return fail(res, 'This quote is not linked to a customer request.', 409);
