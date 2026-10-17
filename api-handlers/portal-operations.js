@@ -1,4 +1,5 @@
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
+import { getWorkClockSnapshot, applyWorkClockAction } from '../src/lib/operations/workClock2026.mjs';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
 import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
@@ -589,6 +590,11 @@ export default async function handler(req, res) {
   try {
     const context = await authenticatePortalRequest(req);
     if (context.error) return fail(res, context.error, context.status);
+    if (req.method === 'GET' && req.query?.workClock === '1') {
+      if (context.role !== 'owner' || !context.isStaff) return fail(res, 'Owner HQ clock access required.', 403);
+      try { return ok(res, await getWorkClockSnapshot(context, null)); }
+      catch (error) { return fail(res, error.message || 'Owner time clock unavailable.', error.status || 500); }
+    }
     if (req.method === 'GET') {
       const notificationPreferences = await getNotificationPreferences(context.supabase, context.user.id);
       if (!context.isStaff) {
@@ -635,6 +641,11 @@ export default async function handler(req, res) {
     }
     if (req.method !== 'POST') return fail(res, 'Method not allowed', 405);
     const { action, ...payload } = req.body || {};
+    if (action === 'work_clock') {
+      if (context.role !== 'owner' || !context.isStaff) return fail(res, 'Owner HQ clock access required.', 403);
+      try { return ok(res, await applyWorkClockAction(context, payload)); }
+      catch (error) { return fail(res, error.message || 'Owner time clock unavailable.', error.status || 500); }
+    }
     if (action === 'estimate_decision') {
       if (context.isStaff || !context.identity) return fail(res, 'Customer portal action required.', 403);
       const estimateId = String(payload.estimateId || '').trim();

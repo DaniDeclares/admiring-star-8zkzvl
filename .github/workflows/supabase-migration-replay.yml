@@ -109,10 +109,19 @@ jobs:
           # version if needed). Tester-only and superseded source files from the cutoff onward are excluded and listed in
           # supabase/production-ledger/excluded-source-files.txt. A ledger row without verified SQL fails this step.
           # Only this disposable workspace changes; no repo file is edited.
+          # Preserve this PR's new additive Owner HQ clock migration. The hybrid
+          # assembly intentionally replays Production ledger history only; without
+          # appending the candidate, CI could pass without executing its DDL.
+          clock_migration="20261017061526_owner_provider_work_clock_existing_ledger.sql"
+          test -f "supabase/migrations/$clock_migration"
+          cp "supabase/migrations/$clock_migration" "$RUNNER_TEMP/$clock_migration"
           python3 scripts/assemble_production_replay_workspace.py . "$RUNNER_TEMP/replay-migrations" --legacy-cutoff 20260930140500 --report assembly-report.json
           rm -f supabase/migrations/*.sql
           cp "$RUNNER_TEMP"/replay-migrations/*.sql supabase/migrations/
-          echo "Hybrid replay set: $(ls supabase/migrations/*.sql | wc -l) files"
+          test ! -e "supabase/migrations/$clock_migration"
+          cp "$RUNNER_TEMP/$clock_migration" "supabase/migrations/$clock_migration"
+          echo "Hybrid replay plus clock candidate: $(ls supabase/migrations/*.sql | wc -l) files"
+          test -f "supabase/migrations/$clock_migration"
 
       - name: Normalize provider staging guard formatting (replay workspace only)
         run: |

@@ -39,6 +39,9 @@ jobs:
       - name: ✅ Run tests
         run: npm test -- --watchAll=false
 
+      - name: ✅ Work clock time study and auth regression
+        run: node --test checks/workClock2026.test.mjs
+
       - name: ✅ Run Stripe crosswalk regression
         run: node --test scripts/auditStripeCanonicalCrosswalk.test.mjs
 
