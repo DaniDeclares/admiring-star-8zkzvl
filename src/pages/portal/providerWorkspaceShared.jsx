@@ -10,9 +10,9 @@ export function statusLabel(value) { return value ? value.replaceAll('_', ' ') :
 export function Requirement({ label, ok, detail }) { return <div className="portal-requirement"><span className={`portal-requirement-dot ${ok ? 'ok' : 'pending'}`} />{label}<small>{detail}</small></div>; }
 export function LockedCard({ title, children }) { return <Card title={title}><p className="portal-note">{children} <Link to="/portal">Check your application status</Link>.</p></Card>; }
 export function AccountBadge({ session }) {
-  if (!session?.user) return null;
   const [busy,setBusy] = useState(false);
   const [error,setError] = useState('');
+  if (!session?.user) return null;
   const signOut = async () => {
     if(busy)return;
     setBusy(true);setError('');
