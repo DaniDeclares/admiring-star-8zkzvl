@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient.js';
 import { captureServiceLifecycle } from '../../lib/posthogAnalytics.js';
@@ -11,8 +11,24 @@ export function Requirement({ label, ok, detail }) { return <div className="port
 export function LockedCard({ title, children }) { return <Card title={title}><p className="portal-note">{children} <Link to="/portal">Check your application status</Link>.</p></Card>; }
 export function AccountBadge({ session }) {
   if (!session?.user) return null;
-  const signOut = async () => { await supabase.auth.signOut(); window.location.href = '/portal/login'; };
-  return <div className="portal-account-badge">Signed in as <strong>{session.user.email}</strong><button type="button" onClick={signOut}>Sign out</button></div>;
+  const [busy,setBusy] = useState(false);
+  const [error,setError] = useState('');
+  const signOut = async () => {
+    if(busy)return;
+    setBusy(true);setError('');
+    try {
+      const {error:authError}=await Promise.race([
+        supabase.auth.signOut({scope:'local'}),
+        new Promise((_,reject)=>window.setTimeout(()=>reject(new Error('Sign-out timed out. Please retry.')),12000))
+      ]);
+      if(authError)throw authError;
+      window.location.assign('/portal/login');
+    } catch(e) {
+      setError(e?.message||'Sign-out failed. Please retry.');
+      setBusy(false);
+    }
+  };
+  return <div className="portal-account-badge">Signed in as <strong>{session.user.email}</strong><button type="button" onClick={signOut} disabled={busy}>{busy?'Signing out…':'Sign out'}</button>{error&&<span role="alert">{error}</span>}</div>;
 }
 export function buildProviderRequirements(application, capabilities) {
   const caps = capabilities || [];
@@ -34,12 +50,16 @@ export function useProviderWorkspace() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const hydratedRef = useRef(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!hydratedRef.current) setLoading(true);
     setError('');
     try {
-      const sessionResult = await supabase.auth.getSession();
+      const sessionResult = await Promise.race([
+        supabase.auth.getSession(),
+        new Promise((_,reject)=>window.setTimeout(()=>reject(new Error('Authentication check timed out. Please retry or sign out.')),12000))
+      ]);
       if (sessionResult.error) throw sessionResult.error;
       const activeSession = sessionResult.data?.session;
       if (!activeSession) {
@@ -80,6 +100,7 @@ export function useProviderWorkspace() {
         : (e?.message || 'Portal data could not be loaded.');
       setError(messageText);
     } finally {
+      hydratedRef.current=true;
       setLoading(false);
     }
   }, []);
