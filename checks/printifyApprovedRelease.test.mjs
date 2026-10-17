@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { assessApprovedClone, assessApprovedExistingPublication, publishApprovedExisting, releaseApprovedClone } from '../scripts/printifyApprovedRelease.mjs';
+import { assessApprovedClone, assessApprovedExistingPublication, publishApprovedExisting, releaseApprovedBatch, releaseApprovedClone } from '../scripts/printifyApprovedRelease.mjs';
 const shops = [
   { id: '11', title: 'Original Printify Store', sales_channel: 'disconnected' },
   { id: '22', title: 'My Store 2', sales_channel: 'Shopify' }
@@ -50,6 +50,32 @@ test('dry-run inspects without mutating', async () => {
   const result = await releaseApprovedClone({token:'fake', sourceShopId:'11', targetShopId:'22', productId:'s1', approval, fetcher:fakeFetch});
   assert.equal(result.status,'READY_TO_CREATE');
   assert.equal(urls.length,3);
+});
+test('successful create with failed readback returns reconcilable product ID', async () => {
+  const prior=process.env.DANI_PRINTIFY_SINGLE_WRITER;
+  process.env.DANI_PRINTIFY_SINGLE_WRITER='true';
+  const fakeFetch=async(url,options={})=>{
+    if(url.endsWith('/shops.json')) return {ok:true,status:200,json:async()=>shops};
+    if(url.endsWith('/shops/11/products/s1.json')) return {ok:true,status:200,json:async()=>source};
+    if(url.includes('/shops/22/products.json?')) return {ok:true,status:200,json:async()=>({data:[],last_page:1})};
+    if(url.endsWith('/shops/22/products.json') && options.method==='POST') return {ok:true,status:200,json:async()=>({id:'created-1'})};
+    if(url.endsWith('/shops/22/products/created-1.json')) return {ok:false,status:503,json:async()=>({})};
+    throw Error('UNEXPECTED_URL '+url);
+  };
+  try {
+    const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,fetcher:fakeFetch});
+    assert.equal(result.status,'PRINTIFY_CREATE_UNCONFIRMED');
+    assert.equal(result.productId,'created-1');
+    assert.deepEqual(result.reasons,['PRINTIFY_HTTP_503']);
+  } finally {
+    if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
+  }
+});
+test('same-shop execute without publish fails loudly before any API call', async () => {
+  await assert.rejects(
+    releaseApprovedBatch({token:'fake',sourceShopId:'22',targetShopId:'22',products:[{expectedSourceTitle:'x',approval:{}}],execute:true,publish:false,fetcher:async()=>{throw Error('API_SHOULD_NOT_RUN')}}),
+    /EXECUTE_REQUIRES_PUBLISH_FOR_EXISTING/
+  );
 });
 
 const existingSource = {...source, visible: false, variants: source.variants.map(v=>v.id===56 ? {...v,is_enabled:false,price:3000} : {...v,price:3000})};
