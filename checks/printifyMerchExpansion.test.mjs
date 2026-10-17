@@ -106,8 +106,8 @@ test('null readback and success-receipt failure preserve the product identity',a
    else if(url.includes('/shops/2/products.json?')) data={data:[],last_page:1};
    else if(url.endsWith('/variants.json')) data={variants:catalog.variants};
    else if(url.endsWith('/shipping.json')) data=catalog.shipping;
-   else if(url.endsWith('/shops/2/products.json') && options.method==='POST') data={id:'new-receipt'};
-   else if(url.endsWith('/shops/2/products/new-receipt.json')) data=readback;
+   else if(url.endsWith('/shops/2/products.json') && options.method==='POST') data={id:'newreceipt'};
+   else if(url.endsWith('/shops/2/products/newreceipt.json')) data=readback;
    else throw Error('UNEXPECTED_URL: '+url);
    return {ok:true,status:200,json:async()=>data};
  };
@@ -116,14 +116,14 @@ test('null readback and success-receipt failure preserve the product identity',a
    const nullResult=await createApprovedExpansionDraft({token:'test',spec,candidate,execute:true,fetcher:makeFetcher(null),
      reserve:async()=>({reserved:true,claimId:'claim-null'}),receipt:async x=>nullReceipts.push(x)});
    assert.equal(nullResult.status,'PRINTIFY_CREATE_UNCONFIRMED');
-   assert.equal(nullResult.printifyProductId,'new-receipt');
-   const good={id:'new-receipt',title:spec.title,tags:['DANI-SKU-'+spec.sku,'customer-retail'],blueprint_id:1,print_provider_id:2,visible:false,
+   assert.equal(nullResult.printifyProductId,'newreceipt');
+   const good={id:'newreceipt',title:spec.title,tags:['DANI-SKU-'+spec.sku,'customer-retail'],blueprint_id:1,print_provider_id:2,visible:false,
      variants:[{id:20,price:2499,is_enabled:true,is_default:true}],
      print_areas:[{variant_ids:[20],placeholders:[{position:'front',images:[{id:'approved',x:.5,y:.5,scale:1,angle:0}]}]}]};
    const receiptResult=await createApprovedExpansionDraft({token:'test',spec,candidate,execute:true,fetcher:makeFetcher(good),
      reserve:async()=>({reserved:true,claimId:'claim-receipt'}),receipt:async()=>{throw Error('LEDGER_DOWN')}});
    assert.equal(receiptResult.status,'PRINTIFY_DRAFT_CREATED_RECEIPT_FAILED');
-   assert.equal(receiptResult.printifyProductId,'new-receipt');
+   assert.equal(receiptResult.printifyProductId,'newreceipt');
    assert.deepEqual(receiptResult.reasons,['DURABLE_RECEIPT_WRITE_FAILED']);
  } finally {
    if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
