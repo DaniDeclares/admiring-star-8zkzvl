@@ -123,35 +123,56 @@ function clonePayload(source, approval) {
 
 // The caller is single-writer; concurrent unattended execution is deliberately
 // disabled until DANI's existing release ledger provides a durable reservation.
-export async function releaseApprovedClone({ token, sourceShopId, targetShopId, productId, approval, execute = false, publish = false, fetcher = fetch }) {
+export async function releaseApprovedClone({ token, sourceShopId, targetShopId, productId, approval, execute = false, publish = false, fetcher = fetch, reserve, receipt }) {
   if (publish && !execute) throw Error('PUBLISH_REQUIRES_EXECUTE');
   const shops = await listPrintifyShops({ token, fetcher });
   const source = await printifyRequest(token, '/shops/' + sourceShopId + '/products/' + productId + '.json', { fetcher });
   const targetProducts = await listAllPrintifyProducts({ token, shopId: targetShopId, fetcher });
   const plan = assessApprovedClone({ shops, source, targetProducts, approval, sourceShopId, targetShopId });
   if (plan.status === 'HOLD' || !execute) return plan;
-  if (process.env.DANI_PRINTIFY_SINGLE_WRITER !== 'true') return { ...plan, status: 'HOLD', reasons: ['SINGLE_WRITER_LOCK_NOT_CONFIRMED'] };
-  const created = await printifyRequest(token, '/shops/' + targetShopId + '/products.json', {
-    method: 'POST', body: clonePayload(source, approval), fetcher
-  });
+  if (process.env.DANI_PRINTIFY_SINGLE_WRITER !== 'true' || typeof reserve !== 'function' || typeof receipt !== 'function') {
+    return { ...plan, status: 'HOLD', reasons: ['DURABLE_RESERVATION_AND_WRITEBACK_REQUIRED'] };
+  }
+  const claimed = await reserve({ sku: approval.canonicalSku, sourceProductId: productId, targetShopId: String(targetShopId), operation: publish ? 'CREATE_AND_PUBLISH' : 'CREATE_DRAFT' });
+  if (!claimed?.reserved || !claimed.claimId) return { ...plan, status: 'HOLD', reasons: ['IDEMPOTENCY_RESERVATION_DENIED'] };
+  const record = async result => {
+    try {
+      await receipt({ claimId: claimed.claimId, sku: approval.canonicalSku, sourceProductId: productId, productId: result.productId || null, shopId: String(targetShopId), state: result.status, reasons: result.reasons || [] });
+      return result;
+    } catch {
+      return { ...result, status: result.productId ? result.status + '_RECEIPT_FAILED' : 'DURABLE_RECEIPT_WRITE_FAILED', reasons: [...(result.reasons || []), 'DURABLE_RECEIPT_WRITE_FAILED'] };
+    }
+  };
+  let created;
+  try {
+    created = await printifyRequest(token, '/shops/' + targetShopId + '/products.json', {
+      method: 'POST', body: clonePayload(source, approval), fetcher
+    });
+  } catch (error) {
+    return record({ status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: null, shopId: String(targetShopId), reasons: [error.message, 'PRINTIFY_CREATE_OUTCOME_UNKNOWN'] });
+  }
   if (!created?.id) {
-    return { status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: null, shopId: String(targetShopId), reasons: ['PRINTIFY_CREATE_READBACK_MISSING'] };
+    return record({ status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: null, shopId: String(targetShopId), reasons: ['PRINTIFY_CREATE_READBACK_MISSING'] });
   }
   let verified;
   try {
     verified = await printifyRequest(token, '/shops/' + targetShopId + '/products/' + created.id + '.json', { fetcher });
   } catch (error) {
-    return { status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: created.id, shopId: String(targetShopId), reasons: [error.message] };
+    return record({ status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: created.id, shopId: String(targetShopId), reasons: [error.message] });
   }
   if (verified?.id !== created.id || verified?.title !== (approval.destinationTitle || source.title) ||
       !(verified?.tags || []).includes(tagFor(approval.canonicalSku))) {
-    return { status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: created.id, shopId: String(targetShopId), reasons: ['PRINTIFY_CREATE_READBACK_MISMATCH'] };
+    return record({ status: 'PRINTIFY_CREATE_UNCONFIRMED', productId: created.id, shopId: String(targetShopId), reasons: ['PRINTIFY_CREATE_READBACK_MISMATCH'] });
   }
-  if (!publish) return { status: 'PRINTIFY_DRAFT_CREATED', productId: created.id, shopId: String(targetShopId), shopifyPublished: false };
-  await printifyRequest(token, '/shops/' + targetShopId + '/products/' + created.id + '/publish.json', {
-    method: 'POST', body: { title: true, description: true, images: true, variants: true, tags: true }, fetcher
-  });
-  return { status: 'PRINTIFY_PUBLISH_REQUESTED', productId: created.id, shopId: String(targetShopId), shopifyPublished: 'UNVERIFIED_CHECK_SHOPIFY' };
+  if (!publish) return record({ status: 'PRINTIFY_DRAFT_CREATED', productId: created.id, shopId: String(targetShopId), shopifyPublished: false });
+  try {
+    await printifyRequest(token, '/shops/' + targetShopId + '/products/' + created.id + '/publish.json', {
+      method: 'POST', body: { title: true, description: true, images: true, variants: true, tags: true }, fetcher
+    });
+  } catch (error) {
+    return record({ status: 'PRINTIFY_PUBLISH_UNCONFIRMED', productId: created.id, shopId: String(targetShopId), reasons: [error.message], shopifyPublished: 'UNVERIFIED_CHECK_SHOPIFY' });
+  }
+  return record({ status: 'PRINTIFY_PUBLISH_REQUESTED', productId: created.id, shopId: String(targetShopId), shopifyPublished: 'UNVERIFIED_CHECK_SHOPIFY' });
 }
 
 
@@ -166,7 +187,8 @@ export function assessApprovedExistingPublication({ shops, shopId, product, sibl
   if (!product?.id || product?.title !== approval?.expectedSourceTitle) reasons.push('PRODUCT_IDENTITY_MISMATCH');
   if (!approval?.approved || !approval?.approvedBy || !approval?.approvedAt || !approval?.shopifyReleaseApproved) reasons.push('OWNER_RELEASE_NOT_APPROVED');
   if (!approval?.artworkRightsVerified || !approval?.printQualityApproved || !approval?.fulfillmentReviewed) reasons.push('ARTWORK_OR_FULFILLMENT_NOT_VERIFIED');
-  if (!approval?.shippingCostApproved || !Number.isSafeInteger(approval?.shippingCostCents) || approval.shippingCostCents < 0 ||
+  if (!approval?.shippingCostApproved || !Number.isSafeInteger(approval?.approvedRetailCents) || approval.approvedRetailCents <= 0 ||
+      !Number.isSafeInteger(approval?.shippingCostCents) || approval.shippingCostCents < 0 ||
       !Number.isSafeInteger(approval?.minimumPreFeeMarginCents) || approval.minimumPreFeeMarginCents < 1) reasons.push('ECONOMICS_UNVERIFIED');
   if (!approval?.canonicalSku || !/^[a-z0-9-]{4,80}$/i.test(approval.canonicalSku)) reasons.push('CANONICAL_SKU_INVALID');
   if (product?.is_locked) reasons.push('PRINTIFY_PRODUCT_LOCKED');
@@ -178,7 +200,7 @@ export function assessApprovedExistingPublication({ shops, shopId, product, sibl
   }
   if (enabled.some(v => v.is_available !== true)) reasons.push('ENABLED_VARIANT_OUT_OF_STOCK');
   for (const v of enabled) {
-    if (!Number.isSafeInteger(v.price) || !Number.isSafeInteger(v.cost) || v.cost < 0 || v.price <= 0 ||
+    if (!Number.isSafeInteger(v.price) || v.price !== approval?.approvedRetailCents || !Number.isSafeInteger(v.cost) || v.cost < 0 || v.price <= 0 ||
         !Number.isSafeInteger(approval?.shippingCostCents) || !Number.isSafeInteger(approval?.minimumPreFeeMarginCents) ||
         v.price - v.cost - approval.shippingCostCents < approval.minimumPreFeeMarginCents) {
       reasons.push('UNVERIFIED_OR_INSUFFICIENT_VARIANT_MARGIN'); break;
@@ -195,25 +217,41 @@ export function assessApprovedExistingPublication({ shops, shopId, product, sibl
   return { status: reasons.length ? 'HOLD' : 'READY_TO_PUBLISH_EXISTING', reasons: [...new Set(reasons)], productId: product?.id || null, shopId: String(shopId), approvedVariantCount: enabled.length };
 }
 
-export async function publishApprovedExisting({ token, shopId, productId, approval, execute = false, fetcher = fetch }) {
+export async function publishApprovedExisting({ token, shopId, productId, approval, execute = false, fetcher = fetch, reserve, receipt }) {
   const shops = await listPrintifyShops({ token, fetcher });
   const product = await printifyRequest(token, '/shops/' + shopId + '/products/' + productId + '.json', { fetcher });
   const siblings = await listAllPrintifyProducts({ token, shopId, fetcher });
   const plan = assessApprovedExistingPublication({ shops, shopId, product, siblings, approval });
   if (plan.status !== 'READY_TO_PUBLISH_EXISTING' || !execute) return plan;
-  if (process.env.DANI_PRINTIFY_SINGLE_WRITER !== 'true') return { ...plan, status: 'HOLD', reasons: ['SINGLE_WRITER_LOCK_NOT_CONFIRMED'] };
+  if (process.env.DANI_PRINTIFY_SINGLE_WRITER !== 'true' || typeof reserve !== 'function' || typeof receipt !== 'function') {
+    return { ...plan, status: 'HOLD', reasons: ['DURABLE_RESERVATION_AND_WRITEBACK_REQUIRED'] };
+  }
+  const claimed = await reserve({ sku: approval.canonicalSku, productId, targetShopId: String(shopId), operation: 'PUBLISH_EXISTING' });
+  if (!claimed?.reserved || !claimed.claimId) return { ...plan, status: 'HOLD', reasons: ['IDEMPOTENCY_RESERVATION_DENIED'] };
+  const record = async result => {
+    try {
+      await receipt({ claimId: claimed.claimId, sku: approval.canonicalSku, productId, shopId: String(shopId), state: result.status, reasons: result.reasons || [] });
+      return result;
+    } catch {
+      return { ...result, status: result.status + '_RECEIPT_FAILED', reasons: [...(result.reasons || []), 'DURABLE_RECEIPT_WRITE_FAILED'] };
+    }
+  };
   // Re-read immediately before mutation: external action is irreversible enough
   // that stale publication, price or inventory must not silently slip through.
   const fresh = await printifyRequest(token, '/shops/' + shopId + '/products/' + productId + '.json', { fetcher });
   const freshPlan = assessApprovedExistingPublication({ shops, shopId, product: fresh, siblings, approval });
-  if (freshPlan.status !== 'READY_TO_PUBLISH_EXISTING') return freshPlan;
-  await printifyRequest(token, '/shops/' + shopId + '/products/' + productId + '/publish.json', {
-    method: 'POST', body: { title: true, description: true, images: true, variants: true, tags: true, keyFeatures: true }, fetcher
-  });
-  return { status: 'PRINTIFY_PUBLISH_REQUESTED', productId, shopId: String(shopId), shopifyPublished: 'UNVERIFIED_CHECK_SHOPIFY' };
+  if (freshPlan.status !== 'READY_TO_PUBLISH_EXISTING') return record({ ...freshPlan, status: 'HOLD_AFTER_RESERVATION' });
+  try {
+    await printifyRequest(token, '/shops/' + shopId + '/products/' + productId + '/publish.json', {
+      method: 'POST', body: { title: true, description: true, images: true, variants: true, tags: true, keyFeatures: true }, fetcher
+    });
+  } catch (error) {
+    return record({ status: 'PRINTIFY_PUBLISH_UNCONFIRMED', productId, shopId: String(shopId), reasons: [error.message], shopifyPublished: 'UNVERIFIED_CHECK_SHOPIFY' });
+  }
+  return record({ status: 'PRINTIFY_PUBLISH_REQUESTED', productId, shopId: String(shopId), shopifyPublished: 'UNVERIFIED_CHECK_SHOPIFY' });
 }
 
-export async function releaseApprovedBatch({ token, sourceShopId, targetShopId, products, execute = false, publish = false, fetcher = fetch }) {
+export async function releaseApprovedBatch({ token, sourceShopId, targetShopId, products, execute = false, publish = false, fetcher = fetch, reserve, receipt }) {
   if (!Array.isArray(products) || !products.length || products.length > 30) throw Error('APPROVED_BATCH_SIZE_INVALID');
   if (String(sourceShopId) === String(targetShopId) && execute && !publish) throw Error('EXECUTE_REQUIRES_PUBLISH_FOR_EXISTING');
   const seen = new Set();
@@ -234,10 +272,10 @@ export async function releaseApprovedBatch({ token, sourceShopId, targetShopId, 
     const approval = { ...item.approval, expectedSourceTitle: item.expectedSourceTitle };
     try {
       const result = String(sourceShopId) === String(targetShopId)
-        ? await publishApprovedExisting({ token, shopId: targetShopId, productId: matches[0].id, approval, execute: execute && publish, fetcher })
+        ? await publishApprovedExisting({ token, shopId: targetShopId, productId: matches[0].id, approval, execute: execute && publish, fetcher, reserve, receipt })
         : await releaseApprovedClone({
           token, sourceShopId, targetShopId, productId: matches[0].id,
-          approval, execute, publish, fetcher
+          approval, execute, publish, fetcher, reserve, receipt
         });
       results.push({ title: item.expectedSourceTitle, ...result });
     } catch (error) {
