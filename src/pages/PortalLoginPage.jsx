@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
-import { completeStagedOnboarding } from '../lib/pendingOnboarding.js';
+import { completeStagedOnboarding, detachStagedOnboarding } from '../lib/pendingOnboarding.js';
 import './PortalAccessPage.css';
 
 const OWNER_EMAIL = 'vendors@danideclares.com';
@@ -61,7 +61,14 @@ export default function PortalLoginPage(){
        const isKnownStaff=STAFF_APP_ROLES.has(role);
        const isKnownOwnerEmail=(session.user.email||'').trim().toLowerCase()===OWNER_EMAIL;
        if(!isKnownStaff&&!isKnownOwnerEmail){
-         const result=await boundedAuth(completeStagedOnboarding(supabase,session,intakeStagingId),'Portal setup timed out. Please retry sign-in.');
+         const onboardingOperation=completeStagedOnboarding(supabase,session,intakeStagingId);
+         let result;
+         try{
+           result=await boundedAuth(onboardingOperation,'Portal setup timed out. Please retry sign-in.');
+         }catch(onboardingError){
+           detachStagedOnboarding(onboardingOperation);
+           throw onboardingError;
+         }
          if(result.attempted&&!result.success)throw new Error(result.error||'Portal setup could not complete.');
        }
        const needsPasswordChange=isKnownOwnerEmail&&!session.user.user_metadata?.password_changed_at;
