@@ -63,7 +63,7 @@ test('successful create with failed readback returns reconcilable product ID', a
     throw Error('UNEXPECTED_URL '+url);
   };
   try {
-    const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,fetcher:fakeFetch});
+    const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,fetcher:fakeFetch,reserve:async()=>({reserved:true,claimId:'claim-test'}),receipt:async()=>{}});
     assert.equal(result.status,'PRINTIFY_CREATE_UNCONFIRMED');
     assert.equal(result.productId,'created1');
     assert.deepEqual(result.reasons,['PRINTIFY_HTTP_503']);
@@ -83,7 +83,7 @@ test('successful create with null readback preserves reconcilable product ID', a
     throw Error('UNEXPECTED_URL '+url);
   };
   try {
-    const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,fetcher:fakeFetch});
+    const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,fetcher:fakeFetch,reserve:async()=>({reserved:true,claimId:'claim-test'}),receipt:async()=>{}});
     assert.equal(result.status,'PRINTIFY_CREATE_UNCONFIRMED');
     assert.equal(result.productId,'creatednull');
     assert.deepEqual(result.reasons,['PRINTIFY_CREATE_READBACK_MISMATCH']);
@@ -107,6 +107,10 @@ test('publish existing Printify product, not a duplicate clone', () => {
 test('already published Printify product is never republished', () => {
   assert.equal(assessApprovedExistingPublication({...existingArgs,product:{...existingSource,visible:true}}).status,'ALREADY_PUBLISHED');
 });
+test('existing publication requires the owner-approved retail price', () => {
+  const changed={...existingSource,variants:existingSource.variants.map(v=>v.is_enabled?{...v,price:2999}:v)};
+  assert.ok(assessApprovedExistingPublication({...existingArgs,product:changed,siblings:[changed]}).reasons.includes('UNVERIFIED_OR_INSUFFICIENT_VARIANT_MARGIN'));
+});
 test('non-Shopify target and missing commercial proof must hold', () => {
   assert.ok(assessApprovedExistingPublication({...existingArgs,shops:[shops[0]]}).reasons.includes('SHOP_NOT_ACCESSIBLE'));
   assert.ok(assessApprovedExistingPublication({...existingArgs,approval:{...approval,approved:false}}).reasons.includes('OWNER_RELEASE_NOT_APPROVED'));
@@ -129,4 +133,44 @@ test('existing publication inspection is read-only until authorized',async()=>{
   const result=await publishApprovedExisting({token:'test',shopId:'22',productId:'s1',approval:existingApproval,fetcher:fakeFetch});
   assert.equal(result.status,'READY_TO_PUBLISH_EXISTING');
   assert.ok(accesses.every(x=>x.method==='GET'));
+});
+
+test('execute is held without a durable reservation and writeback contract', async () => {
+  const prior=process.env.DANI_PRINTIFY_SINGLE_WRITER;
+  process.env.DANI_PRINTIFY_SINGLE_WRITER='true';
+  const fakeFetch=async(url,options={})=>{
+    if(url.endsWith('/shops.json')) return {ok:true,status:200,json:async()=>shops};
+    if(url.endsWith('/shops/11/products/s1.json')) return {ok:true,status:200,json:async()=>source};
+    if(url.includes('/shops/22/products.json?')) return {ok:true,status:200,json:async()=>({data:[],last_page:1})};
+    throw Error('MUTATION_MUST_NOT_RUN');
+  };
+  try {
+    const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,fetcher:fakeFetch});
+    assert.equal(result.status,'HOLD');
+    assert.deepEqual(result.reasons,['DURABLE_RESERVATION_AND_WRITEBACK_REQUIRED']);
+  } finally {
+    if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
+  }
+});
+test('publish failure preserves created product ID and durable receipt', async () => {
+  const prior=process.env.DANI_PRINTIFY_SINGLE_WRITER;
+  process.env.DANI_PRINTIFY_SINGLE_WRITER='true';
+  const receipts=[];
+  const fakeFetch=async(url,options={})=>{
+    if(url.endsWith('/shops.json')) return {ok:true,status:200,json:async()=>shops};
+    if(url.endsWith('/shops/11/products/s1.json')) return {ok:true,status:200,json:async()=>source};
+    if(url.includes('/shops/22/products.json?')) return {ok:true,status:200,json:async()=>({data:[],last_page:1})};
+    if(url.endsWith('/shops/22/products.json') && options.method==='POST') return {ok:true,status:200,json:async()=>({id:'created-publish'})};
+    if(url.endsWith('/shops/22/products/created-publish.json')) return {ok:true,status:200,json:async()=>({...source,id:'created-publish',title:source.title,tags:['DANI-SKU-'+approval.canonicalSku],variants:[{...source.variants[0],price:3000}]})};
+    if(url.endsWith('/shops/22/products/created-publish/publish.json')) return {ok:false,status:503,json:async()=>({})};
+    throw Error('UNEXPECTED_URL '+url);
+  };
+  try {
+    const result=await releaseApprovedClone({token:'fake',sourceShopId:'11',targetShopId:'22',productId:'s1',approval,execute:true,publish:true,fetcher:fakeFetch,reserve:async()=>({reserved:true,claimId:'claim-publish'}),receipt:async x=>receipts.push(x)});
+    assert.equal(result.status,'PRINTIFY_PUBLISH_UNCONFIRMED');
+    assert.equal(result.productId,'created-publish');
+    assert.equal(receipts[0].state,'PRINTIFY_PUBLISH_UNCONFIRMED');
+  } finally {
+    if(prior===undefined) delete process.env.DANI_PRINTIFY_SINGLE_WRITER; else process.env.DANI_PRINTIFY_SINGLE_WRITER=prior;
+  }
 });
