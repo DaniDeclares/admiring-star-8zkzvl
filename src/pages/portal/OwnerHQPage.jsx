@@ -107,8 +107,10 @@ function OwnerHq({ session }) {
     return { activeJobs:activeJobs.length, atRisk, ownerAttention:attentionNow.length, ownerAttentionRows:attentionNow, deferredOwnerAttentionRows:deferred, salesDue:salesDueRows.length, salesDueRows, touchedSales:touchedSalesRows.length, untouchedSales:untouchedSalesRows.length, paidServices:paidServices.length, quoteValue, ownerAccounting:accounting.filter(i=>i.requires_owner_decision).length, accountingExceptions:accounting.length, communicationAttention:comms.length, agentFailures:failedAgents, agentCompleted:completedAgents, outboxExceptions:outbox.filter(i=>!['SUCCEEDED','COMPLETED'].includes(String(i.status||'').toUpperCase())).length, researchOpen:researchWork.filter(i=>String(i.status||'').toUpperCase()!=='GREEN').length, researchReady:researchWork.filter(i=>['EVIDENCE_READY','REVIEW_READY','GREEN'].includes(String(i.status||'').toUpperCase())).length };
   },[data]);
 
-  if (loading) return <main className="portal-shell"><p>Loading DANI HQ…</p></main>;
-  if (error) return <main className="portal-shell"><div className="portal-alert">{error}</div></main>;
+  // Keep the owner clock usable even if the broader HQ snapshot is temporarily
+  // unavailable. Clock writes use an independent authenticated endpoint.
+  if (loading) return <main className="portal-shell"><p>Loading DANI HQ…</p><WorkClock mode="owner" session={session} /></main>;
+  if (error) return <main className="portal-shell"><div className="portal-alert">{error}</div><WorkClock mode="owner" session={session} /></main>;
   const brief=data?.morningBrief; const supportReady=brief?.overnight_verified?.support_ready; const servicesTotal=brief?.business_health?.SERVICE_CATALOG?.metrics?.services_total ?? brief?.overnight_verified?.services_total;
   const supportLabel = Number.isFinite(Number(supportReady)) && Number(servicesTotal)>0 ? `${supportReady}/${servicesTotal}` : '—';
   const companyState=brief?.company_status||'UNKNOWN';
