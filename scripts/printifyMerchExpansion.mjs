@@ -17,6 +17,7 @@ function supplierShippingProfile(shipping, variantId, countryCode) {
 }
 
 function explicitlyUnpublished(product) {
+  if (typeof product?.visible === 'boolean') return product.visible === false;
   const status = String(product?.publishing_status || product?.publication_status || '').toLowerCase();
   return ['draft', 'unpublished', 'not_published'].includes(status) || product?.published === false;
 }
@@ -124,7 +125,6 @@ export async function createApprovedExpansionDraft({token,spec,candidate,execute
   const claimed=await reserve({candidateId:candidate.id,sku:spec.sku,expectedPublicationState:'READY'});
   if(!claimed?.reserved || !claimed.claimId) return {...plan,status:'HOLD',reasons:['IDEMPOTENCY_RESERVATION_DENIED']};
   const payload=draftPayload(spec,candidate.economics_snapshot.approved_price_cents);
-  const created=await printifyRequest(token,'/shops/'+spec.shopId+'/products.json',{method:'POST',body:payload,fetcher});
   const unconfirmed=async(productId,reasons)=>{
     const result={status:'PRINTIFY_CREATE_UNCONFIRMED',sku:spec.sku,printifyProductId:productId || null,shopId:String(spec.shopId),reasons,shopifyPublished:'UNVERIFIED'};
     try {
@@ -134,6 +134,12 @@ export async function createApprovedExpansionDraft({token,spec,candidate,execute
     }
     return result;
   };
+  let created;
+  try {
+    created=await printifyRequest(token,'/shops/'+spec.shopId+'/products.json',{method:'POST',body:payload,fetcher});
+  } catch(error) {
+    return unconfirmed(null,[error.message,'PRINTIFY_CREATE_OUTCOME_UNKNOWN']);
+  }
   if(!created?.id) return unconfirmed(null,['PRINTIFY_CREATE_RESPONSE_ID_MISSING']);
   let check;
   try {
@@ -142,11 +148,15 @@ export async function createApprovedExpansionDraft({token,spec,candidate,execute
     return unconfirmed(created.id,[error.message]);
   }
   const mismatch=[];
-  if(check.id!==created.id) mismatch.push('PRODUCT_ID_MISMATCH');
-  if(!check.tags?.includes(tag(spec.sku))) mismatch.push('CANONICAL_SKU_TAG_MISSING');
+  if(check?.id!==created.id) mismatch.push('PRODUCT_ID_MISMATCH');
+  if(!check?.tags?.includes(tag(spec.sku))) mismatch.push('CANONICAL_SKU_TAG_MISSING');
   if(!explicitlyUnpublished(check)) mismatch.push('PUBLICATION_STATE_UNCONFIRMED');
   if(!sameDraftPayload(check,payload)) mismatch.push('CREATED_PAYLOAD_MISMATCH');
   if(mismatch.length) return unconfirmed(created.id,mismatch);
-  await receipt({claimId:claimed.claimId,sku:spec.sku,printifyProductId:created.id,state:'PRINTIFY_DRAFT_CREATED_NOT_PUBLISHED'});
+  try {
+    await receipt({claimId:claimed.claimId,sku:spec.sku,printifyProductId:created.id,state:'PRINTIFY_DRAFT_CREATED_NOT_PUBLISHED'});
+  } catch {
+    return {status:'PRINTIFY_DRAFT_CREATED_RECEIPT_FAILED',sku:spec.sku,printifyProductId:created.id,reasons:['DURABLE_RECEIPT_WRITE_FAILED'],shopifyPublished:false};
+  }
   return {status:'PRINTIFY_DRAFT_CREATED_NOT_PUBLISHED',sku:spec.sku,printifyProductId:created.id,shopifyPublished:false};
 }
