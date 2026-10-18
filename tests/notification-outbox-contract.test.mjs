@@ -26,7 +26,7 @@ const fakeProvider = async (url, request) => {
   const channel = url.includes('resend') ? 'EMAIL' : 'SMS';
   calls.push({ channel, key:request.headers['Idempotency-Key'], body:String(request.body) });
   if (mode === 'TIMEOUT') throw new Error('synthetic recipient@example.invalid private payload');
-  if (mode === '403' || mode === '422') return { ok:false, status:Number(mode), json:async()=>({ name:'private-provider-body' }) };
+  if (['401','403','422'].includes(mode)) return { ok:false, status:Number(mode), json:async()=>({ name:'private-provider-body' }) };
   if (mode === '429_ONCE') {
     mode = 'ACCEPT';
     return { ok:false, status:429, headers:{ get:name=>name.toLowerCase()==='retry-after'?'1':null },
@@ -106,10 +106,32 @@ test('misclassified uncertain records cannot be cleared by configuration recover
   assert.deepEqual(await get(id),before); assert.equal(calls.length,0);
 });
 
-for (const status of ['403','422']) test(`provider ${status} is terminal and not replayed`,async()=>{
-  await reset(); mode=status; const id=await insert(); await run(); await run(); const row=await get(id);
-  assert.equal(row.delivery_outcome,'REJECTED'); assert.equal(calls.length,1); receipt('terminal '+status,[row]);
+test('provider 422 is terminal and not replayed',async()=>{
+  await reset(); mode='422'; const id=await insert(); await run(); await run(); const row=await get(id);
+  assert.equal(row.delivery_outcome,'REJECTED'); assert.equal(calls.length,1); receipt('terminal 422',[row]);
 });
+
+for (const status of ['401','403']) for (const channel of ['EMAIL','SMS'])
+  test(`${channel} provider ${status} requires explicit credential recovery`,async()=>{
+    await reset(); mode=status; const id=await insert(channel); await run(); let row=await get(id);
+    assert.equal(row.status,'FAILED'); assert.equal(row.delivery_outcome,'CREDENTIAL_REJECTED');
+    assert.equal(row.attempts,1); assert.equal(calls.length,1);
+    assert.equal(Boolean(row.first_attempt_at),channel==='EMAIL');
+    assert.equal(Boolean(row.sms_attempt_started_at),channel==='SMS');
+    const fingerprint=row.request_fingerprint; const providerError=row.last_error;
+    await run(); assert.equal(calls.length,1); assert.equal((await get(id)).attempts,1);
+    const broken=channel==='EMAIL'?{...env,RESEND_API_KEY:''}:{...env,TWILIO_API_KEY_SECRET:''};
+    await assert.rejects(resumeConfigurationBlocked({db,id,env:broken,renderEmail}));
+    await resumeConfigurationBlocked({db,id,env,renderEmail}); row=await get(id);
+    assert.equal(row.status,'PENDING'); assert.equal(row.delivery_outcome,'RETRYABLE');
+    assert.equal(row.attempts,1); assert.equal(row.first_attempt_at,null); assert.equal(row.sms_attempt_started_at,null);
+    assert.equal(row.request_fingerprint,fingerprint); assert.equal(row.last_error,providerError);
+    assert.equal(row.provider_email_id,null); assert.equal(row.provider_sms_id,null);
+    mode='ACCEPT'; await run(); row=await get(id);
+    assert.equal(row.status,'PROCESSED'); assert.equal(row.delivery_outcome,'ACCEPTED');
+    assert.equal(row.attempts,2); assert.equal(calls.length,2);
+    receipt('credential recovery '+channel+' '+status,[row]);
+  });
 
 for (const channel of ['EMAIL','SMS']) test(`${channel} provider 429 clears only its rejected intent and retries`,async()=>{
   await reset(); mode='429_ONCE'; const id=await insert(channel); await run(); let row=await get(id);
@@ -150,6 +172,13 @@ test('competing database connections process each notification at most once',asy
   await Promise.all(Array.from({length:24},(_,i)=>run({db:i%2?db:competitor,env:small})));
   const rows=await Promise.all(ids.map(get)); assert.ok(rows.every(row=>row.status==='PROCESSED'&&row.attempts===1));
   assert.equal(calls.length,12); assert.equal(new Set(calls.map(call=>call.key)).size,12); receipt('concurrent workers',rows);
+});
+
+test('legacy PROCESSING claim without a lease remains held for its old worker to drain',async()=>{
+  await reset(); const id=await insert();
+  await db.$executeRaw`update public.dd_event_outbox set status='PROCESSING',attempts=1,claimed_at=null where id=${id}::uuid`;
+  const before=await get(id); await run(); await run();
+  assert.deepEqual(await get(id),before); assert.equal(calls.length,0); receipt('legacy claim drain hold',[before]);
 });
 
 test('crash after claim but before intent recovers safely',async()=>{
