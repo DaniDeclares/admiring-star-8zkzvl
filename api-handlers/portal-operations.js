@@ -2,7 +2,7 @@ import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { getWorkClockSnapshot, applyWorkClockAction } from '../src/lib/operations/workClock2026.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
-import { customerQuoteScopeFromEstimate, isCustomerQuoteScopeComplete } from '../src/lib/operations/customerQuoteScope2026.js';
+import { canApproveCustomerQuote, customerQuoteScopeFromEstimate, isCustomerQuoteScopeComplete } from '../src/lib/operations/customerQuoteScope2026.js';
 import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
@@ -671,8 +671,7 @@ export default async function handler(req, res) {
         : String(request.lead_id || '') === String(context.identity.entity_id || '');
       if (!authorized) return fail(res, 'This quote is outside the current portal account scope.', 403);
       if (decision === 'APPROVED') {
-        const quoteScope = customerQuoteScopeFromEstimate(estimate);
-        if (!isCustomerQuoteScopeComplete(quoteScope)) {
+        if (!canApproveCustomerQuote(estimate)) {
           return fail(res, 'QUOTE_SCOPE_INCOMPLETE: reviewable canonical line items are required before approval.', 409);
         }
       }
