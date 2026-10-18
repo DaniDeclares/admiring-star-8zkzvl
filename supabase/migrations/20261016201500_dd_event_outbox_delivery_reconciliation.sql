@@ -15,5 +15,5 @@ create unique index if not exists dd_event_outbox_notification_identity_unique
   on public.dd_event_outbox(notification_identity)
   where notification_identity is not null;
 comment on column public.dd_event_outbox.delivery_outcome is
-  'ACCEPTED, COMPLETED, REJECTED, RETRYABLE, CONFIGURATION_BLOCKED, UNCERTAIN; provider acceptance is not delivery.';
+  'ACCEPTED, COMPLETED, REJECTED, RETRYABLE, CONFIGURATION_BLOCKED, CREDENTIAL_REJECTED, UNCERTAIN; provider acceptance is not delivery.';
 -- Never auto-release PROCESSING rows with uncertain external effects.
