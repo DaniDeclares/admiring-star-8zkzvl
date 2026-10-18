@@ -41,3 +41,8 @@ export function isCustomerQuoteScopeComplete(scope) {
       && Number(line.line_total) >= 0
     ));
 }
+
+
+export function canApproveCustomerQuote(estimate) {
+  return isCustomerQuoteScopeComplete(customerQuoteScopeFromEstimate(estimate));
+}
