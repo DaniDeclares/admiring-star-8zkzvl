@@ -9,6 +9,20 @@ export function formatDate(value) { if (!value) return 'Not scheduled'; return n
 export function statusLabel(value) { return value ? value.replaceAll('_', ' ') : 'Not started'; }
 export function Requirement({ label, ok, detail }) { return <div className="portal-requirement"><span className={`portal-requirement-dot ${ok ? 'ok' : 'pending'}`} />{label}<small>{detail}</small></div>; }
 export function LockedCard({ title, children }) { return <Card title={title}><p className="portal-note">{children} <Link to="/portal">Check your application status</Link>.</p></Card>; }
+export async function completeLocalSignOut(signOutOperation,redirectAfterSignOut) {
+  // The SDK operation cannot be cancelled. Keep this handler attached after
+  // the visible timeout so a delayed success still removes the old workspace.
+  void signOutOperation.then(({error:lateError})=>{
+    if(!lateError)redirectAfterSignOut();
+  }).catch(()=>{});
+  const {error:authError}=await Promise.race([
+    signOutOperation,
+    new Promise((_,reject)=>window.setTimeout(()=>reject(new Error('Sign-out timed out. Please retry.')),12000))
+  ]);
+  if(authError)throw authError;
+  redirectAfterSignOut();
+}
+
 export function AccountBadge({ session }) {
   const [busy,setBusy] = useState(false);
   const [error,setError] = useState('');
@@ -24,18 +38,7 @@ export function AccountBadge({ session }) {
         window.location.assign('/portal/login');
       };
       const signOutOperation=supabase.auth.signOut({scope:'local'});
-      // The SDK operation cannot be cancelled. If it completes after the
-      // visible timeout, redirect anyway so a shared device never retains
-      // the prior workspace on screen.
-      void signOutOperation.then(({error:lateError})=>{
-        if(!lateError)redirectAfterSignOut();
-      }).catch(()=>{});
-      const {error:authError}=await Promise.race([
-        signOutOperation,
-        new Promise((_,reject)=>window.setTimeout(()=>reject(new Error('Sign-out timed out. Please retry.')),12000))
-      ]);
-      if(authError)throw authError;
-      redirectAfterSignOut();
+      await completeLocalSignOut(signOutOperation,redirectAfterSignOut);
     } catch(e) {
       setError(e?.message||'Sign-out failed. Please retry.');
       setBusy(false);
