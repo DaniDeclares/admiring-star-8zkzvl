@@ -122,34 +122,10 @@ export default function PortalWorkspacePage() {
           const approved = item.estimate_status === 'approved';
           const scopeComplete = item.scope_complete === true && lines.length > 0;
           return <div className="portal-row" key={item.id}>
-            <div><strong>{item.public_reference}</strong><small>{item.estimate_status.replaceAll('_',' ')} · ${Number(item.estimated_total || 0).toFixed(2)} · {item.created_at ? formatDate(item.created_at) : ''}</small><small>{lines.map(line => line.service_name || line.canonical_sku).join(' + ') || 'Quote package'}</small>
+            <div><strong>{item.public_reference}</strong><small>{item.estimate_status.replaceAll('_',' ')} · {Number(item.estimated_total || 0).toLocaleString('en-US',{style:'currency',currency:'USD'})} · {item.created_at ? formatDate(item.created_at) : ''}</small><small>{lines.map(line => line.service_name || line.canonical_sku).join(' + ') || 'Quote package'}</small>
               {awaiting && <details open={!scopeComplete} style={{marginTop:8,maxWidth:520}}>
                 <summary style={{cursor:'pointer',fontWeight:600}}>Review quoted scope before deciding</summary>
-                {lines.length ? <ul style={{paddingLeft:20,margin:'8px 0'}}>{lines.map((line,index)=><li key={line.id||line.canonical_sku||index}><strong>{line.service_name||'Work item'}</strong>{line.canonical_sku ? ' ('+line.canonical_sku+')' : ''}{line.description ? ': '+line.description : ''}{line.quantity!=null?' · Qty '+line.quantity:''}{line.line_total!=null?' · 
-        }) : <Empty>No quotes are currently attached to this account.</Empty>}
-      </Card>
-      <div id="my-services"><Card title={isCommercial ? 'Commercial Requests & Jobs' : 'My Services'}>{snapshot.requests?.length ? snapshot.requests.map(item => <div className="portal-row" key={item.id}><div><strong>{item.service_needed || item.service_category || 'Service request'}</strong><small>{item.status} · {item.location_address || 'Location on file'}</small></div></div>) : <Empty>No requests are currently attached to this account.</Empty>}{snapshot.jobs?.map(item => <div className="portal-row" key={item.id}><div><strong>{item.job_title}</strong><small>{item.job_status} · {item.location_address || 'Location on file'}</small></div></div>)}</Card></div>
-      <div id="payments"><Card title="Invoices & Financial Records"><p className="portal-note">Invoices display finalized financial records. Customer payment remains processed through the configured payment processor; the portal does not collect raw card data.</p>{snapshot.invoices?.length ? snapshot.invoices.map(item => <div className="portal-row" key={item.id}><div><strong>{item.public_reference}</strong><small>{item.invoice_status} · Balance: ${Number(item.balance_due || 0).toFixed(2)}</small></div>{item.stripe_payment_link && item.invoice_status !== 'paid' && <a className="portal-primary" href={item.stripe_payment_link} target="_blank" rel="noreferrer">Pay invoice</a>}</div>) : <Empty>No invoices are currently attached to this workspace.</Empty>}</Card></div>
-      <Card title="Change Orders & Approvals">{snapshot.changes?.length ? snapshot.changes.map(item => <div className="portal-row" key={item.id}><div><strong>{item.reason}</strong><small>{item.status} · {item.resolved_channel || 'Channel controlled'}</small></div>{item.status === 'PENDING_APPROVAL' && <div className="portal-actions"><button onClick={() => act('change_order_decision', { changeOrderId: item.id, decision: 'APPROVED' })}>Approve</button><button className="secondary" onClick={() => act('change_order_decision', { changeOrderId: item.id, decision: 'REJECTED', reason: 'Declined in portal.' })}>Reject</button></div>}</div>) : <Empty>No pending change orders.</Empty>}</Card>
-      <div id="messages"><Card title="Messages">{(() => {
-        const messagesByJob = new Map();
-        (snapshot.messages || []).forEach(m => { if (!messagesByJob.has(m.job_id)) messagesByJob.set(m.job_id, []); messagesByJob.get(m.job_id).push(m); });
-        const jobs = snapshot.jobs || [];
-        const jobsWithMessages = jobs.filter(job => messagesByJob.has(job.id) || jobs.length <= 5);
-        return jobsWithMessages.length ? jobsWithMessages.map(job => <div key={job.id} style={{ marginBottom: 20 }}>
-          <strong>{job.job_title || 'Job'}</strong>
-          <div className="portal-message-list" style={{ marginTop: 8 }}>{(messagesByJob.get(job.id) || []).length ? messagesByJob.get(job.id).map(m => <div key={m.id} className="portal-message"><small>{m.sender_role} · {formatDate(m.created_at)}</small><p>{m.body}</p></div>) : <Empty>No messages on this job yet.</Empty>}</div>
-          <div className="portal-message-compose"><textarea rows="2" value={messageDrafts[job.id] || ''} onChange={e => setMessageDrafts(prev => ({ ...prev, [job.id]: e.target.value }))} placeholder="Write a message about this job…" /><button onClick={() => sendJobMessage(job.id)}>Send</button></div>
-        </div>) : <Empty>Messages will appear here once you have an active job.</Empty>;
-      })()}</Card></div>
-      <Card title="Self-Service & Support"><p>Start a new service request, request a quote, or contact DANI DECLARES support without leaving your account.</p><div className="portal-actions"><Link className="portal-primary" to="/request-service">Request service</Link><Link className="portal-primary" to="/contact">Contact support</Link><Link className="portal-primary" to="/portal/settings">Notification settings</Link></div></Card>
-    </>}
-    <footer className="portal-footer"><strong>Commercial boundary:</strong> DANI DECLARES pricing is resolved upstream and frozen before operational execution. Portals coordinate work; they do not invent or rewrite rates.</footer>
-  </main>;
-}
-
-// Production stabilization checkpoint: main restored to the last known-good release.
-+Number(line.line_total).toFixed(2):''}</li>)}</ul> : <p className="portal-note">The itemized canonical scope is not available in this portal record.</p>}
+                {lines.length ? <ul style={{paddingLeft:20,margin:'8px 0'}}>{lines.map((line,index)=><li key={line.id||line.canonical_sku||index}><strong>{line.service_name||'Work item'}</strong>{line.canonical_sku ? ' ('+line.canonical_sku+')' : ''}{line.description ? ': '+line.description : ''}{line.quantity!=null?' · Qty '+line.quantity:''}{line.line_total!=null?' · '+Number(line.line_total).toLocaleString('en-US',{style:'currency',currency:'USD'}):''}</li>)}</ul> : <p className="portal-note">The itemized canonical scope is not available in this portal record.</p>}
                 {!scopeComplete && <div className="portal-alert" role="alert">Approval is unavailable until DANI DECLARES attaches a complete canonical scope and governed line totals. You may still decline this quote.</div>}
                 {item.quote_disclaimer && <p className="portal-note">{item.quote_disclaimer}</p>}
               </details>}</div>
