@@ -1,4 +1,5 @@
 import {
+  canApproveCustomerQuote,
   customerQuoteScopeFromEstimate,
   isCustomerQuoteScopeComplete,
 } from './customerQuoteScope2026.js';
@@ -34,6 +35,7 @@ describe('customer quote scope authority', () => {
     expect(scope[0]).not.toHaveProperty('answers');
     expect(scope[0]).not.toHaveProperty('calculation');
     expect(isCustomerQuoteScopeComplete(scope)).toBe(true);
+    expect(canApproveCustomerQuote(estimate)).toBe(true);
   });
 
   test('falls back to the server-resolved saved lines for earlier quotes', () => {
@@ -55,6 +57,9 @@ describe('customer quote scope authority', () => {
     });
 
     expect(isCustomerQuoteScopeComplete(scope)).toBe(false);
+    expect(canApproveCustomerQuote({
+      intake_answers: { pricingSnapshot: { lineItems: [incompleteLine] } },
+    })).toBe(false);
   });
 
   test('fails closed when no reviewable scope exists', () => {
@@ -62,5 +67,6 @@ describe('customer quote scope authority', () => {
 
     expect(scope).toEqual([]);
     expect(isCustomerQuoteScopeComplete(scope)).toBe(false);
+    expect(canApproveCustomerQuote({ intake_answers: {} })).toBe(false);
   });
 });
