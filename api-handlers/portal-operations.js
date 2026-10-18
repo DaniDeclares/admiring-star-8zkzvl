@@ -554,7 +554,8 @@ async function getCustomerSnapshot(supabase, identity, role) {
   [...(jobInvoices.data || []), ...(estimateInvoices.data || [])].forEach(row => invoiceMap.set(row.id, row));
   const customerEstimates = (estimates || []).map(row => {
     const quote_scope = customerQuoteScopeFromEstimate(row);
-    const { intake_answers: _privateIntakeAnswers, ...publicEstimate } = row;
+    const publicEstimate = { ...row };
+    delete publicEstimate.intake_answers;
     return { ...publicEstimate, quote_scope, scope_complete: isCustomerQuoteScopeComplete(quote_scope) };
   });
   return { requests: requests || [], jobs: jobs || [], invoices: [...invoiceMap.values()], estimates: customerEstimates, changes: changes.data || [], messages, residentCommunity, properties };
