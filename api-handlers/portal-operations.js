@@ -2,6 +2,7 @@ import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { getWorkClockSnapshot, applyWorkClockAction } from '../src/lib/operations/workClock2026.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 import { getQuoteCatalog, createEstimate } from '../src/lib/operations/quoteBuilder2026.js';
+import { customerQuoteScopeFromEstimate, isCustomerQuoteScopeComplete } from '../src/lib/operations/customerQuoteScope2026.js';
 import { createEstimateAssignmentOffer, getProviderEstimateAssignments, getOwnerEstimateAssignments, respondToEstimateAssignment, respondToOwnerEstimateAssignment, resolveEstimateCounteroffer } from '../src/lib/operations/estimateAssignments2026.js';
 import { provisionCustomerPortalAccount } from '../src/lib/operations/customerProvisioning2026.js';
 import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
@@ -551,7 +552,12 @@ async function getCustomerSnapshot(supabase, identity, role) {
   if (changes.error) throw changes.error;
   const invoiceMap = new Map();
   [...(jobInvoices.data || []), ...(estimateInvoices.data || [])].forEach(row => invoiceMap.set(row.id, row));
-  return { requests: requests || [], jobs: jobs || [], invoices: [...invoiceMap.values()], estimates: estimates || [], changes: changes.data || [], messages, residentCommunity, properties };
+  const customerEstimates = (estimates || []).map(row => {
+    const quote_scope = customerQuoteScopeFromEstimate(row);
+    const { intake_answers: _privateIntakeAnswers, ...publicEstimate } = row;
+    return { ...publicEstimate, quote_scope, scope_complete: isCustomerQuoteScopeComplete(quote_scope) };
+  });
+  return { requests: requests || [], jobs: jobs || [], invoices: [...invoiceMap.values()], estimates: customerEstimates, changes: changes.data || [], messages, residentCommunity, properties };
 }
 async function createDispatchOffer(supabase, actorId, payload) {
   const { jobId, providerId, adminNotes, providerNotes } = payload;
@@ -651,7 +657,7 @@ export default async function handler(req, res) {
       const estimateId = String(payload.estimateId || '').trim();
       const decision = String(payload.decision || '').toUpperCase();
       if (!estimateId || !['APPROVED','DECLINED'].includes(decision)) return fail(res, 'estimateId and APPROVED/DECLINED decision are required.');
-      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('id,estimate_status,service_request_id,client_name').eq('id', estimateId).maybeSingle();
+      const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('id,estimate_status,service_request_id,client_name,intake_answers').eq('id', estimateId).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate) return fail(res, 'Quote not found.', 404);
       if (estimate.estimate_status !== 'sent') return fail(res, 'This quote is not currently available for customer decision.', 409);
@@ -663,6 +669,12 @@ export default async function handler(req, res) {
         ? String(request.organization_id || '') === String(context.identity.organization_id)
         : String(request.lead_id || '') === String(context.identity.entity_id || '');
       if (!authorized) return fail(res, 'This quote is outside the current portal account scope.', 403);
+      if (decision === 'APPROVED') {
+        const quoteScope = customerQuoteScopeFromEstimate(estimate);
+        if (!isCustomerQuoteScopeComplete(quoteScope)) {
+          return fail(res, 'QUOTE_SCOPE_INCOMPLETE: reviewable canonical line items are required before approval.', 409);
+        }
+      }
       const nextStatus = decision === 'APPROVED' ? 'approved' : 'declined';
       const { data: updated, error: updateError } = await context.supabase.from('dd_estimates')
         .update({ estimate_status: nextStatus, internal_notes: `Customer decision: ${nextStatus} via portal.`, updated_at: new Date().toISOString() })
@@ -937,7 +949,6 @@ export default async function handler(req, res) {
       const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
-      if (estimate.is_test === true) return fail(res, 'TEST_ESTIMATE_EXTERNAL_ACTION_BLOCKED: synthetic quotes cannot issue external invoices or customer notifications.', 409);
       if (estimate.estimate_status !== 'ready_to_send') return fail(res, 'Only READY_TO_SEND estimates can be delivered.', 409);
       if (estimate.economics_status !== 'PASS') return fail(res, 'Quote economics must PASS before delivery.', 409);
       if (!['PENDING_PAYMENT','READY'].includes(String(estimate.assignment_readiness_status || '').toUpperCase())) return fail(res, 'Quote fulfillment must be commercially resolved before delivery.', 409);
@@ -1000,7 +1011,6 @@ export default async function handler(req, res) {
       const { data: estimate, error: estimateError } = await context.supabase.from('dd_estimates').select('*').eq('id', estimateId).maybeSingle();
       if (estimateError) throw estimateError;
       if (!estimate) return fail(res, 'Saved estimate not found.', 404);
-      if (estimate.is_test === true) return fail(res, 'TEST_ESTIMATE_EXTERNAL_ACTION_BLOCKED: synthetic quotes cannot issue external invoices or customer notifications.', 409);
       if (!isStaffRequest) {
         if (context.role !== 'customer') return fail(res, 'Customer portal payment action required.', 403);
         if (!estimate.service_request_id) return fail(res, 'This quote is not linked to a customer request.', 409);
