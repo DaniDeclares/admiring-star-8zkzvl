@@ -1,7 +1,7 @@
 import React from 'react';
 import {act} from 'react-dom/test-utils';
 import {createRoot} from 'react-dom/client';
-import {useProviderWorkspace} from './providerWorkspaceShared.jsx';
+import {completeLocalSignOut,useProviderWorkspace} from './providerWorkspaceShared.jsx';
 import {supabase} from '../../lib/supabaseClient.js';
 
 jest.mock('../../lib/supabaseClient.js',()=>({
@@ -35,6 +35,22 @@ describe('provider workspace recovery',()=>{
     jest.useRealTimers();
     container.remove();
     jest.clearAllMocks();
+  });
+
+  test('delayed successful sign-out redirects after the visible timeout',async()=>{
+    let resolveSignOut;
+    const signOutOperation=new Promise(resolve=>{resolveSignOut=resolve;});
+    const redirectAfterSignOut=jest.fn();
+    const visibleAttempt=completeLocalSignOut(signOutOperation,redirectAfterSignOut).catch(error=>error);
+
+    jest.advanceTimersByTime(12000);
+    await expect(visibleAttempt).resolves.toMatchObject({message:'Sign-out timed out. Please retry.'});
+    expect(redirectAfterSignOut).not.toHaveBeenCalled();
+
+    resolveSignOut({error:null});
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(redirectAfterSignOut).toHaveBeenCalledTimes(1);
   });
 
   test('retry keeps a loading surface visible while no snapshot exists',async()=>{
