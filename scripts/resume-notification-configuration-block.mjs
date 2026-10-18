@@ -1,4 +1,5 @@
-// Explicit per-record recovery. Run only after correcting the worker configuration.
+// Explicit per-record recovery for configuration blocks and credential rejections.
+// Run only after correcting and validating the worker configuration.
 import { createRequire } from 'node:module';
 import { resumeConfigurationBlocked } from '../lib/notificationOutbox.mjs';
 import { renderTransactionalEmail } from '../api-handlers/daniTransactionalEmailTemplates.js';
@@ -12,5 +13,5 @@ if (process.argv.length !== 3 || !process.env.DATABASE_URL) throw new Error('Wor
 const db = new PrismaClient();
 try {
   await resumeConfigurationBlocked({ db, id, renderEmail:renderTransactionalEmail });
-  console.log(JSON.stringify({ id, status:'PENDING', action:'configuration block released; no provider called' }));
+  console.log(JSON.stringify({ id, status:'PENDING', action:'recoverable configuration failure released; no provider called' }));
 } finally { await db.$disconnect(); }
