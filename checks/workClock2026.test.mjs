@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
-import {DANI_CLOCK_TASKS,allowedStudyTask,clockAccess,minutesForEntry,summarizeEntries} from '../src/lib/operations/workClock2026.js';
+import {DANI_CLOCK_TASKS,allowedStudyTask,clockAccess,minutesForEntry,summarizeEntries} from '../src/lib/operations/workClock2026.mjs';
 test('owner cleaning and revenue timing categories remain separate',()=>{
   assert.equal(allowedStudyTask('MAINTENANCE_PREP','ACCESS_SAFETY'),true);
   assert.equal(allowedStudyTask('PRINTIFY_MERCH','PRICE_SHIPPING'),true);
@@ -55,8 +55,8 @@ test('Vercel CommonJS can load the shared clock without ERR_REQUIRE_ESM',()=>{
  assert.match(api,/from '\.\.\/src\/lib\/operations\/workClock2026\.js'/);
  assert.doesNotMatch(api,/workClock2026\.mjs/);
  const browser=readFileSync(new URL('../src/pages/portal/WorkClock.jsx',import.meta.url),'utf8');
- assert.match(browser,/require\('\.\.\/\.\.\/lib\/operations\/workClock2026\.js'\)/);
- assert.doesNotMatch(browser,/workClock2026\.mjs/);
+ assert.match(browser,/from '\.\.\/\.\.\/lib\/operations\/workClock2026\.mjs'/);
+ assert.doesNotMatch(browser,/require\([^\n]+workClock2026\.js/);
 });
 
 test('server and browser clock packages keep task catalogs and duration rules identical',()=>{
