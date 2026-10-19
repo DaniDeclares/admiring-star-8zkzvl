@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { messageReceipt } from './_messageReceipt.mjs';
 import { decryptSecret, encryptSecret, ENVIRONMENT, logIntegrationEvent, requireStaff } from '../../_integrationOAuth.js';
 
 function adminClient() {
@@ -8,16 +9,6 @@ function adminClient() {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
-function header(headers, name) {
-  return (headers || []).find(h => String(h.name || '').toLowerCase() === name.toLowerCase())?.value || '';
-}
-function addresses(value) {
-  return String(value || '').split(',').map(v => v.trim()).filter(Boolean);
-}
-function emailOnly(value) {
-  const m = String(value || '').match(/<([^>]+)>/);
-  return (m ? m[1] : value || '').trim().toLowerCase();
-}
 function gmailSearchQuery(connection) {
   const lastSync = connection.last_sync_at ? new Date(connection.last_sync_at) : null;
   if (!lastSync || Number.isNaN(lastSync.getTime())) return 'newer_than:30d -in:spam -in:trash';
@@ -115,31 +106,9 @@ async function syncConnection(supabase, connection) {
       'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + encodeURIComponent(item.id) + '?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Bcc&metadataHeaders=Subject&metadataHeaders=Date',
       accessToken
     );
-    const headers = message.payload?.headers || [];
-    const fromRaw = header(headers, 'From');
-    const toRaw = header(headers, 'To');
-    const ccRaw = header(headers, 'Cc');
-    const bccRaw = header(headers, 'Bcc');
-    const from = emailOnly(fromRaw);
-    const direction = ownEmail && from === ownEmail ? 'OUTBOUND' : 'INBOUND';
-    const receivedAt = message.internalDate ? new Date(Number(message.internalDate)).toISOString() : new Date().toISOString();
-    const recipients = [...addresses(toRaw), ...addresses(ccRaw), ...addresses(bccRaw)];
-    const { error } = await supabase.rpc('dd_ingest_email_communication', {
-      p_external_message_id: message.id,
-      p_external_thread_id: message.threadId || null,
-      p_direction: direction,
-      p_sender_address: from,
-      p_recipient_addresses: recipients,
-      p_subject: header(headers, 'Subject') || null,
-      p_body_excerpt: message.snippet || null,
-      p_received_at: receivedAt,
-      p_raw_metadata: {
-        history_id: message.historyId || null,
-        label_ids: message.labelIds || [],
-        gmail_connection_id: connection.id,
-        account_email: ownEmail || null
-      }
-    });
+    const receipt = messageReceipt(message, ownEmail, connection.id);
+    if (!receipt) continue;
+    const { error } = await supabase.rpc('dd_ingest_email_communication', receipt);
     if (error) throw error;
     ingested += 1;
   }
