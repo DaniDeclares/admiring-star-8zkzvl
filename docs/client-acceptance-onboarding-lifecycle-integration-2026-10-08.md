@@ -95,3 +95,20 @@ Workbook-only checks demonstrated missing acceptance/payment produces HOLD and t
 Application/database end-to-end tests remain NOT RUN in this audit. Use the existing isolated tester with synthetic parties and external notifications, live payment credentials and physical dispatch disabled. Prove positive, missing-term, stale-version, unpaid, approved-credit, unaccepted-worker, wrong-customer, duplicate/replay, alternate-write and failed-QA cases. Preserve per-step evidence and identify the exact implementation tested. No production release follows from this documentation update alone.
 
 Processor reference: https://docs.stripe.com/api/events/types . Stripe invoice.paid can include out-of-band marking; verify the underlying settlement source rather than asserting a Stripe charge from the event name.
+
+
+## Owner decision — 19 October 2026, 11:45 EDT
+
+Danielle approved 10% as the NEW standard participating-resident benefit on explicitly eligible resident-service charges, with bounded benefits. This supersedes 15% as the intended new standard; it does not retroactively rewrite existing contracts or prove runtime activation.
+
+- Verify resident and active participating property; reconcile the approved price basis and eligible SKU list before numeric resident quoting/checkout.
+- No automatic CH02 discount; no stacking or repeat discount on an already-discounted price. Exclude taxes, pass-through purchases, travel and third-party fees unless explicitly approved.
+- Initially keep laundry, linen and custom intensive work outside automatic activation until pricing units/scope/costs are reconciled. Key/Access is ineligible under the inspected live rule.
+- Bounded benefits: approved menu and single service-request contact; booking assistance within confirmed capacity. Community service days require confirmed staffing/demand. No priority reservation, free visit or unlimited support.
+- Property-funded welcome/renewal credits need separate funding, cap, eligibility and redemption/order tracking.
+- Identify and preserve existing binding 15% commitments according to their terms. Historical source/rule evidence must not be silently overwritten.
+- Any later 15% promotion needs separate approval, defined audience/duration, actual delivery/perk costs and successful economics review.
+
+Implementation remains pending: trace all resident price/checkout sources, preserve existing commitments, version the new rules and verify positive/negative eligibility/stacking cases without moving real money. This documentation change changes no runtime behavior.
+
+The supplied 100%-upfront / 50%-booking payment examples remain proposals, not an approved universal deposit policy. Start with bounded assignments; recurring packages define quantities/hours and portfolio arrangements preserve per-property payer, approver and scope.
