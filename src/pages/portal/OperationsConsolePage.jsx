@@ -10,7 +10,7 @@ const PARTNER_STATUSES=['ACTIVE','INACTIVE','PROSPECTIVE','DO_NOT_USE'];
 const EMPTY_PARTNER={partner_name:'',primary_contact_name:'',phone:'',email:'',website:'',partner_type:'',services_capabilities:'',coverage_area:'',service_radius_or_zips:'',license_credential_notes:'',insurance_status:'',insurance_expiration:'',preferred_contact_method:'',availability_notes:'',internal_notes:'',source:''};
 const SALES_LANE_ORDER=['INBOUND','WARM','REVISIT_CALLABLE','REVISIT_ROUTING','PARTNER','EMAIL_ONLY','REVISIT_NOT_CALLABLE','SCREEN_ONLY'];
 const SALES_LANE_LABELS={INBOUND:'🔥 Inbound',WARM:'🟠 Warm',REVISIT_CALLABLE:'🟡 Revisit — Callable',REVISIT_ROUTING:'🟡 Revisit — Company Routing',PARTNER:'🟢 Partner',EMAIL_ONLY:'📧 Email Only',REVISIT_NOT_CALLABLE:'⚪ Revisit — Not Yet Callable',SCREEN_ONLY:'⚪ Screen Only'};
-const SALES_DISPOSITIONS=['NOT_CONTACTED','NO_ANSWER','VOICEMAIL','RECEPTIONIST','WRONG_PERSON','DECISION_MAKER_REACHED','INTERESTED','NEEDS_INFO','QUOTE_REQUESTED','READY_TO_BUY','PAYMENT_SENT','PAYMENT_SUCCEEDED','CALL_BACK_LATER','NOT_INTERESTED','EXISTING_VENDOR_REVISIT','DO_NOT_CONTACT'];
+const CALL_OUTCOMES=['NO_ANSWER','VOICEMAIL','RECEPTIONIST','WRONG_PERSON','DECISION_MAKER_REACHED','INTERESTED','NEEDS_INFO','QUOTE_REQUESTED','READY_TO_BUY','CALL_BACK_LATER','NOT_INTERESTED','DO_NOT_CONTACT'];
 const CHANNELS=['B2C','B2B-APT','B2B-RE','B2B','B2G'];
 function Stat({label,value,detail}){return <div className="ops-stat"><span>{label}</span><strong>{value}</strong><small>{detail}</small></div>}
 function RoutePendingRow({item,onFinalize}){
@@ -18,22 +18,99 @@ function RoutePendingRow({item,onFinalize}){
  return <div className="ops-row" style={{alignItems:'flex-end',gap:10}}><div style={{flex:1}}><strong>{item.dd_estimates?.public_reference||'Provider assignment'} · Route verification needed</strong><small>{item.dd_estimates?.location_address||'Job destination on file'} · Base offer ${Number(item.proposed_compensation||0).toFixed(2)}</small><small>Enter verified one-way road mileage. DANI will add round-trip travel economics and recheck the frozen margin before the provider can see this offer.</small></div><div className="ops-actions"><input type="number" min="0" step="0.1" placeholder="One-way miles" value={miles} onChange={e=>setMiles(e.target.value)} style={{width:115}}/><input type="text" placeholder="Source note" value={source} onChange={e=>setSource(e.target.value)} style={{minWidth:150}}/><button disabled={miles===''||Number(miles)<0||!source.trim()} onClick={()=>onFinalize(item.id,Number(miles),source)}>Verify route & release</button></div></div>;
 }
 
-function SalesRow({row,onSave,frontDoors=[]}){
+function SalesRow({row,onSave,onRecordCall,frontDoors=[]}){
  const [expanded,setExpanded]=useState(false);
- const [disposition,setDisposition]=useState(row.disposition);
  const [nextAction,setNextAction]=useState(row.next_action||'');
  const [nextActionDate,setNextActionDate]=useState(row.next_action_date||'');
  const [quotedAmount,setQuotedAmount]=useState(row.quoted_amount==null?'':row.quoted_amount);
  const [amountCollected,setAmountCollected]=useState(row.amount_collected||0);
- const [painPoint,setPainPoint]=useState(row.pain_point||''); const [impact,setImpact]=useState(row.impact_statement||''); const [nextStep,setNextStep]=useState(row.next_step_commitment||''); const [frontDoorCode,setFrontDoorCode]=useState(row.front_door_code||'');
- const dirty=disposition!==row.disposition||nextAction!==(row.next_action||'')||nextActionDate!==(row.next_action_date||'')||String(quotedAmount)!==String(row.quoted_amount==null?'':row.quoted_amount)||String(amountCollected)!==String(row.amount_collected||0)||painPoint!==(row.pain_point||'')||impact!==(row.impact_statement||'')||nextStep!==(row.next_step_commitment||'')||frontDoorCode!==(row.front_door_code||'');
+ const [painPoint,setPainPoint]=useState(row.pain_point||'');
+ const [impact,setImpact]=useState(row.impact_statement||'');
+ const [nextStep,setNextStep]=useState(row.next_step_commitment||'');
+ const [frontDoorCode,setFrontDoorCode]=useState(row.front_door_code||'');
+ const [callOutcome,setCallOutcome]=useState('');
+ const [callAction,setCallAction]=useState('');
+ const [callDue,setCallDue]=useState('');
+ const [callNotes,setCallNotes]=useState('');
+ const [correctLast,setCorrectLast]=useState(false);
+ const [recording,setRecording]=useState(false);
+ const callRequestKey=useRef(null);
+ const contactRestricted=Boolean(row.do_not_contact)||
+  ['DO_NOT_CONTACT','PAUSED','COOLDOWN'].includes(row.contact_pressure_state)||
+  Boolean(row.next_permitted_contact_at&&new Date(row.next_permitted_contact_at)>new Date())||
+  row.consent_phone===false;
+ const dirty=nextAction!==(row.next_action||'')||nextActionDate!==(row.next_action_date||'')||
+  String(quotedAmount)!==String(row.quoted_amount==null?'':row.quoted_amount)||
+  String(amountCollected)!==String(row.amount_collected||0)||painPoint!==(row.pain_point||'')||
+  impact!==(row.impact_statement||'')||nextStep!==(row.next_step_commitment||'')||
+  frontDoorCode!==(row.front_door_code||'');
+ const updateCall=(setter,value)=>{callRequestKey.current=null;setter(value)};
+ const record=async()=>{
+  if(!callOutcome||contactRestricted||recording)return;
+  if(!callRequestKey.current)callRequestKey.current=crypto.randomUUID();
+  setRecording(true);
+  try{
+   const saved=await onRecordCall(row.id,{
+    p_operation_key:callRequestKey.current,
+    p_outcome:callOutcome,p_next_action:callAction.trim()||null,
+    p_next_action_date:callDue||null,p_call_notes:callNotes.trim()||null,
+    p_is_correction:correctLast
+   });
+   if(saved){callRequestKey.current=null;setCallOutcome('');setCallAction('');setCallDue('');setCallNotes('');setCorrectLast(false)}
+  }finally{setRecording(false)}
+ };
  return <div className="ops-row sales-row">
-  <div className="sales-row-summary"><div><strong>{row.contact_name||row.company_name||'Sales lead'}</strong>{row.company_name&&row.company_name!==row.contact_name&&<small> · {row.company_name}</small>}{row.role_title&&<small> · {row.role_title}</small>}<small>{row.phone||row.email||'No direct contact method verified'}</small></div><div className="sales-row-meta"><strong>Priority {row.priority_score??'—'}</strong><span>{String(row.disposition||'').replaceAll('_',' ')}</span>{row.next_action_date&&<span>Due {row.next_action_date}</span>}</div><button className="secondary" onClick={()=>setExpanded(v=>!v)}>{expanded?'Close':'Work lead'}</button></div>
-  {expanded&&<div className="sales-row-detail">{row.notes&&<p className="ops-note">{row.notes}</p>}{row.recommended_action&&<p><strong>Recommended:</strong> {row.recommended_action}</p>}<div className="ops-actions">
-   <select value={disposition} onChange={e=>setDisposition(e.target.value)}>{SALES_DISPOSITIONS.map(d=><option key={d} value={d}>{d.replaceAll('_',' ')}</option>)}</select>
-   <input type="text" placeholder="Next action" value={nextAction} onChange={e=>setNextAction(e.target.value)}/><input type="date" value={nextActionDate||''} onChange={e=>setNextActionDate(e.target.value)}/><input type="number" placeholder="Quoted $" value={quotedAmount} onChange={e=>setQuotedAmount(e.target.value)}/><input type="number" placeholder="Collected $" value={amountCollected} onChange={e=>setAmountCollected(e.target.value)}/><select value={frontDoorCode} onChange={e=>setFrontDoorCode(e.target.value)}><option value="">Front door / problem family</option>{frontDoors.map(fd=><option key={fd.front_door_code} value={fd.front_door_code}>{fd.channel_code} · {fd.front_door_name}</option>)}</select><input type="text" placeholder="Pain" value={painPoint} onChange={e=>setPainPoint(e.target.value)}/><input type="text" placeholder="Impact" value={impact} onChange={e=>setImpact(e.target.value)}/><input type="text" placeholder="Committed next step" value={nextStep} onChange={e=>setNextStep(e.target.value)}/>
-   {dirty&&<button onClick={()=>onSave(row.id,{disposition,next_action:nextAction||null,next_action_date:nextActionDate||null,quoted_amount:quotedAmount===''?null:Number(quotedAmount),amount_collected:Number(amountCollected||0),pain_point:painPoint||null,impact_statement:impact||null,next_step_commitment:nextStep||null,front_door_code:frontDoorCode||null})}>Save changes</button>}
-  </div></div>}
+  <div className="sales-row-summary">
+   <div><strong>{row.contact_name||row.company_name||'Sales lead'}</strong>
+    {row.company_name&&row.company_name!==row.contact_name&&<small> · {row.company_name}</small>}
+    {row.role_title&&<small> · {row.role_title}</small>}
+    <small>{row.phone||row.email||'No direct contact method verified'}</small>
+   </div>
+   <div className="sales-row-meta"><strong>Priority {row.priority_score??'—'}</strong>
+    <span>{String(row.disposition||'').replaceAll('_',' ')}</span>
+    {row.next_action_date&&<span>Due {row.next_action_date}</span>}
+   </div>
+   <button className="secondary" onClick={()=>setExpanded(v=>!v)}>{expanded?'Close':'Work lead'}</button>
+  </div>
+  {expanded&&<div className="sales-row-detail">
+   {row.notes&&<p className="ops-note">{row.notes}</p>}
+   {row.recommended_action&&<p><strong>Recommended:</strong> {row.recommended_action}</p>}
+   <div className="ops-actions">
+    <p className="ops-note">Update lead details below without recording a call. For actual calls, use Record call outcome once.</p>
+    <input type="text" placeholder="Next action (manual planning)" value={nextAction} onChange={e=>setNextAction(e.target.value)}/>
+    <input type="date" value={nextActionDate||''} onChange={e=>setNextActionDate(e.target.value)}/>
+    <input type="number" placeholder="Quoted $" value={quotedAmount} onChange={e=>setQuotedAmount(e.target.value)}/>
+    <input type="number" placeholder="Collected $" value={amountCollected} onChange={e=>setAmountCollected(e.target.value)}/>
+    <select value={frontDoorCode} onChange={e=>setFrontDoorCode(e.target.value)}>
+     <option value="">Front door / problem family</option>
+     {frontDoors.map(fd=><option key={fd.front_door_code} value={fd.front_door_code}>{fd.channel_code} · {fd.front_door_name}</option>)}
+    </select>
+    <input type="text" placeholder="Pain" value={painPoint} onChange={e=>setPainPoint(e.target.value)}/>
+    <input type="text" placeholder="Impact" value={impact} onChange={e=>setImpact(e.target.value)}/>
+    <input type="text" placeholder="Committed next step" value={nextStep} onChange={e=>setNextStep(e.target.value)}/>
+    {dirty&&<button onClick={()=>onSave(row.id,{
+     next_action:nextAction||null,next_action_date:nextActionDate||null,
+     quoted_amount:quotedAmount===''?null:Number(quotedAmount),
+     amount_collected:Number(amountCollected||0),pain_point:painPoint||null,
+     impact_statement:impact||null,next_step_commitment:nextStep||null,
+     front_door_code:frontDoorCode||null
+    })}>Update lead details — no call logged</button>}
+   </div>
+   <div className="ops-actions" style={{flexDirection:'column',alignItems:'stretch',gap:8,marginTop:12}}>
+    <strong>Record an actual call outcome</strong>
+    <p className="ops-note">Save one confirmed phone result. The system records history and one owner follow-up task if needed; it does not send messages or create quotes.</p>
+    {contactRestricted&&<p className="ops-note">Contact restriction is active. Review permission and status before logging another outbound call.</p>}
+    <select aria-label="Call outcome" disabled={contactRestricted||recording} value={callOutcome} onChange={e=>updateCall(setCallOutcome,e.target.value)}>
+     <option value="">Choose an actual phone outcome</option>
+     {CALL_OUTCOMES.map(d=><option key={d} value={d}>{d.replaceAll('_',' ')}</option>)}
+    </select>
+    <input aria-label="Owner follow-up action" disabled={contactRestricted||recording} placeholder="Owner follow-up or quote review" value={callAction} onChange={e=>updateCall(setCallAction,e.target.value)}/>
+    <input aria-label="Owner follow-up due date" disabled={contactRestricted||recording} type="date" value={callDue} onChange={e=>updateCall(setCallDue,e.target.value)}/>
+    <textarea aria-label="Call notes" disabled={contactRestricted||recording} placeholder="What happened? (No confidential resident data)" value={callNotes} onChange={e=>updateCall(setCallNotes,e.target.value)}/>
+    <label><input type="checkbox" checked={correctLast} disabled={contactRestricted||recording} onChange={e=>updateCall(setCorrectLast,e.target.checked)}/> Correct most recent logged call; do not count a new contact</label>
+    <button disabled={contactRestricted||recording||!callOutcome} onClick={record}>{recording?'Recording…':correctLast?'Record correction':'Record call outcome once'}</button>
+   </div>
+  </div>}
  </div>;
 }
 function PartnerRow({row,onSave}){
@@ -135,6 +212,7 @@ function OperationsConsole(){
    </body></html>`);
    win.document.close();
  };
+ const recordSalesCall=async(id,fields)=>{setMessage('');setError('');const {data,error}=await supabase.rpc('dd_record_sales_call_outcome',{p_sales_queue_id:id,...fields});if(error){setError(error.message||'Call outcome could not be recorded.');return false}setMessage(data?.idempotent?'Call outcome already recorded; no duplicate was created.':data?.followup_task_id?'Call outcome saved and owner follow-up task recorded. No message sent.':'Call outcome saved; no follow-up task required. No message sent.');await load();return true};
  const updateSalesRow=async(id,patch)=>{setMessage('');setError('');const {error:e}=await supabase.from('dd_sales_queue').update({...patch,updated_at:new Date().toISOString()}).eq('id',id);if(e)setError(e.message);else{setMessage('Sales queue updated.');await load()}};
  const updatePartner=async(id,patch)=>{setMessage('');setError('');const {error:e}=await supabase.from('dd_partners').update({...patch,updated_at:new Date().toISOString()}).eq('id',id);if(e)setError(e.message);else{setMessage('Partner updated.');await load()}};
  const addPartner=async(form)=>{setMessage('');setError('');const payload=Object.fromEntries(Object.entries(form).map(([k,v])=>[k,v===''?null:v]));const {error:e}=await supabase.from('dd_partners').insert(payload);if(e)setError(e.message);else{setMessage('Partner added.');await load()}};
@@ -151,7 +229,7 @@ function OperationsConsole(){
  {error&&<div className="ops-alert">{error}</div>}{message&&<div className="ops-alert" style={{background:'#edf8ef',color:'#276b35'}}>✓ {message}</div>}
  <section className="ops-stats"><Stat label="Collected" value={loading?'…':(data?.weeklyCollectedTarget!=null?`$${salesCollected.toFixed(0)} / $${data.weeklyCollectedTarget}`:`$${salesCollected.toFixed(0)}`)} detail={data?.weeklyCollectedTarget!=null?'Weekly target':'Weekly target not set'}/><Stat label="Requests" value={loading?'…':counts.requests} detail="Intake / CRM"/><Stat label="Jobs" value={loading?'…':counts.jobs} detail="Execution ledger"/><Stat label="Schedule" value={loading?'…':counts.schedule} detail="Appointments + owner requests"/><Stat label="Providers" value={loading?'…':counts.providers} detail="Field network"/><Stat label="Change Orders" value={loading?'…':counts.changes} detail="Commercial deltas"/><Stat label="Evidence" value={loading?'…':counts.evidence} detail="Field proof"/><Stat label="Payments" value={loading?'…':counts.payments} detail="Accounting events"/></section>
  <section className="ops-grid"><aside className="ops-nav"><div className="ops-nav-title">WORKFLOWS</div>{QUEUES.map(item=><button key={item.key} className={active===item.key?'active':''} onClick={()=>setActive(item.key)}><span>{item.label}</span><small>{counts[item.key]}</small></button>)}</aside><section className="ops-workspace"><div className="ops-section-head"><div><p className="ops-eyebrow">LIVE OPERATIONAL LAYER</p><h2>{activeQueue.label}</h2><p>{activeQueue.description}</p></div><span className="ops-live">● STAFF ACCESS</span></div>
- {active==='sales'&&<><div className="ops-card sales-toolbar"><div><h3>Sales workbench</h3><p>Choose one lane, find the lead, and open only the record you are actively working.</p></div><input type="search" placeholder="Search name, company, email or phone" value={salesSearch} onChange={e=>setSalesSearch(e.target.value)}/></div><div className="sales-lane-tabs">{SALES_LANE_ORDER.filter(lane=>salesByLane[lane]?.length).map(lane=><button key={lane} className={salesLane===lane?'active':''} onClick={()=>setSalesLane(lane)}>{SALES_LANE_LABELS[lane]} <strong>{salesByLane[lane].length}</strong></button>)}</div><div className="ops-card"><h3>{SALES_LANE_LABELS[salesLane]} ({visibleSales.length})</h3>{visibleSales.slice(0,25).map(row=><SalesRow key={row.id} row={row} onSave={updateSalesRow} frontDoors={data?.frontDoors||[]}/>)}{visibleSales.length>25&&<p className="ops-note">Showing the first 25 matches. Search to narrow this lane.</p>}{!visibleSales.length&&<p className="ops-note">No leads match this lane and search.</p>}</div></>}
+ {active==='sales'&&<><div className="ops-card sales-toolbar"><div><h3>Sales workbench</h3><p>Choose one lane, find the lead, and open only the record you are actively working.</p></div><input type="search" placeholder="Search name, company, email or phone" value={salesSearch} onChange={e=>setSalesSearch(e.target.value)}/></div><div className="sales-lane-tabs">{SALES_LANE_ORDER.filter(lane=>salesByLane[lane]?.length).map(lane=><button key={lane} className={salesLane===lane?'active':''} onClick={()=>setSalesLane(lane)}>{SALES_LANE_LABELS[lane]} <strong>{salesByLane[lane].length}</strong></button>)}</div><div className="ops-card"><h3>{SALES_LANE_LABELS[salesLane]} ({visibleSales.length})</h3>{visibleSales.slice(0,25).map(row=><SalesRow key={row.id} row={row} onSave={updateSalesRow} onRecordCall={recordSalesCall} frontDoors={data?.frontDoors||[]}/>)}{visibleSales.length>25&&<p className="ops-note">Showing the first 25 matches. Search to narrow this lane.</p>}{!visibleSales.length&&<p className="ops-note">No leads match this lane and search.</p>}</div></>}
  {active==='requests'&&<><div className="ops-card"><h3>Channel routing</h3><div className="channel-grid">{CHANNELS.map(channel=><div key={channel}><strong>{channel}</strong><span>{channelCounts[channel]}</span></div>)}</div></div><div className="ops-card"><h3>Recent intake</h3>{(data?.requests||[]).slice(0,10).map(row=>{
    const linkedJob=(data?.jobs||[]).find(job=>job.service_request_id===row.id);
    const explicitTest=/\bTEST ONLY\b|\bTEST RECORD\b|\bTEST QA\b|\bE2E Proof Test\b/i.test([row.request_details,row.internal_notes,row.location_address].filter(Boolean).join(' '));
