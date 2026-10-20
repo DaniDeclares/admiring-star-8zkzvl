@@ -3,12 +3,16 @@ export async function submitProviderCapabilityRequests({
   servicesForCategory,
   accessToken,
   fetchImpl = fetch,
+  selectedServiceIdsByCategory = null,
 }) {
   if (!accessToken) throw new Error('Your provider session is unavailable. Please sign in again.');
 
   let submittedCount = 0;
   for (const category of categories) {
-    const serviceIds = servicesForCategory(category).map((service) => service.id).filter(Boolean);
+    const validIds = new Set(servicesForCategory(category).map(service => service.id));
+    const requested = selectedServiceIdsByCategory ? selectedServiceIdsByCategory[category.category_key] || [] : [...validIds];
+    if (requested.some(id => !validIds.has(id))) throw new Error('Invalid selected service for category.');
+    const serviceIds = [...new Set(requested)].filter(Boolean);
     if (!serviceIds.length) continue;
 
     let response;
