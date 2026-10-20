@@ -755,8 +755,8 @@ export default async function handler(req, res) {
       }));
       if (!toInsert.length) return ok(res, { requested: [], alreadyOnFile: serviceIds.length });
       const { data: inserted, error: insertError } = await context.supabase.from('dd_provider_capabilities')
-        .upsert(toInsert, { onConflict: 'provider_id,service_id', ignoreDuplicates: true }).select();
-      if (insertError) throw insertError;
+        .insert(toInsert).select();
+      if (insertError) return fail(res, 'Capability request could not be saved. Refresh your existing services before retrying.', 409);
       return ok(res, { requested: inserted || [], alreadyOnFile: existingIds.size });
     }
     // Self-service removal is unrestricted by authorization_status on purpose --
