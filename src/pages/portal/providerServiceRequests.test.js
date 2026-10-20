@@ -79,3 +79,39 @@ test('fails closed before any request when the session or matching services are 
   })).rejects.toThrow('No matching services');
   expect(fetchImpl).not.toHaveBeenCalled();
 });
+
+test('submits only explicitly selected services, never the entire category', async () => {
+  const fetchImpl = jest.fn(async () => ({ ok: true, json: async () => ({ success: true }) }));
+  await submitProviderCapabilityRequests({
+    categories: [{ ...categories[0], category_key: 'CLEANING' }],
+    servicesForCategory,
+    selectedServiceIdsByCategory: { CLEANING: ['service-2'] },
+    accessToken: 'token',
+    fetchImpl,
+  });
+  expect(JSON.parse(fetchImpl.mock.calls[0][1].body).serviceIds).toEqual(['service-2']);
+});
+
+test('rejects invalid per-category service selection without contacting API', async () => {
+  const fetchImpl = jest.fn();
+  await expect(submitProviderCapabilityRequests({
+    categories: [{ ...categories[0], category_key: 'CLEANING' }],
+    servicesForCategory,
+    selectedServiceIdsByCategory: { CLEANING: ['service-3'] },
+    accessToken: 'token',
+    fetchImpl,
+  })).rejects.toThrow('Invalid selected service');
+  expect(fetchImpl).not.toHaveBeenCalled();
+});
+
+test('deduplicates repeated selected IDs before request', async () => {
+  const fetchImpl = jest.fn(async () => ({ ok: true, json: async () => ({ success: true }) }));
+  await submitProviderCapabilityRequests({
+    categories: [{ ...categories[0], category_key: 'CLEANING' }],
+    servicesForCategory,
+    selectedServiceIdsByCategory: { CLEANING: ['service-1','service-1'] },
+    accessToken: 'token',
+    fetchImpl,
+  });
+  expect(JSON.parse(fetchImpl.mock.calls[0][1].body).serviceIds).toEqual(['service-1']);
+});
