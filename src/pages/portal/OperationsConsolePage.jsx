@@ -20,8 +20,6 @@ function RoutePendingRow({item,onFinalize}){
 
 function SalesRow({row,onSave,onRecordCall,frontDoors=[]}){
  const [expanded,setExpanded]=useState(false);
- const [nextAction,setNextAction]=useState(row.next_action||'');
- const [nextActionDate,setNextActionDate]=useState(row.next_action_date||'');
  const [quotedAmount,setQuotedAmount]=useState(row.quoted_amount==null?'':row.quoted_amount);
  const [amountCollected,setAmountCollected]=useState(row.amount_collected||0);
  const [painPoint,setPainPoint]=useState(row.pain_point||'');
@@ -39,8 +37,7 @@ function SalesRow({row,onSave,onRecordCall,frontDoors=[]}){
   ['DO_NOT_CONTACT','PAUSED','COOLDOWN'].includes(row.contact_pressure_state)||
   Boolean(row.next_permitted_contact_at&&new Date(row.next_permitted_contact_at)>new Date())||
   row.consent_phone===false;
- const dirty=nextAction!==(row.next_action||'')||nextActionDate!==(row.next_action_date||'')||
-  String(quotedAmount)!==String(row.quoted_amount==null?'':row.quoted_amount)||
+ const dirty=  String(quotedAmount)!==String(row.quoted_amount==null?'':row.quoted_amount)||
   String(amountCollected)!==String(row.amount_collected||0)||painPoint!==(row.pain_point||'')||
   impact!==(row.impact_statement||'')||nextStep!==(row.next_step_commitment||'')||
   frontDoorCode!==(row.front_door_code||'');
@@ -77,8 +74,7 @@ function SalesRow({row,onSave,onRecordCall,frontDoors=[]}){
    {row.recommended_action&&<p><strong>Recommended:</strong> {row.recommended_action}</p>}
    <div className="ops-actions">
     <p className="ops-note">Update lead details below without recording a call. For actual calls, use Record call outcome once.</p>
-    <input type="text" placeholder="Next action (manual planning)" value={nextAction} onChange={e=>setNextAction(e.target.value)}/>
-    <input type="date" value={nextActionDate||''} onChange={e=>setNextActionDate(e.target.value)}/>
+    <small>Current next action: {row.next_action||'None'} {row.next_action_date||''} (call follow-up changes are recorded below)</small>
     <input type="number" placeholder="Quoted $" value={quotedAmount} onChange={e=>setQuotedAmount(e.target.value)}/>
     <input type="number" placeholder="Collected $" value={amountCollected} onChange={e=>setAmountCollected(e.target.value)}/>
     <select value={frontDoorCode} onChange={e=>setFrontDoorCode(e.target.value)}>
@@ -89,7 +85,6 @@ function SalesRow({row,onSave,onRecordCall,frontDoors=[]}){
     <input type="text" placeholder="Impact" value={impact} onChange={e=>setImpact(e.target.value)}/>
     <input type="text" placeholder="Committed next step" value={nextStep} onChange={e=>setNextStep(e.target.value)}/>
     {dirty&&<button onClick={()=>onSave(row.id,{
-     next_action:nextAction||null,next_action_date:nextActionDate||null,
      quoted_amount:quotedAmount===''?null:Number(quotedAmount),
      amount_collected:Number(amountCollected||0),pain_point:painPoint||null,
      impact_statement:impact||null,next_step_commitment:nextStep||null,
