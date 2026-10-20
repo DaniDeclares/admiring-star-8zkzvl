@@ -109,7 +109,9 @@ begin
   end if;
 
   if coalesce(v_sale.do_not_contact,false)
-     or v_sale.contact_pressure_state in ('DO_NOT_CONTACT','PAUSED') then
+     or coalesce(v_sale.contact_pressure_state,'NORMAL') <> 'NORMAL'
+     or coalesce(v_sale.consent_phone,true) = false
+     or (v_sale.next_permitted_contact_at is not null and v_sale.next_permitted_contact_at > now()) then
     raise exception 'Contact is paused or suppressed: manual authorization review required.' using errcode = '42501';
   end if;
 
