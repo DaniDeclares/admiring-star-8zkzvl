@@ -1,0 +1,30 @@
+{
+  "fixture_version": 1,
+  "scope": "synthetic only; no production IDs, credentials, or financial records",
+  "worker_identity": {
+    "valid": {"jwt_role": "authenticated", "auth_user_exists": true, "app_metadata": {"dani_machine_capability": "EXTERNAL_GITHUB_TESTER_EXECUTOR_V1", "dani_machine_enabled": true}},
+    "invalid": ["anonymous", "service_role_without_dedicated_subject", "authenticated_without_admin_capability", "disabled_machine_user"]
+  },
+  "actions": [
+    {"id":"a1", "destination_system":"DANI_TESTER_SUPABASE", "action_type":"RECONCILE_TESTER_PROMOTION_FEEDBACK", "status":"PENDING", "due":true, "lane":"TESTER", "eligible":true},
+    {"id":"a2", "destination_system":"DANI_TESTER_SUPABASE", "action_type":"INGEST_DANI_PRODUCTION_BRIDGE_LEARNING", "status":"RETRY_WAIT", "due":true, "lane":"TESTER", "eligible":true},
+    {"id":"a3", "destination_system":"GITHUB", "action_type":"EXECUTE_APPROVED_GITHUB_WORK", "status":"PENDING", "due":true, "lane":"GITHUB", "eligible":true},
+    {"id":"a4", "destination_system":"finances", "action_type":"FINANCE_READ_ECONOMICS_RECONCILE", "status":"PENDING", "due":true, "lane":"GITHUB", "eligible":false},
+    {"id":"a5", "destination_system":"UNKNOWN", "action_type":"UNKNOWN_FUTURE_ACTION", "status":"PENDING", "due":true, "lane":"TESTER", "eligible":false},
+    {"id":"a6", "destination_system":"GITHUB", "action_type":"EXECUTE_APPROVED_GITHUB_WORK", "status":"RETRY_WAIT", "due":false, "lane":"GITHUB", "eligible":false},
+    {"id":"a7", "destination_system":"GITHUB", "action_type":"EXECUTE_APPROVED_GITHUB_WORK", "status":"CLAIMED", "lease_expired":false, "lane":"GITHUB", "eligible":false},
+    {"id":"a8", "destination_system":"GITHUB", "action_type":"EXECUTE_APPROVED_GITHUB_WORK", "status":"CLAIMED", "lease_expired":true, "lane":"GITHUB", "eligible":true},
+    {"id":"a9", "destination_system":"GITHUB", "action_type":"EXECUTE_APPROVED_GITHUB_WORK", "status":"CANCELLED", "lane":"GITHUB", "eligible":false}
+  ],
+  "assertions": [
+    "Valid TESTER identity may claim a1/a2 only; all other rows' status, lease, attempt_count, next_attempt_at remain byte-for-byte unchanged.",
+    "Valid GITHUB identity may claim a3/a8 only; neither a4 nor a5 is touched.",
+    "Anonymous, disabled, service-role-only, or unconfigured worker may not claim anything.",
+    "A forged p_lane value cannot authorize FINANCE or unknown action types.",
+    "For two simultaneous GITHUB claimers, each eligible ID is returned at most once; SKIP LOCKED prevents overlapping claims.",
+    "A duplicate idempotency_key is rejected by the existing outbox unique constraint; receipt uniqueness remains destination+idempotency_key.",
+    "A failed Tester preflight means no TESTER claim call; authorized GITHUB lane remains separately exercisable.",
+    "Undue RETRY_WAIT, unexpired CLAIMED, CANCELLED, and any existing held work remain unchanged.",
+    "New function claims a maximum of five rows per invocation; release-time tests must also validate inherited max_attempts and failure rules."
+  ]
+}
