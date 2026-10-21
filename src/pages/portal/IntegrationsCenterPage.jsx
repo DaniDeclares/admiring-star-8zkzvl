@@ -37,6 +37,13 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
   const externalOnly = ['AIRTABLE','POSTHOG'].includes(system.key);
   const connected = (state?.connections || []).some(c => c.adapter_code === system.key && c.connection_status === 'CONNECTED');
   const notionInternalHealthy = system.key === 'NOTION' && Boolean(state?.notionInternalValid);
+  // Status describes evidence returned by this request, not integration usability.
+  const statusLabel = notionInternalHealthy ? 'NOTION API CHECK PASSED'
+    : connected ? 'CONNECTION RECORDED'
+    : (manualCredential && configured) ? 'CONFIGURATION PRESENT'
+    : managed ? 'MANAGED CONNECTION' : manualCredential ? 'CREDENTIAL REQUIRED'
+    : configured ? 'CONFIGURATION PRESENT'
+    : externalOnly ? 'PRODUCTION OAUTH REQUIRED' : 'CREDENTIALS REQUIRED';
 
   async function connect() {
     if (system.key === 'GOOGLE_VOICE') {
@@ -62,7 +69,7 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
   return <div style={{border:'1px solid #e6d9c8',borderRadius:16,padding:18,background:'#fff'}}>
     <div style={{display:'flex',justifyContent:'space-between',gap:10,alignItems:'flex-start'}}>
       <strong style={{fontSize:18,color:'#6b1f2b'}}>{system.name}</strong>
-      <span className='portal-pill'>{connected || notionInternalHealthy || (manualCredential && configured) ? 'DANI CONNECTED' : managed ? 'MANAGED CONNECTION' : manualCredential ? 'CREDENTIAL REQUIRED' : configured ? 'READY TO CONNECT' : externalOnly ? 'PRODUCTION OAUTH REQUIRED' : 'CREDENTIALS REQUIRED'}</span>
+      <span className='portal-pill'>{statusLabel}</span>
     </div>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5}}><strong>DANI role:</strong> {system.role}</p>
     <p style={{fontSize:12,color:'#75696a',lineHeight:1.5}}><strong>Auth:</strong> {system.auth}</p>
@@ -70,7 +77,7 @@ function IntegrationCard({ system, state, env, session, onRefresh }) {
     {!externalOnly && !managed && !manualCredential && system.key !== 'GOOGLE_VOICE' && <button className='portal-primary' style={{border:0,cursor:'pointer'}} disabled={!configured} onClick={connect}>{system.key === 'NOTION' && env.NOTION_INTERNAL ? 'Validate token' : connected ? 'Reconnect' : 'Connect'} ↗</button>}
     {(externalOnly || managed || manualCredential || system.key === 'GOOGLE_VOICE') && <a className='portal-primary' href={system.provider} target='_blank' rel='noreferrer'>Open {system.name} ↗</a>}
     {externalOnly && <p className='portal-note' style={{marginTop:10}}>Available to ChatGPT does not mean the deployed DANI application has OAuth access. DANI will show this as connected only after its own server-side credentials and consent flow are configured.</p>}
-    {(connected || notionInternalHealthy) && <p className='portal-note' style={{marginTop:10}}>{notionInternalHealthy && !connected ? 'The DANI Notion internal connection token is valid. Share the required parent pages/databases with that Notion connection before expecting page reads/writes.' : 'DANI has a stored, encrypted connection record. External IDs remain references; DANI retains its own runtime authority.'}</p>}
+    {(connected || notionInternalHealthy || configured) && <p className='portal-note' style={{marginTop:10}}>{notionInternalHealthy ? 'The Notion identity API responded successfully during the latest status refresh. This does not verify access to other pages, synchronization, or future API requests.' : connected ? 'A DANI connection record is stored. Current authorization, synchronization and business-action success have not been verified by this screen.' : 'Required server configuration is present. API authorization and business-action success have not been verified.'}</p>}
   </div>;
 }
 
@@ -98,7 +105,7 @@ function IntegrationsCenterPage({ session }) {
    <div><p className='portal-eyebrow'>DANI DECLARES • OWNER HQ</p><h1>Integrations & Connections</h1><p>One controlled place to connect the systems around DANI. Secrets never belong in source code, chat, Notion, Asana, or GitHub.</p></div>
    <div className='portal-hero-actions'><Link className='portal-primary' to='/portal/hq'>← Back to DANI HQ</Link></div>
   </header>
-  {(connectedBanner || errorBanner) && <section className='portal-status-banner'><div><strong>{connectedBanner ? 'Connection completed' : 'Connection issue'}</strong><p style={{margin:'6px 0 0',color:'#6d6263'}}>{connectedBanner ? connectedBanner.toUpperCase()+' is now recorded by DANI.' : decodeURIComponent(errorBanner || '').replace(/^\w+_/,'')}</p></div><span className='portal-pill'>{connectedBanner ? 'CONNECTED' : 'REVIEW'}</span></section>}
+  {(connectedBanner || errorBanner) && <section className='portal-status-banner'><div><strong>{connectedBanner ? 'Connection callback returned' : 'Connection issue'}</strong><p style={{margin:'6px 0 0',color:'#6d6263'}}>{connectedBanner ? connectedBanner.toUpperCase()+' returned from the connection flow. Check the status below; this banner does not prove API access or synchronization.' : decodeURIComponent(errorBanner || '').replace(/^\w+_/,'')}</p></div><span className='portal-pill'>{connectedBanner ? 'CHECK STATUS' : 'REVIEW'}</span></section>}
   <section className='portal-card'><p className='portal-eyebrow'>Live DANI connection state</p><h2 style={{margin:'5px 0 0'}}>First-party integrations</h2>
    {loading ? <p className='portal-note'>Checking connection state…</p> : error ? <div className='portal-alert'>{error}</div> :
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(285px,1fr))',gap:12,marginTop:18}}>
