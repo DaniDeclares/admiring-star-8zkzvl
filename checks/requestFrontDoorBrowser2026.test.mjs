@@ -40,7 +40,8 @@ test('isolated built pages: provider navigation, catalog retry, and quote wordin
   await page.goto(origin+'/portal/access');
   await page.getByRole('button',{name:/Property Manager \/ Apartment/}).click();
   await page.getByRole('link',{name:/Join.*Provider/i}).first().click();
-  await page.getByText('Business Details',{exact:true}).waitFor();
+  await page.getByRole('heading',{name:'Service Provider',exact:true}).waitFor();
+  await page.locator('.portal-wizard-step').filter({hasText:'Business Details'}).waitFor();
   assert.equal(new URL(page.url()).pathname,'/providers');
   assert.equal(await page.getByRole('heading',{name:/Property Manager/}).count(),0);
   await page.goto(origin+'/shop');
