@@ -25,6 +25,23 @@ This repository is the production application for DANI DECLARES LLC. Multiple AI
 ## Agent handoff standard
 Every non-trivial change should register its branch/scope in `dd_agent_change_ledger` when database access is available and leave a durable trail in the PR and, where useful, in the DANI Notion authority matrix. State what changed, files/subsystems touched, assumptions, tests/deployments observed, and any permissions still required. For substantial work, also state the requested outcome, current intent-to-outcome state, proof already obtained, remaining proof, and any legitimate hold condition.
 
+
+For routine handoffs that need a new note, use this short format in the existing authoritative work record or its established handoff location. Link to the work record; do not copy changing project state into instruction files or create competing records. If an adequate current handoff already exists, update or reference it instead of creating a duplicate.
+
+```text
+SESSION NOTE — <UTC date> — <session/tool> — <task>
+Record: <authoritative work record>   Revision: <SHA/version>
+Did: <actual work>
+Changed: <local/published/deployed/none>
+Side effects: <actual effects/none>
+Checked: <method, scope, result>
+Not verified: <remaining checks>
+Boundary: <applicable approvals and restrictions>
+Next: <one action> — Owner: <session/person>
+```
+
+Reserve the full DANI receipt template for complex releases or incidents. The authoritative work record remains the coordination destination, not infallible evidence: reconcile discrepancies using current evidence for the same target, revision, and scope, and record corrections without silently erasing history. A session note does not transfer ownership, grant permissions, or replace required approval and verification gates.
+
 ## Claude
 Claude is an authorized engineering collaborator, not a separate source of truth. Claude must follow this file and CLAUDE.md and consult the DANI Notion authority matrix before creating a new integration, database, project, or documentation system.
 
