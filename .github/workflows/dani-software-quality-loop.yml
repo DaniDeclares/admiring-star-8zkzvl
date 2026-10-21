@@ -35,6 +35,10 @@ jobs:
         run: node --test scripts/auditStripeCanonicalCrosswalk.test.mjs
       - name: Production build
         run: npm run build
+      - name: Install browser for contained front-door regressions
+        run: npx playwright install --with-deps chromium
+      - name: Built front-door regressions (external requests blocked)
+        run: node --test checks/requestFrontDoorBrowser2026.test.mjs
 
   ch01-release-gate-investigation:
     if: github.event_name != 'pull_request'

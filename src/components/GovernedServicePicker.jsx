@@ -1,7 +1,7 @@
 import React,{useMemo} from 'react';
 import {requestCatalogServices,selectRequestCatalogService} from '../lib/operations/requestServiceCatalog2026';
 
-const priceLabel=service=>service?.publicPriceDisplay||(service?.baseCustomerPrice!=null?`Starting at $${Number(service.baseCustomerPrice).toFixed(2)}`:'Request a quote');
+import {publicCatalogPriceLabel as priceLabel} from '../lib/operations/publicCatalogPrice2026.js';
 
 export default function GovernedServicePicker({services=[],channelType='',frontDoorCode='',selectedServiceId='',onSelect}){
  const eligible=useMemo(()=>requestCatalogServices(services,channelType,frontDoorCode),[services,channelType,frontDoorCode]);

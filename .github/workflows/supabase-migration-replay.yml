@@ -17,6 +17,7 @@ on:
       - 'scripts/test_replay_skip_production_proofs.py'
   pull_request:
     paths:
+      - '.github/workflows/dani-software-quality-loop.yml'
       - 'supabase/migrations/**'
       - 'supabase/production-ledger/**'
       - 'supabase/config.toml'
