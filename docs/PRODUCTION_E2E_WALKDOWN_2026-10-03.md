@@ -6,9 +6,9 @@
 
 ## Authority chain
 
-Tester proof → governed promotion gate → GitHub `main` → Vercel Production deployment → real Production proof → feedback/learning to Tester.
+Approved release verification → governed promotion gate → GitHub `main` → Vercel Production deployment → real Production proof.
 
-Tester is proof/staging authority, not a substitute for Production verification. GitHub `main` is source authority. Vercel is current Production hosting authority. Historical Netlify previews are evidence only and must resolve to exact Git commits. Never copy Tester secrets into Production.
+Tester is a separate AI/baby development and testing project associated with DANI and Shadow & Sol, not the required staging authority for this release work. Leave Tester untouched. Approved release verification may use contained previews, local or mocked tests, and specifically authorized Production checks. Do not create another staging environment solely to satisfy a legacy instruction. GitHub `main` remains source authority. Vercel remains Production hosting authority. Production Supabase is designated as `ajxezpczaemunlcmqlgl`; verify actual runtime destinations rather than inferring them from labels or public URLs. Historical Netlify previews remain evidence only and must resolve to exact Git commits. Never copy secrets between projects.
 
 ## Evidence states
 
@@ -38,7 +38,7 @@ Tester is proof/staging authority, not a substitute for Production verification.
 
 ## Full walkdown order
 
-1. Tester candidate evidence and promotion receipt.
+1. Approved release evidence and promotion receipt, with its actual verification environment recorded.
 2. Production release SHA/deployment health.
 3. Public homepage, catalog, service category, request-service, portal access/login.
 4. Customer account → request → quote → payment → work order → fulfillment → QA → history.
