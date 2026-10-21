@@ -8,6 +8,7 @@ import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin, isW9EncryptionConfigured } from './_w9Crypto.js';
 import { mintAppointmentToken } from './_appointmentTokens.js';
 import Stripe from 'stripe';
+import { capabilityRequestFailure } from '../src/lib/operations/capabilityRequestFailure.js';
 
 // Verbatim from Form W-9 (Rev. March 2024), Part II Certification -- the IRS's
 // electronic-submission spec requires the perjury statement to carry this exact
@@ -714,29 +715,53 @@ export default async function handler(req, res) {
     // the Operations Console's Provider Network queue.
     if (action === 'request_provider_capabilities') {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
+      if (context.isStaff) return fail(res, 'Requests must use the provider session.', 403);
       const providerId = context.identity?.entity_id;
       if (!providerId) return fail(res, 'No provider profile is linked to this account yet.', 404);
+      if (['providerId', 'provider_id', 'is_authorized', 'authorization_status', 'approved'].some(key => Object.prototype.hasOwnProperty.call(payload, key))) return fail(res, 'Unsupported authorization field.', 400);
+      const serviceIds = Array.isArray(payload.serviceIds) ? payload.serviceIds : [];
+      if (!serviceIds.length || serviceIds.length > 100 || serviceIds.some(id => typeof id !== 'string' || !id.trim()) || new Set(serviceIds).size !== serviceIds.length) return fail(res, 'Choose unique valid services to request.', 400);
+      const capabilityKey = String(payload.capabilityKey || '').trim();
+      if (!capabilityKey) return fail(res, 'Service category is required.', 400);
       const { data: provider, error: providerError } = await context.supabase.from('dd_providers').select('id, org_id').eq('id', providerId).single();
       if (providerError || !provider) return fail(res, 'Provider profile not found.', 404);
-      const serviceIds = Array.isArray(payload.serviceIds) ? [...new Set(payload.serviceIds.filter(Boolean))] : [];
-      if (!serviceIds.length) return fail(res, 'Select at least one service to request.');
-      const { data: services, error: servicesError } = await context.supabase.from('services').select('id, sku, name').in('id', serviceIds);
+      // Legacy public category range and explicitly scoped coaching category remain
+      // eligible; display order is NOT an authorization grant to the provider.
+      const { data: categories, error: categoryError } = await context.supabase.from('dd_provider_capability_categories')
+        .select('category_key,capability_key,display_order,canonical_skus,canonical_service_ids,division_id,canonical_sku_prefix')
+        .eq('capability_key', capabilityKey).or('display_order.lt.90,category_key.eq.LIFE_COACHING');
+      if (categoryError) throw categoryError;
+      if (!categories || categories.length !== 1) return fail(res, 'Service category unavailable for provider selection.', 400);
+      const category = categories[0];
+      const { data: services, error: servicesError } = await context.supabase.from('services')
+        .select('id, sku, name, division_id').in('id', serviceIds);
       if (servicesError) throw servicesError;
-      const { data: existing } = await context.supabase.from('dd_provider_capabilities').select('service_id').eq('provider_id', providerId).in('service_id', serviceIds);
-      const existingIds = new Set((existing || []).map(r => r.service_id));
-      const toInsert = (services || []).filter(s => !existingIds.has(s.id)).map(s => ({
-        provider_id: providerId,
-        provider_org_id: provider.org_id,
-        service_id: s.id,
-        service_line: s.name,
-        capability_key: payload.capabilityKey || null,
-        is_authorized: false,
+      if ((services || []).length !== serviceIds.length) return fail(res, 'Unknown service selected.', 400);
+      const hasIds = Array.isArray(category.canonical_service_ids) && category.canonical_service_ids.length > 0;
+      const hasSkus = Array.isArray(category.canonical_skus) && category.canonical_skus.length > 0;
+      const allowed = services.every(service => service.sku !== 'DNI-12A-028' &&
+        (hasIds ? category.canonical_service_ids.includes(service.id) :
+          hasSkus ? category.canonical_skus.includes(service.sku) :
+            service.division_id === category.division_id &&
+              (!category.canonical_sku_prefix || (service.sku || '').startsWith(`DNI-${category.canonical_sku_prefix}-`))));
+      if (!allowed) return fail(res, 'One or more selected services are not eligible for this category.', 400);
+      const { data: existing, error: existingError } = await context.supabase.from('dd_provider_capabilities')
+        .select('service_id').eq('provider_id', providerId).in('service_id', serviceIds);
+      if (existingError) throw existingError;
+      const existingIds = new Set((existing || []).map(row => row.service_id));
+      const toInsert = services.filter(service => !existingIds.has(service.id)).map(service => ({
+        provider_id: providerId, provider_org_id: provider.org_id, service_id: service.id,
+        service_line: service.name, capability_key: capabilityKey, is_authorized: false,
         tier_availability: { source: 'PROVIDER_SELF_REQUEST', requested_at: new Date().toISOString(), requested_by: context.user.id },
       }));
-      if (!toInsert.length) return fail(res, 'All selected services are already on file for this provider.', 409);
-      const { data: inserted, error: insertError } = await context.supabase.from('dd_provider_capabilities').insert(toInsert).select();
-      if (insertError) throw insertError;
-      return ok(res, { requested: inserted });
+      if (!toInsert.length) return ok(res, { requested: [], alreadyOnFile: serviceIds.length });
+      const { data: inserted, error: insertError } = await context.supabase.from('dd_provider_capabilities')
+        .insert(toInsert).select();
+      if (insertError) {
+        const failure = capabilityRequestFailure(insertError);
+        return fail(res, failure.error, failure.status);
+      }
+      return ok(res, { requested: inserted || [], alreadyOnFile: existingIds.size });
     }
     // Self-service removal is unrestricted by authorization_status on purpose --
     // a provider opting out of a service they're already authorized for (the
@@ -745,10 +770,11 @@ export default async function handler(req, res) {
       const guard = requireRole(context, ['provider']); if (guard && !context.isStaff) return fail(res, guard.error, guard.status);
       const capabilityId = String(payload.capabilityId || '').trim();
       if (!capabilityId) return fail(res, 'capabilityId is required.');
-      const { data: capability, error: capError } = await context.supabase.from('dd_provider_capabilities').select('id, provider_id').eq('id', capabilityId).maybeSingle();
+      const { data: capability, error: capError } = await context.supabase.from('dd_provider_capabilities').select('id, provider_id, is_authorized').eq('id', capabilityId).maybeSingle();
       if (capError) throw capError;
       if (!capability) return fail(res, 'Capability not found.', 404);
       if (String(capability.provider_id) !== String(context.identity?.entity_id)) return fail(res, 'This capability does not belong to your account.', 403);
+      if (capability.is_authorized) return fail(res, 'Approved capability removal requires staff review to protect assignments and history.', 409);
       const { error: deleteError } = await context.supabase.from('dd_provider_capabilities').delete().eq('id', capabilityId);
       if (deleteError) throw deleteError;
       return ok(res, { removed: capabilityId });

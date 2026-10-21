@@ -17,7 +17,7 @@ export default function ProviderServicesPage() {
   const [catalogServices, setCatalogServices] = useState([]);
   const [categories, setCategories] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
-  const [selectedCategories, setSelectedCategories] = useState({});
+  const [selectedServices, setSelectedServices] = useState({});
   const [busy, setBusy] = useState(false);
   const [serviceSearch, setServiceSearch] = useState('');
   const [visibleCount, setVisibleCount] = useState(20);
@@ -34,7 +34,7 @@ export default function ProviderServicesPage() {
     (async () => {
       const [servicesResult, categoriesResult] = await Promise.all([
         supabase.from('services').select('id, name, sku, division_id').neq('sku', 'DNI-12A-028').order('name'),
-        supabase.from('dd_provider_capability_categories').select('*').order('display_order'),
+        supabase.from('dd_provider_capability_categories').select('*').or('display_order.lt.90,category_key.eq.LIFE_COACHING').order('display_order'),
       ]);
       if (cancelled) return;
       if (servicesResult.error || categoriesResult.error) {
@@ -65,12 +65,16 @@ export default function ProviderServicesPage() {
   const existingServiceIds = useMemo(() => new Set(capabilities.map(c => c.canonical_sku).filter(Boolean)), [capabilities]);
   const filteredServices = useMemo(() => capabilities.filter(item => `${item.capability_description || ''} ${item.canonical_sku || ''} ${item.authorization_status || ''}`.toLowerCase().includes(serviceSearch.trim().toLowerCase())), [capabilities, serviceSearch]);
 
-  const toggleCategory = (categoryKey) => {
-    setSelectedCategories(prev => { const next = { ...prev }; if (next[categoryKey]) delete next[categoryKey]; else next[categoryKey] = true; return next; });
+  const toggleService = (categoryKey, serviceId) => {
+    setSelectedServices(prev => {
+      const current = new Set(prev[categoryKey] || []);
+      if (current.has(serviceId)) current.delete(serviceId); else current.add(serviceId);
+      return { ...prev, [categoryKey]: [...current] };
+    });
   };
 
   const submit = async () => {
-    const activeCategories = categories.filter(c => selectedCategories[c.category_key]);
+    const activeCategories = categories.filter(c => (selectedServices[c.category_key] || []).length);
     if (!activeCategories.length) { setLocalError('Select at least one service category to add.'); return; }
     setBusy(true); setLocalError(''); setLocalMessage('');
     try {
@@ -79,8 +83,9 @@ export default function ProviderServicesPage() {
         categories: activeCategories,
         servicesForCategory,
         accessToken: session?.access_token,
+        selectedServiceIdsByCategory: selectedServices,
       });
-      setSelectedCategories({});
+      setSelectedServices({});
       setLocalMessage('Your requested services were submitted for DANI DECLARES review.');
       await load();
     } catch (requestError) {
@@ -123,7 +128,7 @@ export default function ProviderServicesPage() {
       {visibleCount < filteredServices.length && <button type="button" className="provider-show-more" onClick={() => setVisibleCount(count => count + 20)}>Show 20 more services</button>}
     </Card>
     <Card title="Request additional services">
-      <p className="portal-note">Choose only categories you can actually perform. A category currently requests <strong>all services listed inside it</strong>; expand it to check the scope first. Requests are reviewed, not automatically approved.</p>
+      <p className="portal-note">Choose only individual services you can perform. Expand a category and select the scopes you want reviewed. Requests are reviewed, not automatically approved.</p>
       {catalogError && <div className="portal-alert" role="alert">{catalogError}</div>}
       {catalogLoading ? <p>Loading service catalog…</p> : <>
         <label className="provider-search-label" htmlFor="provider-category-search">Find a category</label>
@@ -136,14 +141,14 @@ export default function ProviderServicesPage() {
             return <details className="provider-category" key={category.category_key}>
               <summary><span><strong>{category.label}</strong><small>{category.description} · {total} total services</small></span><span className="provider-category-count">{available.length} not selected</span></summary>
               <div className="provider-category-inside">
-                <label className="provider-category-select"><input type="checkbox" checked={Boolean(selectedCategories[category.category_key])} onChange={() => toggleCategory(category.category_key)} /> Request this entire category for review</label>
+                <p className="portal-note">Select individual services to request review.</p>
                 <p className="portal-note">Includes {total} services. Existing services are preserved; DANI will review the new request.</p>
-                <ul>{servicesForCategory(category).map(service => <li key={service.id}>{service.name}{existingServiceIds.has(service.sku) ? ' · Already saved' : ''}</li>)}</ul>
+                <ul>{servicesForCategory(category).map(service => <li key={service.id}><label><input type="checkbox" disabled={existingServiceIds.has(service.sku)} checked={(selectedServices[category.category_key] || []).includes(service.id)} onChange={() => toggleService(category.category_key, service.id)} /> {service.name}{existingServiceIds.has(service.sku) ? ' · Already saved' : ''}</label></li>)}</ul>
               </div>
             </details>;
           })}
         </div>
-        <button className="portal-primary" disabled={busy || catalogLoading || Boolean(catalogError) || !Object.values(selectedCategories).some(Boolean)} onClick={submit}>{busy ? 'Submitting…' : 'Submit selected categories for review'}</button>
+        <button className="portal-primary" disabled={busy || catalogLoading || Boolean(catalogError) || !Object.values(selectedServices).some(ids => ids.length)} onClick={submit}>{busy ? 'Submitting…' : 'Submit selected services for review'}</button>
       </>}
     </Card>
   </main>;

@@ -1,6 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('DANI DECLARES production critical journeys', () => {
+  // Live smoke is observation-only. Submission validation belongs to contained tests.
+  test.beforeEach(async ({context}) => {
+    await context.route('**/*', route => {
+      if (!['GET', 'HEAD'].includes(route.request().method())) return route.abort();
+      return route.continue();
+    });
+  });
+
   test('@critical homepage renders', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle(/DANI DECLARES LLC/i);
@@ -36,7 +44,7 @@ test.describe('DANI DECLARES production critical journeys', () => {
     await expect(page.locator('button[type="submit"]')).toContainText(/continue/i);
   });
 
-  test('@critical catalog API exposes the released Resident Refresh service', async ({ request }) => {
+  test('@critical catalog API returns governed public records without private economics', async ({ request }) => {
     const response = await request.get('/api/verify-commercial-intent?catalog=1');
     if (!response.ok()) {
       const detail = await response.text();
@@ -45,22 +53,17 @@ test.describe('DANI DECLARES production critical journeys', () => {
     const body = await response.json();
     expect(body.success).toBeTruthy();
     expect(Array.isArray(body.services)).toBeTruthy();
+    expect(body.count).toBe(body.services.length);
+    for (const service of body.services) {
+      expect(service).not.toHaveProperty('internalCost');
+      expect(service).not.toHaveProperty('marginEconomics');
+    }
     expect(body.services.length).toBeGreaterThan(0);
 
     const residentRefresh = body.services.filter((service: { canonical_sku?: string }) =>
       service.serviceId === 'DNI-01A-001'
     );
     expect(residentRefresh).toHaveLength(1);
-  });
-
-  test('@critical service request API rejects incomplete payload safely', async ({ request }) => {
-    const response = await request.post('/api/intake-webhook', {
-      data: {},
-      headers: { 'Content-Type': 'application/json' },
-    });
-    expect(response.status()).toBe(400);
-    const body = await response.json();
-    expect(body.error).toMatch(/name|contact/i);
   });
 
   test('@critical government page exposes procurement presentation without retail pricing', async ({ page }) => {
