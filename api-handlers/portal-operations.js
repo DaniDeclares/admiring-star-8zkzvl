@@ -8,6 +8,7 @@ import { PROVIDER_AGREEMENT_VERSION } from '../src/data/providerAgreement.js';
 import { encryptTin, decryptTin, isW9EncryptionConfigured } from './_w9Crypto.js';
 import { mintAppointmentToken } from './_appointmentTokens.js';
 import Stripe from 'stripe';
+import { capabilityRequestFailure } from '../src/lib/operations/capabilityRequestFailure.js';
 
 // Verbatim from Form W-9 (Rev. March 2024), Part II Certification -- the IRS's
 // electronic-submission spec requires the perjury statement to carry this exact
@@ -756,7 +757,10 @@ export default async function handler(req, res) {
       if (!toInsert.length) return ok(res, { requested: [], alreadyOnFile: serviceIds.length });
       const { data: inserted, error: insertError } = await context.supabase.from('dd_provider_capabilities')
         .insert(toInsert).select();
-      if (insertError) return fail(res, 'Capability request could not be saved. Refresh your existing services before retrying.', 409);
+      if (insertError) {
+        const failure = capabilityRequestFailure(insertError);
+        return fail(res, failure.error, failure.status);
+      }
       return ok(res, { requested: inserted || [], alreadyOnFile: existingIds.size });
     }
     // Self-service removal is unrestricted by authorization_status on purpose --

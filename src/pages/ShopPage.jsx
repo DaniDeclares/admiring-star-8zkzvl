@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CreditCard, Package, Printer, Sparkles } from 'lucide-react';
 
+import { publicCatalogPriceLabel } from '../lib/operations/publicCatalogPrice2026.js';
+
 const FEATURED = [
   { serviceId: 'DNI-11A-017', label: 'Custom DTF Apparel', description: 'Custom printed shirts and apparel for teams, businesses, residents and events.', icon: Printer },
   { serviceId: 'DNI-11A-018', label: 'Heat-Press Apparel', description: 'Custom heat-press apparel for small runs, uniforms and event gear.', icon: Printer },
@@ -47,7 +49,7 @@ export default function ShopPage() {
                 <div className="mt-6 flex items-center justify-between gap-4">
                   <div>
                     <div className="text-xs uppercase tracking-wider font-black text-[#a8791c]">Current pricing</div>
-                    <div className="mt-1 text-xl font-black text-[#5b1624]">{loading ? 'Checking…' : service?.pricingLabel || 'Quote required'}</div>
+                    <div className="mt-1 text-xl font-black text-[#5b1624]">{loading ? 'Checking…' : publicCatalogPriceLabel(service)}</div>
                   </div>
                   <Link to={`/request-service?service=${encodeURIComponent(item.serviceId)}`} className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#6b1f2b] px-4 py-3 text-white font-black text-sm">Order <ArrowRight className="w-4 h-4" /></Link>
                 </div>

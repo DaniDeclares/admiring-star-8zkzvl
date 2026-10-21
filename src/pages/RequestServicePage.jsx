@@ -4,6 +4,7 @@ import {OPERATIONS_CHANNELS} from '../lib/operations/intakeRouting2026';
 import {getServiceVisuals} from '../data/serviceVisuals2026.js';
 import {supabase} from '../lib/supabaseClient.js';
 import {captureServiceLifecycle} from '../lib/posthogAnalytics.js';
+import {publicCatalogPriceLabel as priceLabelFor} from '../lib/operations/publicCatalogPrice2026.js';
 import GovernedServicePicker from '../components/GovernedServicePicker.jsx';
 import {channelTypeForLinkedService} from '../lib/operations/requestServiceCatalog2026.js';
 const CHANNEL_OPTIONS=[{value:OPERATIONS_CHANNELS.B2C,label:'Resident / Household'},{value:OPERATIONS_CHANNELS.B2B_APT,label:'Property Management / Apartment Community'},{value:OPERATIONS_CHANNELS.B2B_RE,label:'Real Estate Professional / Brokerage'},{value:OPERATIONS_CHANNELS.B2B,label:'Business / Commercial'},{value:OPERATIONS_CHANNELS.B2G,label:'Government / Institution'}];
@@ -12,7 +13,6 @@ const today=new Date().toISOString().slice(0,10);
 const baseServiceName=(name='')=>name.replace(/\s+(1BR|2BR|3BR|4BR)$/i,'').replace(/\s+—\s+(30|60)\s*min$/i,'').replace(/\s+—\s+(7|14|30)\s*Days$/i,'');
 const pickVisual=(visuals,id='')=>visuals?.length?visuals[[...id].reduce((n,c)=>n+c.charCodeAt(0),0)%visuals.length]:null;
 const priceValue=s=>Number(s?.baseCustomerPrice??s?.publicPriceLow??0);
-const priceLabelFor=(s,hidePrice=false)=>hidePrice?'Solicitation / quote':(s?.publicPriceDisplay||(s?.baseCustomerPrice!=null?`Starting at ${Number(s.baseCustomerPrice).toFixed(2)}`:'Request a quote'));
 export default function RequestServicePage(){
  const params=useMemo(()=>typeof window==='undefined'?new URLSearchParams():new URLSearchParams(window.location.search),[]),initialServiceId=params.get('service')||'',initialChannelType=params.get('channelType')||'',initialFrontDoor=params.get('frontDoor')||'',referralCode=(params.get('ref')||params.get('referral')||'').trim(); const marketingAttribution=useMemo(()=>({utm_source:params.get('utm_source')||undefined,utm_medium:params.get('utm_medium')||undefined,utm_campaign:params.get('utm_campaign')||undefined,utm_content:params.get('utm_content')||undefined,campaign_audience:params.get('audience')||undefined,referral_code:referralCode||undefined}),[params,referralCode]);
  const validInitialChannel=CHANNEL_OPTIONS.some(o=>o.value===initialChannelType)?initialChannelType:OPERATIONS_CHANNELS.B2C;

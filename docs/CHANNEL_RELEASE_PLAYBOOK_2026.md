@@ -213,3 +213,42 @@ Create a new channel dossier containing:
 12. release evidence.
 
 Channel-specific pricing and commercial rules must be researched and reconciled independently.
+
+
+## Front-door regression operating controls (2026-10-21)
+
+Accountable owner: DANI owner / authorized release maintainer. Reuse
+`.github/workflows/dani-software-quality-loop.yml`; do not add a scheduler.
+The existing triggers are PRs to main, pushes to main, manual dispatch, and
+`23 */4 * * *` (UTC). The deterministic job has read-only repository permission,
+a 20-minute limit, and one cancellable run per Git ref.
+
+After the ordinary build, the added browser step runs
+`node --test checks/requestFrontDoorBrowser2026.test.mjs`. It serves only the
+local build, uses fixed synthetic catalog fixtures, blocks every non-local
+request and every non-GET request, and blocks service workers. No credentials,
+database, queue, customer data, payment, dispatch, or delivery provider is used.
+The test has a 90-second ceiling and a 15-second browser launch ceiling; failures
+are terminal check failures, without automatic submission retries. GitHub job
+logs/check status are the existing failure visibility destination; this change
+adds no messages or alert recipients. The existing live smoke is now GET/HEAD
+only; it does not submit validation payloads to production.
+
+The event broker already deduplicates outbox intents using event_key; that does
+not make HTTP intake retries idempotent. Intake creates requests and booking
+holds, then queues customer/operator messages. Do not enable automatic intake
+retries or claim end-to-end reliability until persistence, authorization,
+transaction/outbox failure handling, and concurrent equivalent retries have
+been verified through the authorized database/release process. PR #670 remains
+the separate outbox repair; this release does not replace it.
+
+Pause/rollback only the new browser check by reverting its two workflow steps
+and associated regression changes. Disabling the entire quality loop also
+stops existing checks and requires a separate decision. UI repair rollback is
+a reviewed revert of the front-door commits and normal Vercel redeployment;
+there is no migration or data reversal in this change. Verify the exact deployed
+SHA and read-only catalog/routes after release. Database writes and production
+test submissions require their own exact payload/effects approval.
+
+Status: new checks and repairs are locally prepared, not published or enabled
+by this document. Historical successful runs do not verify this new revision.

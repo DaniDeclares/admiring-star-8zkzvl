@@ -27,6 +27,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
+      - name: Provider capability request regressions
+        run: node --test checks/providerCapabilityRequests2026.test.mjs
+
       - name: 📦 Install dependencies
         run: npm install
 

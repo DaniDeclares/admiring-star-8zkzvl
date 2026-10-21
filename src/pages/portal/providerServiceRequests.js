@@ -6,14 +6,26 @@ export async function submitProviderCapabilityRequests({
   selectedServiceIdsByCategory = null,
 }) {
   if (!accessToken) throw new Error('Your provider session is unavailable. Please sign in again.');
+  if (!selectedServiceIdsByCategory || typeof selectedServiceIdsByCategory !== 'object' || Array.isArray(selectedServiceIdsByCategory)) {
+    throw new Error('Select individual services before submitting.');
+  }
 
-  let submittedCount = 0;
-  for (const category of categories) {
+  // Validate every category before the first external request. The existing API
+  // still commits categories separately; this preflight does not claim DB atomicity.
+  const requests = categories.map(category => {
     const validIds = new Set(servicesForCategory(category).map(service => service.id));
-    const requested = selectedServiceIdsByCategory ? selectedServiceIdsByCategory[category.category_key] || [] : [...validIds];
+    const requested = selectedServiceIdsByCategory[category.category_key] ?? [];
+    if (!Array.isArray(requested)) throw new Error('Invalid selected service list.');
     if (requested.some(id => !validIds.has(id))) throw new Error('Invalid selected service for category.');
     const serviceIds = [...new Set(requested)].filter(Boolean);
-    if (!serviceIds.length) continue;
+    if (serviceIds.length > 100) throw new Error('Choose no more than 100 services per category.');
+    if (serviceIds.length && !String(category.capability_key || '').trim()) throw new Error('Service category is unavailable.');
+    return { category, serviceIds };
+  }).filter(request => request.serviceIds.length);
+  if (!requests.length) throw new Error('No matching services were available to request.');
+
+  let submittedCount = 0;
+  for (const { category, serviceIds } of requests) {
 
     let response;
     let result = {};

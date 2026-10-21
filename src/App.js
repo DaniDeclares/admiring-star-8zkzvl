@@ -52,7 +52,7 @@ import SavedQuotesPage from "./pages/portal/SavedQuotesPage.jsx";
 import EstimateReviewCockpitPage from "./pages/portal/EstimateReviewCockpitPage.jsx";
 import ContractAcquisitionPage from "./pages/portal/ContractAcquisitionPage.jsx";
 import ContractingPeriodPage from "./pages/portal/ContractingPeriodPage.jsx";
-import PortalAccessPage from "./pages/PortalAccessPage.jsx";
+import PortalAccessRoute from "./pages/PortalAccessRoute.jsx";
 import PortalLoginPage from "./pages/PortalLoginPage.jsx";
 import PortalForgotPasswordPage from "./pages/PortalForgotPasswordPage.jsx";
 import PortalResetPasswordPage from "./pages/PortalResetPasswordPage.jsx";
@@ -122,10 +122,10 @@ export default function App() {
         <Route path="/provider" element={<Navigate to="/portal/access?role=provider" replace />} />
         <Route path="/provider/apply" element={<Navigate to="/portal/access?role=provider" replace />} />
         <Route path="/provider/login" element={<Navigate to="/portal/login?role=provider" replace />} />
-        <Route path="/providers" element={<PortalAccessPage />} />
-        <Route path="/portal/access" element={<PortalAccessPage />} />
-        <Route path="/portal/providers" element={<PortalAccessPage />} />
-        <Route path="/portal/partners" element={<PortalAccessPage />} />
+        <Route path="/providers" element={<PortalAccessRoute />} />
+        <Route path="/portal/access" element={<PortalAccessRoute />} />
+        <Route path="/portal/providers" element={<PortalAccessRoute />} />
+        <Route path="/portal/partners" element={<PortalAccessRoute />} />
         <Route path="/portal/login" element={<PortalLoginPage />} />
         <Route path="/portal/forgot-password" element={<PortalForgotPasswordPage />} />
         <Route path="/portal/reset-password" element={<PortalResetPasswordPage />} />
