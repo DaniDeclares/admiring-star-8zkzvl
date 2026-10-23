@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProviderNav from './ProviderNav.jsx';
+import ProviderReferralsCard from './ProviderReferralsCard.jsx';
 import CustomerNav from './CustomerNav.jsx';
 import RecurringServicesCard from './RecurringServicesCard.jsx';
 import { Card, Empty, Requirement, buildProviderRequirements, statusLabel, formatDate, useProviderWorkspace, AccountBadge } from './providerWorkspaceShared.jsx';
@@ -94,6 +95,7 @@ export default function PortalWorkspacePage() {
         <Link className="portal-summary-tile" to="/portal/messages"><strong>{messageCount}</strong><span>Message{messageCount === 1 ? '' : 's'} on your jobs</span></Link>
         <Link className="portal-summary-tile" to="/portal/profile"><strong>View profile</strong><span>Contact details & documents</span></Link>
       </div>
+      <ProviderReferralsCard key={session?.user?.id} referral={snapshot?.referral} />
       <Card title="Your Authorized Services">{capabilities.length ? capabilities.map(item => <div className="portal-row" key={item.id}><div><strong>{item.capability_description || item.canonical_sku}</strong><small>{item.canonical_sku ? `${item.canonical_sku} · ` : ''}{statusLabel(item.authorization_status)}</small></div></div>) : <Empty>No authorized services on file yet — contact DANI DECLARES if this looks wrong.</Empty>}</Card>
     </> : <>
       <div className="portal-status-banner"><div><strong>Application status: {statusLabel(application?.application_status)}</strong><p style={{ margin: '6px 0 0', color: '#6d6263' }}>DANI DECLARES reviews every requirement below before your account becomes dispatch-eligible. This is not yet an active provider account — nothing here can be assigned work until it's approved.</p></div><span className="portal-pill">{completeCount}/{requirements.length} complete</span></div>
