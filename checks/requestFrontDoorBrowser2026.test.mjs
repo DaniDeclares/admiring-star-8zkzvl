@@ -32,6 +32,8 @@ test('isolated built pages: provider navigation, catalog retry, and quote wordin
    const request=route.request(),url=new URL(request.url());
    if(request.method()!=='GET'){nonGetAttempts++;return route.abort();}
    if(url.origin===origin&&url.pathname==='/api/verify-commercial-intent')return route.fulfill({status:catalogFailure?503:200,json:catalogFailure?{success:false}:{success:true,services:[service],frontDoors:[]}});
+   if(url.hostname==='danideclares.myshopify.com'&&url.pathname==='/products.json')return route.fulfill({status:200,json:{products:[{id:1,title:'Verified Merch Test Mug',handle:'verified-merch-test-mug',published_at:'2026-10-23',product_type:'Mugs',images:[{src:'https://cdn.shopify.com/test-mug.jpg'}],variants:[{price:'17.99',available:true}]}]}});
+   if(url.hostname==='cdn.shopify.com')return route.fulfill({status:200,contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>'});
    if(url.origin===origin&&!url.pathname.startsWith('/api/'))return route.continue();
    // Supabase and telemetry are blocked before they can leave this browser.
    return route.abort();
@@ -45,8 +47,13 @@ test('isolated built pages: provider navigation, catalog retry, and quote wordin
   assert.equal(new URL(page.url()).pathname,'/providers');
   assert.equal(await page.getByRole('heading',{name:/Property Manager/}).count(),0);
   await page.goto(origin+'/shop');
-  await page.getByText('Quote required',{exact:true}).first().waitFor();
-  await page.getByRole('link',{name:'Order',exact:true}).first().click();
+  await page.getByRole('heading',{name:'Verified Merch Test Mug'}).waitFor();
+  await page.getByText('$17.99',{exact:true}).waitFor();
+  assert.equal(await page.locator('article img').count(),1);
+  assert.equal(await page.getByRole('link',{name:/View options & buy/}).getAttribute('href'),'https://danideclares.myshopify.com/products/verified-merch-test-mug');
+  await page.getByRole('link',{name:/Request a custom quote/}).click();
+  assert.equal(new URL(page.url()).pathname,'/request-service');
+  await page.goto(origin+'/request-service?service=DNI-11A-017');
   await page.getByText('Quote required',{exact:true}).first().waitFor();
   assert.equal(await page.getByText(/Starting at/).count(),0);
   catalogFailure=true;
