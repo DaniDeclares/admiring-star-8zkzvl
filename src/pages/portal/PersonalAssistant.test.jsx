@@ -1,6 +1,7 @@
 import React, {act} from 'react';
 import {createRoot} from 'react-dom/client';
 import PersonalAssistant from './PersonalAssistant.jsx';
+import WorkClock from './WorkClock.jsx';
 
 let container,root;
 const session={access_token:'test-session',user:{id:'owner-test'}};
@@ -56,4 +57,9 @@ test('5pm offers clock-out and does not schedule more owner work',async()=>{
   expect(container.textContent).toContain('Your workday is over.');
   expect(button('Marketing')).toBeUndefined();
   act(()=>button('Save my time & clock out').click());expect(onClockOut).toHaveBeenCalledTimes(1);
+});
+test('provider work clock never mounts the owner assistant or requests its dashboard',async()=>{
+  await act(async()=>{root.render(<WorkClock mode="provider" session={session} jobId="fixture-job"/>);});
+  expect(container.querySelector('[aria-label="Your personal assistant"]')).toBeNull();
+  expect(fetch.mock.calls.every(([url])=>!url.includes('ownerDashboard'))).toBe(true);
 });

@@ -14,7 +14,7 @@ Owner outcome: Danielle can enter HQ during her weekday 9–5 workday, receive o
 
 ## Verification
 
-- 13 Jest tests passed across assistant policy, mounted component behavior and existing HQ start-work navigation.
+- 14 Jest tests passed across assistant policy, mounted component behavior, provider exclusion and existing HQ start-work navigation.
 - Existing `checks/workClock2026.test.mjs`: 8 passed.
 - `CI=true npm run build`: passed, including canonical brand verification and postbuild.
 - Contained Chromium harness: authenticated fixture reads; existing clock START/PAUSE/RESUME; timer pauses; stuck guidance; after-hours visibility; 390px mobile overflow check; no other mutations; no browser errors. External requests are blocked, and no real credentials or records are used.
