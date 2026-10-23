@@ -1,70 +1,88 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CreditCard, Package, Printer, Sparkles } from 'lucide-react';
+import { ArrowRight, Package } from 'lucide-react';
 
-import { publicCatalogPriceLabel } from '../lib/operations/publicCatalogPrice2026.js';
-
-const FEATURED = [
-  { serviceId: 'DNI-11A-017', label: 'Custom DTF Apparel', description: 'Custom printed shirts and apparel for teams, businesses, residents and events.', icon: Printer },
-  { serviceId: 'DNI-11A-018', label: 'Heat-Press Apparel', description: 'Custom heat-press apparel for small runs, uniforms and event gear.', icon: Printer },
-  { serviceId: 'DNI-11A-013', label: 'Business Card Printing', description: 'Professional business cards for launches, teams and client-facing brands.', icon: Package },
-  { serviceId: 'DNI-11A-016', label: 'Yard Sign Production', description: 'High-visibility signs for listings, events, businesses and community use.', icon: Package },
-  { serviceId: 'DNI-11A-019', label: 'Promotional Merchandise', description: 'Branded merchandise and customer-facing promotional pieces.', icon: Sparkles },
-  { serviceId: 'DNI-11A-020', label: 'Custom Product Fabrication', description: 'Custom branded physical products and specialty production.', icon: Package },
-];
+// Public Shopify product feed: no Admin credentials or checkout secrets in the browser.
+// Shopify is the authority for product publication, variants, current prices and inventory.
+const STORE = 'https://danideclares.myshopify.com';
+const currency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(amount));
+const purchasable = (product) => product && product.published_at &&
+  Array.isArray(product.variants) && product.variants.some((variant) => variant.available === true);
+const productUrl = (product) => `${STORE}/products/${encodeURIComponent(product.handle)}`;
 
 export default function ShopPage() {
-  const [services, setServices] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [catalogAvailable,setCatalogAvailable] = useState(false);
+  const [error, setError] = useState(false);
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    fetch('/api/verify-commercial-intent?catalog=1')
-      .then((r) => r.json())
-      .then((data) => {setCatalogAvailable(Boolean(data.success));setServices(data.success ? data.services || [] : []);})
-      .catch(() => {setCatalogAvailable(false);setServices([]);})
-      .finally(() => setLoading(false));
+    const controller = new AbortController();
+    fetch(`${STORE}/products.json?limit=250`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error('Catalog unavailable');
+        return response.json();
+      })
+      .then((result) => {
+        if (!Array.isArray(result.products)) throw new Error('Invalid catalog');
+        setProducts(result.products.filter((product) => product?.published_at && product?.handle && Array.isArray(product.variants)));
+        setError(false);
+      })
+      .catch((err) => { if (err.name !== 'AbortError') setError(true); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
   }, []);
 
-  const byId = useMemo(() => new Map(services.map((service) => [service.serviceId, service])), [services]);
+  const categories = useMemo(() => {
+    const types = new Set(products.map((product) => product.product_type || 'Other'));
+    return ['all', ...Array.from(types).sort()];
+  }, [products]);
+  const visible = products.filter((product) => filter === 'all' || (product.product_type || 'Other') === filter);
 
   return (
-    <div className="bg-[#fffaf1] text-[#302226] min-h-screen pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="max-w-3xl mb-12">
-          <p className="text-[#a8791c] font-black uppercase tracking-[.18em] text-xs">Print • Branding • Merchandise</p>
-          <h1 className="mt-3 text-4xl sm:text-5xl font-black text-[#5b1624]">Products made for your next move.</h1>
-          <p className="mt-5 text-lg leading-relaxed text-[#6d5b60]">From branded apparel and business cards to signs and custom production, choose a current offer or tell us what you want made.</p>
-        </div>
-        {!loading && !catalogAvailable && <p role="status" className="mb-6 rounded-xl border border-[#d2a83f] bg-white p-4">Live catalog pricing is temporarily unavailable. Please request a verified quote before ordering.</p>}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURED.map((item) => {
-            const service = byId.get(item.serviceId);
-            const Icon = item.icon;
-            return (
-              <article key={item.serviceId} className="rounded-3xl bg-white border border-[#e3d2a8] p-7 shadow-sm flex flex-col">
-                <Icon className="w-9 h-9 text-[#b58627]" />
-                <h2 className="mt-5 text-xl font-black text-[#5b1624]">{item.label}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-[#6d5b60] flex-1">{item.description}</p>
-                <div className="mt-6 flex items-center justify-between gap-4">
-                  <div>
-                    <div className="text-xs uppercase tracking-wider font-black text-[#a8791c]">Current pricing</div>
-                    <div className="mt-1 text-xl font-black text-[#5b1624]">{loading ? 'Checking…' : publicCatalogPriceLabel(service)}</div>
-                  </div>
-                  <Link to={`/request-service?service=${encodeURIComponent(item.serviceId)}`} className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#6b1f2b] px-4 py-3 text-white font-black text-sm">Order <ArrowRight className="w-4 h-4" /></Link>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-        <div className="mt-12 rounded-3xl bg-[#5a1422] text-white p-8 sm:p-10 grid md:grid-cols-[1fr_auto] gap-6 items-center">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-black">Need something custom?</h2>
-            <p className="mt-2 text-[#f1e4e6]">Tell us the quantity, artwork, size, deadline and delivery needs. We’ll route it to the right production offer.</p>
+    <main className="min-h-screen bg-[#fffaf1] pt-24 pb-20 text-[#302226]">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <header className="mb-10 max-w-3xl">
+          <p className="text-xs font-black uppercase tracking-[.18em] text-[#a8791c]">DANI DECLARES MARKET • Print • Merchandise • Digital products</p>
+          <h1 className="mt-3 text-4xl font-black text-[#5b1624] sm:text-5xl">Shop DANI DECLARES</h1>
+          <p className="mt-4 text-lg text-[#6d5b60]">Browse published products with current Shopify prices and photos. Select an item to choose its available options and check out securely in our store.</p>
+        </header>
+        {loading && <p role="status">Loading current products…</p>}
+        {error && <div role="alert" className="rounded-xl border border-[#d2a83f] bg-white p-5">The live product catalog could not be loaded. <a className="font-bold underline" href={STORE} target="_blank" rel="noopener noreferrer">Open our Shopify store</a> to browse products directly.</div>}
+        {!loading && !error && <>
+          <div className="mb-7 flex flex-wrap gap-2" aria-label="Product categories">
+            {categories.map((category) => <button key={category} type="button" aria-pressed={filter === category} onClick={() => setFilter(category)} className={`rounded-full border px-4 py-2 text-sm font-bold ${filter === category ? 'border-[#5b1624] bg-[#5b1624] text-white' : 'border-[#d9cbbf] bg-white text-[#5b1624]'}`}>{category === 'all' ? 'All products' : category}</button>)}
           </div>
-          <Link to="/request-service" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d2a83f] px-6 py-4 text-[#45101b] font-black">Request Custom Production <CreditCard className="w-5 h-5" /></Link>
-        </div>
+          {visible.length === 0 && <p role="status">No published products in this category.</p>}
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map((product) => {
+              const image = product.image?.src || product.images?.[0]?.src;
+              const available = purchasable(product);
+              const prices = product.variants.map((variant) => Number(variant.price)).filter(Number.isFinite);
+              const low = Math.min(...prices);
+              const high = Math.max(...prices);
+              return <article key={product.id} className="flex overflow-hidden rounded-2xl border border-[#e3d2a8] bg-white shadow-sm flex-col">
+                <a href={productUrl(product)} target="_blank" rel="noopener noreferrer" aria-label={`View ${product.title} in Shopify`} className="block aspect-square overflow-hidden bg-[#f6ede7]">
+                  {image ? <img src={image} alt={product.image?.alt || product.title} loading="lazy" className="h-full w-full object-contain" /> : <div className="flex h-full items-center justify-center text-[#6d5b60]"><Package size={48} aria-label="Image unavailable" /></div>}
+                </a>
+                <div className="flex flex-1 flex-col p-6">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#a8791c]">{product.product_type || 'DANI product'}</p>
+                  <h2 className="text-xl font-black text-[#5b1624]">{product.title}</h2>
+                  <div className="mt-auto pt-5">
+                    <p className="mb-3 font-bold">{prices.length ? `${currency(low)}${low === high ? '' : ` – ${currency(high)}`}` : 'See store for price'}</p>
+                    <a href={productUrl(product)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-[#6b1f2b] px-4 py-3 text-sm font-black text-white">{available ? 'View options & buy' : 'View product in store'} <ArrowRight size={16} /></a>
+                  </div>
+                </div>
+              </article>;
+            })}
+          </div>
+        </>}
+        <section className="mt-12 rounded-3xl bg-[#5a1422] p-8 text-white sm:p-10">
+          <h2 className="text-2xl font-black">Need custom printing or a business service?</h2>
+          <p className="mt-2 text-[#f1e4e6]">Custom quotes, production requests and services continue through our service request process.</p>
+          <Link to="/request-service" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#d2a83f] px-6 py-4 font-black text-[#45101b]">Request a custom quote <ArrowRight size={18} /></Link>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

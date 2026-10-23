@@ -59,16 +59,44 @@ test.each(['network','http','malformed'])('catalog %s failure is recoverable and
  expect(host.textContent).toContain('No matching services');
 });
 
-test.each([undefined,'From $40 per approved scope'])('shop and request use the same public wording (%s)',async publicPriceDisplay=>{
+test.each([undefined,'From $40 per approved scope'])('service request uses approved public wording (%s)',async publicPriceDisplay=>{
  const service={serviceId:'DNI-11A-017',name:'DTF Apparel',division:'11',family:'Apparel',model:'QUOTE',baseCustomerPrice:25,publicPriceDisplay,authorizedChannels:['CH04'],commercialOfferStatus:'INTAKE_ONLY',releaseState:'LIVE_READY'};
  fetch.mockImplementation(async()=>response([service]));
- await render(<BrowserRouter><ShopPage/></BrowserRouter>);
- const expected=publicPriceDisplay||'Quote required';
- expect(host.textContent).toContain(expected);
- expect(host.textContent).not.toContain('Starting at');
  window.history.replaceState({},'', '/request-service?service=DNI-11A-017');
  await render(<BrowserRouter><RequestServicePage/></BrowserRouter>);
- expect(host.textContent).toContain(expected);
+ expect(host.textContent).toContain(publicPriceDisplay||'Quote required');
  expect(host.textContent).not.toContain('Starting at');
  expect(fetch.mock.calls.every(([,options])=>!options?.method||options.method==='GET')).toBe(true);
+});
+
+test('shop displays only published Shopify products with photos and correct store destinations',async()=>{
+ fetch.mockResolvedValueOnce({ok:true,json:async()=>({products:[
+ {id:11,title:'Live Mug',handle:'live-mug',published_at:'2026-10-21',product_type:'Mugs',image:{src:'https://cdn.shopify.com/live.jpg'},variants:[{price:'17.99',available:true}]},
+ {id:12,title:'Draft Mug',handle:'draft-mug',published_at:null,variants:[{price:'1',available:true}]}
+ ]})});
+ await render(<BrowserRouter><ShopPage/></BrowserRouter>);
+ expect(fetch).toHaveBeenCalledWith('https://danideclares.myshopify.com/products.json?limit=250',expect.any(Object));
+ expect(host.textContent).toContain('Live Mug');
+ expect(host.textContent).toContain('$17.99');
+ expect(host.textContent).not.toContain('Draft Mug');
+ expect(host.querySelector('img').src).toBe('https://cdn.shopify.com/live.jpg');
+ expect([...host.querySelectorAll('a')].some(a=>a.href==='https://danideclares.myshopify.com/products/live-mug')).toBe(true);
+ expect(host.textContent).toContain('Request a custom quote');
+});
+
+test('shop catalog fetch error offers direct Shopify fallback',async()=>{
+ fetch.mockRejectedValueOnce(new Error('network error'));
+ await render(<BrowserRouter><ShopPage/></BrowserRouter>);
+ expect(host.querySelector('[role="alert"]').textContent).toContain('could not be loaded');
+ expect(host.querySelector('[role="alert"] a').href).toBe('https://danideclares.myshopify.com/');
+});
+
+test('sold-out Shopify items retain their detail link but do not claim direct purchase',async()=>{
+ fetch.mockResolvedValueOnce({ok:true,json:async()=>({products:[{
+  id:13,title:'Sold Out Tote',handle:'sold-out-tote',published_at:'2026-10-21',product_type:'Bags',images:[{src:'https://cdn.shopify.com/tote.jpg'}],variants:[{price:'25.00',available:false}]
+ }]})});
+ await render(<BrowserRouter><ShopPage/></BrowserRouter>);
+ expect(host.textContent).toContain('Sold Out Tote');
+ expect(host.textContent).toContain('View product in store');
+ expect(host.textContent).not.toContain('View options & buy');
 });
