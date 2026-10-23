@@ -742,6 +742,17 @@ jobs:
       - name: Replay migrations from scratch without seed data
         run: supabase db reset --no-seed
 
+      - name: Contained release-proof prerequisites (manual, runner-local only)
+        if: github.event_name == 'workflow_dispatch' && github.ref_name == 'draft/contained-release-proof-20261023'
+        env:
+          PGPASSWORD: postgres
+        run: |
+          test -z "${SUPABASE_URL:-}" && test -z "${STRIPE_SECRET_KEY:-}"
+          command -v psql
+          printf "candidate_sha=%s\n" "$GITHUB_SHA"
+          sha256sum supabase/production-ledger/manifest.json supabase/tests/contained_release_proof_lifecycle.sql
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 54322 -U postgres -d postgres -f supabase/tests/contained_release_proof_prerequisites.sql
+          psql -X -v ON_ERROR_STOP=1 -v candidate_sha="$GITHUB_SHA" -h 127.0.0.1 -p 54322 -U postgres -d postgres -f supabase/tests/contained_release_proof_lifecycle.sql
       - name: Stop isolated local Supabase
         if: always()
         run: supabase stop --no-backup || true
