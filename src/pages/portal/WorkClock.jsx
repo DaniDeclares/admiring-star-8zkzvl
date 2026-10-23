@@ -1,5 +1,6 @@
 import React, {useEffect,useMemo,useState} from 'react';
 import {DANI_CLOCK_TASKS,minutesForEntry,summarizeEntries} from '../../lib/operations/workClock2026.mjs';
+import PersonalAssistant from './PersonalAssistant.jsx';
 
 const DEFAULT_STUDY='MAINTENANCE_PREP';
 const fmt=minutes=>{const n=Math.max(0,Math.floor(minutes));return Math.floor(n/60)+'h '+String(n%60).padStart(2,'0')+'m';};
@@ -61,7 +62,9 @@ export default function WorkClock({session,mode='owner',jobId=null}) {
     return DANI_CLOCK_TASKS[group]?.find(([id])=>id===key)?.[1]||key.replaceAll('_',' ');
   };
   const clockInfo=active?{label:category((active.metadata?.study_code||'')+':'+(active.metadata?.task_code||'')),minutes:minutesForEntry(active,new Date(now))}:null;
-  return <section className="portal-card" id={owner?'owner-work-clock':undefined} aria-label={owner?'Owner time study clock':'Provider job time ledger'}>
+  return <>
+    {owner&&<PersonalAssistant session={session} clockState={active?'running':paused?'paused':'out'} clockBusy={busy} onBreak={()=>submit('PAUSE')} onResume={()=>submit('RESUME')} onClockOut={()=>submit('CLOCK_OUT')} />}
+    <section className="portal-card" id={owner?'owner-work-clock':undefined} aria-label={owner?'Owner time study clock':'Provider job time ledger'}>
     <div className="owner-command-section-head"><div>
       <p className="portal-eyebrow">{owner?'Owner HQ · Labor evidence':'DANI FIELD · Job time'}</p>
       <h2>{owner?'Clock in / Clock out':'Recorded job time'}</h2>
@@ -104,5 +107,5 @@ export default function WorkClock({session,mode='owner',jobId=null}) {
       {rows.slice(0,12).map(row=><div className="portal-row" key={row.id}><div><strong>{category((row.metadata?.study_code||'PROVIDER_JOB')+':'+(row.metadata?.task_code||'FIELD_WORK'))}</strong><small>{new Date(row.started_at).toLocaleString()} · {row.entry_status}</small></div><strong>{fmt(minutesForEntry(row,new Date(now)))}</strong></div>)}
       </div>
     </details>}
-  </section>;
+  </section></>;
 }
