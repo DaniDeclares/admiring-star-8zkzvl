@@ -117,12 +117,19 @@ export default function PortalWorkspacePage() {
       {role === 'property_manager' && <ResidentInvitesCard session={session} properties={snapshot?.properties || []} />}
       <Card title="Quotes & Proposals">{paymentError && <div className="portal-alert" role="alert" style={{ marginBottom: 12 }}>{paymentError}</div>}
         {(snapshot?.estimates || []).length ? snapshot.estimates.map(item => {
-          const lines = Array.isArray(item.intake_answers?.lineItems) ? item.intake_answers.lineItems : [];
+          const lines = Array.isArray(item.quote_scope) ? item.quote_scope : [];
           const awaiting = item.estimate_status === 'sent';
           const approved = item.estimate_status === 'approved';
+          const scopeComplete = item.scope_complete === true && lines.length > 0;
           return <div className="portal-row" key={item.id}>
-            <div><strong>{item.public_reference}</strong><small>{item.estimate_status.replaceAll('_',' ')} · ${Number(item.estimated_total || 0).toFixed(2)} · {item.created_at ? formatDate(item.created_at) : ''}</small><small>{lines.map(line => line.serviceName || line.serviceSku).join(' + ') || 'Quote package'}</small></div>
-            {awaiting && <div className="portal-actions"><button onClick={() => act('estimate_decision',{estimateId:item.id,decision:'APPROVED'})}>Approve quote</button><button className="secondary" onClick={() => act('estimate_decision',{estimateId:item.id,decision:'DECLINED'})}>Decline</button></div>}
+            <div><strong>{item.public_reference}</strong><small>{item.estimate_status.replaceAll('_',' ')} · {Number(item.estimated_total || 0).toLocaleString('en-US',{style:'currency',currency:'USD'})} · {item.created_at ? formatDate(item.created_at) : ''}</small><small>{lines.map(line => line.service_name || line.canonical_sku).join(' + ') || 'Quote package'}</small>
+              {awaiting && <details open={!scopeComplete} style={{marginTop:8,maxWidth:520}}>
+                <summary style={{cursor:'pointer',fontWeight:600}}>Review quoted scope before deciding</summary>
+                {lines.length ? <ul style={{paddingLeft:20,margin:'8px 0'}}>{lines.map((line,index)=><li key={line.id||line.canonical_sku||index}><strong>{line.service_name||'Work item'}</strong>{line.canonical_sku ? ' ('+line.canonical_sku+')' : ''}{line.description ? ': '+line.description : ''}{line.quantity!=null?' · Qty '+line.quantity:''}{line.line_total!=null?' · '+Number(line.line_total).toLocaleString('en-US',{style:'currency',currency:'USD'}):''}</li>)}</ul> : <p className="portal-note">The itemized canonical scope is not available in this portal record.</p>}
+                {!scopeComplete && <div className="portal-alert" role="alert">Approval is unavailable until DANI DECLARES attaches a complete canonical scope and governed line totals. You may still decline this quote.</div>}
+                {item.quote_disclaimer && <p className="portal-note">{item.quote_disclaimer}</p>}
+              </details>}</div>
+            {awaiting && <div className="portal-actions"><button disabled={!scopeComplete} title={scopeComplete ? 'Approve this reviewed quote' : 'Complete canonical scope required before approval'} onClick={() => act('estimate_decision',{estimateId:item.id,decision:'APPROVED'})}>Approve quote</button><button className="secondary" onClick={() => act('estimate_decision',{estimateId:item.id,decision:'DECLINED'})}>Decline</button></div>}
             {approved && <div className="portal-actions"><button onClick={async () => { try { const r=await fetch('/api/portal-operations',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'create_stripe_invoice',estimateId:item.id})}); const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||'Could not open payment.'); if(d.invoice?.hosted_invoice_url) window.location.href=d.invoice.hosted_invoice_url; else throw new Error('Payment link was not returned.'); } catch(e) { setPaymentError(e.message||'Could not open payment.'); } }}>Continue to Payment</button></div>}
           </div>;
         }) : <Empty>No quotes are currently attached to this account.</Empty>}
