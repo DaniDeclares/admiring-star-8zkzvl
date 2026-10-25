@@ -7,6 +7,7 @@ const TABS = [
   { to: '/portal/assignments', label: 'Offers', locked: true, needsAgreement: true },
   { to: '/portal/checklist', label: 'Tasks', locked: true, needsAgreement: true },
   { to: '/portal/payouts', label: 'Earnings', locked: true, needsAgreement: true },
+  { to: '/portal#referrals', label: 'Referrals', locked: true, needsAgreement: true },
   { to: '/portal/provider-agreement', label: 'Agreement', locked: false, needsAgreement: false },
   { to: '/portal/vendor-onboarding', label: 'Documents', locked: false, needsAgreement: true },
   { to: '/portal/w9', label: 'Tax Form (W-9)', locked: false, needsAgreement: true },
@@ -44,7 +45,7 @@ export default function ProviderNav({ isApprovedProvider, agreementSigned, showA
   const onboardingTabs = tabs.filter(tab => !tab.locked);
   const workTabs = tabs.filter(tab => tab.locked);
   const renderTab = tab => {
-    const active = location.pathname === tab.to;
+    const active = tab.to.includes('#') ? location.pathname + location.hash === tab.to : location.pathname === tab.to && (tab.to !== '/portal' || !location.hash);
     const lockedForAgreement = tab.needsAgreement && !agreementSigned;
     const lockedForApproval = tab.locked && !isApprovedProvider;
     const showLock = lockedForAgreement || lockedForApproval;
