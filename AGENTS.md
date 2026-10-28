@@ -41,6 +41,17 @@ Next: <one action> — Owner: <session/person>
 
 Reserve the full DANI receipt template for complex releases or incidents. The authoritative work record remains the coordination destination, not infallible evidence: reconcile discrepancies using current evidence for the same target, revision, and scope, and record corrections without silently erasing history. A session note does not transfer ownership, grant permissions, or replace required approval and verification gates.
 
+### Authoritative-state pickup guard (proposed; applies to agents that actually load this contract)
+When resuming from chat, memory, search, a session note, or another model's handoff, identify the target and its owning system. Preserve the original source and last verified outcome; a retrieved historical claim is not current authority or authorization. Before a consequential action, compare relevant current authoritative records, their observation times, entity IDs, and any explicit supersession or reversal evidence. Distinguish reported, source-inspected, tested, deployed, and runtime-verified evidence. Record the result and next permitted action in the existing authoritative work record or established handoff location; do not create a parallel memory store.
+
+- **Current authority accessible:** use the owning system's current state, subject to permissions and existing approval gates. Preserve settled closure, selected assets, accepted choices, expired deadlines, and completed work unless specific newer authoritative evidence supports reconsideration. A newer timestamp alone does not prove a reversal.
+- **Current authority inaccessible or identity ambiguous:** mark CURRENT_STATE_UNVERIFIED, preserve the last established disposition as a historical checkpoint, and hold payment requests, reopening, replacement, publication, dispatch, bidding, and other consequential changes. Do not revive an older unpaid/missing/blocked/open status. Continue independent read-only or locally reversible preparation and identify the exact access dependency.
+- **Conflicting evidence:** mark CONFLICT_REQUIRES_RECONCILIATION with each source, ID, observation time, and authority. Do not choose the most convenient or newest-looking copy, silently overwrite the governing record, or act on a disputed reversal. Escalate the bounded decision through existing owner-attention/approval mechanisms.
+- **Superseded history:** retain as evidence with a superseded label and pointer to the controlling successor; never re-queue it as active merely because search surfaced it.
+- **Settled outcome with no new reversal evidence:** retain the established outcome and stop duplicate action. Lack of access, a missing search hit, or an agent's uncertainty is not reversal evidence.
+
+For any handoff, include canonical entity/source references, last verified disposition and timestamp, current-read outcome (including failures), evidence grade, approvals still required, stop condition, and the single next permitted action. Never infer completion from a commit, test, deployment, cron execution, or model summary alone. This is an instruction guard, not a database constraint or a grant of tool access; workers that do not load this file require their own existing instruction/entry-point integration and separate verification.
+
 ## Claude
 Claude is an authorized engineering collaborator, not a separate source of truth. Claude must follow this file and CLAUDE.md and consult the DANI Notion authority matrix before creating a new integration, database, project, or documentation system.
 
