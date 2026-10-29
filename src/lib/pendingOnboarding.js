@@ -102,15 +102,21 @@ let inFlightCompletion = null;
 // the applicant's eventual successful sign-in (a fresh link, or a password
 // login) may carry no staging id at all. It's still a cheap no-op for the
 // overwhelming majority of logins that have no pending intake.
-export async function completeStagedOnboarding(supabase, session, stagingId) {
-  if (!session?.user) return { attempted: false };
+export function completeStagedOnboarding(supabase, session, stagingId) {
+  if (!session?.user) return Promise.resolve({ attempted: false });
   const resolvedId = stagingId || getPendingOnboardingHint()?.stagingId || null;
 
   if (inFlightCompletion) return inFlightCompletion;
-  inFlightCompletion = runCompletion(supabase, resolvedId).finally(() => {
-    inFlightCompletion = null;
+  const operation = runCompletion(supabase, resolvedId);
+  const trackedOperation = operation.finally(() => {
+    if (inFlightCompletion === trackedOperation) inFlightCompletion = null;
   });
-  return inFlightCompletion;
+  inFlightCompletion = trackedOperation;
+  return trackedOperation;
+}
+
+export function detachStagedOnboarding(operation) {
+  if (inFlightCompletion === operation) inFlightCompletion = null;
 }
 
 async function runCompletion(supabase, stagingId) {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient.js';
 import { captureServiceLifecycle } from '../../lib/posthogAnalytics.js';
@@ -9,10 +9,42 @@ export function formatDate(value) { if (!value) return 'Not scheduled'; return n
 export function statusLabel(value) { return value ? value.replaceAll('_', ' ') : 'Not started'; }
 export function Requirement({ label, ok, detail }) { return <div className="portal-requirement"><span className={`portal-requirement-dot ${ok ? 'ok' : 'pending'}`} />{label}<small>{detail}</small></div>; }
 export function LockedCard({ title, children }) { return <Card title={title}><p className="portal-note">{children} <Link to="/portal">Check your application status</Link>.</p></Card>; }
+export async function completeLocalSignOut(signOutOperation,redirectAfterSignOut) {
+  // The SDK operation cannot be cancelled. Keep this handler attached after
+  // the visible timeout so a delayed success still removes the old workspace.
+  void signOutOperation.then(({error:lateError})=>{
+    if(!lateError)redirectAfterSignOut();
+  }).catch(()=>{});
+  const {error:authError}=await Promise.race([
+    signOutOperation,
+    new Promise((_,reject)=>window.setTimeout(()=>reject(new Error('Sign-out timed out. Please retry.')),12000))
+  ]);
+  if(authError)throw authError;
+  redirectAfterSignOut();
+}
+
 export function AccountBadge({ session }) {
+  const [busy,setBusy] = useState(false);
+  const [error,setError] = useState('');
   if (!session?.user) return null;
-  const signOut = async () => { await supabase.auth.signOut(); window.location.href = '/portal/login'; };
-  return <div className="portal-account-badge">Signed in as <strong>{session.user.email}</strong><button type="button" onClick={signOut}>Sign out</button></div>;
+  const signOut = async () => {
+    if(busy)return;
+    setBusy(true);setError('');
+    try {
+      let redirected=false;
+      const redirectAfterSignOut=()=>{
+        if(redirected)return;
+        redirected=true;
+        window.location.assign('/portal/login');
+      };
+      const signOutOperation=supabase.auth.signOut({scope:'local'});
+      await completeLocalSignOut(signOutOperation,redirectAfterSignOut);
+    } catch(e) {
+      setError(e?.message||'Sign-out failed. Please retry.');
+      setBusy(false);
+    }
+  };
+  return <div className="portal-account-badge">Signed in as <strong>{session.user.email}</strong><button type="button" onClick={signOut} disabled={busy}>{busy?'Signing out…':'Sign out'}</button>{error&&<span role="alert">{error}</span>}</div>;
 }
 export function buildProviderRequirements(application, capabilities) {
   const caps = capabilities || [];
@@ -34,16 +66,21 @@ export function useProviderWorkspace() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const snapshotRef = useRef(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!snapshotRef.current) setLoading(true);
     setError('');
     try {
-      const sessionResult = await supabase.auth.getSession();
+      const sessionResult = await Promise.race([
+        supabase.auth.getSession(),
+        new Promise((_,reject)=>window.setTimeout(()=>reject(new Error('Authentication check timed out. Please retry or sign out.')),12000))
+      ]);
       if (sessionResult.error) throw sessionResult.error;
       const activeSession = sessionResult.data?.session;
       if (!activeSession) {
         setSession(null);
+        snapshotRef.current = null;
         setSnapshot(null);
         setError('Please sign in to access your DANI DECLARES workspace.');
         return;
@@ -66,6 +103,7 @@ export function useProviderWorkspace() {
       const body = await response.json().catch(() => ({}));
       if (response.status === 401 || response.status === 403) {
         setSession(null);
+        snapshotRef.current = null;
         setSnapshot(null);
         setError(body.error || 'Your DANI DECLARES session expired. Please sign in again.');
         return;
@@ -73,6 +111,7 @@ export function useProviderWorkspace() {
       if (!response.ok || !body.success) {
         throw new Error(body.error || `Portal data could not be loaded (HTTP ${response.status}).`);
       }
+      snapshotRef.current = body;
       setSnapshot(body);
     } catch (e) {
       const messageText = e?.name === 'AbortError'

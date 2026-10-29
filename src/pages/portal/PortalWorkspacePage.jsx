@@ -59,7 +59,14 @@ export default function PortalWorkspacePage() {
     setMessageDrafts(prev => ({ ...prev, [jobId]: '' }));
   };
   if (loading) return <main className="portal-shell"><p>Loading your DANI DECLARES workspace…</p></main>;
-  if (error && !snapshot) return <main className="portal-shell"><div className="portal-alert">{error}</div></main>;
+  if (error && !snapshot) return <main className="portal-shell">
+    <div className="portal-alert" role="alert">{error}</div>
+    <div className="portal-actions" style={{display:'flex',gap:12,marginTop:16,flexWrap:'wrap'}}>
+      <button type="button" className="portal-primary" onClick={load}>Retry workspace</button>
+      <Link to="/portal/login">Go to sign in</Link>
+      <Link to="/portal/hq">Open Owner HQ directly</Link>
+    </div>
+  </main>;
   const role = snapshot?.role || 'customer';
   if (['admin','owner','staff_admin','staff'].includes(role)) return <OwnerHQPage />;
   const isProvider = role === 'provider'; const isCommercial = ['property_manager', 'procurement'].includes(role);
