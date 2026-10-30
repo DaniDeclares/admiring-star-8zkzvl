@@ -22,6 +22,11 @@ export async function executeAssignedStep(input, adapters) {
   const route=routeExecutionTask(current.routingFacts||{});
   if (route.ownerApprovalRequired || route.independentReviewRequired)
     return held('GOVERNED_REVIEW_REQUIRED');
+  // Never send task context to an external inference provider by implication.
+  if (current.modelInferenceApproved !== true ||
+      current.modelContextSanitized !== true ||
+      !hasText(current.modelApprovalRef))
+    return held('MODEL_INFERENCE_NOT_AUTHORIZED');
   const available=await adapters.listVerifiedWorkers({tier:route.tier,authorityRef:current.authorityRef});
   if (!Array.isArray(available)) return held('NO_VERIFIED_WORKER');
   const workers=available.filter(w=>hasText(w?.id)&&w.verified===true&&w.authorized===true);
@@ -29,7 +34,7 @@ export async function executeAssignedStep(input, adapters) {
 
   const proposal=await adapters.routeModel({
     assignmentId:current.assignmentId,objective:current.objective,tier:route.tier,
-    context:current.modelContext||null,workerIds:workers.map(w=>w.id)
+    context:current.modelContext||null,modelApprovalRef:current.modelApprovalRef,workerIds:workers.map(w=>w.id)
   });
   if (!hasText(proposal?.workerId)||!hasText(proposal?.step)) return held('MODEL_PROPOSAL_INVALID');
   // The model must choose from explicitly approved steps, not invent actions.
