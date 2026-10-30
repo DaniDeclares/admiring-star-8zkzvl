@@ -8,7 +8,7 @@ const setup=(override={})=>{
   const adapters={
     recover:async()=>({...input,status:'READY',approved:true,revision:'r1',
       objective:'Verify an existing product',expectedOutcome:'usable file',
-      scope:{businessDomain:true},
+      scope:{businessDomain:true,allowedSteps:['Inspect existing file']},
       routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT'}}),
     routeModel:async()=>({workerId:'file-qa',step:'Inspect existing file'}),
     listVerifiedWorkers:async()=>[{id:'file-qa',verified:true,authorized:true}],
@@ -39,6 +39,11 @@ test('model proposals cannot change authorization; gated actions are held',async
   assert.deepEqual(h.calls,[]);
   h=setup({recover:async()=>({...input,status:'READY',approved:true,routingFacts:{actions:['PRODUCTION_MUTATION']}})});
   assert.equal((await executeAssignedStep(input,h.adapters)).reason,'GOVERNED_REVIEW_REQUIRED');
+  assert.deepEqual(h.calls,[]);
+});
+test('model cannot invent unapproved work steps',async()=>{
+  const h=setup({routeModel:async()=>({workerId:'file-qa',step:'Publish product'})});
+  assert.equal((await executeAssignedStep(input,h.adapters)).reason,'STEP_NOT_IN_APPROVED_SCOPE');
   assert.deepEqual(h.calls,[]);
 });
 test('verification failure never becomes completion',async()=>{
