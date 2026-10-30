@@ -50,34 +50,50 @@ export async function executeAssignedStep(input, adapters) {
     expectedRevision:current.revision,workerId:proposal.workerId,step:proposal.step
   });
   if (claim?.claimed!==true||!hasText(claim.claimRef)) return held('CLAIM_DENIED');
+  let proof;
   try {
     const result=await adapters.execute({
       claimRef:claim.claimRef,workerId:proposal.workerId,
       step:proposal.step,scope:current.scope
     });
-    const proof=await adapters.verify({
+    proof=await adapters.verify({
       claimRef:claim.claimRef,result,expectedOutcome:current.expectedOutcome
     });
-    if (proof?.passed!==true||!hasText(proof.evidenceRef)) {
-      await adapters.fail({claimRef:claim.claimRef,code:'VERIFICATION_FAILED'});
-      return {state:'FAILED',claimRef:claim.claimRef,reason:'VERIFICATION_FAILED'};
-    }
-    const receipt=await adapters.complete({
+  } catch {
+    // The worker may already have performed the action. Never auto-retry.
+    try { await adapters.fail({claimRef:claim.claimRef,code:'EXECUTION_INTERRUPTED'}); }
+    catch { return {state:'HELD',claimRef:claim.claimRef,reason:'FAILURE_RECORD_UNCONFIRMED'}; }
+    return {state:'FAILED',claimRef:claim.claimRef,reason:'EXECUTION_INTERRUPTED'};
+  }
+  if (proof?.passed!==true||!hasText(proof.evidenceRef)) {
+    try { await adapters.fail({claimRef:claim.claimRef,code:'VERIFICATION_FAILED'}); }
+    catch { return {state:'HELD',claimRef:claim.claimRef,reason:'FAILURE_RECORD_UNCONFIRMED'}; }
+    return {state:'FAILED',claimRef:claim.claimRef,reason:'VERIFICATION_FAILED'};
+  }
+  let receipt;
+  try {
+    receipt=await adapters.complete({
       claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,outcome:proof.outcome
     });
-    if (!hasText(receipt?.receiptRef)) return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_NOT_CONFIRMED'};
-    // Owner delivery is a separately verified output, not an unapproved send.
-    const delivered=await adapters.deliver({
+  } catch {
+    // Completion may have committed before the response failed.
+    return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED'};
+  }
+  if (!hasText(receipt?.receiptRef))
+    return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED'};
+  let delivered;
+  try {
+    delivered=await adapters.deliver({
       assignmentId:current.assignmentId,authorityRef:current.authorityRef,
       claimRef:claim.claimRef,receiptRef:receipt.receiptRef,evidenceRef:proof.evidenceRef
     });
-    if (delivered?.ownerRetrievable!==true || !hasText(delivered?.deliveryRef))
-      return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE'};
-    return {state:'VERIFIED',claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,
-      receiptRef:receipt.receiptRef,deliveryRef:delivered.deliveryRef};
   } catch {
-    // Do not retry automatically: the worker may have committed a side effect.
-    await adapters.fail({claimRef:claim.claimRef,code:'EXECUTION_INTERRUPTED'});
-    return {state:'FAILED',claimRef:claim.claimRef,reason:'EXECUTION_INTERRUPTED'};
+    return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,
+      reason:'OWNER_RESULT_NOT_RETRIEVABLE'};
   }
+  if (delivered?.ownerRetrievable!==true || !hasText(delivered?.deliveryRef))
+    return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,
+      reason:'OWNER_RESULT_NOT_RETRIEVABLE'};
+  return {state:'VERIFIED',claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,
+    receiptRef:receipt.receiptRef,deliveryRef:delivered.deliveryRef};
 }
