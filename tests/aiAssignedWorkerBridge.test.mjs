@@ -16,14 +16,15 @@ const setup=(override={})=>{
     execute:async()=>{calls.push('execute');return {path:'candidate.pdf'}},
     verify:async()=>{calls.push('verify');return {passed:true,evidenceRef:'evidence-1',outcome:'usable file'}},
     complete:async()=>{calls.push('complete');return {receiptRef:'receipt-1'}},
+    deliver:async()=>{calls.push('deliver');return {deliveryRef:'owner-result-1',ownerRetrievable:true}},
     fail:async()=>{calls.push('fail')},...override};
   return {adapters,calls};
 };
 test('one bounded claim executes and produces durable evidence',async()=>{
   const {adapters,calls}=setup();
   const r=await executeAssignedStep(input,adapters);
-  assert.deepEqual(r,{state:'VERIFIED',claimRef:'claim-1',evidenceRef:'evidence-1',receiptRef:'receipt-1'});
-  assert.deepEqual(calls,['claim','execute','verify','complete']);
+  assert.deepEqual(r,{state:'VERIFIED',claimRef:'claim-1',evidenceRef:'evidence-1',receiptRef:'receipt-1',deliveryRef:'owner-result-1'});
+  assert.deepEqual(calls,['claim','execute','verify','complete','deliver']);
 });
 test('owner approval is necessary; LLM cannot choose unauthorized workers',async()=>{
   let h=setup({recover:async()=>({...input,status:'READY',approved:false})});
@@ -58,6 +59,13 @@ test('verification failure never becomes completion',async()=>{
   const {adapters,calls}=setup({verify:async()=>({passed:false})});
   assert.equal((await executeAssignedStep(input,adapters)).state,'FAILED');
   assert.deepEqual(calls,['claim','execute','fail']);
+});
+test('completed work without owner retrieval remains held, not verified',async()=>{
+  const h=setup({deliver:async()=>({ownerRetrievable:false})});
+  const result=await executeAssignedStep(input,h.adapters);
+  assert.equal(result.state,'HELD');
+  assert.equal(result.reason,'OWNER_RESULT_NOT_RETRIEVABLE');
+  assert.equal(result.receiptRef,'receipt-1');
 });
 test('already completed tasks are not re-executed',async()=>{
   const h=setup({recover:async()=>({...input,status:'GREEN',receiptRef:'existing'})});
