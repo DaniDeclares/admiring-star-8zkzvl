@@ -11,7 +11,7 @@ const setup=(override={})=>{
       scope:{businessDomain:true,allowedSteps:['Inspect existing file']},
       routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT'}}),
     recoverContext:async()=>({assignmentId:input.assignmentId,authorityRef:input.authorityRef,
-      sourceRevision:'r1',currentVerified:true,contradictionUnresolved:false,
+      sourceRevision:'r1',currentVerified:true,contextSanitized:true,contradictionUnresolved:false,
       evidenceRefs:['ASANA:task-1:revision-r1'],sanitizedContext:'Already-approved synthetic scope'}),
     routeModel:async()=>({workerId:'file-qa',step:'Inspect existing file'}),
     listVerifiedWorkers:async()=>[{id:'file-qa',verified:true,authorized:true}],
