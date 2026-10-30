@@ -8,7 +8,7 @@ const hasText = x => typeof x === 'string' && x.trim().length > 0;
 const held = reason => ({state:'HELD',reason});
 export async function executeAssignedStep(input, adapters) {
   if (!hasText(input?.assignmentId) || !hasText(input?.authorityRef)) return held('INVALID_ASSIGNMENT');
-  const required=['recover','routeModel','listVerifiedWorkers','claim','execute','verify','complete','fail'];
+  const required=['recover','routeModel','listVerifiedWorkers','claim','execute','verify','complete','deliver','fail'];
   if (!required.every(k=>typeof adapters?.[k]==='function')) return held('ADAPTER_NOT_CONNECTED');
 
   const current=await adapters.recover({assignmentId:input.assignmentId,authorityRef:input.authorityRef});
@@ -66,7 +66,15 @@ export async function executeAssignedStep(input, adapters) {
       claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,outcome:proof.outcome
     });
     if (!hasText(receipt?.receiptRef)) return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_NOT_CONFIRMED'};
-    return {state:'VERIFIED',claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,receiptRef:receipt.receiptRef};
+    // Owner delivery is a separately verified output, not an unapproved send.
+    const delivered=await adapters.deliver({
+      assignmentId:current.assignmentId,authorityRef:current.authorityRef,
+      claimRef:claim.claimRef,receiptRef:receipt.receiptRef,evidenceRef:proof.evidenceRef
+    });
+    if (delivered?.ownerRetrievable!==true || !hasText(delivered?.deliveryRef))
+      return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE'};
+    return {state:'VERIFIED',claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,
+      receiptRef:receipt.receiptRef,deliveryRef:delivered.deliveryRef};
   } catch {
     // Do not retry automatically: the worker may have committed a side effect.
     await adapters.fail({claimRef:claim.claimRef,code:'EXECUTION_INTERRUPTED'});
