@@ -5,8 +5,8 @@ import { OWNER_REVIEW } from './_ownerReviewCore.js';
 function response(){return {headers:{},statusCode:null,payload:null,setHeader(name,value){this.headers[name]=value;return this;},status(code){this.statusCode=code;return this;},json(body){this.payload=body;return this;}};}
 function request(method='GET',overrides={}){return {method,headers:{host:'danideclares.com',...overrides.headers},query:{artifactKey:OWNER_REVIEW.artifactKey},...overrides};}
 function fakeDb(record=null,bytes=null){
- const state={record,bytes,reads:0,writes:0,failUpload:false,failInsert:false};
- const db={state,from(){state.reads++;return {
+ const state={record,bytes,reads:0,writes:0,tables:[],failUpload:false,failInsert:false};
+ const db={state,from(name){state.reads++;state.tables.push(name);return {
    select(){return {eq(){return {async maybeSingle(){return {data:state.record,error:null};}};}};},
    insert(metadata){state.writes++;return {select(){return {async single(){
      if(state.failInsert){state.failInsert=false;return {data:null,error:{message:'failure'}};}
@@ -71,10 +71,10 @@ test('owner POST rejects altered OWNER_REVIEW bytes without storage access',asyn
  expect(res.statusCode).toBe(422);expect(res.payload.code).toBe('HASH_MISMATCH');
  expect(db.state.reads).toBe(0);expect(db.state.writes).toBe(0);
 });
-test('upload failure does not create metadata',async()=>{
+test('invalid import is rejected before any storage or metadata operation',async()=>{
  const db=fakeDb();db.state.failUpload=true;
- await expect(importArtifact(db,{assignmentId:OWNER_REVIEW.assignmentId,contentBase64:'AAAA'})).rejects.toThrow();
- expect(db.state.writes).toBe(0);
+ await expect(importArtifact(db,{assignmentId:OWNER_REVIEW.assignmentId,contentBase64:'AAAA'})).rejects.toThrow('INVALID_IMPORT_METADATA');
+ expect(db.state.reads).toBe(0);expect(db.state.writes).toBe(0);
 });
 test('missing object is not a successful retrieval',async()=>{
  const db=fakeDb({artifact_key:OWNER_REVIEW.artifactKey,assignment_system:'ASANA',assignment_id:OWNER_REVIEW.assignmentId,
@@ -84,6 +84,10 @@ test('missing object is not a successful retrieval',async()=>{
  const result=await retrieveArtifact(db,OWNER_REVIEW.artifactKey);
  expect(result.status).toBe(503);expect(result.code).toBe('CONTENT_INTEGRITY_FAILURE');
 });
-test('privileged operations never touch Sales tables',()=>{
- const db=fakeDb();expect(db.state.writes).toBe(0);
+test('missing-artifact retrieval only queries owner-review metadata, never Sales tables',async()=>{
+ const db=fakeDb();
+ const result=await retrieveArtifact(db,OWNER_REVIEW.artifactKey);
+ expect(result.status).toBe(404);
+ expect(db.state.tables).toEqual(['dd_owner_review_artifacts']);
+ expect(db.state.writes).toBe(0);
 });
