@@ -86,3 +86,40 @@ test('already completed tasks are not re-executed',async()=>{
   assert.deepEqual(await executeAssignedStep(input,h.adapters),{state:'GREEN',receiptRef:'existing'});
   assert.deepEqual(h.calls,[]);
 });
+
+test('synthetic file worker produces a retrievable artifact without duplicate execution',async()=>{
+  const {mkdtemp,writeFile,readFile,rm}=await import('node:fs/promises');
+  const {tmpdir}=await import('node:os');
+  const {join}=await import('node:path');
+  const {createHash}=await import('node:crypto');
+  const dir=await mkdtemp(join(tmpdir(),'dani-bridge-'));
+  const output=join(dir,'approved-synthetic-output.txt');
+  let executionCount=0;
+  let completed=null;
+  const h=setup({
+    recover:async()=>completed?({...input,status:'GREEN',receiptRef:completed}):
+      ({...input,status:'READY',approved:true,revision:'r1',
+        objective:'Produce a synthetic QA artifact',expectedOutcome:'verified output',
+        scope:{allowedSteps:['Write synthetic proof']},modelInferenceApproved:true,
+        modelContextSanitized:true,modelApprovalRef:'synthetic-approved',
+        routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT'}}),
+    routeModel:async()=>({workerId:'file-qa',step:'Write synthetic proof'}),
+    execute:async()=>{executionCount++;await writeFile(output,'DANI governed synthetic test output');
+      return {output};},
+    verify:async({result})=>{const bytes=await readFile(result.output);
+      const hash=createHash('sha256').update(bytes).digest('hex');
+      return {passed:bytes.toString()==='DANI governed synthetic test output',
+        evidenceRef:'SHA256:'+hash,outcome:'verified output'};},
+    complete:async()=>{completed='receipt-synthetic';return {receiptRef:completed};},
+    deliver:async()=>({ownerRetrievable:(await readFile(output,'utf8')).startsWith('DANI governed'),
+      deliveryRef:output})
+  });
+  try {
+    const first=await executeAssignedStep(input,h.adapters);
+    assert.equal(first.state,'VERIFIED');
+    assert.ok(first.evidenceRef.startsWith('SHA256:'));
+    assert.equal(await readFile(first.deliveryRef,'utf8'),'DANI governed synthetic test output');
+    assert.equal((await executeAssignedStep(input,h.adapters)).state,'GREEN');
+    assert.equal(executionCount,1);
+  } finally { await rm(dir,{recursive:true,force:true}); }
+});
