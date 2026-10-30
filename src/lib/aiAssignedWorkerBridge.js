@@ -47,6 +47,7 @@ export async function executeAssignedStep(input, adapters) {
       pickup?.authorityRef!==current.authorityRef ||
       pickup?.sourceRevision!==current.revision ||
       pickup?.currentVerified!==true ||
+      pickup?.contextSanitized!==true ||
       pickup?.contradictionUnresolved===true ||
       !Array.isArray(pickup?.evidenceRefs) || pickup.evidenceRefs.length===0 ||
       !pickup.evidenceRefs.every(hasText))
