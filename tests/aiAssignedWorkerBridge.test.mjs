@@ -29,12 +29,12 @@ test('owner approval is necessary; LLM cannot choose unauthorized workers',async
   let h=setup({recover:async()=>({...input,status:'READY',approved:false})});
   assert.equal((await executeAssignedStep(input,h.adapters)).reason,'NOT_AUTHORIZED');
   assert.deepEqual(h.calls,[]);
-  h=setup({routeModel:async()=>({workerId:'unverified',step:'Proceed'})});
+  h=setup({routeModel:async()=>({workerId:'unverified',step:'Inspect existing file'})});
   assert.equal((await executeAssignedStep(input,h.adapters)).reason,'UNAUTHORIZED_WORKER');
   assert.deepEqual(h.calls,[]);
 });
 test('model proposals cannot change authorization; gated actions are held',async()=>{
-  let h=setup({routeModel:async()=>({workerId:'file-qa',step:'Send',actions:['OUTBOUND_MESSAGE']})});
+  let h=setup({routeModel:async()=>({workerId:'file-qa',step:'Inspect existing file',actions:['OUTBOUND_MESSAGE']})});
   assert.equal((await executeAssignedStep(input,h.adapters)).reason,'MODEL_PROPOSED_AUTHORITY_CHANGE');
   assert.deepEqual(h.calls,[]);
   h=setup({recover:async()=>({...input,status:'READY',approved:true,routingFacts:{actions:['PRODUCTION_MUTATION']}})});
