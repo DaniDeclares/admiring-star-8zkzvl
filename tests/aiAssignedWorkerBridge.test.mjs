@@ -67,6 +67,20 @@ test('completed work without owner retrieval remains held, not verified',async()
   assert.equal(result.reason,'OWNER_RESULT_NOT_RETRIEVABLE');
   assert.equal(result.receiptRef,'receipt-1');
 });
+test('uncertain completion does not call failure or repeat the worker',async()=>{
+  const h=setup({complete:async()=>{throw new Error('response lost')}});
+  const result=await executeAssignedStep(input,h.adapters);
+  assert.equal(result.state,'HELD');
+  assert.equal(result.reason,'COMPLETION_UNCONFIRMED');
+  assert.deepEqual(h.calls,['claim','execute','verify']);
+});
+test('delivery interruption holds completed receipt without marking it failed',async()=>{
+  const h=setup({deliver:async()=>{throw new Error('owner surface unavailable')}});
+  const result=await executeAssignedStep(input,h.adapters);
+  assert.equal(result.reason,'OWNER_RESULT_NOT_RETRIEVABLE');
+  assert.equal(result.receiptRef,'receipt-1');
+  assert.deepEqual(h.calls,['claim','execute','verify','complete']);
+});
 test('already completed tasks are not re-executed',async()=>{
   const h=setup({recover:async()=>({...input,status:'GREEN',receiptRef:'existing'})});
   assert.deepEqual(await executeAssignedStep(input,h.adapters),{state:'GREEN',receiptRef:'existing'});
