@@ -1,4 +1,7 @@
 import React from 'react';
+import { TextDecoder } from 'util';
+// This suite also runs in the repository's general Jest/jsdom configuration.
+if (typeof globalThis.TextDecoder === 'undefined') globalThis.TextDecoder = TextDecoder;
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { OwnerReviewContent } from './OwnerReviewArtifactPage.jsx';
