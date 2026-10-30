@@ -8,7 +8,7 @@ const hasText = x => typeof x === 'string' && x.trim().length > 0;
 const held = reason => ({state:'HELD',reason});
 export async function executeAssignedStep(input, adapters) {
   if (!hasText(input?.assignmentId) || !hasText(input?.authorityRef)) return held('INVALID_ASSIGNMENT');
-  const required=['recover','routeModel','listVerifiedWorkers','claim','execute','verify','complete','deliver','fail'];
+  const required=['recover','recoverContext','routeModel','listVerifiedWorkers','claim','execute','verify','complete','deliver','fail'];
   if (!required.every(k=>typeof adapters?.[k]==='function')) return held('ADAPTER_NOT_CONNECTED');
 
   const current=await adapters.recover({assignmentId:input.assignmentId,authorityRef:input.authorityRef});
@@ -32,9 +32,30 @@ export async function executeAssignedStep(input, adapters) {
   const workers=available.filter(w=>hasText(w?.id)&&w.verified===true&&w.authorized===true);
   if (!workers.length) return held('NO_AUTHORIZED_WORKER');
 
+  // Retrieve fresh task-scoped context from the existing authoritative stores.
+  // A model-written summary is never sufficient evidence of current state.
+  let pickup;
+  try {
+    pickup=await adapters.recoverContext({
+      assignmentId:current.assignmentId,authorityRef:current.authorityRef,
+      expectedRevision:current.revision,contextRefs:route.contextPolicy.include
+    });
+  } catch {
+    return held('CONTEXT_PICKUP_UNAVAILABLE');
+  }
+  if (pickup?.assignmentId!==current.assignmentId ||
+      pickup?.authorityRef!==current.authorityRef ||
+      pickup?.sourceRevision!==current.revision ||
+      pickup?.currentVerified!==true ||
+      pickup?.contradictionUnresolved===true ||
+      !Array.isArray(pickup?.evidenceRefs) || pickup.evidenceRefs.length===0 ||
+      !pickup.evidenceRefs.every(hasText))
+    return held('CONTEXT_PICKUP_UNVERIFIED');
+
   const proposal=await adapters.routeModel({
     assignmentId:current.assignmentId,objective:current.objective,tier:route.tier,
-    context:current.modelContext||null,modelApprovalRef:current.modelApprovalRef,workerIds:workers.map(w=>w.id)
+    context:pickup.sanitizedContext||null,contextEvidenceRefs:pickup.evidenceRefs,
+    modelApprovalRef:current.modelApprovalRef,workerIds:workers.map(w=>w.id)
   });
   if (!hasText(proposal?.workerId)||!hasText(proposal?.step)) return held('MODEL_PROPOSAL_INVALID');
   // The model must choose from explicitly approved steps, not invent actions.
@@ -47,7 +68,8 @@ export async function executeAssignedStep(input, adapters) {
 
   const claim=await adapters.claim({
     assignmentId:current.assignmentId,authorityRef:current.authorityRef,
-    expectedRevision:current.revision,workerId:proposal.workerId,step:proposal.step
+    expectedRevision:current.revision,workerId:proposal.workerId,step:proposal.step,
+    contextEvidenceRefs:pickup.evidenceRefs
   });
   if (claim?.claimed!==true||!hasText(claim.claimRef)) return held('CLAIM_DENIED');
   let proof;
