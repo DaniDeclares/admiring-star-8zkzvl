@@ -7,7 +7,7 @@ const setup=(override={})=>{
   const calls=[];
   const adapters={
     recover:async()=>({...input,status:'READY',approved:true,revision:'r1',
-      objective:'Verify an existing product',expectedOutcome:'usable file',
+      objective:'Verify an existing product',expectedOutcome:'usable file',modelInferenceApproved:true,modelContextSanitized:true,modelApprovalRef:'approved-fixture',
       scope:{businessDomain:true,allowedSteps:['Inspect existing file']},
       routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT'}}),
     routeModel:async()=>({workerId:'file-qa',step:'Inspect existing file'}),
@@ -39,6 +39,14 @@ test('model proposals cannot change authorization; gated actions are held',async
   assert.deepEqual(h.calls,[]);
   h=setup({recover:async()=>({...input,status:'READY',approved:true,routingFacts:{actions:['PRODUCTION_MUTATION']}})});
   assert.equal((await executeAssignedStep(input,h.adapters)).reason,'GOVERNED_REVIEW_REQUIRED');
+  assert.deepEqual(h.calls,[]);
+});
+test('external inference requires explicit approval and sanitized context',async()=>{
+  const h=setup({recover:async()=>({...input,status:'READY',approved:true,
+    scope:{businessDomain:true,allowedSteps:['Inspect existing file']},
+    routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT'},
+    modelInferenceApproved:false,modelContextSanitized:false})});
+  assert.equal((await executeAssignedStep(input,h.adapters)).reason,'MODEL_INFERENCE_NOT_AUTHORIZED');
   assert.deepEqual(h.calls,[]);
 });
 test('model cannot invent unapproved work steps',async()=>{
