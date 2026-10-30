@@ -66,6 +66,7 @@ export function OwnerStartWorking({ salesDue = 0 }) {
     <div className="portal-actions">
       <Link className="portal-primary" to="/portal/acquisition">Review sales actions ({salesDue} due)</Link>
       <Link to="/portal/operations">Jobs &amp; operations</Link>
+      {process.env.REACT_APP_OWNER_REVIEW_READY === 'true' && <Link to="/portal/hq/review">Review worker results</Link>}
       <a href="#attention">Owner decisions</a>
     </div>
   </section>;

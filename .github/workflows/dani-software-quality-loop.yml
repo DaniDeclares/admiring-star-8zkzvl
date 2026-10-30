@@ -31,6 +31,8 @@ jobs:
         run: npm test -- --watchAll=false
       - name: Work clock time study and auth regression
         run: node --test checks/workClock2026.test.mjs
+      - name: Owner review API and UI regression (contained)
+        run: node ./node_modules/jest/bin/jest.js --config owner-review-ci.config.cjs --runInBand --no-cache
       - name: Portal auth/login/logout recovery regression
         run: node --test checks/portalAuthRecovery2026.test.mjs
       - name: Stripe crosswalk regression

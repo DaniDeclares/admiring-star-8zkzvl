@@ -114,15 +114,26 @@ jobs:
           # assembly intentionally replays Production ledger history only; without
           # appending the candidate, CI could pass without executing its DDL.
           clock_migration="20261017061526_owner_provider_work_clock_existing_ledger.sql"
+          review_migration="20261030054901_20261028213000_owner_review_artifacts.sql"
           test -f "supabase/migrations/$clock_migration"
+          test -f "supabase/migrations/$review_migration"
           cp "supabase/migrations/$clock_migration" "$RUNNER_TEMP/$clock_migration"
+          cp "supabase/migrations/$review_migration" "$RUNNER_TEMP/$review_migration"
           python3 scripts/assemble_production_replay_workspace.py . "$RUNNER_TEMP/replay-migrations" --legacy-cutoff 20260930140500 --report assembly-report.json
           rm -f supabase/migrations/*.sql
           cp "$RUNNER_TEMP"/replay-migrations/*.sql supabase/migrations/
           test ! -e "supabase/migrations/$clock_migration"
           cp "$RUNNER_TEMP/$clock_migration" "supabase/migrations/$clock_migration"
-          echo "Hybrid replay plus clock candidate: $(ls supabase/migrations/*.sql | wc -l) files"
+          # The owner-review provisioning ran through Supabase MCP as ledger version
+          # 20261030054901. The source SQL is unchanged and named to match the
+          # recorded ledger version/name. Replay it in the isolated workspace too;
+          # otherwise a green migration replay would never exercise this DDL.
+          test -f "$RUNNER_TEMP/$review_migration"
+          test ! -e "supabase/migrations/$review_migration"
+          cp "$RUNNER_TEMP/$review_migration" "supabase/migrations/$review_migration"
+          echo "Hybrid replay plus clock and owner-review candidates: $(ls supabase/migrations/*.sql | wc -l) files"
           test -f "supabase/migrations/$clock_migration"
+          test -f "supabase/migrations/$review_migration"
 
       - name: Normalize provider staging guard formatting (replay workspace only)
         run: |

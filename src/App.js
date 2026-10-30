@@ -30,6 +30,7 @@ import ResidentWelcomePage from "./pages/ResidentWelcomePage.jsx";
 import ResidentFulfillmentPage from "./pages/portal/ResidentFulfillmentPage.jsx";
 import OperationsConsolePage from "./pages/portal/OperationsConsolePage.jsx";
 import OwnerHQPage from "./pages/portal/OwnerHQPage.jsx";
+import OwnerReviewArtifactPage from "./pages/portal/OwnerReviewArtifactPage.jsx";
 import IntegrationsCenterPage from "./pages/portal/IntegrationsCenterPage.jsx";
 import ScopeDevelopmentPage from "./pages/portal/ScopeDevelopmentPage.jsx";
 import DispatchCalendarPage from "./pages/portal/DispatchCalendarPage.jsx";
@@ -149,6 +150,7 @@ export default function App() {
         <Route path="/portal/resident-fulfillment" element={<ResidentFulfillmentPage />} />
         <Route path="/portal/operations" element={<OperationsConsolePage />} />
         <Route path="/portal/hq" element={<OwnerHQPage />} />
+        <Route path="/portal/hq/review" element={<OwnerReviewArtifactPage />} />
         <Route path="/portal/owner" element={<OwnerHQPage />} />
         <Route path="/portal/integrations" element={<IntegrationsCenterPage />} />
         <Route path="/portal/scope" element={<ScopeDevelopmentPage />} />

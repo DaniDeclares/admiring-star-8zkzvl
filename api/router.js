@@ -7,6 +7,7 @@
 // modules, so both rails run identical handler code.
 
 export const ROUTES = {
+  'owner-review-artifacts': () => import('../api-handlers/owner-review-artifacts.js'),
   'acquisition/thumbtack-spend-decision': () => import('../api-handlers/acquisition/thumbtack-spend-decision.js'),
   'acquisition/thumbtack-spend-recommendation': () => import('../api-handlers/acquisition/thumbtack-spend-recommendation.js'),
   'appointment-response': () => import('../api-handlers/appointment-response.js'),
