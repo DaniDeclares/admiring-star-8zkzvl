@@ -10,6 +10,9 @@ const setup=(override={})=>{
       objective:'Verify an existing product',expectedOutcome:'usable file',modelInferenceApproved:true,modelContextSanitized:true,modelApprovalRef:'approved-fixture',
       scope:{businessDomain:true,allowedSteps:['Inspect existing file']},
       routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT'}}),
+    recoverContext:async()=>({assignmentId:input.assignmentId,authorityRef:input.authorityRef,
+      sourceRevision:'r1',currentVerified:true,contradictionUnresolved:false,
+      evidenceRefs:['ASANA:task-1:revision-r1'],sanitizedContext:'Already-approved synthetic scope'}),
     routeModel:async()=>({workerId:'file-qa',step:'Inspect existing file'}),
     listVerifiedWorkers:async()=>[{id:'file-qa',verified:true,authorized:true}],
     claim:async()=>{calls.push('claim');return {claimed:true,claimRef:'claim-1'}},
@@ -40,6 +43,24 @@ test('model proposals cannot change authorization; gated actions are held',async
   assert.deepEqual(h.calls,[]);
   h=setup({recover:async()=>({...input,status:'READY',approved:true,routingFacts:{actions:['PRODUCTION_MUTATION']}})});
   assert.equal((await executeAssignedStep(input,h.adapters)).reason,'GOVERNED_REVIEW_REQUIRED');
+  assert.deepEqual(h.calls,[]);
+});
+test('fresh context pickup fails closed before any model call',async()=>{
+  let modelCalls=0;
+  const h=setup({recoverContext:async()=>({
+    assignmentId:input.assignmentId,authorityRef:input.authorityRef,
+    sourceRevision:'stale',currentVerified:true,evidenceRefs:['stale-record']
+  }),routeModel:async()=>{modelCalls++;return {workerId:'file-qa',step:'Inspect existing file'}}});
+  assert.equal((await executeAssignedStep(input,h.adapters)).reason,'CONTEXT_PICKUP_UNVERIFIED');
+  assert.equal(modelCalls,0);
+  assert.deepEqual(h.calls,[]);
+});
+test('missing authoritative context does not become a guessed model prompt',async()=>{
+  let modelCalls=0;
+  const h=setup({recoverContext:async()=>{throw new Error('authority unavailable')},
+    routeModel:async()=>{modelCalls++;return {workerId:'file-qa',step:'Inspect existing file'}}});
+  assert.equal((await executeAssignedStep(input,h.adapters)).reason,'CONTEXT_PICKUP_UNAVAILABLE');
+  assert.equal(modelCalls,0);
   assert.deepEqual(h.calls,[]);
 });
 test('external inference requires explicit approval and sanitized context',async()=>{
