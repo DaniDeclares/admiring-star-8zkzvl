@@ -32,6 +32,10 @@ export async function executeAssignedStep(input, adapters) {
     context:current.modelContext||null,workerIds:workers.map(w=>w.id)
   });
   if (!hasText(proposal?.workerId)||!hasText(proposal?.step)) return held('MODEL_PROPOSAL_INVALID');
+  // The model must choose from explicitly approved steps, not invent actions.
+  const allowedSteps=current.scope?.allowedSteps;
+  if (!Array.isArray(allowedSteps)||!allowedSteps.includes(proposal.step))
+    return held('STEP_NOT_IN_APPROVED_SCOPE');
   if (!workers.some(w=>w.id===proposal.workerId)) return held('UNAUTHORIZED_WORKER');
   if (proposal.actions?.length || proposal.changeAuthority || proposal.allowNetwork===true)
     return held('MODEL_PROPOSED_AUTHORITY_CHANGE');
