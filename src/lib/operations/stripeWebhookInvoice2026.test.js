@@ -87,3 +87,19 @@ test('underpaid business invoice fails reconciliation so Stripe retries and noth
   expect(tx.dd_jobs.create).not.toHaveBeenCalled();
   expect(tx.paymentInsert).toBeUndefined();
 });
+
+test('checkout replay lookup is serialized by the request-level transaction lock', () => {
+  // Structural guard only; this does not demonstrate concurrent PostgreSQL persistence.
+  const { readFileSync } = require('node:fs');
+  const { resolve } = require('node:path');
+  const source = readFileSync(resolve(__dirname, '../../../api-handlers/stripe-webhook.js'), 'utf8');
+  const checkout = source.split("if(event.type!=='checkout.session.completed')")[1];
+  expect(checkout).toBeDefined();
+  const transaction = checkout.split('const result=await prisma.$transaction(async tx=>{')[1];
+  expect(transaction).toBeDefined();
+  const lock = transaction.indexOf('pg_advisory_xact_lock(hashtextextended(${requestId}, 0))');
+  const replay = transaction.indexOf('where provider_event_id=${event.id} limit 1');
+  expect(lock).toBeGreaterThanOrEqual(0);
+  expect(replay).toBeGreaterThan(lock);
+  expect(transaction.indexOf('reconcileStripePayment(event,tx)')).toBeGreaterThan(replay);
+});
