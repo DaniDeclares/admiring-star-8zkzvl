@@ -101,3 +101,18 @@ This rule applies going forward. Personal or family data already in the Brain is
 ## 6. What this contract does not do
 
 No schema change, no new worker, no new orchestration or memory tool (consistent with the capability evaluation Danielle accepted 2026-10-02). Revenue work comes first; this contract exists so new AI features are adopted by evidence instead of by announcement.
+
+
+## 7. Owner-approved Grok role clarification (2026-10-31; proposed for merge)
+
+This section supersedes the **Grok assignment row in section 3** for current role routing once merged. It does not rewrite that row's October 2 historical evidence. External AI models remain resources, not the C-Team, Chief of Staff, Tech, or system-of-record owners.
+
+- **Grok is not the primary merchandise-artwork creator or an exclusive merchandise department owner.** Route work according to demonstrated access, capability, cost, quality, and existing assignment. Preserve the established merchandise/product owner and approval gates.
+- **Verified in the supplied Grok session (2026-10-30, self-reported tool receipts; independently recheck when needed):** bounded live Shopify product/status/price/attachment inspection, Notion checkpoint comparison, Gmail evidence review, catalog discrepancy reconciliation, and identification of a specific purchase-to-digital-delivery acceptance gap. These support Grok's work in commercial research, catalog truth, offer readiness, marketing research, and bounded customer-journey QA; they do not prove checkout, buyer receipt, revenue, or Production change authority.
+- **Research/X signal:** Grok may research current market, competitor, audience, and X-platform signals when relevant. The October 2 UNVERIFIED status for direct X capability remains until a DANI-account receipt proves access; marketing claims alone do not count.
+- **Visual production:** select an authorized creative specialist (including ChatGPT image generation, Canva, or Grok Imagine if a task-specific quality test supports it). Grok may brief and QA the creative work but should not force inferior artwork or claim print-ready production from a mockup. Preserve DANI's approved brand and owner creative decisions.
+- **Handoff:** use existing READ → WORK → SAVE → RETRIEVE → HANDOFF governance; do not claim a different AI received or executed a request without receiving-side evidence. No direct cross-AI invocation is assumed.
+- **Current bounded continuation:** retain the Grok investigation of Shopify purchase → digital-file delivery for Holiday Home Planner, 7-Day Home Reset, and Home Command Center. Attached PDFs were reported for these three products, but file correctness, automatic delivery, and buyer receipt remain unverified. Recover actual storefront binding, product/variant IDs, file promises/settings, previous test evidence, and existing QA owner before proposing the smallest authorized acceptance test. Do not repeat the broad catalog audit, create paid orders, alter attachments/prices, publish, or change Production without applicable approval.
+- **Ownership:** do not override existing Asana assignments, Notion decisions, C-Team campaign authority, storefront release owners, or another engineering worker's implementation. The role clarification is not a blanket grant to send, publish, spend, deploy, or change records.
+
+After merge, verify a genuinely fresh Grok session retrieves this exact GitHub revision and applies it; a PR or a pasted prompt alone is not receiving-side adoption. Until merge, this is a review candidate, not main authority.
