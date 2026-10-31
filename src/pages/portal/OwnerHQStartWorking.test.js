@@ -11,7 +11,7 @@ test('routes owner work through existing sales, operations, and attention surfac
   const html = render(7);
   expect(html).toContain('Start here');
   expect(html).toContain('Move today&#x27;s work forward');
-  expect(html).toContain('href="/portal/acquisition"');
+  expect(html).toContain('href="/portal/operations?sales=1"');
   expect(html).toContain('Review sales actions (7 due)');
   expect(html).toContain('href="/portal/operations"');
   expect(html).toContain('Jobs &amp; operations');
