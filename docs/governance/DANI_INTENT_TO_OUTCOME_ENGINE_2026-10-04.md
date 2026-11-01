@@ -171,3 +171,48 @@ A separate product boundary becomes appropriate only after repeated DANI use dem
 ## 13. Current proving workload
 
 The current social/referral/provider acquisition work is an active proving workload for this engine. Its outcome is not "referral code deployed." The outcome is a measured acquisition path from social/referral CTA through attributed customer/provider conversion and downstream commercial evidence. Continue that work under this contract rather than pausing it to build a demo of the engine.
+
+## 14. Evidence-Backed Execution
+
+This section clarifies the existing intent-to-outcome contract. It creates no new state machine, runtime authority, worker, database, or approval.
+
+### Actions and outcomes
+
+Record preparation, action execution, intended outcome, fulfillment, and financial availability as distinct facts using existing domain records and outcome states. A completed action remains completed even when its downstream outcome is pending, failed, or legitimately held.
+
+- Draft prepared != message sent; sent != delivered, read, answered, or sold.
+- Prospect contacted != qualified opportunity.
+- Quote accepted != customer payment collected.
+- Payment successful != settled or currently accessible funds.
+- Collected revenue != profit; profit != owner-available cash.
+- Provider information collected != authorized, assignment-ready provider.
+- Code committed != merged; merged != deployed; deployed != verified in use.
+- Automation completed != its intended downstream outcome achieved.
+- Learning evidence stored != Baby/DANI retrieved or applied that evidence.
+- Calendar entry created != permission, childcare, or appointment confirmed.
+
+### Timing and assignment evidence
+
+Classify timing as contractual deadline, external deadline, proposed internal target, flexible timing, or no deadline established. Preserve the source, date, time, and timezone when relevant. Calculate event-relative requirements, including "48 hours before," against the verified event time and timezone. Never invent a deadline or invalidate long-term aspirations and personal activities for lacking one.
+
+For substantial assignments, make the intended outcome, timing source, next authorized action, responsible worker, action status, outcome status, evidence reference/date, exact blocker, and any owner decision retrievable through existing records. Do not migrate schemas merely to add these labels.
+
+### Evidence, uncertainty, and account coverage
+
+Classify material findings as directly inspected, user-reported, supplied investigation finding, historically documented, proposed, or unknown. Preserve source/record identifiers, source date, verification date, what is established, and material limitations. Workers must distinguish their own inspections from another worker's reports; never reuse unsupported citation identifiers.
+
+A later incomplete search does not erase an earlier retrieved record. Reconcile conflicting findings against source evidence and chronology. For relevant authorized accounts, identify every account searched, associate findings with their originating account, follow material pagination or disclose limits, and do not claim exhaustive coverage from a bounded search. Deduplicate by account, transaction/invoice, and billing period, not service name alone. Later successful payments may resolve earlier failures; repeated notices may concern one debt; separate accounts may have separate subscriptions.
+
+### Financial availability
+
+Before asserting owner-available cash, reconcile successful customer receipts; settlement, destination and access; processing fees; refunds, disputes, restrictions and holds; outstanding fulfillment, provider and other commitments; and payments already made to the owner. Preserve business-versus-personal authority and applicable accounting classification. Unknown is not zero. Failed charges are not withdrawals. Internal transfers are not automatically earned income. Historical balances are not current cash; predicted bills are not confirmed amounts due. Do not infer profit or owner-available funds from a successful deposit alone.
+
+### Component identity and owner capacity
+
+Tester Brain feeds Baby/DANI through governed learning evidence. Tester Brain and Baby/DANI are separate components. Baby is the earlier name for the learning AI Danielle now calls DANI. Preserve the distinct identities and authorities of Tester Brain, Baby/DANI, Production operations, Owner HQ, Chief of Staff, Personal Assistant, and external AI workers/models. Historical implementation mappings do not establish component identity or prove a separate Baby/DANI runtime or Owner HQ integration is live.
+
+Commercial work must respect verified owner availability, childcare, education, family commitments, legal and contractual duties, safety, security, privacy, and protected personal time. An empty calendar does not prove availability. Noncommercial responsibilities remain legitimate priorities. Rest, nature, plants, craft, reflection, and personal practices are not mandatory productivity assignments. Keep sensitive family details out of shared engineering policy.
+
+### Adoption and truthful completion
+
+Report separately: policy prepared, committed, PR opened, merged, worker retrieval tested, and runtime behavior verified. Publishing documentation does not establish that ChatGPT, Claude, Codex, Grok, Perplexity, or Baby/DANI retrieved or applied it. Verify each supported retrieval path independently before claiming adoption. All existing owner approvals, privacy boundaries, release gates, and rollback requirements remain in force.
