@@ -1,3 +1,4 @@
+import { getProviderReferralSnapshot } from '../src/lib/operations/providerReferralSnapshot2026.js';
 import { authenticatePortalRequest, requireRole } from './_portalAuth.js';
 import { getWorkClockSnapshot, applyWorkClockAction } from '../src/lib/operations/workClock2026.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
@@ -471,7 +472,8 @@ async function getProviderSnapshot(supabase, providerId, userId, userSupabase = 
     if (directSnapshot) applicationSnapshot = directSnapshot;
   }
   const w9 = await getW9Status(supabase, userId);
-  applicationSnapshot = { ...applicationSnapshot, w9, w9SubmissionAvailable: isW9EncryptionConfigured() };
+  const referral = await getProviderReferralSnapshot(supabase, providerId);
+  applicationSnapshot = { ...applicationSnapshot, w9, w9SubmissionAvailable: isW9EncryptionConfigured(), referral };
   if (!providerId) return { ...applicationSnapshot, assignments: [], quoteAssignments: [], tasks: [], evidence: [], appointments: [], financials: { earnings: [], payables: [], payouts: [] }, payouts: [], messages: [] };
 
   // Financials are read through the provider-bound projection. The Worker App
