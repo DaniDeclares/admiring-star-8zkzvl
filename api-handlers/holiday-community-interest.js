@@ -55,5 +55,5 @@ export async function handleHolidayCommunityInterest(req, res, { adminClient=def
     metadata:{ role:record.role, area:record.area, source:record.source, attribution:record.attribution },
   });
   if(attention.error) console.error('Holiday community owner attention enqueue failed',attention.error.code);
-  return res.status(200).json({ success:true, inquiryId:inserted.data.id });
+  return res.status(200).json({ success:true }); // Same public success shape for new and repeat submissions.
 }
