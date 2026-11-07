@@ -30,7 +30,7 @@ export default function ConnectPage() {
     <section className="bg-[#551524] text-white">
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 md:py-24">
         <p className="uppercase tracking-[.19em] text-[#eacb8b] text-xs font-black">DANI DECLARES LLC • WE HANDLE THE EXECUTION</p>
-        <h1 className="mt-5 max-w-4xl text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">What brings you to DANI?</h1>
+        <h1 style={{ color: "#FFFFFF" }} className="mt-5 max-w-4xl text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">What brings you to DANI?</h1>
         <p className="mt-5 text-lg text-[#f7eced] max-w-3xl">Looking for work handled, a way to help families this holiday season, or an opportunity to build with us? Choose your starting point. We’ll keep the right request in the right workflow.</p>
       </div>
     </section>
