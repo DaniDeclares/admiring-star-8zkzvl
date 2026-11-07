@@ -44,7 +44,7 @@ export default function HolidayCommunityPage() {
     <section className="bg-[#551524] text-white"><div className="max-w-3xl mx-auto px-5 py-14">
       <Link to="/connect" className="text-[#f1dba8] underline">All ways to connect</Link>
       <p className="mt-5 tracking-widest uppercase text-[#e6c67f] text-sm font-bold">DANI DECLARES • HOLIDAY 2026</p>
-      <h1 className="mt-3 text-4xl md:text-5xl font-bold">Community Support & Opportunity</h1>
+      <h1 style={{ color: "#FFFFFF" }} className="mt-3 text-4xl md:text-5xl font-bold">Community Support & Opportunity</h1>
       <p className="mt-4 leading-7 text-[#f5e7ea]">Help us understand local needs and offers of practical assistance for families experiencing homelessness, housing instability, or transitions to stable housing.</p>
     </div></section>
     <section className="max-w-3xl mx-auto px-5 py-12">
