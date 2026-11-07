@@ -16,7 +16,20 @@ function fixture({replay=false,renewal=false,paidInvoice=invoice}={}){
  return {db,tx,writes,event:{id:'evt_1',type:'invoice.paid',data:{object:paidInvoice}},sub:{id:'sub_1',stripe_subscription_id:'sub_stripe',service_request_id:'request_1',estimate_id:'estimate_1',canonical_sku:'DNI-04A-020'}};
 }
 test('wrong amount fails before payment verification, job or allowance creation',async()=>{const f=fixture({paidInvoice:{...invoice,amount_paid:1}});await expect(reconcileRecurringInvoice(f.db,f.event,f.sub,jest.fn())).rejects.toThrow();expect(f.tx.dd_jobs.create).not.toHaveBeenCalled();expect(f.writes.some(s=>s.includes('first_payment_verified_at'))).toBe(false)});
-test('first paid cycle uses existing assignment gate and records verified payment afterwards',async()=>{const f=fixture();const routes=jest.fn();const result=await reconcileRecurringInvoice(f.db,f.event,f.sub,routes);expect(result.jobId).toBe('job_1');expect(f.tx.$queryRaw.mock.calls.some(([s])=>s.join('').includes('dd_activate_paid_estimate_assignments'))).toBe(true);expect(routes).toHaveBeenCalledWith(f.db,'estimate_1')});
+test('first paid cycle uses existing assignment gate and records verified payment afterwards', async () => {
+  jest.useFakeTimers('modern');
+  jest.setSystemTime(new Date('2026-10-15T12:00:00Z'));
+  try {
+    const f = fixture();
+    const routes = jest.fn();
+    const result = await reconcileRecurringInvoice(f.db, f.event, f.sub, routes);
+    expect(result.jobId).toBe('job_1');
+    expect(f.tx.$queryRaw.mock.calls.some(([s]) => s.join('').includes('dd_activate_paid_estimate_assignments'))).toBe(true);
+    expect(routes).toHaveBeenCalledWith(f.db, 'estimate_1');
+  } finally {
+    jest.useRealTimers();
+  }
+});
 test('renewal is recorded as paid but does not reuse old assignment/economics authority',async()=>{const f=fixture({renewal:true});const result=await reconcileRecurringInvoice(f.db,f.event,f.sub,jest.fn());expect(result.fulfillmentStatus).toBe('REVIEW_REQUIRED');expect(f.tx.dd_jobs.create).not.toHaveBeenCalled();expect(f.tx.$queryRaw.mock.calls.some(([s])=>s.join('').includes('dd_activate_paid_estimate_assignments'))).toBe(false);expect(f.writes.some(s=>s.includes('dd_payment_events'))).toBe(true)});
 test('redelivery of an invoice cannot duplicate a cycle, job or payment',async()=>{const f=fixture({replay:true});expect(await reconcileRecurringInvoice(f.db,f.event,f.sub,jest.fn())).toEqual({replay:true});expect(f.tx.dd_jobs.create).not.toHaveBeenCalled();expect(f.writes).toHaveLength(1)});
 
