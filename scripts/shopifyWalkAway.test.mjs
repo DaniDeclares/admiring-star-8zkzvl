@@ -8,6 +8,6 @@ test('existing merch shop linked in desktop and mobile nav',()=>{
 test('shop has a real existing route and outage fallback',()=>{
  const app=readFileSync(new URL('../src/App.js',import.meta.url),'utf8');
  assert.match(app,/path="\/shop"/);
- assert.match(shop,/catalogAvailable/);
- assert.match(shop,/Live catalog pricing is temporarily unavailable/);
+ assert.match(shop,/\{error && <div role="alert"[^>]*>The live product catalog could not be loaded\./);
+ assert.match(shop,/<a[^>]*href=\{STORE\}[^>]*>Open our Shopify store<\/a>/);
 });
