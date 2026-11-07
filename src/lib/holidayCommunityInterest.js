@@ -24,6 +24,7 @@ export function normalizeHolidayInterest(body = {}, now = new Date()) {
   const email = clean(body.email, 254).toLowerCase();
   const phone = clean(body.phone, 40);
   const city = clean(body.city, 100);
+  const organization = clean(body.organization, 150);
   const role = String(body.role || '');
   const area = String(body.area || '');
   const note = clean(body.note, 600);
@@ -43,7 +44,7 @@ export function normalizeHolidayInterest(body = {}, now = new Date()) {
   attribution.landing_path = '/holiday/community';
   if (errors.length) return { ok: false, errors };
   return { ok: true, errors: [], record: {
-    name, email, phone: phone || null, city, role, area,
+    name, email, phone: phone || null, city, organization: organization || null, role, area,
     note: note || null, attribution, status: 'NEW',
     contact_consent: true, consent_at: now.toISOString(),
     consent_text: HOLIDAY_CONTACT_CONSENT,
