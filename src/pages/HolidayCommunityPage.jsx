@@ -8,7 +8,7 @@ export default function HolidayCommunityPage() {
   const { search } = useLocation();
   const fromUrl = new URLSearchParams(search).get('role');
   const defaultRole = HOLIDAY_INTEREST_ROLES[fromUrl] ? fromUrl : '';
-  const [form, setForm] = useState({ role:defaultRole, area:'', name:'', email:'', phone:'', city:'', note:'', contactConsent:false, website:'' });
+  const [form, setForm] = useState({ role:defaultRole, area:'', name:'', email:'', phone:'', city:'', organization:'', note:'', contactConsent:false, website:'' });
   const [state, setState] = useState({ saving:false, error:'', done:false, id:null });
   const attribution = useMemo(() => {
     const params = new URLSearchParams(search), out = {};
@@ -72,6 +72,7 @@ export default function HolidayCommunityPage() {
           <div><label htmlFor="holiday-phone" className={label}>Phone (optional)</label><input id="holiday-phone" type="tel" className={field} maxLength={40} autoComplete="tel" value={form.phone} onChange={e=>set('phone',e.target.value)}/></div>
           <div><label htmlFor="holiday-city" className={label}>City or general area *</label><input id="holiday-city" className={field} required maxLength={100} placeholder="e.g. Stone Mountain, GA" value={form.city} onChange={e=>set('city',e.target.value)}/></div>
         </div>
+        <div><label htmlFor="holiday-organization" className={label}>Business or organization (optional)</label><input id="holiday-organization" className={field} maxLength={150} value={form.organization} onChange={e=>set('organization',e.target.value)} placeholder="Business, sponsor, nonprofit or group name"/></div>
         <div><label htmlFor="holiday-note" className={label}>Brief description (optional)</label>
           <textarea id="holiday-note" className={field} rows={3} maxLength={600} value={form.note} onChange={e=>set('note',e.target.value)} placeholder="Only general information about the assistance needed or resources you can offer. No private family details."/></div>
         <label className="flex items-start gap-3 text-sm leading-6"><input type="checkbox" required checked={form.contactConsent} onChange={e=>set('contactConsent',e.target.checked)} className="mt-1"/><span>{HOLIDAY_CONTACT_CONSENT}</span></label>
