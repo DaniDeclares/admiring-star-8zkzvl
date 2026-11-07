@@ -12,6 +12,12 @@ test('family intake preserves source without requiring a street address or house
  expect(result.record).not.toHaveProperty('service_id');
  expect(result.record).not.toHaveProperty('locationAddress');
 });
+test('business sponsor can identify its organization without becoming a commercial lead',()=>{
+ const result=normalizeHolidayInterest({...valid,role:'SPONSOR',organization:'Local Housing Partner LLC'});
+ expect(result.ok).toBe(true);
+ expect(result.record.organization).toBe('Local Housing Partner LLC');
+ expect(result.record.source).toBe('WEBSITE_HOLIDAY_2026');
+});
 test('consent and valid declared role are mandatory',()=>{
  expect(normalizeHolidayInterest({...valid,contactConsent:false}).errors).toContain('CONSENT_REQUIRED');
  expect(normalizeHolidayInterest({...valid,role:'APPROVED_PROVIDER'}).errors).toContain('ROLE_INVALID');
