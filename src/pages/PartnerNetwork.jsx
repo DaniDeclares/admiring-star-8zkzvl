@@ -30,7 +30,9 @@ export default function PartnerNetwork() {
   const attribution = useMemo(() => attributionFrom(location.search, location.pathname), [location.search, location.pathname]);
   const requestedParticipation = new URLSearchParams(location.search).get("participation");
   const preselectedParticipation = PARTICIPATION_INTERESTS[requestedParticipation] ? requestedParticipation : "";
-  const [form, setForm] = useState({ name: "", email: "", phone: "", participationInterest: preselectedParticipation, interestAreas: [], skillsAndEquipment: "", locationArea: "", message: "", contactConsent: false, website: "" });
+  const focus = new URLSearchParams(location.search).get("focus");
+  const preselectedMessage = focus === "referrals" ? "I would like to discuss business referrals or reciprocal lead introductions. Please share how your referral relationships work." : focus === "partnership" ? "I would like to explore a business partnership or collaboration with DANI DECLARES." : "";
+  const [form, setForm] = useState({ name: "", email: "", phone: "", participationInterest: preselectedParticipation, interestAreas: [], skillsAndEquipment: "", locationArea: "", message: preselectedMessage, contactConsent: false, website: "" });
   const [state, setState] = useState({ loading: false, error: "", done: null });
 
   const set = (key, value) => setForm(current => ({ ...current, [key]: value }));
