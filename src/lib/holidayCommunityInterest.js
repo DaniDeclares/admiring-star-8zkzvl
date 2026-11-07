@@ -15,7 +15,7 @@ export const HOLIDAY_INTEREST_AREAS = Object.freeze({
   OTHER: 'Other practical support',
 });
 export const HOLIDAY_CONTACT_CONSENT = 'I agree that DANI DECLARES may contact me about this Holiday 2026 community inquiry. Submitting does not guarantee assistance, partnership, or work. My information is not permission for marketing.';
-const clean = (v, len) => String(v ?? '').replace(/[\x00-\x1f\x7f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, len);
+const clean = (v, len) => Array.from(String(v ?? ''), ch => { const code = ch.charCodeAt(0); return code < 32 || code === 127 ? ' ' : ch; }).join('').replace(/\s+/g, ' ').trim().slice(0, len);
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 const ATTRIBUTION_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'];
 export function normalizeHolidayInterest(body = {}, now = new Date()) {
