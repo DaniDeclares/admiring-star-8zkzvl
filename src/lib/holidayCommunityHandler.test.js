@@ -41,7 +41,7 @@ describe('Holiday 2026 community intake privacy and routing',()=>{
  test('persists in community table and queues existing owner attention, not sales or provider paths',async()=>{
   const {res,writes}=await run(valid());
   expect(res.statusCode).toBe(200);
-  expect(res.body).toEqual({success:true,inquiryId:'new-private-id'});
+  expect(res.body).toEqual({success:true});
   expect(writes.map(w=>w.table)).toEqual(['dd_holiday_community_interests','dd_owner_attention_queue']);
   expect(writes[0].row).toEqual(expect.objectContaining({role:'FAMILY_SUPPORT',source:'WEBSITE_HOLIDAY_2026',contact_consent:true}));
   expect(writes[0].row).not.toHaveProperty('locationAddress');
