@@ -9,7 +9,7 @@ export default function HolidayCommunityPage() {
   const fromUrl = new URLSearchParams(search).get('role');
   const defaultRole = HOLIDAY_INTEREST_ROLES[fromUrl] ? fromUrl : '';
   const [form, setForm] = useState({ role:defaultRole, area:'', name:'', email:'', phone:'', city:'', note:'', contactConsent:false, website:'' });
-  const [state, setState] = useState({ saving:false, error:'', id:null });
+  const [state, setState] = useState({ saving:false, error:'', done:false, id:null });
   const attribution = useMemo(() => {
     const params = new URLSearchParams(search), out = {};
     for (const key of attrKeys) if (params.get(key)) out[key] = params.get(key).slice(0,120);
@@ -20,7 +20,7 @@ export default function HolidayCommunityPage() {
   async function submit(event) {
     event.preventDefault();
     if (state.saving) return;
-    setState({ saving:true, error:'', id:null });
+    setState({ saving:true, error:'', done:false, id:null });
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 20000);
     try {
@@ -30,9 +30,9 @@ export default function HolidayCommunityPage() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.success) throw new Error(data.error || 'Your interest was not saved.');
-      setState({ saving:false, error:'', id:data.inquiryId });
+      setState({ saving:false, error:'', done:true, id:data.inquiryId || null });
     } catch (err) {
-      setState({ saving:false, id:null, error:err.name === 'AbortError'
+      setState({ saving:false, done:false, id:null, error:err.name === 'AbortError'
         ? 'We could not confirm your submission. Please try again.'
         : (err.message || 'Your interest was not saved. Please try again.') });
     } finally { window.clearTimeout(timer); }
@@ -49,10 +49,10 @@ export default function HolidayCommunityPage() {
     </div></section>
     <section className="max-w-3xl mx-auto px-5 py-12">
       <div className="rounded-2xl border border-[#d7b980] bg-[#fff7e8] p-5 mb-7 text-sm leading-7">Interest registration only. We cannot promise assistance, volunteer placement, sponsorship acceptance, or tax-deductibility. Do not include children’s names, personal addresses, medical details, or documents. No purchase is required.</div>
-      {state.id ? <div role="status" className="rounded-2xl border border-green-300 bg-white p-8">
+      {state.done ? <div role="status" className="rounded-2xl border border-green-300 bg-white p-8">
         <h2 className="text-2xl font-bold">Your interest was received.</h2>
         <p className="mt-3">This is an acknowledgment of interest, not an eligibility decision or confirmed commitment. Keep your reference number for follow-up.</p>
-        <p className="mt-3 font-bold break-all">Reference: {state.id}</p>
+        {state.id && <p className="mt-3 font-bold break-all">Reference: {state.id}</p>}
         <Link className="inline-block mt-6 underline text-[#6b1f2b]" to="/connect">Explore other ways to connect</Link>
       </div> : <form onSubmit={submit} className="bg-white border border-[#e5d6bf] rounded-2xl shadow-sm p-6 sm:p-9 space-y-5">
         <h2 className="text-2xl font-bold text-[#5b1624]">Register your interest</h2>
