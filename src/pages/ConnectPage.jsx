@@ -10,7 +10,8 @@ const PATHS = [
   { title: 'Volunteer skills or time', detail: 'Offer time, professional skills, coordination help or services toward our developing community mission.', path: '/holiday/community', button: 'Volunteer interest', role: 'VOLUNTEER' },
   { title: 'Refer clients or exchange leads', detail: 'Connect about reciprocal referrals and introductions. Any paid referral terms require separate agreement; no commission is promised here.', path: '/partner-network', button: 'Discuss referrals', participation: 'BUSINESS_PARTNER', focus: 'referrals' },
   { title: 'Become a business partner', detail: 'Explore collaboration, subcontracting, property relationships or joint opportunities with DANI.', path: '/partner-network', button: 'Explore partnership', participation: 'BUSINESS_PARTNER', focus: 'partnership' },
-  { title: 'Vendor or product supplier', detail: 'Introduce your products, supplies, creative work or business capabilities for consideration.', path: '/partner-network', button: 'Introduce your business', participation: 'MAKER_CREATOR' },
+  { title: 'Vendor or supplier', detail: 'Introduce your company, available products, supplies or subcontractable business services for consideration.', path: '/partner-network', button: 'Introduce vendor capabilities', participation: 'BUSINESS_PARTNER', focus: 'vendor' },
+  { title: 'Maker or creative partner', detail: 'Show us your printing, merchandise, marketing, production or other creative capabilities.', path: '/partner-network', button: 'Share creative capabilities', participation: 'MAKER_CREATOR' },
   { title: 'Independent service provider', detail: 'Apply through the existing provider system. Agreement, W-9, qualifications and authorization determine work eligibility.', path: '/providers', button: 'Start provider application', provider: true },
 ];
 const ATTR = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'];
