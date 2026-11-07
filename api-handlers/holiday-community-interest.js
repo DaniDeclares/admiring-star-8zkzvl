@@ -41,7 +41,7 @@ export async function handleHolidayCommunityInterest(req, res, { adminClient=def
     .eq('email',record.email).eq('role',record.role).gte('created_at',yesterday)
     .order('created_at',{ascending:false}).limit(1);
   if(previous.error) return res.status(503).json({ error:'Online registration is unavailable. Please try again later.' });
-  if(previous.data?.length) return res.status(200).json({ success:true, duplicate:true, inquiryId:previous.data[0].id });
+  if(previous.data?.length) return res.status(200).json({ success:true }); // No record ID or existence signal for public email probing.
   const inserted = await admin.from('dd_holiday_community_interests').insert(record).select('id').single();
   if(inserted.error) { console.error('Holiday community interest persistence failed',inserted.error.code); return res.status(503).json({ error:'Your interest could not be saved. Please try again later.' }); }
   // Fail-safe owner receipt: failure is logged but never represented as delivered.
