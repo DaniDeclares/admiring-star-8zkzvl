@@ -9,6 +9,7 @@ create table if not exists public.dd_holiday_community_interests (
   email text not null,
   phone text,
   city text not null,
+  organization text,
   area text not null check(area in ('HOUSING_TRANSITION','HOUSEHOLD_ITEMS','MOVING_LOGISTICS','SERVICES','REFERRALS','OTHER')),
   note text,
   status text not null default 'NEW' check(status in ('NEW','IN_REVIEW','FOLLOWUP','CLOSED')),
