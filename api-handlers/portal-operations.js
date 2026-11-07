@@ -622,7 +622,16 @@ export default async function handler(req, res) {
         if (governedPackagesResult.error) throw governedPackagesResult.error;
         const providers=(providersResult.data||[]).filter(p=>p.dd_provider_organizations?.is_active&&p.dd_provider_organizations?.accepts_new_work);
         const governedPackages=(governedPackagesResult.data||[]).map(p=>({id:p.id,package_code:p.package_code,package_name:p.package_name,division:p.division,commercial_offer_status:p.commercial_offer_status,package_price_cents:p.package_price_cents,pricing_type:p.pricing_type,components:(p.dd_governed_package_components||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))}));
-        return ok(res,{role:context.role,ownerUserId:context.user.id,packageComponents:componentsResult.data||[],providers,governedPackages});
+        // Existing authenticated staff-only quoteEconomics pathway. Never return release reasons publicly.
+        // Only request verified status for the required SKUs in the existing governed package collection.
+        const requiredSkus=[...new Set(governedPackages.flatMap(pkg=>pkg.components.filter(c=>c.is_required).map(c=>c.canonical_sku)))];
+        const releaseResult=requiredSkus.length
+          ? await context.supabase.from('dd_service_release_contract_v1')
+              .select('canonical_sku,service_name,release_state,blocking_gate')
+              .in('canonical_sku',requiredSkus)
+          : {data:[],error:null};
+        if(releaseResult.error) throw releaseResult.error; // Fail closed on verification failure.
+        return ok(res,{role:context.role,ownerUserId:context.user.id,packageComponents:componentsResult.data||[],providers,governedPackages,releaseStatuses:releaseResult.data||[]});
       }
       if (req.query?.clientOrganizations === '1') {
         const { data: organizations, error } = await context.supabase.from('dd_client_organizations')
