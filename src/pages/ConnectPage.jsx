@@ -7,7 +7,8 @@ const PATHS = [
   { title: 'Family holiday support', detail: 'Express private interest in our developing Holiday 2026 mission for families navigating housing instability or transition.', path: '/holiday/community', button: 'Register family interest', role: 'FAMILY_SUPPORT' },
   { title: 'Help the holiday mission', detail: 'Businesses, organizations and individuals: offer supplies, services, volunteer time or connections. No purchase required.', path: '/holiday/community', button: 'Offer community support', role: 'SPONSOR' },
   { title: 'Community organization', detail: 'Connect with DANI about community needs, resource partners and appropriate assistance pathways.', path: '/holiday/community', button: 'Connect an organization', role: 'COMMUNITY_ORG' },
-  { title: 'Referral or business partner', detail: 'Explore business referrals, collaboration and partnership. An inquiry does not create a commission agreement.', path: '/partner-network', button: 'Explore partnership', participation: 'BUSINESS_PARTNER' },
+  { title: 'Refer clients or exchange leads', detail: 'Connect about reciprocal referrals and introductions. Any paid referral terms require separate agreement; no commission is promised here.', path: '/partner-network', button: 'Discuss referrals', participation: 'BUSINESS_PARTNER', focus: 'referrals' },
+  { title: 'Become a business partner', detail: 'Explore collaboration, subcontracting, property relationships or joint opportunities with DANI.', path: '/partner-network', button: 'Explore partnership', participation: 'BUSINESS_PARTNER', focus: 'partnership' },
   { title: 'Vendor or product supplier', detail: 'Introduce your products, supplies, creative work or business capabilities for consideration.', path: '/partner-network', button: 'Introduce your business', participation: 'MAKER_CREATOR' },
   { title: 'Independent service provider', detail: 'Apply through the existing provider system. Agreement, W-9, qualifications and authorization determine work eligibility.', path: '/providers', button: 'Start provider application', provider: true },
 ];
@@ -37,7 +38,7 @@ export default function ConnectPage() {
           <h2 className="text-2xl font-bold text-[#611c2c]">{item.title}</h2>
           <p className="my-4 text-[#64565a] leading-7 flex-1">{item.detail}</p>
           <Link className="inline-flex justify-center rounded-xl bg-[#6b1f2b] px-5 py-3.5 text-white font-bold hover:bg-[#4d1220] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]"
-            to={destinationFor(item.path, search, { role:item.role, participation:item.participation, ...(item.provider ? { audience:'provider' } : {}) })}>{item.button} →</Link>
+            to={destinationFor(item.path, search, { role:item.role, participation:item.participation, focus:item.focus, ...(item.provider ? { audience:'provider' } : {}) })}>{item.button} →</Link>
         </article>)}
       </div>
       <div className="mt-10 rounded-2xl border border-[#d7b980] bg-[#fff7e8] p-6 text-sm leading-7 text-[#66505a]">
