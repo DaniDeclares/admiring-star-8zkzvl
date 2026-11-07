@@ -28,7 +28,9 @@ function attributionFrom(search, pathname) {
 export default function PartnerNetwork() {
   const location = useLocation();
   const attribution = useMemo(() => attributionFrom(location.search, location.pathname), [location.search, location.pathname]);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", participationInterest: "", interestAreas: [], skillsAndEquipment: "", locationArea: "", message: "", contactConsent: false, website: "" });
+  const requestedParticipation = new URLSearchParams(location.search).get("participation");
+  const preselectedParticipation = PARTICIPATION_INTERESTS[requestedParticipation] ? requestedParticipation : "";
+  const [form, setForm] = useState({ name: "", email: "", phone: "", participationInterest: preselectedParticipation, interestAreas: [], skillsAndEquipment: "", locationArea: "", message: "", contactConsent: false, website: "" });
   const [state, setState] = useState({ loading: false, error: "", done: null });
 
   const set = (key, value) => setForm(current => ({ ...current, [key]: value }));
