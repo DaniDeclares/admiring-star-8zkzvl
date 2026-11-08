@@ -25,25 +25,25 @@ export function destinationFor(path, search, extra = {}) {
 }
 export default function ConnectPage() {
   const { search } = useLocation();
-  return <main className="min-h-screen bg-[#fbf8f1] text-[#30191e]">
+  return <main className="min-h-screen bg-[var(--dd-ivory)] text-[color:var(--dd-ink)]">
     <Helmet><title>Get Connected | DANI DECLARES LLC</title><meta name="description" content="Request DANI services, register Holiday 2026 community interest, or explore provider, vendor and partnership opportunities through the right online form." /></Helmet>
-    <section className="bg-[#551524] text-white">
+    <section className="bg-[var(--dd-burgundy-deep)] text-white">
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 md:py-24">
-        <p className="uppercase tracking-[.19em] text-[#eacb8b] text-xs font-black">DANI DECLARES LLC • WE HANDLE THE EXECUTION</p>
-        <h1 style={{ color: "#FFFFFF" }} className="mt-5 max-w-4xl text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">What brings you to DANI?</h1>
-        <p className="mt-5 text-lg text-[#f7eced] max-w-3xl">Looking for work handled, a way to help families this holiday season, or an opportunity to build with us? Choose your starting point. We’ll keep the right request in the right workflow.</p>
+        <p className="uppercase tracking-[.19em] text-[color:var(--dd-gold-soft)] text-xs font-black">DANI DECLARES LLC • WE HANDLE THE EXECUTION</p>
+        <h1 style={{ color: "var(--dd-white)" }} className="mt-5 max-w-4xl text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">What brings you to DANI?</h1>
+        <p className="mt-5 text-lg text-[color:var(--dd-cream)] max-w-3xl">Looking for work handled, a way to help families this holiday season, or an opportunity to build with us? Choose your starting point. We’ll keep the right request in the right workflow.</p>
       </div>
     </section>
     <section className="max-w-6xl mx-auto px-5 sm:px-8 py-12" aria-label="Choose how to connect">
       <div className="grid gap-5 md:grid-cols-2">
-        {PATHS.map(item => <article key={item.title} className="rounded-[24px] border border-[#e3d5bb] bg-white shadow-sm p-7 flex flex-col">
-          <h2 className="text-2xl font-bold text-[#611c2c]">{item.title}</h2>
-          <p className="my-4 text-[#64565a] leading-7 flex-1">{item.detail}</p>
-          <Link className="inline-flex justify-center rounded-xl bg-[#6b1f2b] px-5 py-3.5 text-white font-bold hover:bg-[#4d1220] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]"
+        {PATHS.map(item => <article key={item.title} className="rounded-[24px] border border-[color:var(--dd-border-gold)] bg-[var(--dd-white)] shadow-sm p-7 flex flex-col">
+          <h2 className="text-2xl font-bold text-[color:var(--dd-burgundy-deep)]">{item.title}</h2>
+          <p className="my-4 text-[color:var(--dd-muted)] leading-7 flex-1">{item.detail}</p>
+          <Link className="inline-flex justify-center rounded-xl bg-[var(--dd-burgundy)] px-5 py-3.5 text-white font-bold hover:bg-[var(--dd-burgundy-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--dd-burgundy)]"
             to={destinationFor(item.path, search, { role:item.role, participation:item.participation, focus:item.focus, ...(item.provider ? { audience:'provider' } : {}) })}>{item.button} →</Link>
         </article>)}
       </div>
-      <div className="mt-10 rounded-2xl border border-[#d7b980] bg-[#fff7e8] p-6 text-sm leading-7 text-[#66505a]">
+      <div className="mt-10 rounded-2xl border border-[color:var(--dd-border-gold)] bg-[var(--dd-cream)] p-6 text-sm leading-7 text-[color:var(--dd-muted)]">
         <strong>Holiday 2026 mission:</strong> We are developing local partnerships and resource coordination for families experiencing homelessness or transitioning into stable housing. This is an interest registry, not an approved aid program or guarantee of resources. Family information is collected separately from commercial leads. Paid provider opportunities require their own application and approval.
       </div>
     </section>
