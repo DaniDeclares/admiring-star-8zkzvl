@@ -15,8 +15,9 @@ export default function HolidayCommunityPage() {
   const { search } = useLocation();
   const fromUrl = new URLSearchParams(search).get('role');
   const defaultRole = HOLIDAY_INTEREST_ROLES[fromUrl] ? fromUrl : '';
-  const showContributorInvitation = !fromUrl || fromUrl === 'SPONSOR' || fromUrl === 'VOLUNTEER';
+
   const [form, setForm] = useState({ role:defaultRole, area:'', name:'', email:'', phone:'', city:'', organization:'', note:'', contactConsent:false, website:'' });
+  const showContributorInvitation = !form.role || form.role === 'SPONSOR' || form.role === 'VOLUNTEER';
   const [state, setState] = useState({ saving:false, error:'', done:false, id:null });
   const attribution = useMemo(() => {
     const params = new URLSearchParams(search), out = {};
