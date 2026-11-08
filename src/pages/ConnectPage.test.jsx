@@ -91,13 +91,15 @@ test('Connect & Join reuses existing service photography and keeps Holiday artwo
   const expectedPhotos = [
     'pexels-pavel-danilyuk-7937330.jpg',
     'pexels-rdne-8293769.jpg',
-    'pexels-rdne-8581413.jpg',
     'pexels-pavel-danilyuk-7937734.jpg',
   ];
   expectedPhotos.forEach(photo => expect(html).toContain(photo));
   expect((html.match(/DANI_Holiday_Mission_Contributor_Flyer_2026_Approved.png/g) || [])).toHaveLength(1);
   expect(html).toContain('Holiday 2026');
-  expect(html).toContain('Supporting transitions into a home');
+  expect(html).not.toContain('Supporting transitions into a home');
+  expect(html).not.toContain('pexels-rdne-8581413.jpg');
+  expect(html).toContain('Ways you could contribute');
+  expect(html).toContain('Local businesses &amp; community partners wanted');
   expect(html).toContain('aria-labelledby="get-work-title"');
   expect(html).toContain('aria-labelledby="holiday-title"');
   expect(html).toContain('aria-labelledby="work-title"');

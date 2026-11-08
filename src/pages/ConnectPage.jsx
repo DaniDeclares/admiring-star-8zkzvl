@@ -98,29 +98,35 @@ export default function ConnectPage() {
     <section id="holiday-mission" aria-labelledby="holiday-title" className="scroll-mt-20 border-y border-[var(--dd-border-gold)] bg-[var(--dd-cream)] py-14 sm:py-20">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionTitle id="holiday-title" number="02" eyebrow="Seasonal community initiative" heading="Join the Holiday Mission" description="Separate pathways for families, contributors, community organizations and volunteers. Participation is an expression of interest, not guaranteed assistance or an assignment." />
-        <div className="mb-7 overflow-hidden rounded-3xl border border-[var(--dd-border-gold)] bg-[var(--dd-burgundy-deep)] text-white shadow-sm">
-          <div aria-hidden="true" className="flex items-center justify-between border-b border-[var(--dd-gold-soft)]/30 bg-[var(--dd-burgundy)] px-5 py-3 text-[var(--dd-gold-soft)] sm:px-7">
-            <span className="text-lg tracking-[.45em]">✦ ✧ ✦</span>
-            <span className="text-[10px] font-bold uppercase tracking-[.2em]">Holiday 2026</span>
-            <span className="text-lg tracking-[.45em]">✦ ✧ ✦</span>
+        <div className="mb-7 overflow-hidden rounded-3xl border-2 border-[var(--dd-gold)] bg-[var(--dd-ivory)] shadow-md">
+          <div aria-hidden="true" className="flex items-center justify-between bg-[var(--dd-burgundy-deep)] px-5 py-3 text-[var(--dd-gold-soft)] sm:px-8">
+            <span className="text-lg tracking-[.3em]">✦ ✧ ✦</span>
+            <span className="text-[11px] font-extrabold uppercase tracking-[.2em]">The Holiday Mission · 2026</span>
+            <span className="text-lg tracking-[.3em]">✦ ✧ ✦</span>
           </div>
-          <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_210px_190px] lg:items-center">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--dd-gold-soft)]">Holiday 2026 · Community support</p>
-            <h3 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl">Your skills. Someone’s next step.</h3>
-            <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--dd-cream)]">DANI is developing local partnerships and resource coordination for families navigating homelessness or a transition into stable housing. No purchase is required.</p>
-            <p className="mt-4 text-sm leading-7 text-[var(--dd-cream)]">Contributor inquiries: <a href="mailto:vendors@danideclares.com?subject=Holiday%20Mission%20Contributor" className="font-bold text-[var(--dd-gold-soft)] underline underline-offset-4">vendors@danideclares.com</a></p>
+          <div className="grid items-center gap-8 p-6 sm:p-9 lg:grid-cols-[minmax(0,1fr)_minmax(260px,.82fr)] lg:gap-10">
+            <div className="max-w-lg">
+              <p className="text-xs font-extrabold uppercase tracking-[.18em] text-[var(--dd-burgundy)]">Local businesses & community partners wanted</p>
+              <h3 className="mt-4 font-serif text-3xl font-bold italic leading-tight text-[var(--dd-burgundy-deep)] sm:text-4xl">Your Skills. Someone’s Next Step.</h3>
+              <div aria-hidden="true" className="mt-5 h-1 w-28 rounded-full bg-[var(--dd-gold)]" />
+              <p className="mt-5 max-w-xl text-base leading-8 text-[var(--dd-ink)]">DANI is seeking businesses, organizations and individuals interested in offering skills, services, time or resources to help families navigating housing instability or a transition into stable housing.</p>
+              <div className="mt-6 rounded-xl border border-[var(--dd-gold)] bg-white/80 p-5">
+                <p className="text-xs font-extrabold uppercase tracking-[.18em] text-[var(--dd-burgundy)]">Ways you could contribute</p>
+                <p className="mt-3 text-sm leading-7 text-[var(--dd-ink)]">Home and property support · business and creative skills · moving and supplies · volunteer and community support.</p>
+              </div>
+              <a href="mailto:vendors@danideclares.com?subject=Holiday%20Mission%20Contributor" className="mt-6 inline-flex min-h-[46px] items-center justify-center rounded-xl bg-[var(--dd-burgundy)] px-6 py-3 text-sm font-bold text-white transition hover:bg-[var(--dd-burgundy-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dd-burgundy)]">Tell us what you can offer <span className="ml-3" aria-hidden="true">↗</span></a>
+              <p className="mt-4 text-xs leading-6 text-[var(--dd-muted)]">No purchase required. Interest does not guarantee an assignment or assistance.</p>
+            </div>
+            <figure className="m-0 rounded-2xl border border-[var(--dd-gold)] bg-white p-3 shadow-lg sm:p-4">
+              <img src={approvedMissionFlyer} alt="Approved DANI Holiday Mission contributor flyer showing ways to offer skills, time, services and resources" className="h-auto w-full rounded-lg object-contain" loading="lazy" />
+              <figcaption className="mt-3 text-center text-xs font-semibold text-[var(--dd-burgundy-deep)]">The approved Holiday Mission 2026 flyer</figcaption>
+            </figure>
           </div>
-          <figure className="m-0 overflow-hidden rounded-2xl border border-[var(--dd-gold-soft)]/40">
-            <img src="/images/dani-batch/pexels-rdne-8581413.jpg" alt="Moving boxes and household items ready for a new beginning" className="h-40 w-full object-cover lg:h-60" loading="lazy" />
-            <figcaption className="bg-[var(--dd-burgundy)] px-3 py-3 text-center text-xs leading-5 text-[var(--dd-cream)]">Supporting transitions into a home</figcaption>
-          </figure>
-          <div className="mx-auto w-full max-w-[190px]">
-            <img src={approvedMissionFlyer} alt="Approved DANI Holiday Mission contributor flyer" className="h-auto w-full rounded-lg border border-[var(--dd-gold-soft)] bg-white object-contain" loading="lazy" />
-            <p className="mt-2 text-center text-[11px] text-[var(--dd-cream)]">Approved contributor artwork</p>
-          </div>
+          <div aria-hidden="true" className="flex items-center justify-center gap-4 border-t border-[var(--dd-gold)] bg-[var(--dd-cream)] px-5 py-3 text-center text-[var(--dd-burgundy)]">
+            <span>✦</span><span className="text-[11px] font-extrabold uppercase tracking-[.2em]">We Handle The Execution</span><span>✦</span>
           </div>
         </div>
+        <p className="mb-5 text-center text-xs font-bold uppercase tracking-[.2em] text-[var(--dd-burgundy)]">Choose your Holiday Mission path</p>
         <div className="grid gap-4 sm:grid-cols-2">
           {PATHS.slice(1,5).map((item,i)=><RouteCard key={item.title} item={item} search={search} compact index={i+1}/>)}
         </div>
