@@ -2,6 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {useLocation,Link} from 'react-router-dom';
 import {ArrowRight,Search,X} from 'lucide-react';
 import {getFamilyVisuals} from '../data/serviceVisuals2026.js';
+import {PACKAGE_INTAKE_SCOPE_GROUPS} from '../data/packageScopeInquiry2026.js';
 import {AUDIENCE_LABELS,AUDIENCE_BUCKETS,groupServicesByBucket,groupedServices} from '../data/serviceCatalogFamilies.js';
 
 export default function CommercialCatalogPage({context='services'}){
@@ -43,6 +44,27 @@ export default function CommercialCatalogPage({context='services'}){
       </figure>
     </div>
   </section>
+  {isPackages&&<section className="border-y border-[var(--dd-border-gold)] bg-[var(--dd-cream)]" aria-labelledby="scope-pathways-title">
+    <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 md:py-14">
+      <p className="text-xs font-black uppercase tracking-[.17em] text-[var(--dd-burgundy)]">32 existing scope definitions · inquiry only</p>
+      <h2 id="scope-pathways-title" className="mt-3 max-w-3xl font-serif text-3xl font-bold text-[var(--dd-burgundy-deep)] sm:text-4xl">Explore package scopes by who needs the work handled.</h2>
+      <p className="mt-4 max-w-4xl text-sm leading-7 text-[var(--dd-ink)]">These are DANI's existing intake-only scope definitions, not published, fixed-price packages. Exact component availability, eligibility, timing, and an itemized quote are confirmed through the appropriate request process. No instant booking or package price is implied.</p>
+      <div className="mt-8 grid gap-4 lg:grid-cols-2">
+        {PACKAGE_INTAKE_SCOPE_GROUPS.map(group=><details key={group.key} className="group rounded-2xl border border-[var(--dd-border-gold)] bg-white p-5 shadow-sm" open={group.key==='CH01'||undefined}>
+          <summary className="flex cursor-pointer items-center justify-between gap-3 text-[var(--dd-burgundy-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dd-burgundy)]">
+            <span className="text-lg font-bold">{group.label}</span><span className="shrink-0 rounded-full bg-[var(--dd-cream)] px-3 py-1 text-xs font-bold text-[var(--dd-burgundy)]">{group.items.length} scope pathways</span>
+          </summary>
+          <ul className="mt-5 space-y-2 border-t border-[var(--dd-border-gold)] pt-4">{group.items.map(name=><li key={name} className="flex items-start gap-2 text-sm leading-6 text-[var(--dd-ink)]"><span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--dd-burgundy)]"/>{name}</li>)}</ul>
+          <p className="mt-4 text-xs font-semibold text-[var(--dd-burgundy)]">Scope inquiry only · Component-based quote · Subject to review</p>
+        </details>)}
+      </div>
+      <div className="mt-7 flex flex-wrap items-center gap-4 rounded-2xl border border-[var(--dd-border-gold)] bg-white p-5">
+        <p className="max-w-2xl flex-1 text-sm leading-6 text-[var(--dd-ink)]">Looking for a combined outcome rather than one service? Describe it once and DANI can determine the next governed scope and quote step.</p>
+        <Link to="/request-service" className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-[var(--dd-burgundy)] px-5 py-3 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dd-burgundy)]">Request a scoped quote <ArrowRight className="ml-2 h-4 w-4"/></Link>
+      </div>
+      <p className="mt-4 text-xs leading-6 text-[var(--dd-muted)]">Seasonal home services are commercial inquiries and separate from DANI's community Holiday Mission.</p>
+    </div>
+  </section>}
   <main id="service-discovery" className="max-w-7xl mx-auto scroll-mt-24 px-5 sm:px-8 py-10 md:py-14">
    {error&&<div role="alert" className="p-4 mb-6 rounded-xl bg-red-50 border border-red-200 text-red-800">{error} <button type="button" onClick={()=>setLoadAttempt(n=>n+1)} className="underline font-bold">Try again</button> <Link to="/request-service" className="underline">Tell us what you need</Link></div>}
    {audienceBuckets&&<div className="max-w-3xl mx-auto mb-6 flex flex-wrap items-center justify-center gap-3 rounded-2xl bg-[#f8ecd0] border border-[#dfc78e] px-5 py-3 text-sm"><span className="text-[#5a1624]">Showing services for <strong>{AUDIENCE_LABELS[audience]||audience}</strong></span><Link to="/catalog" className="font-black uppercase tracking-wide text-xs text-[#855d15] hover:text-[#5a1624]">View all services</Link></div>}

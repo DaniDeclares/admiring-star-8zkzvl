@@ -71,3 +71,13 @@ test('small labels use approved contrasting burgundy rather than low-contrast go
     expect(markup).not.toContain('text-[#967022]');
   }
 });
+
+test('packages expose existing intake-only scope families without invented published price or booking', () => {
+ const html=htmlFor(<PackagesPage/>);
+ ['People &amp; households','Property teams','Real estate','Businesses','Institutions &amp; government'].forEach(x=>expect(html).toContain(x));
+ ['Turnover &amp; Make-Ready Execution','Home Reset Execution','Contract &amp; Task Order Execution'].forEach(x=>expect(html).toContain(x));
+ expect(html).toContain('32 existing scope definitions');
+ expect(html).toContain('not published, fixed-price packages');
+ expect(html).toContain('Scope inquiry only');
+ expect(html).toContain('href="/request-service"');
+});
