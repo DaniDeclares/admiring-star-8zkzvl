@@ -4,10 +4,18 @@ import { Link, useLocation } from 'react-router-dom';
 import { HOLIDAY_INTEREST_ROLES, HOLIDAY_INTEREST_AREAS, HOLIDAY_CONTACT_CONSENT } from '../lib/holidayCommunityInterest.js';
 
 const attrKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'];
+const approvedMissionFlyer = 'https://cdn.shopify.com/s/files/1/0763/0825/0763/files/DANI_Holiday_Mission_Contributor_Flyer_2026_Approved.png?v=1794112626';
+const contributorCategories = [
+  ['Home & Property Support', 'Cleaning, organizing, painting, and appropriately qualified repair services.'],
+  ['Business & Creative Skills', 'Administrative support, printing, design, and technical assistance.'],
+  ['Moving, Transportation & Supplies', 'Practical logistics support, household essentials, and materials.'],
+  ['Volunteer & Community Support', 'Individual skills, team participation, and other useful contributions.'],
+];
 export default function HolidayCommunityPage() {
   const { search } = useLocation();
   const fromUrl = new URLSearchParams(search).get('role');
   const defaultRole = HOLIDAY_INTEREST_ROLES[fromUrl] ? fromUrl : '';
+  const showContributorInvitation = !fromUrl || fromUrl === 'SPONSOR' || fromUrl === 'VOLUNTEER';
   const [form, setForm] = useState({ role:defaultRole, area:'', name:'', email:'', phone:'', city:'', organization:'', note:'', contactConsent:false, website:'' });
   const [state, setState] = useState({ saving:false, error:'', done:false, id:null });
   const attribution = useMemo(() => {
@@ -40,15 +48,28 @@ export default function HolidayCommunityPage() {
   const field = 'w-full rounded-xl border border-[#d9c6bd] p-3.5 bg-white text-[#30191e] focus:outline-[#6b1f2b]';
   const label = 'block text-sm font-bold text-[#5b2531] mb-2';
   return <main className="min-h-screen bg-[#fbf8f1] text-[#2e1720]">
-    <Helmet><title>Holiday 2026 Community Interest | DANI DECLARES</title><meta name="description" content="Privately express family or community support interest in DANI DECLARES Holiday 2026 mission in Metro Atlanta." /></Helmet>
+    <Helmet><title>The Holiday Mission — 2026 | DANI DECLARES</title><meta name="description" content="Privately express family or community support interest in DANI DECLARES Holiday 2026 mission in Metro Atlanta." /></Helmet>
     <section className="bg-[#551524] text-white"><div className="max-w-3xl mx-auto px-5 py-14">
       <Link to="/connect" className="text-[#f1dba8] underline">All ways to connect</Link>
-      <p className="mt-5 tracking-widest uppercase text-[#e6c67f] text-sm font-bold">DANI DECLARES • HOLIDAY 2026</p>
-      <h1 style={{ color: "#FFFFFF" }} className="mt-3 text-4xl md:text-5xl font-bold">Community Support & Opportunity</h1>
-      <p className="mt-4 leading-7 text-[#f5e7ea]">Help us understand local needs and offers of practical assistance for families experiencing homelessness, housing instability, or transitions to stable housing.</p>
+      <p className="mt-5 tracking-widest uppercase text-[#e6c67f] text-sm font-bold">DANI DECLARES LLC | THE HOLIDAY MISSION — 2026</p>
+      <h1 style={{ color: "#FFFFFF" }} className="mt-3 text-4xl md:text-5xl font-bold">{showContributorInvitation ? "Your Skills. Someone’s Next Step." : "Community Support & Opportunity"}</h1>
+      <p className="mt-4 leading-7 text-[#f5e7ea]">We are seeking practical support for families and children experiencing homelessness, housing instability, or a transition into stable housing.</p>
     </div></section>
+    <section className="max-w-3xl mx-auto px-5 pt-10">
+      {showContributorInvitation && <div className="grid gap-7 md:grid-cols-2 items-start mb-9">
+        <img src={approvedMissionFlyer} alt="Approved DANI DECLARES Holiday Mission 2026 contributor invitation flyer" className="rounded-2xl shadow-md w-full h-auto" />
+        <div>
+          <h2 className="text-2xl font-bold text-[#5b1624]">Local businesses &amp; community contributors wanted</h2>
+          <p className="mt-3 leading-7">Businesses, organizations, and individuals can express interest in offering skills, services, volunteer time, or resources. These are possible contributions, not confirmed assignments.</p>
+          <ul className="mt-4 space-y-3">{contributorCategories.map(([title, detail]) => <li key={title}><strong className="text-[#5b1624]">{title}</strong><span className="block text-sm mt-1">{detail}</span></li>)}</ul>
+          <p className="mt-5 leading-7">Prefer email? Contact <a href="mailto:vendors@danideclares.com?subject=Holiday%20Mission%20Contributor" className="font-bold underline break-all">vendors@danideclares.com</a> with your name or business, contribution, service area, and availability. Use subject: <strong>Holiday Mission Contributor</strong>.</p>
+        </div>
+      </div>}
+      <div className="rounded-2xl border border-[#d7b980] bg-[#fff7e8] p-5 text-sm leading-7">
+        This is an expression of interest, not a confirmed assignment or a guarantee of assistance, volunteer placement, sponsorship, or tax-deductibility. No purchase is required. Participation depends on verified needs, available resources, and agreed arrangements. Please do not include children's names, street addresses, medical information, or documents.
+      </div>
+    </section>
     <section className="max-w-3xl mx-auto px-5 py-12">
-      <div className="rounded-2xl border border-[#d7b980] bg-[#fff7e8] p-5 mb-7 text-sm leading-7">Interest registration only. We cannot promise assistance, volunteer placement, sponsorship acceptance, or tax-deductibility. Do not include children’s names, personal addresses, medical details, or documents. No purchase is required.</div>
       {state.done ? <div role="status" className="rounded-2xl border border-green-300 bg-white p-8">
         <h2 className="text-2xl font-bold">Your interest was received.</h2>
         <p className="mt-3">This is an acknowledgment of interest, not an eligibility decision or confirmed commitment. DANI will use the contact method you supplied if follow-up is possible.</p>
