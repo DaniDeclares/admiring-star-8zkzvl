@@ -34,7 +34,7 @@ const intentFor = (item, search) => destinationFor(item.path, search, {
 const accentButton = 'inline-flex min-h-[46px] items-center justify-center gap-3 rounded-xl bg-[var(--dd-burgundy)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--dd-burgundy-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dd-burgundy)]';
 function RouteCard({ item, search, compact = false, index }) {
   return <article className={`group flex h-full flex-col rounded-2xl border border-[var(--dd-border-gold)] bg-[var(--dd-white)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${compact ? 'p-5 sm:p-6' : 'p-6 md:p-8'}`}>
-    {index != null && <span aria-hidden="true" className="mb-4 text-xs font-bold tracking-[.17em] text-[var(--dd-gold)]">{String(index).padStart(2, '0')}</span>}
+    {index != null && <span aria-hidden="true" className="mb-4 text-xs font-bold tracking-[.17em] text-[var(--dd-burgundy)]">{String(index).padStart(2, '0')}</span>}
     <h3 className={`font-bold tracking-tight text-[var(--dd-burgundy-deep)] ${compact ? 'text-xl' : 'text-2xl'}`}>{item.title}</h3>
     <p className="mt-3 mb-6 flex-1 text-sm leading-7 text-[var(--dd-muted)]">{item.detail}</p>
     <Link className={accentButton} to={intentFor(item, search)}>{item.button}<span aria-hidden="true">↗</span></Link>
@@ -43,7 +43,7 @@ function RouteCard({ item, search, compact = false, index }) {
 function SectionTitle({ number, eyebrow, heading, description, id }) {
   return <div className="mb-7 flex flex-col gap-3 border-b border-[var(--dd-border-gold)] pb-7 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
     <div>
-      <p className="text-xs font-bold uppercase tracking-[.22em] text-[var(--dd-gold)]">{number} / {eyebrow}</p>
+      <p className="text-xs font-bold uppercase tracking-[.22em] text-[var(--dd-burgundy)]">{number} / {eyebrow}</p>
       <h2 id={id} className="mt-3 text-3xl font-bold tracking-tight text-[var(--dd-burgundy-deep)] sm:text-4xl">{heading}</h2>
     </div>
     <p className="max-w-md text-sm leading-7 text-[var(--dd-muted)]">{description}</p>
@@ -82,7 +82,7 @@ export default function ConnectPage() {
       <SectionTitle id="get-work-title" number="01" eyebrow="For customers" heading="Get Work Handled" description="From home and property needs to business, real estate, events and institutional work: start with the outcome, not an internal service category." />
       <div className="grid overflow-hidden rounded-3xl border border-[var(--dd-border-gold)] bg-[var(--dd-white)] shadow-sm md:grid-cols-[minmax(0,1.4fr)_minmax(280px,.8fr)]">
         <div className="p-7 sm:p-10 lg:p-12">
-          <p className="text-xs font-bold uppercase tracking-[.2em] text-[var(--dd-gold)]">One request · Multiple service areas</p>
+          <p className="text-xs font-bold uppercase tracking-[.2em] text-[var(--dd-burgundy)]">One request · Multiple service areas</p>
           <h3 className="mt-4 text-3xl font-bold tracking-tight text-[var(--dd-burgundy-deep)] sm:text-4xl">Tell us what you need handled.</h3>
           <p className="mt-5 max-w-xl text-base leading-8 text-[var(--dd-muted)]">{PATHS[0].detail}</p>
           <Link to={intentFor(PATHS[0], search)} className={`${accentButton} mt-8`}>Request service <span aria-hidden="true">↗</span></Link>
@@ -90,7 +90,7 @@ export default function ConnectPage() {
         <aside aria-label="Examples of supported customer needs" className="flex flex-col justify-center gap-5 bg-[var(--dd-cream)] p-7 sm:p-9">
           <img src="/images/dani-batch/pexels-rdne-8293769.jpg" alt="Field professional documenting a property condition" className="h-44 w-full rounded-2xl object-cover object-center" loading="lazy" />
           <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--dd-burgundy)]">Across life's moving parts</p>
-          {['Home & resident support','Property & real estate operations','Business & administrative support','Events, print & production','Government & institutional requests'].map((label, i) => <div key={label} className="flex items-start gap-3 border-b border-[var(--dd-border-gold)] pb-4 last:border-0 last:pb-0"><span aria-hidden="true" className="mt-1 text-sm font-bold text-[var(--dd-gold)]">0{i+1}</span><span className="font-semibold text-[var(--dd-burgundy-deep)]">{label}</span></div>)}
+          {['Home & resident support','Property & real estate operations','Business & administrative support','Events, print & production','Government & institutional requests'].map((label, i) => <div key={label} className="flex items-start gap-3 border-b border-[var(--dd-border-gold)] pb-4 last:border-0 last:pb-0"><span aria-hidden="true" className="mt-1 text-sm font-bold text-[var(--dd-burgundy)]">0{i+1}</span><span className="font-semibold text-[var(--dd-burgundy-deep)]">{label}</span></div>)}
         </aside>
       </div>
     </section>
@@ -139,7 +139,7 @@ export default function ConnectPage() {
       <div className="mb-6 grid gap-5 overflow-hidden rounded-3xl border border-[var(--dd-border-gold)] bg-[var(--dd-white)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
         <img src="/images/dani-batch/pexels-pavel-danilyuk-7937734.jpg" alt="Professionals coordinating work together" className="h-44 w-full object-cover sm:h-full sm:min-h-52" loading="lazy" />
         <div className="flex flex-col justify-center p-6 sm:p-8">
-          <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--dd-gold)]">Partnerships with a purpose</p>
+          <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--dd-burgundy)]">Partnerships with a purpose</p>
           <h3 className="mt-3 text-2xl font-bold text-[var(--dd-burgundy-deep)]">Different relationships. Clear next steps.</h3>
           <p className="mt-3 text-sm leading-7 text-[var(--dd-muted)]">Introduce capabilities, explore referrals, or apply to provide services through the path designed for that relationship.</p>
         </div>

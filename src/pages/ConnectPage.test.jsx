@@ -105,3 +105,10 @@ test('Connect & Join reuses existing service photography and keeps Holiday artwo
   expect(html).toContain('aria-labelledby="work-title"');
   expect(html).toContain('href="/providers?audience=provider"');
 });
+
+// Accessibility review: antique gold must not be used on small copy against ivory/cream/white.
+test('Connect & Join gives small foreground labels a high-contrast semantic color',()=>{
+ const html=renderToStaticMarkup(<HelmetProvider><MemoryRouter initialEntries={['/connect']}><ConnectPage /></MemoryRouter></HelmetProvider>);
+ expect(html).not.toContain('text-[var(--dd-gold)]');
+ expect(html).toContain('text-[var(--dd-burgundy)]');
+});
