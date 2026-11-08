@@ -81,3 +81,25 @@ test('Connect & Join keeps genuine source context in the visual paths', () => {
   expect(html).toContain('audience=provider');
   expect(html).not.toContain('utm_campaign=holiday-2026');
 });
+
+test('Connect & Join reuses existing service photography and keeps Holiday artwork unchanged', () => {
+  const html = renderToStaticMarkup(
+    <HelmetProvider><MemoryRouter initialEntries={['/connect']}>
+      <ConnectPage />
+    </MemoryRouter></HelmetProvider>
+  );
+  const expectedPhotos = [
+    'pexels-pavel-danilyuk-7937330.jpg',
+    'pexels-rdne-8293769.jpg',
+    'pexels-rdne-8581413.jpg',
+    'pexels-pavel-danilyuk-7937734.jpg',
+  ];
+  expectedPhotos.forEach(photo => expect(html).toContain(photo));
+  expect((html.match(/DANI_Holiday_Mission_Contributor_Flyer_2026_Approved.png/g) || [])).toHaveLength(1);
+  expect(html).toContain('Holiday 2026');
+  expect(html).toContain('Supporting transitions into a home');
+  expect(html).toContain('aria-labelledby="get-work-title"');
+  expect(html).toContain('aria-labelledby="holiday-title"');
+  expect(html).toContain('aria-labelledby="work-title"');
+  expect(html).toContain('href="/providers?audience=provider"');
+});

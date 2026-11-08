@@ -59,9 +59,16 @@ export default function ConnectPage() {
       <div aria-hidden="true" className="pointer-events-none absolute -right-32 top-0 h-[540px] w-[540px] rounded-full border border-[var(--dd-gold-soft)] opacity-10 sm:right-0" />
       <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
         <p className="text-xs font-extrabold uppercase tracking-[.19em] text-[var(--dd-gold-soft)]">DANI DECLARES LLC <span aria-hidden="true">·</span> WE HANDLE THE EXECUTION</p>
-        <div className="mt-7 max-w-4xl">
-          <h1 style={{color:'var(--dd-white)'}} className="text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl">A clear place to start.<br /><span className="text-[var(--dd-gold-soft)]">Whatever brings you here.</span></h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--dd-cream)] sm:text-lg">Need work handled? Want to support our community mission? Interested in working with DANI? Choose the path that fits. We’ll keep each request in the right workflow.</p>
+        <div className="mt-7 grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(300px,.72fr)] lg:gap-14">
+          <div className="max-w-4xl">
+            <h1 style={{color:'var(--dd-white)'}} className="text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl">A clear place to start.<br /><span className="text-[var(--dd-gold-soft)]">Whatever brings you here.</span></h1>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--dd-cream)] sm:text-lg">Need work handled? Want to support our community mission? Interested in working with DANI? Choose the path that fits. We’ll keep each request in the right workflow.</p>
+          </div>
+          <figure className="relative m-0 max-w-lg lg:max-w-none">
+            <div className="absolute -inset-2 rounded-[1.7rem] border border-[var(--dd-gold-soft)] opacity-50" aria-hidden="true" />
+            <img src="/images/dani-batch/pexels-pavel-danilyuk-7937330.jpg" alt="Property professionals walking through a space together" className="relative h-52 w-full rounded-3xl object-cover object-center shadow-xl sm:h-64 lg:h-72" fetchPriority="high" />
+            <figcaption className="sr-only">Photography represents the range of work DANI helps coordinate; it does not depict a specific completed client project.</figcaption>
+          </figure>
         </div>
         <nav aria-label="Choose your starting point" className="mt-10 grid gap-3 sm:grid-cols-3">
           <a href="#get-work-handled" className="rounded-xl border border-white/25 bg-white/10 p-5 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--dd-gold-soft)]"><span className="block text-[11px] font-bold uppercase tracking-[.18em] text-[var(--dd-gold-soft)]">01 · Services</span><span className="mt-2 flex items-center justify-between text-lg font-bold text-white">Get Work Handled <span aria-hidden="true">↘</span></span></a>
@@ -81,6 +88,7 @@ export default function ConnectPage() {
           <Link to={intentFor(PATHS[0], search)} className={`${accentButton} mt-8`}>Request service <span aria-hidden="true">↗</span></Link>
         </div>
         <aside aria-label="Examples of supported customer needs" className="flex flex-col justify-center gap-5 bg-[var(--dd-cream)] p-7 sm:p-9">
+          <img src="/images/dani-batch/pexels-rdne-8293769.jpg" alt="Field professional documenting a property condition" className="h-44 w-full rounded-2xl object-cover object-center" loading="lazy" />
           <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--dd-burgundy)]">Across life's moving parts</p>
           {['Home & resident support','Property & real estate operations','Business & administrative support','Events, print & production','Government & institutional requests'].map((label, i) => <div key={label} className="flex items-start gap-3 border-b border-[var(--dd-border-gold)] pb-4 last:border-0 last:pb-0"><span aria-hidden="true" className="mt-1 text-sm font-bold text-[var(--dd-gold)]">0{i+1}</span><span className="font-semibold text-[var(--dd-burgundy-deep)]">{label}</span></div>)}
         </aside>
@@ -90,16 +98,27 @@ export default function ConnectPage() {
     <section id="holiday-mission" aria-labelledby="holiday-title" className="scroll-mt-20 border-y border-[var(--dd-border-gold)] bg-[var(--dd-cream)] py-14 sm:py-20">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionTitle id="holiday-title" number="02" eyebrow="Seasonal community initiative" heading="Join the Holiday Mission" description="Separate pathways for families, contributors, community organizations and volunteers. Participation is an expression of interest, not guaranteed assistance or an assignment." />
-        <div className="mb-7 grid gap-5 rounded-3xl border border-[var(--dd-border-gold)] bg-[var(--dd-burgundy-deep)] p-5 text-white shadow-sm sm:p-7 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center">
+        <div className="mb-7 overflow-hidden rounded-3xl border border-[var(--dd-border-gold)] bg-[var(--dd-burgundy-deep)] text-white shadow-sm">
+          <div aria-hidden="true" className="flex items-center justify-between border-b border-[var(--dd-gold-soft)]/30 bg-[var(--dd-burgundy)] px-5 py-3 text-[var(--dd-gold-soft)] sm:px-7">
+            <span className="text-lg tracking-[.45em]">✦ ✧ ✦</span>
+            <span className="text-[10px] font-bold uppercase tracking-[.2em]">Holiday 2026</span>
+            <span className="text-lg tracking-[.45em]">✦ ✧ ✦</span>
+          </div>
+          <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_210px_190px] lg:items-center">
           <div>
             <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--dd-gold-soft)]">Holiday 2026 · Community support</p>
             <h3 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl">Your skills. Someone’s next step.</h3>
             <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--dd-cream)]">DANI is developing local partnerships and resource coordination for families navigating homelessness or a transition into stable housing. No purchase is required.</p>
             <p className="mt-4 text-sm leading-7 text-[var(--dd-cream)]">Contributor inquiries: <a href="mailto:vendors@danideclares.com?subject=Holiday%20Mission%20Contributor" className="font-bold text-[var(--dd-gold-soft)] underline underline-offset-4">vendors@danideclares.com</a></p>
           </div>
-          <div className="mx-auto w-full max-w-[200px]">
+          <figure className="m-0 overflow-hidden rounded-2xl border border-[var(--dd-gold-soft)]/40">
+            <img src="/images/dani-batch/pexels-rdne-8581413.jpg" alt="Moving boxes and household items ready for a new beginning" className="h-40 w-full object-cover lg:h-60" loading="lazy" />
+            <figcaption className="bg-[var(--dd-burgundy)] px-3 py-3 text-center text-xs leading-5 text-[var(--dd-cream)]">Supporting transitions into a home</figcaption>
+          </figure>
+          <div className="mx-auto w-full max-w-[190px]">
             <img src={approvedMissionFlyer} alt="Approved DANI Holiday Mission contributor flyer" className="h-auto w-full rounded-lg border border-[var(--dd-gold-soft)] bg-white object-contain" loading="lazy" />
             <p className="mt-2 text-center text-[11px] text-[var(--dd-cream)]">Approved contributor artwork</p>
+          </div>
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -111,6 +130,14 @@ export default function ConnectPage() {
 
     <section id="work-with-dani" aria-labelledby="work-title" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-14 sm:px-8 sm:py-20">
       <SectionTitle id="work-title" number="03" eyebrow="Professional relationships" heading="Work With DANI" description="Referrals, business partnerships, vendors, makers and independent providers have different processes. Select what you want to contribute or explore." />
+      <div className="mb-6 grid gap-5 overflow-hidden rounded-3xl border border-[var(--dd-border-gold)] bg-[var(--dd-white)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
+        <img src="/images/dani-batch/pexels-pavel-danilyuk-7937734.jpg" alt="Professionals coordinating work together" className="h-44 w-full object-cover sm:h-full sm:min-h-52" loading="lazy" />
+        <div className="flex flex-col justify-center p-6 sm:p-8">
+          <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--dd-gold)]">Partnerships with a purpose</p>
+          <h3 className="mt-3 text-2xl font-bold text-[var(--dd-burgundy-deep)]">Different relationships. Clear next steps.</h3>
+          <p className="mt-3 text-sm leading-7 text-[var(--dd-muted)]">Introduce capabilities, explore referrals, or apply to provide services through the path designed for that relationship.</p>
+        </div>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {PATHS.slice(5).map((item,i)=><RouteCard key={item.title} item={item} search={search} compact index={i+1}/>)}
       </div>
