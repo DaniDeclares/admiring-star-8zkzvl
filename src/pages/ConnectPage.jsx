@@ -25,28 +25,97 @@ export function destinationFor(path, search, extra = {}) {
   const query = output.toString();
   return query ? path + '?' + query : path;
 }
+
+const approvedMissionFlyer = 'https://cdn.shopify.com/s/files/1/0763/0825/0763/files/DANI_Holiday_Mission_Contributor_Flyer_2026_Approved.png?v=1794112626';
+const intentFor = (item, search) => destinationFor(item.path, search, {
+  role: item.role, participation: item.participation, focus: item.focus,
+  ...(item.provider ? { audience: 'provider' } : {}),
+});
+const accentButton = 'inline-flex min-h-[46px] items-center justify-center gap-3 rounded-xl bg-[var(--dd-burgundy)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--dd-burgundy-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dd-burgundy)]';
+function RouteCard({ item, search, compact = false, index }) {
+  return <article className={`group flex h-full flex-col rounded-2xl border border-[var(--dd-border-gold)] bg-[var(--dd-white)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${compact ? 'p-5 sm:p-6' : 'p-6 md:p-8'}`}>
+    {index != null && <span aria-hidden="true" className="mb-4 text-xs font-bold tracking-[.17em] text-[var(--dd-gold)]">{String(index).padStart(2, '0')}</span>}
+    <h3 className={`font-bold tracking-tight text-[var(--dd-burgundy-deep)] ${compact ? 'text-xl' : 'text-2xl'}`}>{item.title}</h3>
+    <p className="mt-3 mb-6 flex-1 text-sm leading-7 text-[var(--dd-muted)]">{item.detail}</p>
+    <Link className={accentButton} to={intentFor(item, search)}>{item.button}<span aria-hidden="true">↗</span></Link>
+  </article>;
+}
+function SectionTitle({ number, eyebrow, heading, description, id }) {
+  return <div className="mb-7 flex flex-col gap-3 border-b border-[var(--dd-border-gold)] pb-7 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
+    <div>
+      <p className="text-xs font-bold uppercase tracking-[.22em] text-[var(--dd-gold)]">{number} / {eyebrow}</p>
+      <h2 id={id} className="mt-3 text-3xl font-bold tracking-tight text-[var(--dd-burgundy-deep)] sm:text-4xl">{heading}</h2>
+    </div>
+    <p className="max-w-md text-sm leading-7 text-[var(--dd-muted)]">{description}</p>
+  </div>;
+}
+
 export default function ConnectPage() {
   const { search } = useLocation();
-  return <main className="min-h-screen bg-[var(--dd-ivory)] text-[color:var(--dd-ink)]">
-    <Helmet><title>Get Connected | DANI DECLARES LLC</title><meta name="description" content="Request DANI services, register Holiday 2026 community interest, or explore provider, vendor and partnership opportunities through the right online form." /></Helmet>
-    <section className="bg-[var(--dd-burgundy-deep)] text-white">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 md:py-24">
-        <p className="uppercase tracking-[.19em] text-[color:var(--dd-gold-soft)] text-xs font-black">DANI DECLARES LLC • WE HANDLE THE EXECUTION</p>
-        <h1 style={{ color: "var(--dd-white)" }} className="mt-5 max-w-4xl text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">What brings you to DANI?</h1>
-        <p className="mt-5 text-lg text-[color:var(--dd-cream)] max-w-3xl">Looking for work handled, a way to help families this holiday season, or an opportunity to build with us? Choose your starting point. We’ll keep the right request in the right workflow.</p>
+  return <main className="min-h-screen bg-[var(--dd-ivory)] text-[var(--dd-ink)]">
+    <Helmet><title>Get Connected | DANI DECLARES LLC</title><meta name="description" content="Three easy ways to connect with DANI: request multi-service execution, join the Holiday Mission, or build a business relationship." /></Helmet>
+    <header className="relative overflow-hidden bg-[var(--dd-burgundy-deep)] text-white">
+      <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-48 h-[480px] w-[480px] rounded-full border border-[var(--dd-gold-soft)] opacity-20 sm:right-16" />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-32 top-0 h-[540px] w-[540px] rounded-full border border-[var(--dd-gold-soft)] opacity-10 sm:right-0" />
+      <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
+        <p className="text-xs font-extrabold uppercase tracking-[.19em] text-[var(--dd-gold-soft)]">DANI DECLARES LLC <span aria-hidden="true">·</span> WE HANDLE THE EXECUTION</p>
+        <div className="mt-7 max-w-4xl">
+          <h1 style={{color:'var(--dd-white)'}} className="text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl">A clear place to start.<br /><span className="text-[var(--dd-gold-soft)]">Whatever brings you here.</span></h1>
+          <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--dd-cream)] sm:text-lg">Need work handled? Want to support our community mission? Interested in working with DANI? Choose the path that fits. We’ll keep each request in the right workflow.</p>
+        </div>
+        <nav aria-label="Choose your starting point" className="mt-10 grid gap-3 sm:grid-cols-3">
+          <a href="#get-work-handled" className="rounded-xl border border-white/25 bg-white/10 p-5 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--dd-gold-soft)]"><span className="block text-[11px] font-bold uppercase tracking-[.18em] text-[var(--dd-gold-soft)]">01 · Services</span><span className="mt-2 flex items-center justify-between text-lg font-bold text-white">Get Work Handled <span aria-hidden="true">↘</span></span></a>
+          <a href="#holiday-mission" className="rounded-xl border border-white/25 bg-white/10 p-5 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--dd-gold-soft)]"><span className="block text-[11px] font-bold uppercase tracking-[.18em] text-[var(--dd-gold-soft)]">02 · Community</span><span className="mt-2 flex items-center justify-between text-lg font-bold text-white">Join the Holiday Mission <span aria-hidden="true">↘</span></span></a>
+          <a href="#work-with-dani" className="rounded-xl border border-white/25 bg-white/10 p-5 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--dd-gold-soft)]"><span className="block text-[11px] font-bold uppercase tracking-[.18em] text-[var(--dd-gold-soft)]">03 · Opportunities</span><span className="mt-2 flex items-center justify-between text-lg font-bold text-white">Work With DANI <span aria-hidden="true">↘</span></span></a>
+        </nav>
+      </div>
+    </header>
+
+    <section id="get-work-handled" aria-labelledby="get-work-title" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-14 sm:px-8 sm:py-20">
+      <SectionTitle id="get-work-title" number="01" eyebrow="For customers" heading="Get Work Handled" description="From home and property needs to business, real estate, events and institutional work: start with the outcome, not an internal service category." />
+      <div className="grid overflow-hidden rounded-3xl border border-[var(--dd-border-gold)] bg-[var(--dd-white)] shadow-sm md:grid-cols-[minmax(0,1.4fr)_minmax(280px,.8fr)]">
+        <div className="p-7 sm:p-10 lg:p-12">
+          <p className="text-xs font-bold uppercase tracking-[.2em] text-[var(--dd-gold)]">One request · Multiple service areas</p>
+          <h3 className="mt-4 text-3xl font-bold tracking-tight text-[var(--dd-burgundy-deep)] sm:text-4xl">Tell us what you need handled.</h3>
+          <p className="mt-5 max-w-xl text-base leading-8 text-[var(--dd-muted)]">{PATHS[0].detail}</p>
+          <Link to={intentFor(PATHS[0], search)} className={`${accentButton} mt-8`}>Request service <span aria-hidden="true">↗</span></Link>
+        </div>
+        <aside aria-label="Examples of supported customer needs" className="flex flex-col justify-center gap-5 bg-[var(--dd-cream)] p-7 sm:p-9">
+          <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--dd-burgundy)]">Across life's moving parts</p>
+          {['Home & resident support','Property & real estate operations','Business & administrative support','Events, print & production','Government & institutional requests'].map((label, i) => <div key={label} className="flex items-start gap-3 border-b border-[var(--dd-border-gold)] pb-4 last:border-0 last:pb-0"><span aria-hidden="true" className="mt-1 text-sm font-bold text-[var(--dd-gold)]">0{i+1}</span><span className="font-semibold text-[var(--dd-burgundy-deep)]">{label}</span></div>)}
+        </aside>
       </div>
     </section>
-    <section className="max-w-6xl mx-auto px-5 sm:px-8 py-12" aria-label="Choose how to connect">
-      <div className="grid gap-5 md:grid-cols-2">
-        {PATHS.map(item => <article key={item.title} className="rounded-[24px] border border-[color:var(--dd-border-gold)] bg-[var(--dd-white)] shadow-sm p-7 flex flex-col">
-          <h2 className="text-2xl font-bold text-[color:var(--dd-burgundy-deep)]">{item.title}</h2>
-          <p className="my-4 text-[color:var(--dd-muted)] leading-7 flex-1">{item.detail}</p>
-          <Link className="inline-flex justify-center rounded-xl bg-[var(--dd-burgundy)] px-5 py-3.5 text-white font-bold hover:bg-[var(--dd-burgundy-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--dd-burgundy)]"
-            to={destinationFor(item.path, search, { role:item.role, participation:item.participation, focus:item.focus, ...(item.provider ? { audience:'provider' } : {}) })}>{item.button} →</Link>
-        </article>)}
+
+    <section id="holiday-mission" aria-labelledby="holiday-title" className="scroll-mt-20 border-y border-[var(--dd-border-gold)] bg-[var(--dd-cream)] py-14 sm:py-20">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+        <SectionTitle id="holiday-title" number="02" eyebrow="Seasonal community initiative" heading="Join the Holiday Mission" description="Separate pathways for families, contributors, community organizations and volunteers. Participation is an expression of interest, not guaranteed assistance or an assignment." />
+        <div className="mb-7 grid gap-5 rounded-3xl border border-[var(--dd-border-gold)] bg-[var(--dd-burgundy-deep)] p-5 text-white shadow-sm sm:p-7 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--dd-gold-soft)]">Holiday 2026 · Community support</p>
+            <h3 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl">Your skills. Someone’s next step.</h3>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--dd-cream)]">DANI is developing local partnerships and resource coordination for families navigating homelessness or a transition into stable housing. No purchase is required.</p>
+            <p className="mt-4 text-sm leading-7 text-[var(--dd-cream)]">Contributor inquiries: <a href="mailto:vendors@danideclares.com?subject=Holiday%20Mission%20Contributor" className="font-bold text-[var(--dd-gold-soft)] underline underline-offset-4">vendors@danideclares.com</a></p>
+          </div>
+          <div className="mx-auto w-full max-w-[200px]">
+            <img src={approvedMissionFlyer} alt="Approved DANI Holiday Mission contributor flyer" className="h-auto w-full rounded-lg border border-[var(--dd-gold-soft)] bg-white object-contain" loading="lazy" />
+            <p className="mt-2 text-center text-[11px] text-[var(--dd-cream)]">Approved contributor artwork</p>
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {PATHS.slice(1,5).map((item,i)=><RouteCard key={item.title} item={item} search={search} compact index={i+1}/>)}
+        </div>
+        <div className="mt-6 rounded-xl border border-[var(--dd-border-gold)] bg-[var(--dd-white)] p-5 text-xs leading-6 text-[var(--dd-muted)]"><strong className="text-[var(--dd-burgundy-deep)]">Participation notice:</strong> This is an interest registry, not an approved aid program or guarantee of resources. Family information is collected separately from commercial leads. Contributor interest does not imply confirmed assignments.</div>
       </div>
-      <div className="mt-10 rounded-2xl border border-[color:var(--dd-border-gold)] bg-[var(--dd-cream)] p-6 text-sm leading-7 text-[color:var(--dd-muted)]">
-        <strong>Holiday 2026 mission:</strong> We are developing local partnerships and resource coordination for families experiencing homelessness or transitioning into stable housing. This is an interest registry, not an approved aid program or guarantee of resources. Family information is collected separately from commercial leads. Paid provider opportunities require their own application and approval.
+    </section>
+
+    <section id="work-with-dani" aria-labelledby="work-title" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-14 sm:px-8 sm:py-20">
+      <SectionTitle id="work-title" number="03" eyebrow="Professional relationships" heading="Work With DANI" description="Referrals, business partnerships, vendors, makers and independent providers have different processes. Select what you want to contribute or explore." />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {PATHS.slice(5).map((item,i)=><RouteCard key={item.title} item={item} search={search} compact index={i+1}/>)}
+      </div>
+      <div className="mt-8 rounded-2xl border border-[var(--dd-border-gold)] bg-[var(--dd-cream)] p-6 text-sm leading-7 text-[var(--dd-muted)]">
+        <strong className="text-[var(--dd-burgundy-deep)]">How these paths differ:</strong> Introductions and referrals are not paid arrangements unless separately agreed. Vendors and creative collaborators introduce capabilities for consideration. Independent service providers must complete separate qualification, documentation and authorization before any work assignment.
       </div>
     </section>
   </main>;
