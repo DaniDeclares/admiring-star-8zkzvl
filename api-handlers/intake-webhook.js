@@ -4,6 +4,7 @@ import { buildIntakeRoutingContext, routeIntake } from '../src/lib/operations/in
 import { getChannelGovernanceDecision, resolveCH01CommercialSelection, resolveVerifiedCommunity } from '../src/lib/operations/governedCommercialGate2026.js';
 import { publishOperationalEvent } from '../src/lib/operations/eventBroker2026.js';
 import { sanitizeMarketingAttribution } from '../src/lib/intakeAttribution.js';
+import { validateGeneralProjectIntake } from '../src/lib/operations/generalProjectIntake2026.js';
 import { captureServerException, flushServerSentry } from '../src/lib/serverSentry.js';
 
 function specialDuration(name, unit, price) {
@@ -64,12 +65,14 @@ export default async function handler(req,res){
  try{
   const {name,email,phone,category,serviceType,serviceId,pricingServiceId,commercialIntent,details,channelType,organizationName,locationAddress,locationCity,locationState,locationZip,timeline,budgetRange,requestedStartAt,commercialModel,subchannelCode,requestedTimezone='America/New_York',frontDoorCode,referralCode}=req.body||{};
   if(!name||(!email&&!phone))return res.status(400).json({error:'Please provide your name and at least one way to contact you.'});
+  const generalProject=validateGeneralProjectIntake(req.body||{});
+  if(!generalProject.allowed)return res.status(400).json({success:false,error:generalProject.reason});
   const normalizedState=String(locationState||'').trim().toUpperCase();
   const normalizedCity=String(locationCity||'').trim();
   const normalizedZip=String(locationZip||'').trim();
   const normalizedStreet=String(locationAddress||'').trim();
-  if(!normalizedStreet||!normalizedCity||!['GA','SC'].includes(normalizedState)||!/^[0-9]{5}(?:-[0-9]{4})?$/.test(normalizedZip))return res.status(400).json({error:'Please provide the complete Georgia or South Carolina service address, including city, state, and ZIP.'});
-  const fullServiceAddress=[normalizedStreet,normalizedCity,normalizedState,normalizedZip].join(', ');
+  if(!generalProject.isGeneral&&(!normalizedStreet||!normalizedCity||!['GA','SC'].includes(normalizedState)||!/^[0-9]{5}(?:-[0-9]{4})?$/.test(normalizedZip)))return res.status(400).json({error:'Please provide the complete Georgia or South Carolina service address, including city, state, and ZIP.'});
+  const fullServiceAddress=generalProject.isGeneral?generalProject.locationAddress:[normalizedStreet,normalizedCity,normalizedState,normalizedZip].join(', ');
 
   const routing=routeIntake({channelType,category,commercialModel});
   const channelToCode={B2C:'CH01',B2B_APT:'CH02',B2B_RE:'CH03',B2B:'CH04',B2G:'CH05'};
@@ -111,14 +114,14 @@ export default async function handler(req,res){
    const channelGovernance=await getChannelGovernanceDecision(serviceRef,'CH02');
    if(!channelGovernance.allowed)return res.status(409).json({success:false,error:'This property-management service is not currently available through the selected service path.',gateReason:channelGovernance.reason});
   }
-  const paymentEligible=channelType==='B2C'&&frozenPrice!=null;
+  const paymentEligible=!generalProject.isGeneral&&channelType==='B2C'&&frozenPrice!=null;
   const requestState=paymentEligible?'payment_pending':routing.initialState.toLowerCase();
   const normalizedReferralCode=/^[A-Za-z0-9_-]{4,64}$/.test(String(referralCode||'').trim())?String(referralCode).trim():null;
   let booking=null;
   let referralAttribution=null;
   const result=await prisma.$transaction(async tx=>{
    const lead=await tx.lead.create({data:{full_name:name,email:email||null,phone:phone||null,organization_name:organizationName||null,status:'new',notes:null}});
-   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:fullServiceAddress,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{operationsRouting:{...routingContext,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null},pricingServiceId:serviceRef,commercialIntent:serverCommercialIntent,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode,marketingAttribution:sanitizeMarketingAttribution(req.body?.marketingAttribution),serviceAddress:{street:normalizedStreet,city:normalizedCity,state:normalizedState,zip:normalizedZip}},status:requestState,priority:'normal',channelType:channelType||null,officialChannel:governedChannelCode,commercialModel:routingContext.commercialModel||null,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null,jurisdictionState:normalizedState,organizationId:portalOrganizationId||null}});
+   const request=await tx.serviceRequest.create({data:{leadId:lead.id,service_category:category||null,service_needed:serviceType||category||null,location_address:fullServiceAddress,timeline:timeline||null,budget_range:budgetRange||null,request_details:details||'Service request submitted via website.',property_details:{requestMode:generalProject.isGeneral?'GENERAL_PROJECT':'SPECIFIC_SERVICE',operationsRouting:{...routingContext,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null},pricingServiceId:serviceRef,commercialIntent:serverCommercialIntent,requestedStartAt:requestedStartAt||null,requestedTimezone,bookingStatus:requestedStartAt?'HOLD_REQUESTED':'NOT_REQUESTED',frontDoorCode:frontDoorCode||null,governedChannelCode,marketingAttribution:sanitizeMarketingAttribution(req.body?.marketingAttribution),serviceAddress:{street:normalizedStreet,city:normalizedCity,state:normalizedState,zip:normalizedZip}},status:requestState,priority:'normal',channelType:channelType||null,officialChannel:governedChannelCode,commercialModel:routingContext.commercialModel||null,subchannelCode:serverCommercialIntent?.subchannelCode||subchannelCode||null,jurisdictionState:generalProject.isGeneral&&!normalizedCity&&!normalizedZip?null:normalizedState,organizationId:portalOrganizationId||null}});
    
    if(paymentEligible){await tx.dd_estimates.create({data:{division_slug:'concierge',lead_id:lead.id,service_request_id:request.id,client_name:name,client_phone:phone||'',client_email:email||'',client_type:'B2C',organization_name:organizationName||null,location_address:fullServiceAddress,timeline:timeline||null,state:normalizedState,zip_code:normalizedZip,intake_answers:{serviceId:serviceRef,commercialIntent:serverCommercialIntent,serviceAddress:{street:normalizedStreet,city:normalizedCity,state:normalizedState,zip:normalizedZip}},client_notes:details||null,estimate_status:'approved',priority:'normal',base_subtotal:frozenPrice,estimated_total:frozenPrice,deposit_due:frozenPrice}});}
    if(normalizedReferralCode){
@@ -176,7 +179,7 @@ export default async function handler(req,res){
    return {lead,request};
   });
   const request=result.request;
-  const notificationText=['New DANI DECLARES service request',`Name: ${name}`,`Email: ${email||'not provided'}`,`Phone: ${phone||'not provided'}`,`Customer type: ${channelType||'not specified'}`,`Starting point: ${frontDoorCode||'not specified'}`,`Service: ${serviceType||category||'not specified'}`,`Service reference: ${serviceRef||'not specified'}`,`Location: ${fullServiceAddress}`,`Requested date/time: ${requestedStartAt||'not provided'}`,`Timeline: ${timeline||'not provided'}`,`Budget: ${budgetRange||'not provided'}`,`Request ID: ${request.id}`,`Booking hold: ${booking?.id||'none'}`].join('\n');
+  const notificationText=['New DANI DECLARES service request',`Name: ${name}`,`Email: ${email||'not provided'}`,`Phone: ${phone||'not provided'}`,`Customer type: ${channelType||'not specified'}`,`Starting point: ${frontDoorCode||'not specified'}`,`Service: ${serviceType||category||'not specified'}`,`Service reference: ${serviceRef||'not specified'}`,`Location: ${fullServiceAddress||'To be confirmed during scope review'}`,`Requested date/time: ${requestedStartAt||'not provided'}`,`Timeline: ${timeline||'not provided'}`,`Budget: ${budgetRange||'not provided'}`,`Request ID: ${request.id}`,`Booking hold: ${booking?.id||'none'}`].join('\n');
   if(!req.__daniTesterProof){
   try{
    if(process.env.NOTIFICATION_EMAIL)await publishOperationalEvent({
@@ -199,7 +202,7 @@ export default async function handler(req,res){
        frontDoorCode:frontDoorCode||'not specified',
        service:serviceType||category||'not specified',
        serviceReference:serviceRef||'not specified',
-       location:locationAddress||'not provided',
+       location:fullServiceAddress||'To be confirmed',
        requestedStartAt:requestedStartAt||null,
        timeline:timeline||'not provided',
        budget:budgetRange||'not provided',
@@ -217,7 +220,7 @@ export default async function handler(req,res){
      `Request ID: ${request.id}`,
      `Service: ${serviceType||category||'Request received'}`,
      `Requested date/time: ${requestedStartAt||'Not specified'}`,
-     `Location: ${fullServiceAddress}`,
+     `Location: ${fullServiceAddress||'To be confirmed during scope review'}`,
      '',
      'Your requested time is not a final appointment until DANI DECLARES confirms scope, availability and scheduling.',
      'We will follow up with the next step for your request.',
