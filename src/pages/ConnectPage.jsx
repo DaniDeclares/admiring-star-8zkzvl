@@ -19,9 +19,11 @@ export function destinationFor(path, search, extra = {}) {
   const input = new URLSearchParams(search);
   const output = new URLSearchParams();
   ATTR.forEach(key => { if (input.get(key)) output.set(key, input.get(key).slice(0, 120)); });
-  if (!output.get('utm_campaign')) output.set('utm_campaign', 'holiday-2026');
+  // Campaign attribution is evidence of the visitor's incoming source, never a default
+  // inferred from passing through DANI's permanent Connect & Join gateway.
   for (const [key, value] of Object.entries(extra)) if (value) output.set(key, value);
-  return path + '?' + output.toString();
+  const query = output.toString();
+  return query ? path + '?' + query : path;
 }
 export default function ConnectPage() {
   const { search } = useLocation();
