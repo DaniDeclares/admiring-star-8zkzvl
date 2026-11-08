@@ -113,13 +113,13 @@ export default function HomePage() {
       <nav aria-label="Explore DANI services and products" className="border-y border-[#e1d2b5] bg-white">
         <div className="mx-auto grid max-w-7xl gap-4 px-5 py-7 sm:grid-cols-3 sm:px-8">
           <Link to="/catalog" className="group flex items-center justify-between gap-4 rounded-2xl border border-[#e8d6b2] bg-[#fbf8f1] px-5 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">
-            <span><span className="block text-xs font-black uppercase tracking-widest text-[#986d20]">Find a service</span><strong className="mt-1 block text-lg text-[#45141d]">Browse the full catalog</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
+            <span><span className="block text-xs font-black uppercase tracking-widest text-[var(--dd-burgundy)]">Find a service</span><strong className="mt-1 block text-lg text-[#45141d]">Browse the full catalog</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
           </Link>
           <Link to="/packages" className="group flex items-center justify-between gap-4 rounded-2xl border border-[#e8d6b2] bg-[#fbf8f1] px-5 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">
-            <span><span className="block text-xs font-black uppercase tracking-widest text-[#986d20]">Define an outcome</span><strong className="mt-1 block text-lg text-[#45141d]">Define a package scope</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
+            <span><span className="block text-xs font-black uppercase tracking-widest text-[var(--dd-burgundy)]">Define an outcome</span><strong className="mt-1 block text-lg text-[#45141d]">Define a package scope</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
           </Link>
           <Link to="/shop" className="group flex items-center justify-between gap-4 rounded-2xl border border-[#e8d6b2] bg-[#fbf8f1] px-5 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">
-            <span><span className="block text-xs font-black uppercase tracking-widest text-[#986d20]">Products & downloads</span><strong className="mt-1 block text-lg text-[#45141d]">Visit the DANI shop</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
+            <span><span className="block text-xs font-black uppercase tracking-widest text-[var(--dd-burgundy)]">Products & downloads</span><strong className="mt-1 block text-lg text-[#45141d]">Visit the DANI shop</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
       </nav>

@@ -63,3 +63,11 @@ test('contact stays an intake form while using approved visual style and no 24-h
   expect(html).toContain('<form');
   ['business','property','notary','creative','events'].forEach(label=>expect(html).toContain('value="'+label+'"'));
 });
+
+test('small labels use approved contrasting burgundy rather than low-contrast gold on pale backgrounds', () => {
+  for (const page of [<HomePage/>,<AboutPage/>,<ContactPage/>]) {
+    const markup = htmlFor(page);
+    expect(markup).not.toContain('text-[#986d20]');
+    expect(markup).not.toContain('text-[#967022]');
+  }
+});

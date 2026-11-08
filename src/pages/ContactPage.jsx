@@ -67,7 +67,7 @@ export default function ContactPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-12 grid items-center gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,.85fr)]">
           <div>
-            <p className="text-xs font-black uppercase tracking-[.19em] text-[#967022]">DANI DECLARES LLC · Get in touch</p>
+            <p className="text-xs font-black uppercase tracking-[.19em] text-[var(--dd-burgundy)]">DANI DECLARES LLC · Get in touch</p>
             <h1 className="mt-4 text-4xl font-black leading-tight text-[#45141d] sm:text-5xl">Tell us what you need handled.</h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-[#6e6264]">Home, property, real estate, business, event or institutional work—share the details so the request can follow the right service and review process.</p>
             <Link to="/catalog" className="mt-6 inline-flex items-center rounded-xl border border-[#b38a2d] bg-white px-5 py-3 text-sm font-black text-[#6b1f2b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">Browse DANI's service areas →</Link>

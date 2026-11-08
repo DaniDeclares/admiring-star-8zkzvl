@@ -35,7 +35,7 @@ export default function AboutPage() {
     </section>
     <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
       <div className="max-w-3xl">
-        <p className="text-xs font-black uppercase tracking-[.2em] text-[#967022]">Our approach</p>
+        <p className="text-xs font-black uppercase tracking-[.2em] text-[var(--dd-burgundy)]">Our approach</p>
         <h2 className="mt-3 text-3xl font-black text-[#45141d] sm:text-4xl">Different needs. A defined next step.</h2>
         <p className="mt-4 text-base leading-8 text-[#6e6264]">DANI is a multi-service execution business, not one service category. The right response depends on who is requesting work, the actual scope, location, availability and applicable approval requirements.</p>
       </div>
@@ -50,7 +50,7 @@ export default function AboutPage() {
     <section className="border-y border-[#e1d2b5] bg-[#f2eadc]">
       <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 py-14 sm:px-8 lg:grid-cols-[1.1fr_.9fr]">
         <div>
-          <p className="text-xs font-black uppercase tracking-[.2em] text-[#967022]">Clear relationships</p>
+          <p className="text-xs font-black uppercase tracking-[.2em] text-[var(--dd-burgundy)]">Clear relationships</p>
           <h2 className="mt-3 text-3xl font-black text-[#45141d]">Work with DANI, in the right way.</h2>
           <p className="mt-4 leading-8 text-[#6e6264]">Customer requests, community participation, referral conversations and independent-provider applications have different entry and approval paths. Each should reach the right team and process.</p>
         </div>
