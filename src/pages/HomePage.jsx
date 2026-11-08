@@ -42,7 +42,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-5 sm:px-8 py-20 md:py-28 grid lg:grid-cols-[1.15fr_.85fr] gap-12 items-end">
           <div>
             <p className="text-[#e5d2a5] text-xs font-black uppercase tracking-[.22em]">DANI DECLARES • OPERATIONS • EXECUTION • SUPPORT</p>
-            <h1 className="mt-5 max-w-5xl text-5xl sm:text-6xl md:text-7xl font-black leading-[.95]">
+            <h1 style={{color: "#ffffff"}} className="mt-5 max-w-5xl text-5xl sm:text-6xl md:text-7xl font-black leading-[.95]">
               More work handled.
               <span className="block text-[#d9b65a]">Less on your plate.</span>
             </h1>
@@ -59,8 +59,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/15 bg-white/8 p-7 md:p-8 backdrop-blur">
-            <p className="text-[#e5d2a5] text-xs font-black uppercase tracking-[.18em]">One accountable starting point</p>
+          <div className="rounded-3xl border border-white/20 bg-white/8 p-5 md:p-7 backdrop-blur">
+            <div className="grid grid-cols-3 gap-2 overflow-hidden rounded-2xl" aria-label="Examples of household, property and event work">
+              <img src="/images/dani-batch/pexels-rdne-5591641.jpg" alt="Organizing household storage" className="h-36 w-full object-cover sm:h-44" loading="eager" />
+              <img src="/images/dani-batch/pexels-pavel-danilyuk-7937330.jpg" alt="Property professionals walking through a space" className="h-36 w-full object-cover sm:h-44" loading="eager" />
+              <img src="/images/dani-batch/pexels-thirdman-8469939.jpg" alt="People enjoying an event together" className="h-36 w-full object-cover sm:h-44" loading="eager" />
+            </div>
+            <p className="mt-3 text-[11px] leading-5 text-white/65">Illustrative photography of service settings—not DANI staff or past client projects.</p>
+            <p className="mt-5 text-[#e5d2a5] text-xs font-black uppercase tracking-[.18em]">One accountable starting point</p>
             <h2 className="mt-3 text-3xl font-black text-white">Home. Property. Business. Real estate. Institutions.</h2>
             <p className="mt-4 text-white/70 leading-relaxed">
               Different customers need different solutions. The experience stays simple: explain the need, get the right path, confirm the scope, and move forward.
@@ -103,6 +109,20 @@ export default function HomePage() {
           })}
         </div>
       </section>
+
+      <nav aria-label="Explore DANI services and products" className="border-y border-[#e1d2b5] bg-white">
+        <div className="mx-auto grid max-w-7xl gap-4 px-5 py-7 sm:grid-cols-3 sm:px-8">
+          <Link to="/catalog" className="group flex items-center justify-between gap-4 rounded-2xl border border-[#e8d6b2] bg-[#fbf8f1] px-5 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">
+            <span><span className="block text-xs font-black uppercase tracking-widest text-[#986d20]">Find a service</span><strong className="mt-1 block text-lg text-[#45141d]">Browse the full catalog</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
+          </Link>
+          <Link to="/packages" className="group flex items-center justify-between gap-4 rounded-2xl border border-[#e8d6b2] bg-[#fbf8f1] px-5 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">
+            <span><span className="block text-xs font-black uppercase tracking-widest text-[#986d20]">Define an outcome</span><strong className="mt-1 block text-lg text-[#45141d]">Define a package scope</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
+          </Link>
+          <Link to="/shop" className="group flex items-center justify-between gap-4 rounded-2xl border border-[#e8d6b2] bg-[#fbf8f1] px-5 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">
+            <span><span className="block text-xs font-black uppercase tracking-widest text-[#986d20]">Products & downloads</span><strong className="mt-1 block text-lg text-[#45141d]">Visit the DANI shop</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
+          </Link>
+        </div>
+      </nav>
 
       <section className="bg-[#f2eadc] border-y border-[#e1d2b5]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-20">
