@@ -233,11 +233,21 @@ export function createGovernedWorkerAdapters(options = {}) {
     async execute({ claimRef, workerId, step }) {
       if (!hasText(claimRef)) throw new Error('MISSING_CLAIM');
       if (step !== 'Inspect repository governance and bridge files') throw new Error('STEP_OUTSIDE_SCOPE');
-      return runRepoInspectionReport({
+      const result = await runRepoInspectionReport({
         assignmentId: claimRef,
         authorityRef: 'local-or-control-plane',
         outDir: artifactDir,
       });
+      // Persist artifact path on the claim so deliver can retrieve it across processes.
+      const local = await loadLocalState();
+      for (const [k, v] of Object.entries(local)) {
+        if (v.claimRef === claimRef) {
+          local[k] = { ...v, artifactPath: result.artifactPath };
+          await saveLocalState(local);
+          break;
+        }
+      }
+      return result;
     },
 
     async verify({ claimRef, result, expectedOutcome }) {
@@ -381,21 +391,6 @@ export async function executeDeterministicInspectionStep(
       step,
       scope: current.scope,
     });
-    const localPath = join(
-      process.env.DANI_WORKER_ARTIFACT_DIR || join(process.cwd(), 'artifacts', 'governed-worker'),
-      'local-assignment-state.json',
-    );
-    try {
-      const raw = await readFile(localPath, 'utf8');
-      const state = JSON.parse(raw);
-      const key = `${current.authorityRef}::${current.assignmentId}`;
-      if (state[key]) {
-        state[key].artifactPath = result.artifactPath;
-        await writeFile(localPath, JSON.stringify(state, null, 2), 'utf8');
-      }
-    } catch {
-      /* best-effort */
-    }
     proof = await adapters.verify({
       claimRef: claim.claimRef,
       result,
