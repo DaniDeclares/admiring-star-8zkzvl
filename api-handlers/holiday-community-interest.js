@@ -41,19 +41,42 @@ export async function handleHolidayCommunityInterest(req, res, { adminClient=def
     .eq('email',record.email).eq('role',record.role).gte('created_at',yesterday)
     .order('created_at',{ascending:false}).limit(1);
   if(previous.error) return res.status(503).json({ error:'Online registration is unavailable. Please try again later.' });
-  if(previous.data?.length) return res.status(200).json({ success:true }); // No record ID or existence signal for public email probing.
-  const inserted = await admin.from('dd_holiday_community_interests').insert(record).select('id').single();
-  if(inserted.error) { console.error('Holiday community interest persistence failed',inserted.error.code); return res.status(503).json({ error:'Your interest could not be saved. Please try again later.' }); }
-  // Fail-safe owner receipt: failure is logged but never represented as delivered.
+
+  let interestId = previous.data?.[0]?.id;
+  if (!interestId) {
+    const inserted = await admin.from('dd_holiday_community_interests').insert(record).select('id').single();
+    if(inserted.error) {
+      console.error('Holiday community interest persistence failed',inserted.error.code);
+      return res.status(503).json({ error:'Your interest could not be saved. Please try again later.' });
+    }
+    interestId = inserted.data.id;
+  } else {
+    // A prior private write may have lost its Owner HQ notification.
+    // Confirm the existing queue receipt before acknowledging a duplicate.
+    const earlierAttention = await admin.from('dd_owner_attention_queue').select('id')
+      .eq('source_table','dd_holiday_community_interests')
+      .eq('source_record_id',interestId).limit(1);
+    if (earlierAttention.error) {
+      console.error('Holiday community owner attention lookup failed',earlierAttention.error.code);
+      return res.status(503).json({ error:'Your interest could not be confirmed. Please try again later.' });
+    }
+    if (earlierAttention.data?.length) return res.status(200).json({ success:true });
+  }
+
   const attention = await admin.from('dd_owner_attention_queue').insert({
-    domain: 'COMMUNICATIONS',
+    domain:'COMMUNICATIONS',
     source_table:'dd_holiday_community_interests',
-    source_record_id:inserted.data.id,
-    reason:'New Holiday 2026 community interest — '+record.role+' / '+record.city,
+    source_record_id:interestId,
+    reason:'New Holiday 2026 community interest - '+record.role+' / '+record.city,
     priority:'NORMAL',
     recommended_action:'Review privately. Do not promise family aid, award referral commissions, or authorize vendors/providers from this inquiry.',
     metadata:{ role:record.role, area:record.area, source:record.source, attribution:record.attribution },
   });
-  if(attention.error) console.error('Holiday community owner attention enqueue failed',attention.error.code);
-  return res.status(200).json({ success:true }); // Same public success shape for new and repeat submissions.
+  if (attention.error) {
+    // Keep the private record for recovery, but do not imply owner notification.
+    // A repeat submission can retry the missing owner receipt.
+    console.error('Holiday community owner attention enqueue failed',attention.error.code);
+    return res.status(503).json({ error:'Your interest was saved, but follow-up could not be confirmed. Please try again later.' });
+  }
+  return res.status(200).json({ success:true });
 }

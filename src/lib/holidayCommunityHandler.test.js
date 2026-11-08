@@ -1,11 +1,11 @@
 import { handleHolidayCommunityInterest } from '../../api-handlers/holiday-community-interest.js';
 
-function fakeAdmin({ recent=false, failInsert=false, failAttention=false } = {}) {
+function fakeAdmin({ recent=false, failInsert=false, failAttention=false, attentionExists=true, failAttentionLookup=false } = {}) {
  const writes = [];
  const admin = { from(table) {
   const q = {
    select() { return q; }, eq() { return q; }, gte() { return q; }, order() { return q; },
-   limit() { return Promise.resolve({data: recent ? [{id:'earlier-secret-id'}] : [], error:null}); },
+   limit() { if(table === 'dd_owner_attention_queue') return Promise.resolve(failAttentionLookup ? {data:null,error:{code:'ATTENTION_LOOKUP_FAILED'}} : {data:attentionExists?[{id:'earlier-attention-id'}]:[],error:null}); return Promise.resolve({data: recent ? [{id:'earlier-secret-id'}] : [], error:null}); },
    insert(row) {
     writes.push({table,row});
     if(table === 'dd_holiday_community_interests') return {
@@ -68,10 +68,27 @@ describe('Holiday 2026 community intake privacy and routing',()=>{
   expect(res.statusCode).toBe(503);
   expect(writes.map(x=>x.table)).toEqual(['dd_holiday_community_interests']);
  });
- test('owner alert failure never loses persisted interest',async()=>{
+ test('owner alert failure keeps interest but does not report success',async()=>{
   const {res,writes}=await run(valid(),{failAttention:true});
-  expect(res.statusCode).toBe(200);
+  expect(res.statusCode).toBe(503);
   expect(writes.map(x=>x.table)).toEqual(['dd_holiday_community_interests','dd_owner_attention_queue']);
+ });
+ test('repeat with missing owner receipt repairs notification without new interest',async()=>{
+  const {res,writes}=await run(valid(),{recent:true,attentionExists:false});
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual({success:true});
+  expect(writes.map(x=>x.table)).toEqual(['dd_owner_attention_queue']);
+  expect(writes[0].row.source_record_id).toBe('earlier-secret-id');
+ });
+ test('failed repeat notification repair does not claim success',async()=>{
+  const {res,writes}=await run(valid(),{recent:true,attentionExists:false,failAttention:true});
+  expect(res.statusCode).toBe(503);
+  expect(writes.map(x=>x.table)).toEqual(['dd_owner_attention_queue']);
+ });
+ test('failed owner receipt lookup prevents redundant notification',async()=>{
+  const {res,writes}=await run(valid(),{recent:true,failAttentionLookup:true});
+  expect(res.statusCode).toBe(503);
+  expect(writes).toEqual([]);
  });
  test('GET does not accept community submissions',async()=>{
   const res=fakeRes();
