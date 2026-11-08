@@ -80,10 +80,12 @@ export async function reconcileHolidayResourceReplies(supabase,{days=45,limit=10
       const item=attention[0];
       const note='Holiday Mission: organization offered adult education/workforce resources; review source email and respondent intake.';
       const action='Review Gmail thread; invite respondent to the existing community-organization form. A matching form is review-only until identity and resources are verified. Do not send automatically.';
+      // Do not overwrite an urgent/qualified attention reason from the existing controller.
+      const reason=item.reason==='Inbound business email requires triage.' ? note : item.reason;
       const metadata={...(item.metadata||{}),holiday_mission:proposed};
-      if(item.reason!==note || item.recommended_action!==action || !eq(item.metadata?.holiday_mission,proposed)){
+      if(item.reason!==reason || item.recommended_action!==action || !eq(item.metadata?.holiday_mission,proposed)){
         const {error:attentionWriteError}=await supabase.from('dd_owner_attention_queue')
-          .update({reason:note,recommended_action:action,metadata}).eq('id',item.id);
+          .update({reason,recommended_action:action,metadata}).eq('id',item.id);
         if(attentionWriteError)throw attentionWriteError;
       }
     }
