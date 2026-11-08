@@ -5,6 +5,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import HomePage from './HomePage';
 import CommercialCatalogPage from './CommercialCatalogPage';
 import PackagesPage from './PackagesPage';
+import AboutPage from './AboutPage';
+import ContactPage from './ContactPage';
 
 const htmlFor = (component) => renderToStaticMarkup(
   <HelmetProvider><MemoryRouter>{component}</MemoryRouter></HelmetProvider>
@@ -39,4 +41,25 @@ test('packages explains scope requirements without implying fixed packages', () 
   expect(html).toContain('confirm an approved scope and quote before booking');
   expect(html).toContain('Search the full catalog to define your package scope');
   expect((html.match(/<main\b/g)||[])).toHaveLength(1);
+});
+
+test('about presents the full business and separates customers from partnerships', () => {
+  const html=htmlFor(<AboutPage/>);
+  expect(html).toContain('We Handle The Execution');
+  ['People &amp; households','Properties &amp; real estate','Businesses &amp; institutions'].forEach(label=>expect(html).toContain(label));
+  expect(html).toContain('href="/request-service"');
+  expect(html).toContain('href="/connect"');
+  expect(html).toContain('Illustrative service photography');
+  expect(html).not.toContain('Full-scale vendor coordination');
+});
+
+test('contact stays an intake form while using approved visual style and no 24-hour promise', () => {
+  const html=htmlFor(<ContactPage/>);
+  expect(html).toContain('Tell us what you need handled.');
+  expect(html).toContain('Share the details');
+  expect(html).toContain('Send your request');
+  expect(html).toContain('Metro Atlanta, Georgia');
+  expect(html).not.toContain('within 24 hours');
+  expect(html).toContain('<form');
+  ['business','property','notary','creative','events'].forEach(label=>expect(html).toContain('value="'+label+'"'));
 });
