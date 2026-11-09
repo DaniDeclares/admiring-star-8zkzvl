@@ -250,7 +250,7 @@ async function getOwnerControlSnapshot(supabase) {
       .select('id,exception_type,source_system,description,assigned_lane,status,requires_owner_decision,resolution,created_at,updated_at')
       .not('status','in','("RESOLVED","CLOSED")').order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_communication_events')
-      .select('id,direction,external_message_id,external_thread_id,sender_address,subject,relationship_type,provider_id,priority,requires_attention,attention_reason,received_at,created_at')
+      .select('id,direction,external_message_id,external_thread_id,sender_address,subject,relationship_type,provider_id,priority,requires_attention,attention_reason,classification,received_at,created_at')
       .eq('requires_attention', true).order('created_at', { ascending: false }).limit(100),
     supabase.from('dd_agent_run_control')
       .select('id,agent_key,stage_key,status,turns_used,tool_calls_used,retries_used,estimated_cost_usd,breaker_reason,fallback_used,started_at,last_activity_at,completed_at')
