@@ -132,6 +132,8 @@ export default function App() {
         <Route path="/portal/providers" element={<PortalAccessRoute />} />
         <Route path="/portal/partners" element={<PortalAccessRoute />} />
         <Route path="/portal/login" element={<PortalLoginPage />} />
+        <Route path="/sign-in" element={<Navigate to="/portal/login" replace />} />
+        <Route path="/login" element={<Navigate to="/portal/login" replace />} />
         <Route path="/portal/forgot-password" element={<PortalForgotPasswordPage />} />
         <Route path="/portal/reset-password" element={<PortalResetPasswordPage />} />
         <Route path="/portal/support-recovery" element={<PortalSupportRecoveryPage />} />
@@ -170,8 +172,8 @@ export default function App() {
         <Route path="/portal/procurement" element={<PortalWorkspacePage />} />
         <Route path="/weddings" element={<WeddingsPage />} />
         <Route path="/events/weddings" element={<WeddingsPage />} />
-        <Route path="/events/festivals" element={<Navigate to="/request-service" replace />} />
-        <Route path="/festival" element={<Navigate to="/request-service" replace />} />
+        <Route path="/events/festivals" element={<Navigate to="/services/events" replace />} />
+        <Route path="/festival" element={<Navigate to="/services/events" replace />} />
         <Route path="/book" element={<BookRedirect />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/travel-quote" element={<Navigate to="/request-service" replace />} />

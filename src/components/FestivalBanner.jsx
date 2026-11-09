@@ -48,7 +48,7 @@ export default function FestivalBanner() {
           </span>
         )}
 
-        <Link to="/festival" className="festival-cta">
+        <Link to="/services/events" className="festival-cta">
           Get Tickets
         </Link>
       </div>

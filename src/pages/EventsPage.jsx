@@ -16,7 +16,7 @@ export default function EventsPage() {
             <Ticket className="w-10 h-10 text-amber-400 mb-4" />
             <h3 className="text-2xl font-bold text-white mb-2">Festivals & Major Public Events</h3>
             <p className="text-slate-400 text-sm mb-4">Turnkey production, vendor logistics, permitting, stage management, and crowd control for community events.</p>
-            <Link to="/festival" className="text-amber-400 text-sm font-bold inline-flex items-center">Explore Festival Operations <ArrowRight className="ml-1 w-4 h-4" /></Link>
+            <Link to="/request-service?channelType=B2B&audience=events" className="text-amber-400 text-sm font-bold inline-flex items-center">Explore Festival Operations <ArrowRight className="ml-1 w-4 h-4" /></Link>
           </div>
           <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800">
             <PartyPopper className="w-10 h-10 text-amber-400 mb-4" />

@@ -51,14 +51,14 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              to="/festival"
+              to="/services/events"
               className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition-all"
             >
               Festival Operations
               <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
             <Link
-              to="/book"
+              to="/request-service?channelType=B2B&audience=business"
               className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm transition-all border border-slate-700"
             >
               Start B2B Project
