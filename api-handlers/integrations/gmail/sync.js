@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { messageReceipt } from './_messageReceipt.mjs';
-import { reconcileHolidayResourceReplies } from './_holidayResourceReply.mjs';
+import { reconcileHolidayResourceReplies, assertHolidayGmailPreviewIsolation } from './_holidayResourceReply.mjs';
 import { decryptSecret, encryptSecret, ENVIRONMENT, logIntegrationEvent, requireStaff } from '../../_integrationOAuth.js';
 
 function adminClient() {
@@ -131,6 +131,9 @@ async function syncConnection(supabase, connection) {
 
 export default async function handler(req, res) {
   if (!['GET','POST'].includes(req.method)) return res.status(405).json({ success: false, error: 'Method not allowed' });
+  // Isolated Gmail testing must never inherit the OAuth bridge's PRODUCTION default.
+  try { assertHolidayGmailPreviewIsolation(); }
+  catch { return res.status(503).json({success:false,error:'GMAIL_PREVIEW_ISOLATION_UNPROVEN'}); }
   const supabase = adminClient();
   try {
     const cronAuthorized = process.env.CRON_SECRET && req.headers.authorization === 'Bearer ' + process.env.CRON_SECRET;

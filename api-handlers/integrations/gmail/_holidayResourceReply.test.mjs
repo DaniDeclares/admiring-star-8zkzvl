@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {classifyHolidayResourceReply,matchRespondentIntake,reconcileHolidayResourceReplies,HOLIDAY_ORGANIZATION_FORM} from './_holidayResourceReply.mjs';
+import {classifyHolidayResourceReply,matchRespondentIntake,reconcileHolidayResourceReplies,HOLIDAY_ORGANIZATION_FORM,assertHolidayGmailPreviewIsolation} from './_holidayResourceReply.mjs';
+test('Vercel Preview Gmail route refuses Production/default integration and wrong database before connection',()=>{
+ for(const config of [{VERCEL_ENV:'preview'}, {VERCEL_ENV:'preview',INTEGRATION_ENVIRONMENT:'PRODUCTION',SUPABASE_URL:'https://okvepooyxurujcwgfoju.supabase.co'},{VERCEL_ENV:'preview',INTEGRATION_ENVIRONMENT:'TESTER',SUPABASE_URL:'https://ajxezpczaemunlcmqlgl.supabase.co'}]){
+  assert.throws(()=>assertHolidayGmailPreviewIsolation(config),/GMAIL_PREVIEW_ISOLATION_UNPROVEN/);
+ }
+ assert.equal(assertHolidayGmailPreviewIsolation({VERCEL_ENV:'preview',INTEGRATION_ENVIRONMENT:'TESTER',SUPABASE_URL:'https://okvepooyxurujcwgfoju.supabase.co'}),true);
+});
 
 const email={id:'evt-1',direction:'INBOUND',external_message_id:'gmail-message-1',
  external_thread_id:'gmail-thread-77',sender_address:'resources@example.org',

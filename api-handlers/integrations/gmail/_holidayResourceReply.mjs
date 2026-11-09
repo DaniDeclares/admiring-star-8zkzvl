@@ -1,6 +1,17 @@
 // Narrow reconciliation on DANI's existing Gmail communication rail.
 // An email is evidence of an offer, NOT respondent form consent or partner approval.
 export const HOLIDAY_ORGANIZATION_FORM = 'https://danideclares.com/holiday/community?role=COMMUNITY_ORG';
+// The existing Gmail OAuth bridge defaults to PRODUCTION. A Vercel Preview must
+// never fall back to that environment or a Production database.
+export function assertHolidayGmailPreviewIsolation(env=process.env) {
+  if(env.VERCEL_ENV!=='preview') return true;
+  let host='';
+  try { host=new URL(env.SUPABASE_URL||'').hostname.toLowerCase(); } catch {}
+  if(env.INTEGRATION_ENVIRONMENT!=='TESTER' || host!=='okvepooyxurujcwgfoju.supabase.co') {
+    throw new Error('GMAIL_PREVIEW_ISOLATION_UNPROVEN');
+  }
+  return true;
+}
 const norm = v => String(v || '').trim().toLowerCase();
 const exactEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(norm(v)) ? norm(v) : null;
 
