@@ -58,7 +58,7 @@ export default function PartnerNetwork() {
   };
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div className={styles.wrap}>
         <header className={styles.hero}>
           <p className={styles.eyebrow}>Operation $1 Million Dollar Company</p>
@@ -160,6 +160,6 @@ export default function PartnerNetwork() {
           <p className={styles.fine}>DANI DECLARES LLC does not promise jobs, clients or income. Paid service work requires an approved provider application, signed agreement, tax form and any required documents. See our <Link to="/privacy">privacy policy</Link>.</p>
         </section>
       </div>
-    </main>
+    </div>
   );
 }
