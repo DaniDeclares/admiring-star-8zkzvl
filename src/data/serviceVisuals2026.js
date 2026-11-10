@@ -63,6 +63,7 @@ const FAMILY_VISUALS = {
   'Laundry & Organization': media('laundry-organize'),
   'Property, Facilities & Field Operations': media('prop-unit-turnover'),
   'Real Estate & Closing Support': media('real-estate-support'),
+  'Notary & Signing Services': media('op-notary-visit'),
   'Administrative & Business Operations': media('op-admin-support'),
   'Business Development & Growth': banner('Business Development & Growth', 'Business planning and growth strategy session'),
   'Business Formation & Digital Infrastructure': banner('Business Formation & Digital Infrastructure', 'Business formation and digital operations workspace'),
