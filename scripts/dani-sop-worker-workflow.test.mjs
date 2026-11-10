@@ -17,7 +17,7 @@ test('review never publishes a registry record or adds a schedule',()=>{
  const section=source.split(/\n  sop_draft_review:\n/)[1];
  assert.ok(section);
  assert.doesNotMatch(section,/dd_claim_external_actions|method: 'POST'|curl -X POST|airtable|merge|deploy/i);
- assert.match(section,/retention-days: 7/);
+ assert.match(section,/retention-days: 1/);
 });
 
 test('public repository SOP dispatch fails closed without source secrets',()=>{
