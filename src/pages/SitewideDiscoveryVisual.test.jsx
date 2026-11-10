@@ -24,6 +24,19 @@ test('home preserves full audience coverage while introducing image-led discover
   expect(html).toContain('not DANI staff or past client projects');
 });
 
+test('Holiday homepage keeps commercial offers separate from community Mission and reuses approved flyer', () => {
+  const html=htmlFor(<HomePage/>);
+  expect(html).toContain('Holiday 2026 · Two distinct ways to connect');
+  expect(html).toContain('Holiday services &amp; products');
+  expect(html).toContain('Holiday Mission · Community participation');
+  expect(html).toContain('Your Skills. Someone&#x27;s Next Step.');
+  expect(html).toContain('DANI_Holiday_Mission_Contributor_Flyer_2026_Approved.png');
+  expect(html).toContain('href="/holiday/community"');
+  expect(html).toContain('href="/shop"');
+  expect(html).toContain('href="/catalog"');
+  expect(html).toContain('not a guarantee of aid, funding or housing placement');
+});
+
 test('catalog is photo-led without changing service API, search, or main', () => {
   const html=htmlFor(<main><CommercialCatalogPage/></main>);
   expect(html).toContain('Find the work you need handled.');
