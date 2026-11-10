@@ -99,7 +99,7 @@ export default function PartnerNetwork() {
             <div className={styles.success} role="status">
               <strong>Thanks, {form.name.split(" ")[0] || "friend"}. We've got your interest.</strong>
               <p>{state.done.nextStepText || "Danielle's team reviews every submission and will reach out by email if there's a fit."}</p>
-              <p>{state.done.duplicate ? "We already have your recent submission, so we won't email you again today." : "We've also emailed you a copy."} Nothing has been promised or scheduled yet.</p>
+              <p>{state.done.duplicate ? "We already have your recent submission; no new submission was created." : "An email acknowledgment may follow; delivery is not confirmed on this screen."} Nothing has been promised or scheduled yet.</p>
               {state.done.nextStep && <>
                 <p>Ready to go further as a service provider? The full application covers your services, agreement and verification. You can save it and come back.</p>
                 <a className={styles.primaryLink} href={state.done.nextStep}>Start the provider application →</a>
