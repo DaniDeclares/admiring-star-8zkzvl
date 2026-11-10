@@ -145,6 +145,41 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="holiday-2026" aria-labelledby="holiday-pathways-title" className="border-y border-[#e1d2b5] bg-[#fff5e9]">
+        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 md:py-20">
+          <p className="text-xs font-black uppercase tracking-[.18em] text-[var(--dd-burgundy)]">Holiday 2026 · Two distinct ways to connect</p>
+          <h2 id="holiday-pathways-title" className="mt-3 max-w-3xl text-3xl font-black text-[#45141d] sm:text-4xl">Holiday work to handle. Community steps to take.</h2>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-[#6e6264]">DANI's seasonal services and shop are commercial offerings. The Holiday Mission is a separate community initiative; no purchase or donation is required to participate.</p>
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <article className="flex flex-col justify-between rounded-3xl border border-[#e8d6b2] bg-white p-6 shadow-sm sm:p-8">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.15em] text-[var(--dd-burgundy)]">Holiday services &amp; products</p>
+                <h3 className="mt-3 text-2xl font-black text-[#45141d]">Let DANI handle the seasonal work.</h3>
+                <p className="mt-4 text-sm leading-7 text-[#6e6264]">Explore seasonal preparation, events, home services, printing, merchandise and digital products. Scope, availability, and prices are confirmed through the appropriate service or shop process.</p>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link to="/catalog" className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-[#6b1f2b] px-5 py-3 text-sm font-black text-white">Explore services <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/shop" className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-[#6b1f2b] px-5 py-3 text-sm font-black text-[#6b1f2b]">Shop DANI</Link>
+              </div>
+            </article>
+            <article className="grid overflow-hidden rounded-3xl border border-[#e8d6b2] bg-white shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(160px,.75fr)]">
+              <div className="flex flex-col justify-between p-6 sm:p-8">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[.15em] text-[var(--dd-burgundy)]">Holiday Mission · Community participation</p>
+                  <h3 className="mt-3 text-2xl font-black text-[#45141d]">Your Skills. Someone's Next Step.</h3>
+                  <p className="mt-4 text-sm leading-7 text-[#6e6264]">Families, volunteers, businesses and organizations can privately express interest or offer skills, resources and introductions. This is not a guarantee of aid, funding or housing placement.</p>
+                </div>
+                <Link to="/holiday/community" className="mt-6 inline-flex min-h-[44px] items-center justify-center self-start rounded-xl bg-[#6b1f2b] px-5 py-3 text-sm font-black text-white">Explore the Holiday Mission <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </div>
+              <figure className="flex min-h-[220px] flex-col justify-center bg-[#f7ebdc] p-4">
+                <img src="https://cdn.shopify.com/s/files/1/0763/0825/0763/files/DANI_Holiday_Mission_Contributor_Flyer_2026_Approved.png?v=1794112626" alt="Approved DANI Holiday Mission contributor flyer" loading="lazy" className="h-auto w-full rounded-lg object-contain" />
+                <figcaption className="mt-2 text-center text-xs text-[#6e6264]">Approved Holiday Mission invitation</figcaption>
+              </figure>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section className="max-w-6xl mx-auto px-5 sm:px-8 py-16 md:py-20">
         <div className="max-w-3xl">
           <p className="text-[#a17a2a] text-xs font-black uppercase tracking-[.18em]">How it works</p>
