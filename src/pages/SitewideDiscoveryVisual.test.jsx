@@ -7,6 +7,8 @@ import CommercialCatalogPage from './CommercialCatalogPage';
 import PackagesPage from './PackagesPage';
 import AboutPage from './AboutPage';
 import ContactPage from './ContactPage';
+import { getFamilyVisuals } from '../data/serviceVisuals2026.js';
+import { bucketByKey } from '../data/serviceCatalogFamilies.js';
 
 const htmlFor = (component) => renderToStaticMarkup(
   <HelmetProvider><MemoryRouter>{component}</MemoryRouter></HelmetProvider>
@@ -40,11 +42,25 @@ test('Holiday homepage keeps commercial offers separate from community Mission a
 test('catalog is photo-led without changing service API, search, or main', () => {
   const html=htmlFor(<main><CommercialCatalogPage/></main>);
   expect(html).toContain('Find the work you need handled.');
-  expect(html).toContain('pexels-pavel-danilyuk-7937330.jpg');
+  expect(html).toContain('pexels-pavel-danilyuk-7937734.jpg');
   expect(html).toContain('Search services');
   expect(html).toContain('id="service-discovery"');
   expect(html).toContain('href="/request-service"');
   expect((html.match(/<main\b/g)||[])).toHaveLength(1);
+});
+
+test('catalog notary card does not reuse real estate or catalog hero photography', () => {
+  const notary=bucketByKey('notary-signing');
+  const realEstate=bucketByKey('real-estate-closing');
+  expect(notary.visualFamily).toBe('Notary & Signing Services');
+  const notaryImage=getFamilyVisuals(notary.visualFamily)[0].imageUrl;
+  const realEstateImage=getFamilyVisuals(realEstate.visualFamily)[0].imageUrl;
+  expect(notaryImage).toContain('mobile-notary-public.jpg');
+  expect(realEstateImage).toContain('pexels-pavel-danilyuk-7937330.jpg');
+  expect(notaryImage).not.toBe(realEstateImage);
+  const catalog=htmlFor(<CommercialCatalogPage/>);
+  expect(catalog).toContain('pexels-pavel-danilyuk-7937734.jpg');
+  expect(catalog).not.toContain('pexels-pavel-danilyuk-7937330.jpg');
 });
 
 test('packages explains scope requirements without implying fixed packages', () => {
