@@ -25,7 +25,7 @@ test('home preserves full audience coverage while introducing image-led discover
 });
 
 test('catalog is photo-led without changing service API, search, or main', () => {
-  const html=htmlFor(<CommercialCatalogPage/>);
+  const html=htmlFor(<main><CommercialCatalogPage/></main>);
   expect(html).toContain('Find the work you need handled.');
   expect(html).toContain('pexels-pavel-danilyuk-7937330.jpg');
   expect(html).toContain('Search services');
@@ -35,7 +35,7 @@ test('catalog is photo-led without changing service API, search, or main', () =>
 });
 
 test('packages explains scope requirements without implying fixed packages', () => {
-  const html=htmlFor(<PackagesPage/>);
+  const html=htmlFor(<main><PackagesPage/></main>);
   expect(html).toContain('Start with the scope.');
   expect(html).toContain('not a one-size-fits-all promise');
   expect(html).toContain('confirm an approved scope and quote before booking');
@@ -73,7 +73,7 @@ test('small labels use approved contrasting burgundy rather than low-contrast go
 });
 
 test('packages expose existing intake-only scope families without invented published price or booking', () => {
- const html=htmlFor(<PackagesPage/>);
+ const html=htmlFor(<main><PackagesPage/></main>);
  ['People &amp; households','Property teams','Real estate','Businesses','Institutions &amp; government'].forEach(x=>expect(html).toContain(x));
  ['Turnover &amp; Make-Ready Execution','Home Reset Execution','Contract &amp; Task Order Execution'].forEach(x=>expect(html).toContain(x));
  expect(html).toContain('32 existing scope definitions');
