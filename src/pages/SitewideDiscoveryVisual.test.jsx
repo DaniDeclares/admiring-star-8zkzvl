@@ -22,7 +22,7 @@ test('home preserves full audience coverage while introducing image-led discover
   expect(html).toContain('href="/packages"');
   expect(html).toContain('href="/shop"');
   expect(html).toContain('href="/request-service"');
-  ['pexels-rdne-5591641.jpg','pexels-pavel-danilyuk-7937330.jpg','pexels-thirdman-8469939.jpg'].forEach(x=>expect(html).toContain(x));
+  ['pexels-rdne-5591641.jpg','pexels-rdne-8293769.jpg','pexels-thirdman-8469939.jpg'].forEach(x=>expect(html).toContain(x));
   expect(html).toContain('not DANI staff or past client projects');
 });
 
