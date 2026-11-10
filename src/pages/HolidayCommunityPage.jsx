@@ -48,7 +48,7 @@ export default function HolidayCommunityPage() {
   }
   const field = 'w-full rounded-xl border border-[color:var(--dd-border)] p-3.5 bg-[var(--dd-white)] text-[color:var(--dd-ink)] focus:outline-[color:var(--dd-burgundy)]';
   const label = 'block text-sm font-bold text-[color:var(--dd-burgundy-deep)] mb-2';
-  return <main className="min-h-screen bg-[var(--dd-ivory)] text-[color:var(--dd-ink)]">
+  return <div className="min-h-screen bg-[var(--dd-ivory)] text-[color:var(--dd-ink)]">
     <Helmet><title>The Holiday Mission — 2026 | DANI DECLARES</title><meta name="description" content="Privately express family or community support interest in DANI DECLARES Holiday 2026 mission in Metro Atlanta." /></Helmet>
     <section className="bg-[var(--dd-burgundy-deep)] text-white"><div className="max-w-3xl mx-auto px-5 py-14">
       <Link to="/connect" className="text-[color:var(--dd-gold-soft)] underline">All ways to connect</Link>
@@ -102,5 +102,5 @@ export default function HolidayCommunityPage() {
         <p className="text-xs text-[color:var(--dd-muted)]">Your information is collected for this inquiry and is not a general marketing subscription. Read our <Link to="/privacy" className="underline">privacy policy</Link>.</p>
       </form>}
     </section>
-  </main>;
+  </div>;
 }
