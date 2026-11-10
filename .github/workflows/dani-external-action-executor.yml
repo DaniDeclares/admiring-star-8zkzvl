@@ -107,9 +107,21 @@ jobs:
           }
           NODE
 
+  # This job never loads database secrets. It reports denied attempts explicitly.
+  sop_draft_security_hold:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'sop_draft_review' && (github.event.repository.private != true || github.actor != 'DaniDeclares')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Refuse unprotected job-data processing
+        run: |
+          echo '::error::SOP_REVIEW_SECURITY_HOLD — private repository and authorized owner required'
+          exit 1
   # Manual SOP review within the EXISTING worker; never claims external actions.
   sop_draft_review:
-    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'sop_draft_review'
+    # Explicitly fail closed: public-repository job metadata cannot be exported.
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'sop_draft_review' && github.event.repository.private == true && github.actor == 'DaniDeclares'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -131,10 +143,15 @@ jobs:
       - name: Generate draft from one existing job's event receipts
         env:
           PRODUCTION_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
-          PRODUCTION_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY }}
+          SOP_REVIEW_READ_ONLY_KEY: ${{ secrets.SOP_REVIEW_READ_ONLY_KEY }}
+          SOP_REVIEW_APPROVED_JOB_ID: ${{ secrets.SOP_REVIEW_APPROVED_JOB_ID }}
           SOP_JOB_ID: ${{ inputs.sop_job_id }}
         run: |
           set -euo pipefail
+          if [ -z "$SOP_REVIEW_READ_ONLY_KEY" ] || [ -z "$SOP_REVIEW_APPROVED_JOB_ID" ] || [ "$SOP_JOB_ID" != "$SOP_REVIEW_APPROVED_JOB_ID" ]; then
+            echo '::error::SOP_REVIEW_APPROVAL_OR_SCOPED_CREDENTIAL_MISSING'
+            exit 1
+          fi
           node scripts/dani-sop-review-draft.mjs \
             --job-id "$SOP_JOB_ID" \
             --out-dir "$RUNNER_TEMP/dani-sop-review"
@@ -146,4 +163,4 @@ jobs:
           name: sop-review-${{ github.run_id }}
           path: ${{ runner.temp }}/dani-sop-review/
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
