@@ -52,7 +52,7 @@ function SectionTitle({ number, eyebrow, heading, description, id }) {
 
 export default function ConnectPage() {
   const { search } = useLocation();
-  return <main className="min-h-screen bg-[var(--dd-ivory)] text-[var(--dd-ink)]">
+  return <div className="min-h-screen bg-[var(--dd-ivory)] text-[var(--dd-ink)]">
     <Helmet><title>Get Connected | DANI DECLARES LLC</title><meta name="description" content="Three easy ways to connect with DANI: request multi-service execution, join the Holiday Mission, or build a business relationship." /></Helmet>
     <header className="relative overflow-hidden bg-[var(--dd-burgundy-deep)] text-white">
       <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-48 h-[480px] w-[480px] rounded-full border border-[var(--dd-gold-soft)] opacity-20 sm:right-16" />
@@ -151,5 +151,5 @@ export default function ConnectPage() {
         <strong className="text-[var(--dd-burgundy-deep)]">How these paths differ:</strong> Introductions and referrals are not paid arrangements unless separately agreed. Vendors and creative collaborators introduce capabilities for consideration. Independent service providers must complete separate qualification, documentation and authorization before any work assignment.
       </div>
     </section>
-  </main>;
+  </div>;
 }
