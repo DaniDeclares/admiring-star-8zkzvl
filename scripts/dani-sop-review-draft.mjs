@@ -87,9 +87,10 @@ export function requireScopedKey(key){
  // the JWT signature, role GRANT, RLS policy and per-job claims on every GET.
  return key;
 }
-export async function readEvents({jobId,base,key,fetcher=fetch}){
+export async function readEvents({jobId,base,key,apiKey,fetcher=fetch}){
  if(!UUID.test(jobId))throw Error('INVALID_JOB_ID');
  requireScopedKey(key);
+ if(typeof apiKey!=='string'||!apiKey.startsWith('sb_publishable_'))throw Error('MISSING_PUBLISHABLE_API_KEY');
  const url=new URL(validBase(base)+'/rest/v1/dd_job_execution_events');
  url.searchParams.set('job_id','eq.'+jobId);
  url.searchParams.set('select','id,job_id,event_at,event_type,source_type');
@@ -98,7 +99,7 @@ export async function readEvents({jobId,base,key,fetcher=fetch}){
  const controller=new AbortController();
  const timer=setTimeout(()=>controller.abort(),10000);
  try{
-  const result=await fetcher(url,{method:'GET',headers:{apikey:key,Authorization:'Bearer '+key,Accept:'application/json'},redirect:'error',signal:controller.signal});
+  const result=await fetcher(url,{method:'GET',headers:{apikey:apiKey,Authorization:'Bearer '+key,Accept:'application/json'},redirect:'error',signal:controller.signal});
   if(!result.ok)throw Error('SOURCE_HTTP_'+result.status);
   const rows=await result.json();
   if(!Array.isArray(rows))throw Error('SOURCE_RESPONSE_INVALID');
@@ -106,8 +107,8 @@ export async function readEvents({jobId,base,key,fetcher=fetch}){
   return rows;
  }finally{clearTimeout(timer)}
 }
-export async function createDraft({jobId,outDir,base,key,fetcher=fetch}){
- const observed=await readEvents({jobId,base,key,fetcher});
+export async function createDraft({jobId,outDir,base,key,apiKey,fetcher=fetch}){
+ const observed=await readEvents({jobId,base,key,apiKey,fetcher});
  const output=compileReview(jobId,observed);
  await fs.mkdir(outDir,{recursive:true});
  await fs.writeFile(path.join(outDir,'SOP_REVIEW_DRAFT.md'),output.markdown,'utf8');
@@ -121,7 +122,7 @@ async function main(){
  if(!jobId||!outDir||!path.isAbsolute(outDir))throw Error('REQUIRED_EXACT_JOB_ID_AND_ABSOLUTE_OUTPUT_DIR');
  const approvedJobId=process.env.SOP_REVIEW_APPROVED_JOB_ID;
  if(!UUID.test(approvedJobId||'')||jobId.toLowerCase()!==approvedJobId.toLowerCase())throw Error('JOB_NOT_EXACTLY_APPROVED');
- const result=await createDraft({jobId,outDir,base:process.env.PRODUCTION_SUPABASE_URL,key:process.env.SOP_REVIEW_READ_ONLY_KEY});
+ const result=await createDraft({jobId,outDir,base:process.env.PRODUCTION_SUPABASE_URL,key:process.env.SOP_REVIEW_READ_ONLY_KEY,apiKey:process.env.SOP_REVIEW_PUBLISHABLE_API_KEY});
  console.log('SOP_REVIEW_GENERATED '+JSON.stringify(result));
 }
 if(process.argv[1]&&fileURLToPath(import.meta.url)===path.resolve(process.argv[1])){
