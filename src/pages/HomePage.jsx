@@ -62,7 +62,7 @@ export default function HomePage() {
           <div className="rounded-3xl border border-white/20 bg-white/8 p-5 md:p-7 backdrop-blur">
             <div className="grid grid-cols-3 gap-2 overflow-hidden rounded-2xl" aria-label="Examples of household, property and event work">
               <img src="/images/dani-batch/pexels-rdne-5591641.jpg" alt="Organizing household storage" className="h-36 w-full object-cover sm:h-44" loading="eager" />
-              <img src="/images/dani-batch/pexels-pavel-danilyuk-7937330.jpg" alt="Property professionals walking through a space" className="h-36 w-full object-cover sm:h-44" loading="eager" />
+              <img src="/images/dani-batch/pexels-rdne-8293769.jpg" alt="Field professional documenting property conditions" className="h-36 w-full object-cover sm:h-44" loading="eager" />
               <img src="/images/dani-batch/pexels-thirdman-8469939.jpg" alt="People enjoying an event together" className="h-36 w-full object-cover sm:h-44" loading="eager" />
             </div>
             <p className="mt-3 text-[11px] leading-5 text-white/65">Illustrative photography of service settings—not DANI staff or past client projects.</p>
