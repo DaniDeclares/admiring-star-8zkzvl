@@ -144,11 +144,12 @@ jobs:
         env:
           PRODUCTION_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
           SOP_REVIEW_READ_ONLY_KEY: ${{ secrets.SOP_REVIEW_READ_ONLY_KEY }}
+          SOP_REVIEW_PUBLISHABLE_API_KEY: ${{ secrets.SOP_REVIEW_PUBLISHABLE_API_KEY }}
           SOP_REVIEW_APPROVED_JOB_ID: ${{ secrets.SOP_REVIEW_APPROVED_JOB_ID }}
           SOP_JOB_ID: ${{ inputs.sop_job_id }}
         run: |
           set -euo pipefail
-          if [ -z "$SOP_REVIEW_READ_ONLY_KEY" ] || [ -z "$SOP_REVIEW_APPROVED_JOB_ID" ] || [ "$SOP_JOB_ID" != "$SOP_REVIEW_APPROVED_JOB_ID" ]; then
+          if [ -z "$SOP_REVIEW_READ_ONLY_KEY" ] || [ -z "$SOP_REVIEW_PUBLISHABLE_API_KEY" ] || [ -z "$SOP_REVIEW_APPROVED_JOB_ID" ] || [ "$SOP_JOB_ID" != "$SOP_REVIEW_APPROVED_JOB_ID" ]; then
             echo '::error::SOP_REVIEW_APPROVAL_OR_SCOPED_CREDENTIAL_MISSING'
             exit 1
           fi
