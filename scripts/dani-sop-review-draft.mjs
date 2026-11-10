@@ -37,9 +37,10 @@ export function compileReview(jobId,events){
   if(!UUID.test(e.id)||!UUID.test(e.job_id)||e.job_id.toLowerCase()!==jobId.toLowerCase())throw Error('CROSS_JOB_EVENT');
   if(seen.has(e.id))throw Error('DUPLICATE_EVENT_ID');
   seen.add(e.id);
-  if(typeof e.event_type!=='string'||!/^[A-Z_]+$/.test(e.event_type))throw Error('INVALID_EVENT_TYPE');
+  if(typeof e.event_type!=='string'||e.event_type.length>64||!/^[A-Z_]+$/.test(e.event_type))throw Error('INVALID_EVENT_TYPE');
   const source=SOURCES.has(e.source_type)?e.source_type:'UNKNOWN_SOURCE';
-  return {id:e.id,at:dateString(e.event_at),type:e.event_type,source:source,description:ACTIONS[e.event_type]||'Unknown event — review original source before using',exception:!ACTIONS[e.event_type]||source==='UNKNOWN_SOURCE'||source==='MIGRATION'};
+  const known=Object.hasOwn(ACTIONS,e.event_type);
+  return {id:e.id,at:dateString(e.event_at),type:known?e.event_type:'UNCLASSIFIED_EVENT',source,description:known?ACTIONS[e.event_type]:'Unknown event — review original source before using',exception:!known||source==='UNKNOWN_SOURCE'||source==='MIGRATION'};
  }).sort((a,b)=>a.at.localeCompare(b.at)||a.id.localeCompare(b.id));
  const lines=[
  '# DANI SOP evidence review — DRAFT / NOT APPROVED','','**Job:** pseudonymous reference '+digest(jobId),
@@ -75,9 +76,20 @@ export function validBase(value){
  if(url.protocol!=='https:'||!(/^[a-z0-9-]+\.supabase\.co$/i.test(url.hostname))||url.username||url.password||url.search||url.hash)throw Error('DATABASE_ORIGIN_REJECTED');
  return url.origin;
 }
+export function requireScopedKey(key){
+ if(typeof key!=='string'||!key)throw Error('MISSING_SCOPED_READER_CREDENTIAL');
+ const parts=key.split('.');
+ if(parts.length!==3)throw Error('UNRECOGNIZED_READER_CREDENTIAL');
+ let role;
+ try{role=JSON.parse(Buffer.from(parts[1],'base64url').toString('utf8')).role}catch{throw Error('READER_ROLE_UNVERIFIED')}
+ if(role!=='dani_sop_reader')throw Error('READER_ROLE_NOT_LEAST_PRIVILEGED');
+ // This early check is NOT an authorization decision: Supabase must verify
+ // the JWT signature, role GRANT, RLS policy and per-job claims on every GET.
+ return key;
+}
 export async function readEvents({jobId,base,key,fetcher=fetch}){
  if(!UUID.test(jobId))throw Error('INVALID_JOB_ID');
- if(!key)throw Error('MISSING_EXISTING_CREDENTIAL');
+ requireScopedKey(key);
  const url=new URL(validBase(base)+'/rest/v1/dd_job_execution_events');
  url.searchParams.set('job_id','eq.'+jobId);
  url.searchParams.set('select','id,job_id,event_at,event_type,source_type');
@@ -107,9 +119,11 @@ async function main(){
  const get=flag=>{const n=args.indexOf(flag);return n<0?undefined:args[n+1]};
  const jobId=get('--job-id'),outDir=get('--out-dir');
  if(!jobId||!outDir||!path.isAbsolute(outDir))throw Error('REQUIRED_EXACT_JOB_ID_AND_ABSOLUTE_OUTPUT_DIR');
- const result=await createDraft({jobId,outDir,base:process.env.PRODUCTION_SUPABASE_URL,key:process.env.PRODUCTION_SUPABASE_SERVICE_ROLE_KEY});
+ const approvedJobId=process.env.SOP_REVIEW_APPROVED_JOB_ID;
+ if(!UUID.test(approvedJobId||'')||jobId.toLowerCase()!==approvedJobId.toLowerCase())throw Error('JOB_NOT_EXACTLY_APPROVED');
+ const result=await createDraft({jobId,outDir,base:process.env.PRODUCTION_SUPABASE_URL,key:process.env.SOP_REVIEW_READ_ONLY_KEY});
  console.log('SOP_REVIEW_GENERATED '+JSON.stringify(result));
 }
 if(process.argv[1]&&fileURLToPath(import.meta.url)===path.resolve(process.argv[1])){
- main().catch(e=>{console.error('SOP_REVIEW_HELD '+String(e.message).slice(0,140));process.exitCode=1});
+ main().catch(e=>{const code=typeof e?.message==='string'&&/^[A-Z0-9_]+$/.test(e.message)?e.message:'REVIEW_FAILED_SAFELY';console.error('SOP_REVIEW_HELD '+code);process.exitCode=1});
 }
