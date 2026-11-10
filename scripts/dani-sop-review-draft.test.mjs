@@ -48,7 +48,7 @@ test('fail closed for insecure or unexpected backend origins',()=>{
 });
 test('runtime GET limited to exact job, read-only with existing credential',async()=>{
  let observed;
- const response=await readEvents({jobId:job,base:'ajxezpczaemunlcmqlgl',key:scopedTestJwt,
+ const response=await readEvents({jobId:job,base:'ajxezpczaemunlcmqlgl',key:scopedTestJwt,apiKey:'sb_publishable_TESTONLY',
   fetcher:async(url,opts)=>{
    observed={url:url.toString(),method:opts.method,hasSecret:!!opts.headers.apikey};
    return {ok:true,json:async()=>sample};
@@ -62,7 +62,7 @@ test('runtime GET limited to exact job, read-only with existing credential',asyn
 test('end-to-end mocked read produces editable draft artifact and manifest only',async()=>{
  const dest=await fs.mkdtemp(path.join(os.tmpdir(),'dani-sop-review-'));
  try{
- const x=await createDraft({jobId:job,outDir:dest,base:'ajxezpczaemunlcmqlgl',key:scopedTestJwt,
+ const x=await createDraft({jobId:job,outDir:dest,base:'ajxezpczaemunlcmqlgl',key:scopedTestJwt,apiKey:'sb_publishable_TESTONLY',
  fetcher:async()=>({ok:true,json:async()=>sample})});
  assert.equal(x.registryWritten,false);
  assert.deepEqual((await fs.readdir(dest)).sort(),['SOP_REVIEW_DRAFT.md','SOP_REVIEW_MANIFEST.json']);
@@ -86,4 +86,8 @@ test('unexpected event type cannot be echoed into an artifact',()=>{
  assert.equal(x.manifest.exceptions,1);
  assert.doesNotMatch(x.markdown,/SENSITIVE_INTERNAL_REFERENCE/);
  assert.match(x.markdown,/UNCLASSIFIED_EVENT/);
+});
+
+test('reject absent publishable API key instead of using restricted bearer as apikey',async()=>{
+ await assert.rejects(()=>readEvents({jobId:job,base:'ajxezpczaemunlcmqlgl',key:scopedTestJwt,fetcher:async()=>{throw Error('UNEXPECTED_NETWORK')}}),/MISSING_PUBLISHABLE_API_KEY/);
 });
