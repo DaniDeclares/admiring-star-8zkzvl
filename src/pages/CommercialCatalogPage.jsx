@@ -39,7 +39,7 @@ export default function CommercialCatalogPage({context='services'}){
         </div>
       </div>
       <figure className="m-0 rounded-3xl border border-white/20 bg-white/10 p-3 shadow-xl">
-        <img src="/images/dani-batch/pexels-pavel-danilyuk-7937330.jpg" alt="Property professionals discussing a space" className="h-56 w-full rounded-2xl object-cover sm:h-64 lg:h-72" fetchPriority="high" />
+        <img src="/images/dani-batch/pexels-pavel-danilyuk-7937734.jpg" alt="Professionals coordinating projects and field work" className="h-56 w-full rounded-2xl object-cover sm:h-64 lg:h-72" fetchPriority="high" />
         <figcaption className="px-2 pt-3 text-xs leading-5 text-[#f0e2e4]">Illustrative photography; service scope and availability are confirmed during inquiry.</figcaption>
       </figure>
     </div>
