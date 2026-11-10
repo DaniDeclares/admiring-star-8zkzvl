@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const source=fs.readFileSync(new URL('../.github/workflows/dani-external-action-executor.yml',import.meta.url),'utf8');
+const source=fs.readFileSync(new URL('../.github/workflows/dani-external-action-executor.yml',import.meta.url),'utf8').replace(/\r\n/g,'\n');
 test('existing scheduled delivery worker remains intact',()=>{
  assert.match(source,/schedule:\s*\n\s+- cron: '3,13,23,33,43,53 \* \* \* \*'/);
  assert.match(source,/deliver:\s*\n\s+if: github\.event_name != 'workflow_dispatch' \|\| inputs\.mode != 'sop_draft_review'/);
  assert.match(source,/RECONCILE_TESTER_PROMOTION_FEEDBACK/);
 });
 test('review mode is manual only, and does not trigger outbound worker',()=>{
- assert.match(source,/sop_draft_review:\s*\n\s+if: github\.event_name == 'workflow_dispatch' && inputs\.mode == 'sop_draft_review'/);
+ assert.match(source,/sop_draft_review:\s*\n(?:\s*#.*\n)*\s+if: github\.event_name == 'workflow_dispatch' && inputs\.mode == 'sop_draft_review'/);
  assert.match(source,/default: external_action_delivery/);
  assert.match(source,/persist-credentials: false/);
  assert.match(source,/permissions:\s*\n\s+contents: read/);
