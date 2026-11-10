@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import {compileReview,validBase,readEvents,createDraft} from './dani-sop-review-draft.mjs';
+import {compileReview,validBase,readEvents,createDraft,requireScopedKey} from './dani-sop-review-draft.mjs';
 const job='09c589e5-a7a2-416a-bfe0-46f1ad14818a';
+const scopedTestJwt='test.'+Buffer.from(JSON.stringify({role:'dani_sop_reader'})).toString('base64url')+'.signature';
 const event=(id,at,type='PROVIDER_REPORTED_COMPLETE',more={})=>({id,job_id:job,event_at:at,event_type:type,source_type:'PHONE_CALL',...more});
 const sample=[
  event('de27f285-42fd-411b-a4e0-35c5389c3a5c','2026-09-25T15:33:00Z'),
@@ -47,7 +48,7 @@ test('fail closed for insecure or unexpected backend origins',()=>{
 });
 test('runtime GET limited to exact job, read-only with existing credential',async()=>{
  let observed;
- const response=await readEvents({jobId:job,base:'ajxezpczaemunlcmqlgl',key:'FAKE_TEST_CREDENTIAL',
+ const response=await readEvents({jobId:job,base:'ajxezpczaemunlcmqlgl',key:scopedTestJwt,
   fetcher:async(url,opts)=>{
    observed={url:url.toString(),method:opts.method,hasSecret:!!opts.headers.apikey};
    return {ok:true,json:async()=>sample};
@@ -61,7 +62,7 @@ test('runtime GET limited to exact job, read-only with existing credential',asyn
 test('end-to-end mocked read produces editable draft artifact and manifest only',async()=>{
  const dest=await fs.mkdtemp(path.join(os.tmpdir(),'dani-sop-review-'));
  try{
- const x=await createDraft({jobId:job,outDir:dest,base:'ajxezpczaemunlcmqlgl',key:'FAKE_TEST_CREDENTIAL',
+ const x=await createDraft({jobId:job,outDir:dest,base:'ajxezpczaemunlcmqlgl',key:scopedTestJwt,
  fetcher:async()=>({ok:true,json:async()=>sample})});
  assert.equal(x.registryWritten,false);
  assert.deepEqual((await fs.readdir(dest)).sort(),['SOP_REVIEW_DRAFT.md','SOP_REVIEW_MANIFEST.json']);
@@ -71,4 +72,18 @@ test('end-to-end mocked read produces editable draft artifact and manifest only'
 });
 test('no events means no fabricated SOP',()=>{
  assert.throws(()=>compileReview(job,[]),/NO_JOB_EXECUTION_EVENTS/);
+});
+
+test('service-role and generic credentials are rejected before database fetch',()=>{
+ const broad='test.'+Buffer.from(JSON.stringify({role:'service_role'})).toString('base64url')+'.signature';
+ assert.throws(()=>requireScopedKey(broad),/NOT_LEAST_PRIVILEGED/);
+ assert.throws(()=>requireScopedKey('FAKE_TEST_CREDENTIAL'),/UNRECOGNIZED/);
+ assert.equal(requireScopedKey(scopedTestJwt),scopedTestJwt);
+});
+test('unexpected event type cannot be echoed into an artifact',()=>{
+ const e=event('5511920a-8145-4414-be26-79574ad8f584','2026-09-25T12:00:00Z','SENSITIVE_INTERNAL_REFERENCE');
+ const x=compileReview(job,[e]);
+ assert.equal(x.manifest.exceptions,1);
+ assert.doesNotMatch(x.markdown,/SENSITIVE_INTERNAL_REFERENCE/);
+ assert.match(x.markdown,/UNCLASSIFIED_EVENT/);
 });
