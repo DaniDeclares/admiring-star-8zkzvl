@@ -216,3 +216,25 @@ Commercial work must respect verified owner availability, childcare, education, 
 ### Adoption and truthful completion
 
 Report separately: policy prepared, committed, PR opened, merged, worker retrieval tested, and runtime behavior verified. Publishing documentation does not establish that ChatGPT, Claude, Codex, Grok, Perplexity, or Baby/DANI retrieved or applied it. Verify each supported retrieval path independently before claiming adoption. All existing owner approvals, privacy boundaries, release gates, and rollback requirements remain in force.
+
+## 15. Cross-System Reconciliation and Procedure Improvement (PROPOSED)
+
+This section clarifies the existing intent-to-outcome execution loop and cross-system authority rules. It creates no new SOP library, source of truth, state machine, worker permissions, or autonomous approval authority. Read it with `AGENTS.md` and `docs/DANI_DECLARES_CROSS_SYSTEM_AUTHORITY_2026-09-14.md`.
+
+### Evidence-scoped recovery and identity
+
+For each substantial cross-system assignment, first recover the original intent, existing task and last execution receipt, applicable instructions and their verified revisions, and the specific records relevant to the outcome. Select sources by domain authority; no single record wins every question. Match stable identifiers where available, including service SKU, package/variant key, customer/account ID, deal/opportunity ID, job/estimate/invoice ID, message/thread ID, and original source reference. Label each match `CONFIRMED`, `POSSIBLE`, or `UNRESOLVED` with supporting evidence. Do not create duplicate records from an absent match in one system, or promote a probable match into a fact.
+
+Preserve the difference between canonical business definitions, earlier approvals and their conditions, observed execution, commercial opportunity stages, and worker action permissions. Resolve conflicting statuses at the relevant domain authority, not by recency alone. If a required source is inaccessible or pagination/coverage is incomplete, name the unavailable source, affected claims and restricted next actions; historical narration may be used only as clearly labeled historical context, never as a substitute for fresh inspection.
+
+### Authorized continuation and exceptions
+
+For each candidate action distinguish: established facts; commercial/operational rationale; current worker permissions; any higher approval or guarded execution path. Continue independently authorized steps while holding restricted ones. Maintain conflict and duplicate candidates as unresolved until evidence supports a disposition. No worker may modify, approve, or expand its own governing permissions merely because a procedure improvement is suggested.
+
+### Evidence-linked completion receipt
+
+Use an existing durable execution/owner-attention record; do not create a second receipt database. Record: assignment/outcome; governing procedure URI and exact revision; source system, record IDs, inspection time and result for each material source; confirmed/provisional/unavailable evidence; matched identities and conflicts; each actual tool action and authorization basis; destination write ID and separately observed read-back (when a write occurred); outcome status; remaining blocker, exact next authorized action and accountable executor. A receipt assertion without matching tool/runtime evidence must be marked `UNVERIFIED` and must not pass acceptance. Distinguish `PREPARED`, `SAVED`, `TESTED`, `LIVE`, and `OWNER_ACCEPTED` without replacing existing domain-specific states. A read-only execution must never claim a write or destination verification.
+
+### Controlled procedure improvement
+
+After work exposes a repeatable instruction gap, compare with the currently applicable governing revision, propose a minimal linked diff, identify impacted workers and retrieval paths, and request established owner/reviewer approval. Only the existing change-control and release process may publish the approved revision. Then verify, separately, that each target worker retrieves the exact published revision through its normal startup path and behaves correctly on representative and adversarial reconciliation cases. A prompt containing pasted policy text proves neither normal retrieval nor authorized adoption. Preserve an exact rollback commit/blob reference and retest after rollback if used.
