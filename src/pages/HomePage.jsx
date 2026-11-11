@@ -42,7 +42,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-5 sm:px-8 py-20 md:py-28 grid lg:grid-cols-[1.15fr_.85fr] gap-12 items-end">
           <div>
             <p className="text-[#e5d2a5] text-xs font-black uppercase tracking-[.22em]">DANI DECLARES • OPERATIONS • EXECUTION • SUPPORT</p>
-            <h1 className="mt-5 max-w-5xl text-5xl sm:text-6xl md:text-7xl font-black leading-[.95]">
+            <h1 style={{color: "#ffffff"}} className="mt-5 max-w-5xl text-5xl sm:text-6xl md:text-7xl font-black leading-[.95]">
               More work handled.
               <span className="block text-[#d9b65a]">Less on your plate.</span>
             </h1>
@@ -59,8 +59,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/15 bg-white/8 p-7 md:p-8 backdrop-blur">
-            <p className="text-[#e5d2a5] text-xs font-black uppercase tracking-[.18em]">One accountable starting point</p>
+          <div className="rounded-3xl border border-white/20 bg-white/8 p-5 md:p-7 backdrop-blur">
+            <div className="grid grid-cols-3 gap-2 overflow-hidden rounded-2xl" aria-label="Examples of household, property and event work">
+              <img src="/images/dani-batch/pexels-rdne-5591641.jpg" alt="Organizing household storage" className="h-36 w-full object-cover sm:h-44" loading="eager" />
+              <img src="/images/dani-batch/pexels-rdne-8293769.jpg" alt="Field professional documenting property conditions" className="h-36 w-full object-cover sm:h-44" loading="eager" />
+              <img src="/images/dani-batch/pexels-thirdman-8469939.jpg" alt="People enjoying an event together" className="h-36 w-full object-cover sm:h-44" loading="eager" />
+            </div>
+            <p className="mt-3 text-[11px] leading-5 text-white/65">Illustrative photography of service settings—not DANI staff or past client projects.</p>
+            <p className="mt-5 text-[#e5d2a5] text-xs font-black uppercase tracking-[.18em]">One accountable starting point</p>
             <h2 className="mt-3 text-3xl font-black text-white">Home. Property. Business. Real estate. Institutions.</h2>
             <p className="mt-4 text-white/70 leading-relaxed">
               Different customers need different solutions. The experience stays simple: explain the need, get the right path, confirm the scope, and move forward.
@@ -104,6 +110,20 @@ export default function HomePage() {
         </div>
       </section>
 
+      <nav aria-label="Explore DANI services and products" className="border-y border-[#e1d2b5] bg-white">
+        <div className="mx-auto grid max-w-7xl gap-4 px-5 py-7 sm:grid-cols-3 sm:px-8">
+          <Link to="/catalog" className="group flex items-center justify-between gap-4 rounded-2xl border border-[#e8d6b2] bg-[#fbf8f1] px-5 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">
+            <span><span className="block text-xs font-black uppercase tracking-widest text-[var(--dd-burgundy)]">Find a service</span><strong className="mt-1 block text-lg text-[#45141d]">Browse the full catalog</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
+          </Link>
+          <Link to="/packages" className="group flex items-center justify-between gap-4 rounded-2xl border border-[#e8d6b2] bg-[#fbf8f1] px-5 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">
+            <span><span className="block text-xs font-black uppercase tracking-widest text-[var(--dd-burgundy)]">Define an outcome</span><strong className="mt-1 block text-lg text-[#45141d]">Define a package scope</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
+          </Link>
+          <Link to="/shop" className="group flex items-center justify-between gap-4 rounded-2xl border border-[#e8d6b2] bg-[#fbf8f1] px-5 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6b1f2b]">
+            <span><span className="block text-xs font-black uppercase tracking-widest text-[var(--dd-burgundy)]">Products & downloads</span><strong className="mt-1 block text-lg text-[#45141d]">Visit the DANI shop</strong></span><ArrowRight className="h-5 w-5 shrink-0 text-[#6b1f2b] transition-transform group-hover:translate-x-1" />
+          </Link>
+        </div>
+      </nav>
+
       <section className="bg-[#f2eadc] border-y border-[#e1d2b5]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-20">
           <div className="max-w-3xl">
@@ -121,6 +141,41 @@ export default function HomePage() {
           </div>
           <div className="mt-8">
             <Link to="/catalog" className="inline-flex items-center rounded-xl bg-[#6b1f2b] px-6 py-4 text-white font-black">Browse the full service catalog <ArrowRight className="ml-2 w-5 h-5" /></Link>
+          </div>
+        </div>
+      </section>
+
+      <section id="holiday-2026" aria-labelledby="holiday-pathways-title" className="border-y border-[#e1d2b5] bg-[#fff5e9]">
+        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 md:py-20">
+          <p className="text-xs font-black uppercase tracking-[.18em] text-[var(--dd-burgundy)]">Holiday 2026 · Two distinct ways to connect</p>
+          <h2 id="holiday-pathways-title" className="mt-3 max-w-3xl text-3xl font-black text-[#45141d] sm:text-4xl">Holiday work to handle. Community steps to take.</h2>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-[#6e6264]">DANI's seasonal services and shop are commercial offerings. The Holiday Mission is a separate community initiative; no purchase or donation is required to participate.</p>
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <article className="flex flex-col justify-between rounded-3xl border border-[#e8d6b2] bg-white p-6 shadow-sm sm:p-8">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.15em] text-[var(--dd-burgundy)]">Holiday services &amp; products</p>
+                <h3 className="mt-3 text-2xl font-black text-[#45141d]">Let DANI handle the seasonal work.</h3>
+                <p className="mt-4 text-sm leading-7 text-[#6e6264]">Explore seasonal preparation, events, home services, printing, merchandise and digital products. Scope, availability, and prices are confirmed through the appropriate service or shop process.</p>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link to="/catalog" className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-[#6b1f2b] px-5 py-3 text-sm font-black text-white">Explore services <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/shop" className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-[#6b1f2b] px-5 py-3 text-sm font-black text-[#6b1f2b]">Shop DANI</Link>
+              </div>
+            </article>
+            <article className="grid overflow-hidden rounded-3xl border border-[#e8d6b2] bg-white shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(160px,.75fr)]">
+              <div className="flex flex-col justify-between p-6 sm:p-8">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[.15em] text-[var(--dd-burgundy)]">Holiday Mission · Community participation</p>
+                  <h3 className="mt-3 text-2xl font-black text-[#45141d]">Your Skills. Someone's Next Step.</h3>
+                  <p className="mt-4 text-sm leading-7 text-[#6e6264]">Families, volunteers, businesses and organizations can privately express interest or offer skills, resources and introductions. This is not a guarantee of aid, funding or housing placement.</p>
+                </div>
+                <Link to="/holiday/community" className="mt-6 inline-flex min-h-[44px] items-center justify-center self-start rounded-xl bg-[#6b1f2b] px-5 py-3 text-sm font-black text-white">Explore the Holiday Mission <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </div>
+              <figure className="flex min-h-[220px] flex-col justify-center bg-[#f7ebdc] p-4">
+                <img src="https://cdn.shopify.com/s/files/1/0763/0825/0763/files/DANI_Holiday_Mission_Contributor_Flyer_2026_Approved.png?v=1794112626" alt="Approved DANI Holiday Mission contributor flyer" loading="lazy" className="h-auto w-full rounded-lg object-contain" />
+                <figcaption className="mt-2 text-center text-xs text-[#6e6264]">Approved Holiday Mission invitation</figcaption>
+              </figure>
+            </article>
           </div>
         </div>
       </section>

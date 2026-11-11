@@ -25,7 +25,7 @@ export const BUCKETS = [
  {key:'logistics-mobile-field',label:'Logistics & Mobile Field Services',tagline:'When something needs to be picked up, delivered, sourced, or handled.',visualFamily:'Logistics, Courier & Asset Sourcing',families:['Logistics, Courier & Asset Sourcing','Mobile Automotive & Vehicle Care']},
  {key:'government-procurement',label:'Government, Procurement & Readiness',tagline:'Support for institutional purchasing and vendor readiness.',visualFamily:'Government & Institutional Procurement',families:['Government & Institutional Procurement','04A Government & Vendor Readiness']},
  {key:'classes-training',label:'Classes & Training',tagline:'Workshops and sessions to build real skills.',visualFamily:'Classes, Workshops & Training',families:['Classes, Workshops & Training']},
- {key:'notary-signing',label:'Notary & Signing Services',tagline:'Professional document signing and notary support.',visualFamily:'Real Estate & Closing Support',families:['05A Notary & Signing Services','Notary & Document Services']},
+ {key:'notary-signing',label:'Notary & Signing Services',tagline:'Professional document signing and notary support.',visualFamily:'Notary & Signing Services',families:['05A Notary & Signing Services','Notary & Document Services']},
 ];
 
 const FAMILY_TO_BUCKET=(()=>{const map=new Map();BUCKETS.forEach(b=>b.families.forEach(f=>map.set(f,b.key)));return map;})();
