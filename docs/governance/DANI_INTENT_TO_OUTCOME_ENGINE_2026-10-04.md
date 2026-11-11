@@ -217,7 +217,7 @@ Commercial work must respect verified owner availability, childcare, education, 
 
 Report separately: policy prepared, committed, PR opened, merged, worker retrieval tested, and runtime behavior verified. Publishing documentation does not establish that ChatGPT, Claude, Codex, Grok, Perplexity, or Baby/DANI retrieved or applied it. Verify each supported retrieval path independently before claiming adoption. All existing owner approvals, privacy boundaries, release gates, and rollback requirements remain in force.
 
-## 15. Cross-System Reconciliation and Procedure Improvement (PROPOSED)
+## 15. Cross-System Reconciliation and Procedure Improvement
 
 This section clarifies the existing intent-to-outcome execution loop and cross-system authority rules. It creates no new SOP library, source of truth, state machine, worker permissions, or autonomous approval authority. Read it with `AGENTS.md` and `docs/DANI_DECLARES_CROSS_SYSTEM_AUTHORITY_2026-09-14.md`.
 
