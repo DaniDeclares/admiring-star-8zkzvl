@@ -40,3 +40,75 @@ test('Holiday Mission pathways preserve their role without manufacturing a campa
   const real=destinationFor('/holiday/community','?utm_campaign=holiday-mission-2026',{role:'VOLUNTEER'});
   expect(new URLSearchParams(real.split('?')[1]).get('utm_campaign')).toBe('holiday-mission-2026');
 });
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import ConnectPage from './ConnectPage.jsx';
+
+test('Connect & Join visual hierarchy keeps three accessible, distinct sections and ten links', () => {
+  const html = renderToStaticMarkup(
+    <HelmetProvider>
+      <MemoryRouter initialEntries={['/connect']}>
+        <ConnectPage />
+      </MemoryRouter>
+    </HelmetProvider>
+  );
+  expect(html).toContain('Get Work Handled');
+  expect(html).toContain('Join the Holiday Mission');
+  expect(html).toContain('Work With DANI');
+  expect(html).toContain('aria-labelledby="get-work-title"');
+  expect(html).toContain('aria-labelledby="holiday-title"');
+  expect(html).toContain('aria-labelledby="work-title"');
+  expect(html).toContain('DANI_Holiday_Mission_Contributor_Flyer_2026_Approved.png');
+  expect(html).toContain('subject=Holiday%20Mission%20Contributor');
+  expect((html.match(/<article\b/g) || [])).toHaveLength(9); // Nine cards plus featured service doorway
+  expect((html.match(/href="\/request-service"/g) || [])).toHaveLength(1);
+  expect((html.match(/href="\/holiday\/community\?role=/g) || [])).toHaveLength(4);
+  expect((html.match(/href="\/partner-network\?participation=/g) || [])).toHaveLength(4);
+  expect(html).toContain('href="/providers?audience=provider"');
+  expect(html).not.toContain('utm_campaign=holiday-2026');
+});
+
+test('Connect & Join keeps genuine source context in the visual paths', () => {
+  const html = renderToStaticMarkup(
+    <HelmetProvider><MemoryRouter initialEntries={['/connect?utm_source=linkedin&utm_campaign=fall-services&ref=verified']}>
+      <ConnectPage />
+    </MemoryRouter></HelmetProvider>
+  );
+  expect(html).toContain('href="/request-service?utm_source=linkedin&amp;utm_campaign=fall-services&amp;ref=verified"');
+  expect(html).toContain('role=SPONSOR');
+  expect(html).toContain('audience=provider');
+  expect(html).not.toContain('utm_campaign=holiday-2026');
+});
+
+test('Connect & Join reuses existing service photography and keeps Holiday artwork unchanged', () => {
+  const html = renderToStaticMarkup(
+    <HelmetProvider><MemoryRouter initialEntries={['/connect']}>
+      <ConnectPage />
+    </MemoryRouter></HelmetProvider>
+  );
+  const expectedPhotos = [
+    'pexels-pavel-danilyuk-7937330.jpg',
+    'pexels-rdne-8293769.jpg',
+    'pexels-pavel-danilyuk-7937734.jpg',
+  ];
+  expectedPhotos.forEach(photo => expect(html).toContain(photo));
+  expect((html.match(/DANI_Holiday_Mission_Contributor_Flyer_2026_Approved.png/g) || [])).toHaveLength(1);
+  expect(html).toContain('Holiday 2026');
+  expect(html).not.toContain('Supporting transitions into a home');
+  expect(html).not.toContain('pexels-rdne-8581413.jpg');
+  expect(html).toContain('Ways you could contribute');
+  expect(html).toContain('Local businesses &amp; community partners wanted');
+  expect(html).toContain('aria-labelledby="get-work-title"');
+  expect(html).toContain('aria-labelledby="holiday-title"');
+  expect(html).toContain('aria-labelledby="work-title"');
+  expect(html).toContain('href="/providers?audience=provider"');
+});
+
+// Accessibility review: antique gold must not be used on small copy against ivory/cream/white.
+test('Connect & Join gives small foreground labels a high-contrast semantic color',()=>{
+ const html=renderToStaticMarkup(<HelmetProvider><MemoryRouter initialEntries={['/connect']}><ConnectPage /></MemoryRouter></HelmetProvider>);
+ expect(html).not.toContain('text-[var(--dd-gold)]');
+ expect(html).toContain('text-[var(--dd-burgundy)]');
+});
