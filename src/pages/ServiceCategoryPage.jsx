@@ -54,9 +54,9 @@ export default function ServiceCategoryPage(){
     {match&&<p className="max-w-2xl mt-5 text-lg text-[#f0e2e4] leading-relaxed">{match.bucket.tagline} {groups.length} service{groups.length===1?'':'s'} in this area.</p>}
    </div>
   </section>
-  <main className="max-w-5xl mx-auto px-5 sm:px-8 py-10 md:py-14">
+  <section aria-label="Available services" className="max-w-5xl mx-auto px-5 sm:px-8 py-10 md:py-14">
    {error&&<div className="p-4 mb-6 rounded-xl bg-red-50 border border-red-200 text-red-800">{error}</div>}
    {loading?<div className="py-20 text-center text-[#756469]">Loading services…</div>:!match?<div className="rounded-2xl bg-white border border-[#ead9b3] p-10 text-center"><h2 className="text-xl font-black text-[#5a1624]">We couldn't find that service area</h2><p className="mt-2 text-[#756469]">It may have moved. <Link to="/services" className="font-black text-[#855d15] hover:text-[#5a1624]">Browse all service areas</Link>.</p></div>:<div className="space-y-10">{sections.map((section,i)=><div key={section.label||i}>{section.label&&<h2 className="mb-4 text-xs font-black uppercase tracking-[.15em] text-[#9b6b00]">{section.label}</h2>}<div className="space-y-4">{section.groups.map(([base,variants])=><ServiceCard key={base} base={base} variants={variants} hidePublicPrice={hidePublicPrice}/>)}</div></div>)}</div>}
-  </main>
+  </section>
  </div>;
 }
