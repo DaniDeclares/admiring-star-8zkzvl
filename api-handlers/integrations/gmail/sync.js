@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { messageReceipt } from './_messageReceipt.mjs';
+import { reconcileHolidayResourceReplies, assertHolidayGmailPreviewIsolation } from './_holidayResourceReply.mjs';
 import { decryptSecret, encryptSecret, ENVIRONMENT, logIntegrationEvent, requireStaff } from '../../_integrationOAuth.js';
 
 function adminClient() {
@@ -130,6 +131,9 @@ async function syncConnection(supabase, connection) {
 
 export default async function handler(req, res) {
   if (!['GET','POST'].includes(req.method)) return res.status(405).json({ success: false, error: 'Method not allowed' });
+  // Isolated Gmail testing must never inherit the OAuth bridge's PRODUCTION default.
+  try { assertHolidayGmailPreviewIsolation(); }
+  catch { return res.status(503).json({success:false,error:'GMAIL_PREVIEW_ISOLATION_UNPROVEN'}); }
   const supabase = adminClient();
   try {
     const cronAuthorized = process.env.CRON_SECRET && req.headers.authorization === 'Bearer ' + process.env.CRON_SECRET;
@@ -160,6 +164,9 @@ export default async function handler(req, res) {
       }
     }
 
+    // Reuse the existing Gmail events, Holiday Mission intake and Owner HQ attention.
+    // No new intake/contact is created; any exact-email match remains review-only.
+    const holiday = await reconcileHolidayResourceReplies(supabase);
     const { data: bridgeResult, error: bridgeError } = await supabase.rpc('dd_reconcile_outbound_sales_touch_bridge');
     if (bridgeError) throw bridgeError;
     const receipt = Array.isArray(bridgeResult) ? bridgeResult[0] : bridgeResult;
@@ -167,6 +174,8 @@ export default async function handler(req, res) {
       success: true,
       connected: true,
       ingested: total,
+      holiday_resource_replies_reviewed: holiday.classified,
+      holiday_intake_match_candidates: holiday.reviewCandidates,
       sales_touch_rows_reconciled: Number(receipt?.updated_rows || 0),
       touched_rows_missing_timestamp: Number(receipt?.touched_missing_timestamp || 0)
     });
