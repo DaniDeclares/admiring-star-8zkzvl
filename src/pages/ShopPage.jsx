@@ -40,7 +40,7 @@ export default function ShopPage() {
   const visible = products.filter((product) => filter === 'all' || (product.product_type || 'Other') === filter);
 
   return (
-    <main className="min-h-screen bg-[#fffaf1] pt-24 pb-20 text-[#302226]">
+    <div className="min-h-screen bg-[#fffaf1] pt-24 pb-20 text-[#302226]">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <header className="mb-10 max-w-3xl">
           <p className="text-xs font-black uppercase tracking-[.18em] text-[#a8791c]">DANI DECLARES MARKET • Print • Merchandise • Digital products</p>
@@ -83,6 +83,6 @@ export default function ShopPage() {
           <Link to="/request-service" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#d2a83f] px-6 py-4 font-black text-[#45101b]">Request a custom quote <ArrowRight size={18} /></Link>
         </section>
       </div>
-    </main>
+    </div>
   );
 }
