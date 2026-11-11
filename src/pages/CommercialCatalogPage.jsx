@@ -1,6 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {useLocation,Link} from 'react-router-dom';
 import {ArrowRight,Search,X} from 'lucide-react';
+import {destinationFor} from './ConnectPage';
 import {getFamilyVisuals} from '../data/serviceVisuals2026.js';
 import {PACKAGE_INTAKE_SCOPE_GROUPS} from '../data/packageScopeInquiry2026.js';
 import {AUDIENCE_LABELS,AUDIENCE_BUCKETS,groupServicesByBucket,groupedServices} from '../data/serviceCatalogFamilies.js';
@@ -60,7 +61,7 @@ export default function CommercialCatalogPage({context='services'}){
       </div>
       <div className="mt-7 flex flex-col items-stretch gap-4 rounded-2xl border border-[var(--dd-border-gold)] bg-white p-5 sm:flex-row sm:items-center">
         <p className="w-full max-w-2xl text-sm leading-6 text-[var(--dd-ink)] sm:w-auto sm:min-w-[220px] sm:flex-1">Looking for a combined outcome rather than one service? Describe it once and DANI can determine the next governed scope and quote step.</p>
-        <Link to="/request-service" className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-[var(--dd-burgundy)] sm:w-auto px-5 py-3 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dd-burgundy)]">Request a scoped quote <ArrowRight className="ml-2 h-4 w-4"/></Link>
+        <Link to={destinationFor("/request-service",location.search)} className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-[var(--dd-burgundy)] sm:w-auto px-5 py-3 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dd-burgundy)]">Request a scoped quote <ArrowRight className="ml-2 h-4 w-4"/></Link>
       </div>
       <p className="mt-4 text-xs leading-6 text-[var(--dd-muted)]">Seasonal home services are commercial inquiries and separate from DANI's community Holiday Mission.</p>
     </div>
