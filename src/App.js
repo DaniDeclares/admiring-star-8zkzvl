@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
+import PublicNotFoundPage from "./pages/PublicNotFoundPage.jsx";
 import SeoRouteMetadata from "./components/SeoRouteMetadata.jsx";
 import SeoStructuredData from "./components/SeoStructuredData.jsx";
 import SeoLandingPage from "./pages/SeoLandingPage.jsx";
@@ -113,6 +114,8 @@ export default function App() {
         <Route path="/resident-welcome" element={<ResidentWelcomePage />} />
         <Route path="/resident-dispatch" element={<Navigate to="/request-service" replace />} />
         <Route path="/request-service" element={<RequestServicePage />} />
+        {/* Existing customer quote links must reach governed intake, never fall back to Home. */}
+        <Route path="/quote" element={<BookRedirect />} />
         <Route path="/pay" element={<PayPage />} />
 
         {/* One platform, three role-based experiences. */}
@@ -192,7 +195,7 @@ export default function App() {
         <Route path="/events" element={<Navigate to="/services/events" replace />} />
         <Route path="/signature-services" element={<Navigate to="/services" replace />} />
         <Route path="/govcon" element={<Navigate to="/industries/government" replace />} />
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<PublicNotFoundPage />} />
       </Routes>
     </Layout>
   );
