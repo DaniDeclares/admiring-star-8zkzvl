@@ -227,3 +227,20 @@ Channel-specific pricing and commercial rules must be researched and reconciled 
 **Verification performed:** Jest 2 suites / 11 tests PASS (including existing front-door regression); production build PASS; isolated compiled-build browser at 390/1280 PASS for /quote query-preserving routing, clear unknown-path recovery, no page errors or horizontal overflow. These are not Production deployment/UX signoff. Details in Windows DANI-HANDOFF/site-live-coherence-readonly-20261111.json and site-route-local-acceptance-20261111.log. No customer records modified or notifications triggered.
 
 **Next website-wide cohesion gates (proposed, not completed):** inspect deliberate visual hierarchy, logo readability, consistent headings/spacing/buttons/forms, content claims, shared audience paths and cross-link destinations across all public routes. Test main mobile menu open/close, keyboard/focus, real catalog API states, Shop products and cart handoff, all 32 inquiry-only package pathways, Connect/Join referrals and Holiday separation. Verify request persistence → owner visibility → accountable next action separately, with only authorized test submissions and inert delivery. Preserve accessibility, privacy, attribution, and per-PR release controls. Review customer-facing imagery and approved holiday designs before making new graphic choices. Require exact-revision preview and live desktop/mobile browser acceptance, rollback reference and source-linked evidence after any governed release.
+
+## Release continuation checkpoint — 2026-11-12 (local candidate, not merged)
+
+This is a release-specific continuation inside the existing Channel Release Playbook; preserve its channel authority and scope rules.
+
+- Baseline: origin/main b5b33618ee15c55b8f595ef8b5b235471c899671.
+- PR #714 eec3f3329e464273610ce2c68405641d2f0b8294: legacy service-area design and customer next steps; open, mergeable, CI build/quality/CodeQL successful; rendered acceptance outstanding.
+- PR #715 9697644f79b31cffb545895ea2e2d4c44a2c8fa3: legacy quote entry and unknown-route recovery; open, mergeable, CI build/quality/CodeQL successful; quote-path acceptance outstanding.
+- PR #716 660dafdf23fed844807541ddf4173a690c483fee: holiday banner/countdown/snow; open, mergeable, CI build/quality/CodeQL successful; holiday cutoff and destination decisions outstanding.
+- Combined isolated worktree: C:\Users\danid\DANI-Worker\combined-release-714-715-716; merged all three without conflicts, local npm run build compiled successfully; temporary test branch only, not published.
+- Browser capability: Firecrawl isolated browser successfully rendered public https://www.danideclares.com and enumerated navigation, hero and holiday section. Protected combined Preview acceptance NOT completed.
+- Vercel: SSO protection enabled for all except custom domains. Deployment-scoped bypass supported but NOT created or authorized. Must host exact combined candidate and verify browser can use URL before requesting a time-limited bypass. Never log bypass secret.
+- Non-PR workflows: critical-production-smoke and ch01-sku-release-contract-proof intentionally skip pull_request; smoke targets public Production; SKU proof targets DNI-01A-001 and is not #715 quote-scope proof.
+- GitHub protection read: HTTP 401 for repository main protection endpoint; applicable rules not confirmed. Mergeable_state=unstable is not approval.
+- Pending owner approvals: none requested for merge/deployment. Temporary protected-Preview bypass requires explicit scope/time approval after a hosted combined candidate exists.
+- Next action: establish hosted combined Preview and browser acceptance, resolve #716 Christmas cutoff/destination, verify review/rules and Production trigger; then request exact governed merge/deployment approval. Do not repeat passing checks without changed heads or baseline.
+- Unrelated local repo modifications remain untouched. Supporting Shopify worker research stays outside release critical path.
