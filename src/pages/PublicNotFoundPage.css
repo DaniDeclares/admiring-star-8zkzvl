@@ -1,0 +1,40 @@
+/* Shared public palette and type; keep navigation consistent with Layout. */
+.dd-route-recovery {
+  min-height: min(65vh, 650px);
+  padding: clamp(3.5rem, 8vw, 7rem) 1.25rem;
+  background: var(--dd-ivory, #fbf7ef);
+  color: var(--dd-ink, #2d2226);
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+.dd-route-recovery__inner { max-width: 860px; margin: 0 auto; }
+.dd-route-recovery__eyebrow {
+  margin: 0 0 1.25rem;
+  color: var(--dd-burgundy, #591729);
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+.dd-route-recovery h1 {
+  margin: 0 0 1.2rem;
+  font-family: Georgia, serif;
+  color: var(--dd-burgundy, #591729);
+  font-size: clamp(2.5rem, 6vw, 4.2rem);
+  line-height: 1.07;
+}
+.dd-route-recovery__lead { max-width: 58ch; font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.65; }
+.dd-route-recovery__actions { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: 2.2rem; }
+.dd-route-recovery__actions a {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: .9rem 1.2rem;
+  border-radius: 11px;
+  font-weight: 750;
+  text-decoration: none;
+}
+.dd-route-recovery__primary { background: var(--dd-burgundy, #591729); color: #fff !important; }
+.dd-route-recovery__secondary { color: var(--dd-burgundy, #591729) !important; border: 1px solid currentColor; }
+.dd-route-recovery__more { margin-top: 2rem; display: flex; gap: 1.3rem; flex-wrap: wrap; }
+.dd-route-recovery__more a { color: var(--dd-burgundy, #591729); text-underline-offset: .22em; }
+.dd-route-recovery a:focus-visible { outline: 3px solid var(--dd-gold, #cba557); outline-offset: 3px; }
