@@ -244,3 +244,11 @@ This is a release-specific continuation inside the existing Channel Release Play
 - Pending owner approvals: none requested for merge/deployment. Temporary protected-Preview bypass requires explicit scope/time approval after a hosted combined candidate exists.
 - Next action: establish hosted combined Preview and browser acceptance, resolve #716 Christmas cutoff/destination, verify review/rules and Production trigger; then request exact governed merge/deployment approval. Do not repeat passing checks without changed heads or baseline.
 - Unrelated local repo modifications remain untouched. Supporting Shopify worker research stays outside release critical path.
+
+### Preview protection-bypass incident — 2026-11-12
+- Deployment: `dpl_6TZKMD3191r2E8BxSLnnbrvXN1wQ`; candidate `a263329b7cfdce3a92f17b867f8d01709a32434a`.
+- Second acceptance-session bypass created at approximately 2026-11-12 19:33 UTC, with 7200-second TTL and reported expiration epoch 1794521624. Do not record or reproduce the secret.
+- Failure: creation returned the secret as an object key, but the orchestration emitted only metadata, losing the secret between separate calls. A subsequent create attempt returned 409 protection_bypass_conflict. No browser acceptance was completed in that session.
+- Cleanup: revocation NOT VERIFIED. Vercel patch revocation contract requires the secret; authenticated alias lookup does not report bypass state. Scheduled expiration is not proof of closure. Manual dashboard cleanup or authenticated status verification remains required.
+- Prevention: never create a bypass in a standalone call. Only create within one guarded execution that captures the secret in a local variable, uses it directly in the browser URL, executes the prepared tests, and revokes it in finally; emit sanitized evidence only. If tool orchestration cannot guarantee this, use human-assisted authenticated browser testing instead. Never create a second bypass after 409.
+- Release: Preview READY and homepage smoke from earlier session are supported; full #714/#715/#716 acceptance, required-review policy, live Production branch configuration and #716 intent remain unverified. No merge or Production release authorized.
