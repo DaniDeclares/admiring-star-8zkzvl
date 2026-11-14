@@ -1,5 +1,6 @@
 /* eslint-disable */
 import React from 'react';
+import HolidayCountdownBanner from '../components/HolidayCountdownBanner';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Briefcase, Building2, CheckCircle2, FileText, Home, Landmark, MapPin, Store } from 'lucide-react';
@@ -32,6 +33,7 @@ const process = [
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#fbf8f1] text-[#24151a]">
+      <HolidayCountdownBanner />
       <Helmet>
         <title>DANI DECLARES LLC | More Gets Handled</title>
         <meta name="description" content="DANI DECLARES helps residents, property teams, real estate professionals, businesses and institutions get work handled across operations, logistics, events, creative production and field support." />

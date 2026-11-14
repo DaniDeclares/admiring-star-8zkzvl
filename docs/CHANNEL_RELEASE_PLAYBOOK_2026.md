@@ -213,3 +213,53 @@ Create a new channel dossier containing:
 12. release evidence.
 
 Channel-specific pricing and commercial rules must be researched and reconciled independently.
+
+## 2026-11-11 proposed addition — continuous public-site navigation and visual acceptance
+
+**Status: PROPOSED SOP amendment, not an approved release or a claim of customer success.** Apply inside the existing governed channel procedure; do not create a competing site governance policy.
+
+**Observed incident on Production b5b3361:** A live read-only Edge inspection at 390px and 1280px covered Home, /services, /catalog, /packages, /shop, /connect, /about, /quote, /holiday, /holiday-mission and /partner-network. Each route returned an HTML shell, no first-load page errors, and no measured horizontal overflow. However /quote and the two unrecognized holiday aliases silently rendered Home because App.js's catch-all redirected to "/". Navigation therefore looked successful while failing to deliver the visitor's requested destination. /services and /catalog rendered the same introduction; that alone is not a defect, but calls for clear intentional navigation. /shop briefly displayed "Loading current products..." at mobile viewport; further load/empty-state and API checks are required before drawing a failure conclusion. This audit is structural, **not** a complete visual/design acceptance or checkout test.
+
+**Reproduction:** Open an unknown URL and /quote with UTM/referral parameters on both mobile and desktop. Record final pathname, visible H1, header/nav, actual clickable destination, horizontal scroll, failed images, page errors, customer-preserving URL parameters, and whether the destination is appropriate. Do not classify 200 from an SPA shell as page success. Use real browser interactions for mobile navigation and final state, not just source code or HTTP GET.
+
+**Correction in isolated candidate:** Add a backwards-compatible /quote path that reaches the existing governed /request-service front door, preserving query parameters; it is an inquiry, **not** a produced estimate or accepted booking. Replace wildcard homepage redirect with a clear recovery page inside the existing Layout offering Services, Request Service, Packages and Connect & Join. Use approved DANI burgundy/ivory/gold tokens and existing nav/footer, not a separate design system.
+
+**Verification performed:** Jest 2 suites / 11 tests PASS (including existing front-door regression); production build PASS; isolated compiled-build browser at 390/1280 PASS for /quote query-preserving routing, clear unknown-path recovery, no page errors or horizontal overflow. These are not Production deployment/UX signoff. Details in Windows DANI-HANDOFF/site-live-coherence-readonly-20261111.json and site-route-local-acceptance-20261111.log. No customer records modified or notifications triggered.
+
+**Next website-wide cohesion gates (proposed, not completed):** inspect deliberate visual hierarchy, logo readability, consistent headings/spacing/buttons/forms, content claims, shared audience paths and cross-link destinations across all public routes. Test main mobile menu open/close, keyboard/focus, real catalog API states, Shop products and cart handoff, all 32 inquiry-only package pathways, Connect/Join referrals and Holiday separation. Verify request persistence → owner visibility → accountable next action separately, with only authorized test submissions and inert delivery. Preserve accessibility, privacy, attribution, and per-PR release controls. Review customer-facing imagery and approved holiday designs before making new graphic choices. Require exact-revision preview and live desktop/mobile browser acceptance, rollback reference and source-linked evidence after any governed release.
+
+## Release continuation checkpoint — 2026-11-12 (local candidate, not merged)
+
+This is a release-specific continuation inside the existing Channel Release Playbook; preserve its channel authority and scope rules.
+
+- Baseline: origin/main b5b33618ee15c55b8f595ef8b5b235471c899671.
+- PR #714 eec3f3329e464273610ce2c68405641d2f0b8294: legacy service-area design and customer next steps; open, mergeable, CI build/quality/CodeQL successful; rendered acceptance outstanding.
+- PR #715 9697644f79b31cffb545895ea2e2d4c44a2c8fa3: legacy quote entry and unknown-route recovery; open, mergeable, CI build/quality/CodeQL successful; quote-path acceptance outstanding.
+- PR #716 660dafdf23fed844807541ddf4173a690c483fee: holiday banner/countdown/snow; open, mergeable, CI build/quality/CodeQL successful; holiday cutoff and destination decisions outstanding.
+- Combined isolated worktree: C:\Users\danid\DANI-Worker\combined-release-714-715-716; merged all three without conflicts, local npm run build compiled successfully; temporary test branch only, not published.
+- Browser capability: Firecrawl isolated browser successfully rendered public https://www.danideclares.com and enumerated navigation, hero and holiday section. Protected combined Preview acceptance NOT completed.
+- Vercel: SSO protection enabled for all except custom domains. Deployment-scoped bypass supported but NOT created or authorized. Must host exact combined candidate and verify browser can use URL before requesting a time-limited bypass. Never log bypass secret.
+- Non-PR workflows: critical-production-smoke and ch01-sku-release-contract-proof intentionally skip pull_request; smoke targets public Production; SKU proof targets DNI-01A-001 and is not #715 quote-scope proof.
+- GitHub protection read: HTTP 401 for repository main protection endpoint; applicable rules not confirmed. Mergeable_state=unstable is not approval.
+- Pending owner approvals: none requested for merge/deployment. Temporary protected-Preview bypass requires explicit scope/time approval after a hosted combined candidate exists.
+- Next action: establish hosted combined Preview and browser acceptance, resolve #716 Christmas cutoff/destination, verify review/rules and Production trigger; then request exact governed merge/deployment approval. Do not repeat passing checks without changed heads or baseline.
+- Unrelated local repo modifications remain untouched. Supporting Shopify worker research stays outside release critical path.
+
+### Preview protection-bypass incident � 2026-11-12
+- Deployment: `dpl_6TZKMD3191r2E8BxSLnnbrvXN1wQ`; candidate `a263329b7cfdce3a92f17b867f8d01709a32434a`.
+- Second acceptance-session bypass created at approximately 2026-11-12 19:33 UTC, with 7200-second TTL and reported expiration epoch 1794521624. Do not record or reproduce the secret.
+- Failure: creation returned the secret as an object key, but the orchestration emitted only metadata, losing the secret between separate calls. A subsequent create attempt returned 409 protection_bypass_conflict. No browser acceptance was completed in that session.
+- Cleanup: revocation NOT VERIFIED. Vercel patch revocation contract requires the secret; authenticated alias lookup does not report bypass state. Scheduled expiration is not proof of closure. Manual dashboard cleanup or authenticated status verification remains required.
+- Prevention: never create a bypass in a standalone call. Only create within one guarded execution that captures the secret in a local variable, uses it directly in the browser URL, executes the prepared tests, and revokes it in finally; emit sanitized evidence only. If tool orchestration cannot guarantee this, use human-assisted authenticated browser testing instead. Never create a second bypass after 409.
+- Release: Preview READY and homepage smoke from earlier session are supported; full #714/#715/#716 acceptance, required-review policy, live Production branch configuration and #716 intent remain unverified. No merge or Production release authorized.
+
+## Release continuation checkpoint — 2026-11-13 (prepared locally; not deployed)
+
+- Owner decision recovered for #716: holiday destination must serve residential and business audiences; unverified holiday-only entry falls back to general /catalog. Countdown and snow are OFF by default. Christmas message is shown from 2026-12-25 00:00 Eastern through 2026-12-25 23:59:59.999 Eastern; banner disappears 2026-12-26 00:00 Eastern.
+- #716 P1 canonical brand finding addressed in source on branch feat/holiday-countdown-20261112 commit 0b91336c687338bb2c6a29894b68377f6ca9879e; PR reviewer thread still requires independent resolution/acceptance. No change to payment or pricing.
+- Combined isolated worktree now includes the fix at commit 2aabba48688002e4e6ed533062e653f2cd4c3f36, atop prior combined candidate 188f6e01. This is LOCAL ONLY; old hosted Preview dpl_6TZKMD3191r2E8BxSLnnbrvXN1wQ remains tied to earlier a263329b and is not evidence for the new candidate.
+- Verification: four Eastern-boundary timing tests PASS; canonical brand verifier PASS; optimized production build PASS. Headless Edge compiled-build local acceptance at 390px and 1280px PASS on /, /quote with channelType/ref query, unknown-route recovery, /catalog and /packages. /quote redirected to /request-service while retaining query; unknown route showed recovery page; no observed page JS errors or horizontal overflow in 10 route/viewport observations. Local screenshots: C:\Users\danid\DANI-Worker\artifacts\combined-local-home-390-20261113.png and combined-local-quote-390-20261113.png.
+- Remaining gates: (1) authorized new exact-revision combined Preview deployment (not yet approved); (2) authenticated human-assisted desktop/mobile visual and quote-builder acceptance on that exact deployment, including actual catalog API and source-to-intake persistence; (3) #716 review thread and required CI/reviewer resolution; (4) GitHub applicable branch/rulesets and Vercel Production branch/trigger verification; (5) verify closure of prior protection bypass in Vercel dashboard; (6) exact owner merge/Production release approval; (7) live verification and rollback receipt. Do not claim GREEN.
+- #717 is a separate draft security PR, not a dependency of #714-#716 without an independently established reason.
+- Supporting external-example reconciliation is recorded in existing Notion DANI Integration Architecture and Asana subtask 1220524840071619. It is not a release gate; no background worker acceptance demonstrated.
+- No bypass created, no Production deployment or merge performed in this checkpoint. Next executable action: request scoped permission to publish the new combined candidate to Preview only, then perform prepared acceptance; separately request one bundled human check for GitHub rules, Vercel Production branch, and bypass status if APIs remain insufficient.
