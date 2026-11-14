@@ -124,7 +124,7 @@ function OwnerHq({ session }) {
       <a className="active" href="#overview">Overview</a>
       <Link to="/portal/acquisition">Sales <span className="nav-count">{metrics.salesDue}</span></Link>
       <Link to="/portal/operations">Operations <span className="nav-count">{metrics.activeJobs}</span></Link>
-      <Link to="/portal/providers">Providers</Link><Link to="/portal/customers">Customers</Link>
+      <Link to="/portal/provider-approval">Providers</Link><Link to="/portal/customers">Customers</Link>
       <a href="#money">Money <span className="nav-count">{metrics.ownerAccounting}</span></a>
       <a href="#research">Research</a><Link to="/portal/services">Catalog</Link><a href="#tech">Tech</a><a href="#connections">Connections</a>
     </nav>
