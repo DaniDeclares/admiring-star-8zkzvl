@@ -11,7 +11,7 @@ A buyer may bring a multi-need outcome in their own words, e.g. phone/callback a
 ## Fulfillment model
 - Owner first-refusal where commercially/operationally authorized.
 - Approved independent providers only, based on qualification, service coverage, actual availability, authorization and contract terms; support accept/decline and geographic dispatch.
-- Preserve source referral-code attribution. For referred customers, implement documented provider-first priority subject to acceptance and qualification; do not fabricate confirmed bookings.
+- Preserve source referral-code attribution. For a provider-generated qualifying customer job, record the founder's automatic booking/assignment rule to the referring provider instead of ordinary open dispatch. Verify approval, service qualification, geographic coverage, availability and the terms governing whether provider acceptance is additionally required; do not falsely confirm a booking if the provider cannot perform the work. If unavailable or disqualified, preserve attribution and use documented fallback without erasing the referral.
 - Preserve client-preferred provider for future eligible jobs, and permit reoffer/fallback if unavailable or declined.
 - Partner companies can refer customers and/or fulfill jobs when approved internal provider capacity is absent. Separate the partner-referral role from partner-fulfillment role. Confirm each payout from its own approved agreement and qualifying paid outcome.
 - Authorized providers may stop offering a service, without erasing accepted assignments, completion evidence or historical obligations. PR #684 must resolve this behavior before release.
