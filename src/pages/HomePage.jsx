@@ -24,7 +24,7 @@ const capabilities = [
 
 const process = [
   ['01', 'Tell us what is happening', 'You do not have to know the exact service name. Start with the need, problem or outcome.'],
-  ['02', 'We route the work', 'DANI matches the request to the appropriate service, quote path, channel and fulfillment requirements.'],
+  ['02', 'We keep the needs together', 'DANI reviews every requested responsibility, including work spanning divisions, and checks the applicable commercial and fulfillment requirements.'],
   ['03', 'Confirm the scope', 'Straightforward services move through governed pricing; variable or larger work can move through a documented quote or proposal.'],
   ['04', 'Get it handled', 'We coordinate the approved work, provide updates, collect evidence where needed and close the loop.'],
 ];
@@ -33,7 +33,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#fbf8f1] text-[#24151a]">
       <Helmet>
-        <title>DANI DECLARES LLC | More Gets Handled</title>
+        <title>DANI DECLARES LLC | We Handle the Execution</title>
         <meta name="description" content="DANI DECLARES helps residents, property teams, real estate professionals, businesses and institutions get work handled across operations, logistics, events, creative production and field support." />
       </Helmet>
 
@@ -43,11 +43,11 @@ export default function HomePage() {
           <div>
             <p className="text-[#e5d2a5] text-xs font-black uppercase tracking-[.22em]">DANI DECLARES • OPERATIONS • EXECUTION • SUPPORT</p>
             <h1 style={{color: "#ffffff"}} className="mt-5 max-w-5xl text-5xl sm:text-6xl md:text-7xl font-black leading-[.95]">
-              More work handled.
-              <span className="block text-[#d9b65a]">Less on your plate.</span>
+              We handle the execution.
+              <span className="block text-[#d9b65a]">Across the work on your plate.</span>
             </h1>
             <p className="mt-7 max-w-3xl text-lg md:text-xl leading-relaxed text-white/80">
-              One place to start when home, property, business, real estate, events, logistics or field work needs to move from “someone needs to handle this” to a clear next step.
+              Tell us what you need accomplished—even when it spans multiple services. DANI helps scope and coordinate the right administrative, household, property, business, creative and logistical support under one relationship.
             </p>
             <div className="mt-9 flex flex-col sm:flex-row gap-3">
               <Link to="/request-service" className="inline-flex items-center justify-center rounded-xl bg-[#c9a45c] px-7 py-4 text-[#45141d] font-black">
@@ -69,7 +69,7 @@ export default function HomePage() {
             <p className="mt-5 text-[#e5d2a5] text-xs font-black uppercase tracking-[.18em]">One accountable starting point</p>
             <h2 className="mt-3 text-3xl font-black text-white">Home. Property. Business. Real estate. Institutions.</h2>
             <p className="mt-4 text-white/70 leading-relaxed">
-              Different customers need different solutions. The experience stays simple: explain the need, get the right path, confirm the scope, and move forward.
+              Cleaning is one part of what we handle. DANI also coordinates administrative support, calls and scheduling, customer follow-up, marketing, print, digital systems, property work and more. We confirm scope, eligibility, availability and approval before committing to execution.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               {['Resident support','Field execution','Business operations','Creative + events'].map(item => (
