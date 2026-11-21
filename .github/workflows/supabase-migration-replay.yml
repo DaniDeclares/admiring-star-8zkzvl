@@ -115,10 +115,13 @@ jobs:
           # appending the candidate, CI could pass without executing its DDL.
           clock_migration="20261017061526_owner_provider_work_clock_existing_ledger.sql"
           review_migration="20261030054901_20261028213000_owner_review_artifacts.sql"
+          resource_migration="20261120213000_agent_runtime_resource_governor.sql"
           test -f "supabase/migrations/$clock_migration"
           test -f "supabase/migrations/$review_migration"
+          test -f "supabase/migrations/$resource_migration"
           cp "supabase/migrations/$clock_migration" "$RUNNER_TEMP/$clock_migration"
           cp "supabase/migrations/$review_migration" "$RUNNER_TEMP/$review_migration"
+          cp "supabase/migrations/$resource_migration" "$RUNNER_TEMP/$resource_migration"
           python3 scripts/assemble_production_replay_workspace.py . "$RUNNER_TEMP/replay-migrations" --legacy-cutoff 20260930140500 --report assembly-report.json
           rm -f supabase/migrations/*.sql
           cp "$RUNNER_TEMP"/replay-migrations/*.sql supabase/migrations/
@@ -131,9 +134,16 @@ jobs:
           test -f "$RUNNER_TEMP/$review_migration"
           test ! -e "supabase/migrations/$review_migration"
           cp "$RUNNER_TEMP/$review_migration" "supabase/migrations/$review_migration"
-          echo "Hybrid replay plus clock and owner-review candidates: $(ls supabase/migrations/*.sql | wc -l) files"
+          # The resource governor is a candidate extension to the existing agent
+          # runtime. Preserve it in this disposable replay so CI executes its DDL
+          # without adding it to the Production migration ledger or applying it remotely.
+          test -f "$RUNNER_TEMP/$resource_migration"
+          test ! -e "supabase/migrations/$resource_migration"
+          cp "$RUNNER_TEMP/$resource_migration" "supabase/migrations/$resource_migration"
+          echo "Hybrid replay plus clock, owner-review and resource-governor candidates: $(ls supabase/migrations/*.sql | wc -l) files"
           test -f "supabase/migrations/$clock_migration"
           test -f "supabase/migrations/$review_migration"
+          test -f "supabase/migrations/$resource_migration"
 
       - name: Normalize provider staging guard formatting (replay workspace only)
         run: |
@@ -752,6 +762,15 @@ jobs:
 
       - name: Replay migrations from scratch without seed data
         run: supabase db reset --no-seed
+
+      - name: Run isolated agent resource-governor SQL regression
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+          eval "$(supabase status -o env)"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/20261120_agent_runtime_resource_governor.sql
 
       - name: Stop isolated local Supabase
         if: always()

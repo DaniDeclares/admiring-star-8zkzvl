@@ -6,6 +6,19 @@ import {
   routeExecutionTask,
 } from './aiExecutionGovernor';
 
+const runtimePolicy = (overrides = {}) => ({
+  policy_key: 'test-runtime-policy',
+  resource_governance_mode: 'SHADOW',
+  max_agent_turns: 4,
+  max_model_calls: 2,
+  max_tool_calls: 8,
+  max_retries: 1,
+  max_elapsed_seconds: 60,
+  token_budget: 8000,
+  cost_budget_usd: 0.05,
+  ...overrides,
+});
+
 describe('aiExecutionGovernor', () => {
   test('routes known deterministic work away from reasoning models', () => {
     const route = routeExecutionTask({ kind: 'HASH_COMPARE', deterministic: true, knownProcedure: true, authorityResolved: true });
@@ -82,57 +95,88 @@ describe('aiExecutionGovernor', () => {
     expect(evaluateExecutionResult({ route, result: { preProductionVerified: true, independentReviewPassed: false } })).toEqual({ outcomeState: 'EXECUTING', nextAction: 'INDEPENDENT_REVIEW' });
   });
 
-  test('provides bounded shadow resource ceilings by routing tier', () => {
-    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true });
+  test('uses existing per-agent policy budgets instead of inventing tier ceilings', () => {
+    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true, runtimePolicy: runtimePolicy() });
     expect(route.resourceGovernance).toEqual(expect.objectContaining({
-      mode: 'SHADOW', action: 'OBSERVE_AND_COMPARE', retryPolicy: 'NO_AUTOMATIC_REPEAT_AFTER_RESOURCE_OVERRUN',
+      policyResolved: true, policyKey: 'test-runtime-policy', mode: 'SHADOW',
+      action: 'OBSERVE_AND_COMPARE', retryPolicy: 'NO_AUTOMATIC_REPEAT_AFTER_RESOURCE_OVERRUN',
     }));
-    expect(route.resourceGovernance.limits.inputTokens).toBe(8000);
-    expect(route.resourceGovernance.requested.inputTokens).toBeNull();
+    expect(route.resourceGovernance.limits).toEqual({
+      totalTokens: 8000, modelCalls: 2, toolCalls: 8, retries: 1, wallTimeMs: 60000, costUsd: 0.05,
+    });
+    expect(route.resourceGovernance.preInferenceCapEnforced).toBe(false);
   });
   test('captures supplied estimates without inventing missing usage or cost', () => {
-    const route = routeExecutionTask({ authorityResolved: true, estimatedInputTokens: 9000, estimatedCostUsd: 0.01 });
-    expect(route.resourceGovernance.requested).toEqual(expect.objectContaining({ inputTokens: 9000, costUsd: 0.01, outputTokens: null }));
-  });
-  test('detects measured resource overrun but never automatically retries', () => {
-    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true });
-    expect(evaluateResourceUsage({ route, usage: { inputTokens: 9001, outputTokens: 800, modelCalls: 1, wallTimeMs: 12000 } })).toEqual(expect.objectContaining({
-      mode: 'SHADOW', status: 'EXCEEDED', exceeded: ['inputTokens'], retryAllowed: false, nextAction: 'HOLD_AND_REVIEW_RESOURCE_OVERRUN',
+    const route = routeExecutionTask({
+      authorityResolved: true, runtimePolicy: runtimePolicy(),
+      estimatedInputTokens: 9000, estimatedCostUsd: 0.01,
+    });
+    expect(route.resourceGovernance.requested).toEqual(expect.objectContaining({
+      inputTokens: 9000, costUsd: 0.01, outputTokens: null, totalTokens: null,
     }));
   });
-  test('keeps missing usage unknown and respects valid scoped policy overrides', () => {
-    const route = routeExecutionTask({ authorityResolved: true, resourceLimits: { inputTokens: 1000, costUsd: 0.02 } });
+  test('detects a shadow overrun without turning shadow observation into enforcement', () => {
+    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true, runtimePolicy: runtimePolicy() });
+    expect(evaluateResourceUsage({ route, usage: {
+      inputTokens: 7500, outputTokens: 800, modelCalls: 1, toolCalls: 2, retries: 0, wallTimeMs: 12000, costUsd: 0.01,
+    } })).toEqual(expect.objectContaining({
+      mode: 'SHADOW', status: 'EXCEEDED', exceeded: ['totalTokens'],
+      retryAllowed: false, nextAction: 'RECORD_SHADOW_OVERRUN',
+    }));
+  });
+  test('enforce mode holds on a measured overrun before claim or action', () => {
+    const route = routeExecutionTask({
+      kind: 'EXTRACT', authorityResolved: true, scopeBounded: true,
+      runtimePolicy: runtimePolicy({ resource_governance_mode: 'ENFORCE' }),
+    });
+    expect(evaluateResourceUsage({ route, usage: {
+      inputTokens: 7500, outputTokens: 800, modelCalls: 1, toolCalls: 2, retries: 0, wallTimeMs: 12000, costUsd: 0.01,
+    } })).toEqual(expect.objectContaining({
+      mode: 'ENFORCE', status: 'EXCEEDED', exceeded: ['totalTokens'],
+      retryAllowed: false, nextAction: 'HOLD_BEFORE_CLAIM_OR_ACTION',
+    }));
+  });
+  test('keeps missing usage unknown and respects only the authoritative runtime policy', () => {
+    const route = routeExecutionTask({ authorityResolved: true, runtimePolicy: runtimePolicy() });
     expect(evaluateResourceUsage({ route, usage: {} })).toEqual(expect.objectContaining({
-      status: 'UNKNOWN', observed: {}, missing: ['inputTokens', 'outputTokens', 'modelCalls', 'wallTimeMs', 'costUsd'],
+      status: 'UNKNOWN',
+      missing: ['inputTokens', 'outputTokens', 'modelCalls', 'toolCalls', 'retries', 'wallTimeMs', 'costUsd'],
       measurementComplete: false, retryAllowed: false, nextAction: 'CONTINUE_WITH_USAGE_GAP',
     }));
-    expect(route.resourceGovernance.limits.inputTokens).toBe(1000);
-    expect(route.resourceGovernance.limits.costUsd).toBe(0.02);
+    expect(route.resourceGovernance.limits.totalTokens).toBe(8000);
+    const noPolicy = routeExecutionTask({ authorityResolved: true });
+    expect(evaluateResourceUsage({ route: noPolicy, usage: {} }).status).toBe('UNKNOWN');
   });
   test('marks partial and invalid provider measurements without treating them as zero', () => {
-    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true });
-    expect(evaluateResourceUsage({ route, usage: { inputTokens: 100 } })).toEqual(expect.objectContaining({
-      status: 'PARTIAL', observed: { inputTokens: 100 }, missing: ['outputTokens', 'modelCalls', 'wallTimeMs'],
+    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true, runtimePolicy: runtimePolicy() });
+    expect(evaluateResourceUsage({ route, usage: {
+      inputTokens: 100, modelCalls: 1, toolCalls: 0, retries: 0, wallTimeMs: 1000, costUsd: 0.001,
+    } })).toEqual(expect.objectContaining({
+      status: 'PARTIAL', observed: expect.objectContaining({ inputTokens: 100 }), missing: ['outputTokens'],
       measurementComplete: false,
     }));
-    expect(evaluateResourceUsage({ route, usage: { inputTokens: -1 } })).toEqual(expect.objectContaining({
+    expect(evaluateResourceUsage({ route, usage: {
+      inputTokens: -1, outputTokens: 1, modelCalls: 1, toolCalls: 0, retries: 0, wallTimeMs: 1000, costUsd: 0.001,
+    } })).toEqual(expect.objectContaining({
       status: 'INVALID', invalid: ['inputTokens'], measurementComplete: false,
     }));
   });
   test('reports within limits only when every configured measurement is present', () => {
-    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true });
+    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true, runtimePolicy: runtimePolicy() });
     expect(evaluateResourceUsage({ route, usage: {
-      inputTokens: 1200, outputTokens: 300, modelCalls: 1, wallTimeMs: 12000, costUsd: 0.004,
+      inputTokens: 1200, outputTokens: 300, modelCalls: 1, toolCalls: 2, retries: 0, wallTimeMs: 12000, costUsd: 0.004,
     } })).toEqual(expect.objectContaining({
       status: 'WITHIN_LIMITS', measurementComplete: true, missing: [], invalid: [], exceeded: [],
-      observed: { inputTokens: 1200, outputTokens: 300, modelCalls: 1, wallTimeMs: 12000, costUsd: 0.004 },
+      observed: expect.objectContaining({ totalTokens: 1500, costUsd: 0.004 }),
     }));
-    expect(route.resourceGovernance.limits.costUsd).toBeUndefined();
   });
-  test('rejects invalid or unknown resource-limit overrides instead of silently accepting them', () => {
-    const route = routeExecutionTask({ authorityResolved: true, resourceLimits: { inputTokens: -1, vendorRank: 1, costUsd: 0.01 } });
-    expect(route.resourceGovernance.limits.inputTokens).toBe(24000);
-    expect(route.resourceGovernance.limits.costUsd).toBe(0.01);
-    expect(route.resourceGovernance.invalidOverrides).toEqual(['inputTokens', 'vendorRank']);
+  test('does not allow task-local overrides to replace the existing runtime policy', () => {
+    const route = routeExecutionTask({
+      authorityResolved: true, runtimePolicy: runtimePolicy(),
+      resourceLimits: { token_budget: 100, cost_budget_usd: 0.001 },
+    });
+    expect(route.resourceGovernance.limits.totalTokens).toBe(8000);
+    expect(route.resourceGovernance.limits.costUsd).toBe(0.05);
+    expect(route.resourceGovernance.invalidOverrides).toEqual(['token_budget', 'cost_budget_usd']);
   });
 });

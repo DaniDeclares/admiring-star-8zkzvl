@@ -11,15 +11,6 @@ export const EXECUTION_TIERS = Object.freeze({
   FRONTIER_REVIEW: 'FRONTIER_REVIEW',
 });
 
-// Conservative per-inference ceilings. These are advisory/shadow values, not vendor
-// prices or guarantees. Provider usage is evaluated only when a worker returns it.
-export const RESOURCE_CEILINGS = Object.freeze({
-  [EXECUTION_TIERS.DETERMINISTIC]: Object.freeze({ inputTokens: 0, outputTokens: 0, modelCalls: 0, wallTimeMs: 30000 }),
-  [EXECUTION_TIERS.BOUNDED_WORKER]: Object.freeze({ inputTokens: 8000, outputTokens: 2000, modelCalls: 1, wallTimeMs: 60000 }),
-  [EXECUTION_TIERS.GENERAL_REASONING]: Object.freeze({ inputTokens: 24000, outputTokens: 4000, modelCalls: 1, wallTimeMs: 120000 }),
-  [EXECUTION_TIERS.FRONTIER_REVIEW]: Object.freeze({ inputTokens: 40000, outputTokens: 6000, modelCalls: 1, wallTimeMs: 180000 }),
-});
-
 const OWNER_GATED_ACTIONS = new Set([
   'DEBT_COMMITMENT', 'INVESTMENT_COMMITMENT', 'INVENTORY_PURCHASE', 'OUTBOUND_MESSAGE',
   'PRICING_CHANGE', 'MONEY_MOVEMENT', 'LEGAL_CLAIM', 'COMPLIANCE_CLAIM', 'PRODUCTION_MUTATION',
@@ -32,64 +23,90 @@ const BOUNDED_KINDS = new Set([
 ]);
 function unique(values) { return [...new Set(values.filter(Boolean))]; }
 function validUsageNumber(value) { return Number.isFinite(value) && value >= 0; }
-const RESOURCE_USAGE_FIELDS = Object.freeze(['inputTokens', 'outputTokens', 'modelCalls', 'wallTimeMs', 'costUsd']);
 
-function normalizeResourceLimits(defaults, overrides) {
-  const limits = { ...defaults };
-  const invalidOverrides = [];
-  if (overrides !== undefined && overrides !== null) {
-    if (typeof overrides !== 'object' || Array.isArray(overrides)) {
-      invalidOverrides.push('resourceLimits');
-    } else {
-      for (const [field, value] of Object.entries(overrides)) {
-        if (!RESOURCE_USAGE_FIELDS.includes(field) || !validUsageNumber(value)) invalidOverrides.push(field);
-        else limits[field] = value;
-      }
-    }
+function resolveRuntimeResourcePolicy(policy) {
+  if (!policy || typeof policy !== 'object' || typeof policy.policy_key !== 'string' || !policy.policy_key ||
+      !['SHADOW', 'ENFORCE'].includes(policy.resource_governance_mode)) {
+    return { policyResolved: false, policyKey: policy?.policy_key || null, mode: 'UNCONFIGURED', limits: {} };
   }
-  return { limits, invalidOverrides };
+  const maxModelCalls = validUsageNumber(policy.max_model_calls)
+    ? policy.max_model_calls
+    : policy.max_agent_turns;
+  const limits = {
+    totalTokens: validUsageNumber(policy.token_budget) ? policy.token_budget : null,
+    modelCalls: validUsageNumber(maxModelCalls) ? maxModelCalls : null,
+    toolCalls: validUsageNumber(policy.max_tool_calls) ? policy.max_tool_calls : null,
+    retries: validUsageNumber(policy.max_retries) ? policy.max_retries : null,
+    wallTimeMs: validUsageNumber(policy.max_elapsed_seconds) ? policy.max_elapsed_seconds * 1000 : null,
+    costUsd: validUsageNumber(policy.cost_budget_usd) ? policy.cost_budget_usd : null,
+  };
+  return {
+    policyResolved: true,
+    policyKey: policy.policy_key,
+    mode: policy.resource_governance_mode === 'ENFORCE' ? 'ENFORCE' : 'SHADOW',
+    limits,
+  };
 }
 
-/** Compares normalized provider usage with configured limits. Missing/invalid metrics are never zero. */
+/** Compares provider usage with the existing per-agent runtime policy. No local tier budgets are invented. */
 export function evaluateResourceUsage({ route, usage = {} } = {}) {
   if (!route) throw new Error('route is required');
-  const limits = route.resourceGovernance?.limits || RESOURCE_CEILINGS[route.tier] || {};
-  const requiredFields = RESOURCE_USAGE_FIELDS.filter((field) => validUsageNumber(limits[field]));
-  const exceeded = [];
+  const limits = route.resourceGovernance?.limits || {};
   const observed = {};
   const missing = [];
   const invalid = [];
-  for (const field of RESOURCE_USAGE_FIELDS) {
-    const value = usage?.[field];
-    if (value === undefined || value === null) {
-      if (requiredFields.includes(field)) missing.push(field);
-      continue;
+  const exceeded = [];
+  const metricValues = {
+    inputTokens: usage?.inputTokens,
+    outputTokens: usage?.outputTokens,
+    modelCalls: usage?.modelCalls,
+    toolCalls: usage?.toolCalls,
+    retries: usage?.retries,
+    wallTimeMs: usage?.wallTimeMs,
+    costUsd: usage?.costUsd,
+  };
+  for (const [field, value] of Object.entries(metricValues)) {
+    if (value === undefined || value === null) continue;
+    if (!validUsageNumber(value)) invalid.push(field);
+    else observed[field] = value;
+  }
+  const requiredMetricCount = (validUsageNumber(limits.totalTokens) ? 2 : 0)
+    + ['modelCalls', 'toolCalls', 'retries', 'wallTimeMs', 'costUsd'].filter((field) => validUsageNumber(limits[field])).length;
+  if (validUsageNumber(limits.totalTokens)) {
+    if (metricValues.inputTokens === undefined || metricValues.inputTokens === null) missing.push('inputTokens');
+    if (metricValues.outputTokens === undefined || metricValues.outputTokens === null) missing.push('outputTokens');
+    if (validUsageNumber(metricValues.inputTokens) && validUsageNumber(metricValues.outputTokens)) {
+      observed.totalTokens = metricValues.inputTokens + metricValues.outputTokens;
+      if (observed.totalTokens > limits.totalTokens) exceeded.push('totalTokens');
     }
-    if (!validUsageNumber(value)) {
-      invalid.push(field);
-      continue;
-    }
-    observed[field] = value;
-    if (validUsageNumber(limits[field]) && value > limits[field]) exceeded.push(field);
+  }
+  for (const field of ['modelCalls', 'toolCalls', 'retries', 'wallTimeMs', 'costUsd']) {
+    if (!validUsageNumber(limits[field])) continue;
+    const value = metricValues[field];
+    if (value === undefined || value === null) missing.push(field);
+    else if (validUsageNumber(value) && value > limits[field]) exceeded.push(field);
   }
   const status = exceeded.length ? 'EXCEEDED'
     : invalid.length ? 'INVALID'
-    : missing.length === requiredFields.length ? 'UNKNOWN'
+    : !route.resourceGovernance?.policyResolved || missing.length === requiredMetricCount ? 'UNKNOWN'
     : missing.length ? 'PARTIAL'
     : 'WITHIN_LIMITS';
-  const nextAction = status === 'EXCEEDED' ? 'HOLD_AND_REVIEW_RESOURCE_OVERRUN'
-    : status === 'INVALID' || status === 'PARTIAL' || status === 'UNKNOWN'
-      ? 'CONTINUE_WITH_USAGE_GAP'
+  const mode = route.resourceGovernance?.mode || 'SHADOW';
+  const nextAction = status === 'EXCEEDED'
+    ? (mode === 'SHADOW' ? 'RECORD_SHADOW_OVERRUN' : 'HOLD_BEFORE_CLAIM_OR_ACTION')
+    : ['INVALID', 'PARTIAL', 'UNKNOWN'].includes(status)
+      ? (mode === 'SHADOW' ? 'CONTINUE_WITH_USAGE_GAP' : 'HOLD_FOR_USAGE_EVIDENCE')
       : 'CONTINUE_EXISTING_VERIFICATION';
   return {
-    mode: 'SHADOW',
+    mode,
+    policyKey: route.resourceGovernance?.policyKey || null,
     status,
     observed,
-    missing,
-    invalid,
+    missing: unique(missing),
+    invalid: unique(invalid),
     limits,
     exceeded,
-    measurementComplete: missing.length === 0 && invalid.length === 0,
+    measurementComplete: missing.length === 0 && invalid.length === 0 && route.resourceGovernance?.policyResolved === true,
     retryAllowed: false,
     nextAction,
   };
@@ -146,23 +163,29 @@ export function routeExecutionTask(task = {}) {
   const independentReviewRequired = task.materialChange === true || tier === EXECUTION_TIERS.FRONTIER_REVIEW || actions.has('PRODUCTION_MUTATION');
   const demandValidation = task.demandValidationRequired === true ? evaluateDemandValidation(task.demandValidation || {}) : null;
   if (demandValidation && demandValidation.decision !== 'PROCEED') reasons.push('demand validation requires evidence or a bounded test before new build');
-  const ceilings = RESOURCE_CEILINGS[tier] || RESOURCE_CEILINGS[EXECUTION_TIERS.GENERAL_REASONING];
-  const { limits, invalidOverrides } = normalizeResourceLimits(ceilings, task.resourceLimits);
+  const runtimeResourcePolicy = resolveRuntimeResourcePolicy(task.runtimePolicy);
+  const invalidOverrides = task.resourceLimits && typeof task.resourceLimits === 'object'
+    ? Object.keys(task.resourceLimits)
+    : task.resourceLimits == null ? [] : ['resourceLimits'];
+  const requestedInputTokens = validUsageNumber(task.estimatedInputTokens) ? task.estimatedInputTokens : null;
+  const requestedOutputTokens = validUsageNumber(task.estimatedOutputTokens) ? task.estimatedOutputTokens : null;
   const resourceGovernance = {
-    mode: 'SHADOW',
-    limits,
+    ...runtimeResourcePolicy,
     invalidOverrides,
     requested: {
-      inputTokens: validUsageNumber(task.estimatedInputTokens) ? task.estimatedInputTokens : null,
-      outputTokens: validUsageNumber(task.estimatedOutputTokens) ? task.estimatedOutputTokens : null,
+      inputTokens: requestedInputTokens,
+      outputTokens: requestedOutputTokens,
+      totalTokens: requestedInputTokens !== null && requestedOutputTokens !== null ? requestedInputTokens + requestedOutputTokens : null,
       modelCalls: validUsageNumber(task.expectedModelCalls) ? task.expectedModelCalls : null,
+      toolCalls: validUsageNumber(task.expectedToolCalls) ? task.expectedToolCalls : null,
+      retries: validUsageNumber(task.expectedRetries) ? task.expectedRetries : null,
       wallTimeMs: validUsageNumber(task.estimatedWallTimeMs) ? task.estimatedWallTimeMs : null,
       costUsd: validUsageNumber(task.estimatedCostUsd) ? task.estimatedCostUsd : null,
     },
-    usageFields: RESOURCE_USAGE_FIELDS.filter((field) => validUsageNumber(limits[field])),
-    enforcementBoundary: 'POST_INFERENCE_PRE_CLAIM',
+    usageFields: Object.entries(runtimeResourcePolicy.limits).filter(([, limit]) => validUsageNumber(limit)).map(([field]) => field),
+    enforcementBoundary: 'EXISTING_GOVERNED_AGENT_RUNTIME_RESERVATION_REQUIRED',
     preInferenceCapEnforced: false,
-    action: 'OBSERVE_AND_COMPARE',
+    action: runtimeResourcePolicy.mode === 'ENFORCE' ? 'REQUIRE_GOVERNED_RUNTIME_RESERVATION' : runtimeResourcePolicy.mode === 'UNCONFIGURED' ? 'HOLD_UNCONFIGURED_POLICY' : 'OBSERVE_AND_COMPARE',
     retryPolicy: 'NO_AUTOMATIC_REPEAT_AFTER_RESOURCE_OVERRUN',
   };
   return {

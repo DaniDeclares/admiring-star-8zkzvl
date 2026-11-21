@@ -19,6 +19,7 @@ export async function executeAssignedStep(input, adapters) {
   if (route.ownerApprovalRequired || route.independentReviewRequired) return held('GOVERNED_REVIEW_REQUIRED');
   // Never send task context to an external inference provider by implication.
   if (current.modelInferenceApproved!==true || current.modelContextSanitized!==true || !hasText(current.modelApprovalRef)) return held('MODEL_INFERENCE_NOT_AUTHORIZED');
+  if (route.resourceGovernance?.policyResolved!==true) return held('RESOURCE_POLICY_UNRESOLVED');
   const available=await adapters.listVerifiedWorkers({tier:route.tier,authorityRef:current.authorityRef});
   if (!Array.isArray(available)) return held('NO_VERIFIED_WORKER');
   const workers=available.filter(w=>hasText(w?.id)&&w.verified===true&&w.authorized===true);
@@ -33,17 +34,96 @@ export async function executeAssignedStep(input, adapters) {
       pickup?.sourceRevision!==current.revision || pickup?.currentVerified!==true || pickup?.contextSanitized!==true ||
       pickup?.contradictionUnresolved===true || !Array.isArray(pickup?.evidenceRefs) || pickup.evidenceRefs.length===0 ||
       !pickup.evidenceRefs.every(hasText)) return held('CONTEXT_PICKUP_UNVERIFIED');
+
+  const resourceMode=route.resourceGovernance.mode;
+  const runtimeRunId=current.runtimeRunId;
+  const reservationKey=current.resourceReservationKey;
+  const hasResourceContext=hasText(runtimeRunId)&&hasText(reservationKey);
+  if (resourceMode==='ENFORCE' && (!hasResourceContext ||
+      typeof adapters.reserveResources!=='function' || typeof adapters.recordResourceUsage!=='function')) {
+    return held('RESOURCE_RESERVATION_UNAVAILABLE');
+  }
+
+  let resourceReservation=null;
+  let executionRoute=route;
+  if (hasResourceContext && typeof adapters.reserveResources==='function') {
+    try {
+      resourceReservation=await adapters.reserveResources({
+        runId:runtimeRunId,
+        reservationKey,
+        policyKey:route.resourceGovernance.policyKey,
+        estimatedInputTokens:route.resourceGovernance.requested.inputTokens,
+        estimatedOutputTokens:route.resourceGovernance.requested.outputTokens,
+        estimatedCostUsd:route.resourceGovernance.requested.costUsd,
+      });
+    } catch {
+      if (resourceMode==='ENFORCE') return held('RESOURCE_RESERVATION_UNCONFIRMED');
+    }
+    if (resourceReservation?.authorized!==true && resourceMode==='ENFORCE') {
+      return {state:'HELD',reason:'RESOURCE_RESERVATION_DENIED',resourceReservation};
+    }
+    if (resourceReservation?.authorized===true) {
+      executionRoute={
+        ...route,
+        resourceGovernance:{
+          ...route.resourceGovernance,
+          preInferenceCapEnforced:resourceMode==='ENFORCE',
+          preInferenceReservationRecorded:true,
+        },
+      };
+    }
+  }
+
+  // In ENFORCE mode, the existing run-control reservation must be confirmed before
+  // this inference call. The bridge itself never fabricates a reservation.
   const proposal=await adapters.routeModel({
     assignmentId:current.assignmentId,objective:current.objective,tier:route.tier,
     context:pickup.sanitizedContext||null,contextEvidenceRefs:pickup.evidenceRefs,
     modelApprovalRef:current.modelApprovalRef,workerIds:workers.map(w=>w.id),
-    resourceGovernance:route.resourceGovernance,
+    resourceGovernance:executionRoute.resourceGovernance,
+    resourceReservation,
   });
   if (!hasText(proposal?.workerId)||!hasText(proposal?.step)) return held('MODEL_PROPOSAL_INVALID');
-  // Shadow policy is evaluated from standardized provider usage when present. This
-  // happens before claiming or executing an action; missing metrics are unknown.
-  const resourceReceipt=evaluateResourceUsage({route,usage:proposal.usage||{}});
-  if (resourceReceipt.status==='EXCEEDED') return {state:'HELD',reason:'RESOURCE_LIMIT_EXCEEDED',resourceReceipt};
+
+  // Normalize provider usage and persist it through the existing run-control adapter
+  // before claim/action. Missing metrics remain unknown; no automatic retry occurs.
+  const measuredResourceReceipt=evaluateResourceUsage({route:executionRoute,usage:proposal.usage||{}});
+  let durableResourceReceipt=null;
+  let persistenceStatus=resourceReservation?.authorized===true?'RESERVATION_ONLY':resourceReservation?'REJECTED':'NOT_CONFIGURED';
+  if (resourceReservation?.authorized===true && typeof adapters.recordResourceUsage==='function') {
+    try {
+      durableResourceReceipt=await adapters.recordResourceUsage({
+        runId:runtimeRunId,
+        reservationKey,
+        usage:proposal.usage||{},
+        reservation:resourceReservation,
+      });
+      persistenceStatus=durableResourceReceipt?.accepted===true?'CONFIRMED':'REJECTED';
+    } catch {
+      persistenceStatus='UNCONFIRMED';
+      if (resourceMode==='ENFORCE') {
+        return {state:'HELD',reason:'RESOURCE_USAGE_RECEIPT_UNCONFIRMED',resourceReceipt:measuredResourceReceipt};
+      }
+    }
+    if (resourceMode==='ENFORCE' && durableResourceReceipt?.accepted!==true) {
+      return {
+        state:'HELD',
+        reason:durableResourceReceipt?.status==='EXCEEDED'?'RESOURCE_LIMIT_EXCEEDED':'RESOURCE_USAGE_UNVERIFIED',
+        resourceReceipt:{...measuredResourceReceipt,persistenceStatus,durableReceipt:durableResourceReceipt},
+      };
+    }
+  }
+
+  const resourceReceipt={
+    ...measuredResourceReceipt,
+    persistenceStatus,
+    reservationKey:hasResourceContext?reservationKey:null,
+    durableReceipt:durableResourceReceipt,
+  };
+  if (resourceMode==='ENFORCE' && resourceReceipt.status!=='WITHIN_LIMITS') {
+    return {state:'HELD',reason:resourceReceipt.status==='EXCEEDED'?'RESOURCE_LIMIT_EXCEEDED':'RESOURCE_USAGE_UNVERIFIED',resourceReceipt};
+  }
+
   const allowedSteps=current.scope?.allowedSteps;
   if (!Array.isArray(allowedSteps)||!allowedSteps.includes(proposal.step)) return held('STEP_NOT_IN_APPROVED_SCOPE');
   if (!workers.some(w=>w.id===proposal.workerId)) return held('UNAUTHORIZED_WORKER');
@@ -66,13 +146,13 @@ export async function executeAssignedStep(input, adapters) {
     return {state:'FAILED',claimRef:claim.claimRef,reason:'VERIFICATION_FAILED'};
   }
   let receipt;
-  try { receipt=await adapters.complete({claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,outcome:proof.outcome,resourceReceipt}); }
+  try { receipt=await adapters.complete({claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,outcome:proof.outcome,resourceReceipt,resourceReservation}); }
   catch { return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED'}; }
   if (!hasText(receipt?.receiptRef)) return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED'};
   let delivered;
   try {
-    delivered=await adapters.deliver({assignmentId:current.assignmentId,authorityRef:current.authorityRef,claimRef:claim.claimRef,receiptRef:receipt.receiptRef,evidenceRef:proof.evidenceRef,resourceReceipt});
+    delivered=await adapters.deliver({assignmentId:current.assignmentId,authorityRef:current.authorityRef,claimRef:claim.claimRef,receiptRef:receipt.receiptRef,evidenceRef:proof.evidenceRef,resourceReceipt,resourceReservation});
   } catch { return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE'}; }
   if (delivered?.ownerRetrievable!==true || !hasText(delivered?.deliveryRef)) return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE'};
-  return {state:'VERIFIED',claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,receiptRef:receipt.receiptRef,deliveryRef:delivered.deliveryRef,resourceReceipt};
+  return {state:'VERIFIED',claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,receiptRef:receipt.receiptRef,deliveryRef:delivered.deliveryRef,resourceReceipt,resourceReservation};
 }

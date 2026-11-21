@@ -3,13 +3,19 @@ import assert from 'node:assert/strict';
 import {executeAssignedStep} from '../src/lib/aiAssignedWorkerBridge.js';
 
 const input={assignmentId:'task-1',authorityRef:'ASANA:task-1'};
-const setup=(override={})=>{
+const runtimePolicy={
+  policy_key:'test-runtime-policy',resource_governance_mode:'SHADOW',
+  max_agent_turns:4,max_model_calls:1,max_tool_calls:8,max_retries:2,
+  max_elapsed_seconds:60,token_budget:8000,cost_budget_usd:0.05,
+};
+const setup=(override={},policyOverrides={})=>{
   const calls=[];
   const adapters={
     recover:async()=>({...input,status:'READY',approved:true,revision:'r1',
+      runtimeRunId:'runtime-run-1',resourceReservationKey:'model-call-1',
       objective:'Verify an existing product',expectedOutcome:'usable file',modelInferenceApproved:true,modelContextSanitized:true,modelApprovalRef:'approved-fixture',
       scope:{businessDomain:true,allowedSteps:['Inspect existing file']},
-      routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT'}}),
+      routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT',runtimePolicy:{...runtimePolicy,...policyOverrides}}}),
     recoverContext:async()=>({assignmentId:input.assignmentId,authorityRef:input.authorityRef,
       sourceRevision:'r1',currentVerified:true,contextSanitized:true,contradictionUnresolved:false,
       evidenceRefs:['ASANA:task-1:revision-r1'],sanitizedContext:'Already-approved synthetic scope'}),
@@ -113,20 +119,35 @@ test('already completed tasks are not re-executed',async()=>{
   assert.deepEqual(h.calls,[]);
 });
 
-test('a measured resource overrun holds before claim or worker action',async()=>{
-  let modelCalls=0;
-  const h=setup({routeModel:async(args)=>{
-    modelCalls++;
-    assert.equal(args.resourceGovernance.mode,'SHADOW');
-    assert.equal(args.resourceGovernance.preInferenceCapEnforced,false);
-    return {workerId:'file-qa',step:'Inspect existing file',
-      usage:{inputTokens:8001,outputTokens:500,modelCalls:1,wallTimeMs:12000}};
-  }});
+test('enforce mode reserves before inference and holds a measured overrun before claim/action',async()=>{
+  const events=[];
+  const h=setup({
+    reserveResources:async(args)=>{
+      events.push('reserve');
+      assert.equal(args.runId,'runtime-run-1');
+      assert.equal(args.reservationKey,'model-call-1');
+      assert.equal(args.policyKey,'test-runtime-policy');
+      return {authorized:true,status:'RESERVED',reservationId:'reservation-1'};
+    },
+    routeModel:async(args)=>{
+      events.push('model');
+      assert.equal(args.resourceGovernance.mode,'ENFORCE');
+      assert.equal(args.resourceGovernance.preInferenceCapEnforced,true);
+      return {workerId:'file-qa',step:'Inspect existing file',
+        usage:{inputTokens:8001,outputTokens:500,modelCalls:1,toolCalls:1,retries:0,wallTimeMs:12000,costUsd:0.01}};
+    },
+    recordResourceUsage:async(args)=>{
+      events.push('record');
+      assert.equal(args.runId,'runtime-run-1');
+      assert.equal(args.reservationKey,'model-call-1');
+      return {accepted:false,status:'EXCEEDED',reason:'RESOURCE_BUDGET_EXCEEDED'};
+    },
+  },{resource_governance_mode:'ENFORCE'});
   const result=await executeAssignedStep(input,h.adapters);
-  assert.equal(modelCalls,1);
+  assert.deepEqual(events,['reserve','model','record']);
   assert.equal(result.state,'HELD');
   assert.equal(result.reason,'RESOURCE_LIMIT_EXCEEDED');
-  assert.deepEqual(result.resourceReceipt.exceeded,['inputTokens']);
+  assert.deepEqual(result.resourceReceipt.exceeded,['totalTokens']);
   assert.deepEqual(h.calls,[]);
 });
 
@@ -152,7 +173,8 @@ test('unknown usage remains visible and is carried through existing receipt adap
   });
   const result=await executeAssignedStep(input,h.adapters);
   assert.equal(modelEnvelope.mode,'SHADOW');
-  assert.equal(modelEnvelope.enforcementBoundary,'POST_INFERENCE_PRE_CLAIM');
+  assert.equal(modelEnvelope.policyKey,'test-runtime-policy');
+  assert.equal(modelEnvelope.enforcementBoundary,'EXISTING_GOVERNED_AGENT_RUNTIME_RESERVATION_REQUIRED');
   assert.equal(modelEnvelope.preInferenceCapEnforced,false);
   assert.equal(result.state,'VERIFIED');
   assert.equal(result.resourceReceipt.status,'UNKNOWN');
@@ -160,6 +182,34 @@ test('unknown usage remains visible and is carried through existing receipt adap
   assert.deepEqual(completedResource,result.resourceReceipt);
   assert.deepEqual(deliveredResource,result.resourceReceipt);
   assert.deepEqual(h.calls,['claim','execute','verify','complete','deliver']);
+});
+
+test('enforce mode holds when provider usage is missing instead of treating it as zero',async()=>{
+  const events=[];
+  const h=setup({
+    reserveResources:async()=>{events.push('reserve');return {authorized:true,status:'RESERVED'};},
+    routeModel:async()=>{events.push('model');return {workerId:'file-qa',step:'Inspect existing file'};},
+    recordResourceUsage:async()=>{events.push('record');return {accepted:false,status:'UNKNOWN'};},
+  },{resource_governance_mode:'ENFORCE'});
+  const result=await executeAssignedStep(input,h.adapters);
+  assert.deepEqual(events,['reserve','model','record']);
+  assert.equal(result.state,'HELD');
+  assert.equal(result.reason,'RESOURCE_USAGE_UNVERIFIED');
+  assert.equal(result.resourceReceipt.status,'UNKNOWN');
+  assert.equal(result.resourceReceipt.measurementComplete,false);
+  assert.deepEqual(h.calls,[]);
+});
+
+test('enforce mode refuses to call the model without the existing runtime reservation adapter',async()=>{
+  let modelCalls=0;
+  const h=setup({
+    routeModel:async()=>{modelCalls++;return {workerId:'file-qa',step:'Inspect existing file'};},
+  },{resource_governance_mode:'ENFORCE'});
+  const result=await executeAssignedStep(input,h.adapters);
+  assert.equal(result.state,'HELD');
+  assert.equal(result.reason,'RESOURCE_RESERVATION_UNAVAILABLE');
+  assert.equal(modelCalls,0);
+  assert.deepEqual(h.calls,[]);
 });
 
 test('synthetic file worker produces a retrievable artifact without duplicate execution',async()=>{
@@ -174,10 +224,11 @@ test('synthetic file worker produces a retrievable artifact without duplicate ex
   const h=setup({
     recover:async()=>completed?({...input,status:'GREEN',receiptRef:completed}):
       ({...input,status:'READY',approved:true,revision:'r1',
+        runtimeRunId:'runtime-run-synthetic',resourceReservationKey:'model-call-synthetic',
         objective:'Produce a synthetic QA artifact',expectedOutcome:'verified output',
         scope:{allowedSteps:['Write synthetic proof']},modelInferenceApproved:true,
         modelContextSanitized:true,modelApprovalRef:'synthetic-approved',
-        routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT'}}),
+        routingFacts:{authorityResolved:true,scopeBounded:true,kind:'FORMAT',runtimePolicy}}),
     routeModel:async()=>({workerId:'file-qa',step:'Write synthetic proof'}),
     execute:async()=>{executionCount++;await writeFile(output,'DANI governed synthetic test output');
       return {output};},
@@ -191,7 +242,7 @@ test('synthetic file worker produces a retrievable artifact without duplicate ex
   });
   try {
     const first=await executeAssignedStep(input,h.adapters);
-    assert.equal(first.state,'VERIFIED');
+    assert.equal(first.state,'VERIFIED',first.reason||JSON.stringify(first));
     assert.ok(first.evidenceRef.startsWith('SHA256:'));
     assert.equal(await readFile(first.deliveryRef,'utf8'),'DANI governed synthetic test output');
     assert.equal((await executeAssignedStep(input,h.adapters)).state,'GREEN');
