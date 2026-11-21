@@ -26,7 +26,12 @@ const setup=(override={})=>{
 test('one bounded claim executes and produces durable evidence',async()=>{
   const {adapters,calls}=setup();
   const r=await executeAssignedStep(input,adapters);
-  assert.deepEqual(r,{state:'VERIFIED',claimRef:'claim-1',evidenceRef:'evidence-1',receiptRef:'receipt-1',deliveryRef:'owner-result-1'});
+  assert.equal(r.state,'VERIFIED');
+  assert.equal(r.claimRef,'claim-1');
+  assert.equal(r.evidenceRef,'evidence-1');
+  assert.equal(r.receiptRef,'receipt-1');
+  assert.equal(r.deliveryRef,'owner-result-1');
+  assert.equal(r.resourceReceipt.status,'UNKNOWN');
   assert.deepEqual(calls,['claim','execute','verify','complete','deliver']);
 });
 test('owner approval is necessary; LLM cannot choose unauthorized workers',async()=>{
@@ -106,6 +111,55 @@ test('already completed tasks are not re-executed',async()=>{
   const h=setup({recover:async()=>({...input,status:'GREEN',receiptRef:'existing'})});
   assert.deepEqual(await executeAssignedStep(input,h.adapters),{state:'GREEN',receiptRef:'existing'});
   assert.deepEqual(h.calls,[]);
+});
+
+test('a measured resource overrun holds before claim or worker action',async()=>{
+  let modelCalls=0;
+  const h=setup({routeModel:async(args)=>{
+    modelCalls++;
+    assert.equal(args.resourceGovernance.mode,'SHADOW');
+    assert.equal(args.resourceGovernance.preInferenceCapEnforced,false);
+    return {workerId:'file-qa',step:'Inspect existing file',
+      usage:{inputTokens:8001,outputTokens:500,modelCalls:1,wallTimeMs:12000}};
+  }});
+  const result=await executeAssignedStep(input,h.adapters);
+  assert.equal(modelCalls,1);
+  assert.equal(result.state,'HELD');
+  assert.equal(result.reason,'RESOURCE_LIMIT_EXCEEDED');
+  assert.deepEqual(result.resourceReceipt.exceeded,['inputTokens']);
+  assert.deepEqual(h.calls,[]);
+});
+
+test('unknown usage remains visible and is carried through existing receipt adapters',async()=>{
+  let completedResource=null;
+  let deliveredResource=null;
+  let modelEnvelope=null;
+  const h=setup({
+    routeModel:async(args)=>{
+      modelEnvelope=args.resourceGovernance;
+      return {workerId:'file-qa',step:'Inspect existing file'};
+    },
+    complete:async({resourceReceipt})=>{
+      h.calls.push('complete');
+      completedResource=resourceReceipt;
+      return {receiptRef:'receipt-unknown-usage'};
+    },
+    deliver:async({resourceReceipt})=>{
+      h.calls.push('deliver');
+      deliveredResource=resourceReceipt;
+      return {deliveryRef:'owner-result-unknown-usage',ownerRetrievable:true};
+    },
+  });
+  const result=await executeAssignedStep(input,h.adapters);
+  assert.equal(modelEnvelope.mode,'SHADOW');
+  assert.equal(modelEnvelope.enforcementBoundary,'POST_INFERENCE_PRE_CLAIM');
+  assert.equal(modelEnvelope.preInferenceCapEnforced,false);
+  assert.equal(result.state,'VERIFIED');
+  assert.equal(result.resourceReceipt.status,'UNKNOWN');
+  assert.equal(result.resourceReceipt.measurementComplete,false);
+  assert.deepEqual(completedResource,result.resourceReceipt);
+  assert.deepEqual(deliveredResource,result.resourceReceipt);
+  assert.deepEqual(h.calls,['claim','execute','verify','complete','deliver']);
 });
 
 test('synthetic file worker produces a retrievable artifact without duplicate execution',async()=>{

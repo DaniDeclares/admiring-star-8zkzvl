@@ -66,13 +66,13 @@ export async function executeAssignedStep(input, adapters) {
     return {state:'FAILED',claimRef:claim.claimRef,reason:'VERIFICATION_FAILED'};
   }
   let receipt;
-  try { receipt=await adapters.complete({claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,outcome:proof.outcome}); }
+  try { receipt=await adapters.complete({claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,outcome:proof.outcome,resourceReceipt}); }
   catch { return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED'}; }
   if (!hasText(receipt?.receiptRef)) return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED'};
   let delivered;
   try {
-    delivered=await adapters.deliver({assignmentId:current.assignmentId,authorityRef:current.authorityRef,claimRef:claim.claimRef,receiptRef:receipt.receiptRef,evidenceRef:proof.evidenceRef});
+    delivered=await adapters.deliver({assignmentId:current.assignmentId,authorityRef:current.authorityRef,claimRef:claim.claimRef,receiptRef:receipt.receiptRef,evidenceRef:proof.evidenceRef,resourceReceipt});
   } catch { return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE'}; }
   if (delivered?.ownerRetrievable!==true || !hasText(delivered?.deliveryRef)) return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE'};
-  return {state:'VERIFIED',claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,receiptRef:receipt.receiptRef,deliveryRef:delivered.deliveryRef};
+  return {state:'VERIFIED',claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,receiptRef:receipt.receiptRef,deliveryRef:delivered.deliveryRef,resourceReceipt};
 }

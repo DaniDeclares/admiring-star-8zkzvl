@@ -32,30 +32,66 @@ const BOUNDED_KINDS = new Set([
 ]);
 function unique(values) { return [...new Set(values.filter(Boolean))]; }
 function validUsageNumber(value) { return Number.isFinite(value) && value >= 0; }
+const RESOURCE_USAGE_FIELDS = Object.freeze(['inputTokens', 'outputTokens', 'modelCalls', 'wallTimeMs', 'costUsd']);
 
-/** Compares provider-reported usage with a route's limits. Missing usage is unknown, never zero. */
+function normalizeResourceLimits(defaults, overrides) {
+  const limits = { ...defaults };
+  const invalidOverrides = [];
+  if (overrides !== undefined && overrides !== null) {
+    if (typeof overrides !== 'object' || Array.isArray(overrides)) {
+      invalidOverrides.push('resourceLimits');
+    } else {
+      for (const [field, value] of Object.entries(overrides)) {
+        if (!RESOURCE_USAGE_FIELDS.includes(field) || !validUsageNumber(value)) invalidOverrides.push(field);
+        else limits[field] = value;
+      }
+    }
+  }
+  return { limits, invalidOverrides };
+}
+
+/** Compares normalized provider usage with configured limits. Missing/invalid metrics are never zero. */
 export function evaluateResourceUsage({ route, usage = {} } = {}) {
   if (!route) throw new Error('route is required');
   const limits = route.resourceGovernance?.limits || RESOURCE_CEILINGS[route.tier] || {};
-  const fields = ['inputTokens', 'outputTokens', 'modelCalls', 'wallTimeMs', 'costUsd'];
+  const requiredFields = RESOURCE_USAGE_FIELDS.filter((field) => validUsageNumber(limits[field]));
   const exceeded = [];
   const observed = {};
-  for (const field of fields) {
-    const value = usage[field];
-    if (validUsageNumber(value)) {
-      observed[field] = value;
-      const limit = limits[field];
-      if (validUsageNumber(limit) && value > limit) exceeded.push(field);
+  const missing = [];
+  const invalid = [];
+  for (const field of RESOURCE_USAGE_FIELDS) {
+    const value = usage?.[field];
+    if (value === undefined || value === null) {
+      if (requiredFields.includes(field)) missing.push(field);
+      continue;
     }
+    if (!validUsageNumber(value)) {
+      invalid.push(field);
+      continue;
+    }
+    observed[field] = value;
+    if (validUsageNumber(limits[field]) && value > limits[field]) exceeded.push(field);
   }
+  const status = exceeded.length ? 'EXCEEDED'
+    : invalid.length ? 'INVALID'
+    : missing.length === requiredFields.length ? 'UNKNOWN'
+    : missing.length ? 'PARTIAL'
+    : 'WITHIN_LIMITS';
+  const nextAction = status === 'EXCEEDED' ? 'HOLD_AND_REVIEW_RESOURCE_OVERRUN'
+    : status === 'INVALID' || status === 'PARTIAL' || status === 'UNKNOWN'
+      ? 'CONTINUE_WITH_USAGE_GAP'
+      : 'CONTINUE_EXISTING_VERIFICATION';
   return {
     mode: 'SHADOW',
-    status: exceeded.length ? 'EXCEEDED' : 'WITHIN_LIMITS',
+    status,
     observed,
+    missing,
+    invalid,
     limits,
     exceeded,
+    measurementComplete: missing.length === 0 && invalid.length === 0,
     retryAllowed: false,
-    nextAction: exceeded.length ? 'HOLD_AND_REVIEW_RESOURCE_OVERRUN' : 'CONTINUE_EXISTING_VERIFICATION',
+    nextAction,
   };
 }
 
@@ -111,9 +147,11 @@ export function routeExecutionTask(task = {}) {
   const demandValidation = task.demandValidationRequired === true ? evaluateDemandValidation(task.demandValidation || {}) : null;
   if (demandValidation && demandValidation.decision !== 'PROCEED') reasons.push('demand validation requires evidence or a bounded test before new build');
   const ceilings = RESOURCE_CEILINGS[tier] || RESOURCE_CEILINGS[EXECUTION_TIERS.GENERAL_REASONING];
+  const { limits, invalidOverrides } = normalizeResourceLimits(ceilings, task.resourceLimits);
   const resourceGovernance = {
     mode: 'SHADOW',
-    limits: { ...ceilings, ...(task.resourceLimits || {}) },
+    limits,
+    invalidOverrides,
     requested: {
       inputTokens: validUsageNumber(task.estimatedInputTokens) ? task.estimatedInputTokens : null,
       outputTokens: validUsageNumber(task.estimatedOutputTokens) ? task.estimatedOutputTokens : null,
@@ -121,6 +159,9 @@ export function routeExecutionTask(task = {}) {
       wallTimeMs: validUsageNumber(task.estimatedWallTimeMs) ? task.estimatedWallTimeMs : null,
       costUsd: validUsageNumber(task.estimatedCostUsd) ? task.estimatedCostUsd : null,
     },
+    usageFields: RESOURCE_USAGE_FIELDS.filter((field) => validUsageNumber(limits[field])),
+    enforcementBoundary: 'POST_INFERENCE_PRE_CLAIM',
+    preInferenceCapEnforced: false,
     action: 'OBSERVE_AND_COMPARE',
     retryPolicy: 'NO_AUTOMATIC_REPEAT_AFTER_RESOURCE_OVERRUN',
   };

@@ -100,9 +100,39 @@ describe('aiExecutionGovernor', () => {
       mode: 'SHADOW', status: 'EXCEEDED', exceeded: ['inputTokens'], retryAllowed: false, nextAction: 'HOLD_AND_REVIEW_RESOURCE_OVERRUN',
     }));
   });
-  test('treats missing usage as unknown and respects scoped policy overrides', () => {
+  test('keeps missing usage unknown and respects valid scoped policy overrides', () => {
     const route = routeExecutionTask({ authorityResolved: true, resourceLimits: { inputTokens: 1000, costUsd: 0.02 } });
-    expect(evaluateResourceUsage({ route, usage: {} })).toEqual(expect.objectContaining({ status: 'WITHIN_LIMITS', observed: {}, retryAllowed: false }));
+    expect(evaluateResourceUsage({ route, usage: {} })).toEqual(expect.objectContaining({
+      status: 'UNKNOWN', observed: {}, missing: ['inputTokens', 'outputTokens', 'modelCalls', 'wallTimeMs', 'costUsd'],
+      measurementComplete: false, retryAllowed: false, nextAction: 'CONTINUE_WITH_USAGE_GAP',
+    }));
     expect(route.resourceGovernance.limits.inputTokens).toBe(1000);
+    expect(route.resourceGovernance.limits.costUsd).toBe(0.02);
+  });
+  test('marks partial and invalid provider measurements without treating them as zero', () => {
+    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true });
+    expect(evaluateResourceUsage({ route, usage: { inputTokens: 100 } })).toEqual(expect.objectContaining({
+      status: 'PARTIAL', observed: { inputTokens: 100 }, missing: ['outputTokens', 'modelCalls', 'wallTimeMs'],
+      measurementComplete: false,
+    }));
+    expect(evaluateResourceUsage({ route, usage: { inputTokens: -1 } })).toEqual(expect.objectContaining({
+      status: 'INVALID', invalid: ['inputTokens'], measurementComplete: false,
+    }));
+  });
+  test('reports within limits only when every configured measurement is present', () => {
+    const route = routeExecutionTask({ kind: 'EXTRACT', authorityResolved: true, scopeBounded: true });
+    expect(evaluateResourceUsage({ route, usage: {
+      inputTokens: 1200, outputTokens: 300, modelCalls: 1, wallTimeMs: 12000, costUsd: 0.004,
+    } })).toEqual(expect.objectContaining({
+      status: 'WITHIN_LIMITS', measurementComplete: true, missing: [], invalid: [], exceeded: [],
+      observed: { inputTokens: 1200, outputTokens: 300, modelCalls: 1, wallTimeMs: 12000, costUsd: 0.004 },
+    }));
+    expect(route.resourceGovernance.limits.costUsd).toBeUndefined();
+  });
+  test('rejects invalid or unknown resource-limit overrides instead of silently accepting them', () => {
+    const route = routeExecutionTask({ authorityResolved: true, resourceLimits: { inputTokens: -1, vendorRank: 1, costUsd: 0.01 } });
+    expect(route.resourceGovernance.limits.inputTokens).toBe(24000);
+    expect(route.resourceGovernance.limits.costUsd).toBe(0.01);
+    expect(route.resourceGovernance.invalidOverrides).toEqual(['inputTokens', 'vendorRank']);
   });
 });
