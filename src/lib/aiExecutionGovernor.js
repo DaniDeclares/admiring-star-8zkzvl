@@ -1,12 +1,9 @@
 /**
- * Deterministic routing policy for DANI's existing Intent-to-Outcome Engine.
+ * Deterministic routing and shadow resource policy for DANI's existing Intent-to-Outcome Engine.
  *
- * This is not an agent, scheduler, queue, model registry, or source of authority.
- * It converts already-resolved task facts into a minimum execution tier and
- * verification/escalation requirements. Worker selection still comes from
- * verified capability evidence (Tester dd_integration_operating_registry).
+ * Not an agent, scheduler, queue, model registry, or authority. Worker selection still
+ * comes from verified capability evidence in Tester dd_integration_operating_registry.
  */
-
 export const EXECUTION_TIERS = Object.freeze({
   DETERMINISTIC: 'DETERMINISTIC',
   BOUNDED_WORKER: 'BOUNDED_WORKER',
@@ -14,38 +11,52 @@ export const EXECUTION_TIERS = Object.freeze({
   FRONTIER_REVIEW: 'FRONTIER_REVIEW',
 });
 
+// Conservative per-inference ceilings. These are advisory/shadow values, not vendor
+// prices or guarantees. Provider usage is evaluated only when a worker returns it.
+export const RESOURCE_CEILINGS = Object.freeze({
+  [EXECUTION_TIERS.DETERMINISTIC]: Object.freeze({ inputTokens: 0, outputTokens: 0, modelCalls: 0, wallTimeMs: 30000 }),
+  [EXECUTION_TIERS.BOUNDED_WORKER]: Object.freeze({ inputTokens: 8000, outputTokens: 2000, modelCalls: 1, wallTimeMs: 60000 }),
+  [EXECUTION_TIERS.GENERAL_REASONING]: Object.freeze({ inputTokens: 24000, outputTokens: 4000, modelCalls: 1, wallTimeMs: 120000 }),
+  [EXECUTION_TIERS.FRONTIER_REVIEW]: Object.freeze({ inputTokens: 40000, outputTokens: 6000, modelCalls: 1, wallTimeMs: 180000 }),
+});
+
 const OWNER_GATED_ACTIONS = new Set([
-  'DEBT_COMMITMENT',
-  'INVESTMENT_COMMITMENT',
-  'INVENTORY_PURCHASE',
-  'OUTBOUND_MESSAGE',
-  'PRICING_CHANGE',
-  'MONEY_MOVEMENT',
-  'LEGAL_CLAIM',
-  'COMPLIANCE_CLAIM',
-  'PRODUCTION_MUTATION',
+  'DEBT_COMMITMENT', 'INVESTMENT_COMMITMENT', 'INVENTORY_PURCHASE', 'OUTBOUND_MESSAGE',
+  'PRICING_CHANGE', 'MONEY_MOVEMENT', 'LEGAL_CLAIM', 'COMPLIANCE_CLAIM', 'PRODUCTION_MUTATION',
 ]);
-
 const FRONTIER_RISKS = new Set([
-  'SECURITY_BOUNDARY',
-  'ARCHITECTURE',
-  'DATA_AUTHORITY_CONFLICT',
-  'FAILED_VERIFICATION',
-  'PRODUCTION_INCIDENT',
+  'SECURITY_BOUNDARY', 'ARCHITECTURE', 'DATA_AUTHORITY_CONFLICT', 'FAILED_VERIFICATION', 'PRODUCTION_INCIDENT',
 ]);
-
 const BOUNDED_KINDS = new Set([
-  'CLASSIFY',
-  'EXTRACT',
-  'FORMAT',
-  'HASH_COMPARE',
-  'KNOWN_TEST_RUN',
-  'KNOWN_RECONCILIATION',
-  'MECHANICAL_EDIT',
+  'CLASSIFY', 'EXTRACT', 'FORMAT', 'HASH_COMPARE', 'KNOWN_TEST_RUN', 'KNOWN_RECONCILIATION', 'MECHANICAL_EDIT',
 ]);
+function unique(values) { return [...new Set(values.filter(Boolean))]; }
+function validUsageNumber(value) { return Number.isFinite(value) && value >= 0; }
 
-function unique(values) {
-  return [...new Set(values.filter(Boolean))];
+/** Compares provider-reported usage with a route's limits. Missing usage is unknown, never zero. */
+export function evaluateResourceUsage({ route, usage = {} } = {}) {
+  if (!route) throw new Error('route is required');
+  const limits = route.resourceGovernance?.limits || RESOURCE_CEILINGS[route.tier] || {};
+  const fields = ['inputTokens', 'outputTokens', 'modelCalls', 'wallTimeMs', 'costUsd'];
+  const exceeded = [];
+  const observed = {};
+  for (const field of fields) {
+    const value = usage[field];
+    if (validUsageNumber(value)) {
+      observed[field] = value;
+      const limit = limits[field];
+      if (validUsageNumber(limit) && value > limit) exceeded.push(field);
+    }
+  }
+  return {
+    mode: 'SHADOW',
+    status: exceeded.length ? 'EXCEEDED' : 'WITHIN_LIMITS',
+    observed,
+    limits,
+    exceeded,
+    retryAllowed: false,
+    nextAction: exceeded.length ? 'HOLD_AND_REVIEW_RESOURCE_OVERRUN' : 'CONTINUE_EXISTING_VERIFICATION',
+  };
 }
 
 /** Advisory pre-build validation: no side effects and never grants release authority. */
@@ -81,61 +92,45 @@ export function routeExecutionTask(task = {}) {
   const risks = new Set(task.risks || []);
   const ownerApprovalRequired = [...actions].some((action) => OWNER_GATED_ACTIONS.has(action));
   const frontierRequired = [...risks].some((risk) => FRONTIER_RISKS.has(risk));
-
   let tier = EXECUTION_TIERS.GENERAL_REASONING;
   const reasons = [];
-
   if (frontierRequired) {
     tier = EXECUTION_TIERS.FRONTIER_REVIEW;
     reasons.push('material risk requires strongest available verified reasoning/review');
-  } else if (
-    task.deterministic === true &&
-    task.knownProcedure === true &&
-    task.authorityResolved === true
-  ) {
+  } else if (task.deterministic === true && task.knownProcedure === true && task.authorityResolved === true) {
     tier = EXECUTION_TIERS.DETERMINISTIC;
     reasons.push('known deterministic procedure with resolved authority');
-  } else if (
-    task.authorityResolved === true &&
-    task.scopeBounded === true &&
-    BOUNDED_KINDS.has(task.kind)
-  ) {
+  } else if (task.authorityResolved === true && task.scopeBounded === true && BOUNDED_KINDS.has(task.kind)) {
     tier = EXECUTION_TIERS.BOUNDED_WORKER;
     reasons.push('bounded mechanical work should use the cheapest verified capable worker');
   } else {
     reasons.push('task still requires non-trivial judgment');
   }
-
-  if (ownerApprovalRequired) {
-    reasons.push('owner-gated action must stop at the existing approval boundary before mutation');
-  }
-
-  const independentReviewRequired =
-    task.materialChange === true ||
-    tier === EXECUTION_TIERS.FRONTIER_REVIEW ||
-    actions.has('PRODUCTION_MUTATION');
-
-  const demandValidation = task.demandValidationRequired === true
-    ? evaluateDemandValidation(task.demandValidation || {}) : null;
-  if (demandValidation && demandValidation.decision !== 'PROCEED') {
-    reasons.push('demand validation requires evidence or a bounded test before new build');
-  }
-
+  if (ownerApprovalRequired) reasons.push('owner-gated action must stop at the existing approval boundary before mutation');
+  const independentReviewRequired = task.materialChange === true || tier === EXECUTION_TIERS.FRONTIER_REVIEW || actions.has('PRODUCTION_MUTATION');
+  const demandValidation = task.demandValidationRequired === true ? evaluateDemandValidation(task.demandValidation || {}) : null;
+  if (demandValidation && demandValidation.decision !== 'PROCEED') reasons.push('demand validation requires evidence or a bounded test before new build');
+  const ceilings = RESOURCE_CEILINGS[tier] || RESOURCE_CEILINGS[EXECUTION_TIERS.GENERAL_REASONING];
+  const resourceGovernance = {
+    mode: 'SHADOW',
+    limits: { ...ceilings, ...(task.resourceLimits || {}) },
+    requested: {
+      inputTokens: validUsageNumber(task.estimatedInputTokens) ? task.estimatedInputTokens : null,
+      outputTokens: validUsageNumber(task.estimatedOutputTokens) ? task.estimatedOutputTokens : null,
+      modelCalls: validUsageNumber(task.expectedModelCalls) ? task.expectedModelCalls : null,
+      wallTimeMs: validUsageNumber(task.estimatedWallTimeMs) ? task.estimatedWallTimeMs : null,
+      costUsd: validUsageNumber(task.estimatedCostUsd) ? task.estimatedCostUsd : null,
+    },
+    action: 'OBSERVE_AND_COMPARE',
+    retryPolicy: 'NO_AUTOMATIC_REPEAT_AFTER_RESOURCE_OVERRUN',
+  };
   return {
-    tier,
-    demandValidation,
-    ownerApprovalRequired,
-    independentReviewRequired,
-    workerSelection: 'CHEAPEST_VERIFIED_CAPABLE',
-    authoritySource: 'EXISTING_CANONICAL_SYSTEMS',
+    tier, demandValidation, ownerApprovalRequired, independentReviewRequired,
+    workerSelection: 'CHEAPEST_VERIFIED_CAPABLE', authoritySource: 'EXISTING_CANONICAL_SYSTEMS',
+    resourceGovernance,
     contextPolicy: {
       recoverHistoryFirst: true,
-      include: unique([
-        'owner_intent',
-        'authority_receipts',
-        'relevant_prior_fixes',
-        ...(task.contextRefs || []),
-      ]),
+      include: unique(['owner_intent', 'authority_receipts', 'relevant_prior_fixes', ...(task.contextRefs || [])]),
       excludeByDefault: ['unrelated_repo_tree', 'unrelated_logs', 'unscoped_chat_history'],
     },
     reasons,
@@ -144,34 +139,11 @@ export function routeExecutionTask(task = {}) {
 
 export function evaluateExecutionResult({ route, result = {} } = {}) {
   if (!route) throw new Error('route is required');
-
-  if (result.ownerDecisionPending === true) {
-    return { outcomeState: 'HELD', nextAction: 'SURFACE_OWNER_DECISION' };
-  }
-
-  if (result.verificationPassed === false) {
-    return {
-      outcomeState: 'FAILED',
-      nextAction: 'ESCALATE_REPAIR',
-      minimumNextTier: EXECUTION_TIERS.FRONTIER_REVIEW,
-    };
-  }
-
-  if (route.independentReviewRequired && result.independentReviewPassed !== true) {
-    return { outcomeState: 'EXECUTING', nextAction: 'INDEPENDENT_REVIEW' };
-  }
-
-  if (result.liveVerified === true && result.businessOutcomeProven === true) {
-    return { outcomeState: 'GREEN', nextAction: 'RECORD_LEARNING' };
-  }
-
-  if (result.liveVerified === true) {
-    return { outcomeState: 'OBSERVING', nextAction: 'OBSERVE_BUSINESS_OUTCOME' };
-  }
-
-  if (result.preProductionVerified === true) {
-    return { outcomeState: 'VERIFIED', nextAction: 'FOLLOW_EXISTING_PROMOTION_GATE' };
-  }
-
+  if (result.ownerDecisionPending === true) return { outcomeState: 'HELD', nextAction: 'SURFACE_OWNER_DECISION' };
+  if (result.verificationPassed === false) return { outcomeState: 'FAILED', nextAction: 'ESCALATE_REPAIR', minimumNextTier: EXECUTION_TIERS.FRONTIER_REVIEW };
+  if (route.independentReviewRequired && result.independentReviewPassed !== true) return { outcomeState: 'EXECUTING', nextAction: 'INDEPENDENT_REVIEW' };
+  if (result.liveVerified === true && result.businessOutcomeProven === true) return { outcomeState: 'GREEN', nextAction: 'RECORD_LEARNING' };
+  if (result.liveVerified === true) return { outcomeState: 'OBSERVING', nextAction: 'OBSERVE_BUSINESS_OUTCOME' };
+  if (result.preProductionVerified === true) return { outcomeState: 'VERIFIED', nextAction: 'FOLLOW_EXISTING_PROMOTION_GATE' };
   return { outcomeState: 'EXECUTING', nextAction: 'CONTINUE_SMALLEST_DELTA' };
 }
