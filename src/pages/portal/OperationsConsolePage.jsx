@@ -1,11 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import RequireStaffAuth from '../../components/auth/RequireStaffAuth.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 import { statusLabel } from './providerWorkspaceShared.jsx';
 import './OperationsConsolePage.css';
 
 const QUEUES=[{key:'sales',label:'Sales Queue',description:'Work the acquisition board: inbound, warm, revisit and partner lanes toward the weekly collection target.'},{key:'requests',label:'Intake & CRM',description:'Route new B2C, B2B and B2G requests.'},{key:'jobs',label:'Jobs & Dispatch',description:'Run priced work through dispatch and field execution.'},{key:'schedule',label:'Schedule',description:'Appointments, owner booking requests and provider availability.'},{key:'providers',label:'Provider Network',description:'Capabilities, coverage and assignment readiness.'},{key:'partners',label:'Partner Directory',description:'Trusted external businesses DANI refers to or receives referrals from -- no provider authorization or dispatch implied.'},{key:'changes',label:'Change Orders',description:'Approve isolated commercial deltas without touching the base estimate.'},{key:'evidence',label:'Evidence & QA',description:'Review field evidence and completion gates.'},{key:'payments',label:'Payments & Accounting',description:'Reconcile payment events against frozen commercial records.'}];
+// Owner HQ sales shortcuts deep-link into the existing Operations Sales Queue.
+// All ordinary Operations links retain the current Intake & CRM default.
+export function resolveOperationsQueue(search='') {
+ return new URLSearchParams(search).get('queue')==='sales'?'sales':'requests';
+}
 const PARTNER_STATUSES=['ACTIVE','INACTIVE','PROSPECTIVE','DO_NOT_USE'];
 const EMPTY_PARTNER={partner_name:'',primary_contact_name:'',phone:'',email:'',website:'',partner_type:'',services_capabilities:'',coverage_area:'',service_radius_or_zips:'',license_credential_notes:'',insurance_status:'',insurance_expiration:'',preferred_contact_method:'',availability_notes:'',internal_notes:'',source:''};
 const SALES_LANE_ORDER=['INBOUND','WARM','REVISIT_CALLABLE','REVISIT_ROUTING','PARTNER','EMAIL_ONLY','REVISIT_NOT_CALLABLE','SCREEN_ONLY'];
@@ -95,7 +100,8 @@ function AddPartnerForm({onAdd}){
  </div>;
 }
 function OperationsConsole(){
- const [active,setActive]=useState('requests'),[data,setData]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[message,setMessage]=useState(''),[revealedTins,setRevealedTins]=useState({});
+ const {search:routeSearch}=useLocation();
+ const [active,setActive]=useState(()=>resolveOperationsQueue(routeSearch)),[data,setData]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[message,setMessage]=useState(''),[revealedTins,setRevealedTins]=useState({});
  const load=async()=>{setLoading(true);setError('');const {data:auth}=await supabase.auth.getSession();if(!auth.session){setError('Staff session required.');setLoading(false);return}const response=await fetch('/api/portal-operations',{headers:{Authorization:`Bearer ${auth.session.access_token}`}});const body=await response.json();if(!response.ok||!body.success){setError(body.error||'Operations data could not be loaded.');setLoading(false);return}const {data:bookingRequests,error:bookingError}=await supabase.from('dd_owner_booking_requests').select('*').order('starts_at',{ascending:true}).limit(100);if(bookingError){setError(bookingError.message);setLoading(false);return}const {data:salesQueue,error:salesError}=await supabase.from('dd_sales_engine_v1').select('*').order('priority_score',{ascending:false}).order('company_name',{ascending:true});if(salesError){setError(salesError.message);setLoading(false);return}const {data:partners,error:partnersError}=await supabase.from('dd_partners').select('*').order('partner_name',{ascending:true});if(partnersError){setError(partnersError.message);setLoading(false);return}const {data:frontDoors,error:frontDoorError}=await supabase.from('dd_channel_front_doors').select('channel_code,front_door_code,front_door_name,audience,customer_promise,public_navigation_order').eq('status','LOCKED').order('channel_code',{ascending:true}).order('public_navigation_order',{ascending:true});if(frontDoorError){setError(frontDoorError.message);setLoading(false);return}setData({...body,bookingRequests:bookingRequests||[],salesQueue:salesQueue||[],partners:partners||[],frontDoors:frontDoors||[]});setLoading(false)};
  useEffect(()=>{load()},[]);
  const act=async(action,payload)=>{setMessage('');setError('');const {data:auth}=await supabase.auth.getSession();if(!auth.session)return setError('Staff session required.');const response=await fetch('/api/portal-operations',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${auth.session.access_token}`},body:JSON.stringify({action,...payload})});const body=await response.json();if(!response.ok||!body.success)setError(body.error||'Operation failed.');else{setMessage('Operation completed.');await load()}};
