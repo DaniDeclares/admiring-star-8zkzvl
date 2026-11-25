@@ -3,7 +3,20 @@ name: DANI External Action Executor
 # Narrow first runtime envelope: Production promotion-feedback outbox -> Tester reconciliation RPC.
 # Never executes arbitrary SQL, money movement, external contact, permission changes, merge, or deploy.
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Existing external-action delivery or read-only SOP evidence review
+        type: choice
+        required: true
+        default: external_action_delivery
+        options:
+          - external_action_delivery
+          - sop_draft_review
+      sop_job_id:
+        description: Existing Production job UUID for review-only SOP draft
+        type: string
+        required: false
   # GitHub schedules can be delayed. Main-path activation gives the existing
   # idempotent claimant a bounded fallback whenever governed work lands.
   push:
@@ -22,6 +35,7 @@ concurrency:
 
 jobs:
   deliver:
+    if: github.event_name != 'workflow_dispatch' || inputs.mode != 'sop_draft_review'
     runs-on: ubuntu-latest
     steps:
       - name: Deliver allowlisted promotion feedback
@@ -92,3 +106,62 @@ jobs:
             }
           }
           NODE
+
+  # This job never loads database secrets. It reports denied attempts explicitly.
+  sop_draft_security_hold:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'sop_draft_review' && (github.event.repository.private != true || github.actor != 'DaniDeclares')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Refuse unprotected job-data processing
+        run: |
+          echo '::error::SOP_REVIEW_SECURITY_HOLD — private repository and authorized owner required'
+          exit 1
+  # Manual SOP review within the EXISTING worker; never claims external actions.
+  sop_draft_review:
+    # Explicitly fail closed: public-repository job metadata cannot be exported.
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'sop_draft_review' && github.event.repository.private == true && github.actor == 'DaniDeclares'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout source without persistent write credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check SOP review boundaries
+        run: node --test scripts/dani-sop-review-draft.test.mjs scripts/dani-sop-worker-workflow.test.mjs
+
+      - name: Generate draft from one existing job's event receipts
+        env:
+          PRODUCTION_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SOP_REVIEW_READ_ONLY_KEY: ${{ secrets.SOP_REVIEW_READ_ONLY_KEY }}
+          SOP_REVIEW_PUBLISHABLE_API_KEY: ${{ secrets.SOP_REVIEW_PUBLISHABLE_API_KEY }}
+          SOP_REVIEW_APPROVED_JOB_ID: ${{ secrets.SOP_REVIEW_APPROVED_JOB_ID }}
+          SOP_JOB_ID: ${{ inputs.sop_job_id }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SOP_REVIEW_READ_ONLY_KEY" ] || [ -z "$SOP_REVIEW_PUBLISHABLE_API_KEY" ] || [ -z "$SOP_REVIEW_APPROVED_JOB_ID" ] || [ "$SOP_JOB_ID" != "$SOP_REVIEW_APPROVED_JOB_ID" ]; then
+            echo '::error::SOP_REVIEW_APPROVAL_OR_SCOPED_CREDENTIAL_MISSING'
+            exit 1
+          fi
+          node scripts/dani-sop-review-draft.mjs \
+            --job-id "$SOP_JOB_ID" \
+            --out-dir "$RUNNER_TEMP/dani-sop-review"
+          echo "Created review-only draft; no registry, job, customer, or Production write." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Retain review artifacts for manual acceptance
+        uses: actions/upload-artifact@v4
+        with:
+          name: sop-review-${{ github.run_id }}
+          path: ${{ runner.temp }}/dani-sop-review/
+          if-no-files-found: error
+          retention-days: 1
