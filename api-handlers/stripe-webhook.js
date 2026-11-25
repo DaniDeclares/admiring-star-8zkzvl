@@ -211,10 +211,10 @@ export default async function handler(req,res){
    if(testerProofMode&&offer.releaseState!=='LIVE_READY')return res.status(422).json({error:'Tester proof cannot bypass an uncleared release contract.'});
    const quoteRequired=QUOTE_PRICING_TYPES.has(String(offer.pricingType||'').toUpperCase());
    const result=await prisma.$transaction(async tx=>{
+    // Serialize deliveries for this request before checking for an existing payment event.
+    await tx.$executeRaw`select pg_advisory_xact_lock(hashtextextended(${requestId}, 0))`;
     const existing=await tx.$queryRaw`select id,invoice_id from public.dd_payment_events where provider_event_id=${event.id} limit 1`;
     if(existing.length)return {status:'IDEMPOTENT_REPLAY',paymentEventId:existing[0].id,invoiceId:existing[0].invoice_id};
-    // PostgreSQL advisory transaction lock serializes duplicate deliveries for this request.
-    await tx.$executeRaw`select pg_advisory_xact_lock(hashtextextended(${requestId}, 0))`;
     const request=await tx.serviceRequest.findUnique({where:{id:requestId}});
     if(!request)throw new Error(`ServiceRequest ${requestId} not found`);
     const channel=readChannel(request.property_details);
