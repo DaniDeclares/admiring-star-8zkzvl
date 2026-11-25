@@ -1,4 +1,5 @@
 import { createEstimateEconomicsSnapshot } from './estimateAssignments2026.js';
+import { assertOriginalScopeRetained } from './quoteScopeIntegrity2026.js';
 const CHANNELS = Object.freeze({ regular_resident: 'CH01', apartment_resident: 'CH01', property_manager: 'CH02', realtor: 'CH03', business: 'CH04', government: 'CH05' });
 const ESTIMATE_CLIENT_TYPES = Object.freeze({ regular_resident: 'other', apartment_resident: 'renter', property_manager: 'property_manager', realtor: 'realtor', business: 'business', government: 'other' });
 const money = value => Math.round(Number(value || 0) * 100) / 100;
@@ -437,7 +438,7 @@ export async function createEstimate(supabase, body) {
   let sourceRequest=null;
   let sourceLeadId=null;
   if(requestId){
-    const {data:req,error:reqError}=await supabase.from('service_requests').select('id,lead_id').eq('id',requestId).maybeSingle();
+    const {data:req,error:reqError}=await supabase.from('service_requests').select('id,lead_id,scope_snapshot').eq('id',requestId).maybeSingle();
     if(reqError) throw reqError;
     if(!req) throw new Error('The originating website request could not be found. Refresh the request and try again.');
     sourceRequest=req;
@@ -452,6 +453,7 @@ export async function createEstimate(supabase, body) {
     ? body.lineItems
     : [{ serviceSku: body.serviceSku, answers: body.answers || {} }];
   if (requestedLineItems.length > 25) throw new Error('An estimate can contain at most 25 service components.');
+  if (sourceRequest?.scope_snapshot) assertOriginalScopeRetained(sourceRequest.scope_snapshot, requestedLineItems);
   const resolvedLineItems = [];
   for (const item of requestedLineItems) {
     const itemSku = String(item?.serviceSku || '').trim();
