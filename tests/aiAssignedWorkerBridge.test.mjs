@@ -249,3 +249,31 @@ test('synthetic file worker produces a retrievable artifact without duplicate ex
     assert.equal(executionCount,1);
   } finally { await rm(dir,{recursive:true,force:true}); }
 });
+
+
+test('resource usage is evaluated before invalid proposal rejection and receipt is preserved',async()=>{
+  const h=setup({
+    routeModel:async()=>({usage:{inputTokens:8001,outputTokens:0},step:null,workerId:null}),
+  });
+  const result=await executeAssignedStep(input,h.adapters);
+  assert.equal(result.state,'HELD');
+  assert.equal(result.reason,'MODEL_PROPOSAL_INVALID');
+  assert.equal(result.resourceReceipt.status,'EXCEEDED');
+  assert.deepEqual(h.calls,[]);
+});
+
+test('resource receipt survives completion and delivery failures without retry',async()=>{
+  const completion=setup({complete:async()=>{throw new Error('completion unavailable')}});
+  const completed=await executeAssignedStep(input,completion.adapters);
+  assert.equal(completed.state,'HELD');
+  assert.equal(completed.reason,'COMPLETION_UNCONFIRMED');
+  assert.equal(completed.resourceReceipt.status,'UNKNOWN');
+  assert.deepEqual(completion.calls,['claim','execute','verify']);
+
+  const delivery=setup({deliver:async()=>{throw new Error('delivery unavailable')}});
+  const delivered=await executeAssignedStep(input,delivery.adapters);
+  assert.equal(delivered.state,'HELD');
+  assert.equal(delivered.reason,'OWNER_RESULT_NOT_RETRIEVABLE');
+  assert.equal(delivered.resourceReceipt.status,'UNKNOWN');
+  assert.deepEqual(delivery.calls,['claim','execute','verify','complete']);
+});
