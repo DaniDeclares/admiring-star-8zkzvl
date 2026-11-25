@@ -1,0 +1,17 @@
+.dani-holiday{position:relative;overflow:hidden;background:linear-gradient(105deg,var(--dd-burgundy-deep),var(--dd-burgundy));color:var(--dd-cream);padding:18px 22px;border-bottom:2px solid var(--dd-gold)}
+.dani-holiday__inner{position:relative;z-index:1;max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.dani-holiday__copy{display:grid;gap:4px;font-size:14px;line-height:1.35}
+.dani-holiday__copy strong{font-size:clamp(20px,2.4vw,30px);letter-spacing:-.025em}
+.dani-holiday__eyebrow{font-size:11px;font-weight:800;letter-spacing:.15em;color:var(--dd-gold-soft)}
+.dani-holiday__actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.dani-holiday__days{color:var(--dd-gold-soft);font-weight:800;white-space:nowrap}
+.dani-holiday__cta{background:var(--dd-cream);color:var(--dd-burgundy-deep);border:2px solid var(--dd-gold);padding:11px 16px;border-radius:10px;font-weight:800;text-decoration:none}
+.dani-holiday__cta:hover{background:var(--dd-ivory);color:var(--dd-burgundy-deep)}
+.dani-holiday__motion{background:transparent;color:var(--dd-cream);border:1px solid var(--dd-gold-soft);border-radius:10px;padding:10px 12px;cursor:pointer}
+.dani-holiday a:focus-visible,.dani-holiday button:focus-visible{outline:3px solid var(--dd-cream);outline-offset:3px}
+.dani-holiday__snow{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.dani-holiday__snow span{position:absolute;top:-24px;left:calc(var(--x)*1%);opacity:.55;font-size:16px;animation:dani-fall calc(5s + var(--x)*.06s) linear infinite;animation-delay:calc(var(--x)*-.12s)}
+.dani-holiday__snow span:nth-child(12n+1){--x:5}.dani-holiday__snow span:nth-child(12n+2){--x:14}.dani-holiday__snow span:nth-child(12n+3){--x:22}.dani-holiday__snow span:nth-child(12n+4){--x:31}.dani-holiday__snow span:nth-child(12n+5){--x:40}.dani-holiday__snow span:nth-child(12n+6){--x:49}.dani-holiday__snow span:nth-child(12n+7){--x:57}.dani-holiday__snow span:nth-child(12n+8){--x:66}.dani-holiday__snow span:nth-child(12n+9){--x:74}.dani-holiday__snow span:nth-child(12n+10){--x:82}.dani-holiday__snow span:nth-child(12n+11){--x:90}.dani-holiday__snow span:nth-child(12n+12){--x:97}
+@keyframes dani-fall{to{transform:translate3d(14px,180px,0);opacity:0}}
+@media(max-width:640px){.dani-holiday{padding:16px}.dani-holiday__inner{align-items:flex-start}.dani-holiday__actions{gap:9px}.dani-holiday__cta{width:100%;text-align:center}}
+@media(prefers-reduced-motion:reduce){.dani-holiday__snow{display:none}}
