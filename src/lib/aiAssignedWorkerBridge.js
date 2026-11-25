@@ -83,8 +83,6 @@ export async function executeAssignedStep(input, adapters) {
     resourceGovernance:executionRoute.resourceGovernance,
     resourceReservation,
   });
-  if (!hasText(proposal?.workerId)||!hasText(proposal?.step)) return held('MODEL_PROPOSAL_INVALID');
-
   // Normalize provider usage and persist it through the existing run-control adapter
   // before claim/action. Missing metrics remain unknown; no automatic retry occurs.
   const measuredResourceReceipt=evaluateResourceUsage({route:executionRoute,usage:proposal.usage||{}});
@@ -123,13 +121,15 @@ export async function executeAssignedStep(input, adapters) {
   if (resourceMode==='ENFORCE' && resourceReceipt.status!=='WITHIN_LIMITS') {
     return {state:'HELD',reason:resourceReceipt.status==='EXCEEDED'?'RESOURCE_LIMIT_EXCEEDED':'RESOURCE_USAGE_UNVERIFIED',resourceReceipt};
   }
+  const heldWithResource = reason => ({...held(reason),resourceReceipt});
+  if (!hasText(proposal?.workerId)||!hasText(proposal?.step)) return heldWithResource('MODEL_PROPOSAL_INVALID');
 
   const allowedSteps=current.scope?.allowedSteps;
-  if (!Array.isArray(allowedSteps)||!allowedSteps.includes(proposal.step)) return held('STEP_NOT_IN_APPROVED_SCOPE');
-  if (!workers.some(w=>w.id===proposal.workerId)) return held('UNAUTHORIZED_WORKER');
-  if (proposal.actions?.length || proposal.changeAuthority || proposal.allowNetwork===true) return held('MODEL_PROPOSED_AUTHORITY_CHANGE');
+  if (!Array.isArray(allowedSteps)||!allowedSteps.includes(proposal.step)) return heldWithResource('STEP_NOT_IN_APPROVED_SCOPE');
+  if (!workers.some(w=>w.id===proposal.workerId)) return heldWithResource('UNAUTHORIZED_WORKER');
+  if (proposal.actions?.length || proposal.changeAuthority || proposal.allowNetwork===true) return heldWithResource('MODEL_PROPOSED_AUTHORITY_CHANGE');
   const claim=await adapters.claim({assignmentId:current.assignmentId,authorityRef:current.authorityRef,expectedRevision:current.revision,workerId:proposal.workerId,step:proposal.step,contextEvidenceRefs:pickup.evidenceRefs});
-  if (claim?.claimed!==true||!hasText(claim.claimRef)) return held('CLAIM_DENIED');
+  if (claim?.claimed!==true||!hasText(claim.claimRef)) return heldWithResource('CLAIM_DENIED');
   let proof;
   try {
     const result=await adapters.execute({claimRef:claim.claimRef,workerId:proposal.workerId,step:proposal.step,scope:current.scope});
@@ -137,22 +137,22 @@ export async function executeAssignedStep(input, adapters) {
   } catch {
     // The worker may already have performed the action. Never auto-retry.
     try { await adapters.fail({claimRef:claim.claimRef,code:'EXECUTION_INTERRUPTED'}); }
-    catch { return {state:'HELD',claimRef:claim.claimRef,reason:'FAILURE_RECORD_UNCONFIRMED'}; }
-    return {state:'FAILED',claimRef:claim.claimRef,reason:'EXECUTION_INTERRUPTED'};
+    catch { return {state:'HELD',claimRef:claim.claimRef,reason:'FAILURE_RECORD_UNCONFIRMED',resourceReceipt}; }
+    return {state:'FAILED',claimRef:claim.claimRef,reason:'EXECUTION_INTERRUPTED',resourceReceipt};
   }
   if (proof?.passed!==true||!hasText(proof.evidenceRef)) {
     try { await adapters.fail({claimRef:claim.claimRef,code:'VERIFICATION_FAILED'}); }
-    catch { return {state:'HELD',claimRef:claim.claimRef,reason:'FAILURE_RECORD_UNCONFIRMED'}; }
-    return {state:'FAILED',claimRef:claim.claimRef,reason:'VERIFICATION_FAILED'};
+    catch { return {state:'HELD',claimRef:claim.claimRef,reason:'FAILURE_RECORD_UNCONFIRMED',resourceReceipt}; }
+    return {state:'FAILED',claimRef:claim.claimRef,reason:'VERIFICATION_FAILED',resourceReceipt};
   }
   let receipt;
   try { receipt=await adapters.complete({claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,outcome:proof.outcome,resourceReceipt,resourceReservation}); }
-  catch { return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED'}; }
-  if (!hasText(receipt?.receiptRef)) return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED'};
+  catch { return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED',resourceReceipt}; }
+  if (!hasText(receipt?.receiptRef)) return {state:'HELD',claimRef:claim.claimRef,reason:'COMPLETION_UNCONFIRMED',resourceReceipt};
   let delivered;
   try {
     delivered=await adapters.deliver({assignmentId:current.assignmentId,authorityRef:current.authorityRef,claimRef:claim.claimRef,receiptRef:receipt.receiptRef,evidenceRef:proof.evidenceRef,resourceReceipt,resourceReservation});
-  } catch { return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE'}; }
-  if (delivered?.ownerRetrievable!==true || !hasText(delivered?.deliveryRef)) return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE'};
+  } catch { return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE',resourceReceipt}; }
+  if (delivered?.ownerRetrievable!==true || !hasText(delivered?.deliveryRef)) return {state:'HELD',claimRef:claim.claimRef,receiptRef:receipt.receiptRef,reason:'OWNER_RESULT_NOT_RETRIEVABLE',resourceReceipt};
   return {state:'VERIFIED',claimRef:claim.claimRef,evidenceRef:proof.evidenceRef,receiptRef:receipt.receiptRef,deliveryRef:delivered.deliveryRef,resourceReceipt,resourceReservation};
 }
